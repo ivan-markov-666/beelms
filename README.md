@@ -55,12 +55,17 @@ cd db/migrations
 # Изпълнете тестовете с npm
 npm test
 
-# Или използвайте скрипта за тестване в Docker среда
+# Или използвайте специализирания скрипт за директно тестване
 cd ../..  # връщане в основната директория
-./db/scripts/run-docker-tests.sh
-```
+./db/scripts/run-migrations-tests.sh
 
-Тези тестове проверяват дали SQL миграциите могат да се приложат успешно и да се върнат обратно при необходимост.
+# За тестване в изолирана Docker среда
+./db/scripts/run-docker-tests.sh
+
+# Можете също да тествате само връзката и зареждането на миграциите:
+cd db/migrations
+npx ts-node tests/db-migration-connection-test.ts
+```
 
 За подробности относно всички тестове, моля, вижте [TESTS.md](TESTS.md).
 
