@@ -9,7 +9,7 @@ export class AddAdditionalIndices1683456789001 implements MigrationInterface {
 
     // Добавяне на индекс за търсене на съдържание
     await queryRunner.query(`
-      CREATE INDEX idx_content_title_text ON contents USING gin(to_tsvector('bulgarian', title || ' ' || content))
+      CREATE INDEX idx_content_title_text ON contents USING gin(to_tsvector('simple', title || ' ' || content))
     `);
 
     // Добавяне на комбиниран индекс за тестови опити
@@ -19,7 +19,7 @@ export class AddAdditionalIndices1683456789001 implements MigrationInterface {
 
     // Добавяне на индекс за търсене на курсове
     await queryRunner.query(`
-      CREATE INDEX idx_course_title_description ON courses USING gin(to_tsvector('bulgarian', title || ' ' || COALESCE(description, '')))
+      CREATE INDEX idx_course_title_description ON courses USING gin(to_tsvector('simple', title || ' ' || COALESCE(description, '')))
     `);
 
     // Индекс за статистики на реклами
