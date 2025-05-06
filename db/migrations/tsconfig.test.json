@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": [
+      "node",
+      "jest"
+    ],
+    "esModuleInterop": true
+  },
+  "include": [
+    "tests/**/*.ts",
+    "migrations/**/*.ts",
+    "typeorm.config.ts"
+  ]
+}
