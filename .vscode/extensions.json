@@ -1,0 +1,25 @@
+{
+    "recommendations": [
+      "dbaeumer.vscode-eslint",
+      "esbenp.prettier-vscode",
+      "ms-azuretools.vscode-docker",
+      "bazelbuild.vscode-bazel",
+      "prisma.prisma",
+      "orta.vscode-jest",
+      "wallabyjs.quokka-vscode",
+      "usernamehw.errorlens",
+      "xabikos.javascriptsnippets",
+      "waderyan.nodejs-extension-pack",
+      "pmneo.tsimporter",
+      "streetsidesoftware.code-spell-checker",
+      "eamodio.gitlens",
+      "redhat.vscode-yaml",
+      "ms-vscode.vscode-typescript-next",
+      "rvest.vs-code-prettier-eslint",
+      "christian-kohler.path-intellisense",
+      "formulahendry.code-runner",
+      "gruntfuggly.todo-tree",
+      "ritwickdey.liveserver",
+      "codezombiech.gitignore"
+    ]
+  }

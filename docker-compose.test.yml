@@ -1,0 +1,24 @@
+services:
+  # Test database connection
+  test-db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_password
+      POSTGRES_DB: test_db
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U test_user -d test_db']
+      interval: 5s
+      timeout: 5s
+      retries: 3
+    command: ['postgres', '-c', 'log_statement=all']
+
+  # Test Redis connection
+  test-redis:
+    image: redis:7-alpine
+    command: redis-server --requirepass test_redis_password
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 5s
+      retries: 3
