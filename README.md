@@ -38,10 +38,10 @@
 
 ```bash
 # В PowerShell на Windows
-.\test-environment.ps1
+.\validate-docker-infrastructure..ps1
 
 # В Linux с PowerShell Core
-./test-environment.ps1
+./validate-docker-infrastructure..ps1
 ```
 
 ### Тестване на миграциите на базата данни
