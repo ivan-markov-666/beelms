@@ -2,7 +2,7 @@
 
 В този документ ще намерите информация за различните тестове на системата, тяхното предназначение и как да ги изпълнявате.
 
-## Тест на средата за разработка (`test-environment.ps1`)
+## Тест на средата за разработка (`validate-docker-infrastructure.ps1`)
 
 ### Предназначение
 
@@ -29,7 +29,7 @@
 4. Навигирайте до папката на проекта
 5. Изпълнете:
    ```powershell
-   .\test-environment.ps1
+   .\validate-docker-infrastructure..ps1
    ```
 
 #### На Linux (не е тествано дали работи):
@@ -49,14 +49,14 @@
 2. Направете скрипта изпълним:
 
    ```bash
-   chmod +x test-environment.ps1
+   chmod +x validate-docker-infrastructure..ps1
    ```
 
 3. Изпълнете скрипта:
    ```bash
-   ./test-environment.ps1
+   ./validate-docker-infrastructure..ps1
    # или
-   pwsh test-environment.ps1
+   pwsh validate-docker-infrastructure..ps1
    ```
 
 ### Очаквани резултати
