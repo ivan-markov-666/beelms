@@ -192,7 +192,7 @@ export class AuthService {
 
   async validateToken(token: string): Promise<User | null> {
     try {
-      const payload = this.jwtService.verify(token);
+      const payload: JwtPayload = this.jwtService.verify(token);
       const user = await this.usersRepository.findOne({
         where: { id: payload.sub },
       });
