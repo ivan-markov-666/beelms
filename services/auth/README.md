@@ -1,98 +1,149 @@
+# Auth Service
+
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
 </p>
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
+<p align="center">
+  <a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
+  <a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
+  <a href="https://www.npmjs.com/package/@nestjs/common" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
 </p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## Description
+## Описание
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Auth Service е част от microservices архитектурата на QA-4-Free платформата. Той отговаря за:
+- Потребителска автентикация и оторизация
+- Управление на потребителски сесии
+- Забравени пароли и възстановяване на акаунти
+- Генериране и валидиране на JWT токени
 
-## Project setup
+## Съдържание
 
-```bash
-$ npm install
-```
+- [Изисквания](#изисквания)
+- [Настройка на средата](#настройка-на-средата)
+- [Стартиране на приложението](#стартиране-на-приложението)
+- [API Документация](#api-документация)
+- [Тестване](#тестване)
+- [Конфигурация](#конфигурация)
+- [Логване](#логване)
+- [Поддръжка и контакти](#поддръжка-и-контакти)
+- [Лиценз](#лиценз)
 
-## Compile and run the project
+## Изисквания
 
-```bash
-# development
-$ npm run start
+- Node.js (версия 16 или по-нова)
+- npm (версия 7 или по-нова)
+- PostgreSQL (версия 13 или по-нова)
+- Redis (опционално, за кеширане на сесии)
 
-# watch mode
-$ npm run start:dev
+## Настройка на средата
 
-# production mode
-$ npm run start:prod
-```
-
-## Run tests
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-```
-
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+1. Клониране на хранилището
+2. Инсталиране на зависимостите:
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+npm install
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+3. Копирайте `.env.example` във файл `.env` и попълнете необходимите променливи за средата.
 
-## Resources
+## Стартиране на приложението
 
-Check out a few resources that may come in handy when working with NestJS:
+### Локално стартиране (за разработка)
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+```bash
+# Стартиране в режим на разработка с автоматично презареждане
+npm run start:dev
+```
 
-## Support
+Приложението ще се стартира на порт 4000 по подразбиране (конфигурируемо чрез променливата `PORT` в `.env` файла).
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+### Стартиране с Docker
 
-## Stay in touch
+```bash
+# От корен директорията на проекта
+docker-compose up auth-service
+```
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+## API Документация
 
-## License
+След като приложението е стартирано, достъпна е интерактивна Swagger документация на:
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+```
+http://localhost:4000/api
+```
+
+Документацията включва:
+- Всички налични ендпойнти
+- Детайлно описание на заявките и отговорите
+- Възможност за изпращане на тестови заявки
+
+### Достъп до защитени ендпойнти
+
+1. Влезте в системата чрез `/auth/login` ендпойнта
+2. Копирайте получения JWT токен
+3. Кликнете върху бутона "Authorize" (с ключалка) в горния десен ъгъл
+4. Въведете токена във формат: `Bearer <вашият_токен>`
+5. Вече имате достъп до защитените ендпойнти
+
+## Тестване
+
+### Единични тестове
+
+```bash
+# Стартиране на всички тестове
+npm run test
+
+# Стартиране на тестове в режим на наблюдение
+npm run test:watch
+
+# Генериране на покритие на кода
+npm run test:cov
+```
+
+### Интеграционни тестове
+
+```bash
+# Стартиране на интеграционни тестове
+npm run test:e2e
+```
+
+## Конфигурация
+
+Конфигурационните настройки се управляват чрез `.env` файл. Ето основните настройки:
+
+```env
+# База данни
+DATABASE_HOST=localhost
+DATABASE_PORT=5433
+DATABASE_USERNAME=postgres
+DATABASE_PASSWORD=your_password
+DATABASE_NAME=learning_platform
+
+# JWT
+JWT_SECRET=your_jwt_secret
+JWT_EXPIRES_IN=24h
+JWT_REFRESH_EXPIRES_IN=7d
+
+# Redis (опционално)
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=your_redis_password
+
+# Приложение
+PORT=4000
+NODE_ENV=development
+```
+
+## Логване
+
+Приложението използва вграденото логване на NestJS. Логовете се извеждат в конзолата и могат да бъдат насочени към файл чрез външен логер.
+
+## Поддръжка и контакти
+
+Ако имате въпроси или срещнете проблеми, моля, отворете тикет в хранилището на проекта.
+
+## Лиценз
+
+Този проект е лицензиран под [MIT лиценз](LICENSE).
