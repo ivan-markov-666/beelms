@@ -1,9 +1,10 @@
 // services/auth/test/app.e2e-spec.ts
 import { INestApplication } from '@nestjs/common';
+import { Server } from 'http';
+import * as request from 'supertest';
 import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import * as request from 'supertest';
 import { AuthModule } from '../src/auth/auth.module';
 import { PasswordReset } from '../src/auth/entities/password-reset.entity';
 import { Session } from '../src/auth/entities/session.entity';
@@ -51,12 +52,14 @@ describe('AppController (e2e)', () => {
 
   // Почистване след всички тестове
   afterAll(async () => {
-    await app.close();
+    if (app) {
+      await app.close();
+    }
   });
 
   // Базов тест за проверка на работоспособност
   it('/ (GET)', () => {
-    return request(app.getHttpServer())
+    return request(app.getHttpServer() as Server)
       .get('/')
       .expect(200)
       .expect('Hello World!');

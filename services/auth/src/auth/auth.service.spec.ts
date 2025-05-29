@@ -130,8 +130,10 @@ describe('AuthService', () => {
         registerDto.password,
         'mockedSalt',
       );
-      expect(userRepository.save).toHaveBeenCalled();
-      expect(jwtService.sign).toHaveBeenCalled();
+      const saveSpy = jest.spyOn(userRepository, 'save');
+      const signSpy = jest.spyOn(jwtService, 'sign');
+      expect(saveSpy).toHaveBeenCalled();
+      expect(signSpy).toHaveBeenCalled();
     });
 
     it('should throw BadRequestException if user already exists', async () => {
@@ -149,11 +151,12 @@ describe('AuthService', () => {
       );
 
       // Act & Assert
-      await expect(async () => {
-        await service.register(registerDto);
-      }).rejects.toThrow(BadRequestException);
+      await expect(service.register(registerDto)).rejects.toThrow(
+        BadRequestException,
+      );
 
-      expect(userRepository.findOne).toHaveBeenCalledWith({
+      const findOneSpy = jest.spyOn(userRepository, 'findOne');
+      expect(findOneSpy).toHaveBeenCalledWith({
         where: { email: registerDto.email },
       });
     });
@@ -178,22 +181,21 @@ describe('AuthService', () => {
         lastLogin: null,
       } as User;
 
-      jest
-        .spyOn(userRepository, 'findOne')
-        .mockImplementation(() => Promise.resolve(user));
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(user);
+      jest.spyOn(bcrypt, 'compare').mockResolvedValue(true as never);
 
-      jest
-        .spyOn(bcrypt, 'compare')
-        .mockImplementation(() => Promise.resolve(true));
-
-      jest.spyOn(userRepository, 'save').mockImplementation((updatedUser) =>
-        Promise.resolve({
-          ...user,
-          ...updatedUser,
-          failedLoginAttempts: 0,
-          lastLogin: expect.any(Date),
-        } as User),
-      );
+      const saveMock = jest
+        .fn()
+        .mockImplementation((updatedUser: Partial<User>) => {
+          const result = {
+            ...user,
+            ...updatedUser,
+            failedLoginAttempts: 0,
+            lastLogin: new Date(),
+          };
+          return Promise.resolve(result as User);
+        });
+      jest.spyOn(userRepository, 'save').mockImplementation(saveMock);
 
       jest.spyOn(jwtService, 'sign').mockImplementation(() => 'jwt-token');
 
@@ -205,8 +207,10 @@ describe('AuthService', () => {
       expect(result).toHaveProperty('token');
       expect(result.user.email).toBe(loginDto.email);
       expect(result.token).toBe('jwt-token');
-      expect(userRepository.save).toHaveBeenCalled();
-      expect(jwtService.sign).toHaveBeenCalled();
+      const saveSpy = jest.spyOn(userRepository, 'save');
+      const signSpy = jest.spyOn(jwtService, 'sign');
+      expect(saveSpy).toHaveBeenCalled();
+      expect(signSpy).toHaveBeenCalled();
     });
 
     it('should throw UnauthorizedException if user not found', async () => {
@@ -274,24 +278,22 @@ describe('AuthService', () => {
         .spyOn(userRepository, 'findOne')
         .mockImplementation(() => Promise.resolve(user));
 
-      jest
-        .spyOn(bcrypt, 'compare')
-        .mockImplementation(() => Promise.resolve(false));
+      jest.spyOn(bcrypt, 'compare').mockResolvedValue(false as never);
 
-      jest.spyOn(userRepository, 'save').mockImplementation((updatedUser) =>
+      jest.spyOn(userRepository, 'save').mockImplementation((user) =>
         Promise.resolve({
           ...user,
-          ...updatedUser,
           failedLoginAttempts: 1,
         } as User),
       );
 
       // Act & Assert
-      await expect(async () => {
-        await service.login(loginDto);
-      }).rejects.toThrow(UnauthorizedException);
+      await expect(service.login(loginDto)).rejects.toThrow(
+        UnauthorizedException,
+      );
 
-      expect(userRepository.save).toHaveBeenCalledWith(
+      const saveSpy = jest.spyOn(userRepository, 'save');
+      expect(saveSpy).toHaveBeenCalledWith(
         expect.objectContaining({
           failedLoginAttempts: 1,
         }),
@@ -316,29 +318,26 @@ describe('AuthService', () => {
         lastLogin: null,
       } as User;
 
-      jest
-        .spyOn(userRepository, 'findOne')
-        .mockImplementation(() => Promise.resolve(user));
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(user);
+      jest.spyOn(bcrypt, 'compare').mockResolvedValue(false as never);
 
-      jest
-        .spyOn(bcrypt, 'compare')
-        .mockImplementation(() => Promise.resolve(false));
-
-      jest.spyOn(userRepository, 'save').mockImplementation((updatedUser) =>
-        Promise.resolve({
-          ...user,
-          ...updatedUser,
-          failedLoginAttempts: 5,
-          isActive: false,
-        } as User),
-      );
+      const saveSpy = jest
+        .spyOn(userRepository, 'save')
+        .mockImplementation((updatedUser) =>
+          Promise.resolve({
+            ...user,
+            ...(updatedUser as Partial<User>),
+            failedLoginAttempts: 5,
+            isActive: false,
+          } as User),
+        );
 
       // Act & Assert
-      await expect(async () => {
-        await service.login(loginDto);
-      }).rejects.toThrow(UnauthorizedException);
+      await expect(service.login(loginDto)).rejects.toThrow(
+        UnauthorizedException,
+      );
 
-      expect(userRepository.save).toHaveBeenCalledWith(
+      expect(saveSpy).toHaveBeenCalledWith(
         expect.objectContaining({
           failedLoginAttempts: 5,
           isActive: false,

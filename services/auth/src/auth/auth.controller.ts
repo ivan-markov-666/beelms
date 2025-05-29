@@ -11,15 +11,11 @@ import {
 import {
   ApiTags,
   ApiOperation,
-  ApiResponse,
   ApiBody,
   ApiBearerAuth,
   ApiUnauthorizedResponse,
   ApiBadRequestResponse,
   ApiOkResponse,
-  ApiCreatedResponse,
-  ApiForbiddenResponse,
-  ApiNotFoundResponse,
 } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
@@ -47,7 +43,10 @@ export class AuthController {
 
   @Get('health')
   @ApiOperation({ summary: 'Health check endpoint' })
-  @ApiOkResponse({ description: 'Service is running', schema: { properties: { status: { type: 'string', example: 'ok' } } }})
+  @ApiOkResponse({
+    description: 'Service is running',
+    schema: { properties: { status: { type: 'string', example: 'ok' } } },
+  })
   healthCheck(): { status: string } {
     return { status: 'ok' };
   }
@@ -73,11 +72,16 @@ export class AuthController {
         id: { type: 'number', example: 1 },
         email: { type: 'string', example: 'user@example.com' },
         role: { type: 'string', example: 'user' },
-        accessToken: { type: 'string', example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' },
+        accessToken: {
+          type: 'string',
+          example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+        },
       },
     },
   })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized - Invalid credentials' })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized - Invalid credentials',
+  })
   @ApiBody({ type: LoginDto })
   async login(@Body() loginDto: LoginDto) {
     const { user, token } = await this.authService.login(loginDto);
@@ -96,9 +100,10 @@ export class AuthController {
     description: 'If the email exists, a reset link will be sent',
     schema: {
       properties: {
-        message: { 
-          type: 'string', 
-          example: 'Ако имейлът съществува, ще получите линк за рестартиране на паролата.' 
+        message: {
+          type: 'string',
+          example:
+            'Ако имейлът съществува, ще получите линк за рестартиране на паролата.',
         },
       },
     },
@@ -122,14 +127,16 @@ export class AuthController {
     description: 'Password successfully reset',
     schema: {
       properties: {
-        message: { 
-          type: 'string', 
-          example: 'Паролата беше успешно променена.' 
+        message: {
+          type: 'string',
+          example: 'Паролата беше успешно променена.',
         },
       },
     },
   })
-  @ApiBadRequestResponse({ description: 'Bad Request - Invalid or expired token' })
+  @ApiBadRequestResponse({
+    description: 'Bad Request - Invalid or expired token',
+  })
   @ApiBody({ type: ResetPasswordDto })
   async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
     await this.authService.resetPassword(resetPasswordDto);
@@ -147,14 +154,16 @@ export class AuthController {
     description: 'User successfully logged out',
     schema: {
       properties: {
-        message: { 
-          type: 'string', 
-          example: 'Успешно излизане от системата.' 
+        message: {
+          type: 'string',
+          example: 'Успешно излизане от системата.',
         },
       },
     },
   })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized - Invalid or missing token' })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized - Invalid or missing token',
+  })
   async logout(@Request() req: RequestWithUser) {
     const token = req.headers.authorization?.split(' ')[1] || '';
     await this.authService.logout(token);
