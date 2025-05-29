@@ -1,5 +1,7 @@
-import { BaseEntity } from '@shared/entities/base.entity';
-import { Column, Entity, Index } from 'typeorm';
+import { Column, Entity, Index, OneToMany } from 'typeorm';
+import { PasswordReset } from '../../auth/entities/password-reset.entity';
+import { Session } from '../../auth/entities/session.entity';
+import { BaseEntity } from '../../common/entities/base.entity';
 
 @Entity('users')
 export class User extends BaseEntity {
@@ -24,4 +26,10 @@ export class User extends BaseEntity {
 
   @Column({ name: 'last_login', nullable: true, type: 'timestamp' })
   lastLogin: Date | null;
+
+  @OneToMany(() => PasswordReset, (passwordReset) => passwordReset.user)
+  passwordResets: PasswordReset[];
+
+  @OneToMany(() => Session, (session) => session.user)
+  sessions: Session[];
 }

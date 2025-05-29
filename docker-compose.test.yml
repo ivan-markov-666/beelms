@@ -10,9 +10,10 @@ services:
       - '5433:5432' # Добавете това
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U test_user -d test_db']
-      interval: 5s
+      interval: 10s
       timeout: 5s
-      retries: 3
+      retries: 5
+      start_period: 15s
     command: ['postgres', '-c', 'log_statement=all']
 
   # Test Redis connection
@@ -21,6 +22,7 @@ services:
     command: redis-server --requirepass test_redis_password
     healthcheck:
       test: ['CMD', 'redis-cli', 'ping']
-      interval: 5s
+      interval: 10s
       timeout: 5s
-      retries: 3
+      retries: 5
+      start_period: 15s

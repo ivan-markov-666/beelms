@@ -1,27 +1,20 @@
-// db/migrations/simple-test.ts
 import { DataSource } from 'typeorm';
-// Директен импорт на класовете за миграция
 import { CreateInitialSchema1683456789000 } from '../migrations/1683456789000-CreateInitialSchema';
 import { AddAdditionalIndices1683456789001 } from '../migrations/1683456789001-AddAdditionalIndices';
 
-/**
- * Функция за тестване на зареждането на миграции
- * Проверява дали TypeORM може да открие и зареди класовете с миграции
- */
 async function testMigrationLoading() {
   try {
-    // Конфигуриране на връзката с базата данни
+    // Конфигуриране на връзката с реалната база данни
     const dataSource = new DataSource({
       type: 'postgres',
       host: 'localhost',
       port: 5433,
-      username: 'test_user',
-      password: 'test_password',
-      database: 'test_db',
+      username: 'postgres',
+      password: 'postgres123',
+      database: 'learning_platform',
       synchronize: false,
       logging: true,
       entities: [],
-      // Директно указване на класовете с миграции, вместо търсене по шаблон
       migrations: [CreateInitialSchema1683456789000, AddAdditionalIndices1683456789001],
       migrationsTableName: 'migrations_history_test',
     });

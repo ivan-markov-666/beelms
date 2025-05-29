@@ -16,14 +16,18 @@
       "@/*": [
         "./*"
       ]
-    }
+    },
+    "types": [
+      "node",
+      "jest"
+    ] // Добавете това
   },
   "include": [
     "migrations/**/*.ts",
-    "typeorm.config.ts"
+    "typeorm.config.ts",
+    "tests/**/*.ts" // Добавете това
   ],
   "exclude": [
-    "node_modules",
-    "tests"
+    "node_modules"
   ]
 }

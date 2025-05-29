@@ -1,6 +1,6 @@
-import { BaseEntity } from '@shared/entities/base.entity';
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
-import { User } from './user.entity';
+import { BaseEntity } from '../../common/entities/base.entity';
+import { User } from '../../users/entities/user.entity';
 
 @Entity('password_resets')
 export class PasswordReset extends BaseEntity {
@@ -8,7 +8,7 @@ export class PasswordReset extends BaseEntity {
   @Index('idx_password_reset_user_id')
   userId: number;
 
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, (user) => user.passwordResets, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
 
