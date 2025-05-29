@@ -1,4 +1,3 @@
-// db/migrations/jest.config.js
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
@@ -11,4 +10,8 @@ module.exports = {
   collectCoverage: true,
   coverageDirectory: 'coverage',
   collectCoverageFrom: ['migrations/**/*.ts'],
+  // Добави тези опции:
+  testTimeout: 120000, // увеличаваме таймаута
+  detectOpenHandles: true, // автоматично включва тази опция
+  forceExit: true, // принудително излизане след тестовете
 };

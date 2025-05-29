@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>QA-4-Free Test Report - 20250527_170759</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test { margin-bottom: 15px; padding: 10px; border-radius: 5px; }
+        .passed { background-color: #e6ffe6; border-left: 5px solid #4CAF50; }
+        .failed { background-color: #ffe6e6; border-left: 5px solid #f44336; }
+        .summary { padding: 15px; margin: 20px 0; border-radius: 5px; background-color: #f5f5f5; }
+        .timestamp { color: #666; font-size: 0.9em; }
+        pre { background-color: #f8f8f8; padding: 10px; border-radius: 3px; overflow-x: auto; }
+        h1 { color: #333; }
+        h2 { color: #444; }
+    </style>
+</head>
+<body>
+    <h1>QA-4-Free Test Report</h1>
+    <div class="timestamp">Generated on: 2025-05-27 17:07:59</div>    <div class="summary">
+        <h2>Test Summary</h2>
+        <p>Total tests: 2</p>
+        <p>Passed: <span style="color: #4CAF50;">1</span></p>
+        <p>Failed: <span style="color: #f44336;">1</span></p>
+        <p>Duration: 00:01:42.886</p>
+        <p>Status: <span style="color: #f44336;">Some tests failed</span></p>
+    </div><h2>Test Results</h2>        <div class="test passed">
+            <h3>Development Environment Test <span style="color: #4CAF50;">[PASS]</span></h3>
+            <div class="timestamp">2025-05-27 17:09:36</div></div>        <div class="test failed">
+            <h3>Database Migrations Test <span style="color: #f44336;">[FAIL]</span></h3>
+            <div class="timestamp">2025-05-27 17:09:42</div>            <div class="details">
+                <h4>Details:</h4>
+                <pre>> learning-platform-migrations@1.0.0 test:connection<br/>> ts-node tests/db-migration-connection-test.ts<br/><br/>╨Ю╨┐╨╕╤В ╨╖╨░ ╤Б╨▓╤К╤А╨╖╨▓╨░╨╜╨╡ ╤Б ╨▒╨░╨╖╨░╤В╨░ ╨┤╨░╨╜╨╜╨╕...<br/>[90m[4mquery:[24m[39m [94mSELECT[0m [95mversion[0m[37m([0m[37m)[0m<br/>[90m[4mquery:[24m[39m [94mSELECT[0m [37m*[0m [94mFROM[0m [95mcurrent_schema[0m[37m([0m[37m)[0m<br/>╨Т╤А╤К╨╖╨║╨░╤В╨░ ╤Б ╨▒╨░╨╖╨░╤В╨░ ╨┤╨░╨╜╨╜╨╕ ╨╡ ╤Г╤Б╨┐╨╡╤И╨╜╨░!<br/>╨Ю╨┐╨╕╤В ╨╖╨░ ╨╕╨╖╨▓╨╗╨╕╤З╨░╨╜╨╡ ╨╜╨░ ╨╝╨╕╨│╤А╨░╤Ж╨╕╨╕╤В╨╡...<br/>╨Э╨░╨╝╨╡╤А╨╡╨╜╨╕ ╤Б╨░ 2 ╨╝╨╕╨│╤А╨░╤Ж╨╕╨╕:<br/>- CreateInitialSchema1683456789000<br/>- AddAdditionalIndices1683456789001</pre>
+            </div></div></body>
+</html>
