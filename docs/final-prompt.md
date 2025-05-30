@@ -758,6 +758,7 @@ Development план:
 Този план позволява методично и структурирано разработване на системата, като първо се фокусира върху локалната разработка и тестване, а след това преминава към разгръщане и внедряване. С използването на Docker контейнеризация, същата система, която разработвате локално, може лесно да бъде преместена на VPS сървъра, което минимизира проблемите при внедряване.
 
 Ето и самия проект до момента:
+
 docker-compose.override.yml
 # Override за локална разработка
 services:
@@ -1111,13 +1112,51 @@ export class AppService {
 services/auth/src/main.ts
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // Enable CORS for Swagger UI
+  app.enableCors();
+
+  // Global validation pipe
   app.useGlobalPipes(new ValidationPipe());
-  await app.listen(process.env.PORT || 3000);
+
+  // Swagger configuration
+  const config = new DocumentBuilder()
+    .setTitle('Auth Service API')
+    .setDescription('Authentication and Authorization API for QA-4-Free')
+    .setVersion('1.0')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'JWT',
+        description: 'Enter JWT token',
+        in: 'header',
+      },
+      'JWT-auth', // This name should match the one in @ApiBearerAuth() in your controller
+    )
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, document, {
+    swaggerOptions: {
+      persistAuthorization: true,
+    },
+  });
+
+  const port = process.env.PORT || 3000;
+  await app.listen(port);
+  console.log(`Application is running on: http://localhost:${port}`);
+  console.log(
+    `Swagger documentation available at: http://localhost:${port}/api`,
+  );
 }
+
 bootstrap().catch((err) => {
   console.error('Error starting server:', err);
   process.exit(1);
@@ -1194,6 +1233,7 @@ export abstract class BaseEntity {
 }
 
 
+services/auth/src/common/rate-limiting
 services/auth/src/users
 services/auth/src/users/entities
 services/auth/src/users/entities/user.entity.ts
@@ -1235,6 +1275,315 @@ export class User extends BaseEntity {
 
 
 services/auth/src/auth
+services/auth/src/auth/auth.module.ts
+import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { User } from '../users/entities/user.entity';
+import { AuthController } from './auth.controller';
+import { AuthService } from './auth.service';
+import { PasswordReset } from './entities/password-reset.entity';
+import { Session } from './entities/session.entity';
+import { JwtStrategy } from './strategies/jwt.strategy';
+
+@Module({
+  imports: [
+    PassportModule.register({ defaultStrategy: 'jwt' }),
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        const secret = configService.get<string>('jwt.secret');
+        if (!secret) {
+          throw new Error('JWT secret is not defined');
+        }
+        return {
+          secret,
+          signOptions: {
+            expiresIn: configService.get('jwt.expiresIn', '1h'),
+          },
+        };
+      },
+    }),
+    TypeOrmModule.forFeature([User, PasswordReset, Session]),
+  ],
+  controllers: [AuthController],
+  providers: [AuthService, JwtStrategy],
+  exports: [AuthService, JwtStrategy],
+})
+export class AuthModule {}
+
+
+services/auth/src/auth/entities
+services/auth/src/auth/entities/password-reset.entity.ts
+import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
+import { BaseEntity } from '../../common/entities/base.entity';
+import { User } from '../../users/entities/user.entity';
+
+@Entity('password_resets')
+export class PasswordReset extends BaseEntity {
+  @Column({ name: 'user_id' })
+  @Index('idx_password_reset_user_id')
+  userId: number;
+
+  @ManyToOne(() => User, (user) => user.passwordResets, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'user_id' })
+  user: User;
+
+  @Column({ length: 255 })
+  @Index('idx_password_reset_token')
+  token: string;
+
+  @Column({ default: false })
+  used: boolean;
+
+  @Column({ name: 'expires_at', type: 'timestamp' })
+  expiresAt: Date;
+}
+
+
+services/auth/src/auth/entities/session.entity.ts
+import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
+import { BaseEntity } from '../../common/entities/base.entity';
+import { User } from '../../users/entities/user.entity';
+
+@Entity('sessions')
+export class Session extends BaseEntity {
+  @Column({ name: 'user_id' })
+  @Index('idx_session_user_id')
+  userId: number;
+
+  @ManyToOne(() => User, (user) => user.sessions, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'user_id' })
+  user: User;
+
+  @Column({ length: 255 })
+  @Index('idx_session_token')
+  token: string;
+
+  @Column({ name: 'ip_address', type: 'varchar', length: 45, nullable: true })
+  ipAddress: string | null;
+
+  @Column({ name: 'user_agent', type: 'text', nullable: true })
+  userAgent: string | null;
+
+  @Column({ name: 'expires_at', type: 'timestamp' })
+  expiresAt: Date;
+
+  @Column({
+    name: 'last_active',
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
+  lastActive: Date;
+}
+
+
+services/auth/src/auth/dto
+services/auth/src/auth/dto/login.dto.ts
+import { IsEmail, IsNotEmpty } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+
+export class LoginDto {
+  @ApiProperty({
+    example: 'user@example.com',
+    description: "User's email address",
+    required: true,
+  })
+  @IsEmail({}, { message: 'Моля, въведете валиден имейл адрес' })
+  email: string;
+
+  @ApiProperty({
+    example: 'yourSecurePassword123!',
+    description: "User's password",
+    required: true,
+    minLength: 6,
+  })
+  @IsNotEmpty({ message: 'Паролата е задължителна' })
+  password: string;
+}
+
+
+services/auth/src/auth/dto/reset-password-request.dto.ts
+import { IsEmail } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+
+export class ResetPasswordRequestDto {
+  @ApiProperty({
+    example: 'user@example.com',
+    description: 'Email address to send the password reset link to',
+    required: true,
+  })
+  @IsEmail({}, { message: 'Моля, въведете валиден имейл адрес' })
+  email: string;
+}
+
+
+services/auth/src/auth/dto/reset-password.dto.ts
+import { IsNotEmpty, Matches, MinLength } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+
+export class ResetPasswordDto {
+  @ApiProperty({
+    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+    description: 'Password reset token received via email',
+    required: true,
+  })
+  @IsNotEmpty({ message: 'Токенът е задължителен' })
+  token: string;
+
+  @ApiProperty({
+    example: 'NewSecurePass123!',
+    description:
+      'New password. Must be at least 8 characters long and contain at ' +
+      'least one uppercase letter, one lowercase letter, and one number or special character.',
+    required: true,
+    minLength: 8,
+  })
+  @IsNotEmpty({ message: 'Новата парола е задължителна' })
+  @MinLength(8, { message: 'Паролата трябва да бъде поне 8 символа' })
+  @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
+    message:
+      'Паролата трябва да съдържа главна буква, малка буква и цифра/специален символ',
+  })
+  newPassword: string;
+}
+
+
+services/auth/src/auth/dto/register.dto.ts
+import { IsEmail, IsNotEmpty, Matches, MinLength } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+
+export class RegisterDto {
+  @ApiProperty({
+    example: 'user@example.com',
+    description: "User's email address",
+    required: true,
+  })
+  @IsEmail({}, { message: 'Моля, въведете валиден имейл адрес' })
+  email: string;
+
+  @ApiProperty({
+    example: 'SecurePass123!',
+    description:
+      "User's password. Must be at least 8 characters long and contain at " +
+      'least one uppercase letter, one lowercase letter, and one number or special character.',
+    required: true,
+    minLength: 8,
+  })
+  @IsNotEmpty({ message: 'Паролата е задължителна' })
+  @MinLength(8, { message: 'Паролата трябва да бъде поне 8 символа' })
+  @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
+    message:
+      'Паролата трябва да съдържа главна буква, малка буква и цифра/специален символ',
+  })
+  password: string;
+}
+
+
+services/auth/src/auth/strategies
+services/auth/src/auth/strategies/jwt.strategy.ts
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { PassportStrategy } from '@nestjs/passport';
+import { InjectRepository } from '@nestjs/typeorm';
+import { ExtractJwt, Strategy } from 'passport-jwt';
+import { Repository } from 'typeorm';
+import { User } from '../../users/entities/user.entity';
+
+@Injectable()
+export class JwtStrategy extends PassportStrategy(Strategy) {
+  constructor(
+    private readonly configService: ConfigService,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+  ) {
+    const secretKey = configService.get<string>('jwt.secret');
+    if (!secretKey) {
+      throw new Error('JWT secret key is not defined');
+    }
+
+    super({
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      ignoreExpiration: false,
+      secretOrKey: secretKey,
+    });
+  }
+
+  async validate(payload: { sub: number; email: string }): Promise<User> {
+    const user = await this.userRepository.findOne({
+      where: { id: payload.sub },
+    });
+    if (!user || !user.isActive) {
+      throw new UnauthorizedException('Невалиден потребител или токен');
+    }
+    return user;
+  }
+}
+
+
+services/auth/src/auth/guards
+services/auth/src/auth/guards/jwt-auth.guard.ts
+import {
+  ExecutionContext,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
+import { Observable } from 'rxjs';
+
+@Injectable()
+export class JwtAuthGuard extends AuthGuard('jwt') {
+  canActivate(
+    context: ExecutionContext,
+  ): boolean | Promise<boolean> | Observable<boolean> {
+    return super.canActivate(context);
+  }
+
+  handleRequest(err: any, user: any): any {
+    if (err || !user) {
+      throw err || new UnauthorizedException('Не сте оторизиран');
+    }
+    return user;
+  }
+}
+
+
+services/auth/src/auth/guards/roles.guard.ts
+import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
+
+interface RequestWithUser {
+  user: {
+    role: string;
+  };
+}
+
+@Injectable()
+export class RolesGuard implements CanActivate {
+  constructor(private reflector: Reflector) {}
+
+  canActivate(context: ExecutionContext): boolean {
+    const roles = this.reflector.get<string[]>('roles', context.getHandler());
+    if (!roles) {
+      return true;
+    }
+    const request = context.switchToHttp().getRequest<RequestWithUser>();
+    const user = request.user;
+    return roles.includes(user.role);
+  }
+}
+
+
+services/auth/src/auth/decorators
+services/auth/src/auth/decorators/roles.decorator.ts
+import { SetMetadata } from '@nestjs/common';
+
+export const Roles = (...roles: string[]) => SetMetadata('roles', roles);
+
+
 services/auth/src/auth/auth.controller.ts
 import {
   Body,
@@ -1246,6 +1595,15 @@ import {
   Request,
   UseGuards,
 } from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBody,
+  ApiBearerAuth,
+  ApiUnauthorizedResponse,
+  ApiBadRequestResponse,
+  ApiOkResponse,
+} from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
@@ -1265,11 +1623,17 @@ interface RequestWithUser {
   };
 }
 
+@ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Get('health')
+  @ApiOperation({ summary: 'Health check endpoint' })
+  @ApiOkResponse({
+    description: 'Service is running',
+    schema: { properties: { status: { type: 'string', example: 'ok' } } },
+  })
   healthCheck(): { status: string } {
     return { status: 'ok' };
   }
@@ -1287,6 +1651,25 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'User login' })
+  @ApiOkResponse({
+    description: 'User successfully logged in',
+    schema: {
+      properties: {
+        id: { type: 'number', example: 1 },
+        email: { type: 'string', example: 'user@example.com' },
+        role: { type: 'string', example: 'user' },
+        accessToken: {
+          type: 'string',
+          example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+        },
+      },
+    },
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized - Invalid credentials',
+  })
+  @ApiBody({ type: LoginDto })
   async login(@Body() loginDto: LoginDto) {
     const { user, token } = await this.authService.login(loginDto);
     return {
@@ -1299,6 +1682,21 @@ export class AuthController {
 
   @Post('reset-password-request')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Request password reset' })
+  @ApiOkResponse({
+    description: 'If the email exists, a reset link will be sent',
+    schema: {
+      properties: {
+        message: {
+          type: 'string',
+          example:
+            'Ако имейлът съществува, ще получите линк за рестартиране на паролата.',
+        },
+      },
+    },
+  })
+  @ApiBadRequestResponse({ description: 'Bad Request - Invalid email format' })
+  @ApiBody({ type: ResetPasswordRequestDto })
   async resetPasswordRequest(
     @Body() resetPasswordRequestDto: ResetPasswordRequestDto,
   ) {
@@ -1311,6 +1709,22 @@ export class AuthController {
 
   @Post('reset-password')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Reset password with token' })
+  @ApiOkResponse({
+    description: 'Password successfully reset',
+    schema: {
+      properties: {
+        message: {
+          type: 'string',
+          example: 'Паролата беше успешно променена.',
+        },
+      },
+    },
+  })
+  @ApiBadRequestResponse({
+    description: 'Bad Request - Invalid or expired token',
+  })
+  @ApiBody({ type: ResetPasswordDto })
   async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
     await this.authService.resetPassword(resetPasswordDto);
     return {
@@ -1321,6 +1735,22 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Post('logout')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Logout user' })
+  @ApiBearerAuth('JWT-auth')
+  @ApiOkResponse({
+    description: 'User successfully logged out',
+    schema: {
+      properties: {
+        message: {
+          type: 'string',
+          example: 'Успешно излизане от системата.',
+        },
+      },
+    },
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized - Invalid or missing token',
+  })
   async logout(@Request() req: RequestWithUser) {
     const token = req.headers.authorization?.split(' ')[1] || '';
     await this.authService.logout(token);
@@ -1331,6 +1761,21 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
+  @ApiOperation({ summary: 'Get current user profile' })
+  @ApiBearerAuth('JWT-auth')
+  @ApiOkResponse({
+    description: 'Returns the authenticated user profile',
+    schema: {
+      properties: {
+        id: { type: 'number', example: 1 },
+        email: { type: 'string', example: 'user@example.com' },
+        role: { type: 'string', example: 'user' },
+      },
+    },
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized - Invalid or missing token',
+  })
   getProfile(@Request() req: RequestWithUser) {
     const user = req.user;
     return {
@@ -1475,8 +1920,10 @@ describe('AuthService', () => {
         registerDto.password,
         'mockedSalt',
       );
-      expect(userRepository.save).toHaveBeenCalled();
-      expect(jwtService.sign).toHaveBeenCalled();
+      const saveSpy = jest.spyOn(userRepository, 'save');
+      const signSpy = jest.spyOn(jwtService, 'sign');
+      expect(saveSpy).toHaveBeenCalled();
+      expect(signSpy).toHaveBeenCalled();
     });
 
     it('should throw BadRequestException if user already exists', async () => {
@@ -1494,11 +1941,12 @@ describe('AuthService', () => {
       );
 
       // Act & Assert
-      await expect(async () => {
-        await service.register(registerDto);
-      }).rejects.toThrow(BadRequestException);
+      await expect(service.register(registerDto)).rejects.toThrow(
+        BadRequestException,
+      );
 
-      expect(userRepository.findOne).toHaveBeenCalledWith({
+      const findOneSpy = jest.spyOn(userRepository, 'findOne');
+      expect(findOneSpy).toHaveBeenCalledWith({
         where: { email: registerDto.email },
       });
     });
@@ -1523,22 +1971,21 @@ describe('AuthService', () => {
         lastLogin: null,
       } as User;
 
-      jest
-        .spyOn(userRepository, 'findOne')
-        .mockImplementation(() => Promise.resolve(user));
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(user);
+      jest.spyOn(bcrypt, 'compare').mockResolvedValue(true as never);
 
-      jest
-        .spyOn(bcrypt, 'compare')
-        .mockImplementation(() => Promise.resolve(true));
-
-      jest.spyOn(userRepository, 'save').mockImplementation((updatedUser) =>
-        Promise.resolve({
-          ...user,
-          ...updatedUser,
-          failedLoginAttempts: 0,
-          lastLogin: expect.any(Date),
-        } as User),
-      );
+      const saveMock = jest
+        .fn()
+        .mockImplementation((updatedUser: Partial<User>) => {
+          const result = {
+            ...user,
+            ...updatedUser,
+            failedLoginAttempts: 0,
+            lastLogin: new Date(),
+          };
+          return Promise.resolve(result as User);
+        });
+      jest.spyOn(userRepository, 'save').mockImplementation(saveMock);
 
       jest.spyOn(jwtService, 'sign').mockImplementation(() => 'jwt-token');
 
@@ -1550,8 +1997,10 @@ describe('AuthService', () => {
       expect(result).toHaveProperty('token');
       expect(result.user.email).toBe(loginDto.email);
       expect(result.token).toBe('jwt-token');
-      expect(userRepository.save).toHaveBeenCalled();
-      expect(jwtService.sign).toHaveBeenCalled();
+      const saveSpy = jest.spyOn(userRepository, 'save');
+      const signSpy = jest.spyOn(jwtService, 'sign');
+      expect(saveSpy).toHaveBeenCalled();
+      expect(signSpy).toHaveBeenCalled();
     });
 
     it('should throw UnauthorizedException if user not found', async () => {
@@ -1619,24 +2068,22 @@ describe('AuthService', () => {
         .spyOn(userRepository, 'findOne')
         .mockImplementation(() => Promise.resolve(user));
 
-      jest
-        .spyOn(bcrypt, 'compare')
-        .mockImplementation(() => Promise.resolve(false));
+      jest.spyOn(bcrypt, 'compare').mockResolvedValue(false as never);
 
-      jest.spyOn(userRepository, 'save').mockImplementation((updatedUser) =>
+      jest.spyOn(userRepository, 'save').mockImplementation((user) =>
         Promise.resolve({
           ...user,
-          ...updatedUser,
           failedLoginAttempts: 1,
         } as User),
       );
 
       // Act & Assert
-      await expect(async () => {
-        await service.login(loginDto);
-      }).rejects.toThrow(UnauthorizedException);
+      await expect(service.login(loginDto)).rejects.toThrow(
+        UnauthorizedException,
+      );
 
-      expect(userRepository.save).toHaveBeenCalledWith(
+      const saveSpy = jest.spyOn(userRepository, 'save');
+      expect(saveSpy).toHaveBeenCalledWith(
         expect.objectContaining({
           failedLoginAttempts: 1,
         }),
@@ -1661,29 +2108,26 @@ describe('AuthService', () => {
         lastLogin: null,
       } as User;
 
-      jest
-        .spyOn(userRepository, 'findOne')
-        .mockImplementation(() => Promise.resolve(user));
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(user);
+      jest.spyOn(bcrypt, 'compare').mockResolvedValue(false as never);
 
-      jest
-        .spyOn(bcrypt, 'compare')
-        .mockImplementation(() => Promise.resolve(false));
-
-      jest.spyOn(userRepository, 'save').mockImplementation((updatedUser) =>
-        Promise.resolve({
-          ...user,
-          ...updatedUser,
-          failedLoginAttempts: 5,
-          isActive: false,
-        } as User),
-      );
+      const saveSpy = jest
+        .spyOn(userRepository, 'save')
+        .mockImplementation((updatedUser) =>
+          Promise.resolve({
+            ...user,
+            ...(updatedUser as Partial<User>),
+            failedLoginAttempts: 5,
+            isActive: false,
+          } as User),
+        );
 
       // Act & Assert
-      await expect(async () => {
-        await service.login(loginDto);
-      }).rejects.toThrow(UnauthorizedException);
+      await expect(service.login(loginDto)).rejects.toThrow(
+        UnauthorizedException,
+      );
 
-      expect(userRepository.save).toHaveBeenCalledWith(
+      expect(saveSpy).toHaveBeenCalledWith(
         expect.objectContaining({
           failedLoginAttempts: 5,
           isActive: false,
@@ -1696,47 +2140,7 @@ describe('AuthService', () => {
 });
 
 
-services/auth/src/auth/auth.module.ts
-import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { JwtModule } from '@nestjs/jwt';
-import { PassportModule } from '@nestjs/passport';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from '../users/entities/user.entity';
-import { AuthController } from './auth.controller';
-import { AuthService } from './auth.service';
-import { PasswordReset } from './entities/password-reset.entity';
-import { Session } from './entities/session.entity';
-import { JwtStrategy } from './strategies/jwt.strategy';
-
-@Module({
-  imports: [
-    PassportModule.register({ defaultStrategy: 'jwt' }),
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => {
-        const secret = configService.get<string>('jwt.secret');
-        if (!secret) {
-          throw new Error('JWT secret is not defined');
-        }
-        return {
-          secret,
-          signOptions: {
-            expiresIn: configService.get('jwt.expiresIn', '1h'),
-          },
-        };
-      },
-    }),
-    TypeOrmModule.forFeature([User, PasswordReset, Session]),
-  ],
-  controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
-  exports: [AuthService, JwtStrategy],
-})
-export class AuthModule {}
-
-
+services/auth/src/auth/services
 services/auth/src/auth/auth.service.ts
 import {
   BadRequestException,
@@ -1932,7 +2336,7 @@ export class AuthService {
 
   async validateToken(token: string): Promise<User | null> {
     try {
-      const payload = this.jwtService.verify(token);
+      const payload: JwtPayload = this.jwtService.verify(token);
       const user = await this.usersRepository.findOne({
         where: { id: payload.sub },
       });
@@ -1960,228 +2364,6 @@ export class AuthService {
 }
 
 
-services/auth/src/auth/entities
-services/auth/src/auth/entities/password-reset.entity.ts
-import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
-import { BaseEntity } from '../../common/entities/base.entity';
-import { User } from '../../users/entities/user.entity';
-
-@Entity('password_resets')
-export class PasswordReset extends BaseEntity {
-  @Column({ name: 'user_id' })
-  @Index('idx_password_reset_user_id')
-  userId: number;
-
-  @ManyToOne(() => User, (user) => user.passwordResets, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'user_id' })
-  user: User;
-
-  @Column({ length: 255 })
-  @Index('idx_password_reset_token')
-  token: string;
-
-  @Column({ default: false })
-  used: boolean;
-
-  @Column({ name: 'expires_at', type: 'timestamp' })
-  expiresAt: Date;
-}
-
-
-services/auth/src/auth/entities/session.entity.ts
-import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
-import { BaseEntity } from '../../common/entities/base.entity';
-import { User } from '../../users/entities/user.entity';
-
-@Entity('sessions')
-export class Session extends BaseEntity {
-  @Column({ name: 'user_id' })
-  @Index('idx_session_user_id')
-  userId: number;
-
-  @ManyToOne(() => User, (user) => user.sessions, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'user_id' })
-  user: User;
-
-  @Column({ length: 255 })
-  @Index('idx_session_token')
-  token: string;
-
-  @Column({ name: 'ip_address', type: 'varchar', length: 45, nullable: true })
-  ipAddress: string | null;
-
-  @Column({ name: 'user_agent', type: 'text', nullable: true })
-  userAgent: string | null;
-
-  @Column({ name: 'expires_at', type: 'timestamp' })
-  expiresAt: Date;
-
-  @Column({
-    name: 'last_active',
-    type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP',
-  })
-  lastActive: Date;
-}
-
-
-services/auth/src/auth/dto
-services/auth/src/auth/dto/register.dto.ts
-import { IsEmail, IsNotEmpty, Matches, MinLength } from 'class-validator';
-
-export class RegisterDto {
-  @IsEmail({}, { message: 'Моля, въведете валиден имейл адрес' })
-  email: string;
-
-  @IsNotEmpty({ message: 'Паролата е задължителна' })
-  @MinLength(8, { message: 'Паролата трябва да бъде поне 8 символа' })
-  @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
-    message:
-      'Паролата трябва да съдържа главна буква, малка буква и цифра/специален символ',
-  })
-  password: string;
-}
-
-
-services/auth/src/auth/dto/login.dto.ts
-import { IsEmail, IsNotEmpty } from 'class-validator';
-
-export class LoginDto {
-  @IsEmail({}, { message: 'Моля, въведете валиден имейл адрес' })
-  email: string;
-
-  @IsNotEmpty({ message: 'Паролата е задължителна' })
-  password: string;
-}
-
-
-services/auth/src/auth/dto/reset-password-request.dto.ts
-import { IsEmail } from 'class-validator';
-
-export class ResetPasswordRequestDto {
-  @IsEmail({}, { message: 'Моля, въведете валиден имейл адрес' })
-  email: string;
-}
-
-
-services/auth/src/auth/dto/reset-password.dto.ts
-import { IsNotEmpty, Matches, MinLength } from 'class-validator';
-
-export class ResetPasswordDto {
-  @IsNotEmpty({ message: 'Токенът е задължителен' })
-  token: string;
-
-  @IsNotEmpty({ message: 'Новата парола е задължителна' })
-  @MinLength(8, { message: 'Паролата трябва да бъде поне 8 символа' })
-  @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
-    message:
-      'Паролата трябва да съдържа главна буква, малка буква и цифра/специален символ',
-  })
-  newPassword: string;
-}
-
-
-services/auth/src/auth/strategies
-services/auth/src/auth/strategies/jwt.strategy.ts
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { PassportStrategy } from '@nestjs/passport';
-import { InjectRepository } from '@nestjs/typeorm';
-import { ExtractJwt, Strategy } from 'passport-jwt';
-import { Repository } from 'typeorm';
-import { User } from '../../users/entities/user.entity';
-
-@Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(
-    private readonly configService: ConfigService,
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
-  ) {
-    const secretKey = configService.get<string>('jwt.secret');
-    if (!secretKey) {
-      throw new Error('JWT secret key is not defined');
-    }
-
-    super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      ignoreExpiration: false,
-      secretOrKey: secretKey,
-    });
-  }
-
-  async validate(payload: { sub: number; email: string }): Promise<User> {
-    const user = await this.userRepository.findOne({
-      where: { id: payload.sub },
-    });
-    if (!user || !user.isActive) {
-      throw new UnauthorizedException('Невалиден потребител или токен');
-    }
-    return user;
-  }
-}
-
-
-services/auth/src/auth/guards
-services/auth/src/auth/guards/jwt-auth.guard.ts
-import {
-  ExecutionContext,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
-import { Observable } from 'rxjs';
-
-@Injectable()
-export class JwtAuthGuard extends AuthGuard('jwt') {
-  canActivate(
-    context: ExecutionContext,
-  ): boolean | Promise<boolean> | Observable<boolean> {
-    return super.canActivate(context);
-  }
-
-  handleRequest(err: any, user: any): any {
-    if (err || !user) {
-      throw err || new UnauthorizedException('Не сте оторизиран');
-    }
-    return user;
-  }
-}
-
-
-services/auth/src/auth/guards/roles.guard.ts
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
-
-interface RequestWithUser {
-  user: {
-    role: string;
-  };
-}
-
-@Injectable()
-export class RolesGuard implements CanActivate {
-  constructor(private reflector: Reflector) {}
-
-  canActivate(context: ExecutionContext): boolean {
-    const roles = this.reflector.get<string[]>('roles', context.getHandler());
-    if (!roles) {
-      return true;
-    }
-    const request = context.switchToHttp().getRequest<RequestWithUser>();
-    const user = request.user;
-    return roles.includes(user.role);
-  }
-}
-
-
-services/auth/src/auth/decorators
-services/auth/src/auth/decorators/roles.decorator.ts
-import { SetMetadata } from '@nestjs/common';
-
-export const Roles = (...roles: string[]) => SetMetadata('roles', roles);
-
-
 services/auth/test
 services/auth/test/jest-e2e.json
 {
@@ -2195,13 +2377,16 @@ services/auth/test/jest-e2e.json
 }
 
 
+services/auth/test/integration
+services/auth/test/interfaces
 services/auth/test/app.e2e-spec.ts
 // services/auth/test/app.e2e-spec.ts
 import { INestApplication } from '@nestjs/common';
+import { Server } from 'http';
+import * as request from 'supertest';
 import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import * as request from 'supertest';
 import { AuthModule } from '../src/auth/auth.module';
 import { PasswordReset } from '../src/auth/entities/password-reset.entity';
 import { Session } from '../src/auth/entities/session.entity';
@@ -2249,12 +2434,14 @@ describe('AppController (e2e)', () => {
 
   // Почистване след всички тестове
   afterAll(async () => {
-    await app.close();
+    if (app) {
+      await app.close();
+    }
   });
 
   // Базов тест за проверка на работоспособност
   it('/ (GET)', () => {
-    return request(app.getHttpServer())
+    return request(app.getHttpServer() as Server)
       .get('/')
       .expect(200)
       .expect('Hello World!');
@@ -2308,6 +2495,7 @@ services/auth/package.json
     "@nestjs/jwt": "^11.0.0",
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.1",
+    "@nestjs/swagger": "^11.2.0",
     "@nestjs/typeorm": "^11.0.0",
     "bcrypt": "^5.1.1",
     "class-transformer": "^0.5.1",
@@ -2336,7 +2524,7 @@ services/auth/package.json
     "@types/node": "^22.10.7",
     "@types/passport-jwt": "^4.0.1",
     "@types/passport-local": "^1.0.38",
-    "@types/supertest": "^6.0.2",
+    "@types/supertest": "^6.0.3",
     "@types/uuid": "^10.0.0",
     "cross-env": "^7.0.3",
     "eslint": "^9.18.0",
@@ -2346,8 +2534,8 @@ services/auth/package.json
     "jest": "^29.7.0",
     "prettier": "^3.4.2",
     "source-map-support": "^0.5.21",
-    "supertest": "^7.0.0",
-    "ts-jest": "^29.2.5",
+    "supertest": "^7.1.1",
+    "ts-jest": "^29.3.4",
     "ts-loader": "^9.5.2",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
@@ -2378,30 +2566,6 @@ services/auth/tsconfig.build.json
 {
   "extends": "./tsconfig.json",
   "exclude": ["node_modules", "test", "dist", "**/*spec.ts"]
-}
-
-
-services/auth/tsconfig.json
-{
-  "compilerOptions": {
-    "module": "commonjs",
-    "declaration": true,
-    "removeComments": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "allowSyntheticDefaultImports": true,
-    "target": "ES2023",
-    "sourceMap": true,
-    "outDir": "./dist",
-    "baseUrl": "./",
-    "incremental": true,
-    "skipLibCheck": true,
-    "strictNullChecks": true,
-    "forceConsistentCasingInFileNames": true,
-    "noImplicitAny": false,
-    "strictBindCallApply": false,
-    "noFallthroughCasesInSwitch": false
-  }
 }
 
 
@@ -2466,28 +2630,26 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 services/auth/.env
 ### Съдържание на .env файл ###
-# services/auth/.env
 # Database
 DATABASE_HOST=localhost
 DATABASE_PORT=5433
 DATABASE_USERNAME=postgres
-DATABASE_PASSWORD=postgres
+DATABASE_PASSWORD=postgres123
 DATABASE_NAME=learning_platform
 
 # JWT
-JWT_SECRET=your_jwt_secret_key_here
-JWT_EXPIRES_IN=1h
+JWT_SECRET=dev_jwt_secret_key_12345
+JWT_EXPIRES_IN=24h
 JWT_REFRESH_EXPIRES_IN=7d
 
 # Redis
 REDIS_HOST=localhost
 REDIS_PORT=6379
-REDIS_PASSWORD=redis_password
+REDIS_PASSWORD=redis123
 
 # App
-PORT=3001
+PORT=4000
 NODE_ENV=development
-
 ### Край на .env файл ###
 
 services/auth/logs
@@ -2553,6 +2715,1127 @@ function Test-AuthHealthCheck {
 
 
 
+services/auth/auth-integration.test.ps1
+<#
+Auth Service Integration Tests
+
+This test suite verifies all auth service endpoints:
+- Registration
+- Login
+- Profile access
+- Logout
+- Password reset flow
+#>
+
+# Test data
+$testUser = @{
+    email = "testuser_$(Get-Date -Format 'yyyyMMddHHmmss')@example.com"
+    password = "TestPass123!"
+    name = "Test User"
+}
+
+$baseUrl = "http://localhost:3001"
+# Script-scoped variable for access token
+$script:accessToken = $null
+
+function Test-AuthRegistration {
+    [CmdletBinding()]
+    param()
+    
+    $testName = "Auth Registration Test"
+    $description = "Verifies user registration endpoint"
+    $endpoint = "/auth/register"
+    $testOutput = @()
+    $testResult = $false
+
+    try {
+        Write-Host "Running $testName..." -ForegroundColor Cyan
+        Write-Host "  $description" -ForegroundColor Cyan
+        
+        $testOutput += "Testing endpoint: ${baseUrl}${endpoint}"
+        
+        # Make the registration request
+        $body = @{
+            email = $testUser.email
+            password = $testUser.password
+            name = $testUser.name
+        } | ConvertTo-Json
+
+        $response = Invoke-RestMethod -Uri "${baseUrl}${endpoint}" `
+            -Method Post `
+            -Body $body `
+            -ContentType "application/json" `
+            -ErrorAction Stop
+        
+        # Check response
+        if ($response.id -and $response.email -eq $testUser.email -and $response.accessToken) {
+            $testOutput += "✓ Registration successful. User ID: $($response.id)"
+            $testResult = $true
+            
+            # Store access token for subsequent tests
+            $script:accessToken = $response.accessToken
+            $testOutput += "User ID: $($response.id)"
+            
+        } else {
+            $testOutput += "✗ Registration failed. Unexpected response: $($response | ConvertTo-Json -Depth 5)"
+        }
+    }
+    catch {
+        $errorMsg = $_.Exception.Message
+        $testOutput += "✗ Error occurred: $errorMsg"
+        if ($_.Exception.Response) {
+            $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream())
+            $reader.BaseStream.Position = 0
+            $reader.DiscardBufferedData()
+            $responseBody = $reader.ReadToEnd()
+            $testOutput += "Response body: $responseBody"
+        }
+    }
+
+    return @{
+        Name = $testName
+        Description = $description
+        Output = $testOutput
+        Result = $testResult
+    }
+}
+
+function Test-AuthLogin {
+    [CmdletBinding()]
+    param()
+    
+    $testName = "Auth Login Test"
+    $description = "Verifies user login endpoint"
+    $endpoint = "/auth/login"
+    $testOutput = @()
+    $testResult = $false
+
+    try {
+        Write-Host "Running $testName..." -ForegroundColor Cyan
+        Write-Host "  $description" -ForegroundColor Cyan
+        
+        $testOutput += "Testing endpoint: ${baseUrl}${endpoint}"
+        
+        # Make the login request
+        $body = @{
+            email = $testUser.email
+            password = $testUser.password
+        } | ConvertTo-Json
+
+        $response = Invoke-RestMethod -Uri "${baseUrl}${endpoint}" `
+            -Method Post `
+            -Body $body `
+            -ContentType "application/json" `
+            -ErrorAction Stop
+        
+        # Check response
+        if ($response.id -and $response.email -eq $testUser.email -and $response.accessToken) {
+            $testOutput += "✓ Login successful. User ID: $($response.id)"
+            $testResult = $true
+            
+            # Store access token for subsequent tests
+            $script:accessToken = $response.accessToken
+            $testOutput += "User ID: $($response.id)"
+            
+        } else {
+            $testOutput += "✗ Login failed. Unexpected response: $($response | ConvertTo-Json -Depth 5)"
+        }
+    }
+    catch {
+        $errorMsg = $_.Exception.Message
+        $testOutput += "✗ Error occurred: $errorMsg"
+        if ($_.Exception.Response) {
+            $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream())
+            $reader.BaseStream.Position = 0
+            $reader.DiscardBufferedData()
+            $responseBody = $reader.ReadToEnd()
+            $testOutput += "Response body: $responseBody"
+        }
+    }
+
+    return @{
+        Name = $testName
+        Description = $description
+        Output = $testOutput
+        Result = $testResult
+    }
+}
+
+function Test-GetProfile {
+    [CmdletBinding()]
+    param()
+    
+    $testName = "Get Profile Test"
+    $description = "Verifies profile endpoint with authentication"
+    $endpoint = "/auth/profile"
+    $testOutput = @()
+    $testResult = $false
+
+    try {
+        Write-Host "Running $testName..." -ForegroundColor Cyan
+        Write-Host "  $description" -ForegroundColor Cyan
+        
+        if (-not $global:accessToken) {
+            throw "No access token available. Please run login test first."
+        }
+        
+        $testOutput += "Testing endpoint: ${baseUrl}${endpoint}"
+        
+        # Make the authenticated request
+        $headers = @{
+            "Authorization" = "Bearer $global:accessToken"
+        }
+
+        $response = Invoke-RestMethod -Uri "${baseUrl}${endpoint}" `
+            -Method Get `
+            -Headers $headers `
+            -ContentType "application/json" `
+            -ErrorAction Stop
+        
+        # Check response
+        if ($response.id -and $response.email -eq $testUser.email) {
+            $testOutput += "✓ Profile retrieved successfully. User ID: $($response.id)"
+            $testResult = $true
+        } else {
+            $testOutput += "✗ Failed to get profile. Unexpected response: $($response | ConvertTo-Json -Depth 5)"
+        }
+    }
+    catch {
+        $errorMsg = $_.Exception.Message
+        $testOutput += "✗ Error occurred: $errorMsg"
+        if ($_.Exception.Response) {
+            $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream())
+            $reader.BaseStream.Position = 0
+            $reader.DiscardBufferedData()
+            $responseBody = $reader.ReadToEnd()
+            $testOutput += "Response body: $responseBody"
+        }
+    }
+
+    return @{
+        Name = $testName
+        Description = $description
+        Output = $testOutput
+        Result = $testResult
+    }
+}
+
+function Test-PasswordResetFlow {
+    [CmdletBinding()]
+    param()
+    
+    $testName = "Password Reset Flow Test"
+    $description = "Verifies password reset request and reset endpoints"
+    $requestEndpoint = "/auth/reset-password-request"
+    $resetEndpoint = "/auth/reset-password"
+    $testOutput = @()
+    $testResult = $false
+
+    try {
+        Write-Host "Running $testName..." -ForegroundColor Cyan
+        Write-Host "  $description" -ForegroundColor Cyan
+        
+        # Step 1: Request password reset
+        $testOutput += "Testing password reset request..."
+        $body = @{
+            email = $testUser.email
+        } | ConvertTo-Json
+
+        $response = Invoke-RestMethod -Uri "${baseUrl}${requestEndpoint}" `
+            -Method Post `
+            -Body $body `
+            -ContentType "application/json" `
+            -ErrorAction Stop
+        
+        # Note: In a real test, we would extract the reset token from an email
+        # For this test, we'll simulate a successful request
+        if ($response.message -match 'Ако имейлът съществува') {
+            $testOutput += "✓ Password reset request successful"
+            
+            # Simulate getting a reset token (in real scenario, this would come from email)
+            $resetToken = "simulated-reset-token-$(Get-Random -Minimum 1000 -Maximum 9999)"
+            $newPassword = "NewTestPass123!"
+            
+            # Step 2: Reset password with new password
+            $testOutput += "Testing password reset..."
+            $resetBody = @{
+                token = $resetToken
+                newPassword = $newPassword
+            } | ConvertTo-Json
+
+            $resetResponse = Invoke-RestMethod -Uri "${baseUrl}${resetEndpoint}" `
+                -Method Post `
+                -Body $resetBody `
+                -ContentType "application/json" `
+                -ErrorAction Stop
+            
+            if ($resetResponse.message -match 'успешно променена') {
+                $testOutput += "✓ Password reset successful"
+                $testResult = $true
+                
+                # Update test user password for subsequent tests
+                $testUser.password = $newPassword
+            } else {
+                $testOutput += "✗ Password reset failed. Response: $($resetResponse | ConvertTo-Json -Depth 5)"
+            }
+        } else {
+            $testOutput += "✗ Password reset request failed. Response: $($response | ConvertTo-Json -Depth 5)"
+        }
+    }
+    catch {
+        $errorMsg = $_.Exception.Message
+        $testOutput += "✗ Error occurred: $errorMsg"
+        if ($_.Exception.Response) {
+            $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream())
+            $reader.BaseStream.Position = 0
+            $reader.DiscardBufferedData()
+            $responseBody = $reader.ReadToEnd()
+            $testOutput += "Response body: $responseBody"
+        }
+    }
+
+    return @{
+        Name = $testName
+        Description = $description
+        Output = $testOutput
+        Result = $testResult
+    }
+}
+
+function Test-Logout {
+    [CmdletBinding()]
+    param()
+    
+    $testName = "Logout Test"
+    $description = "Verifies logout endpoint"
+    $endpoint = "/auth/logout"
+    $testOutput = @()
+    $testResult = $false
+
+    try {
+        Write-Host "Running $testName..." -ForegroundColor Cyan
+        Write-Host "  $description" -ForegroundColor Cyan
+        
+        if (-not $global:accessToken) {
+            throw "No access token available. Please run login test first."
+        }
+        
+        $testOutput += "Testing endpoint: ${baseUrl}${endpoint}"
+        
+        # Make the logout request
+        $headers = @{
+            "Authorization" = "Bearer $global:accessToken"
+        }
+
+        $response = Invoke-RestMethod -Uri "${baseUrl}${endpoint}" `
+            -Method Post `
+            -Headers $headers `
+            -ContentType "application/json" `
+            -ErrorAction Stop
+        
+        # Check response
+        if ($response.message -match 'успешно излизане') {
+            $testOutput += "✓ Logout successful"
+            $testResult = $true
+            
+            # Clear the token after logout
+            $script:accessToken = $null
+            
+        } else {
+            $testOutput += "✗ Logout failed. Response: $($response | ConvertTo-Json -Depth 5)"
+        }
+    }
+    catch {
+        $errorMsg = $_.Exception.Message
+        $testOutput += "✗ Error occurred: $errorMsg"
+        if ($_.Exception.Response) {
+            $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream())
+            $reader.BaseStream.Position = 0
+            $reader.DiscardBufferedData()
+            $responseBody = $reader.ReadToEnd()
+            $testOutput += "Response body: $responseBody"
+        }
+    }
+
+    return @{
+        Name = $testName
+        Description = $description
+        Output = $testOutput
+        Result = $testResult
+    }
+}
+
+# Export test functions for the test runner
+export-modulemember -function Test-AuthRegistration, Test-AuthLogin, Test-GetProfile, Test-PasswordResetFlow, Test-Logout
+
+
+services/auth/auth-integration.fixed.ps1
+<#
+Auth Service Integration Tests
+
+This test suite verifies all auth service endpoints:
+- Registration
+- Login
+- Profile access
+- Logout
+- Password reset flow
+#>
+
+# Test data
+$testUser = @{
+    email = "testuser_$(Get-Date -Format 'yyyyMMddHHmmss')@example.com"
+    password = "TestPass123!"
+    name = "Test User"
+}
+
+$baseUrl = "http://localhost:3001"
+$script:accessToken = $null  # Script-scoped variable for access token
+
+function Test-AuthRegistration {
+    [CmdletBinding()]
+    param()
+    
+    $testName = "Auth Registration Test"
+    $description = "Verifies user registration endpoint"
+    $endpoint = "/auth/register"
+    $testOutput = @()
+    $testResult = $false
+
+    try {
+        Write-Host "Running $testName..." -ForegroundColor Cyan
+        Write-Host "  $description" -ForegroundColor Cyan
+        
+        $testOutput += "Testing endpoint: ${baseUrl}${endpoint}"
+        
+        # Make the registration request
+        $body = @{
+            email = $testUser.email
+            password = $testUser.password
+            name = $testUser.name
+        } | ConvertTo-Json
+
+        $response = Invoke-RestMethod -Uri "${baseUrl}${endpoint}" `
+            -Method Post `
+            -Body $body `
+            -ContentType "application/json" `
+            -ErrorAction Stop
+        
+        # Check response
+        if ($response.id -and $response.email -eq $testUser.email -and $response.accessToken) {
+            $testOutput += "✓ Registration successful. User ID: $($response.id)"
+            $testResult = $true
+            
+            # Store access token for subsequent tests
+            $script:accessToken = $response.accessToken
+            $testOutput += "User ID: $($response.id)"
+            
+        } else {
+            $testOutput += "✗ Registration failed. Unexpected response: $($response | ConvertTo-Json -Depth 5)"
+        }
+    }
+    catch {
+        $errorMsg = $_.Exception.Message
+        $testOutput += "✗ Error occurred: $errorMsg"
+        if ($_.Exception.Response) {
+            $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream())
+            $reader.BaseStream.Position = 0
+            $reader.DiscardBufferedData()
+            $responseBody = $reader.ReadToEnd()
+            $testOutput += "Response body: $responseBody"
+        }
+    }
+
+    return @{
+        Name = $testName
+        Description = $description
+        Output = $testOutput
+        Result = $testResult
+    }
+}
+
+function Test-AuthLogin {
+    [CmdletBinding()]
+    param()
+    
+    $testName = "Auth Login Test"
+    $description = "Verifies user login endpoint"
+    $endpoint = "/auth/login"
+    $testOutput = @()
+    $testResult = $false
+
+    try {
+        Write-Host "Running $testName..." -ForegroundColor Cyan
+        Write-Host "  $description" -ForegroundColor Cyan
+        
+        $testOutput += "Testing endpoint: ${baseUrl}${endpoint}"
+        
+        # Make the login request
+        $body = @{
+            email = $testUser.email
+            password = $testUser.password
+        } | ConvertTo-Json
+
+        $response = Invoke-RestMethod -Uri "${baseUrl}${endpoint}" `
+            -Method Post `
+            -Body $body `
+            -ContentType "application/json" `
+            -ErrorAction Stop
+        
+        # Check response
+        if ($response.id -and $response.email -eq $testUser.email -and $response.accessToken) {
+            $testOutput += "✓ Login successful. User ID: $($response.id)"
+            $testResult = $true
+            
+            # Store access token for subsequent tests
+            $script:accessToken = $response.accessToken
+            $testOutput += "User ID: $($response.id)"
+            
+        } else {
+            $testOutput += "✗ Login failed. Unexpected response: $($response | ConvertTo-Json -Depth 5)"
+        }
+    }
+    catch {
+        $errorMsg = $_.Exception.Message
+        $testOutput += "✗ Error occurred: $errorMsg"
+        if ($_.Exception.Response) {
+            $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream())
+            $reader.BaseStream.Position = 0
+            $reader.DiscardBufferedData()
+            $responseBody = $reader.ReadToEnd()
+            $testOutput += "Response body: $responseBody"
+        }
+    }
+
+    return @{
+        Name = $testName
+        Description = $description
+        Output = $testOutput
+        Result = $testResult
+    }
+}
+
+function Test-GetProfile {
+    [CmdletBinding()]
+    param()
+    
+    $testName = "Get Profile Test"
+    $description = "Verifies profile endpoint with authentication"
+    $endpoint = "/auth/profile"
+    $testOutput = @()
+    $testResult = $false
+
+    try {
+        Write-Host "Running $testName..." -ForegroundColor Cyan
+        Write-Host "  $description" -ForegroundColor Cyan
+        
+        if (-not $script:accessToken) {
+            throw "No access token available. Please run login test first."
+        }
+        
+        $testOutput += "Testing endpoint: ${baseUrl}${endpoint}"
+        
+        # Make the authenticated request
+        $headers = @{
+            "Authorization" = "Bearer $($script:accessToken)"
+        }
+
+        $response = Invoke-RestMethod -Uri "${baseUrl}${endpoint}" `
+            -Method Get `
+            -Headers $headers `
+            -ContentType "application/json" `
+            -ErrorAction Stop
+        
+        # Check response
+        if ($response.id -and $response.email -eq $testUser.email) {
+            $testOutput += "✓ Profile retrieved successfully. User ID: $($response.id)"
+            $testResult = $true
+        } else {
+            $testOutput += "✗ Failed to get profile. Unexpected response: $($response | ConvertTo-Json -Depth 5)"
+        }
+    }
+    catch {
+        $errorMsg = $_.Exception.Message
+        $testOutput += "✗ Error occurred: $errorMsg"
+        if ($_.Exception.Response) {
+            $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream())
+            $reader.BaseStream.Position = 0
+            $reader.DiscardBufferedData()
+            $responseBody = $reader.ReadToEnd()
+            $testOutput += "Response body: $responseBody"
+        }
+    }
+
+    return @{
+        Name = $testName
+        Description = $description
+        Output = $testOutput
+        Result = $testResult
+    }
+}
+
+function Test-PasswordResetFlow {
+    [CmdletBinding()]
+    param()
+    
+    $testName = "Password Reset Flow Test"
+    $description = "Verifies password reset request and reset endpoints"
+    $requestEndpoint = "/auth/reset-password-request"
+    $resetEndpoint = "/auth/reset-password"
+    $testOutput = @()
+    $testResult = $false
+
+    try {
+        Write-Host "Running $testName..." -ForegroundColor Cyan
+        Write-Host "  $description" -ForegroundColor Cyan
+        
+        # Step 1: Request password reset
+        $testOutput += "Testing password reset request..."
+        $body = @{
+            email = $testUser.email
+        } | ConvertTo-Json
+
+        $response = Invoke-RestMethod -Uri "${baseUrl}${requestEndpoint}" `
+            -Method Post `
+            -Body $body `
+            -ContentType "application/json" `
+            -ErrorAction Stop
+        
+        # Note: In a real test, we would extract the reset token from an email
+        # For this test, we'll simulate a successful request
+        if ($response.message -match 'Ако имейлът съществува') {
+            $testOutput += "✓ Password reset request successful"
+            
+            # Simulate getting a reset token (in real scenario, this would come from email)
+            $resetToken = "simulated-reset-token-$(Get-Random -Minimum 1000 -Maximum 9999)"
+            $newPassword = "NewTestPass123!"
+            
+            # Step 2: Reset password with new password
+            $testOutput += "Testing password reset..."
+            $resetBody = @{
+                token = $resetToken
+                newPassword = $newPassword
+            } | ConvertTo-Json
+
+            $resetResponse = Invoke-RestMethod -Uri "${baseUrl}${resetEndpoint}" `
+                -Method Post `
+                -Body $resetBody `
+                -ContentType "application/json" `
+                -ErrorAction Stop
+            
+            if ($resetResponse.message -match 'успешно променена') {
+                $testOutput += "✓ Password reset successful"
+                $testResult = $true
+                
+                # Update test user password for subsequent tests
+                $testUser.password = $newPassword
+            } else {
+                $testOutput += "✗ Password reset failed. Response: $($resetResponse | ConvertTo-Json -Depth 5)"
+            }
+        } else {
+            $testOutput += "✗ Password reset request failed. Response: $($response | ConvertTo-Json -Depth 5)"
+        }
+    }
+    catch {
+        $errorMsg = $_.Exception.Message
+        $testOutput += "✗ Error occurred: $errorMsg"
+        if ($_.Exception.Response) {
+            $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream())
+            $reader.BaseStream.Position = 0
+            $reader.DiscardBufferedData()
+            $responseBody = $reader.ReadToEnd()
+            $testOutput += "Response body: $responseBody"
+        }
+    }
+
+    return @{
+        Name = $testName
+        Description = $description
+        Output = $testOutput
+        Result = $testResult
+    }
+}
+
+function Test-Logout {
+    [CmdletBinding()]
+    param()
+    
+    $testName = "Logout Test"
+    $description = "Verifies logout endpoint"
+    $endpoint = "/auth/logout"
+    $testOutput = @()
+    $testResult = $false
+
+    try {
+        Write-Host "Running $testName..." -ForegroundColor Cyan
+        Write-Host "  $description" -ForegroundColor Cyan
+        
+        if (-not $script:accessToken) {
+            throw "No access token available. Please run login test first."
+        }
+        
+        $testOutput += "Testing endpoint: ${baseUrl}${endpoint}"
+        
+        # Make the logout request
+        $headers = @{
+            "Authorization" = "Bearer $($script:accessToken)"
+        }
+
+        $response = Invoke-RestMethod -Uri "${baseUrl}${endpoint}" `
+            -Method Post `
+            -Headers $headers `
+            -ContentType "application/json" `
+            -ErrorAction Stop
+        
+        # Check response
+        if ($response.message -match 'успешно излизане') {
+            $testOutput += "✓ Logout successful"
+            $testResult = $true
+            
+            # Clear the token after logout
+            $script:accessToken = $null
+            
+        } else {
+            $testOutput += "✗ Logout failed. Response: $($response | ConvertTo-Json -Depth 5)"
+        }
+    }
+    catch {
+        $errorMsg = $_.Exception.Message
+        $testOutput += "✗ Error occurred: $errorMsg"
+        if ($_.Exception.Response) {
+            $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream())
+            $reader.BaseStream.Position = 0
+            $reader.DiscardBufferedData()
+            $responseBody = $reader.ReadToEnd()
+            $testOutput += "Response body: $responseBody"
+        }
+    }
+
+    return @{
+        Name = $testName
+        Description = $description
+        Output = $testOutput
+        Result = $testResult
+    }
+}
+
+# Test functions are available in the script scope
+
+
+services/auth/auth-integration.ps1
+<#
+Auth Service Integration Tests
+
+This test suite verifies all auth service endpoints:
+- Registration
+- Login
+- Profile access
+- Logout
+- Password reset flow
+#>
+
+# Test data
+$testUser = @{
+    email = "testuser_$(Get-Date -Format 'yyyyMMddHHmmss')@example.com"
+    password = "TestPass123!"
+    name = "Test User"
+}
+
+$baseUrl = "http://localhost:3001"
+# Script-scoped variable for access token
+$script:accessToken = $null
+
+function Test-AuthRegistration {
+    [CmdletBinding()]
+    param()
+    
+    $testName = "Auth Registration Test"
+    $description = "Verifies user registration endpoint"
+    $endpoint = "/auth/register"
+    $testOutput = @()
+    $testResult = $false
+
+    try {
+        Write-Host "Running $testName..." -ForegroundColor Cyan
+        Write-Host "  $description" -ForegroundColor Cyan
+        
+        $testOutput += "Testing endpoint: ${baseUrl}${endpoint}"
+        
+        # Make the registration request
+        $body = @{
+            email = $testUser.email
+            password = $testUser.password
+            name = $testUser.name
+        } | ConvertTo-Json
+
+        $response = Invoke-RestMethod -Uri "${baseUrl}${endpoint}" `
+            -Method Post `
+            -Body $body `
+            -ContentType "application/json" `
+            -ErrorAction Stop
+        
+        # Check response
+        if ($response.id -and $response.email -eq $testUser.email -and $response.accessToken) {
+            $testOutput += "✓ Registration successful. User ID: $($response.id)"
+            $testResult = $true
+            
+            # Store access token for subsequent tests
+            $script:accessToken = $response.accessToken
+            $testOutput += "User ID: $($response.id)"
+            
+        } else {
+            $testOutput += "✗ Registration failed. Unexpected response: $($response | ConvertTo-Json -Depth 5)"
+        }
+    }
+    catch {
+        $errorMsg = $_.Exception.Message
+        $testOutput += "✗ Error occurred: $errorMsg"
+        if ($_.Exception.Response) {
+            $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream())
+            $reader.BaseStream.Position = 0
+            $reader.DiscardBufferedData()
+            $responseBody = $reader.ReadToEnd()
+            $testOutput += "Response body: $responseBody"
+        }
+    }
+
+    return @{
+        Name = $testName
+        Description = $description
+        Output = $testOutput
+        Result = $testResult
+    }
+}
+
+function Test-AuthLogin {
+    [CmdletBinding()]
+    param()
+    
+    $testName = "Auth Login Test"
+    $description = "Verifies user login endpoint"
+    $endpoint = "/auth/login"
+    $testOutput = @()
+    $testResult = $false
+
+    try {
+        Write-Host "Running $testName..." -ForegroundColor Cyan
+        Write-Host "  $description" -ForegroundColor Cyan
+        
+        $testOutput += "Testing endpoint: ${baseUrl}${endpoint}"
+        
+        # Make the login request
+        $body = @{
+            email = $testUser.email
+            password = $testUser.password
+        } | ConvertTo-Json
+
+        $response = Invoke-RestMethod -Uri "${baseUrl}${endpoint}" `
+            -Method Post `
+            -Body $body `
+            -ContentType "application/json" `
+            -ErrorAction Stop
+        
+        # Check response
+        if ($response.id -and $response.email -eq $testUser.email -and $response.accessToken) {
+            $testOutput += "✓ Login successful. User ID: $($response.id)"
+            $testResult = $true
+            
+            # Store access token for subsequent tests
+            $script:accessToken = $response.accessToken
+            $testOutput += "User ID: $($response.id)"
+            
+        } else {
+            $testOutput += "✗ Login failed. Unexpected response: $($response | ConvertTo-Json -Depth 5)"
+        }
+    }
+    catch {
+        $errorMsg = $_.Exception.Message
+        $testOutput += "✗ Error occurred: $errorMsg"
+        if ($_.Exception.Response) {
+            $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream())
+            $reader.BaseStream.Position = 0
+            $reader.DiscardBufferedData()
+            $responseBody = $reader.ReadToEnd()
+            $testOutput += "Response body: $responseBody"
+        }
+    }
+
+    return @{
+        Name = $testName
+        Description = $description
+        Output = $testOutput
+        Result = $testResult
+    }
+}
+
+function Test-GetProfile {
+    [CmdletBinding()]
+    param()
+    
+    $testName = "Get Profile Test"
+    $description = "Verifies profile endpoint with authentication"
+    $endpoint = "/auth/profile"
+    $testOutput = @()
+    $testResult = $false
+
+    try {
+        Write-Host "Running $testName..." -ForegroundColor Cyan
+        Write-Host "  $description" -ForegroundColor Cyan
+        
+        if (-not $script:accessToken) {
+            throw "No access token available. Please run login test first."
+        }
+        
+        $testOutput += "Testing endpoint: ${baseUrl}${endpoint}"
+        
+        # Make the authenticated request
+        $headers = @{
+            "Authorization" = "Bearer $($script:accessToken)"
+        }
+
+        $response = Invoke-RestMethod -Uri "${baseUrl}${endpoint}" `
+            -Method Get `
+            -Headers $headers `
+            -ContentType "application/json" `
+            -ErrorAction Stop
+        
+        # Check response
+        if ($response.id -and $response.email -eq $testUser.email) {
+            $testOutput += "✓ Profile retrieved successfully. User ID: $($response.id)"
+            $testResult = $true
+        } else {
+            $testOutput += "✗ Failed to get profile. Unexpected response: $($response | ConvertTo-Json -Depth 5)"
+        }
+    }
+    catch {
+        $errorMsg = $_.Exception.Message
+        $testOutput += "✗ Error occurred: $errorMsg"
+        if ($_.Exception.Response) {
+            $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream())
+            $reader.BaseStream.Position = 0
+            $reader.DiscardBufferedData()
+            $responseBody = $reader.ReadToEnd()
+            $testOutput += "Response body: $responseBody"
+        }
+    }
+
+    return @{
+        Name = $testName
+        Description = $description
+        Output = $testOutput
+        Result = $testResult
+    }
+}
+
+function Test-PasswordResetFlow {
+    [CmdletBinding()]
+    param()
+    
+    $testName = "Password Reset Flow Test"
+    $description = "Verifies password reset request and reset endpoints"
+    $requestEndpoint = "/auth/reset-password-request"
+    $resetEndpoint = "/auth/reset-password"
+    $testOutput = @()
+    $testResult = $false
+
+    try {
+        Write-Host "Running $testName..." -ForegroundColor Cyan
+        Write-Host "  $description" -ForegroundColor Cyan
+        
+        # Display base URL being used
+        $testOutput += "Using base URL: $baseUrl"
+        $testOutput += "Test user email: $($testUser.email)"
+        
+        # Step 1: Request password reset
+        $testOutput += "[1/2] Testing password reset request..."
+        $body = @{
+            email = $testUser.email
+        } | ConvertTo-Json
+
+        $testOutput += "Sending request to: ${baseUrl}${requestEndpoint}"
+        $testOutput += "Request body: $body"
+        
+        try {
+            $response = Invoke-RestMethod -Uri "${baseUrl}${requestEndpoint}" `
+                -Method Post `
+                -Body $body `
+                -ContentType "application/json" `
+                -ErrorAction Stop
+                
+            $testOutput += "Response received: $($response | ConvertTo-Json -Depth 5)"
+        
+            # Check if the reset request was successful
+            if ($response.message -match 'Ако имейлът съществува') {
+                $testOutput += "✓ Password reset request successful"
+                
+                # Simulate getting a reset token (in real scenario, this would come from email)
+                $resetToken = "simulated-reset-token-$(Get-Random -Minimum 1000 -Maximum 9999)"
+                $newPassword = "NewTestPass123!"
+                
+                # Step 2: Reset password with new password
+                $testOutput += "[2/2] Testing password reset..."
+                $resetBody = @{
+                    token = $resetToken
+                    newPassword = $newPassword
+                } | ConvertTo-Json
+
+                $testOutput += "Sending reset request to: ${baseUrl}${resetEndpoint}"
+                $testOutput += "Reset request body: $resetBody"
+                
+                try {
+                    $resetResponse = Invoke-RestMethod -Uri "${baseUrl}${resetEndpoint}" `
+                        -Method Post `
+                        -Body $resetBody `
+                        -ContentType "application/json" `
+                        -ErrorAction Stop
+                        
+                    $testOutput += "Reset response: $($resetResponse | ConvertTo-Json -Depth 5)"
+            
+                    if ($resetResponse.message -match 'успешно променена') {
+                        $testOutput += "✓ Password reset successful"
+                        $testResult = $true
+                        
+                        # Update test user password for subsequent tests
+                        $testUser.password = $newPassword
+                    } else {
+                        $testOutput += "✗ Password reset failed. Response: $($resetResponse | ConvertTo-Json -Depth 5)"
+                    }
+                }
+                catch {
+                    $resetError = $_.Exception
+                    $testOutput += "✗ Error during password reset: $($resetError.Message)"
+                    if ($resetError.Response) {
+                        $reader = New-Object System.IO.StreamReader($resetError.Response.GetResponseStream())
+                        $reader.BaseStream.Position = 0
+                        $reader.DiscardBufferedData()
+                        $responseBody = $reader.ReadToEnd()
+                        $testOutput += "Reset error response: $responseBody"
+                    }
+                    throw
+                }
+            } else {
+                $testOutput += "✗ Password reset request did not return expected success message. Response: $($response | ConvertTo-Json -Depth 5)"
+            }
+        }
+        catch {
+            $testOutput += "✗ Error during password reset request: $($_.Exception.Message)"
+            if ($_.Exception.Response) {
+                $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream())
+                $reader.BaseStream.Position = 0
+                $reader.DiscardBufferedData()
+                $responseBody = $reader.ReadToEnd()
+                $testOutput += "Request error response: $responseBody"
+            }
+            throw
+        }
+    }
+    catch {
+        $errorMsg = $_.Exception.Message
+        $testOutput += "✗ Error occurred: $errorMsg"
+        if ($_.Exception.Response) {
+            $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream())
+            $reader.BaseStream.Position = 0
+            $reader.DiscardBufferedData()
+            $responseBody = $reader.ReadToEnd()
+            $testOutput += "Response body: $responseBody"
+        }
+    }
+
+    return @{
+        Name = $testName
+        Description = $description
+        Output = $testOutput
+        Result = $testResult
+    }
+}
+
+function Test-Logout {
+    [CmdletBinding()]
+    param()
+    
+    $testName = "Logout Test"
+    $description = "Verifies logout endpoint"
+    $endpoint = "/auth/logout"
+    $testOutput = @()
+    $testResult = $false
+
+    try {
+        Write-Host "Running $testName..." -ForegroundColor Cyan
+        Write-Host "  $description" -ForegroundColor Cyan
+        
+        if (-not $script:accessToken) {
+            throw "No access token available. Please run login test first."
+        }
+        
+        $testOutput += "Testing endpoint: ${baseUrl}${endpoint}"
+        
+        # Make the logout request
+        $headers = @{
+            "Authorization" = "Bearer $($script:accessToken)"
+        }
+
+        $response = Invoke-RestMethod -Uri "${baseUrl}${endpoint}" `
+            -Method Post `
+            -Headers $headers `
+            -ContentType "application/json" `
+            -ErrorAction Stop
+        
+        # Check response
+        if ($response.message -match 'успешно излизане') {
+            $testOutput += "✓ Logout successful"
+            $testResult = $true
+            
+            # Clear the token after logout
+            $script:accessToken = $null
+            
+        } else {
+            $testOutput += "✗ Logout failed. Response: $($response | ConvertTo-Json -Depth 5)"
+        }
+    }
+    catch {
+        $errorMsg = $_.Exception.Message
+        $testOutput += "✗ Error occurred: $errorMsg"
+        if ($_.Exception.Response) {
+            $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream())
+            $reader.BaseStream.Position = 0
+            $reader.DiscardBufferedData()
+            $responseBody = $reader.ReadToEnd()
+            $testOutput += "Response body: $responseBody"
+        }
+    }
+
+    return @{
+        Name = $testName
+        Description = $description
+        Output = $testOutput
+        Result = $testResult
+    }
+}
+
+
+services/auth/tsconfig.json
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2022",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strictNullChecks": true,
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "noFallthroughCasesInSwitch": false
+  }
+}
+
+
 services/user
 services/user/Dockerfile
 FROM node:20-alpine
@@ -2580,6 +3863,38 @@ http.createServer((req, res) => {\
 EXPOSE 3000
 
 CMD ["npm", "run", "start:dev"]
+
+services/user/package.json
+{
+  "name": "microservice",
+  "version": "0.1.0",
+  "scripts": {
+    "start": "node server.js",
+    "start:dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
+
+
+services/user/server.js
+console.log('Service running on port 3000');
+const http = require('http');
+http
+  .createServer((req, res) => {
+    if (req.url === '/health') {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ status: 'ok' }));
+      return;
+    }
+
+    // Съществуващ код за други маршрути
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ status: 'ok', service: 'placeholder' }));
+  })
+  .listen(3000);
+
 
 services/user/src
 services/user/src/entities
@@ -2609,39 +3924,6 @@ export class UserProfile extends BaseEntity {
 
   @Column({ type: 'jsonb', nullable: true })
   preferences: Record<string, any> | null;
-}
-
-
-services/user/logs
-services/user/server.js
-console.log('Service running on port 3000');
-const http = require('http');
-http
-  .createServer((req, res) => {
-    if (req.url === '/health') {
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ status: 'ok' }));
-      return;
-    }
-
-    // Съществуващ код за други маршрути
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ status: 'ok', service: 'placeholder' }));
-  })
-  .listen(3000);
-
-
-services/user/package.json
-{
-  "name": "microservice",
-  "version": "0.1.0",
-  "scripts": {
-    "start": "node server.js",
-    "start:dev": "node server.js"
-  },
-  "dependencies": {
-    "express": "^4.18.2"
-  }
 }
 
 
@@ -6339,23 +7621,49 @@ Write-Host "Report will be saved to: $reportFile" -ForegroundColor $infoColor
 try {
   # Import test modules
   Import-Module "$PSScriptRoot\services\auth\auth-health.test.ps1" -Force -ErrorAction Stop
+  . "$PSScriptRoot\services\auth\auth-integration.ps1" -ErrorAction Stop
 
   # Define available tests with their names, descriptions, and function references
-  $testDefinitions = @(
+  $availableTests = @(
     @{
-      Name        = "TestDevelopmentEnvironment"
-      Description = "Validate development environment configuration"
-      Function    = ${function:Test-DevelopmentEnvironment}
+      Name = "TestDevelopmentEnvironment"
+      Description = "Verifies development environment setup"
+      TestFunction = ${function:Test-DevelopmentEnvironment}
     },
     @{
-      Name        = "TestDatabaseMigrations"
-      Description = "Test database migrations and connection"
-      Function    = ${function:Test-DatabaseMigrations}
+      Name = "TestDatabaseMigrations"
+      Description = "Validates database connection and migration loading"
+      TestFunction = ${function:Test-DatabaseMigrations}
     },
     @{
-      Name        = "TestAuthHealthCheck"
-      Description = "Verify auth service health check endpoint"
-      Function    = ${function:Test-AuthHealthCheck}
+      Name = "TestAuthHealthCheck"
+      Description = "Verifies auth service health check endpoint"
+      TestFunction = ${function:Test-AuthHealthCheck}
+    },
+    @{
+      Name = "TestAuthRegistration"
+      Description = "Verifies user registration endpoint"
+      TestFunction = ${function:Test-AuthRegistration}
+    },
+    @{
+      Name = "TestAuthLogin"
+      Description = "Verifies user login endpoint"
+      TestFunction = ${function:Test-AuthLogin}
+    },
+    @{
+      Name = "TestGetProfile"
+      Description = "Verifies profile endpoint with authentication"
+      TestFunction = ${function:Test-GetProfile}
+    },
+    @{
+      Name = "TestPasswordResetFlow"
+      Description = "Verifies password reset request and reset endpoints"
+      TestFunction = ${function:Test-PasswordResetFlow}
+    },
+    @{
+      Name = "TestLogout"
+      Description = "Verifies logout endpoint"
+      TestFunction = ${function:Test-Logout}
     }
   )
   
@@ -6365,22 +7673,22 @@ try {
   $passedTests = 0
   $failedTests = 0
 
-  # Run specific test if specified
-  if ($TestName -ne "") {
-    $testToRun = $testDefinitions | Where-Object { $_.Name -eq $TestName }
+  # Run selected tests or all tests
+  if ($TestName) {
+    $testToRun = $availableTests | Where-Object { $_.Name -eq $TestName }
     if ($testToRun) {
-      Write-Host "Running test: $($testToRun.Name) - $($testToRun.Description)" -ForegroundColor $infoColor
+      Write-Host "Running test: $($testToRun.Name)" -ForegroundColor Cyan
       try {
-        & $testToRun.Function
+        & $testToRun.TestFunction
         $testResults += [PSCustomObject]@{
-          Name = $testToRun.Name
+          Name    = $testToRun.Name
           Success = $true
           Message = "Test passed"
         }
         $passedTests++
       } catch {
         $testResults += [PSCustomObject]@{
-          Name = $testToRun.Name
+          Name    = $testToRun.Name
           Success = $false
           Message = $_.Exception.Message
         }
@@ -6388,22 +7696,21 @@ try {
       }
       $testCount++
     } else {
-      $availableTestNames = $testDefinitions | ForEach-Object { $_.Name }
+      $availableTestNames = $availableTests | ForEach-Object { $_.Name }
       $errorMsg = "Test '$TestName' not found. Available tests: $($availableTestNames -join ', ')"
-      Write-Host "Error: $errorMsg" -ForegroundColor $errorColor
+      Write-Host "Error: $errorMsg" -ForegroundColor Red
       throw $errorMsg
     }
-  }
-  else {
+  } else {
     # Run all tests
-    Write-Host "Running all regression tests..." -ForegroundColor $infoColor
+    Write-Host "Running all regression tests..." -ForegroundColor Cyan
         
     # Execute each test
-    foreach ($test in $testDefinitions) {
+    foreach ($test in $availableTests) {
       $testCount++
-      Write-Host "`nRunning test: $($test.Name) - $($test.Description)" -ForegroundColor $infoColor
+      Write-Host "`nRunning test: $($test.Name) - $($test.Description)" -ForegroundColor Cyan
       try {
-        & $test.Function
+        & $test.TestFunction
         $testResults += [PSCustomObject]@{
           Name    = $test.Name
           Success = $true
@@ -6466,7 +7773,6 @@ catch {
   Write-Host $_.ScriptStackTrace -ForegroundColor $errorColor
   exit 1
 }
-
 
 Искам да продължим със стъпка 12 (фаза 3) от docs\developmentPlan.md файла
 12. Разработка на User Service
