@@ -758,7 +758,6 @@ Development план:
 Този план позволява методично и структурирано разработване на системата, като първо се фокусира върху локалната разработка и тестване, а след това преминава към разгръщане и внедряване. С използването на Docker контейнеризация, същата система, която разработвате локално, може лесно да бъде преместена на VPS сървъра, което минимизира проблемите при внедряване.
 
 Ето и самия проект до момента:
-
 docker-compose.override.yml
 # Override за локална разработка
 services:
@@ -3836,97 +3835,6 @@ services/auth/tsconfig.json
 }
 
 
-services/user
-services/user/Dockerfile
-FROM node:20-alpine
-
-WORKDIR /app
-
-# За неразработени сървиси или за първоначално стартиране
-# Създаваме минимално приложение
-RUN echo '{ \
-  "name": "microservice", \
-  "version": "0.1.0", \
-  "scripts": { \
-    "start": "node server.js", \
-    "start:dev": "node server.js" \
-  } \
-}' > package.json
-
-RUN echo 'console.log("Service running on port 3000");\
-const http = require("http");\
-http.createServer((req, res) => {\
-  res.writeHead(200, {"Content-Type": "application/json"});\
-  res.end(JSON.stringify({status: "ok", service: "placeholder"}));\
-}).listen(3000);' > server.js
-
-EXPOSE 3000
-
-CMD ["npm", "run", "start:dev"]
-
-services/user/package.json
-{
-  "name": "microservice",
-  "version": "0.1.0",
-  "scripts": {
-    "start": "node server.js",
-    "start:dev": "node server.js"
-  },
-  "dependencies": {
-    "express": "^4.18.2"
-  }
-}
-
-
-services/user/server.js
-console.log('Service running on port 3000');
-const http = require('http');
-http
-  .createServer((req, res) => {
-    if (req.url === '/health') {
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ status: 'ok' }));
-      return;
-    }
-
-    // Съществуващ код за други маршрути
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ status: 'ok', service: 'placeholder' }));
-  })
-  .listen(3000);
-
-
-services/user/src
-services/user/src/entities
-services/user/src/entities/user-profile.entity.ts
-import { BaseEntity } from '@shared/entities/base.entity';
-import { Column, Entity, Index, JoinColumn, OneToOne } from 'typeorm';
-import { User } from './user.entity';
-
-@Entity('user_profiles')
-export class UserProfile extends BaseEntity {
-  @Column({ name: 'user_id', unique: true })
-  @Index('idx_user_profile_user_id')
-  userId: number;
-
-  @OneToOne(() => User, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'user_id' })
-  user: User;
-
-  @Column({ name: 'first_name', length: 100, nullable: true })
-  firstName: string | null;
-
-  @Column({ name: 'last_name', length: 100, nullable: true })
-  lastName: string | null;
-
-  @Column({ name: 'avatar_url', length: 255, nullable: true })
-  avatarUrl: string | null;
-
-  @Column({ type: 'jsonb', nullable: true })
-  preferences: Record<string, any> | null;
-}
-
-
 services/course
 services/course/Dockerfile
 FROM node:20-alpine
@@ -4738,6 +4646,411 @@ export class MigrationService {
   }
 }
 
+
+services/user
+services/user/.prettierrc
+[Бинарно или не-текстово съдържание не е показано]
+
+services/user/eslint.config.mjs
+[Бинарно или не-текстово съдържание не е показано]
+
+services/user/nest-cli.json
+{
+  "$schema": "https://json.schemastore.org/nest-cli",
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "src",
+  "compilerOptions": {
+    "deleteOutDir": true
+  }
+}
+
+
+services/user/package.json
+{
+  "name": "user",
+  "version": "0.0.1",
+  "description": "",
+  "author": "",
+  "private": true,
+  "license": "UNLICENSED",
+  "scripts": {
+    "build": "nest build",
+    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "start": "nest start",
+    "start:dev": "nest start --watch",
+    "start:debug": "nest start --debug --watch",
+    "start:prod": "node dist/main",
+    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:cov": "jest --coverage",
+    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
+    "test:e2e": "jest --config ./test/jest-e2e.json"
+  },
+  "dependencies": {
+    "@nestjs/cache-manager": "^3.0.1",
+    "@nestjs/common": "^11.0.1",
+    "@nestjs/config": "^4.0.2",
+    "@nestjs/core": "^11.0.1",
+    "@nestjs/jwt": "^11.0.0",
+    "@nestjs/platform-express": "^11.0.1",
+    "@nestjs/typeorm": "^11.0.0",
+    "bcrypt": "^6.0.0",
+    "cache-manager": "^6.4.3",
+    "cache-manager-redis-store": "^3.0.1",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.2",
+    "passport": "^0.7.0",
+    "passport-jwt": "^4.0.1",
+    "pg": "^8.16.0",
+    "redis": "^4.7.1",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1",
+    "typeorm": "^0.3.24"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.2.0",
+    "@eslint/js": "^9.18.0",
+    "@nestjs/cli": "^11.0.0",
+    "@nestjs/schematics": "^11.0.0",
+    "@nestjs/testing": "^11.0.1",
+    "@swc/cli": "^0.6.0",
+    "@swc/core": "^1.10.7",
+    "@types/bcrypt": "^5.0.2",
+    "@types/express": "^5.0.0",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.10.7",
+    "@types/passport-jwt": "^4.0.1",
+    "@types/supertest": "^6.0.2",
+    "eslint": "^9.18.0",
+    "eslint-config-prettier": "^10.0.1",
+    "eslint-plugin-prettier": "^5.2.2",
+    "globals": "^16.0.0",
+    "jest": "^29.7.0",
+    "prettier": "^3.4.2",
+    "source-map-support": "^0.5.21",
+    "supertest": "^7.0.0",
+    "ts-jest": "^29.2.5",
+    "ts-loader": "^9.5.2",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.20.0"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
+    "rootDir": "src",
+    "testRegex": ".*\\.spec\\.ts$",
+    "transform": {
+      "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "collectCoverageFrom": [
+      "**/*.(t|j)s"
+    ],
+    "coverageDirectory": "../coverage",
+    "testEnvironment": "node"
+  }
+}
+
+
+services/user/tsconfig.build.json
+{
+  "extends": "./tsconfig.json",
+  "exclude": ["node_modules", "test", "dist", "**/*spec.ts"]
+}
+
+
+services/user/tsconfig.json
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2023",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strictNullChecks": true,
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "noFallthroughCasesInSwitch": false
+  }
+}
+
+
+services/user/src
+services/user/src/app.controller.ts
+import { Controller, Get } from '@nestjs/common';
+import { AppService } from './app.service';
+
+@Controller()
+export class AppController {
+  constructor(private readonly appService: AppService) {}
+
+  @Get()
+  getHello(): string {
+    return this.appService.getHello();
+  }
+}
+
+
+services/user/src/app.module.ts
+import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { AuthModule } from './auth/auth.module';
+import { ConfigModule as AppConfigModule } from './config/config.module';
+import { SharedModule } from './shared/shared.module';
+import { UsersModule } from './users/users.module';
+
+@Module({
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        type: 'postgres',
+        host: configService.get('DATABASE_HOST'),
+        port: configService.get('DATABASE_PORT'),
+        username: configService.get('DATABASE_USERNAME'),
+        password: configService.get('DATABASE_PASSWORD'),
+        database: configService.get('DATABASE_NAME'),
+        entities: [__dirname + '/**/*.entity{.ts,.js}'],
+        synchronize: configService.get('NODE_ENV') === 'development',
+      }),
+    }),
+    UsersModule,
+    AuthModule,
+    SharedModule,
+    AppConfigModule,
+  ],
+  controllers: [AppController],
+  providers: [AppService],
+})
+export class AppModule {}
+
+
+services/user/src/app.service.ts
+import { Injectable } from '@nestjs/common';
+
+@Injectable()
+export class AppService {
+  getHello(): string {
+    return 'Hello World!';
+  }
+}
+
+
+services/user/src/main.ts
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+  await app.listen(process.env.PORT ?? 3000);
+}
+bootstrap();
+
+
+services/user/src/app.controller.spec.ts
+import { Test, TestingModule } from '@nestjs/testing';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+
+describe('AppController', () => {
+  let appController: AppController;
+
+  beforeEach(async () => {
+    const app: TestingModule = await Test.createTestingModule({
+      controllers: [AppController],
+      providers: [AppService],
+    }).compile();
+
+    appController = app.get<AppController>(AppController);
+  });
+
+  describe('root', () => {
+    it('should return "Hello World!"', () => {
+      expect(appController.getHello()).toBe('Hello World!');
+    });
+  });
+});
+
+
+services/user/src/users
+services/user/src/users/users.module.ts
+import { Module } from '@nestjs/common';
+import { UsersController } from './users.controller';
+import { UsersService } from './users.service';
+
+@Module({
+  controllers: [UsersController],
+  providers: [UsersService]
+})
+export class UsersModule {}
+
+
+services/user/src/users/users.controller.spec.ts
+import { Test, TestingModule } from '@nestjs/testing';
+import { UsersController } from './users.controller';
+
+describe('UsersController', () => {
+  let controller: UsersController;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      controllers: [UsersController],
+    }).compile();
+
+    controller = module.get<UsersController>(UsersController);
+  });
+
+  it('should be defined', () => {
+    expect(controller).toBeDefined();
+  });
+});
+
+
+services/user/src/users/users.controller.ts
+import { Controller } from '@nestjs/common';
+
+@Controller('users')
+export class UsersController {}
+
+
+services/user/src/users/users.service.spec.ts
+import { Test, TestingModule } from '@nestjs/testing';
+import { UsersService } from './users.service';
+
+describe('UsersService', () => {
+  let service: UsersService;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [UsersService],
+    }).compile();
+
+    service = module.get<UsersService>(UsersService);
+  });
+
+  it('should be defined', () => {
+    expect(service).toBeDefined();
+  });
+});
+
+
+services/user/src/users/users.service.ts
+import { Injectable } from '@nestjs/common';
+
+@Injectable()
+export class UsersService {}
+
+
+services/user/src/users/dto
+services/user/src/users/entities
+services/user/src/auth
+services/user/src/auth/auth.module.ts
+import { Module } from '@nestjs/common';
+
+@Module({})
+export class AuthModule {}
+
+
+services/user/src/shared
+services/user/src/shared/shared.module.ts
+import { Module } from '@nestjs/common';
+
+@Module({})
+export class SharedModule {}
+
+
+services/user/src/config
+services/user/src/config/config.module.ts
+import { Module } from '@nestjs/common';
+
+@Module({})
+export class ConfigModule {}
+
+
+services/user/test
+services/user/test/jest-e2e.json
+{
+  "moduleFileExtensions": ["js", "json", "ts"],
+  "rootDir": ".",
+  "testEnvironment": "node",
+  "testRegex": ".e2e-spec.ts$",
+  "transform": {
+    "^.+\\.(t|j)s$": "ts-jest"
+  }
+}
+
+
+services/user/test/app.e2e-spec.ts
+import { Test, TestingModule } from '@nestjs/testing';
+import { INestApplication } from '@nestjs/common';
+import * as request from 'supertest';
+import { App } from 'supertest/types';
+import { AppModule } from './../src/app.module';
+
+describe('AppController (e2e)', () => {
+  let app: INestApplication<App>;
+
+  beforeEach(async () => {
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+
+    app = moduleFixture.createNestApplication();
+    await app.init();
+  });
+
+  it('/ (GET)', () => {
+    return request(app.getHttpServer())
+      .get('/')
+      .expect(200)
+      .expect('Hello World!');
+  });
+});
+
+
+services/user/.env
+### Съдържание на .env файл ###
+# Database
+DATABASE_HOST=localhost
+DATABASE_PORT=5433
+DATABASE_USERNAME=postgres
+DATABASE_PASSWORD=postgres123
+DATABASE_NAME=learning_platform
+
+# JWT
+JWT_SECRET=dev_jwt_secret_key_12345
+JWT_EXPIRES_IN=24h
+JWT_REFRESH_EXPIRES_IN=7d
+
+# Redis
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=redis123
+
+# App
+PORT=3002
+NODE_ENV=development
+### Край на .env файл ###
 
 frontend
 frontend/Dockerfile
@@ -7076,271 +7389,6 @@ MAX_FILE_SIZE=5242880
 
 ### Край на .env файл ###
 
-docker-compose.yml
-services:
-  # PostgreSQL база данни
-  db:
-    image: postgres:15
-    container_name: learning-platform-db
-    environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
-    ports:
-      - '5433:5432'
-    networks:
-      - learning-network
-    healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U ${DB_USER} -d ${DB_NAME}']
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 15s
-
-  # Redis кеш
-  redis:
-    image: redis:7-alpine
-    container_name: learning-platform-redis
-    command: redis-server --requirepass ${REDIS_PASSWORD}
-    volumes:
-      - redis_data:/data
-    ports:
-      - '6379:6379'
-    networks:
-      - learning-network
-    healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 15s
-
-  # Auth Service
-  auth-service:
-    build:
-      context: ./services/auth
-      dockerfile: Dockerfile
-    container_name: learning-platform-auth
-    environment:
-      NODE_ENV: development
-      DATABASE_HOST: db
-      DATABASE_PORT: 5432 # Вътрешен порт в контейнера
-      DATABASE_USERNAME: ${DB_USER}
-      DATABASE_PASSWORD: ${DB_PASSWORD}
-      DATABASE_NAME: ${DB_NAME}
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      REDIS_PASSWORD: ${REDIS_PASSWORD}
-      JWT_SECRET: ${JWT_SECRET}
-      PORT: 3000
-    ports:
-      - '3001:3000'
-    networks:
-      - learning-network
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    volumes:
-      - ./services/auth:/app
-      - /app/node_modules
-    command: npm run start:dev
-    healthcheck:
-      test:
-        [
-          'CMD',
-          'node',
-          '-e',
-          "require('http').get('http://localhost:3000/auth/health', (r) => r.statusCode !== 200 ? process.exit(1) : process.exit(0))",
-        ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 15s
-
-  # User Service
-  user-service:
-    build:
-      context: ./services/user
-      dockerfile: Dockerfile
-    container_name: learning-platform-user
-    environment:
-      NODE_ENV: development
-      DATABASE_URL: postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
-      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
-      JWT_SECRET: ${JWT_SECRET}
-    ports:
-      - '3002:3000'
-    networks:
-      - learning-network
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    volumes:
-      - ./services/user:/app
-      - /app/node_modules
-    command: npm run start:dev
-
-  # Course Service
-  course-service:
-    build:
-      context: ./services/course
-      dockerfile: Dockerfile
-    container_name: learning-platform-course
-    environment:
-      NODE_ENV: development
-      DATABASE_URL: postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
-      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
-      JWT_SECRET: ${JWT_SECRET}
-    ports:
-      - '3003:3000'
-    networks:
-      - learning-network
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    volumes:
-      - ./services/course:/app
-      - /app/node_modules
-    command: npm run start:dev
-
-  # Test Service
-  test-service:
-    build:
-      context: ./services/test
-      dockerfile: Dockerfile
-    container_name: learning-platform-test
-    environment:
-      NODE_ENV: development
-      DATABASE_URL: postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
-      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
-      JWT_SECRET: ${JWT_SECRET}
-    ports:
-      - '3004:3000'
-    networks:
-      - learning-network
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    volumes:
-      - ./services/test:/app
-      - /app/node_modules
-    command: npm run start:dev
-
-  # Analytics Service
-  analytics-service:
-    build:
-      context: ./services/analytics
-      dockerfile: Dockerfile
-    container_name: learning-platform-analytics
-    environment:
-      NODE_ENV: development
-      DATABASE_URL: postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
-      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
-      JWT_SECRET: ${JWT_SECRET}
-    ports:
-      - '3005:3000'
-    networks:
-      - learning-network
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    volumes:
-      - ./services/analytics:/app
-      - /app/node_modules
-    command: npm run start:dev
-
-  # Ads Service
-  ads-service:
-    build:
-      context: ./services/ads
-      dockerfile: Dockerfile
-    container_name: learning-platform-ads
-    environment:
-      NODE_ENV: development
-      DATABASE_URL: postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
-      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
-      JWT_SECRET: ${JWT_SECRET}
-    ports:
-      - '3006:3000'
-    networks:
-      - learning-network
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    volumes:
-      - ./services/ads:/app
-      - /app/node_modules
-    command: npm run start:dev
-
-  # Frontend
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: learning-platform-frontend
-    environment:
-      NODE_ENV: development
-      REACT_APP_API_URL: http://nginx:8080
-    ports:
-      - '3000:3000'
-    networks:
-      - learning-network
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    command: npm start
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 15s
-
-  # Nginx Gateway
-  nginx:
-    build:
-      context: ./nginx
-      dockerfile: Dockerfile
-    container_name: learning-platform-nginx
-    ports:
-      - '8080:80'
-    networks:
-      - learning-network
-    depends_on:
-      - auth-service
-      - user-service
-      - course-service
-      - test-service
-      - analytics-service
-      - ads-service
-      - frontend
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-
-networks:
-  learning-network:
-    driver: bridge
-
-volumes:
-  postgres_data:
-  redis_data:
-
-
 redis
 redis/logs
 regression-suite.ps1
@@ -7774,13 +7822,282 @@ catch {
   exit 1
 }
 
-Искам да продължим със стъпка 12 (фаза 3) от docs\developmentPlan.md файла
+
+docker-compose.yml
+services:
+  # PostgreSQL база данни
+  db:
+    image: postgres:15
+    container_name: learning-platform-db
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - '5433:5432'
+    networks:
+      - learning-network
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_USER} -d ${DB_NAME}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  # Redis кеш
+  redis:
+    image: redis:7-alpine
+    container_name: learning-platform-redis
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+    ports:
+      - '6379:6379'
+    networks:
+      - learning-network
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  # Auth Service
+  auth-service:
+    build:
+      context: ./services/auth
+      dockerfile: Dockerfile
+    container_name: learning-platform-auth
+    environment:
+      NODE_ENV: development
+      DATABASE_HOST: db
+      DATABASE_PORT: 5432 # Вътрешен порт в контейнера
+      DATABASE_USERNAME: ${DB_USER}
+      DATABASE_PASSWORD: ${DB_PASSWORD}
+      DATABASE_NAME: ${DB_NAME}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      PORT: 3000
+    ports:
+      - '3001:3000'
+    networks:
+      - learning-network
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./services/auth:/app
+      - /app/node_modules
+    command: npm run start:dev
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "require('http').get('http://localhost:3000/auth/health', (r) => r.statusCode !== 200 ? process.exit(1) : process.exit(0))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  # User Service
+  user-service:
+    build:
+      context: ./services/user
+      dockerfile: Dockerfile
+    container_name: learning-platform-user
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      JWT_SECRET: ${JWT_SECRET}
+    ports:
+      - '3002:3000'
+    networks:
+      - learning-network
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./services/user:/app
+      - /app/node_modules
+    command: npm run start:dev
+
+  # Course Service
+  course-service:
+    build:
+      context: ./services/course
+      dockerfile: Dockerfile
+    container_name: learning-platform-course
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      JWT_SECRET: ${JWT_SECRET}
+    ports:
+      - '3003:3000'
+    networks:
+      - learning-network
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./services/course:/app
+      - /app/node_modules
+    command: npm run start:dev
+
+  # Test Service
+  test-service:
+    build:
+      context: ./services/test
+      dockerfile: Dockerfile
+    container_name: learning-platform-test
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      JWT_SECRET: ${JWT_SECRET}
+    ports:
+      - '3004:3000'
+    networks:
+      - learning-network
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./services/test:/app
+      - /app/node_modules
+    command: npm run start:dev
+
+  # Analytics Service
+  analytics-service:
+    build:
+      context: ./services/analytics
+      dockerfile: Dockerfile
+    container_name: learning-platform-analytics
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      JWT_SECRET: ${JWT_SECRET}
+    ports:
+      - '3005:3000'
+    networks:
+      - learning-network
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./services/analytics:/app
+      - /app/node_modules
+    command: npm run start:dev
+
+  # Ads Service
+  ads-service:
+    build:
+      context: ./services/ads
+      dockerfile: Dockerfile
+    container_name: learning-platform-ads
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      JWT_SECRET: ${JWT_SECRET}
+    ports:
+      - '3006:3000'
+    networks:
+      - learning-network
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./services/ads:/app
+      - /app/node_modules
+    command: npm run start:dev
+
+  # Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: learning-platform-frontend
+    environment:
+      NODE_ENV: development
+      REACT_APP_API_URL: http://nginx:8080
+    ports:
+      - '3000:3000'
+    networks:
+      - learning-network
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: npm start
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  # Nginx Gateway
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: learning-platform-nginx
+    ports:
+      - '8080:80'
+    networks:
+      - learning-network
+    depends_on:
+      - auth-service
+      - user-service
+      - course-service
+      - test-service
+      - analytics-service
+      - ads-service
+      - frontend
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+
+networks:
+  learning-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+
+
+Може ли да продължим с точка 12 от docs\developmentPlan.md файла моля а именно:
 12. Разработка на User Service
     - CRUD операции за потребители
     - Профилни данни
     - Потребителски настройки
 
-И... не забравяй:
+От файла 'docs\architecture.md' споделен п0-горе може да видиш и архитектурата която е предвидена за user service. Не забравяй, че вече имаме направен и работещ auth service, който трябва да вържем с новия user service. 
+Новия user service трябва да се намира в папка services\user, като там вече имаме базов nestJS проект, който да ползваме за отправна точка.
+Вече имаме разработен auth service, може да го взаимстваш от него за файлова структура, конфигурация и прочие. 
+
 Моля отговаряй ми само на Български език.
 Не забравяй, че използваните технологии са:
 NestJS за BE
