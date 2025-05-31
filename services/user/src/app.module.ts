@@ -24,7 +24,7 @@ import { UsersModule } from './users/users.module';
         password: configService.get('DATABASE_PASSWORD'),
         database: configService.get('DATABASE_NAME'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: configService.get('NODE_ENV') === 'development',
+        synchronize: false, // Деактивирано, за да избегнем проблеми с вече съществуващи данни
       }),
     }),
     UsersModule,
