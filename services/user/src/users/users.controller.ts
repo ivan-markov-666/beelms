@@ -6,12 +6,14 @@ import {
   Param,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
-import {
-  ApiOperation,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { ResourceOwnerGuard } from '../auth/guards/resource-owner.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { UserRole } from '../auth/enums/user-role.enum';
 import { CreateProfileDto } from './dto/create-profile.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
@@ -44,7 +46,8 @@ export class UsersController {
     description: 'List of all users',
     type: [User],
   })
-  // TODO: Implement AdminGuard
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   findAll(): Promise<User[]> {
     return this.usersService.findAll();
   }
@@ -53,6 +56,8 @@ export class UsersController {
   @ApiOperation({ summary: 'Get a user by ID' })
   @ApiResponse({ status: 200, description: 'User found', type: User })
   @ApiResponse({ status: 404, description: 'User not found' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Not resource owner' })
+  @UseGuards(JwtAuthGuard, ResourceOwnerGuard)
   findOne(@Param('id') id: string): Promise<User> {
     const userId = Number(id);
     if (isNaN(userId)) {
@@ -70,7 +75,8 @@ export class UsersController {
   })
   @ApiResponse({ status: 404, description: 'User not found' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
-  // TODO: Implement AdminGuard
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   update(
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
@@ -86,7 +92,8 @@ export class UsersController {
   @ApiOperation({ summary: 'Delete a user' })
   @ApiResponse({ status: 200, description: 'User deleted successfully' })
   @ApiResponse({ status: 404, description: 'User not found' })
-  // TODO: Implement AdminGuard
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   remove(@Param('id') id: string): Promise<void> {
     const userId = Number(id);
     if (isNaN(userId)) {
@@ -103,7 +110,8 @@ export class UsersController {
     type: User,
   })
   @ApiResponse({ status: 404, description: 'User not found' })
-  // TODO: Implement AdminGuard
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   deactivate(@Param('id') id: string): Promise<User> {
     const userId = Number(id);
     if (isNaN(userId)) {
@@ -122,6 +130,8 @@ export class UsersController {
   })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 404, description: 'User not found' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Not resource owner' })
+  @UseGuards(JwtAuthGuard, ResourceOwnerGuard)
   createProfile(
     @Param('id') id: string,
     @Body() createProfileDto: CreateProfileDto,
@@ -137,6 +147,8 @@ export class UsersController {
   @ApiOperation({ summary: 'Get the profile of a user' })
   @ApiResponse({ status: 200, description: 'Profile found', type: UserProfile })
   @ApiResponse({ status: 404, description: 'Profile not found' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Not resource owner' })
+  @UseGuards(JwtAuthGuard, ResourceOwnerGuard)
   getProfile(@Param('id') id: string): Promise<UserProfile> {
     const userId = Number(id);
     if (isNaN(userId)) {
@@ -153,6 +165,8 @@ export class UsersController {
     type: UserProfile,
   })
   @ApiResponse({ status: 404, description: 'Profile not found' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Not resource owner' })
+  @UseGuards(JwtAuthGuard, ResourceOwnerGuard)
   updateProfile(
     @Param('id') id: string,
     @Body() updateProfileDto: UpdateProfileDto,

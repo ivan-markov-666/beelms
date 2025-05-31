@@ -1,5 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsEmail, IsOptional, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsEmail,
+  IsEnum,
+  IsOptional,
+  IsString,
+  MinLength,
+} from 'class-validator';
+import { UserRole } from '../../auth/enums/user-role.enum';
 
 export class UpdateUserDto {
   @ApiProperty({
@@ -12,13 +20,14 @@ export class UpdateUserDto {
   email?: string;
 
   @ApiProperty({
-    example: 'user',
+    example: 'USER',
     description: 'The role of the user',
+    enum: UserRole,
     required: false,
   })
-  @IsString()
+  @IsEnum(UserRole)
   @IsOptional()
-  role?: string;
+  role?: UserRole;
 
   @ApiProperty({
     example: true,
@@ -28,4 +37,14 @@ export class UpdateUserDto {
   @IsBoolean()
   @IsOptional()
   is_active?: boolean;
+
+  @ApiProperty({
+    example: 'newSecurePassword123',
+    description: 'The new password for the user',
+    required: false,
+  })
+  @IsString()
+  @MinLength(8, { message: 'Password must be at least 8 characters long' })
+  @IsOptional()
+  password?: string;
 }

@@ -1,12 +1,17 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreateProfileDto } from './dto/create-profile.dto';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateProfileDto } from './dto/update-profile.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { UserProfile } from './entities/user-profile.entity';
 import { User } from './entities/user.entity';
+import { UserProfile } from './entities/user-profile.entity';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateProfileDto } from './dto/create-profile.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
+import { PasswordUtils } from '../shared/utils/password.utils';
 
 @Injectable()
 export class UsersService {
@@ -50,13 +55,20 @@ export class UsersService {
       throw new BadRequestException('User with this email already exists');
     }
 
-    // In a real implementation, password would be hashed here
-    // For now, we'll just create the user without proper password hashing
-    // This should be integrated with the auth service
+    // Generate a secure salt for this user
+    const salt = PasswordUtils.generateSalt();
+
+    // Hash the password with the salt
+    const passwordHash = PasswordUtils.hashPassword(
+      createUserDto.password,
+      salt,
+    );
+
+    // Create the user with secure password
     const user = this.usersRepository.create({
       email: createUserDto.email,
-      password_hash: createUserDto.password, // This should be hashed in production
-      salt: 'salt', // This should be a real salt in production
+      password_hash: passwordHash,
+      salt: salt,
     });
 
     return this.usersRepository.save(user);
@@ -83,6 +95,17 @@ export class UsersService {
       user.is_active = updateUserDto.is_active;
     }
 
+    // Update password if provided
+    if (updateUserDto.password) {
+      // Generate a new salt for security
+      user.salt = PasswordUtils.generateSalt();
+      // Hash the new password
+      user.password_hash = PasswordUtils.hashPassword(
+        updateUserDto.password,
+        user.salt,
+      );
+    }
+
     return this.usersRepository.save(user);
   }
 
@@ -97,7 +120,10 @@ export class UsersService {
     return this.usersRepository.save(user);
   }
 
-  async createProfile(userId: number, createProfileDto: CreateProfileDto): Promise<UserProfile> {
+  async createProfile(
+    userId: number,
+    createProfileDto: CreateProfileDto,
+  ): Promise<UserProfile> {
     // Check if user exists
     const user = await this.findOne(userId);
 
@@ -115,12 +141,17 @@ export class UsersService {
     return this.profilesRepository.save(profile);
   }
 
-  async updateProfile(userId: number, updateProfileDto: UpdateProfileDto): Promise<UserProfile> {
+  async updateProfile(
+    userId: number,
+    updateProfileDto: UpdateProfileDto,
+  ): Promise<UserProfile> {
     const user = await this.findOne(userId);
 
     // Check if profile exists
     if (!user.profile) {
-      throw new NotFoundException(`Profile for user with ID ${userId} not found`);
+      throw new NotFoundException(
+        `Profile for user with ID ${userId} not found`,
+      );
     }
 
     // Update profile properties
@@ -134,7 +165,9 @@ export class UsersService {
     const user = await this.findOne(userId);
 
     if (!user.profile) {
-      throw new NotFoundException(`Profile for user with ID ${userId} not found`);
+      throw new NotFoundException(
+        `Profile for user with ID ${userId} not found`,
+      );
     }
 
     return user.profile;
