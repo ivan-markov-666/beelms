@@ -7,9 +7,10 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
-import { Repository } from 'typeorm';
+import { Repository, LessThan } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
 import { User } from '../users/entities/user.entity';
+import { RedisService } from '../common/redis/redis.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { ResetPasswordRequestDto } from './dto/reset-password-request.dto';
@@ -22,6 +23,7 @@ interface JwtPayload {
   sub: number;
   email: string;
   role: string;
+  exp?: number; // Добавяме поле за срок на валидност
 }
 
 @Injectable()
@@ -35,6 +37,7 @@ export class AuthService {
     private sessionRepository: Repository<Session>,
     private jwtService: JwtService,
     private configService: ConfigService,
+    private redisService: RedisService,
   ) {}
 
   async register(
@@ -107,8 +110,22 @@ export class AuthService {
     user.lastLogin = new Date();
     await this.usersRepository.save(user);
 
+    // Премахване на всички изтекли сесии
+    await this.cleanupExpiredSessions(user.id);
+
     // Генериране на JWT токен
     const token = this.generateToken(user);
+
+    // Съхраняване на токена в Redis кеш
+    const expiresIn = parseInt(
+      this.configService.get('jwt.expiresIn', '3600'),
+      10,
+    );
+    await this.redisService.set(
+      `token:${token}`,
+      user.id.toString(),
+      expiresIn,
+    );
 
     return { user, token };
   }
@@ -192,14 +209,34 @@ export class AuthService {
 
   async validateToken(token: string): Promise<User | null> {
     try {
+      // Проверка дали токенът е в черния списък в Redis
+      const isBlacklisted = await this.redisService.isBlacklisted(token);
+      if (isBlacklisted) {
+        return null;
+      }
+
       const payload: JwtPayload = this.jwtService.verify(token);
+
+      // Проверка дали токенът е отхвърлен в базата данни
+      const session = await this.sessionRepository.findOne({
+        where: { token, revoked: true },
+      });
+
+      if (session) {
+        return null;
+      }
+
       const user = await this.usersRepository.findOne({
         where: { id: payload.sub },
       });
+
       return user;
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (_) {
+    } catch (error) {
       // Intentionally ignoring error
+      console.error(
+        'Token validation error:',
+        error instanceof Error ? error.message : 'Unknown error',
+      );
       return null;
     }
   }
@@ -214,7 +251,51 @@ export class AuthService {
   }
 
   async logout(token: string): Promise<void> {
-    // Намиране и изтриване на сесията
-    await this.sessionRepository.delete({ token });
+    try {
+      const payload: JwtPayload = this.jwtService.verify(token);
+      const session = await this.sessionRepository.findOne({
+        where: { token },
+      });
+
+      if (session) {
+        await this.sessionRepository.remove(session);
+      } else {
+        // Създаване на запис за отхвърлен токен
+        const userId = payload.sub;
+        const expiresAt = new Date((payload.exp || 0) * 1000);
+
+        const newSession = this.sessionRepository.create({
+          userId,
+          token,
+          expiresAt,
+          revoked: true,
+        });
+        await this.sessionRepository.save(newSession);
+      }
+
+      // Добавяне на токена в Redis blacklist
+      const timeUntilExpiry = Math.floor(
+        ((payload.exp || 0) * 1000 - Date.now()) / 1000,
+      );
+      if (timeUntilExpiry > 0) {
+        await this.redisService.addToBlacklist(token, timeUntilExpiry);
+      }
+    } catch (error) {
+      // Ако токенът не може да бъде верифициран, просто продължаваме
+      if (error instanceof Error) {
+        console.error('Невалиден токен при опит за излизане:', error.message);
+      }
+    }
+  }
+
+  /**
+   * Почистване на изтеклите сесии за даден потребител
+   */
+  private async cleanupExpiredSessions(userId: number): Promise<void> {
+    const now = new Date();
+    await this.sessionRepository.delete({
+      userId,
+      expiresAt: LessThan(now),
+    });
   }
 }

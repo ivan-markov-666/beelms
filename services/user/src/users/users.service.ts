@@ -11,6 +11,10 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import {
+  UpdateUserSettingsDto,
+  UserSettingsDto,
+} from './dto/user-settings.dto';
 import { PasswordUtils } from '../shared/utils/password.utils';
 
 @Injectable()
@@ -171,5 +175,87 @@ export class UsersService {
     }
 
     return user.profile;
+  }
+
+  /**
+   * Получава настройките на потребителя
+   * @param userId ID на потребителя
+   * @returns Настройки на потребителя
+   */
+  async getUserSettings(userId: number): Promise<UserSettingsDto> {
+    const user = await this.findOne(userId);
+
+    // Ако потребителят няма профил, няма и настройки - създаваме празни настройки
+    if (!user.profile) {
+      return { preferences: {} };
+    }
+
+    return { preferences: user.profile.preferences || {} };
+  }
+
+  /**
+   * Актуализира настройките на потребителя
+   * @param userId ID на потребителя
+   * @param updateUserSettingsDto Обект с новите настройки
+   * @returns Актуализирани настройки
+   */
+  async updateUserSettings(
+    userId: number,
+    updateUserSettingsDto: UpdateUserSettingsDto,
+  ): Promise<UserSettingsDto> {
+    const user = await this.findOne(userId);
+
+    // Ако потребителят няма профил, трябва да създадем първо профил
+    if (!user.profile) {
+      const profile = this.profilesRepository.create({
+        userId,
+        preferences: updateUserSettingsDto.preferences || {},
+      });
+      await this.profilesRepository.save(profile);
+      return { preferences: profile.preferences };
+    }
+
+    // Ако потребителят има профил, актуализираме настройките
+    const currentPreferences = user.profile.preferences || {};
+    user.profile.preferences = {
+      ...currentPreferences,
+      ...updateUserSettingsDto.preferences,
+    };
+
+    const updatedProfile = await this.profilesRepository.save(user.profile);
+    return { preferences: updatedProfile.preferences };
+  }
+
+  /**
+   * Нулира настройките на потребителя до стойности по подразбиране
+   * @param userId ID на потребителя
+   * @returns Настройки по подразбиране
+   */
+  async resetUserSettings(userId: number): Promise<UserSettingsDto> {
+    const user = await this.findOne(userId);
+
+    // Проверяваме дали потребителят има профил
+    if (!user.profile) {
+      throw new NotFoundException(
+        `Profile for user with ID ${userId} not found`,
+      );
+    }
+
+    // Задаваме настройки по подразбиране
+    const defaultPreferences = {
+      darkMode: false,
+      notifications: {
+        email: true,
+        push: true,
+      },
+      language: 'bg',
+      pageSize: 10,
+    };
+
+    // Записваме настройките по подразбиране
+    user.profile.preferences = defaultPreferences;
+    const updatedProfile = await this.profilesRepository.save(user.profile);
+
+    return { preferences: updatedProfile.preferences };
   }
 }

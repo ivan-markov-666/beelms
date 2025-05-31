@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -18,6 +19,10 @@ import { CreateProfileDto } from './dto/create-profile.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import {
+  UpdateUserSettingsDto,
+  UserSettingsDto,
+} from './dto/user-settings.dto';
 import { UserProfile } from './entities/user-profile.entity';
 import { User } from './entities/user.entity';
 import { UsersService } from './users.service';
@@ -61,7 +66,7 @@ export class UsersController {
   findOne(@Param('id') id: string): Promise<User> {
     const userId = Number(id);
     if (isNaN(userId)) {
-      throw new Error('Invalid user ID');
+      throw new BadRequestException('Invalid user ID');
     }
     return this.usersService.findOne(userId);
   }
@@ -83,7 +88,7 @@ export class UsersController {
   ): Promise<User> {
     const userId = Number(id);
     if (isNaN(userId)) {
-      throw new Error('Invalid user ID');
+      throw new BadRequestException('Invalid user ID');
     }
     return this.usersService.update(userId, updateUserDto);
   }
@@ -97,7 +102,7 @@ export class UsersController {
   remove(@Param('id') id: string): Promise<void> {
     const userId = Number(id);
     if (isNaN(userId)) {
-      throw new Error('Invalid user ID');
+      throw new BadRequestException('Invalid user ID');
     }
     return this.usersService.remove(userId);
   }
@@ -115,7 +120,7 @@ export class UsersController {
   deactivate(@Param('id') id: string): Promise<User> {
     const userId = Number(id);
     if (isNaN(userId)) {
-      throw new Error('Invalid user ID');
+      throw new BadRequestException('Invalid user ID');
     }
     return this.usersService.deactivate(userId);
   }
@@ -138,7 +143,7 @@ export class UsersController {
   ): Promise<UserProfile> {
     const userId = Number(id);
     if (isNaN(userId)) {
-      throw new Error('Invalid user ID');
+      throw new BadRequestException('Invalid user ID');
     }
     return this.usersService.createProfile(userId, createProfileDto);
   }
@@ -152,7 +157,7 @@ export class UsersController {
   getProfile(@Param('id') id: string): Promise<UserProfile> {
     const userId = Number(id);
     if (isNaN(userId)) {
-      throw new Error('Invalid user ID');
+      throw new BadRequestException('Invalid user ID');
     }
     return this.usersService.getProfile(userId);
   }
@@ -173,8 +178,66 @@ export class UsersController {
   ): Promise<UserProfile> {
     const userId = Number(id);
     if (isNaN(userId)) {
-      throw new Error('Invalid user ID');
+      throw new BadRequestException('Invalid user ID');
     }
     return this.usersService.updateProfile(userId, updateProfileDto);
+  }
+
+  // User Settings endpoints
+  @Get(':id/settings')
+  @ApiOperation({ summary: 'Get the settings of a user' })
+  @ApiResponse({
+    status: 200,
+    description: 'Settings retrieved successfully',
+    type: UserSettingsDto,
+  })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Not resource owner' })
+  @UseGuards(JwtAuthGuard, ResourceOwnerGuard)
+  getUserSettings(@Param('id') id: string): Promise<UserSettingsDto> {
+    const userId = Number(id);
+    if (isNaN(userId)) {
+      throw new BadRequestException('Invalid user ID');
+    }
+    return this.usersService.getUserSettings(userId);
+  }
+
+  @Patch(':id/settings')
+  @ApiOperation({ summary: 'Update the settings of a user' })
+  @ApiResponse({
+    status: 200,
+    description: 'Settings updated successfully',
+    type: UserSettingsDto,
+  })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Not resource owner' })
+  @UseGuards(JwtAuthGuard, ResourceOwnerGuard)
+  updateUserSettings(
+    @Param('id') id: string,
+    @Body() updateUserSettingsDto: UpdateUserSettingsDto,
+  ): Promise<UserSettingsDto> {
+    const userId = Number(id);
+    if (isNaN(userId)) {
+      throw new BadRequestException('Invalid user ID');
+    }
+    return this.usersService.updateUserSettings(userId, updateUserSettingsDto);
+  }
+
+  @Post(':id/settings/reset')
+  @ApiOperation({ summary: 'Reset the settings of a user to default values' })
+  @ApiResponse({
+    status: 200,
+    description: 'Settings reset successfully',
+    type: UserSettingsDto,
+  })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Not resource owner' })
+  @UseGuards(JwtAuthGuard, ResourceOwnerGuard)
+  resetUserSettings(@Param('id') id: string): Promise<UserSettingsDto> {
+    const userId = Number(id);
+    if (isNaN(userId)) {
+      throw new BadRequestException('Invalid user ID');
+    }
+    return this.usersService.resetUserSettings(userId);
   }
 }
