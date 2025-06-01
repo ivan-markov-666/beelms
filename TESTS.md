@@ -354,6 +354,8 @@ cd db/scripts
 | Име на тест | Предназначение | Зависимости |
 |-------------|-----------------|--------------|
 | `TestAuthService` | Валидира процеса на автентикация и JWT токени | Keycloak, Redis |
+| `auth-health.test.ps1` | Проверява здравословното състояние на услугата | Keycloak, Redis |
+| `auth-integration.test.ps1` | Интеграционни тестове за автентикация и авторизация | Keycloak, Redis |
 | `TestUserService` | Тества CRUD операции за потребителски профили | PostgreSQL, Redis |
 | `TestCourseService` | Проверява управлението на курсове и учебни модули | PostgreSQL, Elasticsearch |
 | `TestTestService` | Валидира генерирането и изпълнението на тестове | PostgreSQL, Redis |
