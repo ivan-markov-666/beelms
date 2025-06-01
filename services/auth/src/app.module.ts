@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
@@ -8,6 +8,9 @@ import { PasswordReset } from './auth/entities/password-reset.entity';
 import { Session } from './auth/entities/session.entity';
 import appConfig from './config/app.config';
 import { User } from './users/entities/user.entity';
+import { XssMiddleware } from './common/middlewares/xss.middleware';
+import { CsrfMiddleware } from './common/middlewares/csrf.middleware';
+import { RedisModule } from './common/redis/redis.module';
 
 @Module({
   imports: [
@@ -30,9 +33,14 @@ import { User } from './users/entities/user.entity';
         logging: configService.get('NODE_ENV') === 'development',
       }),
     }),
+    RedisModule,
     AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(XssMiddleware, CsrfMiddleware).forRoutes('*');
+  }
+}

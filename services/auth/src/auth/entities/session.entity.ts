@@ -31,4 +31,11 @@ export class Session extends BaseEntity {
     default: () => 'CURRENT_TIMESTAMP',
   })
   lastActive: Date;
+
+  @Column({
+    name: 'revoked',
+    type: 'boolean',
+    default: false,
+  })
+  revoked: boolean;
 }

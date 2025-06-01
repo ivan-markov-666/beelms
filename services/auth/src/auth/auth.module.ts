@@ -9,6 +9,7 @@ import { AuthService } from './auth.service';
 import { PasswordReset } from './entities/password-reset.entity';
 import { Session } from './entities/session.entity';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { RedisModule } from '../common/redis/redis.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
       },
     }),
     TypeOrmModule.forFeature([User, PasswordReset, Session]),
+    RedisModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],
