@@ -279,6 +279,10 @@ try {
   # Load auth integration tests
   . "$PSScriptRoot\services\auth\auth-integration.test.ps1"
   $authTests = Get-AuthTestFunctions
+  
+  # Load user integration tests
+  . "$PSScriptRoot\services\user\user-integration.test.ps1"
+  $userTests = Get-UserTestFunctions
 
   # Define available tests with their names, descriptions, and function references
   $availableTests = @(
@@ -321,6 +325,42 @@ try {
       Name = "TestLogout"
       Description = "Verifies logout endpoint"
       TestFunction = $authTests['Test-Logout']
+    },
+    # User microservice tests
+    @{
+      Name = "TestUserCreation"
+      Description = "Verifies user creation endpoint"
+      TestFunction = $userTests['Test-UserCreation']
+    },
+    @{
+      Name = "TestCreateUserProfile"
+      Description = "Verifies user profile creation endpoint"
+      TestFunction = $userTests['Test-CreateUserProfile']
+    },
+    @{
+      Name = "TestGetUserProfile"
+      Description = "Verifies get user profile endpoint"
+      TestFunction = $userTests['Test-GetUserProfile']
+    },
+    @{
+      Name = "TestUpdateUserProfile"
+      Description = "Verifies update user profile endpoint"
+      TestFunction = $userTests['Test-UpdateUserProfile']
+    },
+    @{
+      Name = "TestGetUserSettings"
+      Description = "Verifies get user settings endpoint"
+      TestFunction = $userTests['Test-GetUserSettings']
+    },
+    @{
+      Name = "TestUpdateUserSettings"
+      Description = "Verifies update user settings endpoint"
+      TestFunction = $userTests['Test-UpdateUserSettings']
+    },
+    @{
+      Name = "TestResetUserSettings"
+      Description = "Verifies reset user settings endpoint"
+      TestFunction = $userTests['Test-ResetUserSettings']
     }
   )
   
