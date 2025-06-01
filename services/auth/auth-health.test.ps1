@@ -15,6 +15,7 @@ function Test-AuthHealthCheck {
     $endpoint = "/auth/health"
     $testOutput = @()
     $testResult = $false
+    $infoColor = "Cyan"  # Add missing variable
 
     try {
         Write-Host "Running $testName..." -ForegroundColor $infoColor

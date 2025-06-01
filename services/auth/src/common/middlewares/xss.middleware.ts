@@ -1,6 +1,5 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
-import { ParsedQs } from 'qs';
 
 // Типът за безопасен обект
 type SafeObject = Record<string, unknown> | unknown[];
@@ -33,13 +32,44 @@ export class XssMiddleware implements NestMiddleware {
     }
 
     // Санитизиране на входните данни в query параметрите
+    // Не променяме req.query директно, защото е readonly в някои версии на Express
+    // Вместо това, ще санитизираме стойностите в place
     if (req.query) {
-      // Използваме тип от Express Query
-      const sanitizedQuery = this.sanitizeObject(
-        req.query as unknown as SafeObject,
-      );
-      // Използваме типа ParsedQs от Express за безопасно присвояване
-      req.query = sanitizedQuery as unknown as ParsedQs;
+      const sanitizeQueryValue = (value: unknown): unknown => {
+        if (typeof value === 'string') {
+          return this.sanitizeValue(value) as string;
+        }
+        if (Array.isArray(value)) {
+          return value.map((item: unknown) => {
+            if (typeof item === 'string') {
+              return this.sanitizeValue(item) as string;
+            }
+            return item;
+          });
+        }
+        if (value && typeof value === 'object') {
+          const result: Record<string, unknown> = {};
+          for (const key in value) {
+            if (Object.prototype.hasOwnProperty.call(value, key)) {
+              const val = (value as Record<string, unknown>)[key];
+              result[key] = this.sanitizeValue(val as string) as string;
+            }
+          }
+          return result;
+        }
+        return value;
+      };
+
+      // Прилагаме санитизацията върху копие на query обекта
+      const queryCopy = { ...req.query };
+      Object.keys(queryCopy).forEach((key: string) => {
+        (queryCopy as Record<string, unknown>)[key] = sanitizeQueryValue(
+          queryCopy[key],
+        );
+      });
+
+      // Заместваме стойностите в оригиналния обект
+      Object.assign(req.query, queryCopy);
     }
 
     next();

@@ -275,7 +275,10 @@ Write-Host "Report will be saved to: $reportFile" -ForegroundColor $infoColor
 try {
   # Import test modules
   Import-Module "$PSScriptRoot\services\auth\auth-health.test.ps1" -Force -ErrorAction Stop
-  . "$PSScriptRoot\services\auth\auth-integration.ps1" -ErrorAction Stop
+  
+  # Load auth integration tests
+  . "$PSScriptRoot\services\auth\auth-integration.test.ps1"
+  $authTests = Get-AuthTestFunctions
 
   # Define available tests with their names, descriptions, and function references
   $availableTests = @(
@@ -297,27 +300,27 @@ try {
     @{
       Name = "TestAuthRegistration"
       Description = "Verifies user registration endpoint"
-      TestFunction = ${function:Test-AuthRegistration}
+      TestFunction = $authTests['Test-AuthRegistration']
     },
     @{
       Name = "TestAuthLogin"
       Description = "Verifies user login endpoint"
-      TestFunction = ${function:Test-AuthLogin}
+      TestFunction = $authTests['Test-AuthLogin']
     },
     @{
       Name = "TestGetProfile"
       Description = "Verifies profile endpoint with authentication"
-      TestFunction = ${function:Test-GetProfile}
+      TestFunction = $authTests['Test-GetProfile']
     },
     @{
       Name = "TestPasswordResetFlow"
       Description = "Verifies password reset request and reset endpoints"
-      TestFunction = ${function:Test-PasswordResetFlow}
+      TestFunction = $authTests['Test-PasswordResetFlow']
     },
     @{
       Name = "TestLogout"
       Description = "Verifies logout endpoint"
-      TestFunction = ${function:Test-Logout}
+      TestFunction = $authTests['Test-Logout']
     }
   )
   
