@@ -820,6 +820,243 @@ function Test-GetProgress {
     }
 }
 
+function Test-DeleteContent {
+    [CmdletBinding()]
+    param()
+    
+    $testName = "Delete Content Test"
+    $description = "Verifies content deletion endpoint"
+    $testOutput = @()
+    $testResult = $false
+
+    try {
+        Write-Host "Running $testName..." -ForegroundColor Cyan
+        Write-Host "  $description" -ForegroundColor Cyan
+        
+        # Ensure we have a content ID
+        if (-not $script:contentId) {
+            $testOutput += "✗ No content ID available. Run Test-CreateContent first."
+            return @{
+                Name = $testName
+                Description = $description
+                Output = $testOutput
+                Result = $false
+            }
+        }
+        
+        # Ensure we have an admin token
+        if (-not $script:adminAccessToken) {
+            $testOutput += "✗ No admin access token available. Run Test-Login first."
+            return @{
+                Name = $testName
+                Description = $description
+                Output = $testOutput
+                Result = $false
+            }
+        }
+        
+        $endpoint = "/contents/$($script:contentId)"
+        $testOutput += "Testing endpoint: ${baseUrl}${endpoint}"
+        
+        # Delete the content
+        try {
+            $response = Invoke-WebRequest -Uri "${baseUrl}${endpoint}" `
+                -Method Delete `
+                -Headers @{
+                    "Authorization" = "Bearer $script:adminAccessToken"
+                } `
+                -ErrorAction Stop
+            
+            $testOutput += "✓ Content deleted successfully"
+            $testResult = $true
+            
+            # Clear the content ID since it no longer exists
+            $script:contentId = $null
+        } catch {
+            $errorResponse = $_.Exception.Response
+            $testOutput += "✗ Request failed with status code: $($errorResponse.StatusCode) $($errorResponse.StatusDescription)"
+            
+            $reader = New-Object System.IO.StreamReader($errorResponse.GetResponseStream())
+            $reader.BaseStream.Position = 0
+            $reader.DiscardBufferedData()
+            $responseBody = $reader.ReadToEnd()
+            $testOutput += "Response body: $responseBody"
+            throw
+        }
+    }
+    catch {
+        $errorMsg = $_.Exception.Message
+        $testOutput += "✗ Error occurred: $errorMsg"
+        $testOutput += "Error details: $_"
+        $testResult = $false
+    }
+
+    return @{
+        Name = $testName
+        Description = $description
+        Output = $testOutput
+        Result = $testResult
+    }
+}
+
+function Test-DeleteChapter {
+    [CmdletBinding()]
+    param()
+    
+    $testName = "Delete Chapter Test"
+    $description = "Verifies chapter deletion endpoint"
+    $testOutput = @()
+    $testResult = $false
+
+    try {
+        Write-Host "Running $testName..." -ForegroundColor Cyan
+        Write-Host "  $description" -ForegroundColor Cyan
+        
+        # Ensure we have a chapter ID
+        if (-not $script:chapterId) {
+            $testOutput += "✗ No chapter ID available. Run Test-CreateChapter first."
+            return @{
+                Name = $testName
+                Description = $description
+                Output = $testOutput
+                Result = $false
+            }
+        }
+        
+        # Ensure we have an admin token
+        if (-not $script:adminAccessToken) {
+            $testOutput += "✗ No admin access token available. Run Test-Login first."
+            return @{
+                Name = $testName
+                Description = $description
+                Output = $testOutput
+                Result = $false
+            }
+        }
+        
+        $endpoint = "/chapters/$($script:chapterId)"
+        $testOutput += "Testing endpoint: ${baseUrl}${endpoint}"
+        
+        # Delete the chapter
+        try {
+            $response = Invoke-WebRequest -Uri "${baseUrl}${endpoint}" `
+                -Method Delete `
+                -Headers @{
+                    "Authorization" = "Bearer $script:adminAccessToken"
+                } `
+                -ErrorAction Stop
+            
+            $testOutput += "✓ Chapter deleted successfully"
+            $testResult = $true
+            
+            # Clear the chapter ID since it no longer exists
+            $script:chapterId = $null
+        } catch {
+            $errorResponse = $_.Exception.Response
+            $testOutput += "✗ Request failed with status code: $($errorResponse.StatusCode) $($errorResponse.StatusDescription)"
+            
+            $reader = New-Object System.IO.StreamReader($errorResponse.GetResponseStream())
+            $reader.BaseStream.Position = 0
+            $reader.DiscardBufferedData()
+            $responseBody = $reader.ReadToEnd()
+            $testOutput += "Response body: $responseBody"
+            throw
+        }
+    }
+    catch {
+        $errorMsg = $_.Exception.Message
+        $testOutput += "✗ Error occurred: $errorMsg"
+        $testOutput += "Error details: $_"
+        $testResult = $false
+    }
+
+    return @{
+        Name = $testName
+        Description = $description
+        Output = $testOutput
+        Result = $testResult
+    }
+}
+
+function Test-DeleteCourse {
+    [CmdletBinding()]
+    param()
+    
+    $testName = "Delete Course Test"
+    $description = "Verifies course deletion endpoint"
+    $testOutput = @()
+    $testResult = $false
+
+    try {
+        Write-Host "Running $testName..." -ForegroundColor Cyan
+        Write-Host "  $description" -ForegroundColor Cyan
+        
+        # Ensure we have a course ID
+        if (-not $script:courseId) {
+            $testOutput += "✗ No course ID available. Run Test-CreateCourse first."
+            return @{
+                Name = $testName
+                Description = $description
+                Output = $testOutput
+                Result = $false
+            }
+        }
+        
+        # Ensure we have an admin token
+        if (-not $script:adminAccessToken) {
+            $testOutput += "✗ No admin access token available. Run Test-Login first."
+            return @{
+                Name = $testName
+                Description = $description
+                Output = $testOutput
+                Result = $false
+            }
+        }
+        
+        $endpoint = "/courses/$($script:courseId)"
+        $testOutput += "Testing endpoint: ${baseUrl}${endpoint}"
+        
+        # Delete the course
+        try {
+            $response = Invoke-WebRequest -Uri "${baseUrl}${endpoint}" `
+                -Method Delete `
+                -Headers @{
+                    "Authorization" = "Bearer $script:adminAccessToken"
+                } `
+                -ErrorAction Stop
+            
+            $testOutput += "✓ Course deleted successfully"
+            $testResult = $true
+            
+            # Clear the course ID since it no longer exists
+            $script:courseId = $null
+        } catch {
+            $errorResponse = $_.Exception.Response
+            $testOutput += "✗ Request failed with status code: $($errorResponse.StatusCode) $($errorResponse.StatusDescription)"
+            
+            $reader = New-Object System.IO.StreamReader($errorResponse.GetResponseStream())
+            $reader.BaseStream.Position = 0
+            $reader.DiscardBufferedData()
+            $responseBody = $reader.ReadToEnd()
+            $testOutput += "Response body: $responseBody"
+            throw
+        }
+    }
+    catch {
+        $errorMsg = $_.Exception.Message
+        $testOutput += "✗ Error occurred: $errorMsg"
+        $testOutput += "Error details: $_"
+        $testResult = $false
+    }
+
+    return @{
+        Name = $testName
+        Description = $description
+        Output = $testOutput
+        Result = $testResult
+    }
+}
+
 # Function to get all test functions for the regression suite
 function Get-CourseTestFunctions {
     return @{
@@ -827,10 +1064,13 @@ function Get-CourseTestFunctions {
         "Test-GetCourses" = ${function:Test-GetCourses}
         "Test-CreateCourse" = ${function:Test-CreateCourse}
         "Test-GetCourseById" = ${function:Test-GetCourseById}
+        "Test-DeleteCourse" = ${function:Test-DeleteCourse}
         "Test-CreateChapter" = ${function:Test-CreateChapter}
         "Test-GetChapters" = ${function:Test-GetChapters}
+        "Test-DeleteChapter" = ${function:Test-DeleteChapter}
         "Test-CreateContent" = ${function:Test-CreateContent}
         "Test-GetContents" = ${function:Test-GetContents}
+        "Test-DeleteContent" = ${function:Test-DeleteContent}
         "Test-UpdateProgress" = ${function:Test-UpdateProgress}
         "Test-GetProgress" = ${function:Test-GetProgress}
     }
@@ -850,6 +1090,11 @@ if ($MyInvocation.InvocationName -eq $MyInvocation.MyCommand.Name) {
     $testResults += Test-GetContents
     $testResults += Test-UpdateProgress
     $testResults += Test-GetProgress
+    
+    # Run delete tests in reverse order (content -> chapter -> course)
+    $testResults += Test-DeleteContent
+    $testResults += Test-DeleteChapter
+    $testResults += Test-DeleteCourse
     
     # Display summary
     $passedCount = ($testResults | Where-Object { $_.Result -eq $true }).Count
