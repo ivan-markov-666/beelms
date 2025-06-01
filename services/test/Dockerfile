@@ -1,25 +1,40 @@
-FROM node:20-alpine
+FROM node:18-alpine as build
 
 WORKDIR /app
 
-# За неразработени сървиси или за първоначално стартиране
-# Създаваме минимално приложение
-RUN echo '{ \
-  "name": "microservice", \
-  "version": "0.1.0", \
-  "scripts": { \
-    "start": "node server.js", \
-    "start:dev": "node server.js" \
-  } \
-}' > package.json
+# Copy package.json and package-lock.json
+COPY package*.json ./
 
-RUN echo 'console.log("Service running on port 3000");\
-const http = require("http");\
-http.createServer((req, res) => {\
-  res.writeHead(200, {"Content-Type": "application/json"});\
-  res.end(JSON.stringify({status: "ok", service: "placeholder"}));\
-}).listen(3000);' > server.js
+# Install dependencies
+RUN npm ci
 
+# Copy source code
+COPY . .
+
+# Build the application
+RUN npm run build
+
+# Remove development dependencies
+RUN npm prune --production
+
+# Runtime stage
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Copy from build stage
+COPY --from=build /app/node_modules ./node_modules
+COPY --from=build /app/dist ./dist
+COPY --from=build /app/package*.json ./
+
+# Set environment variables
+ENV NODE_ENV=production
+
+# Expose port
 EXPOSE 3000
 
-CMD ["npm", "run", "start:dev"]
+# Health check
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1
+
+# Start the application
+CMD ["node", "dist/main.js"]
