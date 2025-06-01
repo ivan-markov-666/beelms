@@ -283,6 +283,10 @@ try {
   # Load user integration tests
   . "$PSScriptRoot\services\user\user-integration.test.ps1"
   $userTests = Get-UserTestFunctions
+  
+  # Load course integration tests
+  . "$PSScriptRoot\services\course\course-integration.test.ps1"
+  $courseTests = Get-CourseTestFunctions
 
   # Define available tests with their names, descriptions, and function references
   $availableTests = @(
@@ -361,6 +365,57 @@ try {
       Name = "TestResetUserSettings"
       Description = "Verifies reset user settings endpoint"
       TestFunction = $userTests['Test-ResetUserSettings']
+    },
+    # Course microservice tests
+    @{
+      Name = "TestCourseLogin"
+      Description = "Verifies login for course tests"
+      TestFunction = $courseTests['Test-Login']
+    },
+    @{
+      Name = "TestGetCourses"
+      Description = "Verifies getting all courses endpoint"
+      TestFunction = $courseTests['Test-GetCourses']
+    },
+    @{
+      Name = "TestCreateCourse"
+      Description = "Verifies course creation endpoint"
+      TestFunction = $courseTests['Test-CreateCourse']
+    },
+    @{
+      Name = "TestGetCourseById"
+      Description = "Verifies getting course by ID endpoint"
+      TestFunction = $courseTests['Test-GetCourseById']
+    },
+    @{
+      Name = "TestCreateChapter"
+      Description = "Verifies chapter creation endpoint"
+      TestFunction = $courseTests['Test-CreateChapter']
+    },
+    @{
+      Name = "TestGetChapters"
+      Description = "Verifies getting chapters for a course endpoint"
+      TestFunction = $courseTests['Test-GetChapters']
+    },
+    @{
+      Name = "TestCreateContent"
+      Description = "Verifies content creation endpoint"
+      TestFunction = $courseTests['Test-CreateContent']
+    },
+    @{
+      Name = "TestGetContents"
+      Description = "Verifies getting contents for a chapter endpoint"
+      TestFunction = $courseTests['Test-GetContents']
+    },
+    @{
+      Name = "TestUpdateProgress"
+      Description = "Verifies updating content progress endpoint"
+      TestFunction = $courseTests['Test-UpdateProgress']
+    },
+    @{
+      Name = "TestGetProgress"
+      Description = "Verifies getting user progress endpoint"
+      TestFunction = $courseTests['Test-GetProgress']
     }
   )
   
