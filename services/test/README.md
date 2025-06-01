@@ -1,98 +1,234 @@
+# Test Service
+
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
 </p>
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
-
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Test Service is a microservice responsible for managing tests, questions, and test attempts in the online learning platform. It provides functionality for creating, retrieving, updating, and deleting tests and questions, as well as managing test attempts and results.
 
-## Project setup
+## Features
+
+- **Test Management**: Create, read, update, and delete tests
+- **Question Management**: Manage questions within tests
+- **Test Attempts**: Track user test attempts and results
+- **Scoring**: Calculate test scores based on user answers
+- **Analytics**: Generate test statistics and analytics
+
+## API Endpoints
+
+### Tests
+- `POST /tests` - Create a new test
+- `GET /tests` - Get all tests
+- `GET /tests/:id` - Get a test by ID
+- `PATCH /tests/:id` - Update a test
+- `DELETE /tests/:id` - Delete a test
+
+### Questions
+- `POST /questions` - Create a new question
+- `GET /questions/:id` - Get a question by ID
+- `PATCH /questions/:id` - Update a question
+- `DELETE /questions/:id` - Delete a question
+
+### Test Attempts
+- `POST /attempts/start` - Start a new test attempt
+- `POST /attempts/complete` - Complete a test attempt
+- `GET /attempts/user/:userId` - Get user's test attempts
+- `GET /attempts/:id` - Get a test attempt by ID
+
+## Dependencies
+
+- **Database**: PostgreSQL
+- **Cache**: Redis
+- **Queue**: Bull (for background jobs)
+- **Search**: Elasticsearch (for full-text search)
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js (v14 or later)
+- npm (v6 or later)
+- PostgreSQL (v12 or later)
+- Redis (v6 or later)
+
+### Installation
+
+1. Clone the repository
+2. Install dependencies:
 
 ```bash
-$ npm install
+npm install
 ```
 
-## Compile and run the project
+3. Copy the environment file and update the configuration:
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+cp .env.example .env
 ```
 
-## Run tests
+4. Update the `.env` file with your database and Redis connection details
+
+### Running the Service
+
+#### Development Mode
 
 ```bash
-# unit tests
-$ npm run test
+# Start in development mode with hot-reload
+npm run start:dev
+```
 
-# e2e tests
-$ npm run test:e2e
+#### Production Mode
 
-# test coverage
-$ npm run test:cov
+```bash
+# Build the application
+npm run build
+
+# Start in production mode
+npm run start:prod
+```
+
+## Testing
+
+The test service includes a comprehensive test suite to ensure functionality and reliability.
+
+### Running Tests
+
+#### Unit Tests
+
+```bash
+# Run all unit tests
+npm run test
+
+# Run tests with coverage
+npm run test:cov
+
+# Run tests in watch mode
+npm run test:watch
+```
+
+#### Integration Tests
+
+Integration tests verify the interaction between different components and external services.
+
+```bash
+# Run integration tests
+npm run test:integration
+
+# Run e2e tests
+npm run test:e2e
+```
+
+### Test Data
+
+Test data is located in the `test/data` directory. The following test data is available:
+
+- `test-data/tests/` - Test test data
+- `test-data/questions/` - Test question data
+- `test-data/attempts/` - Test attempt data
+
+### Test Reports
+
+Test reports are generated in the `coverage` directory after running tests with coverage.
+
+## API Documentation
+
+API documentation is available when running the service in development mode at:
+
+```
+http://localhost:3000/api
 ```
 
 ## Deployment
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+### Docker
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+The service can be deployed using Docker:
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+# Build the Docker image
+docker build -t test-service .
+
+# Run the container
+docker run -p 3000:3000 test-service
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### Kubernetes
 
-## Resources
+Kubernetes deployment files are located in the `k8s` directory.
 
-Check out a few resources that may come in handy when working with NestJS:
+## Monitoring
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+The service exposes the following endpoints for monitoring:
 
-## Support
+- `/health` - Health check
+- `/metrics` - Prometheus metrics
+- `/version` - Service version information
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+## Development
 
-## Stay in touch
+### Code Style
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+This project uses ESLint and Prettier for code formatting. Before committing, please run:
+
+```bash
+npm run lint
+npm run format
+```
+
+### Git Hooks
+
+Git hooks are set up using Husky. They will automatically run linting and tests before each commit.
+
+### Commit Messages
+
+Please follow the [Conventional Commits](https://www.conventionalcommits.org/) specification for commit messages.
+
+## Troubleshooting
+
+### Common Issues
+
+#### Database Connection Issues
+
+- Ensure PostgreSQL is running and accessible
+- Verify database credentials in `.env`
+- Check if the database exists and the user has proper permissions
+
+#### Redis Connection Issues
+
+- Ensure Redis server is running
+- Verify Redis configuration in `.env`
+- Check if Redis is accessible from the application
+
+### Debugging
+
+To enable debug logging, set the `DEBUG` environment variable:
+
+```bash
+DEBUG=test-service:* npm run start:dev
+```
+
+## API Reference
+
+For detailed API documentation, please refer to the [API Reference](API.md).
+
+## Contributing
+
+Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
+
+## Versioning
+
+We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/yourusername/test-service/tags).
 
 ## License
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- [NestJS](https://nestjs.com/) - The web framework used
+- [TypeORM](https://typeorm.io/) - Database ORM
+- [Redis](https://redis.io/) - In-memory data store
+- [Bull](https://optimalbits.github.io/bull/) - Queue system
+- [Elasticsearch](https://www.elastic.co/elasticsearch/) - Search and analytics engine

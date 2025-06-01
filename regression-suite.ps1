@@ -287,6 +287,10 @@ try {
   # Load course integration tests
   . "$PSScriptRoot\services\course\course-integration.test.ps1"
   $courseTests = Get-CourseTestFunctions
+  
+  # Load test service integration tests
+  . "$PSScriptRoot\services\test\test-integration.test.ps1"
+  $testServiceTests = Get-TestServiceTestFunctions
 
   # Define available tests with their names, descriptions, and function references
   $availableTests = @(
@@ -388,6 +392,21 @@ try {
       TestFunction = $courseTests['Test-GetCourseById']
     },
     @{
+      Name = "TestDeleteContent"
+      Description = "Verifies content deletion endpoint"
+      TestFunction = $courseTests['Test-DeleteContent']
+    },
+    @{
+      Name = "TestDeleteChapter"
+      Description = "Verifies chapter deletion endpoint"
+      TestFunction = $courseTests['Test-DeleteChapter']
+    },
+    @{
+      Name = "TestDeleteCourse"
+      Description = "Verifies course deletion endpoint"
+      TestFunction = $courseTests['Test-DeleteCourse']
+    },
+    @{
       Name = "TestCreateChapter"
       Description = "Verifies chapter creation endpoint"
       TestFunction = $courseTests['Test-CreateChapter']
@@ -416,6 +435,42 @@ try {
       Name = "TestGetProgress"
       Description = "Verifies getting user progress endpoint"
       TestFunction = $courseTests['Test-GetProgress']
+    },
+    # Test service microservice tests
+    @{
+      Name = "TestCreateTest"
+      Description = "Verifies test creation endpoint"
+      TestFunction = $testServiceTests['Test-CreateTest']
+    },
+    @{
+      Name = "TestFindAllTests"
+      Description = "Verifies retrieving all tests endpoint"
+      TestFunction = $testServiceTests['Test-FindAllTests']
+    },
+    @{
+      Name = "TestFindTestById"
+      Description = "Verifies retrieving a test by ID endpoint"
+      TestFunction = $testServiceTests['Test-FindTestById']
+    },
+    @{
+      Name = "TestCreateQuestion"
+      Description = "Verifies question creation endpoint"
+      TestFunction = $testServiceTests['Test-CreateQuestion']
+    },
+    @{
+      Name = "TestFindQuestionById"
+      Description = "Verifies retrieving a question by ID endpoint"
+      TestFunction = $testServiceTests['Test-FindQuestionById']
+    },
+    @{
+      Name = "TestStartTestAttempt"
+      Description = "Verifies starting a test attempt endpoint"
+      TestFunction = $testServiceTests['Test-StartTestAttempt']
+    },
+    @{
+      Name = "TestCompleteTestAttempt"
+      Description = "Verifies completing a test attempt endpoint"
+      TestFunction = $testServiceTests['Test-CompleteTestAttempt']
     }
   )
   
