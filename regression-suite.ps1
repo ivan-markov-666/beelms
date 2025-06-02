@@ -291,6 +291,10 @@ try {
   # Load test service integration tests
   . "$PSScriptRoot\services\test\test-integration.test.ps1"
   $testServiceTests = Get-TestServiceTestFunctions
+  
+  # Load analytics service integration tests
+  . "$PSScriptRoot\services\analytics\analytics-integration.test.ps1"
+  $analyticsTests = Get-AnalyticsTestFunctions
 
   # Define available tests with their names, descriptions, and function references
   $availableTests = @(
@@ -471,6 +475,11 @@ try {
       Name = "TestCompleteTestAttempt"
       Description = "Verifies completing a test attempt endpoint"
       TestFunction = $testServiceTests['Test-CompleteTestAttempt']
+    },
+    @{
+      Name = "TestAnalyticsIntegration"
+      Description = "Runs integration tests for Analytics service endpoints"
+      TestFunction = $analyticsTests['Run-AnalyticsIntegrationTests']
     }
   )
   

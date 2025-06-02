@@ -362,6 +362,42 @@ cd db/scripts
 | `TestAnalyticsService` | Тества събирането и визуализацията на аналитични данни | PostgreSQL, Prometheus |
 | `TestAdsService` | Проверява интеграцията с рекламни платформи | Google Ads API, Meta Ads API |
 
+### Детайли за тестовете на Analytics Service
+
+#### Интеграционни тестове
+
+Интеграционните тестове за Analytics Service са разположени в `services/analytics/analytics-integration.test.ps1` и тестват всички основни ендпойнти на услугата.
+
+**Налични тестове:**
+
+| Тестова функция | Описание | Тестван ендпойнт |
+|----------------|----------|------------------|
+| `Test-CreateAnalyticsEvent` | Тества създаването на обикновено аналитично събитие | `POST /api/analytics/events` |
+| `Test-CreateCompletedEvent` | Тества създаването на събитие за завършен тест | `POST /api/analytics/events` |
+| `Test-GetUserProgress` | Тества извличането на прогрес за потребител | `GET /api/analytics/user-progress/:userId` |
+| `Test-GetTestStatistics` | Тества извличането на статистика за тест | `GET /api/analytics/test-statistics/:testId` |
+| `Test-GetCourseCompletionRates` | Тества извличането на нива на завършване на курсове | `GET /api/analytics/course-completion-rates` |
+| `Test-GetAggregatePerformance` | Тества извличането на агрегирани данни за производителност | `GET /api/analytics/aggregate-performance` |
+| `Test-GetIndividualPerformance` | Тества извличането на индивидуален отчет за потребител | `GET /api/analytics/individual-performance/:userId` |
+| `Test-ExportAnalyticsData` | Тества експортирането на аналитични данни | `GET /api/analytics/export` |
+
+**Как да изпълните тестовете:**
+
+```powershell
+# Изпълнете всички тестове на аналитичния сървис
+.\regression-suite.ps1 -TestName "TestAnalyticsIntegration"
+
+# Или изпълнете всички регресионни тестове
+.\regression-suite.ps1
+```
+
+**Изход от тестовете:**
+
+- Детайлни логове за всеки тест
+- Статус на изпълнението (Успех/Грешка)
+- Време за изпълнение на всеки тест
+- Обобщение на резултатите
+
 ### Детайли за тестовете на Test Service
 
 #### Преглед
