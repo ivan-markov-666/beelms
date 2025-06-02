@@ -20,10 +20,10 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document);
 
   const port = process.env.PORT || 3000;
-  await app.listen(port);
+  await app.listen(port, '127.0.0.1');
 
   // Log the URLs
-  const baseUrl = `http://localhost:${port}`;
+  const baseUrl = `http://127.0.0.1:${port}`;
   console.log(`Course microservice running on ${baseUrl}`);
   console.log(`Swagger documentation available at: ${baseUrl}/api`);
 }

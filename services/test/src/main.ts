@@ -31,12 +31,12 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document);
 
   const port = configService.get<number>('PORT') || 3000;
-  await app.listen(port);
+  await app.listen(port, '127.0.0.1');
 
-  console.log(`Test microservice running on http://localhost:${port}`);
+  console.log(`Test microservice running on http://127.0.0.1:${port}`);
 
   console.log(
-    `Swagger documentation available at: http://localhost:${port}/api`,
+    `Swagger documentation available at: http://127.0.0.1:${port}/api`,
   );
 }
 
