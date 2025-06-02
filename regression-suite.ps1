@@ -275,6 +275,7 @@ Write-Host "Report will be saved to: $reportFile" -ForegroundColor $infoColor
 try {
   # Import test modules
   Import-Module "$PSScriptRoot\services\auth\auth-health.test.ps1" -Force -ErrorAction Stop
+  Import-Module "$PSScriptRoot\services\ads\test\ads-integration.test.ps1" -Force -ErrorAction Stop
   
   # Load auth integration tests
   . "$PSScriptRoot\services\auth\auth-integration.test.ps1"
@@ -295,6 +296,9 @@ try {
   # Load analytics service integration tests
   . "$PSScriptRoot\services\analytics\analytics-integration.test.ps1"
   $analyticsTests = Get-AnalyticsTestFunctions
+  
+  # Load ads service integration tests
+  . "$PSScriptRoot\services\ads\test\ads-integration.test.ps1"
 
   # Define available tests with their names, descriptions, and function references
   $availableTests = @(
@@ -302,6 +306,12 @@ try {
       Name = "TestDevelopmentEnvironment"
       Description = "Verifies development environment setup"
       TestFunction = ${function:Test-DevelopmentEnvironment}
+    },
+    @{
+      Name = "TestAdsEndpoints"
+      Description = "Integration tests for Ads Service endpoints"
+      TestFunction = ${function:Test-AdsEndpoints}
+      Parameters = @{ BaseUrl = "http://localhost:3000" }  # Default port for NestJS
     },
     @{
       Name = "TestDatabaseMigrations"
@@ -495,7 +505,12 @@ try {
     if ($testToRun) {
       Write-Host "Running test: $($testToRun.Name)" -ForegroundColor Cyan
       try {
-        & $testToRun.TestFunction
+        # Check if test has parameters and call accordingly
+        if ($testToRun.Parameters) {
+          $testToRun.TestFunction.Invoke($testToRun.Parameters)
+        } else {
+          & $testToRun.TestFunction
+        }
         $testResults += [PSCustomObject]@{
           Name    = $testToRun.Name
           Success = $true
@@ -526,7 +541,12 @@ try {
       $testCount++
       Write-Host "`nRunning test: $($test.Name) - $($test.Description)" -ForegroundColor Cyan
       try {
-        & $test.TestFunction
+        # Check if test has parameters and call accordingly
+        if ($test.Parameters) {
+          $test.TestFunction.Invoke($test.Parameters)
+        } else {
+          & $test.TestFunction
+        }
         $testResults += [PSCustomObject]@{
           Name    = $test.Name
           Success = $true
