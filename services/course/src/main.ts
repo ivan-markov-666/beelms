@@ -28,4 +28,7 @@ async function bootstrap() {
   console.log(`Swagger documentation available at: ${baseUrl}/api`);
 }
 
-bootstrap();
+bootstrap().catch((err) => {
+  console.error('Failed to start application:', err);
+  process.exit(1);
+});

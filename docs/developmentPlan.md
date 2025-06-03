@@ -30,78 +30,151 @@
     - CRUD операции за потребители
     - Профилни данни
     - Потребителски настройки
-13. Разработка на Course Service
-    - CRUD операции за курсове и глави
-    - API за извличане на структурирано съдържание
+13. Разработка на Course Service (Разширена функционалност)
+    - **Управление на курсове**
+      - CRUD операции за курсове
+      - Metadata управление
+      - Активиране/деактивиране на курсове
+    - **Управление на глави**
+      - CRUD операции за глави
+      - Поредност и организация
+      - Йерархична структура
+    - **Управление на съдържанието**
+      - CRUD операции за съдържание
+      - Поддръжка на различни типове съдържание (text, video, image, PDF)
+      - Rich text editor интеграция
+      - File upload управление
+    - **Версиониране на съдържанието**
+      - Автоматично създаване на версии при промени
+      - История на промените с описания
+      - Възможност за връщане към предишни версии
+      - Draft/Published states за съдържанието
+      - Approval workflow за публикуване
+    - **Проследяване на прогреса**
+      - API за записване на прогреса при преглед
+      - Автоматично проследяване на времето прекарано
+      - Ръчно маркиране като завършено
+      - Статистики за индивидуален прогрес
+      - Aggregate статистики за курсове
+    - **Кеширане и оптимизация**
+      - Redis кеширане на често използвано съдържание
+      - Lazy loading за големи текстове
+      - Пагинация за списъци
+    - **Сигурност и права**
+      - Role-based access control (admin/user)
+      - Валидация на входните данни
+      - Защита от XSS в съдържанието
 14. Разработка на Test Service
     - CRUD операции за тестове и въпроси
     - API за решаване на тестове и записване на резултати
 15. Разработка на Analytics Service
     - Събиране на данни
     - Генериране на отчети
+    - Интеграция с progress tracking от Course Service
 16. Разработка на Ads Service
     - Показване на реклами
     - Проследяване на показвания и кликвания
-17. Имплементация на Content Service за интеграция с вашия съществуващ проект
-18. Добавяне на междинен слой за сигурност към всички микросервиси
+17. Добавяне на междинен слой за сигурност към всички микросервиси
 
 ## Фаза 4: Разработка на Frontend с Codux/React
 
-19. Създаване на структура на потребителския интерфейс
-20. Разработка на компоненти за автентикация
+18. Създаване на структура на потребителския интерфейс
+19. Разработка на компоненти за автентикация
     - Регистрационна форма
     - Форма за вписване
     - Форма за рестартиране на парола
-21. Разработка на основни компоненти
+20. Разработка на основни компоненти
     - Навигация и меню
     - Списък с курсове
-    - Преглед на съдържание
+    - Преглед на съдържание с progress tracking
+    - Rich content display (text, images, videos)
+    - "Следваща глава" бутон с progress update
+    - "Маркирай като прочетено" функционалност
     - Решаване на тест
     - Потребителски профил
-22. Разработка на Admin панел
+    - Персонален progress dashboard
+21. Разработка на Admin панел
     - Табло за управление
     - Управление на потребители
-    - Управление на курсове и съдържание
+    - **Content Management System (CMS)**
+      - WYSIWYG редактор за съдържание
+      - Управление на курсове и глави
+      - File upload и media management
+      - Content версиониране interface
+      - Preview функционалност
+      - Bulk operations
     - Управление на тестове
     - Преглед на аналитични данни
+    - Progress analytics и reports
     - Управление на реклами
-23. Имплементация на проследяване на прогреса
-24. Имплементация на система за показване на реклами (защитена от adblocker)
-25. Оптимизация на производителността и UX
+22. Имплементация на проследяване на прогреса
+    - Автоматично tracking при scroll до края
+    - Progress bars и visual indicators
+    - Resume functionality - връщане към последно гледано
+23. Имплементация на система за показване на реклами (защитена от adblocker)
+24. Оптимизация на производителността и UX
+    - Code splitting и lazy loading
+    - Caching strategies
+    - Performance monitoring
 
 ## Фаза 5: Интеграция и тестване
 
-26. Интеграция на всички микросервиси
-27. Настройка на комуникацията между микросервисите
-28. Интеграция на Frontend с Backend API
+25. Интеграция на всички микросервиси
+26. Настройка на комуникацията между микросервисите
+27. Интеграция на Frontend с Backend API
+28. **Специализирано тестване на Course Service**
+    - Unit тестове за content management
+    - Integration тестове за версиониране
+    - E2E тестове за progress tracking
+    - Performance тестове за големи текстове
 29. Разработка на компонентни тестове за Frontend
 30. Разработка на unit тестове за Backend микросервиси
 31. Разработка на интеграционни тестове
 32. Тестване на производителността
+    - Load testing на content delivery
+    - Database performance optimization
 33. Тестване на сигурността
     - Penetration тестове
     - Тестове за уязвимост
-    - Тестване на защитите срещу XSS, CSRF, SQL Injection и др.
+    - Content security testing
+    - XSS protection тестове
 34. Тестване на потребителското преживяване
+    - Usability testing на CMS
+    - Progress tracking UX validation
 
 ## Фаза 6: Оптимизация и подготовка за внедряване
 
 35. Оптимизация на SQL заявките
+    - Index optimization за content queries
+    - Query optimization за progress tracking
 36. Настройка на кеширането
+    - Redis caching strategies за content
+    - CDN setup за media files
 37. Оптимизация на свалянето на статично съдържание
 38. Настройка на логване и мониторинг
+    - Content access logging
+    - Performance metrics tracking
 39. Настройка на бекъп стратегия
+    - Database backup с versions
+    - Content backup strategies
 40. Създаване на документация за разработчици
+    - API documentation за Course Service
+    - Content management guidelines
 41. Създаване на документация за потребители
+    - Admin панел user guide
+    - End-user tutorial
 42. Финална проверка на сигурността
 
 ## Фаза 7: Подготовка за разгръщане на VPS
 
 43. Подготовка на Docker Compose файлове за продукционна среда
 44. Настройка на CI/CD процес
+    - Automated content backup при deployment
 45. Създаване на скриптове за автоматично разгръщане
 46. Настройка на SSL/TLS сертификати
 47. Разработка на стратегия за миграция на данни
+    - Content migration procedures
+    - Version history preservation
 48. Разработка на план за възстановяване при аварии
 49. Настройка на автоматични бекъпи
 50. Подготовка на скриптове за мониторинг
@@ -118,6 +191,8 @@
 58. Разгръщане на Frontend
 59. Конфигуриране на Nginx и SSL/TLS
 60. Тестване на внедрената система
+    - Full content workflow testing
+    - Progress tracking validation
 61. Мониторинг на производителността след разгръщане
 62. Оптимизации на базата на събраните данни от мониторинга
 
@@ -125,9 +200,39 @@
 
 63. Събиране на обратна връзка от потребители
 64. Планиране на нови функционалности
+    - Advanced content types (interactive content)
+    - Enhanced analytics
+    - Mobile app considerations
 65. Интегриране на допълнителни микросервиси при нужда
 66. Оптимизация на мащабируемостта според натоварването
+    - Content delivery optimization
+    - Database scaling strategies
 67. Периодични обновления за сигурност
 68. Развитие на аналитичната платформа за изследователски цели
+69. **Бъдещи възможности за разширяване**
+    - Миграция към MongoDB за content при нужда
+    - Microservices decomposition при високо натоварване
+    - AI-powered content recommendations
+    - Advanced content authoring tools
+
+## Ключови особености на разширената Course Service
+
+### Content Management Capabilities:
+- **Rich Text Support**: Markdown, HTML, и WYSIWYG editing
+- **Media Integration**: Images, videos, PDFs, embedded content
+- **Structured Content**: Courses → Chapters → Content hierarchy
+- **Version Control**: Git-like versioning за content changes
+
+### Progress Tracking Features:
+- **Granular Tracking**: Per-content item progress
+- **Time Analytics**: Reading time, engagement metrics
+- **Completion States**: Not started, In progress, Completed
+- **Resume Functionality**: Auto-save последна позиция
+
+### Admin Experience:
+- **Intuitive CMS**: User-friendly content creation
+- **Preview Mode**: See content като end-user
+- **Bulk Operations**: Mass updates, import/export
+- **Analytics Dashboard**: Content performance metrics
 
 Този план позволява методично и структурирано разработване на системата, като първо се фокусира върху локалната разработка и тестване, а след това преминава към разгръщане и внедряване. С използването на Docker контейнеризация, същата система, която разработвате локално, може лесно да бъде преместена на VPS сървъра, което минимизира проблемите при внедряване.

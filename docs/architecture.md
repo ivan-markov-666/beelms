@@ -14,7 +14,7 @@ graph TB
             subgraph "Backend Контейнери"
                 auth["Auth Service<br>(NestJS)"]
                 user["User Service<br>(NestJS)"]
-                course["Course Service<br>(NestJS)"]
+                course["Course Service<br>(NestJS + Content Management)"]
                 test["Test Service<br>(NestJS)"]
                 analytics["Analytics Service<br>(NestJS)"]
                 ads["Ads Service<br>(NestJS)"]
@@ -23,10 +23,6 @@ graph TB
             subgraph "База данни"
                 postgres["PostgreSQL"]
                 redis["Redis Cache"]
-            end
-            
-            subgraph "Съдържание"
-                content["Content Service<br>(Отделен проект)"]
             end
             
             subgraph "Мониторинг"
@@ -47,7 +43,6 @@ graph TB
     nginx --> test
     nginx --> analytics
     nginx --> ads
-    nginx --> content
     nginx --> admin
     
     auth --> postgres
@@ -56,7 +51,6 @@ graph TB
     test --> postgres
     analytics --> postgres
     ads --> postgres
-    content --> postgres
     
     auth --> redis
     user --> redis
@@ -64,14 +58,12 @@ graph TB
     test --> redis
     analytics --> redis
     ads --> redis
-    content --> redis
     
     auth <--> user
     course <--> user
     test <--> user
     analytics <--> test
     ads <--> user
-    content <--> course
 ```
 
 ## Структура на базата данни (ER диаграма)
@@ -129,8 +121,21 @@ erDiagram
         text content
         string content_type
         int order
+        int version
+        boolean is_published
+        int created_by FK
         datetime created_at
         datetime updated_at
+    }
+    
+    ContentVersion {
+        int id PK
+        int content_id FK
+        int version_number
+        text content_body
+        string change_description
+        int created_by FK
+        datetime created_at
     }
     
     UserProgress {
@@ -238,10 +243,14 @@ erDiagram
     User ||--o{ UserAdView : views
     User ||--o{ PasswordReset : requests
     User ||--o{ Session : maintains
+    User ||--o{ Content : creates
+    User ||--o{ ContentVersion : creates
     
     Course ||--o{ Chapter : contains
     Chapter ||--o{ Content : includes
     Chapter ||--o{ Test : assesses
+    
+    Content ||--o{ ContentVersion : versioned_as
     
     Test ||--o{ Question : consists_of
     Test ||--o{ UserTestAttempt : completed_by
@@ -279,16 +288,38 @@ classDiagram
     }
     
     class CourseService {
+        // Course Management
         +getCourses()
         +getCourseById(courseId)
-        +getChapters(courseId)
-        +getChapterById(chapterId)
-        +getContent(chapterId)
-        +getContentById(contentId)
         +createCourse(courseData) // Admin only
         +updateCourse(courseId, courseData) // Admin only
+        +deleteCourse(courseId) // Admin only
+        
+        // Chapter Management
+        +getChapters(courseId)
+        +getChapterById(chapterId)
         +createChapter(courseId, chapterData) // Admin only
         +updateChapter(chapterId, chapterData) // Admin only
+        +deleteChapter(chapterId) // Admin only
+        
+        // Content Management
+        +getContent(chapterId)
+        +getContentById(contentId)
+        +createContent(chapterId, contentData) // Admin only
+        +updateContent(contentId, contentData) // Admin only
+        +deleteContent(contentId) // Admin only
+        
+        // Content Versioning
+        +getContentVersions(contentId) // Admin only
+        +getContentVersion(contentId, version) // Admin only
+        +createContentVersion(contentId, versionData) // Admin only
+        +publishContent(contentId, version) // Admin only
+        +revertContent(contentId, version) // Admin only
+        
+        // Progress Tracking
+        +getUserProgress(userId)
+        +updateUserProgress(userId, contentId, progress)
+        +markContentAsCompleted(userId, contentId)
     }
     
     class TestService {
@@ -311,6 +342,7 @@ classDiagram
         +getCourseCompletionRates()
         +getIndividualPerformanceReport(userId)
         +getAggregatePerformanceReport()
+        +getContentEngagementMetrics()
         +exportData(criteria)
     }
     
@@ -321,13 +353,6 @@ classDiagram
         +createAd(adData) // Admin only
         +updateAd(adId, adData) // Admin only
         +getAdStatistics(adId) // Admin only
-    }
-    
-    class ContentService {
-        +uploadContent(chapterId, contentData)
-        +getContent(contentId)
-        +updateContent(contentId, contentData)
-        +deleteContent(contentId)
     }
     
     class SecurityMiddleware {
@@ -360,10 +385,12 @@ classDiagram
         +CourseCatalogPage
         +CourseViewPage
         +ChapterViewPage
+        +ContentViewPage
         +TestPage
         +ProfilePage
         +ProgressPage
         +AdminDashboard
+        +AdminContentEditor
     }
     
     ReactFrontend --> AuthService
@@ -379,7 +406,6 @@ classDiagram
     TestService --> SecurityMiddleware
     AnalyticsService --> SecurityMiddleware
     AdsService --> SecurityMiddleware
-    ContentService --> SecurityMiddleware
     
     SecurityMiddleware --> RedisCache
     SecurityMiddleware --> PostgresDatabase
@@ -396,8 +422,6 @@ classDiagram
     AnalyticsService --> PostgresDatabase
     AdsService --> RedisCache
     AdsService --> PostgresDatabase
-    ContentService --> RedisCache
-    ContentService --> PostgresDatabase
 ```
 
 ## Сигурност и защитни механизми
@@ -440,7 +464,7 @@ pie
     "Redis" : 0.5
     "Nginx" : 0.5
     "React Frontend" : 0.3
-    "Съдържание и други" : 0.2
+    "Мониторинг" : 0.2
 ```
 
 ## Подробно описание на архитектурата
@@ -454,11 +478,10 @@ pie
 - **Backend микросервиси** - изградени с NestJS:
   - **Auth Service** - управлява всички процеси по автентикация
   - **User Service** - управлява потребителски данни и профили
-  - **Course Service** - управлява курсове, глави и учебно съдържание
+  - **Course Service** - управлява курсове, глави, учебно съдържание с версиониране и проследяване на прогреса
   - **Test Service** - управлява тестове, въпроси и отговори
   - **Analytics Service** - събира и анализира данни от използването на системата
   - **Ads Service** - управлява показването на реклами
-- **Content Service** - отделен проект, който управлява съдържанието
 - **БД слой** - PostgreSQL за постоянно съхранение и Redis за кеширане
 - **Admin Panel** - за управление на системата
 - **Мониторинг** - Prometheus и Grafana за наблюдение на производителността
@@ -471,17 +494,46 @@ pie
 - **Връзки между таблиците** - за поддържане на интегритет на данните
 - **JSON полета** - за гъвкавост при необходимост
 - **Времеви маркери** - за проследяване на създаване и промени
+- **Версиониране на съдържанието** - за проследяване на промени и възможност за връщане към предишни версии
 
 Основни таблици включват:
 - **User** - съхранява основна потребителска информация
 - **UserProfile** - разширена информация за потребителя
 - **Course**, **Chapter**, **Content** - учебно съдържание
+- **ContentVersion** - версиониране на съдържанието
 - **Test**, **Question**, **UserTestAttempt**, **UserAnswer** - тестове и отговори
 - **Advertisement**, **UserAdView** - рекламна система
 - **UserProgress** - проследяване на прогреса на потребителя
 - **PasswordReset**, **Session** - управление на сесии и рестартиране на пароли
 
-### 3. Сигурност
+### 3. Разширена функционалност на Course Service
+
+Course Service сега включва цялостно управление на съдържанието:
+
+#### 3.1 Управление на курсове и глави
+- CRUD операции за курсове
+- CRUD операции за глави
+- Йерархична структура на съдържанието
+
+#### 3.2 Управление на съдържанието
+- CRUD операции за съдържание
+- Поддръжка на различни типове съдържание (text, video, image, etc.)
+- Rich text editing capabilities
+
+#### 3.3 Версиониране на съдържанието
+- Автоматично създаване на версии при всяка промяна
+- Преглед на история на промените
+- Възможност за връщане към предишни версии
+- Публикуване на конкретни версии
+- Draft/Published states
+
+#### 3.4 Проследяване на прогреса
+- Автоматично записване на прогреса при преглед на съдържание
+- Ръчно маркиране като завършено
+- Проследяване на времето прекарано върху съдържанието
+- Персонални статистики
+
+### 4. Сигурност
 
 Архитектурата включва многопластов подход към сигурността:
 - **Транспортен слой**: HTTPS с модерно шифроване
@@ -493,7 +545,7 @@ pie
 - **Сесийна сигурност**: Управление на сесии, автоматично излизане при неактивност
 - **Мониторинг и логване**: Проследяване на подозрителни дейности, блокиране на IP адреси
 
-### 4. Реклами без adblocker блокиране
+### 5. Реклами без adblocker блокиране
 
 За реализация на рекламите, които да не се блокират от adblocker-и, препоръчвам:
 
@@ -503,7 +555,7 @@ pie
 4. **Сървърно-рендерирани реклами** - интегрирани директно в HTML
 5. **Избягване на ключови думи** като "ad", "banner", "sponsor" в CSS и HTML
 
-### 5. Проследяване на прогреса
+### 6. Проследяване на прогреса
 
 За проследяване на прогреса на потребителя предлагам:
 
@@ -513,7 +565,7 @@ pie
 4. **Проследяване на времето прекарано на страницата** - за по-точна метрика
 5. **Тестове за валидиране на знания** - за да се гарантира, че потребителят не само е преминал, но и е усвоил материала
 
-### 6. Мащабируемост и разширяемост
+### 7. Мащабируемост и разширяемост
 
 Архитектурата е проектирана с мисъл за бъдещо разширяване:
 
@@ -522,9 +574,9 @@ pie
 3. **Кеширане с Redis** - подобряване на производителността
 4. **API-first подход** - лесно интегриране с мобилни приложения в бъдеще
 5. **Опашки за обработка на тежки задачи** - при нужда от генериране на сложни отчети
-6. **Разделение на съдържанието в отделен проект** - както сте посочили, подобрява сигурността и концептуалната структура
+6. **Възможност за миграция към MongoDB** - при нужда от по-гъвкаво съхранение на съдържание
 
-### 7. Оптимизация за VPS ресурси
+### 8. Оптимизация за VPS ресурси
 
 За оптимално използване на посочените ресурси (6 vCPU, 12GB RAM, 200GB SSD):
 
@@ -544,5 +596,7 @@ pie
 - Ефективно използва ограничените ресурси на VPS
 - Осигурява лесна мащабируемост и разширяемост в бъдеще
 - Следва съвременните добри практики за разработка
+- Включва цялостно управление на съдържанието с версиониране
+- Предоставя гъвкавост за бъдеща миграция към други технологии
 
 Архитектурата е проектирана да започне с минимално необходимите компоненти за VPS, но да позволява поетапно разширяване с нови функционалности или скалиране към по-голяма инфраструктура, ако се появи такава нужда в бъдеще.

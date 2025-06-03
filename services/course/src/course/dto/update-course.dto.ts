@@ -13,7 +13,8 @@ export class UpdateCourseDto {
 
   @ApiProperty({
     description: 'Описание на курса',
-    example: 'Този курс ще ви запознае с основите на JavaScript програмирането...',
+    example:
+      'Този курс ще ви запознае с основите на JavaScript програмирането...',
     required: false,
   })
   @IsString()
