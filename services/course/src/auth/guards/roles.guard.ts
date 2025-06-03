@@ -5,6 +5,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { Request } from 'express';
 import { ROLES_KEY } from '../decorators/roles.decorator';
 
 interface User {
@@ -27,17 +28,18 @@ export class RolesGuard implements CanActivate {
       return true;
     }
 
-    const { user } = context.switchToHttp().getRequest();
-    
+    const request = context
+      .switchToHttp()
+      .getRequest<Request & { user?: User }>();
+    const user = request.user;
+
     if (!user || !user.roles) {
       throw new ForbiddenException(
         'Потребителят няма необходимите права за достъп',
       );
     }
 
-    const typedUser = user as User;
-
-    if (requiredRoles.some((role) => typedUser.roles.includes(role))) {
+    if (requiredRoles.some((role) => user.roles.includes(role))) {
       return true;
     }
 

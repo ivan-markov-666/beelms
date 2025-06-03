@@ -5,6 +5,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule as AppConfigModule } from './config/config.module';
+import { CacheModule } from './config/cache.module';
 import { CourseModule } from './course/course.module';
 import { SharedModule } from './shared/shared.module';
 
@@ -27,6 +28,7 @@ import { SharedModule } from './shared/shared.module';
         synchronize: configService.get('NODE_ENV') === 'development',
       }),
     }),
+    CacheModule, // Redis кеширане
     CourseModule,
     AuthModule,
     SharedModule,

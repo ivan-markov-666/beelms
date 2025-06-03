@@ -12,13 +12,16 @@ import {
   HttpCode,
   HttpStatus,
   ParseIntPipe,
+  NotFoundException,
 } from '@nestjs/common';
+import { RequestWithUser } from '../shared/interfaces/request.interface';
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
   ApiQuery,
+  getSchemaPath,
 } from '@nestjs/swagger';
 import { CourseService } from './course.service';
 import { Course } from './entities/course.entity';
@@ -31,6 +34,7 @@ import { CreateChapterDto } from './dto/create-chapter.dto';
 import { UpdateChapterDto } from './dto/update-chapter.dto';
 import { CreateContentDto } from './dto/create-content.dto';
 import { UpdateContentDto } from './dto/update-content.dto';
+import { UpdateUserProgressDto } from './dto/update-user-progress.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -51,18 +55,33 @@ export class CourseController {
   @ApiResponse({
     status: 200,
     description: 'Списък с курсове',
-    type: [Course],
+    schema: {
+      type: 'object',
+      properties: {
+        courses: {
+          type: 'array',
+          items: { $ref: getSchemaPath(Course) },
+        },
+        total: { type: 'number' },
+        page: { type: 'number' },
+        limit: { type: 'number' },
+      },
+      required: ['courses', 'total', 'page', 'limit'],
+    },
   })
   @ApiOperation({
     summary: 'Вземи всички курсове',
     description:
       'Връща списък с всички курсове, с възможност за филтриране по активни',
   })
-  getCourses(
-    @Query('isActive') isActive?: boolean | string,
-  ): Promise<Course[]> {
+  getCourses(@Query('isActive') isActive?: boolean | string): Promise<{
+    courses: Course[];
+    total: number;
+    page: number;
+    limit: number;
+  }> {
     let isActiveBoolean: boolean | undefined;
-    
+
     if (isActive !== undefined) {
       isActiveBoolean = isActive === 'true' || isActive === true;
     }
@@ -122,7 +141,11 @@ export class CourseController {
   @Roles('admin')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Обновяване на съществуващ курс' })
-  @ApiResponse({ status: 200, description: 'Курсът е обновен успешно', type: Course })
+  @ApiResponse({
+    status: 200,
+    description: 'Курсът е обновен успешно',
+    type: Course,
+  })
   @ApiResponse({ status: 400, description: 'Невалидни данни' })
   @ApiResponse({ status: 401, description: 'Неоторизиран достъп' })
   @ApiResponse({ status: 403, description: 'Забранен достъп' })
@@ -152,11 +175,32 @@ export class CourseController {
 
   @Get(':courseId/chapters')
   @ApiOperation({ summary: 'Получаване на всички глави за даден курс' })
-  @ApiResponse({ status: 200, description: 'Списък с всички глави за курса', type: [Chapter] })
+  @ApiResponse({
+    status: 200,
+    description: 'Списък с всички глави за курса',
+    schema: {
+      type: 'object',
+      properties: {
+        chapters: {
+          type: 'array',
+          items: { $ref: getSchemaPath(Chapter) },
+        },
+        total: { type: 'number' },
+        page: { type: 'number' },
+        limit: { type: 'number' },
+      },
+      required: ['chapters', 'total', 'page', 'limit'],
+    },
+  })
   @ApiResponse({ status: 404, description: 'Курсът не е намерен' })
   async getChapters(
     @Param('courseId', ParseIntPipe) courseId: number,
-  ): Promise<Chapter[]> {
+  ): Promise<{
+    chapters: Chapter[];
+    total: number;
+    page: number;
+    limit: number;
+  }> {
     return this.courseService.getChapters(courseId);
   }
 
@@ -164,7 +208,9 @@ export class CourseController {
   @ApiOperation({ summary: 'Получаване на глава по ID' })
   @ApiResponse({ status: 200, description: 'Данни за главата', type: Chapter })
   @ApiResponse({ status: 404, description: 'Главата не е намерена' })
-  async getChapterById(@Param('id', ParseIntPipe) id: number): Promise<Chapter> {
+  async getChapterById(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<Chapter> {
     return this.courseService.getChapterById(id);
   }
 
@@ -173,12 +219,18 @@ export class CourseController {
   @Roles('admin')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Създаване на нова глава' })
-  @ApiResponse({ status: 201, description: 'Главата е създадена успешно', type: Chapter })
+  @ApiResponse({
+    status: 201,
+    description: 'Главата е създадена успешно',
+    type: Chapter,
+  })
   @ApiResponse({ status: 400, description: 'Невалидни данни' })
   @ApiResponse({ status: 401, description: 'Неоторизиран достъп' })
   @ApiResponse({ status: 403, description: 'Забранен достъп' })
   @ApiResponse({ status: 404, description: 'Курсът не е намерен' })
-  async createChapter(@Body() createChapterDto: CreateChapterDto): Promise<Chapter> {
+  async createChapter(
+    @Body() createChapterDto: CreateChapterDto,
+  ): Promise<Chapter> {
     return this.courseService.createChapter(createChapterDto);
   }
 
@@ -187,7 +239,11 @@ export class CourseController {
   @Roles('admin')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Обновяване на съществуваща глава' })
-  @ApiResponse({ status: 200, description: 'Главата е обновена успешно', type: Chapter })
+  @ApiResponse({
+    status: 200,
+    description: 'Главата е обновена успешно',
+    type: Chapter,
+  })
   @ApiResponse({ status: 400, description: 'Невалидни данни' })
   @ApiResponse({ status: 401, description: 'Неоторизиран достъп' })
   @ApiResponse({ status: 403, description: 'Забранен достъп' })
@@ -217,19 +273,46 @@ export class CourseController {
 
   @Get('chapters/:chapterId/contents')
   @ApiOperation({ summary: 'Получаване на цялото съдържание за дадена глава' })
-  @ApiResponse({ status: 200, description: 'Списък със съдържание за главата', type: [Content] })
+  @ApiResponse({
+    status: 200,
+    description: 'Списък със съдържание за главата',
+    schema: {
+      type: 'object',
+      properties: {
+        contents: {
+          type: 'array',
+          items: { $ref: getSchemaPath(Content) },
+        },
+        total: { type: 'number' },
+        page: { type: 'number' },
+        limit: { type: 'number' },
+      },
+      required: ['contents', 'total', 'page', 'limit'],
+    },
+  })
   @ApiResponse({ status: 404, description: 'Главата не е намерена' })
   async getContentsByChapterId(
     @Param('chapterId', ParseIntPipe) chapterId: number,
-  ): Promise<Content[]> {
+  ): Promise<{
+    contents: Content[];
+    total: number;
+    page: number;
+    limit: number;
+  }> {
     return this.courseService.getContentsByChapterId(chapterId);
   }
 
   @Get('contents/:id')
   @ApiOperation({ summary: 'Получаване на съдържание по ID' })
-  @ApiResponse({ status: 200, description: 'Данни за съдържанието', type: Content })
+  @ApiResponse({
+    status: 200,
+    description: 'Данни за съдържанието',
+    type: Content,
+  })
   @ApiResponse({ status: 404, description: 'Съдържанието не е намерено' })
-  async getContentById(@Param('id', ParseIntPipe) id: number): Promise<Content> {
+  async getContentById(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<Content> {
     return this.courseService.getContentById(id);
   }
 
@@ -238,12 +321,18 @@ export class CourseController {
   @Roles('admin')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Създаване на ново съдържание' })
-  @ApiResponse({ status: 201, description: 'Съдържанието е създадено успешно', type: Content })
+  @ApiResponse({
+    status: 201,
+    description: 'Съдържанието е създадено успешно',
+    type: Content,
+  })
   @ApiResponse({ status: 400, description: 'Невалидни данни' })
   @ApiResponse({ status: 401, description: 'Неоторизиран достъп' })
   @ApiResponse({ status: 403, description: 'Забранен достъп' })
   @ApiResponse({ status: 404, description: 'Главата не е намерена' })
-  async createContent(@Body() createContentDto: CreateContentDto): Promise<Content> {
+  async createContent(
+    @Body() createContentDto: CreateContentDto,
+  ): Promise<Content> {
     return this.courseService.createContent(createContentDto);
   }
 
@@ -252,7 +341,11 @@ export class CourseController {
   @Roles('admin')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Обновяване на съществуващо съдържание' })
-  @ApiResponse({ status: 200, description: 'Съдържанието е обновено успешно', type: Content })
+  @ApiResponse({
+    status: 200,
+    description: 'Съдържанието е обновено успешно',
+    type: Content,
+  })
   @ApiResponse({ status: 400, description: 'Невалидни данни' })
   @ApiResponse({ status: 401, description: 'Неоторизиран достъп' })
   @ApiResponse({ status: 403, description: 'Забранен достъп' })
@@ -284,61 +377,97 @@ export class CourseController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Получаване на прогреса на потребителя' })
-  @ApiResponse({ status: 200, description: 'Прогрес на потребителя', type: [UserProgress] })
+  @ApiResponse({
+    status: 200,
+    description: 'Прогрес на потребителя',
+    type: [UserProgress],
+  })
   @ApiResponse({ status: 401, description: 'Неоторизиран достъп' })
-  @ApiQuery({ name: 'courseId', required: false, type: Number, description: 'ID на курс за филтриране' })
+  @ApiQuery({
+    name: 'courseId',
+    required: false,
+    type: Number,
+    description: 'ID на курс за филтриране',
+  })
   async getUserProgress(
-    @Req() req,
+    @Req() req: RequestWithUser,
     @Query('courseId', new ParseIntPipe({ optional: true })) courseId?: number,
   ): Promise<UserProgress[]> {
     const userId = req.user.id;
     return this.courseService.getUserProgress(userId, courseId);
   }
 
-  @Post('progress/chapter/:chapterId')
+  @Put('user-progress/chapter/:chapterId')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Обновяване на прогреса за глава' })
-  @ApiResponse({ status: 200, description: 'Прогресът е обновен успешно', type: UserProgress })
+  @ApiOperation({ summary: 'Update user progress for a chapter' })
+  @ApiResponse({
+    status: 200,
+    description: 'Прогресът е обновен успешно',
+    type: UserProgress,
+  })
   @ApiResponse({ status: 401, description: 'Неоторизиран достъп' })
-  @ApiResponse({ status: 404, description: 'Главата не е намерена' })
+  @ApiResponse({ status: 404, description: 'Не е намерена глава' })
   async updateChapterProgress(
-    @Req() req,
+    @Req() req: RequestWithUser,
     @Param('chapterId', ParseIntPipe) chapterId: number,
-    @Body() body: { completed?: boolean; progressPercentage?: number },
+    @Body() updateUserProgressDto: UpdateUserProgressDto,
   ): Promise<UserProgress> {
     const userId = req.user.id;
-    const { completed = false, progressPercentage = 0 } = body;
+    const {
+      completed = false,
+      progressPercentage = 0,
+      timeSpentSeconds = 0,
+      deviceInfo,
+    } = updateUserProgressDto;
+
     return this.courseService.updateUserProgress(
       userId,
       chapterId,
       undefined,
       completed,
       progressPercentage,
+      timeSpentSeconds,
+      deviceInfo,
     );
   }
 
-  @Post('progress/content/:contentId')
+  @Put('user-progress/content/:contentId')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Обновяване на прогреса за съдържание' })
-  @ApiResponse({ status: 200, description: 'Прогресът е обновен успешно', type: UserProgress })
+  @ApiOperation({ summary: 'Update user progress for content' })
+  @ApiResponse({
+    status: 200,
+    description: 'Прогресът е обновен успешно',
+    type: UserProgress,
+  })
   @ApiResponse({ status: 401, description: 'Неоторизиран достъп' })
   @ApiResponse({ status: 404, description: 'Съдържанието не е намерено' })
   async updateContentProgress(
-    @Req() req,
+    @Req() req: RequestWithUser,
     @Param('contentId', ParseIntPipe) contentId: number,
-    @Body() body: { completed?: boolean; progressPercentage?: number },
+    @Body() updateUserProgressDto: UpdateUserProgressDto,
   ): Promise<UserProgress> {
     const userId = req.user.id;
     const content = await this.courseService.getContentById(contentId);
-    const { completed = false, progressPercentage = 0 } = body;
+    if (!content) {
+      throw new NotFoundException('Съдържанието не е намерено');
+    }
+    const {
+      completed = false,
+      progressPercentage = 0,
+      timeSpentSeconds = 0,
+      deviceInfo,
+    } = updateUserProgressDto;
+
     return this.courseService.updateUserProgress(
       userId,
       content.chapterId,
       contentId,
       completed,
       progressPercentage,
+      timeSpentSeconds,
+      deviceInfo,
     );
   }
 }

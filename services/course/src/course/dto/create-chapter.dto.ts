@@ -20,7 +20,8 @@ export class CreateChapterDto {
 
   @ApiProperty({
     description: 'Описание на главата',
-    example: 'В тази глава ще научите за различните типове данни в JavaScript...',
+    example:
+      'В тази глава ще научите за различните типове данни в JavaScript...',
   })
   @IsString()
   @IsNotEmpty({ message: 'Описанието е задължително' })

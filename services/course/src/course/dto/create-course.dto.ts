@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsOptional, IsBoolean, IsObject } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsBoolean,
+  IsObject,
+} from 'class-validator';
 
 export class CreateCourseDto {
   @ApiProperty({
@@ -12,7 +18,8 @@ export class CreateCourseDto {
 
   @ApiProperty({
     description: 'Описание на курса',
-    example: 'Този курс ще ви запознае с основите на JavaScript програмирането...',
+    example:
+      'Този курс ще ви запознае с основите на JavaScript програмирането...',
   })
   @IsString()
   @IsNotEmpty({ message: 'Описанието е задължително' })
@@ -29,7 +36,11 @@ export class CreateCourseDto {
 
   @ApiProperty({
     description: 'Допълнителни метаданни за курса',
-    example: { level: 'начинаещ', duration: '10 часа', tags: ['програмиране', 'javascript'] },
+    example: {
+      level: 'начинаещ',
+      duration: '10 часа',
+      tags: ['програмиране', 'javascript'],
+    },
     required: false,
   })
   @IsObject()

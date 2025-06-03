@@ -14,7 +14,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     return super.canActivate(context);
   }
 
-  handleRequest(err: any, user: any, info: any): any {
+  handleRequest(err: any, user: any): any {
     if (err || !user) {
       throw err || new UnauthorizedException('Не е осигурен валиден JWT токен');
     }

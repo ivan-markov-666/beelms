@@ -307,6 +307,52 @@ try {
       Description = "Verifies development environment setup"
       TestFunction = ${function:Test-DevelopmentEnvironment}
     },
+    # Course service microservice tests
+    @{
+      Name = "TestGetCourses"
+      Description = "Verifies retrieving all courses endpoint"
+      TestFunction = $courseTests['Test-GetCourses']
+    },
+    @{
+      Name = "TestCreateCourse"
+      Description = "Verifies course creation endpoint"
+      TestFunction = $courseTests['Test-CreateCourse']
+    },
+    @{
+      Name = "TestGetCourseById"
+      Description = "Verifies retrieving a course by ID endpoint"
+      TestFunction = $courseTests['Test-GetCourseById']
+    },
+    @{
+      Name = "TestCreateChapter"
+      Description = "Verifies chapter creation endpoint"
+      TestFunction = $courseTests['Test-CreateChapter']
+    },
+    @{
+      Name = "TestGetChapters"
+      Description = "Verifies retrieving chapters for a course endpoint"
+      TestFunction = $courseTests['Test-GetChapters']
+    },
+    @{
+      Name = "TestCreateContent"
+      Description = "Verifies content creation endpoint"
+      TestFunction = $courseTests['Test-CreateContent']
+    },
+    @{
+      Name = "TestGetContents"
+      Description = "Verifies retrieving contents for a chapter endpoint"
+      TestFunction = $courseTests['Test-GetContents']
+    },
+    @{
+      Name = "TestUpdateProgress"
+      Description = "Verifies updating content progress endpoint"
+      TestFunction = $courseTests['Test-UpdateProgress']
+    },
+    @{
+      Name = "TestGetProgress"
+      Description = "Verifies retrieving user progress endpoint"
+      TestFunction = $courseTests['Test-GetProgress']
+    },
     @{
       Name = "TestAdsEndpoints"
       Description = "Integration tests for Ads Service endpoints"

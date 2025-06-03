@@ -1,5 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsNumber, Min } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsNumber,
+  Min,
+  IsBoolean,
+  IsOptional,
+} from 'class-validator';
 
 export class CreateContentDto {
   @ApiProperty({
@@ -41,4 +48,31 @@ export class CreateContentDto {
   @IsNumber()
   @Min(1, { message: 'Поредният номер трябва да бъде положително число' })
   order: number;
+
+  @ApiProperty({
+    description: 'Дали съдържанието е публикувано',
+    example: false,
+    required: false,
+  })
+  @IsBoolean()
+  @IsOptional()
+  isPublished?: boolean;
+
+  @ApiProperty({
+    description: 'ID на потребителя, който създава съдържанието',
+    example: 1,
+    required: false,
+  })
+  @IsNumber()
+  @IsOptional()
+  createdBy?: number;
+
+  @ApiProperty({
+    description: 'Описание на промените в съдържанието',
+    example: 'Първоначално създаване',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  changeDescription?: string;
 }
