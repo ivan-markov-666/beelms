@@ -4,7 +4,7 @@ import { createClient, RedisClientType } from 'redis';
 
 @Injectable()
 export class RedisService implements OnModuleInit, OnModuleDestroy {
-  private client: RedisClientType;
+  public client: RedisClientType;
 
   constructor(private configService: ConfigService) {}
 
@@ -51,5 +51,28 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   async isBlacklisted(token: string): Promise<boolean> {
     const result = await this.get(`blacklist:${token}`);
     return result !== null;
+  }
+
+  async exists(key: string): Promise<number> {
+    const value = await this.get(key);
+    return value !== null ? 1 : 0;
+  }
+
+  async incr(key: string): Promise<number> {
+    const currentValue = await this.get(key);
+    const newValue = currentValue ? parseInt(currentValue, 10) + 1 : 1;
+    await this.set(key, newValue.toString());
+    return newValue;
+  }
+
+  async expire(key: string, seconds: number): Promise<void> {
+    const value = await this.get(key);
+    if (value !== null) {
+      await this.set(key, value, seconds);
+    }
+  }
+
+  getClient(): RedisClientType {
+    return this.client;
   }
 }
