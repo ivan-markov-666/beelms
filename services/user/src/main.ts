@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { IpBlockGuard } from './common/guards/ip-block.guard';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -14,6 +15,10 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
+
+  // Register global IP blocking guard
+  const ipBlockGuard = app.get(IpBlockGuard);
+  app.useGlobalGuards(ipBlockGuard);
 
   // Enable CORS
   app.enableCors();
@@ -32,7 +37,9 @@ async function bootstrap() {
   const port = configService.get<number>('PORT') || 3000;
   await app.listen(port, '127.0.0.1');
   console.log(`User microservice running on http://127.0.0.1:${port}`);
-  console.log(`Swagger documentation available at: http://127.0.0.1:${port}/api`);
+  console.log(
+    `Swagger documentation available at: http://127.0.0.1:${port}/api`,
+  );
 }
 
 void bootstrap().catch((err) => {
