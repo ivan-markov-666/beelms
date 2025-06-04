@@ -14,11 +14,10 @@ export class LoggingInterceptor implements NestInterceptor {
   private readonly logger = new Logger(LoggingInterceptor.name);
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-    const req = context.switchToHttp().getRequest<Request>();
+    const request = context.switchToHttp().getRequest<Request>();
     const res = context.switchToHttp().getResponse<Response>();
-    const { method, url, ip, headers } = req;
-    const userAgent = headers['user-agent'] || 'unknown';
-
+    const { method, url, ip } = request;
+    const userAgent = request.headers['user-agent'] || '';
     const now = Date.now();
 
     this.logger.log(`Request: ${method} ${url} from ${ip} using ${userAgent}`);
@@ -40,12 +39,22 @@ export class LoggingInterceptor implements NestInterceptor {
             );
           }
         },
-        error: (err) => {
+        error: (err: unknown) => {
           const responseTime = Date.now() - now;
 
+          let errorMessage = 'Unknown error';
+          let errorStack = 'No stack trace';
+
+          if (err instanceof Error) {
+            errorMessage = err.message;
+            errorStack = err.stack || 'No stack trace';
+          } else if (typeof err === 'string') {
+            errorMessage = err;
+          }
+
           this.logger.error(
-            `Error in ${method} ${url} - ${err.message} after ${responseTime}ms`,
-            err.stack,
+            `Error in ${method} ${url} - ${errorMessage} after ${responseTime}ms`,
+            errorStack,
           );
         },
       }),

@@ -169,13 +169,13 @@ export class SecurityMonitoringService {
 
     // Тук може да се добави интеграция с външна система за нотификации
     // Например Slack, Email, SMS, или система за мониторинг
-    this.sendAlertNotification(alertMessage, event);
+    this.sendAlertNotification(alertMessage);
   }
 
   /**
    * Изпраща нотификация за аларма (примерна имплементация)
    */
-  private sendAlertNotification(message: string, event: SecurityEvent): void {
+  private sendAlertNotification(message: string): void {
     // Тук бихме добавили реална интеграция с външна система
     // Например:
     // - this.emailService.sendSecurityAlert(message, event);

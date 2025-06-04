@@ -73,7 +73,15 @@ export class SecurityService {
    */
   sanitizeInput(input: string): string {
     // Базова нормализация - премахване на излишни интервали и контролни символи
-    let sanitized = input.trim().replace(/[\x00-\x1F\x7F]/g, '');
+    // Replace control characters with safer approach
+    // Filter out control characters using Array methods instead of regex
+    const chars = input.trim().split('');
+    let sanitized = chars
+      .filter((char) => {
+        const code = char.charCodeAt(0);
+        return !(code <= 0x1f || code === 0x7f);
+      })
+      .join('');
 
     // Escape на HTML специални символи
     sanitized = sanitized

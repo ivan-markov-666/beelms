@@ -5,54 +5,91 @@ import {
   BadRequestException,
   Logger,
 } from '@nestjs/common';
-import { validate } from 'class-validator';
-import { plainToClass } from 'class-transformer';
+import { validate, ValidationError } from 'class-validator';
+import { ClassConstructor, plainToInstance } from 'class-transformer';
+
+type Constructor = new (...args: unknown[]) => unknown;
 
 @Injectable()
-export class InputValidationPipe implements PipeTransform<any> {
+export class InputValidationPipe implements PipeTransform {
   private readonly logger = new Logger(InputValidationPipe.name);
+  private readonly primitiveTypes: Constructor[] = [
+    String,
+    Boolean,
+    Number,
+    Array,
+    Object,
+  ];
 
-  async transform(value: any, { metatype }: ArgumentMetadata) {
-    // Ако няма метатип или не е клас, връщаме стойността без трансформация
+  /**
+   * Validates the input value against the provided metadata
+   * @param value - The input value to validate
+   * @param metadata - The argument metadata
+   * @returns The validated and transformed value
+   * @throws BadRequestException if validation fails
+   */
+  async transform<T>(value: T, { metatype }: ArgumentMetadata): Promise<T> {
     if (!metatype || !this.toValidate(metatype)) {
       return value;
     }
 
-    // Преобразуване на обикновен обект към клас
-    const object = plainToClass(metatype, value);
+    // Convert plain object to class instance
+    const object = plainToInstance(
+      metatype as ClassConstructor<unknown>,
+      value,
+    );
 
-    // Валидиране на обекта
-    const errors = await validate(object);
+    // Validate the object
+    const errors = await validate(object as object, {
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    });
 
     if (errors.length > 0) {
-      // Създаване на подробно съобщение за грешка
+      // Format error messages
       const errorMessages = this.formatErrors(errors);
 
-      // Логване на грешките за дебъгване
-      this.logger.warn(`Validation failed: ${errorMessages}`);
+      // Log validation errors for debugging
+      this.logger.warn(`Validation failed: ${JSON.stringify(errorMessages)}`);
 
-      // Връщане на грешка към клиента
+      // Return error response to client
       throw new BadRequestException({
         message: 'Validation failed',
         errors: errorMessages,
       });
     }
 
-    return object;
+    return object as T;
   }
 
-  private toValidate(metatype: Function): boolean {
-    const types: Function[] = [String, Boolean, Number, Array, Object];
-    return !types.includes(metatype);
+  /**
+   * Checks if the provided type should be validated
+   * @param metatype - The type to check
+   * @returns boolean indicating if the type should be validated
+   */
+  private toValidate(metatype: Constructor): boolean {
+    return !this.primitiveTypes.some((type) => metatype === type);
   }
 
-  private formatErrors(errors: any[]): string[] {
-    return errors.map((err) => {
-      const constraints = err.constraints;
-      if (constraints) {
-        return Object.values(constraints).join(', ');
+  /**
+   * Formats validation errors into a user-friendly format
+   * @param errors - Array of validation errors
+   * @returns Array of formatted error messages
+   */
+  private formatErrors(errors: ValidationError[]): string[] {
+    return errors.flatMap((error: ValidationError) => {
+      if (error.constraints) {
+        return Object.values(error.constraints);
       }
-      return 'Invalid value';
+
+      // Handle nested validation errors
+      if (error.children?.length) {
+        return this.formatErrors(error.children).map(
+          (msg: string) => `${error.property}.${msg}`,
+        );
+      }
+
+      return ['Invalid value'];
     });
   }
 }

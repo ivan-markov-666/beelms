@@ -11,12 +11,16 @@ describe('SecurityMonitoringService', () => {
   let mockLogger: Record<string, jest.Mock>;
 
   const mockConfigService = {
-    get: jest.fn().mockImplementation((key, defaultValue) => {
-      if (key === 'MAX_SECURITY_EVENTS_IN_MEMORY') return 10;
-      if (key === 'ALERT_THRESHOLD_LOGIN_FAILURE') return 3;
-      if (key === 'ALERT_THRESHOLD_IP_BLOCKED') return 2;
-      return defaultValue;
-    }),
+    get: jest
+      .fn()
+      .mockImplementation(
+        (key: string, defaultValue?: unknown): number | string | undefined => {
+          if (key === 'MAX_SECURITY_EVENTS_IN_MEMORY') return 10;
+          if (key === 'ALERT_THRESHOLD_LOGIN_FAILURE') return 3;
+          if (key === 'ALERT_THRESHOLD_IP_BLOCKED') return 2;
+          return defaultValue as string | number | undefined;
+        },
+      ),
   };
 
   beforeEach(async () => {
@@ -40,9 +44,14 @@ describe('SecurityMonitoringService', () => {
     service = module.get<SecurityMonitoringService>(SecurityMonitoringService);
 
     // Подменяме оригиналния logger с нашия mock
+    // Use a type-safe approach for mocking the Logger
+    const loggerClass = Logger as unknown as {
+      getInstance: () => Logger;
+    };
     jest
-      .spyOn(Logger, 'getInstance')
-      .mockImplementation(() => mockLogger as any);
+      .spyOn(loggerClass, 'getInstance')
+      .mockImplementation(() => mockLogger as unknown as Logger);
+
     jest.spyOn(Logger.prototype, 'error').mockImplementation(mockLogger.error);
     jest.spyOn(Logger.prototype, 'warn').mockImplementation(mockLogger.warn);
     jest.spyOn(Logger.prototype, 'log').mockImplementation(mockLogger.log);

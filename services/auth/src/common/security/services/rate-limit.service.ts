@@ -30,34 +30,47 @@ export class RateLimitService {
    * @returns true ако заявката е разрешена, false ако е надвишен лимитът
    */
   async checkRateLimit(key: string, route?: string): Promise<boolean> {
-    const redis = this.redisService.client;
-    const rateKey = route ? `rate:${key}:${route}` : `rate:${key}`;
+    try {
+      const redis = this.redisService.client;
+      const rateKey = route ? `rate:${key}:${route}` : `rate:${key}`;
+      const now = Date.now();
 
-    // Получаване на текущия брой заявки
-    const currentCount = await redis.get(rateKey);
+      // Use proper casing for Redis methods
+      const multi = redis.multi();
+      // Correct method names with proper casing
+      multi.zAdd(rateKey, { score: now, value: now.toString() });
+      multi.zRangeByScore(
+        rateKey,
+        '-inf',
+        now - this.DEFAULT_RATE_WINDOW_SECONDS * 1000,
+      );
+      multi.zRemRangeByScore(
+        rateKey,
+        '-inf',
+        now - this.DEFAULT_RATE_WINDOW_SECONDS * 1000,
+      );
+      multi.expire(rateKey, this.DEFAULT_RATE_WINDOW_SECONDS);
 
-    // Определяне на специфичен лимит за маршрута или използване на подразбиращия се
-    const limit = this.getLimitForRoute(route);
+      const result = await multi.exec();
 
-    // Ако ключът не съществува, създаваме го и разрешаваме заявката
-    if (!currentCount) {
-      await redis.set(rateKey, '1', { EX: this.DEFAULT_RATE_WINDOW_SECONDS });
+      const requestCount = (result[1] as number[]).length;
+
+      const limit = this.getLimitForRoute(route);
+
+      if (requestCount >= limit) {
+        this.logger.warn(
+          `Rate limit exceeded for ${key} on route ${route || 'all'}: ${requestCount}/${limit}`,
+        );
+        return false;
+      }
+
       return true;
-    }
-
-    const count = parseInt(currentCount, 10);
-
-    // Проверка дали лимитът е достигнат
-    if (count >= limit) {
-      this.logger.warn(
-        `Rate limit exceeded for ${key} on route ${route || 'all'}: ${count}/${limit}`,
+    } catch (error) {
+      this.logger.error(
+        `Error in rate limiting: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
       return false;
     }
-
-    // Увеличаване на брояча
-    await redis.incr(rateKey);
-    return true;
   }
 
   /**
@@ -69,13 +82,18 @@ export class RateLimitService {
     }
 
     // Тук можете да добавите специфични лимити за различни маршрути
-    const routeLimits = {
+    const routeLimits: Record<string, number> = {
       '/auth/login': 10, // По-строг лимит за опити за вписване
       '/auth/register': 5, // Много строг лимит за регистрации
       '/auth/password-reset': 3, // Много строг лимит за заявки за рестартиране на парола
     };
 
-    return routeLimits[route] || this.DEFAULT_RATE_LIMIT;
+    // Use explicit check and return to avoid formatting issues
+    if (route in routeLimits) {
+      return routeLimits[route];
+    }
+
+    return this.DEFAULT_RATE_LIMIT;
   }
 
   /**
