@@ -9,6 +9,10 @@ import { ConfigModule as AppConfigModule } from './config/config.module';
 import { SharedModule } from './shared/shared.module';
 import { UsersModule } from './users/users.module';
 import { CsrfMiddleware } from './common/middleware/csrf.middleware';
+import { HelmetMiddleware } from './common/middleware/helmet.middleware';
+import { XssMiddleware } from './common/middleware/xss.middleware';
+import { SanitizationMiddleware } from './common/middleware/sanitization.middleware';
+import { SessionMiddleware } from './common/middleware/session.middleware';
 import * as cookieParser from 'cookie-parser';
 
 @Module({
@@ -53,11 +57,25 @@ import * as cookieParser from 'cookie-parser';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    // Прилагаме cookie-parser middleware глобално
+    // Прилагаме security middlewares в правилния ред
+
+    // 1. Прилагаме cookie-parser middleware глобално
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-argument
     consumer.apply(cookieParser()).forRoutes('*');
 
-    // Прилагаме CSRF защита за всички пътища с изключение на тези, които
+    // 2. Прилагаме Helmet middleware за HTTP хедъри и CSP политика
+    consumer.apply(HelmetMiddleware).forRoutes('*');
+
+    // 3. Прилагаме XSS защита - санитизира request данни
+    consumer.apply(XssMiddleware).forRoutes('*');
+
+    // 4. Прилагаме защита от parameter pollution
+    consumer.apply(SanitizationMiddleware).forRoutes('*');
+
+    // 5. Прилагаме Session управление с автоматично изтичане
+    consumer.apply(SessionMiddleware).forRoutes('*');
+
+    // 6. Прилагаме CSRF защита за всички пътища с изключение на тези, които
     // изрично се изключват в самия middleware
     consumer.apply(CsrfMiddleware).forRoutes('*');
   }
