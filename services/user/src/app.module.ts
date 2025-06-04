@@ -1,7 +1,13 @@
-import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
+import {
+  Module,
+  NestModule,
+  MiddlewareConsumer,
+  ValidationPipe,
+} from '@nestjs/common';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { APP_FILTER, APP_PIPE } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
@@ -13,6 +19,10 @@ import { HelmetMiddleware } from './common/middleware/helmet.middleware';
 import { XssMiddleware } from './common/middleware/xss.middleware';
 import { SanitizationMiddleware } from './common/middleware/sanitization.middleware';
 import { SessionMiddleware } from './common/middleware/session.middleware';
+import { RateLimitMiddleware } from './common/middleware/rate-limit.middleware';
+import { SqlInjectionMiddleware } from './common/middleware/sql-injection.middleware';
+import { ValidationExceptionFilter } from './common/filters/validation.filter';
+import { SecureFileUploadService } from './common/services/secure-file-upload.service';
 import * as cookieParser from 'cookie-parser';
 
 @Module({
@@ -53,7 +63,26 @@ import * as cookieParser from 'cookie-parser';
     AppConfigModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    SecureFileUploadService,
+    // Глобален ValidationPipe за автоматична валидация на всички входящи данни
+    {
+      provide: APP_PIPE,
+      useValue: new ValidationPipe({
+        whitelist: true, // Премахва полета, които не са декорирани с валидационни правила
+        forbidNonWhitelisted: true, // Отхвърля заявки с непозволени полета
+        transform: true, // Автоматично трансформира примитивни типове
+        transformOptions: { enableImplicitConversion: true },
+        disableErrorMessages: process.env.NODE_ENV === 'production',
+      }),
+    },
+    // Глобален ValidationExceptionFilter за по-добра обработка на валидационни грешки
+    {
+      provide: APP_FILTER,
+      useClass: ValidationExceptionFilter,
+    },
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
@@ -66,16 +95,22 @@ export class AppModule implements NestModule {
     // 2. Прилагаме Helmet middleware за HTTP хедъри и CSP политика
     consumer.apply(HelmetMiddleware).forRoutes('*');
 
-    // 3. Прилагаме XSS защита - санитизира request данни
+    // 3. Прилагаме Rate Limiting middleware за защита от brute force и DoS атаки
+    consumer.apply(RateLimitMiddleware).forRoutes('*');
+
+    // 4. Прилагаме SQL Injection защита
+    consumer.apply(SqlInjectionMiddleware).forRoutes('*');
+
+    // 5. Прилагаме XSS защита - санитизира request данни
     consumer.apply(XssMiddleware).forRoutes('*');
 
-    // 4. Прилагаме защита от parameter pollution
+    // 6. Прилагаме защита от parameter pollution
     consumer.apply(SanitizationMiddleware).forRoutes('*');
 
-    // 5. Прилагаме Session управление с автоматично изтичане
+    // 7. Прилагаме Session управление с автоматично изтичане
     consumer.apply(SessionMiddleware).forRoutes('*');
 
-    // 6. Прилагаме CSRF защита за всички пътища с изключение на тези, които
+    // 8. Прилагаме CSRF защита за всички пътища с изключение на тези, които
     // изрично се изключват в самия middleware
     consumer.apply(CsrfMiddleware).forRoutes('*');
   }
