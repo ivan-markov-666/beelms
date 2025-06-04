@@ -7,13 +7,20 @@ export enum SecurityEventType {
   SUSPICIOUS_ACTIVITY = 'suspicious_activity',
 }
 
+export interface SecurityEventMetadata {
+  component?: string;
+  action?: string;
+  level?: 'debug' | 'info' | 'warn' | 'error';
+  [key: string]: unknown;
+}
+
 export interface SecurityEvent {
   type: SecurityEventType;
   timestamp: Date;
   ipAddress: string;
   userId?: string;
   endpoint?: string;
-  metadata?: Record<string, any>;
+  metadata?: SecurityEventMetadata;
 }
 
 @Injectable()
@@ -30,14 +37,32 @@ export class SecurityMonitorService {
     // Добавяме събитието в локалната опашка
     this.events.push(event);
 
-    // Логваме събитието
-    this.logger.warn(
-      `Security event detected: ${event.type} from IP ${event.ipAddress} on ${event.endpoint || 'N/A'}`,
-      {
-        securityEvent: event,
-        userId: event.userId || 'anonymous',
-      },
-    );
+    // Determine log level based on event type or metadata
+    const logLevel = event.metadata?.level || 'warn';
+    const logMessage = `Security event: ${event.type} from IP ${event.ipAddress} on ${event.endpoint || 'N/A'}`;
+    const logContext = {
+      securityEvent: event,
+      userId: event.userId || 'anonymous',
+    };
+
+    // Log with appropriate level - limit context info for debug logs
+    switch (logLevel) {
+      case 'debug':
+        // For debug level, only log the message without exposing full object details
+        this.logger.debug(logMessage);
+        break;
+      case 'info':
+        this.logger.log(logMessage, logContext);
+        break;
+      case 'warn':
+        this.logger.warn(logMessage, logContext);
+        break;
+      case 'error':
+        this.logger.error(logMessage, logContext);
+        break;
+      default:
+        this.logger.log(logMessage, logContext);
+    }
 
     // Ограничаваме размера на опашката за локални събития
     if (this.events.length > this.MAX_STORED_EVENTS) {

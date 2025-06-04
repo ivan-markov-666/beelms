@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
@@ -8,6 +8,9 @@ import { ConfigModule as AppConfigModule } from './config/config.module';
 import { CacheModule } from './config/cache.module';
 import { CourseModule } from './course/course.module';
 import { SharedModule } from './shared/shared.module';
+// Импортиране на защитни middleware
+import { CsrfMiddleware } from './shared/middleware/csrf.middleware';
+import { RateLimitMiddleware } from './shared/middleware/rate-limit.middleware';
 
 @Module({
   imports: [
@@ -37,4 +40,17 @@ import { SharedModule } from './shared/shared.module';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    // Добавяне на защитни middleware за всички маршрути
+    consumer.apply(RateLimitMiddleware).forRoutes('*');
+
+    // Прилагане на CSRF защита само за мутиращи маршрути (POST, PUT, DELETE, PATCH)
+    consumer.apply(CsrfMiddleware).forRoutes(
+      { path: '*', method: 1 }, // POST
+      { path: '*', method: 3 }, // PUT
+      { path: '*', method: 4 }, // DELETE
+      { path: '*', method: 5 }, // PATCH
+    );
+  }
+}

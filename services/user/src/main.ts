@@ -6,7 +6,18 @@ import { IpBlockGuard } from './common/guards/ip-block.guard';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  // Only log errors and warnings in production, log everything in development
+  // Set NODE_ENV to production if not set to suppress debug logs
+  if (!process.env.NODE_ENV) {
+    process.env.NODE_ENV = 'production';
+  }
+
+  const app = await NestFactory.create(AppModule, {
+    logger:
+      process.env.NODE_ENV === 'production'
+        ? ['error', 'warn', 'log']
+        : ['error', 'warn', 'log', 'debug', 'verbose'],
+  });
   const configService = app.get(ConfigService);
   app.useGlobalPipes(
     new ValidationPipe({
