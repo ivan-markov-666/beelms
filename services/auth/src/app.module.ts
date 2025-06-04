@@ -11,6 +11,7 @@ import { User } from './users/entities/user.entity';
 import { XssMiddleware } from './common/middlewares/xss.middleware';
 import { CsrfMiddleware } from './common/middlewares/csrf.middleware';
 import { RedisModule } from './common/redis/redis.module';
+import { SecurityModule } from './common/security/security.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { RedisModule } from './common/redis/redis.module';
       }),
     }),
     RedisModule,
+    SecurityModule,
     AuthModule,
   ],
   controllers: [AppController],
