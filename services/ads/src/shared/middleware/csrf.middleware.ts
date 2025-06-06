@@ -26,7 +26,7 @@ export class CsrfMiddleware implements NestMiddleware {
 
     // CSRF проверка за всички останали заявки
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    this.csrfProtection(req, res, (err: Error | null) => {
+    this.csrfProtection(req, res, (err: unknown) => {
       if (err) {
         this.logger.warn(
           `CSRF validation failed for ${req.method} ${req.url} from IP: ${req.ip || '127.0.0.1'}`,
