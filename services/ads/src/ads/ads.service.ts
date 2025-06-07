@@ -19,6 +19,28 @@ export interface StatisticsResult {
   clickThroughRate: number;
 }
 
+interface RawViewsQueryResult {
+  totalViews: string | number;
+  uniqueSessions: string | number;
+  uniqueUsers: string | number;
+}
+
+interface RawClicksQueryResult {
+  totalClicks: string | number;
+  uniqueSessionClicks: string | number;
+  uniqueUserClicks: string | number;
+}
+
+interface RawDailyActivityResult {
+  date: string;
+  views: string | number;
+  clicks: string | number;
+}
+
+interface RawCountResult {
+  total: string | number;
+}
+
 export interface AdStatisticsResult {
   id: number;
   title: string;
@@ -241,7 +263,7 @@ export class AdsService {
 
     // Save the updated advertisement with increased click count
     await this.advertisementRepository.save(ad);
-    
+
     // Return statistics after recording the click
     return this.getStatistics();
   }
@@ -255,29 +277,34 @@ export class AdsService {
     const activeAds = await this.advertisementRepository.count({
       where: { isActive: true },
     });
-    
+
     // Get total impressions across all ads
-    const totalImpressions = await this.userAdViewRepository
-      .createQueryBuilder('view')
-      .select('COUNT(view.id)', 'total')
-      .getRawOne() as { total: string } | undefined;
-    
+    const totalImpressions: RawCountResult | undefined =
+      await this.userAdViewRepository
+        .createQueryBuilder('view')
+        .select('COUNT(view.id)', 'total')
+        .getRawOne();
+
     // Get total clicks across all ads
-    const totalClicks = await this.userAdViewRepository
-      .createQueryBuilder('view')
-      .select('COUNT(view.id)', 'total')
-      .where('view.clicked = true')
-      .getRawOne() as { total: string } | undefined;
+    const totalClicks: RawCountResult | undefined =
+      await this.userAdViewRepository
+        .createQueryBuilder('view')
+        .select('COUNT(view.id)', 'total')
+        .where('view.clicked = true')
+        .getRawOne();
 
     // Safe conversion of possible null/undefined values
-    const impressionsTotal = totalImpressions && 'total' in totalImpressions
-      ? Number(String(totalImpressions.total))
-      : 0;
-    const clicksTotal = totalClicks && 'total' in totalClicks
-      ? Number(String(totalClicks.total))
-      : 0;
-    
-    const clickThroughRate = impressionsTotal > 0 ? (clicksTotal / impressionsTotal) * 100 : 0;
+    const impressionsTotal =
+      totalImpressions && 'total' in totalImpressions
+        ? Number(totalImpressions.total) // .total is string | number from RawCountResult
+        : 0;
+    const clicksTotal =
+      totalClicks && 'total' in totalClicks
+        ? Number(totalClicks.total) // .total is string | number from RawCountResult
+        : 0;
+
+    const clickThroughRate =
+      impressionsTotal > 0 ? (clicksTotal / impressionsTotal) * 100 : 0;
 
     return {
       totalAds,
@@ -288,40 +315,34 @@ export class AdsService {
     };
   }
 
-    /**
+  /**
    * Get statistics for a specific advertisement
    * @param adId - Advertisement ID
    * @returns Detailed statistics for the ad
    */
   async getAdStatistics(adId: number): Promise<AdStatisticsResult> {
     const ad = await this.findOne(adId);
-    
+
     // Get total views and unique sessions/users
-    const viewsQuery = await this.userAdViewRepository
-      .createQueryBuilder('view')
-      .select('COUNT(view.id)', 'totalViews')
-      .addSelect('COUNT(DISTINCT view.sessionId)', 'uniqueSessions')
-      .addSelect('COUNT(DISTINCT view.userId)', 'uniqueUsers')
-      .where('view.adId = :adId', { adId })
-      .getRawOne() as {
-        totalViews: string;
-        uniqueSessions: string;
-        uniqueUsers: string;
-      } | undefined;
-    
+    const viewsQuery: RawViewsQueryResult | undefined =
+      await this.userAdViewRepository
+        .createQueryBuilder('view')
+        .select('COUNT(view.id)', 'totalViews')
+        .addSelect('COUNT(DISTINCT view.sessionId)', 'uniqueSessions')
+        .addSelect('COUNT(DISTINCT view.userId)', 'uniqueUsers')
+        .where('view.adId = :adId', { adId })
+        .getRawOne();
+
     // Get clicks data
-    const clicksQuery = await this.userAdViewRepository
-      .createQueryBuilder('view')
-      .select('COUNT(view.id)', 'totalClicks')
-      .addSelect('COUNT(DISTINCT view.sessionId)', 'uniqueSessionClicks')
-      .addSelect('COUNT(DISTINCT view.userId)', 'uniqueUserClicks')
-      .where('view.adId = :adId AND view.clicked = true', { adId })
-      .getRawOne() as {
-        totalClicks: string;
-        uniqueSessionClicks: string;
-        uniqueUserClicks: string;
-      } | undefined;
-    
+    const clicksQuery: RawClicksQueryResult | undefined =
+      await this.userAdViewRepository
+        .createQueryBuilder('view')
+        .select('COUNT(view.id)', 'totalClicks')
+        .addSelect('COUNT(DISTINCT view.sessionId)', 'uniqueSessionClicks')
+        .addSelect('COUNT(DISTINCT view.userId)', 'uniqueUserClicks')
+        .where('view.adId = :adId AND view.clicked = true', { adId })
+        .getRawOne();
+
     // Calculate click-through rate (CTR)
     const totalViews = parseInt(
       String(
@@ -349,22 +370,23 @@ export class AdsService {
     // Get daily views and clicks for the last 30 days
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    
-    const dailyActivityRaw = await this.userAdViewRepository
-      .createQueryBuilder('view')
-      .select('DATE(view.createdAt)', 'date')
-      .addSelect('COUNT(view.id)', 'views')
-      .addSelect(
-        'SUM(CASE WHEN view.clicked = true THEN 1 ELSE 0 END)',
-        'clicks',
-      )
-      .where('view.adId = :adId AND view.createdAt >= :startDate', {
-        adId,
-        startDate: thirtyDaysAgo,
-      })
-      .groupBy('DATE(view.createdAt)')
-      .orderBy('DATE(view.createdAt)', 'ASC')
-      .getRawMany() as Array<{ date: string; views: string; clicks: string }>;
+
+    const dailyActivityRaw: RawDailyActivityResult[] =
+      await this.userAdViewRepository
+        .createQueryBuilder('view')
+        .select('DATE(view.createdAt)', 'date')
+        .addSelect('COUNT(view.id)', 'views')
+        .addSelect(
+          'SUM(CASE WHEN view.clicked = true THEN 1 ELSE 0 END)',
+          'clicks',
+        )
+        .where('view.adId = :adId AND view.createdAt >= :startDate', {
+          adId,
+          startDate: thirtyDaysAgo,
+        })
+        .groupBy('DATE(view.createdAt)')
+        .orderBy('DATE(view.createdAt)', 'ASC')
+        .getRawMany();
 
     // Convert string values to numbers
     const dailyActivity = dailyActivityRaw.map((item) => ({

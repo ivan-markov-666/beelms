@@ -73,7 +73,6 @@ interface StatisticsResponse {
 describe('AdsController (e2e)', () => {
   let app: INestApplication;
   let server: request.SuperTest<request.Test>;
-  let createdAdId: number;
 
   // Test data
   const testAd: TestAd = {
@@ -98,7 +97,8 @@ describe('AdsController (e2e)', () => {
   });
 
   afterAll(async () => {
-    await closeTestApp();
+    // Pass app instance to closeTestApp
+    await closeTestApp(app);
   });
 
   describe('POST /ads', () => {
@@ -120,16 +120,10 @@ describe('AdsController (e2e)', () => {
       });
       expect(responseBody.impressions).toBe(0);
       expect(responseBody.clicks).toBe(0);
-
-      // Save the created ad ID for other tests
-      createdAdId = responseBody.id;
     });
 
     it('should return 401 for unauthenticated requests', async () => {
-      await server
-        .post('/ads')
-        .send(testAd)
-        .expect(401);
+      await server.post('/ads').send(testAd).expect(401);
     });
 
     it('should return 403 for non-admin users', async () => {
@@ -183,7 +177,7 @@ describe('AdsController (e2e)', () => {
         .expect(200);
 
       const activeResponseBody = activeResponse.body as AdResponse[];
-      expect(activeResponseBody.every(ad => ad.isActive === true)).toBe(true);
+      expect(activeResponseBody.every((ad) => ad.isActive === true)).toBe(true);
 
       // Test inactive filter
       const inactiveResponse = await server
@@ -192,7 +186,9 @@ describe('AdsController (e2e)', () => {
         .expect(200);
 
       const inactiveResponseBody = inactiveResponse.body as AdResponse[];
-      expect(inactiveResponseBody.every(ad => ad.isActive === false)).toBe(true);
+      expect(inactiveResponseBody.every((ad) => ad.isActive === false)).toBe(
+        true,
+      );
     });
   });
 
@@ -204,9 +200,7 @@ describe('AdsController (e2e)', () => {
         .set('Authorization', `Bearer ${MOCK_ADMIN_TOKEN}`)
         .send({ ...testAd, isActive: true });
 
-      const response = await server
-        .get('/ads/random')
-        .expect(200);
+      const response = await server.get('/ads/random').expect(200);
 
       const responseBody = response.body as AdResponse;
       expect(responseBody).toMatchObject({
@@ -246,7 +240,7 @@ describe('AdsController (e2e)', () => {
         .post('/ads')
         .set('Authorization', `Bearer ${MOCK_ADMIN_TOKEN}`)
         .send(testAd);
-      
+
       testAdId = (response.body as AdResponse).id;
     });
 
@@ -278,7 +272,7 @@ describe('AdsController (e2e)', () => {
         .post('/ads')
         .set('Authorization', `Bearer ${MOCK_ADMIN_TOKEN}`)
         .send(testAd);
-      
+
       testAdId = (response.body as AdResponse).id;
     });
 
@@ -327,7 +321,7 @@ describe('AdsController (e2e)', () => {
         .post('/ads')
         .set('Authorization', `Bearer ${MOCK_ADMIN_TOKEN}`)
         .send(testAd);
-      
+
       testAdId = (response.body as AdResponse).id;
     });
 
@@ -361,7 +355,7 @@ describe('AdsController (e2e)', () => {
         .post('/ads')
         .set('Authorization', `Bearer ${MOCK_ADMIN_TOKEN}`)
         .send(testAd);
-      
+
       testAdId = (response.body as AdResponse).id;
     });
 
@@ -392,7 +386,7 @@ describe('AdsController (e2e)', () => {
       const adResponse = await server
         .get(`/ads/${testAdId}`)
         .set('Authorization', `Bearer ${MOCK_ADMIN_TOKEN}`);
-      
+
       const adResponseBody = adResponse.body as AdResponse;
       expect(adResponseBody.impressions).toBe(1);
     });
@@ -408,10 +402,10 @@ describe('AdsController (e2e)', () => {
         .post('/ads')
         .set('Authorization', `Bearer ${MOCK_ADMIN_TOKEN}`)
         .send(testAd);
-      
+
       testAdId = (response.body as AdResponse).id;
       testSessionId = `test-session-${Date.now()}`;
-      
+
       // Record an impression first
       await server.post('/ads/impression').send({
         adId: testAdId,
@@ -450,7 +444,7 @@ describe('AdsController (e2e)', () => {
       const adResponse = await server
         .get(`/ads/${testAdId}`)
         .set('Authorization', `Bearer ${MOCK_ADMIN_TOKEN}`);
-      
+
       const adResponseBody = adResponse.body as AdResponse;
       expect(adResponseBody.clicks).toBe(1);
     });
@@ -463,9 +457,9 @@ describe('AdsController (e2e)', () => {
         .post('/ads')
         .set('Authorization', `Bearer ${MOCK_ADMIN_TOKEN}`)
         .send(testAd);
-      
+
       const adId = (createResponse.body as AdResponse).id;
-      
+
       // Record an impression and click for the ad
       const sessionId = `test-session-${Date.now()}`;
       await server.post('/ads/impression').send({
@@ -477,7 +471,7 @@ describe('AdsController (e2e)', () => {
         referrer: 'https://example.com',
         clicked: false,
       });
-      
+
       await server.post('/ads/click').send({
         adId,
         sessionId,
@@ -501,9 +495,9 @@ describe('AdsController (e2e)', () => {
       expect(responseBody.totalImpressions).toBeGreaterThanOrEqual(1);
       expect(responseBody.totalClicks).toBeGreaterThanOrEqual(1);
       expect(Array.isArray(responseBody.ads)).toBe(true);
-      
+
       // Verify our test ad is in the statistics
-      const testAdStats = responseBody.ads.find(ad => ad.id === adId);
+      const testAdStats = responseBody.ads.find((ad) => ad.id === adId);
       expect(testAdStats).toBeDefined();
       expect(testAdStats?.title).toBe(testAd.title);
       expect(testAdStats?.impressions).toBeGreaterThanOrEqual(1);
