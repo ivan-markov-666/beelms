@@ -7,4 +7,5 @@ import { SetMetadata } from '@nestjs/common';
  */
 export const SkipThrottle = () => SetMetadata('skipThrottle', true);
 
-export const Throttle = (ttl: number, limit: number) => SetMetadata('throttle', { ttl, limit });
+export const Throttle = (ttl: number, limit: number) =>
+  SetMetadata('throttle', { ttl, limit });

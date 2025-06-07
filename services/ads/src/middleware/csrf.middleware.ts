@@ -8,14 +8,16 @@ export class CsrfMiddleware implements NestMiddleware {
   private csrfProtection: (
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ) => void;
   private generateToken: (req: Request, res: Response) => string;
 
   constructor(private configService: ConfigService) {
     // Конфигурация на CSRF защитата
     const csrfOptions: DoubleCsrfConfigOptions = {
-      getSecret: () => this.configService.get<string>('CSRF_SECRET') || 'default-csrf-secret-key',
+      getSecret: () =>
+        this.configService.get<string>('CSRF_SECRET') ||
+        'default-csrf-secret-key',
       cookieName: 'x-csrf-token',
       cookieOptions: {
         httpOnly: true,
@@ -25,16 +27,17 @@ export class CsrfMiddleware implements NestMiddleware {
       },
       size: 64, // размер на токена в байтове
       ignoredMethods: ['GET', 'HEAD', 'OPTIONS'],
-      getCsrfTokenFromRequest: (req: Request) => req.headers['x-csrf-token'] as string,
+      getCsrfTokenFromRequest: (req: Request) =>
+        req.headers['x-csrf-token'] as string,
       // Добавяне на задължителния getSessionIdentifier
       getSessionIdentifier: (req: Request) => req.ip || 'default-session',
     };
-    
+
     const csrfUtilities = doubleCsrf(csrfOptions);
 
     this.csrfProtection = csrfUtilities.doubleCsrfProtection;
     // Явно привеждане на типа за generateToken
-    this.generateToken = csrfUtilities['generateToken'] as (req: Request, res: Response) => string;
+    this.generateToken = csrfUtilities.generateCsrfToken;
   }
 
   use(req: Request, res: Response, next: NextFunction): void {

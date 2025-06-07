@@ -44,9 +44,15 @@ export const closeTestApp = async (app: INestApplication): Promise<void> => {
   await app.close();
 };
 
-export const getTestServer = (app: INestApplication): request.SuperTest<request.Test> => {
-  return request(app.getHttpServer());
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+export const getTestServer = (
+  app: INestApplication,
+): request.SuperTest<request.Test> => {
+  return request(
+    app.getHttpServer(),
+  ) as unknown as request.SuperTest<request.Test>;
 };
+/* eslint-enable @typescript-eslint/no-unsafe-argument */
 
 export const clearDatabase = async (): Promise<void> => {
   const connection = getConnection();

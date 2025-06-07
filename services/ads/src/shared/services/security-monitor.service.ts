@@ -1,4 +1,13 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  LoggerService,
+  Inject,
+  Optional,
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import * as fs from 'fs';
+import * as path from 'path';
 
 export enum SecurityEventType {
   CSRF_VALIDATION_FAILED = 'csrf_validation_failed',
@@ -7,6 +16,12 @@ export enum SecurityEventType {
   SUSPICIOUS_ACTIVITY = 'suspicious_activity',
   SQL_INJECTION_ATTEMPT = 'sql_injection_attempt',
   XSS_ATTEMPT = 'xss_attempt',
+  SESSION_CREATED = 'session_created',
+  SESSION_TERMINATED = 'session_terminated',
+  SESSION_EXPIRED = 'session_expired',
+  ACCESS_DENIED = 'access_denied',
+  DATA_ACCESS_VIOLATION = 'data_access_violation',
+  SENSITIVE_DATA_EXPOSURE = 'sensitive_data_exposure',
 }
 
 export interface SecurityEventMetadata {
@@ -27,10 +42,53 @@ export interface SecurityEvent {
 
 @Injectable()
 export class SecurityMonitorService {
-  private readonly logger = new Logger(SecurityMonitorService.name);
+  private readonly logger: LoggerService;
   private events: SecurityEvent[] = [];
   private readonly MAX_STORED_EVENTS = 1000;
   private blockedIps: Set<string> = new Set<string>();
+  private readonly securityLogPath: string;
+  private readonly enableFileLogging: boolean;
+  private readonly enableConsoleLogging: boolean;
+  private readonly enableExternalLogging: boolean;
+
+  constructor(
+    @Optional()
+    @Inject('winston')
+    private readonly winstonLogger: LoggerService,
+    private readonly configService: ConfigService,
+  ) {
+    // Използваме Winston logger ако е инжектиран, иначе стандартния NestJS logger
+    this.logger = winstonLogger || new Logger(SecurityMonitorService.name);
+
+    // Конфигурираме пътя до security log файла
+    const logDir = path.join(process.cwd(), 'logs');
+    if (!fs.existsSync(logDir)) {
+      try {
+        fs.mkdirSync(logDir, { recursive: true });
+      } catch (error: unknown) {
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
+        this.logger.warn(`Could not create logs directory: ${errorMessage}`);
+      }
+    }
+    this.securityLogPath = path.join(logDir, 'security-events.log');
+
+    // Конфигурационни настройки
+    this.enableFileLogging =
+      configService.get<string>('SECURITY_FILE_LOGGING') !== 'false';
+    this.enableConsoleLogging =
+      configService.get<string>('SECURITY_CONSOLE_LOGGING') !== 'false';
+    this.enableExternalLogging =
+      configService.get<string>('ENABLE_EXTERNAL_SECURITY_MONITORING') ===
+      'true';
+
+    this.logger.log(
+      'SecurityMonitorService initialized with config: ' +
+        `fileLogging=${this.enableFileLogging}, ` +
+        `consoleLogging=${this.enableConsoleLogging}, ` +
+        `externalLogging=${this.enableExternalLogging}`,
+    );
+  }
 
   /**
    * Регистрира ново security събитие
@@ -41,30 +99,39 @@ export class SecurityMonitorService {
     this.events.push(event);
 
     // Determine log level based on event type or metadata
-    const logLevel = event.metadata?.level || 'warn';
-    const logMessage = `Security event: ${event.type} from IP ${event.ipAddress} on ${event.endpoint || 'N/A'}`;
-    const logContext = {
-      securityEvent: event,
-      userId: event.userId || 'anonymous',
-    };
+    const logLevel =
+      event.metadata?.level || this.getDefaultLogLevel(event.type);
+    const logMessage = this.formatLogMessage(event);
+    const logContext = this.formatLogContext(event);
 
-    // Log with appropriate level - limit context info for debug logs
-    switch (logLevel) {
-      case 'debug':
-        // For debug level, only log the message without exposing full object details
-        this.logger.debug(logMessage);
-        break;
-      case 'info':
-        this.logger.log(logMessage, logContext);
-        break;
-      case 'warn':
-        this.logger.warn(logMessage, logContext);
-        break;
-      case 'error':
-        this.logger.error(logMessage, logContext);
-        break;
-      default:
-        this.logger.log(logMessage, logContext);
+    // Логване в конзолата (чрез NestJS/Winston logger)
+    if (this.enableConsoleLogging) {
+      switch (logLevel) {
+        case 'debug':
+          if (typeof this.logger.debug === 'function') {
+            this.logger.debug(logMessage);
+          } else {
+            // Fallback if debug is not available
+            this.logger.log(`[DEBUG] ${logMessage}`);
+          }
+          break;
+        case 'info':
+          this.logger.log(logMessage, logContext);
+          break;
+        case 'warn':
+          this.logger.warn(logMessage, logContext);
+          break;
+        case 'error':
+          this.logger.error(logMessage, logContext);
+          break;
+        default:
+          this.logger.log(logMessage, logContext);
+      }
+    }
+
+    // Логване във файл директно (допълнително към Winston логването)
+    if (this.enableFileLogging) {
+      this.logToFile(event, logMessage);
     }
 
     // Ограничаваме размера на опашката за локални събития
@@ -76,8 +143,9 @@ export class SecurityMonitorService {
     this.analyzeEvents(event);
 
     // В реална система бихме изпратили събитието и към външна система за мониторинг
-    // например чрез message broker до централизирана security monitoring система
-    this.sendToExternalMonitoring(event);
+    if (this.enableExternalLogging) {
+      this.sendToExternalMonitoring(event);
+    }
   }
 
   /**
@@ -257,12 +325,135 @@ export class SecurityMonitorService {
   private sendToExternalMonitoring(securityEvent: SecurityEvent): void {
     // Пример за интеграция с външна система
     // В реалния свят бихме използвали SIEM система, Elasticsearch, или друг централизиран механизъм
-    if (process.env.ENABLE_EXTERNAL_SECURITY_MONITORING === 'true') {
-      this.logger.log(
-        `Sending security event of type ${securityEvent.type} to external monitoring system`,
+    this.logger.log(
+      `Sending security event of type ${securityEvent.type} to external monitoring system`,
+      { event: securityEvent.type, sent: true },
+    );
+    // Примерен код за интеграция
+    // await this.messageBroker.publish('security.events', securityEvent);
+  }
+
+  /**
+   * Записва събитието във файл
+   */
+  private logToFile(event: SecurityEvent, formattedMessage: string): void {
+    try {
+      const timestamp = new Date().toISOString();
+      const logEntry = `[${timestamp}] [${event.type.toUpperCase()}] ${formattedMessage} ${JSON.stringify(event)}\n`;
+
+      fs.appendFileSync(this.securityLogPath, logEntry, { encoding: 'utf8' });
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      this.logger.error(
+        `Failed to write to security log file: ${errorMessage}`,
       );
-      // Примерен код за интеграция
-      // await this.messageBroker.publish('security.events', securityEvent);
+    }
+  }
+
+  /**
+   * Форматира съобщението за логване
+   */
+  private formatLogMessage(event: SecurityEvent): string {
+    const username = this.safeToString(event.metadata?.username) || 'unknown';
+    const userId = event.userId || 'anonymous';
+    const ipAddress = event.ipAddress || 'unknown-ip';
+
+    let message = `Security event: ${event.type} from IP ${ipAddress}`;
+
+    // Add contextual information based on the event type
+    switch (event.type) {
+      case SecurityEventType.SESSION_CREATED:
+        message = `Session created for user ${username} (${userId}) from IP ${ipAddress}`;
+        break;
+      case SecurityEventType.SESSION_TERMINATED: {
+        const reason =
+          this.safeToString(event.metadata?.reason) || 'unknown reason';
+        message = `Session terminated for user ${username} (${userId}) from IP ${ipAddress}: ${reason}`;
+        break;
+      }
+      case SecurityEventType.SESSION_EXPIRED:
+        message = `Session expired due to inactivity for user ${username} (${userId}) from IP ${ipAddress}`;
+        break;
+      case SecurityEventType.AUTH_FAILED:
+        message = `Authentication failed for user ${username} from IP ${ipAddress}`;
+        break;
+      case SecurityEventType.ACCESS_DENIED: {
+        const endpoint = event.endpoint || 'unknown resource';
+        message = `Access denied for user ${username} (${userId}) to ${endpoint}`;
+        break;
+      }
+      default:
+        if (event.endpoint) {
+          message += ` on ${event.endpoint}`;
+        }
+    }
+
+    return message;
+  }
+
+  /**
+   * Форматира контекста за логване
+   */
+  private formatLogContext(event: SecurityEvent): Record<string, any> {
+    return {
+      securityEvent: {
+        type: event.type,
+        userId: event.userId || 'anonymous',
+        ipAddress: event.ipAddress,
+        endpoint: event.endpoint,
+        timestamp: event.timestamp,
+      },
+      metadata: event.metadata || {},
+      security: true, // Маркер за филтриране в система за логване
+    };
+  }
+
+  /**
+   * Определя ниво на логване по подразбиране според типа събитие
+   */
+  /**
+   * Safely converts any value to string, handling null/undefined and objects
+   */
+
+  private safeToString(value: unknown): string {
+    if (value === null || value === undefined) return '';
+    if (typeof value === 'string') return value;
+    if (typeof value === 'object') {
+      try {
+        return JSON.stringify(value);
+      } catch {
+        return '[object]';
+      }
+    }
+    // eslint-disable-next-line @typescript-eslint/no-base-to-string
+    return String(value);
+  }
+
+  private getDefaultLogLevel(
+    eventType: SecurityEventType,
+  ): 'debug' | 'info' | 'warn' | 'error' {
+    switch (eventType) {
+      case SecurityEventType.SUSPICIOUS_ACTIVITY:
+      case SecurityEventType.SQL_INJECTION_ATTEMPT:
+      case SecurityEventType.XSS_ATTEMPT:
+      case SecurityEventType.SENSITIVE_DATA_EXPOSURE:
+      case SecurityEventType.DATA_ACCESS_VIOLATION:
+        return 'error';
+
+      case SecurityEventType.CSRF_VALIDATION_FAILED:
+      case SecurityEventType.RATE_LIMIT_EXCEEDED:
+      case SecurityEventType.AUTH_FAILED:
+      case SecurityEventType.ACCESS_DENIED:
+        return 'warn';
+
+      case SecurityEventType.SESSION_CREATED:
+      case SecurityEventType.SESSION_TERMINATED:
+      case SecurityEventType.SESSION_EXPIRED:
+        return 'info';
+
+      default:
+        return 'info';
     }
   }
 }
