@@ -11,8 +11,43 @@ import * as cookieParser from 'cookie-parser';
 import { Request, Response, NextFunction } from 'express';
 import { ForbiddenException } from '@nestjs/common';
 import * as helmet from 'helmet';
+import * as fs from 'fs';
+import * as path from 'path';
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  // Проверка среды для определения нужен ли HTTPS
+  const isProduction = process.env.NODE_ENV === 'production';
+  
+  // Конфигурация для SSL/TLS
+  let httpsOptions = {};
+  
+  if (isProduction) {
+    try {
+      // Пути к SSL сертификатам
+      const keyPath = process.env.SSL_KEY_PATH || path.resolve(__dirname, '../ssl/private-key.pem');
+      const certPath = process.env.SSL_CERT_PATH || path.resolve(__dirname, '../ssl/certificate.pem');
+      const caPath = process.env.SSL_CA_PATH || path.resolve(__dirname, '../ssl/ca.pem');
+      
+      // Проверка существования файлов
+      if (fs.existsSync(keyPath) && fs.existsSync(certPath)) {
+        httpsOptions = {
+          key: fs.readFileSync(keyPath),
+          cert: fs.readFileSync(certPath),
+          // Если есть CA сертификат, тоже загружаем
+          ...(fs.existsSync(caPath) && { ca: fs.readFileSync(caPath) }),
+        };
+        console.log('SSL certificates loaded successfully');
+      } else {
+        console.warn('SSL certificates not found at specified paths');
+      }
+    } catch (error) {
+      console.error('Error loading SSL certificates:', error);
+    }
+  }
+
+  // Создаем приложение с поддержкой HTTPS, если есть настройки SSL
+  const app = await NestFactory.create(AppModule, {
+    httpsOptions: Object.keys(httpsOptions).length > 0 ? httpsOptions : undefined,
+  });
   const configService = app.get(ConfigService);
 
   // Apply Helmet middleware with CSP headers for enhanced security
@@ -133,7 +168,13 @@ async function bootstrap() {
 
   // Get port from environment variable or use default 3105
   const port = configService.get<number>('PORT', 3105);
-  await app.listen(port, '127.0.0.1');
+  const host = configService.get<string>('HOST', '127.0.0.1');
+  
+  // Log whether we're running in HTTPS or HTTP mode
+  const protocol = Object.keys(httpsOptions).length > 0 ? 'HTTPS' : 'HTTP';
+  console.log(`Starting server in ${protocol} mode`);
+  
+  await app.listen(port, host);
 
   // Get the server URL
   const baseUrl = await app.getUrl();
