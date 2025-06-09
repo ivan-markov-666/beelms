@@ -19,7 +19,8 @@ import {
 import { IpBlockingService } from '../services/ip-blocking.service';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
-import { Roles, UserRole } from '../../auth/decorators/roles.decorator';
+import { Roles } from '../../auth/decorators/roles.decorator';
+import { UserRole } from '../../auth/enums/user-role.enum';
 
 /**
  * DTO for adding an IP to the blocklist

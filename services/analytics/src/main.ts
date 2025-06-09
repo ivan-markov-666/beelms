@@ -1,52 +1,60 @@
 import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import {
   ValidationPipe,
   ValidationError,
   BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import * as cookieParser from 'cookie-parser';
 import { Request, Response, NextFunction } from 'express';
-import { ForbiddenException } from '@nestjs/common';
 import * as helmet from 'helmet';
 import * as fs from 'fs';
 import * as path from 'path';
+
 async function bootstrap() {
-  // Проверка среды для определения нужен ли HTTPS
+  // Настройка за HTTPS/SSL
+  // Проверяваме дали сме в production режим и дали имаме сертификати
   const isProduction = process.env.NODE_ENV === 'production';
-  
-  // Конфигурация для SSL/TLS
+
+  // Конфигурация за SSL/TLS
   let httpsOptions = {};
-  
+
   if (isProduction) {
     try {
-      // Пути к SSL сертификатам
-      const keyPath = process.env.SSL_KEY_PATH || path.resolve(__dirname, '../ssl/private-key.pem');
-      const certPath = process.env.SSL_CERT_PATH || path.resolve(__dirname, '../ssl/certificate.pem');
-      const caPath = process.env.SSL_CA_PATH || path.resolve(__dirname, '../ssl/ca.pem');
-      
-      // Проверка существования файлов
-      if (fs.existsSync(keyPath) && fs.existsSync(certPath)) {
+      // Пътища към SSL сертификатите
+      const sslKeyPath =
+        process.env.SSL_KEY_PATH ||
+        path.resolve(__dirname, '../ssl/private-key.pem');
+      const sslCertPath =
+        process.env.SSL_CERT_PATH ||
+        path.resolve(__dirname, '../ssl/certificate.pem');
+      const sslCaPath =
+        process.env.SSL_CA_PATH || path.resolve(__dirname, '../ssl/ca.pem');
+
+      // Проверка за съществуване на файловете
+      if (fs.existsSync(sslKeyPath) && fs.existsSync(sslCertPath)) {
         httpsOptions = {
-          key: fs.readFileSync(keyPath),
-          cert: fs.readFileSync(certPath),
-          // Если есть CA сертификат, тоже загружаем
-          ...(fs.existsSync(caPath) && { ca: fs.readFileSync(caPath) }),
+          key: fs.readFileSync(sslKeyPath),
+          cert: fs.readFileSync(sslCertPath),
+          // Ако имаме CA сертификат, също го зареждаме
+          ...(fs.existsSync(sslCaPath) && { ca: fs.readFileSync(sslCaPath) }),
         };
-        console.log('SSL certificates loaded successfully');
+        console.log('SSL сертификатите са заредени успешно');
       } else {
-        console.warn('SSL certificates not found at specified paths');
+        console.warn('SSL сертификатите не са намерени на указаните пътища');
       }
     } catch (error) {
-      console.error('Error loading SSL certificates:', error);
+      console.error('Грешка при зареждане на SSL сертификатите:', error);
     }
   }
 
-  // Создаем приложение с поддержкой HTTPS, если есть настройки SSL
+  // Създаваме приложението със съпорт за HTTPS, ако имаме настройки за SSL
   const app = await NestFactory.create(AppModule, {
-    httpsOptions: Object.keys(httpsOptions).length > 0 ? httpsOptions : undefined,
+    httpsOptions:
+      Object.keys(httpsOptions).length > 0 ? httpsOptions : undefined,
   });
   const configService = app.get(ConfigService);
 
@@ -169,11 +177,11 @@ async function bootstrap() {
   // Get port from environment variable or use default 3105
   const port = configService.get<number>('PORT', 3105);
   const host = configService.get<string>('HOST', '127.0.0.1');
-  
+
   // Log whether we're running in HTTPS or HTTP mode
   const protocol = Object.keys(httpsOptions).length > 0 ? 'HTTPS' : 'HTTP';
   console.log(`Starting server in ${protocol} mode`);
-  
+
   await app.listen(port, host);
 
   // Get the server URL

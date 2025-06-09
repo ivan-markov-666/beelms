@@ -3,11 +3,11 @@ import {
   NestMiddleware,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 import { Request, Response, NextFunction } from 'express';
-import { JwtPayload } from '../../auth/interfaces/jwt-payload.interface';
 import Redis from 'ioredis';
+import { JwtPayload } from '../../auth/types/auth.types';
 
 type ErrorWithName = {
   name?: string;
@@ -100,7 +100,11 @@ export class JwtValidationMiddleware implements NestMiddleware {
         const payload = this.jwtService.verify<JwtPayload>(token);
 
         // Запазваме данните от токена в request обекта за по-нататъшна употреба
-        req['user'] = { id: payload.sub, email: payload.email };
+        req.user = {
+          userId: (payload.userId || payload.sub || '').toString(),
+          email: payload.email || '',
+          roles: payload.roles || [],
+        };
 
         // Логваме успешното удостоверяване
         console.log(

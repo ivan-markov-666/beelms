@@ -39,8 +39,12 @@ export class SessionTimeoutMiddleware implements NestMiddleware {
       }
 
       // Запазваме информация за потребителя в заявката, ако вече няма такава
-      if (userId && !req['user']) {
-        req['user'] = { id: userId };
+      if (userId && !req.user) {
+        req.user = {
+          userId: userId.toString(),
+          email: '',
+          roles: [],
+        };
       }
 
       // Ако сесията е валидна, опресняваме сесионната бисквитка

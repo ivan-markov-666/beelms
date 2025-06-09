@@ -11,7 +11,9 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AnalyticsModule } from './analytics/analytics.module';
+import { AnalyticsController } from './analytics/analytics.controller';
 import { AuthModule } from './auth/auth.module';
+import { IpBlockingController } from './shared/controllers/ip-blocking.controller';
 import { XssProtectionMiddleware } from './shared/middleware/xss-protection.middleware';
 import { CsrfProtectionMiddleware } from './shared/middleware/csrf-protection.middleware';
 import { IpBlockingMiddleware } from './shared/middleware/ip-blocking.middleware';
@@ -19,6 +21,7 @@ import { RequestLoggingMiddleware } from './shared/middleware/request-logging.mi
 import { AppThrottlerGuard } from './shared/guards/throttler.guard';
 import { IpBlockingModule } from './shared/modules/ip-blocking.module';
 import { RequestLoggingModule } from './shared/modules/request-logging.module';
+import { AuthController } from './auth/auth.controller';
 
 @Module({
   imports: [
@@ -55,7 +58,12 @@ import { RequestLoggingModule } from './shared/modules/request-logging.module';
     IpBlockingModule,
     RequestLoggingModule,
   ],
-  controllers: [AppController],
+  controllers: [
+    AppController,
+    AnalyticsController,
+    IpBlockingController,
+    AuthController,
+  ],
   providers: [
     AppService,
     // Add global rate limiting protection

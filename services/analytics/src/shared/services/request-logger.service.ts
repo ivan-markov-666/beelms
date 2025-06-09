@@ -52,8 +52,10 @@ export class RequestLoggerService {
         if (!fs.existsSync(this.logDirectory)) {
           fs.mkdirSync(this.logDirectory, { recursive: true });
         }
-      } catch (error) {
-        this.logger.error(`Failed to create log directory: ${error.message}`);
+      } catch (error: unknown) {
+        const errorMessage =
+          error instanceof Error ? error.message : 'Unknown error';
+        this.logger.error(`Failed to create log directory: ${errorMessage}`);
       }
     }
   }
@@ -62,13 +64,43 @@ export class RequestLoggerService {
    * Log request details for security audit purposes
    */
   logRequest(logEntry: RequestLogEntry): void {
-    // Sanitize sensitive information before logging
-    const sanitizedEntry = this.sanitizeLogEntry(logEntry);
+    let sanitizedEntry: RequestLogEntry;
 
-    // Console logging
-    this.logger.log(
-      `[REQUEST] ${sanitizedEntry.method} ${sanitizedEntry.url} - Status: ${sanitizedEntry.statusCode} - IP: ${sanitizedEntry.ip} - User: ${sanitizedEntry.userId || 'anonymous'} - ReqID: ${sanitizedEntry.requestId}`,
-    );
+    try {
+      // Sanitize sensitive information before logging
+      sanitizedEntry = this.sanitizeLogEntry(logEntry);
+
+      // Console logging with safe property access
+      const logMessage = [
+        sanitizedEntry.method || 'UNKNOWN_METHOD',
+        sanitizedEntry.url || 'unknown_url',
+        '-',
+        sanitizedEntry.statusCode || '000',
+        `[${sanitizedEntry.responseTime || 0}ms]`,
+      ].join(' ');
+
+      this.logger.log(logMessage);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      this.logger.error(`Error in logRequest: ${errorMessage}`);
+      return; // Exit early if we couldn't sanitize the entry
+    }
+
+    // File logging if enabled
+    if (this.logToFile) {
+      try {
+        const logFile = path.join(this.logDirectory, 'requests.log');
+        const logLine = JSON.stringify(sanitizedEntry) + '\n';
+        fs.appendFileSync(logFile, logLine);
+      } catch (fileError) {
+        const errorMessage =
+          fileError instanceof Error ? fileError.message : String(fileError);
+        this.logger.error(
+          'Failed to write to request log file: ' + errorMessage,
+        );
+      }
+    }
 
     // File logging if enabled
     if (this.logToFile) {
@@ -80,8 +112,10 @@ export class RequestLoggerService {
 
         // Append to daily log file
         fs.appendFileSync(logFilePath, `${JSON.stringify(sanitizedEntry)}\n`);
-      } catch (error) {
-        this.logger.error(`Failed to write to log file: ${error.message}`);
+      } catch (error: unknown) {
+        const errorMessage =
+          error instanceof Error ? error.message : 'Unknown error';
+        this.logger.error(`Failed to write to log file: ${errorMessage}`);
       }
     }
   }
@@ -91,38 +125,44 @@ export class RequestLoggerService {
    */
   logSecurityEvent(
     eventType: string,
-    details: Record<string, any>,
+    details: Record<string, unknown>,
     ip: string,
     userId?: string,
   ): void {
-    const sanitizedDetails = this.sanitizeObject(details);
+    try {
+      // Sanitize sensitive information from details
+      const sanitizedDetails = this.sanitizeObject(details);
 
-    const securityLog = {
-      timestamp: new Date().toISOString(),
-      eventType,
-      details: sanitizedDetails,
-      ip,
-      userId: userId || 'anonymous',
-    };
+      // Create security log entry
+      const securityLog = {
+        timestamp: new Date().toISOString(),
+        eventType,
+        details: sanitizedDetails,
+        ip,
+        userId,
+      };
 
-    this.logger.warn(
-      `[SECURITY] ${eventType} - IP: ${ip} - User: ${userId || 'anonymous'}`,
-    );
+      // Log to console
+      this.logger.warn(
+        `Security Event: ${eventType} - IP: ${ip}${userId ? `, User: ${userId}` : ''}`,
+      );
 
-    // File logging for security events
-    if (this.logToFile) {
-      try {
-        const securityLogPath = path.join(
-          this.logDirectory,
-          `security-log-${new Date().toISOString().split('T')[0]}.log`,
-        );
-
-        fs.appendFileSync(securityLogPath, `${JSON.stringify(securityLog)}\n`);
-      } catch (error) {
-        this.logger.error(
-          `Failed to write security log to file: ${error.message}`,
-        );
+      // Log to file if enabled
+      if (this.logToFile) {
+        const logFile = path.join(this.logDirectory, 'security.log');
+        const logLine = JSON.stringify(securityLog) + '\n';
+        fs.appendFile(logFile, logLine, (err: NodeJS.ErrnoException | null) => {
+          if (err) {
+            this.logger.error(
+              `Failed to write to security log: ${err.message}`,
+            );
+          }
+        });
       }
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      this.logger.error(`Error logging security event: ${errorMessage}`);
     }
   }
 
@@ -130,16 +170,27 @@ export class RequestLoggerService {
    * Sanitize log entry by removing sensitive information
    */
   private sanitizeLogEntry(logEntry: RequestLogEntry): RequestLogEntry {
-    const sanitized = { ...logEntry };
+    // Create a shallow copy to avoid modifying the original
+    const sanitized: RequestLogEntry = {
+      ...logEntry,
+      // Ensure required fields have defaults if not provided
+      timestamp: logEntry.timestamp || new Date().toISOString(),
+      method: logEntry.method || 'UNKNOWN',
+      url: logEntry.url || 'unknown',
+      ip: logEntry.ip || 'unknown',
+      requestId: logEntry.requestId || 'none',
+    };
 
-    // Sanitize request body if present
-    if (sanitized.requestBody) {
-      sanitized.requestBody = this.sanitizeObject(sanitized.requestBody);
+    // Sanitize request and response bodies if they exist
+    if ('requestBody' in logEntry && logEntry.requestBody) {
+      sanitized.requestBody = this.sanitizeObject(
+        logEntry.requestBody,
+      ) as Record<string, unknown>;
     }
-
-    // Sanitize response body if present
-    if (sanitized.responseBody) {
-      sanitized.responseBody = this.sanitizeObject(sanitized.responseBody);
+    if ('responseBody' in logEntry && logEntry.responseBody) {
+      sanitized.responseBody = this.sanitizeObject(
+        logEntry.responseBody,
+      ) as Record<string, unknown>;
     }
 
     return sanitized;
@@ -148,31 +199,47 @@ export class RequestLoggerService {
   /**
    * Recursively sanitize an object to mask sensitive fields
    */
-  private sanitizeObject(obj: any): any {
-    if (!obj || typeof obj !== 'object') {
+  private sanitizeObject<T>(obj: T): T | Record<string, unknown> | unknown[] {
+    // Handle primitive types and null/undefined
+    if (obj === null || obj === undefined || typeof obj !== 'object') {
       return obj;
     }
 
     // Handle arrays
     if (Array.isArray(obj)) {
-      return obj.map((item) => this.sanitizeObject(item));
+      return (obj as unknown[]).map((item) => this.sanitizeObject(item));
     }
 
-    // Handle objects
-    const sanitized = { ...obj };
-    for (const key in sanitized) {
-      if (
-        this.sensitiveFields.some((field) => key.toLowerCase().includes(field))
-      ) {
-        sanitized[key] = '[REDACTED]';
-      } else if (
-        typeof sanitized[key] === 'object' &&
-        sanitized[key] !== null
-      ) {
-        sanitized[key] = this.sanitizeObject(sanitized[key]);
+    // Handle plain objects
+    const sanitized: Record<string, unknown> = {};
+
+    try {
+      for (const [key, value] of Object.entries(
+        obj as Record<string, unknown>,
+      )) {
+        // Skip non-string keys
+        if (typeof key !== 'string') continue;
+
+        // Check if the key is in our sensitive fields list (case insensitive)
+        const isSensitive = this.sensitiveFields.some(
+          (field) => field.toLowerCase() === key.toLowerCase(),
+        );
+
+        if (isSensitive) {
+          sanitized[key] = '***REDACTED***';
+        } else if (value !== null && typeof value === 'object') {
+          sanitized[key] = this.sanitizeObject(value);
+        } else {
+          sanitized[key] = value;
+        }
       }
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      this.logger.error(`Error in sanitizeObject: ${errorMessage}`);
+      // Continue with partial sanitization if possible
     }
 
-    return sanitized;
+    return sanitized as unknown as T;
   }
 }
