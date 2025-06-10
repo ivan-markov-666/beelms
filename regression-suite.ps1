@@ -275,6 +275,7 @@ Write-Host "Report will be saved to: $reportFile" -ForegroundColor $infoColor
 try {
   # Import test modules
   Import-Module "$PSScriptRoot\services\auth\auth-health.test.ps1" -Force -ErrorAction Stop
+  Import-Module "$PSScriptRoot\services\auth\auth-playwright-e2e.test.ps1" -Force -ErrorAction Stop
   Import-Module "$PSScriptRoot\services\ads\test\ads-integration.test.ps1" -Force -ErrorAction Stop
   
   # Load auth integration tests
@@ -368,6 +369,11 @@ try {
       Name = "TestAuthHealthCheck"
       Description = "Verifies auth service health check endpoint"
       TestFunction = ${function:Test-AuthHealthCheck}
+    },
+    @{
+      Name = "TestAuthPlaywrightE2E"
+      Description = "Runs Playwright e2e tests for auth service endpoints"
+      TestFunction = ${function:Test-AuthPlaywrightE2E}
     },
     @{
       Name = "TestAuthRegistration"

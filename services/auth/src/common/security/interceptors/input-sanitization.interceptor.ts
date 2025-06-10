@@ -28,8 +28,14 @@ export class InputSanitizationInterceptor implements NestInterceptor {
     // Sanitize request params
     request.params = request.params ? this.sanitizeObject(request.params) : {};
 
-    // Sanitize query parameters
-    request.query = request.query ? this.sanitizeObject(request.query) : {};
+    // Sanitize query parameters safely
+    try {
+      if (request.query && Object.getOwnPropertyDescriptor(request, 'query')?.writable !== false) {
+        request.query = this.sanitizeObject(request.query);
+      }
+    } catch (error) {
+      this.logger.warn('Could not sanitize query parameters', error);
+    }
 
     return next.handle().pipe(
       map((data: unknown) => {
