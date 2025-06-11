@@ -3,9 +3,13 @@
 ## Обща системна архитектура
 ```mermaid
 graph TB
+    subgraph "Cloudflare Edge Network"
+        cf["Cloudflare CDN/WAF<br>(DDoS Protection, Global SSL)"]
+    end
+    
     subgraph "VPS"
         subgraph "Docker Среда"
-            nginx["Nginx Gateway<br>(SSL, Load Balancer)"]
+            nginx["Nginx Gateway<br>(Origin SSL, Load Balancer)"]
             
             subgraph "Frontend Контейнер"
                 react["React Frontend<br>(Codux)"]
@@ -14,7 +18,7 @@ graph TB
             subgraph "Backend Контейнери"
                 auth["Auth Service<br>(NestJS)"]
                 user["User Service<br>(NestJS)"]
-                course["Course Service<br>(NestJS)"]
+                course["Course Service<br>(NestJS + Content Management)"]
                 test["Test Service<br>(NestJS)"]
                 analytics["Analytics Service<br>(NestJS)"]
                 ads["Ads Service<br>(NestJS)"]
@@ -25,10 +29,6 @@ graph TB
                 redis["Redis Cache"]
             end
             
-            subgraph "Съдържание"
-                content["Content Service<br>(Отделен проект)"]
-            end
-            
             subgraph "Мониторинг"
                 admin["Admin Panel"]
                 monitor["Prometheus + Grafana"]
@@ -36,7 +36,8 @@ graph TB
         end
     end
     
-    client["Крайни потребители"] --> nginx
+    client["Крайни потребители"] --> cf
+    cf --> nginx
     
     nginx --> react
     react --> nginx
@@ -47,7 +48,6 @@ graph TB
     nginx --> test
     nginx --> analytics
     nginx --> ads
-    nginx --> content
     nginx --> admin
     
     auth --> postgres
@@ -56,7 +56,6 @@ graph TB
     test --> postgres
     analytics --> postgres
     ads --> postgres
-    content --> postgres
     
     auth --> redis
     user --> redis
@@ -64,14 +63,12 @@ graph TB
     test --> redis
     analytics --> redis
     ads --> redis
-    content --> redis
     
     auth <--> user
     course <--> user
     test <--> user
     analytics <--> test
     ads <--> user
-    content <--> course
 ```
 
 ## Структура на базата данни (ER диаграма)
@@ -129,8 +126,21 @@ erDiagram
         text content
         string content_type
         int order
+        int version
+        boolean is_published
+        int created_by FK
         datetime created_at
         datetime updated_at
+    }
+    
+    ContentVersion {
+        int id PK
+        int content_id FK
+        int version_number
+        text content_body
+        string change_description
+        int created_by FK
+        datetime created_at
     }
     
     UserProgress {
@@ -238,10 +248,14 @@ erDiagram
     User ||--o{ UserAdView : views
     User ||--o{ PasswordReset : requests
     User ||--o{ Session : maintains
+    User ||--o{ Content : creates
+    User ||--o{ ContentVersion : creates
     
     Course ||--o{ Chapter : contains
     Chapter ||--o{ Content : includes
     Chapter ||--o{ Test : assesses
+    
+    Content ||--o{ ContentVersion : versioned_as
     
     Test ||--o{ Question : consists_of
     Test ||--o{ UserTestAttempt : completed_by
@@ -279,16 +293,38 @@ classDiagram
     }
     
     class CourseService {
+        // Course Management
         +getCourses()
         +getCourseById(courseId)
-        +getChapters(courseId)
-        +getChapterById(chapterId)
-        +getContent(chapterId)
-        +getContentById(contentId)
         +createCourse(courseData) // Admin only
         +updateCourse(courseId, courseData) // Admin only
+        +deleteCourse(courseId) // Admin only
+        
+        // Chapter Management
+        +getChapters(courseId)
+        +getChapterById(chapterId)
         +createChapter(courseId, chapterData) // Admin only
         +updateChapter(chapterId, chapterData) // Admin only
+        +deleteChapter(chapterId) // Admin only
+        
+        // Content Management
+        +getContent(chapterId)
+        +getContentById(contentId)
+        +createContent(chapterId, contentData) // Admin only
+        +updateContent(contentId, contentData) // Admin only
+        +deleteContent(contentId) // Admin only
+        
+        // Content Versioning
+        +getContentVersions(contentId) // Admin only
+        +getContentVersion(contentId, version) // Admin only
+        +createContentVersion(contentId, versionData) // Admin only
+        +publishContent(contentId, version) // Admin only
+        +revertContent(contentId, version) // Admin only
+        
+        // Progress Tracking
+        +getUserProgress(userId)
+        +updateUserProgress(userId, contentId, progress)
+        +markContentAsCompleted(userId, contentId)
     }
     
     class TestService {
@@ -311,6 +347,7 @@ classDiagram
         +getCourseCompletionRates()
         +getIndividualPerformanceReport(userId)
         +getAggregatePerformanceReport()
+        +getContentEngagementMetrics()
         +exportData(criteria)
     }
     
@@ -321,13 +358,6 @@ classDiagram
         +createAd(adData) // Admin only
         +updateAd(adId, adData) // Admin only
         +getAdStatistics(adId) // Admin only
-    }
-    
-    class ContentService {
-        +uploadContent(chapterId, contentData)
-        +getContent(contentId)
-        +updateContent(contentId, contentData)
-        +deleteContent(contentId)
     }
     
     class SecurityMiddleware {
@@ -360,10 +390,12 @@ classDiagram
         +CourseCatalogPage
         +CourseViewPage
         +ChapterViewPage
+        +ContentViewPage
         +TestPage
         +ProfilePage
         +ProgressPage
         +AdminDashboard
+        +AdminContentEditor
     }
     
     ReactFrontend --> AuthService
@@ -379,7 +411,6 @@ classDiagram
     TestService --> SecurityMiddleware
     AnalyticsService --> SecurityMiddleware
     AdsService --> SecurityMiddleware
-    ContentService --> SecurityMiddleware
     
     SecurityMiddleware --> RedisCache
     SecurityMiddleware --> PostgresDatabase
@@ -396,9 +427,51 @@ classDiagram
     AnalyticsService --> PostgresDatabase
     AdsService --> RedisCache
     AdsService --> PostgresDatabase
-    ContentService --> RedisCache
-    ContentService --> PostgresDatabase
 ```
+
+## Cloudflare Integration Layer
+
+Cloudflare служи като първа линия на защита и performance optimization:
+
+```mermaid
+flowchart LR
+    A[Глобални потребители] -->|HTTPS/TLS 1.3| B[Cloudflare Edge]
+    B -->|Origin SSL| C[VPS Nginx]
+    C -->|HTTP| D[NestJS Services]
+    
+    B --> E[WAF Protection]
+    B --> F[DDoS Mitigation]
+    B --> G[Bot Management]
+    B --> H[Global CDN]
+```
+
+### Cloudflare функционалности:
+- **Edge CDN** - глобално разпространение на съдържанието с 300+ локации
+- **DDoS Protection** - автоматична защита до 100+ Tbps без допълнителна конфигурация
+- **Web Application Firewall** - блокиране на OWASP Top 10 атаки
+- **Origin Protection** - скриване на VPS IP адреса от публичен достъп
+- **SSL Management** - автоматично SSL/TLS handling с Modern encryption
+- **Performance Optimization** - compression, minification, HTTP/2
+- **Analytics** - detailed traffic и security insights
+
+## Environment-based Security Configuration
+
+Системата използва environment-driven подход за управление на защитите:
+
+```mermaid
+flowchart TD
+    A[Environment Detection] --> B{NODE_ENV}
+    B -->|development| C[Relaxed Security<br>- No rate limiting<br>- Flexible CORS<br>- Testing bypass]
+    B -->|test| D[Test Security<br>- No rate limiting<br>- Mock authentication<br>- Fast validation]
+    B -->|production| E[Full Security<br>- All protections ON<br>- Strict validation<br>- Complete logging]
+    
+    F[Critical Features] --> G[Always Enabled<br>- JWT validation<br>- Input validation<br>- SQL injection protection]
+```
+
+### Security Feature Categories:
+- **Critical** (винаги включени): JWT validation, Input validation, SQL injection protection
+- **Important** (изключени в dev/test): Rate limiting, CSRF protection, Strict CORS
+- **Optional** (configurable): Detailed logging, Performance monitoring
 
 ## Сигурност и защитни механизми
 ```mermaid
@@ -432,16 +505,20 @@ flowchart TD
 ```
 
 ## Разпределение на ресурсите на VPS
+
 ```mermaid
 pie
-    title Разпределение на vCPU ядрата на VPS
-    "NestJS Backend" : 3
+    title Разпределение на vCPU ядрата на VPS (с Cloudflare optimization)
+    "NestJS Backend" : 2.5
     "PostgreSQL" : 1.5
     "Redis" : 0.5
-    "Nginx" : 0.5
-    "React Frontend" : 0.3
-    "Съдържание и други" : 0.2
+    "Nginx (Origin)" : 0.3
+    "React Frontend" : 0.2
+    "Мониторинг" : 0.2
+    "Cloudflare Overhead" : 0.3
 ```
+
+*Забележка: Cloudflare намалява натоварването на VPS с 60-80% заради edge caching и traffic filtering.*
 
 ## Подробно описание на архитектурата
 
@@ -449,16 +526,16 @@ pie
 
 Предложената архитектура е базирана на **микросервисен подход**, но e опростена и оптимизирана за посочените VPS ресурси. Основните компоненти са:
 
-- **Nginx Gateway** - служи като входна точка към системата, осигурява SSL терминиране, балансиране на натоварването и базова защита от атаки
+- **Cloudflare Edge Network** - служи като първа линия на защита и CDN, осигурява глобална дистрибуция, DDoS защита и SSL терминиране
+- **Nginx Gateway** - служи като входна точка към VPS системата, осигурява Origin SSL терминиране, балансиране на натоварването и Real IP detection от Cloudflare
 - **React Frontend** - изграден с Codux, респонсивен и оптимизиран за различни устройства
 - **Backend микросервиси** - изградени с NestJS:
   - **Auth Service** - управлява всички процеси по автентикация
   - **User Service** - управлява потребителски данни и профили
-  - **Course Service** - управлява курсове, глави и учебно съдържание
+  - **Course Service** - управлява курсове, глави, учебно съдържание с версиониране и проследяване на прогреса
   - **Test Service** - управлява тестове, въпроси и отговори
   - **Analytics Service** - събира и анализира данни от използването на системата
   - **Ads Service** - управлява показването на реклами
-- **Content Service** - отделен проект, който управлява съдържанието
 - **БД слой** - PostgreSQL за постоянно съхранение и Redis за кеширане
 - **Admin Panel** - за управление на системата
 - **Мониторинг** - Prometheus и Grafana за наблюдение на производителността
@@ -471,20 +548,93 @@ pie
 - **Връзки между таблиците** - за поддържане на интегритет на данните
 - **JSON полета** - за гъвкавост при необходимост
 - **Времеви маркери** - за проследяване на създаване и промени
+- **Версиониране на съдържанието** - за проследяване на промени и възможност за връщане към предишни версии
 
 Основни таблици включват:
 - **User** - съхранява основна потребителска информация
 - **UserProfile** - разширена информация за потребителя
 - **Course**, **Chapter**, **Content** - учебно съдържание
+- **ContentVersion** - версиониране на съдържанието
 - **Test**, **Question**, **UserTestAttempt**, **UserAnswer** - тестове и отговори
 - **Advertisement**, **UserAdView** - рекламна система
 - **UserProgress** - проследяване на прогреса на потребителя
 - **PasswordReset**, **Session** - управление на сесии и рестартиране на пароли
 
-### 3. Сигурност
+### 3. Разширена функционалност на Course Service
+
+Course Service сега включва цялостно управление на съдържанието:
+
+#### 3.1 Управление на курсове и глави
+- CRUD операции за курсове
+- CRUD операции за глави
+- Йерархична структура на съдържанието
+
+#### 3.2 Управление на съдържанието
+- CRUD операции за съдържание
+- Поддръжка на различни типове съдържание (text, video, image, etc.)
+- Rich text editing capabilities
+
+#### 3.3 Версиониране на съдържанието
+- Автоматично създаване на версии при всяка промяна
+- Преглед на история на промените
+- Възможност за връщане към предишни версии
+- Публикуване на конкретни версии
+- Draft/Published states
+
+#### 3.4 Проследяване на прогреса
+- Автоматично записване на прогреса при преглед на съдържание
+- Ръчно маркиране като завършено
+- Проследяване на времето прекарано върху съдържанието
+- Персонални статистики
+
+### 4. Cloudflare Integration
+
+Cloudflare осигурява enterprise-level защита и performance без допълнителни разходи:
+
+#### 4.1 Сигурност
+- **DDoS Protection** - автоматична защита до 100+ Tbps
+- **WAF Protection** - блокиране на OWASP Top 10 атаки
+- **Bot Management** - sophisticated bot detection
+- **Origin Protection** - VPS IP адресът е скрит от публичен достъп
+
+#### 4.2 Performance
+- **Global CDN** - 300+ edge locations по света
+- **Compression** - automatic гзip/brotli compression
+- **HTTP/2 & HTTP/3** - modern protocols support
+- **Caching** - intelligent edge caching
+
+#### 4.3 SSL/TLS Management
+- **Universal SSL** - free SSL certificate за домейна
+- **Origin Certificate** - 15-годишен certificate за VPS
+- **TLS 1.3** - latest encryption standards
+- **HSTS** - strict transport security
+
+### 5. Environment-based Security
+
+Системата използва адаптивен подход към сигурността според environment:
+
+#### 5.1 Development Environment
+- Relaxed CORS settings за local testing
+- Disabled rate limiting за development productivity
+- Enhanced logging за debugging
+- Testing bypass mechanisms
+
+#### 5.2 Testing Environment
+- Minimal security overhead за fast test execution
+- Mock authentication services
+- Isolated test data
+- Automated security testing
+
+#### 5.3 Production Environment
+- Maximum security enforcement
+- All protection mechanisms active
+- Comprehensive audit logging
+- Real-time security monitoring
+
+### 6. Сигурност
 
 Архитектурата включва многопластов подход към сигурността:
-- **Транспортен слой**: HTTPS с модерно шифроване
+- **Транспортен слой**: HTTPS с Cloudflare Edge SSL + Origin SSL
 - **Автентикация**: JWT токени с кратък срок на валидност
 - **Оторизация**: Ролеви модел (потребител/администратор)
 - **Защита от атаки**: XSS, CSRF, SQL Injection, Rate Limiting
@@ -493,7 +643,7 @@ pie
 - **Сесийна сигурност**: Управление на сесии, автоматично излизане при неактивност
 - **Мониторинг и логване**: Проследяване на подозрителни дейности, блокиране на IP адреси
 
-### 4. Реклами без adblocker блокиране
+### 7. Реклами без adblocker блокиране
 
 За реализация на рекламите, които да не се блокират от adblocker-и, препоръчвам:
 
@@ -503,7 +653,7 @@ pie
 4. **Сървърно-рендерирани реклами** - интегрирани директно в HTML
 5. **Избягване на ключови думи** като "ad", "banner", "sponsor" в CSS и HTML
 
-### 5. Проследяване на прогреса
+### 8. Проследяване на прогреса
 
 За проследяване на прогреса на потребителя предлагам:
 
@@ -513,36 +663,44 @@ pie
 4. **Проследяване на времето прекарано на страницата** - за по-точна метрика
 5. **Тестове за валидиране на знания** - за да се гарантира, че потребителят не само е преминал, но и е усвоил материала
 
-### 6. Мащабируемост и разширяемост
+### 9. Мащабируемост и разширяемост
 
 Архитектурата е проектирана с мисъл за бъдещо разширяване:
 
 1. **Микросервисна архитектура** - позволява добавяне на нови услуги без да се засягат съществуващите
 2. **Контейнеризация с Docker** - лесно мащабиране на отделни компоненти
-3. **Кеширане с Redis** - подобряване на производителността
-4. **API-first подход** - лесно интегриране с мобилни приложения в бъдеще
-5. **Опашки за обработка на тежки задачи** - при нужда от генериране на сложни отчети
-6. **Разделение на съдържанието в отделен проект** - както сте посочили, подобрява сигурността и концептуалната структура
+3. **Cloudflare CDN** - глобална дистрибуция без infrastruktura промени
+4. **Кеширане с Redis** - подобряване на производителността
+5. **API-first подход** - лесно интегриране с мобилни приложения в бъдеще
+6. **Опашки за обработка на тежки задачи** - при нужда от генериране на сложни отчети
+7. **Възможност за миграция към MongoDB** - при нужда от по-гъвкаво съхранение на съдържание
 
-### 7. Оптимизация за VPS ресурси
+### 10. Оптимизация за VPS ресурси
 
-За оптимално използване на посочените ресурси (6 vCPU, 12GB RAM, 200GB SSD):
+За оптимално използване на посочените ресурси (6 vCPU, 12GB RAM, 200GB SSD) с Cloudflare:
 
-1. **Балансирано разпределение на CPU ядрата** - повече ресурси за DB и backend
-2. **Кеширане за намаляване на повторни DB заявки**
-3. **Оптимизация на индексите в PostgreSQL**
-4. **Компресия на статично съдържание**
-5. **Lazy loading на съдържание в React**
-6. **Автоматично скалиране на услугите според натоварването**
-7. **Мониторинг на ресурси и ранно предупреждение при достигане на лимити**
+1. **Значително намалено натоварване** - Cloudflare филтрира 60-80% от traffic-а
+2. **Балансирано разпределение на CPU ядрата** - повече ресурси за DB и backend
+3. **Кеширане за намаляване на повторни DB заявки**
+4. **Оптимизация на индексите в PostgreSQL**
+5. **Edge compression** - Cloudflare автоматично компресира статично съдържание
+6. **Lazy loading на съдържание в React**
+7. **Автоматично скалиране на услугите според натоварването**
+8. **Мониторинг на ресурси и ранно предупреждение при достигане на лимити**
+9. **Origin protection** - само legitimate traffic достига до VPS
 
 ## Заключение
 
 Предложената архитектура осигурява балансирано решение, което:
 - Отговаря на всички посочени функционални изисквания
-- Интегрира всички изисквани механизми за сигурност
-- Ефективно използва ограничените ресурси на VPS
+- Интегрира всички изисквани механизми за сигурност с Cloudflare protection layer
+- Ефективно използва ограничените ресурси на VPS с помощта на edge optimization
+- Осигурява enterprise-level security без допълнителни разходи
+- Осигурява глобална performance чрез Cloudflare CDN
+- Поддържа environment-based configuration за лесно development и testing
 - Осигурява лесна мащабируемост и разширяемост в бъдеще
 - Следва съвременните добри практики за разработка
+- Включва цялостно управление на съдържанието с версиониране
+- Предоставя гъвкавост за бъдеща миграция към други технологии
 
-Архитектурата е проектирана да започне с минимално необходимите компоненти за VPS, но да позволява поетапно разширяване с нови функционалности или скалиране към по-голяма инфраструктура, ако се появи такава нужда в бъдеще.
+Архитектурата е проектирана да започне с минимално необходимите компоненти за VPS, но да позволява поетапно разширяване с нови функционалности или скалиране към по-голяма инфраструктура, ако се появи такава нужда в бъдеще. Cloudflare интеграцията осигурява enterprise-level възможности при startup budget.
