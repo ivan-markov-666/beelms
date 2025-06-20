@@ -10,6 +10,6 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
-    "bmad-method": "^4.4.0"
+    "bmad-method": "github:bmadcode/BMAD-METHOD#main"
   }
 }
