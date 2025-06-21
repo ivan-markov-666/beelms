@@ -11,6 +11,23 @@
 
 ⭐ **If you find this project helpful or useful, please give it a star!** It helps others discover BMAD-METHOD and you will be notified of updates!
 
+## 🔄 Important: Keeping Your BMAD Installation Updated
+
+**Stay up-to-date effortlessly!** If you already have BMAD-METHOD installed in your project, simply run:
+
+```bash
+npx bmad-method install
+```
+
+The installer will:
+
+- ✅ Automatically detect your existing v4 installation
+- ✅ Update only the files that have changed
+- ✅ Create `.bak` backup files for any custom modifications you've made
+- ✅ Preserve your project-specific configurations
+
+This makes it easy to benefit from the latest improvements, bug fixes, and new agents without losing your customizations!
+
 ## 🚀 Quick Start
 
 ### Fastest Start: Web UI (2 minutes) 🏃‍♂️
@@ -155,11 +172,37 @@ The upgrade process will:
 
 After upgrading:
 
-1. Review your documents in the `docs/` folder
-2. Use `@bmad-master` agent to run the `doc-migration-task` to align your documents with V4 templates
-3. If you have separate front-end and backend architecture docs, the migration task will help merge them into a unified `full-stack-architecture.md`
+1. Review your documents in the `docs/` folder - if you had a PRD or architecture in your old project, copy it from the backup to the docs folder if they are not there.
+2. Optionally run the `doc-migration-task` to align your documents with V4 templates - you can do this with your agent my saying something like: 'run {drag in task} against {drag prd or arch file from docs} to align with {drag the template from .bmad-core/templates/full-stack-architecture.md}
+3. If you have separate front-end and backend architecture docs you can modify step 2 to merge both into a single full stack architecture or separate Front and Back end.
 
-**Note**: The agents in `.bmad-core/` fully replace the items in `bmad-agent/`.
+The reason #2 and 3 are optional is because now BMad V4 makes sharding optional for the SM. See [Core Configuration](#-core-configuration-new-in-v4)
+
+**Note**: The agents in `.bmad-core/` fully replace the items in `bmad-agent/` - you can remove the backup folder versions.
+
+### 🔧 Core Configuration (NEW in V4)
+
+**Critical**: V4 introduces `bmad-core/core-config.yml` - a powerful configuration file that enables BMAD to work seamlessly with any project structure, whether it's V4-optimized or legacy. You can even now use non-standard PRDs and architectures!
+
+#### What is core-config.yml?
+
+This configuration file tells BMAD agents exactly where to find your project documents and how they're structured. It's the key to V4's flexibility and backwards compatibility.
+
+#### Key Features:
+
+- **Version Awareness**: Agents understand if your PRD/Architecture follows V4 conventions or earlier versions
+- **Flexible Document Locations**: Works whether your epics are embedded in PRD or properly sharded
+- **Developer Context**: Define which files the dev agent should always load
+- **Debug Support**: Built-in logging for troubleshooting story implementation
+
+#### Why It Matters:
+
+- **Use BMAD with ANY project structure** - V3, V4, or custom layouts
+- **No forced migrations** - Keep your existing document organization
+- **Customize developer workflow** - Specify exactly which files provide context
+- **Seamless upgrades** - Start with V3 docs and gradually adopt V4 patterns
+
+See the [detailed core-config.yml guide](docs/user-guide.md#core-configuration-coreconfigyml) for configuration examples and best practices.
 
 ## Teams & Workflows
 
@@ -191,7 +234,7 @@ Structured approaches for different scenarios:
 ├── tasks/           # Reusable task definitions
 ├── checklists/      # Quality checklists
 ├── data/            # Knowledge base
-└── web-bundles/     # Pre-built bundles (deprecated - use dist/ instead)
+└── web-bundles/     # Optional can be added if you use the install command and select this folder as a destination for the build bundle files
 
 tools/
 ├── cli.js           # Build tool

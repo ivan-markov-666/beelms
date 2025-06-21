@@ -102,6 +102,17 @@ class Installer {
         spinner.start("Analyzing installation directory...");
       }
 
+      // If this is an update request from early detection, handle it directly
+      if (config.installType === 'update') {
+        const state = await this.detectInstallationState(installDir);
+        if (state.type === 'v4_existing') {
+          return await this.performUpdate(config, installDir, state.manifest, spinner);
+        } else {
+          spinner.fail('No existing v4 installation found to update');
+          throw new Error('No existing v4 installation found');
+        }
+      }
+
       // Detect current state
       const state = await this.detectInstallationState(installDir);
 
@@ -425,7 +436,10 @@ class Installer {
         console.log(chalk.cyan("\n📦 Starting v3 to v4 upgrade process..."));
         const V3ToV4Upgrader = require("../../upgraders/v3-to-v4-upgrader");
         const upgrader = new V3ToV4Upgrader();
-        return await upgrader.upgrade({ projectPath: installDir });
+        return await upgrader.upgrade({ 
+          projectPath: installDir,
+          ides: config.ides || [] // Pass IDE selections from initial config
+        });
       }
       case "alongside":
         return await this.performFreshInstall(config, installDir, spinner);
@@ -538,7 +552,8 @@ class Installer {
         installType: manifest.install_type,
         agent: manifest.agent,
         directory: installDir,
-        ide: newConfig.ide || manifest.ide_setup, // Use new IDE choice if provided
+        ide: newConfig?.ide || manifest.ide_setup, // Use new IDE choice if provided
+        ides: newConfig?.ides || manifest.ides_setup || [],
       };
 
       await this.performFreshInstall(config, installDir, spinner);

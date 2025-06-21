@@ -1,0 +1,114 @@
+# AUTH-1-T5: Имейл услуга
+
+## Описание
+Имплементация на услуга за изпращане на имейли с поддръжка на i18n, observability и мониторинг.
+
+## Функционалност
+
+### Поддържани шаблони
+1. **Потвърждение на имейл** (`email-verification`)
+   - Изпраща се след успешна регистрация
+   - Съдържа линк за потвърждение
+   - Валиден 24 часа
+
+2. **Забравена парола** (`password-reset`)
+   - Изпраща се при заявка за нулиране на парола
+   - Съдържа линк за задаване на нова парола
+   - Валиден 1 час
+
+3. **Успешна регистрация** (`welcome`)
+   - Изпраща се след успешно потвърден имейл
+   - Съдържа информация за акаунта
+
+### Конфигурация
+```env
+# SMTP конфигурация
+SMTP_HOST=smtp.example.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=user@example.com
+SMTP_PASS=password
+SMTP_FROM="LMS System <noreply@example.com>"
+
+# Настройки за разработка
+EMAIL_OVERRIDE=test@example.com # Всички имейли се пренасочват тук
+EMAIL_TEMPLATE_DIR=./src/i18n/emails
+```
+
+## Имплементация
+
+### EmailService
+```typescript
+interface EmailOptions {
+  to: string;
+  subject: string;
+  template: string;
+  context: Record<string, any>;
+  locale?: string;
+}
+
+class EmailService {
+  async sendEmail(options: EmailOptions): Promise<void>;
+  
+  // Хелпър методи за конкретни типове имейли
+  async sendVerificationEmail(
+    email: string, 
+    name: string, 
+    token: string,
+    locale = 'bg'
+  ): Promise<void>;
+  
+  async sendPasswordResetEmail(
+    email: string,
+    name: string,
+    token: string,
+    locale = 'bg'
+  ): Promise<void>;
+}
+```
+
+### Шаблони
+Шабоните се намират в `src/i18n/emails/{locale}/` като Handlebars шаблони:
+
+```handlebars
+<!-- verification.hbs -->
+<div>
+  <h1>Здравейте, {{name}}!</h1>
+  <p>Моля, потвърдете вашия имейл като кликнете на линка по-долу:</p>
+  <a href="{{verificationUrl}}">Потвърдете имейла</a>
+  <p>Ако не сте направили тази заявка, моля, игнорирайте този имейл.</p>
+</div>
+```
+
+## Observability
+
+### Метрики
+- `email_sent_total{status="success|error", template}` - Брой изпратени имейли
+- `email_send_duration_seconds` - Време за изпращане на имейл
+- `email_errors_total{type="smtp|template|validation"}` - Грешки при изпращане
+
+### Логове
+- Всички опити за изпращане на имейли се логват
+- Грешките се логват с пълен контекст (без чувствителни данни)
+- Използва се структурирано логване
+
+## Тестване
+- Unit тестове за всички методи
+- Интеграционни тестове с тестов SMTP сървър
+- Тестове за различни езикови настройки
+- Тестове за обработка на грешки
+
+## Критерии за приемане
+- [ ] Всички тестове минават успешно
+- [ ] Имейлите се изпращат асинхронно
+- [ ] Има метрики за успешни/неуспешни изпращания
+- [ ] Поддържат се различни езици
+- [ ] Чувствителните данни не се логват
+
+## Зависимости
+- [AUTH-1-T4](AUTH-1-T4.md)
+
+## Свързани файлове
+- `src/common/services/email.service.ts`
+- `src/i18n/emails/`
+- `test/common/services/email.service.spec.ts`
