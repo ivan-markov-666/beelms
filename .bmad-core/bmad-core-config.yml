@@ -11,7 +11,7 @@ agent_file_references:
   story_files:
     - 'docs/stories/ # Stories directory (pattern: {epicNum}.{storyNum}.story.md)'
   epic_locations:
-    primary: docs/
+    primary: docs/epics
     secondary: docs/prd/
   architecture_shards:
     backend:
