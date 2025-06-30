@@ -1,858 +1,1085 @@
-# Интерактивна онлайн система за самостоятелно обучение
-## Техническа спецификация и план за разработка
+# QA Обучителната Платформа - Fullstack Архитектурен Документ (v4.1 WindSurf & Codux Optimized)
 
-## Съдържание
-1. [Обзор на проекта](#обзор-на-проекта)
-2. [Функционални изисквания](#функционални-изисквания)
-3. [Техническа архитектура](#техническа-архитектура)
-4. [База данни](#база-данни)
-5. [Сигурност](#сигурност)
-6. [Инфраструктура](#инфраструктура)
-7. [План за имплементация](#план-за-имплементация)
+## Въведение
 
----
+Този документ описва пълната fullstack архитектура за QA Обучителната Платформа - интерактивна онлайн система за обучение в hobby мащаб, фокусирана върху Quality Assurance и тестване на софтуер. Платформата прилага **прогресивен достъп модел**, при който лекционното съдържание е свободно достъпно за всички посетители, докато разширените функции (тестове, проследяване на прогреса) изискват потребителска регистрация.
 
-## 1. Обзор на проекта
+**Архитектурна Философия**: **Monorepo архитектура**, специално проектирана за разработка с AI асистенти. Основният инструмент за разработка ще бъде **WindSurf**, AI асистент за кодиране, който работи в тандем с разработчика. За визуалната част и UI компонентите ще се използва **Codux**. Целта е да се предостави единна, кохерентна кодова база, върху която AI може да работи най-ефективно, като същевременно се запазват професионалните инженерни практики за сигурност, управление на данни и поддръжка.
 
-### Цел
-Създаване на интерактивна онлайн система за самостоятелно обучение с фокус върху:
-- Лесна употреба от крайни потребители
-- Проследяване на прогреса и оценяване на знанията
-- Възможност за монетизация чрез реклами
-- Събиране на данни за анализ и научни изследвания
+### Starter Template или Съществуващ Проект
 
-### Технологичен стек
-- **Frontend:** React (Codux)
-- **Backend:** NestJS микросервиси
-- **База данни:** PostgreSQL + Redis
-- **Инфраструктура:** Docker, Nginx, Cloudflare
-- **Мониторинг:** Prometheus + Grafana
+**Тип Проект**: Greenfield разработка - изграждане от нулата
+**Подход**: Персонализирана разработка само с PostgreSQL
+**Обосновка**: Уникалният прогресивен достъп модел и специализираните образователни функции изискват надеждно съхранение на данни и бързина на достъп, които PostgreSQL предоставят, като същевременно поддържат възможност за бъдещо разширяване.
 
----
+## Стратегия за Бекъп и Възстановяване
 
-## 2. Функционални изисквания
+Това е **критичен компонент** от архитектурата от ден 1, с фокус върху сигурността и надеждността.
 
-### 2.1. Потребителска автентикация и управление
+- **Метод**: Ежедневни автоматизирани бекъпи на PostgreSQL базата данни чрез `pg_dump`.
+- **Сигурност (Шифриране)**: Преди качване, бекъп файлът **задължително се шифрира** с `gpg` и силна, уникална парола.
+- **Управление на Ключа**: Паролата за `gpg` **никога не се съхранява** на самия сървър. Тя трябва да се пази на сигурно място, например в password manager (Bitwarden, 1Password).
+- **Автоматизация**: `cron` задача, която изпълнява скрипт за: 1) `pg_dump`, 2) компресиране, 3) шифриране, 4) качване с `rclone`.
+- **Съхранение**: Шифрираният файл се качва на **външна облачна услуга** (напр. Google Drive, Backblaze B2).
+- **Задължително Тестване на Възстановяване**: Процедурата за възстановяване (изтегляне, дешифриране, импортиране) трябва да бъде **документирана стъпка по стъпка** и **реално тествана** поне веднъж на тримесечие, за да се гарантира, че бекъпите са използваеми.
 
-#### Регистрация
-- Регистрация само с email и парола
-- Автоматично присвояване на роля 'student'
-- Email верификация (препоръчително)
+## Управление на Конфигурации и Тайни (Хибриден Подход)
 
-#### Вписване
-- Стандартно вписване с email и парола
-- JWT базирана автентикация
-- Refresh token механизъм
+Прилага се хибриден подход, който разграничава критичната за стартиране конфигурация от оперативните настройки, които могат да се променят в реално време.
 
-#### Възстановяване на парола
-- Изпращане на уникален линк на email
-- Временен токен с ограничена валидност
-- Сигурна форма за нова парола
+#### 1. Критична Конфигурация за Стартиране (`.env` файлове)
+Това са настройки, без които приложението не може да функционира. Липсата им трябва да доведе до незабавен срив при стартиране.
 
-#### Администраторски достъп
-- Ръчно създаване на admin потребител (не през публичен API)
-- Разширени права за управление на системата
+- **Принцип**: Конфигурацията се зарежда от променливи на средата, дефинирани в `.env` файлове.
+- **Примери**: `DATABASE_URL`, `JWT_SECRET`, `JWT_REFRESH_SECRET`, `SENDGRID_API_KEY`, `PORT`.
+- **Локална Разработка**:
+    - Всеки проект (`backend`, `frontend`, `admin`) съдържа `.env.example` файл.
+    - Разработчиците го копират като `.env` (който е в `.gitignore`) и попълват локалните стойности.
+- **Production Среда (VPS)**:
+    - На сървъра се създава един-единствен `.env` файл на сигурно, външно за проекта място (напр. `/etc/qa-platform/production.env`).
+    - Този файл има силно ограничени права за достъп.
+- **Валидация**: При стартиране, приложението **задължително** валидира наличието и формата на тези променливи (напр. с `@nestjs/config` и `Joi`).
 
-### 2.2. Учебно съдържание
+#### 2. Оперативни Настройки (База Данни)
+Това са настройки, които могат да се променят от администратор през UI, без да е необходим deploy.
 
-#### Курсове и глави
-- Йерархична структура: Курс → Глави → Съдържание
-- Поддръжка на различни типове съдържание (текст, видео, изображения)
-- Версиониране на съдържанието
+- **Принцип**: Съхраняват се в таблицата `system_settings` в базата данни.
+- **Примери**: `EMAIL_DAILY_LIMIT`, `MAINTENANCE_MODE_ENABLED`, `NEW_USER_REGISTRATION_DISABLED`.
+- **Устойчивост**: Приложението **трябва да има разумни стойности по подразбиране** за тези настройки в кода си. Ако дадена настройка липсва в базата данни, приложението трябва да продължи да работи, използваййки стойността по подразбиране, и да запише `WARN` съобщение в логовете.
+- **Администрация**: Управляват се през административния панел (`/admin/settings`).
 
-#### Проследяване на прогреса
-- Автоматично проследяване при достигане край на страница
-- Ръчно маркиране като "прочетено"
-- Бутон "Следваща глава" с автоматично записване
-- Измерване на време прекарано на страница
-- Персонални статистики за напредък
+#### 3. Управление на Тайни
+- Всички основни тайни (парола за база данни, JWT секрети, API ключове) се съхраняват централизирано и сигурно в **password manager** (Bitwarden, 1Password) и се поставят в `.env` файла в production средата ръчно.
 
-### 2.3. Тестове и оценяване
+## Наблюдаемост (Observability)
 
-#### Функционалности
-- Различни типове въпроси (единичен избор, множествен избор, свободен текст)
-- Времеви ограничения
-- Автоматично оценяване
-- Детайлни резултати и обратна връзка
+За да се осигури модерна и ефективна видимост в състоянието на системата, без да се натоварва VPS сървъра, се възприема стратегия, базирана на външна SaaS услуга.
 
-#### Анализ и отчети
-- Индивидуални резултати
-- Агрегирани статистики
-- Експорт на данни за изследвания
+- **Инструмент**: **Sentry**.
+- **Обосновка**: Sentry е индустриален стандарт, който предлага много повече от просто логване, с щедър безплатен план. Той комбинира:
+    - **Проследяване на грешки (Error Tracking)**: Автоматично улавяне на всички необработени грешки в бекенда и фронтенда.
+    - **Мониторинг на производителността (Performance Monitoring)**: Проследяване на бавни API заявки и транзакции.
+    - **Алертиране**: Конфигурируеми аларми при скок в броя на грешките или влошаване на производителността.
+- **Интеграция**:
+    - **Без натоварване на VPS**: Интеграцията се състои в добавяне на Sentry SDK към NestJS и React приложенията. Цялата обработка, съхранение и анализ на данни се случва на сървърите на Sentry.
+    - **Структурирано Логване**: Приложението ще продължи да използва `pino` за генериране на JSON логове, но те ще бъдат изпращани към Sentry (и опционално към `stdout` в Docker), вместо да се записват във файлове на диска. Това елиминира нуждата от `logrotate` и ръчен достъп до сървъра за анализ на проблеми.
 
-### 2.4. Рекламна система
+## Миграции на Базата Данни
 
-#### Anti-adblocker стратегия
-- Сървърно-рендерирани реклами
-- Вградени изображения от същия домейн
-- Динамични CSS класове
-- Base64 кодирани изображения
-- Избягване на ключови думи като "ad", "banner"
+За да се управляват промените по схемата на базата данни по сигурен и версиониран начин:
 
-#### Функционалности
-- Управление на рекламни кампании
-- Проследяване на импресии и кликове
-- Таргетиране по потребителски групи
+- **Инструмент**: Ще се използва вграденият механизъм за миграции на **TypeORM** (който работи отлично с NestJS).
+- **Процес**: Всяка промяна по схемата (добавяне на таблица, промяна на колона) се дефинира като **миграционен файл** (SQL или TypeScript), който се съхранява в source control.
+- **Прилагане**: Процесът на deploy **задължително** включва стъпка за автоматично прилагане на всички нови, неприложени миграции. Това гарантира, че състоянието на базата данни винаги отговаря на версията на кода.
 
----
+## Високо Ниво Архитектура
 
-## 3. Техническа архитектура
+### Технологично Резюме
 
-### 3.1. Микросервисна архитектура
+QA Обучителната Платформа използва **прагматична fullstack архитектура**, състояща се от **NestJS backend** и **две отделни React приложения** (управлявани като отделни приложения в обща monorepo структура) – едно за публичната част и едно за административния панел. Системата използва **само PostgreSQL** като основна база данни, което опростява инфраструктурата. Deployment-ът е насочен към **единична VPS среда**, но включва **задължителна стратегия за ежедневни автоматизирани бекъпи** на външна локация.
 
-```mermaid
-graph TB
-    subgraph "Cloudflare Edge Network"
-        cf["Cloudflare CDN/WAF<br>(DDoS Protection, Global SSL)"]
-    end
-    
-    subgraph "VPS Infrastructure"
-        nginx["Nginx Gateway<br>(Origin SSL, Load Balancer)"]
-        
-        subgraph "Микросервиси"
-            auth["Auth Service"]
-            user["User Service"]
-            course["Course Service"]
-            test["Test Service"]
-            analytics["Analytics Service"]
-            ads["Ads Service"]
-        end
-        
-        subgraph "Data Layer"
-            postgres["PostgreSQL"]
-            redis["Redis Cache"]
-        end
-    end
-    
-    client["Потребители"] --> cf
-    cf --> nginx
-    nginx --> auth & user & course & test & analytics & ads
+### Избор на Платформа и Инфраструктура
+
+**PostgreSQL-Only Platform Decision**:
+
+За тази образователна платформа избирам **PostgreSQL** поради:
+
+**Предимства на PostgreSQL Подхода**:
+- **Надеждност и стабилност**: PostgreSQL предлага ACID compliance и надеждно съхранение на данни
+- **Производителност**: PostgreSQL осигурява бърз достъп до данни и реално време функционалност
+- **Мащабируемост**: Лесно разширяемо решение с възможност за бъдещ растеж
+- **Разширена функционалност**: PostgreSQL предлага разширени възможности за заявки и индексиране
+- **Гъвкавост**: Поддръжка на сложни заявки и структури от данни
+
+**Платформа**: VPS с Docker
+**Ключови Услуги**: 
+- Nginx (reverse proxy & статично файлово обслужване)
+- **PostgreSQL** (основна база данни)
+
+- Docker Compose (опростена оркестрация)
+- GitHub Actions (CI/CD)
+
+**Deployment Host и Региони**: Единична VPS инстанция (Европейски регион за българската аудитория)
+**Target Performance**: 50-100+ concurrent users с възможност за лесно мащабиране
+**Storage**: 
+- PostgreSQL: 10-20GB (включително индекси и временни данни)
+
+**RAM**: Минимум 2GB за PostgreSQL + 2-4GB за приложението
+
+### Структура на Проекта
+
+**Решение за Структура**: **Monorepo**, управлявано с **pnpm workspaces**. Тази структура е оптимална за разработка с AI асистенти като WindSurf, тъй като предоставя пълен контекст на целия проект на едно място.
+
+```
+qa-platform/ (Single Git Repository)
+├── apps/
+│   ├── web/               # Публично React приложение за потребители
+│   └── admin/             # React приложение за административния панел
+│   └── backend/           # NestJS API сървър
+├── packages/
+│   ├── shared-types/      # Споделени TypeScript типове
+│   ├── ui-components/     # Споделени UI компоненти
+│   └── constants/         # Споделени константи (API пътища и др.)
+└── package.json           # Главен package.json за управление на workspaces
 ```
 
-### 3.2. Описание на микросервисите
+**Споделяне на Код**: Чрез **workspaces**, пакетите в `packages/` директорията могат да бъдат импортирани директно в приложенията в `apps/` (напр. `import { User } from '@qa-platform/shared-types'`), осигурявайки типова сигурност и консистентност в целия проект.
 
-#### Auth Service
-- JWT token management
-- Регистрация и вписване
-- Възстановяване на пароли
-- Session management
-
-#### User Service
-- Потребителски профили
-- Управление на роли
-- Потребителски настройки
-
-#### Course Service
-- CRUD операции за курсове
-- Управление на съдържание
-- Версиониране
-- Проследяване на прогрес
-
-#### Test Service
-- Управление на тестове
-- Обработка на отговори
-- Оценяване и резултати
-
-#### Analytics Service
-- Събиране на данни
-- Генериране на отчети
-- Експорт функционалности
-
-#### Ads Service
-- Управление на реклами
-- Anti-adblocker механизми
-- Статистики и отчети
-
-### 3.3. Детайлни схеми на микросервисите
-
-#### Auth Service Schema
+### Диаграма на Високо Ниво Архитектура
 
 ```mermaid
-classDiagram
-    class AuthController {
-        +POST /auth/register
-        +POST /auth/login
-        +POST /auth/logout
-        +POST /auth/refresh
-        +POST /auth/forgot-password
-        +POST /auth/reset-password
-        +GET /auth/verify-email
-    }
-    
-    class AuthService {
-        -jwtService: JwtService
-        -userRepository: UserRepository
-        -emailService: EmailService
-        -redisService: RedisService
-        +register(dto: RegisterDto): Promise~AuthResponse~
-        +login(dto: LoginDto): Promise~AuthResponse~
-        +logout(userId: string): Promise~void~
-        +refreshToken(token: string): Promise~AuthResponse~
-        +forgotPassword(email: string): Promise~void~
-        +resetPassword(token: string, password: string): Promise~void~
-        +verifyEmail(token: string): Promise~void~
-        +validateUser(email: string, password: string): Promise~User~
-        +generateTokens(user: User): Promise~TokenPair~
-    }
-    
-    class JwtStrategy {
-        +validate(payload: JwtPayload): Promise~User~
-    }
-    
-    class RefreshTokenGuard {
-        +canActivate(context: ExecutionContext): Promise~boolean~
-    }
-    
-    class SessionRepository {
-        +create(session: Session): Promise~Session~
-        +findByToken(token: string): Promise~Session~
-        +invalidate(userId: string): Promise~void~
-        +invalidateAll(userId: string): Promise~void~
-    }
-    
-    class PasswordResetRepository {
-        +create(reset: PasswordReset): Promise~PasswordReset~
-        +findByToken(token: string): Promise~PasswordReset~
-        +markAsUsed(id: number): Promise~void~
-    }
-    
-    AuthController --> AuthService
-    AuthService --> JwtService
-    AuthService --> UserRepository
-    AuthService --> EmailService
-    AuthService --> RedisService
-    AuthService --> SessionRepository
-    AuthService --> PasswordResetRepository
-    AuthController --> JwtStrategy
-    AuthController --> RefreshTokenGuard
-```
-
-#### User Service Schema
-
-```mermaid
-classDiagram
-    class UserController {
-        +GET /users/profile
-        +PUT /users/profile
-        +GET /users/:id [Admin]
-        +GET /users [Admin]
-        +PUT /users/:id [Admin]
-        +DELETE /users/:id [Admin]
-        +POST /users/:id/deactivate [Admin]
-        +GET /users/:id/sessions [Admin]
-    }
-    
-    class UserService {
-        -userRepository: UserRepository
-        -profileRepository: UserProfileRepository
-        -cacheService: RedisService
-        +getProfile(userId: string): Promise~UserProfile~
-        +updateProfile(userId: string, dto: UpdateProfileDto): Promise~UserProfile~
-        +getAllUsers(pagination: PaginationDto): Promise~UserList~
-        +getUserById(id: string): Promise~User~
-        +updateUser(id: string, dto: UpdateUserDto): Promise~User~
-        +deactivateUser(id: string): Promise~void~
-        +getUserSessions(id: string): Promise~Session[]~
-    }
-    
-    class UserRepository {
-        +findById(id: string): Promise~User~
-        +findByEmail(email: string): Promise~User~
-        +create(user: User): Promise~User~
-        +update(id: string, user: Partial~User~): Promise~User~
-        +findAll(options: FindOptions): Promise~User[]~
-    }
-    
-    class UserProfileRepository {
-        +findByUserId(userId: string): Promise~UserProfile~
-        +create(profile: UserProfile): Promise~UserProfile~
-        +update(id: string, profile: Partial~UserProfile~): Promise~UserProfile~
-    }
-    
-    class RoleGuard {
-        +canActivate(context: ExecutionContext): Promise~boolean~
-    }
-    
-    UserController --> UserService
-    UserController --> RoleGuard
-    UserService --> UserRepository
-    UserService --> UserProfileRepository
-    UserService --> RedisService
-```
-
-#### Course Service Schema
-
-```mermaid
-classDiagram
-    class CourseController {
-        +GET /courses
-        +GET /courses/:id
-        +POST /courses [Admin]
-        +PUT /courses/:id [Admin]
-        +DELETE /courses/:id [Admin]
-        +GET /courses/:id/chapters
-        +POST /courses/:id/chapters [Admin]
-        +PUT /chapters/:id [Admin]
-        +DELETE /chapters/:id [Admin]
-        +GET /chapters/:id/content
-        +POST /chapters/:id/content [Admin]
-        +PUT /content/:id [Admin]
-        +DELETE /content/:id [Admin]
-        +GET /content/:id/versions [Admin]
-        +POST /content/:id/publish [Admin]
-        +POST /content/:id/revert [Admin]
-        +GET /users/:userId/progress
-        +POST /progress/update
-        +POST /progress/complete
-    }
-    
-    class CourseService {
-        -courseRepository: CourseRepository
-        -chapterRepository: ChapterRepository
-        -contentRepository: ContentRepository
-        -progressRepository: UserProgressRepository
-        -cacheService: RedisService
-        +getCourses(filters: CourseFilterDto): Promise~Course[]~
-        +getCourseById(id: string): Promise~Course~
-        +createCourse(dto: CreateCourseDto): Promise~Course~
-        +updateCourse(id: string, dto: UpdateCourseDto): Promise~Course~
-        +deleteCourse(id: string): Promise~void~
-    }
-    
-    class ChapterService {
-        -chapterRepository: ChapterRepository
-        +getChaptersByCourse(courseId: string): Promise~Chapter[]~
-        +createChapter(courseId: string, dto: CreateChapterDto): Promise~Chapter~
-        +updateChapter(id: string, dto: UpdateChapterDto): Promise~Chapter~
-        +deleteChapter(id: string): Promise~void~
-        +reorderChapters(courseId: string, order: number[]): Promise~void~
-    }
-    
-    class ContentService {
-        -contentRepository: ContentRepository
-        -versionRepository: ContentVersionRepository
-        +getContentByChapter(chapterId: string): Promise~Content[]~
-        +createContent(chapterId: string, dto: CreateContentDto): Promise~Content~
-        +updateContent(id: string, dto: UpdateContentDto): Promise~Content~
-        +deleteContent(id: string): Promise~void~
-        +getVersionHistory(contentId: string): Promise~ContentVersion[]~
-        +publishVersion(contentId: string, version: number): Promise~void~
-        +revertToVersion(contentId: string, version: number): Promise~void~
-    }
-    
-    class ProgressService {
-        -progressRepository: UserProgressRepository
-        -eventEmitter: EventEmitter2
-        +getUserProgress(userId: string): Promise~UserProgress[]~
-        +updateProgress(userId: string, contentId: string, progress: number): Promise~void~
-        +markAsCompleted(userId: string, contentId: string): Promise~void~
-        +getProgressStats(userId: string): Promise~ProgressStats~
-    }
-    
-    CourseController --> CourseService
-    CourseController --> ChapterService
-    CourseController --> ContentService
-    CourseController --> ProgressService
-```
-
-#### Test Service Schema
-
-```mermaid
-classDiagram
-    class TestController {
-        +GET /tests/chapter/:chapterId
-        +GET /tests/:id
-        +POST /tests [Admin]
-        +PUT /tests/:id [Admin]
-        +DELETE /tests/:id [Admin]
-        +GET /tests/:id/questions
-        +POST /tests/:id/questions [Admin]
-        +PUT /questions/:id [Admin]
-        +DELETE /questions/:id [Admin]
-        +POST /tests/:id/start
-        +POST /attempts/:attemptId/answer
-        +POST /attempts/:attemptId/complete
-        +GET /attempts/:attemptId/results
-        +GET /users/:userId/test-history
-    }
-    
-    class TestService {
-        -testRepository: TestRepository
-        -questionRepository: QuestionRepository
-        -attemptRepository: UserTestAttemptRepository
-        -answerRepository: UserAnswerRepository
-        +getTestsByChapter(chapterId: string): Promise~Test[]~
-        +getTestById(id: string): Promise~Test~
-        +createTest(dto: CreateTestDto): Promise~Test~
-        +updateTest(id: string, dto: UpdateTestDto): Promise~Test~
-        +deleteTest(id: string): Promise~void~
-    }
-    
-    class QuestionService {
-        -questionRepository: QuestionRepository
-        +getQuestionsByTest(testId: string): Promise~Question[]~
-        +createQuestion(testId: string, dto: CreateQuestionDto): Promise~Question~
-        +updateQuestion(id: string, dto: UpdateQuestionDto): Promise~Question~
-        +deleteQuestion(id: string): Promise~void~
-        +validateAnswer(questionId: string, answer: any): Promise~boolean~
-    }
-    
-    class TestAttemptService {
-        -attemptRepository: UserTestAttemptRepository
-        -answerRepository: UserAnswerRepository
-        -testRepository: TestRepository
-        -eventEmitter: EventEmitter2
-        +startTest(userId: string, testId: string): Promise~UserTestAttempt~
-        +submitAnswer(attemptId: string, questionId: string, answer: any): Promise~UserAnswer~
-        +completeTest(attemptId: string): Promise~TestResult~
-        +getTestResults(attemptId: string): Promise~TestResult~
-        +getUserTestHistory(userId: string): Promise~UserTestAttempt[]~
-        +calculateScore(attemptId: string): Promise~number~
-    }
-    
-    class TestValidationService {
-        +validateTestStructure(test: Test): boolean
-        +validateQuestionFormat(question: Question): boolean
-        +checkTimeLimit(attempt: UserTestAttempt): boolean
-    }
-    
-    TestController --> TestService
-    TestController --> QuestionService
-    TestController --> TestAttemptService
-    TestAttemptService --> TestValidationService
-```
-
-#### Analytics Service Schema
-
-```mermaid
-classDiagram
-    class AnalyticsController {
-        +GET /analytics/user/:userId/progress
-        +GET /analytics/test/:testId/statistics
-        +GET /analytics/course/:courseId/completion
-        +GET /analytics/reports/performance/:userId
-        +GET /analytics/reports/aggregate
-        +GET /analytics/content/engagement
-        +POST /analytics/export
-        +GET /analytics/dashboard [Admin]
-    }
-    
-    class AnalyticsService {
-        -progressRepository: UserProgressRepository
-        -testRepository: UserTestAttemptRepository
-        -courseRepository: CourseRepository
-        -aggregationService: AggregationService
-        +getUserProgressAnalytics(userId: string): Promise~UserAnalytics~
-        +getTestStatistics(testId: string): Promise~TestStats~
-        +getCourseCompletionRates(courseId: string): Promise~CompletionStats~
-        +generatePerformanceReport(userId: string): Promise~PerformanceReport~
-        +generateAggregateReport(filters: ReportFilters): Promise~AggregateReport~
-        +getContentEngagement(contentId: string): Promise~EngagementMetrics~
-    }
-    
-    class AggregationService {
-        -clickhouse: ClickHouseClient
-        +aggregateUserProgress(timeRange: TimeRange): Promise~AggregatedData~
-        +aggregateTestResults(timeRange: TimeRange): Promise~AggregatedData~
-        +calculateTrends(metric: string, period: string): Promise~TrendData~
-    }
-    
-    class ExportService {
-        -queueService: BullQueue
-        +exportData(criteria: ExportCriteria): Promise~ExportJob~
-        +generateCSV(data: any[]): Promise~Buffer~
-        +generatePDF(report: Report): Promise~Buffer~
-        +getExportStatus(jobId: string): Promise~ExportStatus~
-    }
-    
-    class MetricsCollector {
-        -eventEmitter: EventEmitter2
-        +collectProgressMetric(event: ProgressEvent): void
-        +collectTestMetric(event: TestEvent): void
-        +collectEngagementMetric(event: EngagementEvent): void
-    }
-    
-    AnalyticsController --> AnalyticsService
-    AnalyticsService --> AggregationService
-    AnalyticsController --> ExportService
-    AnalyticsService --> MetricsCollector
-```
-
-#### Ads Service Schema
-
-```mermaid
-classDiagram
-    class AdsController {
-        +GET /ads/serve
-        +POST /ads/view
-        +POST /ads/click
-        +GET /ads [Admin]
-        +POST /ads [Admin]
-        +PUT /ads/:id [Admin]
-        +DELETE /ads/:id [Admin]
-        +GET /ads/:id/statistics [Admin]
-        +GET /ads/campaigns [Admin]
-    }
-    
-    class AdsService {
-        -adRepository: AdvertisementRepository
-        -viewRepository: UserAdViewRepository
-        -targetingService: TargetingService
-        -antiBlockService: AntiAdblockService
-        +getAd(userId: string, context: AdContext): Promise~Advertisement~
-        +recordView(userId: string, adId: string): Promise~void~
-        +recordClick(userId: string, adId: string): Promise~void~
-        +createAd(dto: CreateAdDto): Promise~Advertisement~
-        +updateAd(id: string, dto: UpdateAdDto): Promise~Advertisement~
-        +getAdStatistics(id: string): Promise~AdStats~
-    }
-    
-    class TargetingService {
-        -userRepository: UserRepository
-        -progressRepository: UserProgressRepository
-        +getTargetedAds(userId: string, context: AdContext): Promise~Advertisement[]~
-        +calculateRelevanceScore(user: User, ad: Advertisement): number
-        +applyFrequencyCapping(ads: Advertisement[], userId: string): Advertisement[]
-    }
-    
-    class AntiAdblockService {
-        +generateDynamicClassName(): string
-        +encodeImageBase64(imageUrl: string): Promise~string~
-        +obfuscateAdMarkup(html: string): string
-        +serverSideRender(ad: Advertisement): string
-        +injectAdNatively(content: string, ad: string): string
-    }
-    
-    class AdCampaignService {
-        -campaignRepository: CampaignRepository
-        +createCampaign(dto: CreateCampaignDto): Promise~Campaign~
-        +manageBudget(campaignId: string): Promise~void~
-        +pauseCampaign(campaignId: string): Promise~void~
-        +getCampaignPerformance(id: string): Promise~CampaignStats~
-    }
-    
-    AdsController --> AdsService
-    AdsService --> TargetingService
-    AdsService --> AntiAdblockService
-    AdsController --> AdCampaignService
-```
-
-### 3.4. Междусервисна комуникация
-
-```mermaid
-flowchart LR
-    subgraph "API Gateway"
-        nginx[Nginx]
+graph TD
+    subgraph "Достъп"
+        User[Потребители] -->|yourdomain.com| LB[Nginx Reverse Proxy]
+        Admin[Администратори] -->|yourdomain.com/admin| LB
     end
-    
-    subgraph "Auth Domain"
-        auth[Auth Service]
+
+    subgraph "VPS Среда"
+        LB -- / --> WebApp[Публично React Приложение (apps/web)]
+        LB -- /admin --> AdminApp[Админ React Приложение (apps/admin)]
+        LB --> API[NestJS Backend API]
+
+        WebApp --> API
+        AdminApp --> API
+        API --> PostgresDB[(PostgreSQL Database)]
     end
-    
-    subgraph "User Domain"
-        user[User Service]
+
+    subgraph "Външни Услуги"
+        API --> EmailService[SendGrid]
+        API --> Sentry[Sentry]
     end
-    
-    subgraph "Course Domain"
-        course[Course Service]
-        progress[Progress Tracking]
-    end
-    
-    subgraph "Test Domain"
-        test[Test Service]
-    end
-    
-    subgraph "Analytics Domain"
-        analytics[Analytics Service]
-    end
-    
-    subgraph "Ads Domain"
-        ads[Ads Service]
-    end
-    
-    subgraph "Shared Services"
-        redis[(Redis)]
-        postgres[(PostgreSQL)]
-        rabbitmq[RabbitMQ]
-    end
-    
-    nginx --> auth
-    nginx --> user
-    nginx --> course
-    nginx --> test
-    nginx --> analytics
-    nginx --> ads
-    
-    auth <--> user
-    course <--> progress
-    course --> analytics
-    test --> analytics
-    progress --> analytics
-    ads --> user
-    ads --> analytics
-    
-    auth --> redis
-    user --> redis
-    course --> redis
-    test --> redis
-    
-    auth --> postgres
-    user --> postgres
-    course --> postgres
-    test --> postgres
-    analytics --> postgres
-    ads --> postgres
-    
-    course --> rabbitmq
-    test --> rabbitmq
-    analytics --> rabbitmq
-    ads --> rabbitmq
+
+    User --> WebApp
+    Admin --> AdminApp
 ```
 
----
+### Frontend Архитектура
 
-## 4. База данни
+Архитектурата включва **две отделни React приложения**, за да се оптимизира производителността и да се разграничат ясно отговорностите:
 
-### 4.1. Схема на базата данни
+- **Публично Приложение (`apps/web`)**: Леко и бързо приложение, предназначено за крайните потребители. То съдържа само функционалностите, свързани с разглеждане на курсове, регистрация и потребителски профили.
+- **Административно Приложение (`apps/admin`)**: По-функционално приложение, предназначено за администраторите. То съдържа всички инструменти за управление на съдържание, потребители и системни настройки.
 
-```mermaid
-erDiagram
-    User ||--o{ UserProfile : has
-    User ||--o{ UserProgress : tracks
-    User ||--o{ UserTestAttempt : takes
-    User ||--o{ Session : maintains
-    
-    Course ||--o{ Chapter : contains
-    Chapter ||--o{ Content : includes
-    Chapter ||--o{ Test : assesses
-    Chapter ||--o{ UserProgress : tracked_in
-    
-    Content ||--o{ ContentVersion : versioned_as
-    Content ||--o{ UserProgress : progress_on
-    
-    Test ||--o{ Question : consists_of
-    Test ||--o{ UserTestAttempt : completed_by
-    
-    UserTestAttempt ||--o{ UserAnswer : records
-    Question ||--o{ UserAnswer : answered_by
-    
-    Advertisement ||--o{ UserAdView : shown_to
-```
+- **Цел**: Да предостави единен, консистентен интерфейс за всички потребители (публични и администратори).
+- **Инструменти за разработка и работен процес**: Разработката ще се извършва с помощта на **WindSurf** за генериране на код, логика и структура. За визуалната част, готовите React компоненти ще бъдат отваряни и доразвивани с **Codux**. Готовите компоненти ще се намират в `packages/ui-components`.
+- **Достъп**:
+    - `yourdomain.com` за публичната част.
+    - `yourdomain.com/admin` за административния панел.
+- **Ключови Функционалности**:
+    - Разглеждане на курсове, регистрация, потребителски профил (за обикновени потребители).
+    - CRUD операции за цялото съдържание и управление на потребители (за администратори).
 
-### 4.2. Ключови таблици
+#### Списък на Страниците по Приложения
 
-#### User
-- Основна информация за автентикация
-- Роли и права
-- Security fields (failed_login_attempts, last_login)
+За да се дефинира ясно обхватът за генериране на код с AI асистент, ето списък на основните страници (views) за всяко от двете приложения.
 
-#### Course/Chapter/Content
-- Йерархична структура на учебното съдържание
-- Поддръжка на версиониране
-- Метаданни и настройки
+**1. Публично Приложение (`apps/web`)**
 
-#### UserProgress
-- Детайлно проследяване на напредъка
-- Време прекарано на съдържание
-- Процент на завършеност
+*   **Публични страници (достъпни без логин):**
+    1.  **Начална страница (`/`)**: Представяне на платформата, популярни курсове, призив за регистрация.
+    2.  **Страница с всички курсове (`/courses`)**: Списък с всички курсове с филтриране.
+    3.  **Страница с детайли за курс (`/courses/:id`)**: Показва всички лекции в даден курс.
+    4.  **Страница на лекция (`/topics/:id`)**: Показва съдържание на лекцията.
+    5.  **Страница за регистрация (`/register`)**: Форма за създаване на нов акаунт.
+    6.  **Страница за вход (`/login`)**: Форма за влизане.
+*   **Страници за регистрирани потребители (изискват автентикация):**
+    7.  **Потребителско табло (`/dashboard`)**: Преглед на записаните курсове и прогреса.
+    8.  **Страница на профил (`/profile`)**: Смяна на парола и настройки.
+    9.  **Страница за решаване на тест (`/test/:id`)**: Интерфейс за отговаряне на въпроси.
+    10. **Страница с резултати от тест (`/test/results/:id`)**: Показва резултата.
 
-#### Test/Question/UserAnswer
-- Гъвкава система за тестове
-- Различни типове въпроси
-- Детайлни резултати
+**2. Административно Приложение (`apps/admin`)**
 
----
+*   **Административни страници (достъпни само за роля 'admin', през `/`):**
+    11. **Админ Табло (`/dashboard`)**: Ключови системни статистики.
+    12. **Управление на Категории (`/categories`)**: CRUD за категории.
+    13. **Управление на Теми/Лекции (`/topics`)**: CRUD за лекции.
+    14. **Управление на Тестове (`/tests`)**: CRUD за тестове и въпроси.
+    15. **Управление на Потребители (`/users`)**: Таблица с всички потребители.
+    16. **Системни Настройки (`/settings`)**: Управление на глобални настройки (напр. лимит за имейли).
 
-## 5. Сигурност
+**Споделяне на Код**:
+- **UI Компоненти (`packages/ui-components`)**: За да се изгради консистентна дизайн система, този пакет ще съдържа следните основни, преизползваеми компоненти:
+        - `Button`: Стандартизиран бутон с различни варианти (primary, secondary, danger).
+        - `Input`: Стандартизирано поле за въвеждане с валидация и съобщения за грешки.
+        - `Card`: Контейнер за съдържание (напр. за показване на курс или лекция).
+        - `Modal`: Модален диалогов прозорец за потвърждения или показване на информация.
+        - `Spinner`: Индикатор за зареждане.
+        - `PageLayout`: Основен layout компонент, който дефинира структурата на страницата (header, content, footer).
+        - `Header`: Глобален хедър с навигация и потребителско меню.
+        - `Footer`: Глобален футър с полезна информация.
+        - `CourseCard`: Специализирана карта за показване на информация за курс в списък.
+        - `TopicListItem`: Компонент за елемент от списъка с лекции в даден курс.
+- **Типове (`packages/shared-types`)**: Общи TypeScript интерфейси се споделят оттук, за да се осигури типова сигурност между бекенд и фронтенд. Например, пакетът може да съдържа: `export interface UserDto { id: string; email: string; role: 'user' | 'admin'; }`.
+- **Константи (`packages/constants`)**: Общи константи, като например API маршрути, се споделят оттук, за да се избегне дублиране на код. Например, пакетът може да съдържа: `export const API_ROUTES = { courses: '/courses', auth: { login: '/auth/login' } };`.
 
-### 5.1. Многопластова защита
+#### Стратегия за Управление на Състоянието (Frontend State Management)
 
-```mermaid
-flowchart TD
-    A[Потребител] -->|HTTPS/TLS 1.3| B[Cloudflare Edge]
-    B -->|Origin SSL| C[Nginx]
-    C --> D[Security Middleware]
-    D --> E[JWT Validation]
-    E --> F[Rate Limiting]
-    F --> G[Input Validation]
-    G --> H[CORS/CSRF Protection]
-    H --> I[Application Logic]
-```
+За да се управлява глобалното състояние на React приложенията (напр. информация за логнатия потребител, кеширани данни от API) по ефективен и лесен за поддръжка начин:
 
-### 5.2. Ключови мерки за сигурност
+- **Инструмент**: Ще се използва библиотеката **Zustand**.
+- **Обосновка**: Zustand е избрана заради своята простота, минимален boilerplate код и отлична производителност. Тя позволява създаването на леки, независими "stores" за различните части от състоянието, без да е необходимо обвиване на цялото приложение в `Provider` контекст.
+- **Приложение**: Ще се създадат отделни stores, например `useAuthStore` за управление на автентикацията и потребителските данни, и `useCoursesStore` за кеширане на списъка с курсове.
 
-#### Транспортен слой
-- Cloudflare Edge SSL + Origin Certificate
-- HSTS headers
-- TLS 1.3 only
+#### Централизирано Справяне с Грешки (Frontend Error Handling)
 
-#### Автентикация и оторизация
-- JWT с кратък access token (15-60 мин)
-- Refresh tokens в HttpOnly cookies
-- Ролеви модел на достъп
+За да се осигури консистентно потребителско изживяване при възникване на грешки от API-то:
 
-#### Защита от атаки
-- **XSS:** CSP headers, output encoding, input sanitization
-- **CSRF:** Double-submit cookies, SameSite attributes
-- **SQL Injection:** ORM с параметризирани заявки
-- **DDoS:** Cloudflare автоматична защита
-- **Rate Limiting:** На ниво API endpoints
+- **Инструмент**: Ще се създаде централизиран API клиент чрез библиотеката **axios**.
+- **Подход**: Ще се конфигурира **axios инстанция** с `interceptors` (прихващачи) за обработка на отговорите:
+    - **Грешки `401 Unauthorized`**: Прихващачът автоматично ще опитва да опресни `access token`-а. Ако това е неуспешно, потребителят ще бъде пренасочен към страницата за вход.
+    - **Грешки `403 Forbidden`**: Ще се показва стандартизирано съобщение "Нямате достъп до този ресурс".
+    - **Грешки `429 Too Many Requests`**: Ще се обработва специфичната грешка за лимита на имейлите, както е описано в секцията за имейл услуга.
+    - **Други грешки (`5xx`, `404`)**: Ще се показва общо съобщение за грешка, като детайлите се записват в конзолата за целите на дебъгването.
+- **Полза**: Този подход централизира логиката за грешки на едно място, вместо да я разпръсква из всички компоненти, които правят API заявки.
 
-#### Защита на данните
-- Bcrypt/Argon2 за пароли
-- Уникални соли за всяка парола
-- Валидация и санитизация на входните данни
-- Audit logging за критични операции
+### Backend Архитектура: API и Сигурност
 
-### 5.3. Environment-based конфигурация
+За да се осигури ясна и сигурна комуникация между frontend приложенията и backend сървъра, се дефинират следните архитектурни принципи.
+
+
+
+#### 1. Схема на Базата Данни (Data Models)
+
+Ще се използва TypeORM за дефиниране на моделите, които ще се превърнат в таблици в PostgreSQL.
+
+*   **User (`users`)**
+    *   `id`: `uuid` (Primary Key)
+    *   `email`: `string` (Unique)
+    *   `password`: `string` (Хеширана парола с `bcrypt`)
+    *   `role`: `enum` ('user', 'admin') - Default: 'user'
+    *   `createdAt`: `timestamp`
+    *   `updatedAt`: `timestamp`
+
+*   **Category (`categories`)**
+    *   `id`: `uuid`
+    *   `name`: `string` (Unique)
+    *   *Връзка*: Една категория има много курсове.
+
+*   **Course (`courses`)**
+    *   `id`: `uuid`
+    *   `title`: `string`
+    *   `description`: `text`
+    *   `categoryId`: `uuid` (Foreign Key към `categories`)
+    *   *Връзка*: Един курс има много лекции.
+
+*   **Topic (`topics`)**
+    *   `id`: `uuid`
+    *   `title`: `string`
+    *   `content`: `text` (Съдържание на лекцията в Markdown формат)
+    *   `courseId`: `uuid` (Foreign Key към `courses`)
+    *   *Връзка*: Една лекция има един тест.
+
+*   **Test (`tests`)**
+    *   `id`: `uuid`
+    *   `title`: `string`
+    *   `topicId`: `uuid` (Foreign Key към `topics`)
+    *   *Връзка*: Един тест има много въпроси.
+
+*   **Question (`questions`)**
+    *   `id`: `uuid`
+    *   `text`: `string`
+    *   `options`: `jsonb` (Масив от стрингове, напр. `['Отговор А', 'Отговор Б']`)
+    *   `correctAnswerIndex`: `integer`
+    *   `testId`: `uuid` (Foreign Key към `tests`)
+
+*   **UserProgress (`user_progress`)** - *Свързваща таблица за проследяване на прогреса*
+    *   `userId`: `uuid` (Foreign Key към `users`)
+    *   `topicId`: `uuid` (Foreign Key към `topics`)
+    *   `completedAt`: `timestamp`
+    *   *Primary Key*: (`userId`, `topicId`) - Гарантира, че всяка лекция може да бъде маркирана като завършена само веднъж за потребител.
+
+*   **UserCourseProgress (`user_course_progress`)** - *Денормализирана таблица за бърз достъп до прогреса*
+    *   `userId`: `uuid` (Foreign Key към `users`)
+    *   `courseId`: `uuid` (Foreign Key към `courses`)
+    *   `completedTopics`: `integer`
+    *   `totalTopics`: `integer`
+    *   `progressPercentage`: `integer`
+    *   `updatedAt`: `timestamp`
+    *   *Primary Key*: (`userId`, `courseId`)
+    *   *Забележка (Подобрен Подход с Optimistic UI)*: За да се гарантира консистентност на данните, без да се влошава потребителското изживяване, се прилага хибриден модел:
+        1.  **Надеждност (Backend)**: Актуализацията на таблицата `user_course_progress` се извършва чрез **система за фонови задачи (background jobs)** с **BullMQ**. Когато потребител завърши лекция, се създава задача, която асинхронно и надеждно изчислява и записва новия прогрес. Това гарантира точност и устойчивост при грешки.
+        2.  **Незабавна Обратна Връзка (Frontend)**: За да не чака потребителят, frontend приложението прилага **оптимистична актуализация (Optimistic UI Update)**. Веднага след като потребителят маркира лекция като завършена, UI-то локално обновява състоянието (напр. увеличава броя на завършените лекции и преизчислява процента), давайки илюзията за мигновена промяна.
+        3.  **Синхронизация**: За да се избегнат разминавания, ако фоновата задача се провали, UI-то трябва периодично да се синхронизира с реалните данни от бекенда (напр. при презареждане на страницата или след определен интервал).
+
+*   **SystemSetting (`system_settings`)** - *Таблица за динамични, оперативни настройки*
+    *   `key`: `string` (Primary Key, напр. 'EMAIL_DAILY_LIMIT', 'MAINTENANCE_MODE_ENABLED')
+    *   `value`: `string` (Стойността на настройката, напр. '100' или 'true')
+    *   `description`: `text` (Пояснение за администратора, видимо в UI)
+    *   `updatedAt`: `timestamp`
+
+#### 2. Първоначална Настройка на Системата
+
+За да може системата да бъде използваема веднага след инсталация, са предвидени два автоматизирани механизма, достъпни през CLI.
+
+##### 2.1. Създаване на Администраторски Акаунт
+За да се управлява системата, е необходимо да се създаде първоначален администраторски акаунт.
+
+*   **Метод**: Ще се имплементира **CLI (Command-Line Interface) команда** в NestJS. Този подход е сигурен, тъй като изисква достъп до сървъра и не излага функционалност за създаване на администратори през публично API.
+*   **Процес**:
+    1.  Разработчикът/системният администратор се свързва със сървъра.
+    2.  Изпълнява команда, например: `npm run cli -- create:admin --email admin@example.com --password STRONG_PASSWORD`.
+    3.  Скриптът директно създава потребител в базата данни с роля `admin`.
+*   **Сигурност**: Тази команда трябва да бъде достъпна само в production среда и да не е част от стандартния API.
+
+##### 2.2. Попълване с Примерни Данни (Data Seeding) - Гъвкав Подход
+За да се ускори процесът на разработка и тестване, ще бъде създаден гъвкав и модулен механизъм за автоматично попълване на базата данни с примерни данни.
+
+*   **Цел**: Да се осигури бързо и консистентно попълване на данни за различни среди (локална разработка, автоматизирани тестове, staging).
+*   **Структура**: Вместо един монолитен скрипт, ще се създаде директория `src/database/seeders/`, съдържаща отделни "seeder" файлове за всеки модел (напр. `user.seeder.ts`, `category.seeder.ts`).
+*   **Инструменти**:
+    -   **Factories**: Ще се използват "factory" функции за генериране на модели. Например, `userFactory` ще създава обект на потребител.
+    -   **Faker.js**: За генериране на реалистични данни (имена, имейли, текстове) ще се използва библиотеката `@faker-js/faker`.
+*   **Процес**: Ще се създаде основен CLI скрипт, който позволява гъвкаво изпълнение:
+    -   `npm run cli -- db:seed`: Изпълнява всички seeder-и в препоръчителен ред.
+    -   `npm run cli -- db:seed --seeder=users,categories`: Изпълнява само конкретно посочени seeder-и.
+*   **Полза**: Този подход позволява лесно да се генерират различни по обем и съдържание набори от данни, улеснява поддръжката при промяна на схемата и прави процеса по-надежден.
+
+#### 3. Автентикация и Авторизация (Authentication & Authorization)
+
+Сигурността ще се управлява чрез **JSON Web Tokens (JWT)**, използвайки **безсъстоятелен (stateless) модел с Access и Refresh токени**. Този подход е модерен, сигурен и силно мащабируем, като елиминира нуждата от CSRF защита.
+
+*   **Процес на Автентикация (Stateless Access + Refresh Token Flow)**:
+    *   **Философия**: Разделяне на отговорностите между два типа токени за максимална сигурност и гъвкавост. Този модел е стандарт за модерни Single Page Applications (SPA).
+    *   **Access Token (краткотраен, ~15 минути)**:
+        -   **Предназначение**: Използва се за авторизация при всяка API заявка.
+        -   **Съхранение**: Съхранява се **само в паметта на frontend приложението** (напр. в Zustand store). **Никога** не се записва в `localStorage` или `sessionStorage`.
+        -   **Изпращане**: Изпраща се с всяка API заявка в `Authorization: Bearer <token>` хедъра.
+        -   **Сигурност**: Краткият му живот драстично намалява риска при евентуална кражба (XSS).
+    *   **Refresh Token (дълготраен, ~7 дни)**:
+        -   **Предназначение**: Използва се **единствено** за получаване на нов `access token`, когато старият изтече.
+        -   **Съхранение**: Съхранява се в **сигурна, `httpOnly`, `secure`, `sameSite=strict` бисквитка**. Това го прави недостъпен за JavaScript и го защитава от XSS атаки.
+        -   **Изпращане**: Браузърът го изпраща автоматично само до специален ендпойнт (`POST /auth/refresh`).
+
+*   **Процес на Влизане и Опресняване**:
+    1.  **Login (`POST /auth/login`)**: Потребителят изпраща `email` и `password`.
+    2.  При успех, бекендът връща **`access token`** в тялото на отговора и поставя **`refresh token`** в `httpOnly` бисквитка.
+    3.  Frontend приложението съхранява `access token`-а в паметта си.
+    4.  **API Заявки**: За всяка заявка, frontend-ът добавя `access token`-а в `Authorization` хедъра.
+    5.  **Token Expiration**: Когато API върне `401 Unauthorized` грешка, това е сигнал, че `access token`-ът е изтекъл.
+    6.  **Refresh (`POST /auth/refresh`)**: Frontend-ът автоматично изпраща заявка към ендпойнта за опресняване (без `Authorization` хедър). Браузърът прикача `httpOnly` бисквитката с `refresh token`-а.
+    7.  Бекендът валидира `refresh token`-а и ако е валиден, издава нов `access token`.
+    8.  Frontend-ът повтаря оригиналната заявка с новия `access token`.
+
+*   **Излизане (Logout) - Stateless Подход**: За да се запази безсъстоятелният модел, процесът по излизане се управлява по следния начин:
+        1.  Frontend приложението изпраща заявка към `POST /auth/logout`.
+        2.  Backend сървърът **не поддържа blacklist** за обикновени излизания. Вместо това, той отговаря, като изпраща `Set-Cookie` хедър, който инструктира браузъра да изчисти `refresh_token` бисквитката (напр. като задава изтекла дата на валидност).
+        3.  Frontend приложението, след като получи успешен отговор, **изтрива `access token`-а от своята памет** (Zustand store).
+    *   **Сигурност при Критични Събития**: Механизъм за инвалидиране на токени (blacklist, напр. в Redis) **трябва да се запази**, но само за критични събития като **смяна на парола** или **ръчно прекратяване на всички сесии от потребителя**. Това е компромис, който запазва stateless операцията за 99% от случаите, но добавя сигурност там, където е абсолютно наложително.
+
+*   **Авторизация (Role-Based Access)**:
+    *   Ще се създаде специален `RolesGuard` в NestJS.
+    *   Той ще се прилага към всички административни endpoints (напр. `@UseGuards(RolesGuard)` и `@Roles('admin')`).
+    *   Guard-ът ще чете и валидира `access token`-а от `Authorization` хедъра и ще проверява `role` полето в неговия payload.
+
+#### 4. Защита от Brute-Force и DoS Атаки (Rate Limiting)
+
+За да се предпази системата от автоматизирани атаки, е **задължително** да се въведе **Rate Limiting** (ограничаване на честотата на заявките).
+
+-   **Риск**: Без Rate Limiting, чувствителни ендпойнтове като `POST /auth/login` и `POST /auth/register` са уязвими към **brute-force** атаки (автоматизирано налучкване на пароли) и **Denial-of-Service** атаки, които могат да претоварят и сринат сървъра.
+-   **Решение**: Ще се използва библиотеката **`nestjs-throttler`**, която позволява лесно и гъвкаво конфигуриране на лимити.
+-   **Конфигурация**:
+    -   **Глобално правило**: Ще се приложи общо, по-свободно правило за всички ендпойнтове (напр. 60 заявки в минута от един IP адрес).
+    -   **Специфични правила**: За най-чувствителните ендпойнтове ще се приложат много по-строги правила:
+        -   `POST /auth/login`: Не повече от 5 опита за 1 минута.
+        -   `POST /auth/register`: Не повече от 10 заявки за 1 час.
+        -   `POST /auth/refresh`: Не повече от 10 заявки за 1 час.
+-   **Отговор при Лимит**: Когато лимитът е надвишен, API-то ще връща HTTP статус `429 Too Many Requests`.
+
+#### 5. Валидация на Входящи Данни (Input Validation)
+
+За да се гарантира сигурността и интегритета на данните, **всяка** входяща заявка към API-то трябва да бъде стриктно валидирана.
+
+-   **Принцип**: Никога не се доверявай на данните, идващи от клиента (`Never trust user input`).
+-   **Инструменти**: Ще се използват стандартните за NestJS пакети **`class-validator`** и **`class-transformer`**.
+-   **Имплементация**:
+    -   Всички данни, които се очакват в тялото (`body`), параметрите (`params`) или заявката (`query`) на една заявка, ще бъдат дефинирани като **DTO (Data Transfer Object) класове**.
+    -   В тези DTO класове ще се използват **декоратори** от `class-validator` за дефиниране на правилата за валидация.
+    -   NestJS `ValidationPipe` ще бъде конфигуриран глобално, за да прилага автоматично тези валидации към всички входящи заявки.
+-   **Пример (`RegisterUserDto`)**:
+
+    ```typescript
+    import { IsEmail, IsNotEmpty, MinLength } from 'class-validator';
+
+    export class RegisterUserDto {
+      @IsEmail({}, { message: 'Моля, въведете валиден имейл адрес.' })
+      @IsNotEmpty({ message: 'Имейлът е задължително поле.' })
+      email: string;
+
+      @MinLength(8, { message: 'Паролата трябва да е поне 8 символа.' })
+      @IsNotEmpty({ message: 'Паролата е задължително поле.' })
+      password: string;
+    }
+    ```
+-   **Полза**: Този подход гарантира, че до бизнес логиката (services) достигат само данни, които са в очаквания формат и отговарят на изискванията, което предотвратява огромен клас от грешки и уязвимости.
+
+#### 6. Имейл Услуга (Email Service)
+
+За изпращане на системни имейли (напр. при регистрация) **няма да се използва стандартен Gmail SMTP акаунт**, тъй като това е ненадеждно за приложения и често води до блокиране.
+
+- **Решение**: Ще се използва **транзакционна имейл услуга** като **SendGrid**.
+- **Обосновка**: SendGrid предлага щедър **безплатен план** (до 100 имейла на ден), висока надеждност на доставката, лесна интеграция и е индустриален стандарт за този тип функционалност. API ключът за услугата ще се управлява като всички други тайни.
+
+##### Управление на Лимита (Limit Handling)
+Тъй като проектът разчита на безплатния план на SendGrid, е **критично важно** да се управлява дневният лимит от 100 имейла, за да се избегне неочаквано спиране на услугата.
+
+-   **Механизъм за Проследяване и Конфигурация**:
+    -   **Дневен Брояч**: В бекенда ще се поддържа дневен брояч за изпратените имейли. Този брояч ще се съхранява в базата данни (напр. в таблицата `system_settings`) и ще се нулира автоматично веднъж на 24 часа.
+    -   **Конфигурируем Лимит**: Стойността на дневния лимит **няма да бъде фиксирана** в променлива на средата. Вместо това, тя ще се съхранява в базата данни (напр. в `system_settings` с ключ `EMAIL_DAILY_LIMIT`).
+    -   **Администраторски Контрол**: Администраторите ще могат да променят стойността на този лимит директно през **Административния панел** (`/admin/settings`), което осигурява гъвкавост при смяна на плана на SendGrid или при нужда от временни корекции.
+-   **Логика при Достигнат Лимит**:
+    -   Преди всяко извикване на функция за изпращане на имейл (напр. при регистрация, забравена парола), системата **първо ще проверява** дали броячът е достигнал лимита.
+    -   Ако лимитът е достигнат, API-то **няма да се опита** да изпрати имейл. Вместо това:
+        1.  Ще запише **лог на ниво `WARN`** със следното съобщение: `Daily email limit reached. Consider upgrading the email service plan.`
+        2.  Ще върне специфичен HTTP статус за грешка (напр. `429 Too Many Requests`) заедно с ясен код за грешка.
+-   **Потребителско Съобщение (Frontend)**:
+    -   Frontend приложенията ще бъдат настроени да разпознават този специфичен код на грешка.
+    -   При получаването му, на потребителя ще се покаже следното съобщение: *"Понеже този проект е хоби, той използва предимно безплатни външни услуги. Поради тази причина максималният брой изпратени имейли от системата до потребителските имейл пощи, е достигнат. Моля опитайте отново утре - благодаря за разбирането."*
+
+Този подход гарантира, че системата се държи предвидимо и информира потребителите по подходящ начин, без да създава неясноти относно неуспешната операция.
+
+#### 5. REST API Ендпойнти и Авторизация
+
+Следващата таблица дефинира **единствения авторитетен списък** с API ендпойнти, техните HTTP методи и необходимото ниво на достъп. Това служи като "карта" за взаимодействието в системата и премахва всякакви двусмислици.
+
+| HTTP Метод | Ендпойнт                      | Описание                                  | Ниво на Достъп |
+| :--------- | :---------------------------- | :---------------------------------------- | :------------- |
+| **Автентикация** | | | |
+| `POST`     | `/auth/register`              | Регистрация на нов потребител             | **Публичен**   |
+| `POST`     | `/auth/login`                 | Вход на потребител и издаване на JWT      | **Публичен**   |
+| `GET`      | `/auth/profile`               | Вземане на профила на текущия потребител | **Нужен Логин**|
+| **Публично Съдържание** | | | |
+| `GET`      | `/categories`                 | Списък с всички категории                | **Публичен**   |
+| `GET`      | `/courses`                    | Списък с всички курсове (с филтри)      | **Публичен**   |
+| `GET`      | `/courses/:id`                | Детайли за конкретен курс                 | **Публичен**   |
+| `GET`      | `/topics/:id`                 | Съдържание на конкретна лекция            | **Публичен**   |
+| **Действия на Потребителя** | | | |
+| `GET`      | `/users/me/progress`          | Връща агрегиран прогрес по курсове за текущия потребител. Чете данните директно от денормализираната `user_course_progress` таблица за максимална производителност. | **Нужен Логин**|
+| `POST`     | `/tests/:id/submit`           | Изпращане на отговори за тест             | **Нужен Логин**|
+| `GET`      | `/tests/results/:id`          | Преглед на резултати от опит за тест     | **Нужен Логин**|
+| **Администрация: Потребители** | | | |
+| `GET`      | `/admin/users`                | Списък с всички потребители (с пагинация) | **Само Админ** |
+| `PUT`      | `/admin/users/:id`            | Редакция на потребител (роля, статус)    | **Само Админ** |
+| **Администрация: Съдържание (CRUD)** | | | |
+| `POST`, `PUT`, `DELETE` | `/admin/categories(/:id)` | CRUD операции за категории | **Само Админ** |
+| `POST`, `PUT`, `DELETE` | `/admin/courses(/:id)`    | CRUD операции за курсове   | **Само Админ** |
+| `POST`, `PUT`, `DELETE` | `/admin/topics(/:id)`     | CRUD операции за лекции    | **Само Админ** |
+| `POST`, `PUT`, `DELETE` | `/admin/tests(/:id)`      | CRUD операции за тестове   | **Само Админ** |
+| **Администрация: Табло** | | | |
+| `GET`      | `/admin/dashboard/stats`      | Статистики за таблото за управление       | **Само Админ** |
+| **Администрация: Настройки** | | | |
+| `GET`      | `/admin/settings`             | Връща всички системни настройки           | **Само Админ** |
+| `PUT`      | `/admin/settings`             | Актуализира една или повече настройки     | **Само Админ** |
+
+#### Стратегия за Валидация на Входа (Input Validation)
+
+За да се гарантира сигурността и интегритета на данните, **всяка заявка** към API-то, която носи данни (`body`, `query`, `params`), **задължително ще бъде валидирана**.
+- **Инструменти**: Ще се използват вградените в NestJS `ValidationPipe`, заедно с библиотеките `class-validator` и `class-transformer`.
+- **Подход**: За всеки ендпойнт, който приема данни, ще се създава специален **DTO (Data Transfer Object)** клас с декоратори за валидация (напр. `@IsString()`, `@IsEmail()`, `@MinLength(8)`). Това осигурява ранно прихващане на грешни данни и ясни съобщения за грешки към клиента.
+
+### Архитектурни Шаблони
+
+- **Relational Data Modeling**: Добре структурирани релационни модели в PostgreSQL
+
+- **Connection Pooling**: Ефективно управление на database връзките
+- **Full-Text Search**: Разширени възможности за търсене с PostgreSQL FTS
+
+
+- **Data Persistence**: Надеждно съхранение на данни с PostgreSQL
+
+## Технологичен Stack
+
+### Таблица на Технологичния Stack
+
+| Категория                | Технология        | Версия      | Предназначение             | Обосновка                                        |
+| :----------------------- | :---------------- | :---------- | :------------------------ | :----------------------------------------------- |
+| **Frontend Език**        | TypeScript        | 5.3.x       | Типово-безопасна frontend разработка | Типова безопасност, отлични инструменти         |
+| **Frontend Framework**   | React             | 18.2.x      | Интерактивен UI framework  | Голяма екосистема, многократна употреба на компоненти |
+| **UI Component Library** | Mantine UI        | 7.x         | Цялостен UI framework      | Отлична поддръжка на TypeScript, hooks         |
+| **State Management**     | Zustand           | 4.4.x       | Client state управление    | Прост, лек, TypeScript-friendly                  |
+| **Backend Език**         | TypeScript        | 5.3.x       | Типово-безопасна backend разработка | Споделяне на код с frontend, силна типизация   |
+| **Backend Framework**    | NestJS            | 10.x        | Node.js API framework      | Enterprise шаблони, dependency injection        |
+| **API Стил**             | REST              | -           | HTTP API комуникация       | Прост, добре разбран, отговаря на изискванията  |
+| **База Данни**           | **PostgreSQL**    | **15.x**    | **Основно съхранение на данни**  | **Надеждна, мащабируема релационна база данни** |
+| **Full-Text Search**     | **PostgreSQL FTS** | **Built-in** | **Разширено търсене** | **Интегрирани възможности за пълнотекстово търсене** |
+
+| **File Storage**         | Local File System | -           | Статични активи            | Прост за hobby мащаб, без cloud dependency      |
+| **Authentication**       | **Stateless JWT** | **Latest**  | **Потребителска автентикация** | **Stateless автентикация. Токените се съхраняват в `httpOnly` бисквитки за по-добра сигурност.** |
+| **Frontend Testing**     | Vitest + RTL      | Latest      | Тестване на компоненти     | Бърз, модерни инструменти за тестване          |
+| **Backend Testing**      | Jest              | 29.x        | API & service тестване     | Зрял, добре интегриран с NestJS                 |
+| **E2E Testing**          | Playwright        | 1.40.x      | End-to-end тестване        | Модерен, надежден, cross-browser                |
+| **Build Tool**           | Vite              | 5.x         | Frontend build             | Бързи builds, отлично dev experience           |
+| **ORM**                  | **TypeORM**       | **0.3.x**  | **Database абстракция**    | **Поддръжка на PostgreSQL, TypeScript integration** |
+| **CI/CD**                | GitHub Actions    | -           | Автоматизиран deployment   | Безплатен за публични repo, Docker поддръжка   |
+| **Logging**              | pino + logrotate  | Latest      | Структурирани логове      | Лека, бърза библиотека за JSON логове и ротация на файлове |
+| **Email Service**        | SendGrid          | -           | Регистрация & уведомления  | Надеждна транзакционна услуга с безплатен план |
+
+
+### Управление на Лимита за Имейли
+
+За да се управлява лимита на SendGrid, системата ще имплементира механизъм за лимитиране директно в PostgreSQL:
+
+1.  **Конфигурируема Стойност**: В системните настройки ще се съхранява стойност `EMAIL_DAILY_LIMIT` (по подразбиране `450`, за сигурност под лимита на Gmail).
+2.  **Проследяване в Базата Данни**: Ще се използва таблица `daily_metrics` (или подобна), която ще записва броя изпратени имейли за текущия ден.
+3.  **Проверка преди Изпращане**: Преди изпращане на имейл, системата ще проверява брояча в таблицата.
+4.  **Обработка на Грешка**: Ако лимитът е достигнат, API-то ще връща грешка `429 Too Many Requests` и потребителят ще бъде информиран да опита на следващия ден.
+
+## Модели на Данни (PostgreSQL)
+
+### User (Потребител)
+
+**Предназначение**: Представлява регистрирани потребители в системата с minimal PII collection
+
+**Ключови Атрибути**:
+- id: UUID - Уникален идентификатор
+- email: string - Email адрес на потребителя (уникален)
+- passwordHash: string - bcrypt хеширана парола
+- isActive: boolean - Статус на активация на профила
+- preferredLanguage: string - bg/en/de language preference
+- registrationDate: Date - Timestamp на създаване на профила
+- lastLoginDate: Date - Последен успешен вход
+
+**TypeScript Интерфейс**:
 
 ```typescript
-// Development: Relaxed security за по-лесно тестване
-// Test: Минимална security overhead
-// Production: Максимална защита по подразбиране
+interface User {
+  id: string;
+  email: string;
+  passwordHash: string;
+  role: 'user' | 'admin';
+  isActive: boolean;
+  preferredLanguage: 'bg' | 'en' | 'de';
+  registrationDate: Date;
+  lastLoginDate: Date | null;
+  // Related entities
+  learningPlanTopics?: LearningPlanTopic[];
+  testAttempts?: TestAttempt[];
+  bookmarks?: Bookmark[];
+  userProgress?: UserProgress[];
+
+}
 ```
 
----
+**PostgreSQL Оптимизации**:
+- Правилно индексиране за бързи заявки
+- JSONB за гъвкаво съхранение на данни
+- Партициониране за големи таблици при необходимост
+- Connection pooling за оптимална производителност
 
-## 6. Инфраструктура
+### Category (Категория)
 
-### 6.1. VPS спецификации
-- **CPU:** 6 vCPU ядра
-- **RAM:** 12 GB
-- **Storage:** 200 GB SSD / 100 GB NVMe
-- **Traffic:** 32 TB
+**Предназначение**: Организира теми в логически групи (QA Fundamentals, Automation, etc.)
 
-### 6.2. Разпределение на ресурсите
+**TypeScript Интерфейс**:
 
-```mermaid
-pie title VPS Resource Allocation
-    "NestJS Services" : 2.5
-    "PostgreSQL" : 1.5
-    "Redis" : 0.5
-    "Nginx" : 0.3
-    "React Frontend" : 0.2
-    "Monitoring" : 0.2
-    "Buffer" : 0.8
+```typescript
+interface Category {
+  id: string;
+  name: string; // Translation key
+  description: string; // Translation key
+  colorCode: string; // Hex color for visual identification
+  iconName: string; // Material-UI icon identifier
+  sortOrder: number; // Display order
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  topics: Topic[];
+}
 ```
 
-### 6.3. Cloudflare интеграция
+**PostgreSQL FTS Integration**: Разширено пълнотекстово търсене с PostgreSQL Full-Text Search (FTS) и GIN/GIST индекси
 
-#### Предимства
-- 60-80% намаляване на директен трафик
-- Глобална CDN мрежа (300+ locations)
-- Автоматична DDoS защита
-- WAF и bot protection
-- Origin IP скриване
+### Topic (Тема)
 
-#### Конфигурация
-```yaml
-ssl_mode: "Full (strict)"
-security_level: "Medium"
-always_use_https: true
-hsts_enabled: true
-bot_fight_mode: true
-minify:
-  css: true
-  js: true
-  html: true
+**Предназначение**: Индивидуални единици обучително съдържание
+
+**TypeScript Интерфейс**:
+
+```typescript
+interface Topic {
+  id: string;
+  categoryId: string;
+  topicNumber: number; // Sequential numbering within category
+  name: string; // Translation key
+  slug: string; // URL-friendly identifier
+  estimatedReadingTime: number; // Minutes
+  isPublished: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  category: Category;
+  content: TopicContent[];
+  test?: Test;
+}
 ```
 
-### 6.4. Docker композиция
+### TopicContent (Многоезично Съдържание)
 
-```yaml
-version: '3.8'
-services:
-  nginx:
-    image: nginx:alpine
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-      - /etc/ssl/cloudflare:/etc/ssl/cloudflare
-    ports:
-      - "80:80"
-      - "443:443"
-  
-  postgres:
-    image: postgres:15-alpine
-    environment:
-      POSTGRES_DB: learning_platform
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-  
-  redis:
-    image: redis:7-alpine
-    command: redis-server --requirepass ${REDIS_PASSWORD}
-  
-  # Микросервиси...
+**Предназначение**: Езиково-специфично съдържание с PostgreSQL full-text search
+
+**TypeScript Интерфейс**:
+
+```typescript
+interface TopicContent {
+  id: string;
+  topicId: string;
+  languageCode: 'bg' | 'en' | 'de';
+  title: string; // Localized title
+  content: string; // Rich text content
+  searchVector: any; // PostgreSQL tsvector for full-text search
+  metaDescription: string; // SEO description
+  createdAt: Date;
+  updatedAt: Date;
+  topic: Topic;
+}
 ```
 
----
+**PostgreSQL Full-Text Search Configuration**:
+```sql
+-- Add tsvector column for full-text search
+ALTER TABLE topic_content ADD COLUMN search_vector tsvector;
 
-## 7. План за имплементация
+-- Create GIN index for faster text search
+CREATE INDEX idx_topic_content_search_vector ON topic_content USING GIN(search_vector);
 
-### Фаза 1: Основна инфраструктура (1-2 седмици)
-- [ ] Настройка на VPS и Docker среда
-- [ ] Конфигурация на Cloudflare
-- [ ] Настройка на Nginx с Origin SSL
-- [ ] PostgreSQL и Redis setup
-- [ ] Основна CI/CD pipeline
+-- Create a function to update the search vector
+CREATE OR REPLACE FUNCTION topic_content_search_vector_update() RETURNS trigger AS $$
+DECLARE
+  search_language regconfig;
+BEGIN
+  -- Map language_code to PostgreSQL text search configuration
+  CASE NEW.languageCode
+    WHEN 'bg' THEN search_language := 'bulgarian';
+    WHEN 'en' THEN search_language := 'english';
+    WHEN 'de' THEN search_language := 'german';
+    ELSE search_language := 'simple';
+  END CASE;
 
-### Фаза 2: Автентикация и потребители (2-3 седмици)
-- [ ] Auth Service с JWT
-- [ ] User Service
-- [ ] Регистрация и вписване
-- [ ] Възстановяване на пароли
-- [ ] Admin функционалности
+  NEW.search_vector =
+    setweight(to_tsvector(search_language, COALESCE(NEW.title, '')), 'A') ||
+    setweight(to_tsvector(search_language, COALESCE(NEW.content, '')), 'B') ||
+    setweight(to_tsvector(search_language, COALESCE(NEW.meta_description, '')), 'C');
+  RETURN NEW;
+END
+$$ LANGUAGE plpgsql;
 
-### Фаза 3: Учебно съдържание (3-4 седмици)
-- [ ] Course Service
-- [ ] Content management
-- [ ] Версиониране
-- [ ] Progress tracking
-- [ ] Frontend за преглед на курсове
+-- Create a trigger to update the search vector on insert/update
+CREATE TRIGGER topic_content_search_vector_update_trigger
+BEFORE INSERT OR UPDATE ON topic_content
+FOR EACH ROW EXECUTE FUNCTION topic_content_search_vector_update();
 
-### Фаза 4: Тестове и оценяване (2-3 седмици)
-- [ ] Test Service
-- [ ] Различни типове въпроси
-- [ ] Автоматично оценяване
-- [ ] Резултати и статистики
+-- Example search query
+-- SELECT * FROM topic_content 
+-- WHERE search_vector @@ to_tsquery('english', 'search term')
+-- ORDER BY ts_rank(search_vector, to_tsquery('english', 'search term')) DESC;
+```
 
-### Фаза 5: Анализи и реклами (2 седмици)
-- [ ] Analytics Service
-- [ ] Ads Service с anti-adblocker
-- [ ] Отчети и експорт
+### Test (Тест със Sequential Questions)
 
-### Фаза 6: Финализиране (1-2 седмици)
-- [ ] Security audit
-- [ ] Performance optimization
-- [ ] Мониторинг setup
-- [ ] Документация
-- [ ] Deployment
+**Предназначение**: Simple sequential testing механизъм
 
-### Общо време за разработка: ~13-16 седмици
+**TypeScript Интерфейс**:
 
----
+```typescript
+interface Test {
+  id: string;
+  topicId: string;
+  title: string; // Translation key
+  passingPercentage: number; // 0-100
+  maxAttempts: number;
+  // jsonQuestions: string; // Note: This field is part of the CreateTestDto for bulk creation, not the core entity.
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  topic: Topic;
+  questions: Question[];
+  attempts: TestAttempt[];
+}
 
-## Допълнителни препоръки
+interface Question {
+  id: string;
+  testId: string;
+  questionType: 'single' | 'multiple';
+  questionText: string;
+  explanation: string;
+  sortOrder: number; // Critical for sequential display
+  isActive: boolean;
+  options: QuestionOption[];
+}
+```
 
-### Бъдещи подобрения
-1. **Мобилно приложение** - React Native за по-добра мобилна поддръжка
-2. **Gamification** - точки, значки, класации за мотивация
-3. **AI асистент** - персонализирани препоръки за обучение
-4. **Live sessions** - възможност за уебинари и live обучения
-5. **Интеграции** - Google Calendar, Zoom, MS Teams
+**JSON Import Format**:
+```json
+{
+  "questions": [
+    {
+      "questionText": "Въпрос текст на български",
+      "questionType": "single",
+      "explanation": "Обяснение на отговора",
+      "sortOrder": 1,
+      "options": [
+        {"optionText": "Опция 1", "isCorrect": false, "sortOrder": 1},
+        {"optionText": "Правилна опция", "isCorrect": true, "sortOrder": 2}
+      ]
+    },
+    {
+      "questionText": "Втори въпрос (множествен избор)",
+      "questionType": "multiple",
+      "explanation": "Обяснение за втория въпрос",
+      "sortOrder": 2,
+      "options": [
+        {"optionText": "Грешна опция", "isCorrect": false, "sortOrder": 1},
+        {"optionText": "Правилна опция 1", "isCorrect": true, "sortOrder": 2},
+        {"optionText": "Правилна опция 2", "isCorrect": true, "sortOrder": 3}
+      ]
+    }
+  ]
+}
+```
 
-### Технически подобрения
-1. **GraphQL** - за по-ефективно извличане на данни
-2. **WebSockets** - за real-time функционалности
-3. **Elasticsearch** - за подобрено търсене в съдържанието
-4. **S3 storage** - за медийни файлове
-5. **Kubernetes** - при нужда от по-сериозно скалиране
+### TestAttempt (Опит за Тест)
 
-### Мониторинг и поддръжка
-1. **Automated backups** - ежедневни бекъпи на БД
-2. **Health checks** - автоматични проверки на услугите
-3. **Error tracking** - Sentry или подобен инструмент
-4. **A/B testing** - за оптимизиране на UX
-5. **User feedback** - система за обратна връзка
+**Предназначение**: Записва потребителски тест опити със simple scoring
+
+**TypeScript Интерфейс**:
+
+```typescript
+interface TestAttempt {
+  id: string;
+  userId: string;
+  testId: string;
+  score: number; // Simple: 1 point per correct answer
+  totalQuestions: number;
+  correctAnswers: number;
+  passed: boolean; // Based on test.passingPercentage
+  startedAt: Date;
+  completedAt: Date;
+  user: User;
+  test: Test;
+  answers: TestAnswer[];
+}
+
+interface TestAnswer {
+  id: string;
+  attemptId: string;
+  questionId: string;
+  selectedOptions: string[]; // Array of option IDs
+  isCorrect: boolean;
+}
+```
+
+### Hobby-Scale Data Models
+
+**Learning Plan Management**:
+```typescript
+interface LearningPlanTopic {
+  id: string;
+  userId: string;
+  topicId: string;
+  addedAt: Date;
+  // Simple many-to-many relationship
+}
+
+interface UserProgress {
+  id: string;
+  userId: string;
+  topicId: string;
+  completionPercentage: number;
+  manuallyCompleted: boolean;
+  lastAccessed: Date;
+  completedAt: Date | null;
+}
+
+interface Bookmark {
+  id: string;
+  userId: string;
+  topicId: string;
+  created_at: Date;
+}
+```
+
+### PostgreSQL Tables
+
+```sql
+-- Users table
+CREATE TABLE users (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    role VARCHAR(10) NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'admin')),
+    is_active BOOLEAN DEFAULT FALSE,
+    preferred_language VARCHAR(2) DEFAULT 'bg' CHECK (preferred_language IN ('bg', 'en', 'de')),
+    registration_date TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    last_login_date TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Categories table
+CREATE TABLE categories (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    color_code VARCHAR(7) DEFAULT '#1976d2',
+    icon_name VARCHAR(50) DEFAULT 'book',
+    sort_order INTEGER DEFAULT 0,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Topics table
+CREATE TABLE topics (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    category_id UUID NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
+    topic_number INTEGER NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    slug VARCHAR(255) UNIQUE NOT NULL,
+    estimated_reading_time INTEGER DEFAULT 5,
+    is_published BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(category_id, topic_number)
+);
+
+-- Topic content with multi-language support
+CREATE TABLE topic_content (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    topic_id UUID NOT NULL REFERENCES topics(id) ON DELETE CASCADE,
+    language_code VARCHAR(2) NOT NULL DEFAULT 'bg' CHECK (language_code IN ('bg', 'en', 'de')),
+    title VARCHAR(255) NOT NULL,
+    content TEXT NOT NULL,
+    meta_description TEXT,
+    search_vector TSVECTOR, -- For full-text search
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(topic_id, language_code)
+);
+
+-- Create GIN index for full-text search
+CREATE INDEX idx_topic_content_search ON topic_content USING GIN(search_vector);
+
+-- Function to update search_vector
+CREATE OR REPLACE FUNCTION topic_content_search_update() RETURNS trigger AS $$
+BEGIN
+    NEW.search_vector =
+        setweight(to_tsvector('english', COALESCE(NEW.title, '')), 'A') ||
+        setweight(to_tsvector('english', COALESCE(NEW.content, '')), 'B') ||
+        setweight(to_tsvector('english', COALESCE(NEW.meta_description, '')), 'C');
+    RETURN NEW;
+END
+$$ LANGUAGE plpgsql;
+
+-- Trigger for search vector update
+CREATE TRIGGER tsvector_update BEFORE INSERT OR UPDATE
+ON topic_content FOR EACH ROW EXECUTE FUNCTION topic_content_search_update();
+
+-- Tests table със JSON import field
+CREATE TABLE tests (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    topic_id UUID NOT NULL REFERENCES topics(id) ON DELETE CASCADE,
+    title VARCHAR(255) NOT NULL,
+    passing_percentage INTEGER DEFAULT 70,
+    max_attempts INTEGER DEFAULT 3,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(topic_id)
+);
+
+-- Questions със sequential ordering
+CREATE TABLE questions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    test_id UUID NOT NULL REFERENCES tests(id) ON DELETE CASCADE,
+    question_type VARCHAR(10) NOT NULL CHECK (question_type IN ('single', 'multiple')),
+    question_text TEXT NOT NULL,
+    explanation TEXT,
+    sort_order INTEGER DEFAULT 0, -- Critical за sequential display
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Question options
+CREATE TABLE question_options (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    question_id UUID NOT NULL REFERENCES questions(id) ON DELETE CASCADE,
+    option_text TEXT NOT NULL,
+    is_correct BOOLEAN DEFAULT FALSE,
+    sort_order INTEGER DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Test attempts
+CREATE TABLE test_attempts (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    test_id UUID NOT NULL REFERENCES tests(id) ON DELETE CASCADE,
+    score REAL NOT NULL,
+    total_questions INTEGER NOT NULL,
+    correct_answers INTEGER NOT NULL,
+    passed BOOLEAN NOT NULL,
+    started_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    completed_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Test answers (JSON array за selected options)
+CREATE TABLE test_answers (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    attempt_id UUID NOT NULL REFERENCES test_attempts(id) ON DELETE CASCADE,
+    question_id UUID NOT NULL REFERENCES questions(id) ON DELETE CASCADE,
+    selected_options JSONB NOT NULL, -- JSON array от option IDs
+    is_correct BOOLEAN NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Learning plan topics (simple many-to-many)
+CREATE TABLE learning_plan_topics (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    topic_id UUID NOT NULL REFERENCES topics(id) ON DELETE CASCADE,
+    added_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(user_id, topic_id)
+);
+
+-- User progress tracking
+CREATE TABLE user_progress (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    topic_id UUID NOT NULL REFERENCES topics(id) ON DELETE CASCADE,
+    completion_percentage INTEGER DEFAULT 0,
+    manually_completed BOOLEAN DEFAULT FALSE,
+    last_accessed TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    completed_at TIMESTAMP WITH TIME ZONE,
+    UNIQUE(user_id, topic_id)
+);
+
+-- Bookmarks
+CREATE TABLE bookmarks (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    topic_id UUID NOT NULL REFERENCES topics(id) ON DELETE CASCADE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(user_id, topic_id)
+);
+
+## Maintenance and Monitoring (PostgreSQL)
+
+### Database Maintenance
+
+**PostgreSQL Maintenance Tasks**:
+```sql
+-- Regular maintenance tasks
+ANALYZE;
+VACUUM ANALYZE;
+
+-- Rebuild indexes for specific tables
+REINDEX TABLE users;
+REINDEX TABLE categories;
+REINDEX TABLE topics;
+REINDEX TABLE topic_content;
+
+-- Check for table bloat
+SELECT nspname, relname, 
+       pg_size_pretty(pg_relation_size(quote_ident(nspname) || '.' || quote_ident(relname))) as size,
+       pg_size_pretty(pg_total_relation_size(quote_ident(nspname) || '.' || quote_ident(relname)) - pg_relation_size(quote_ident(nspname) || '.' || quote_ident(relname))) as index_size
+FROM pg_catalog.pg_statio_user_tables 
+ORDER BY pg_relation_size(quote_ident(nspname) || '.' || quote_ident(relname)) DESC;
+```
+
+### Monitoring Stack
+
+**Application Monitoring**:
+- Structured logging with proper log levels
+- Distributed tracing with OpenTelemetry
+- Centralized log management
+
+**Database Monitoring**:
+- PostgreSQL query performance metrics
+- Connection pool statistics
+- Cache hit ratios
+
+### Key Metrics
+
+**PostgreSQL Metrics**:
+- Query performance (>100ms threshold)
+- Connection pool utilization
+- Cache hit ratio
+- Replication lag
+- Deadlocks and long-running transactions
+
+**Application Metrics**:
+- Request rates per endpoint
+- Authentication success/failure rates
+- API response times
+- Error rates by type
+- Cache hit/miss ratios
+
+## Security (PostgreSQL)
+
+### Database Security
+
+**PostgreSQL Security**:
+- Role-based access control (RBAC)
+- Row-level security (RLS) for multi-tenant data
+- Connection encryption with SSL/TLS
+- Password policies and authentication methods
+
+**SQL Injection Prevention**:
+- TypeORM parameterized queries
+- Input validation and sanitization
+- Least privilege database users
+
+**Backup Security**:
+- Encrypted backups
+- Secure offsite storage
+- Regular backup testing
+
+### Stateless Authentication Security
+
+**JWT Security**:
+- Strong secret rotation
+- Short-lived access tokens
+- Refresh token rotation
+- Token blacklisting
+
+**Session Management**:
+- Stateless JWT approach
+
+**Rate Limiting**:
+- IP-based and user-based limits
+- Exponential backoff for failed attempts
+
+**Password Security**:
+- bcrypt hashing with appropriate cost
+- Password complexity requirements
+- Account lockout after failed attempts
+
+### Input Validation
+
+**Multi-language Content**: XSS prevention за rich text content
+**Search Queries**: FTS5 query sanitization за injection prevention
+### Key Metrics
+
+**PostgreSQL Metrics**:
+- Query performance (>100ms threshold)
+- Connection pool utilization
+- Cache hit ratio
+- Replication lag
+- Deadlocks and long-running transactions
+
+**Application Metrics**:
+- Request rates per endpoint
+- Authentication success/failure rates
+- API response times
+- Error rates by type
+- Cache hit/miss ratios
+
+**Production Alerts**:
+- Database connection pool exhaustion
+- PostgreSQL deadlocks
+- High query latency
+- Failed health checks
+- Backup failures
+- SSL certificate expiration
+- Security events
+- Memory usage >80% for >30 minutes
