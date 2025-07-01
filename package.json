@@ -1,13 +1,15 @@
 {
-  "name": "lms-monorepo",
-  "version": "1.0.0",
+  "name": "qa-lms-monorepo",
   "private": true,
-  "description": "A monorepo for the Learning Management System",
-  "main": "index.js",
+  "version": "1.0.0",
+  "description": "QA Learning Management System, a monorepo for the fullstack application.",
+  "author": "Ivan Markov",
+  "license": "UNLICENSED",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "//": "Top-level scripts will be added later for building/testing all packages"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  }
 }
