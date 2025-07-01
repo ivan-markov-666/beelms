@@ -1,0 +1,10 @@
+{
+  "name": "qa-platform",
+  "private": true,
+  "scripts": {
+    "test:regression": "pnpm -r --parallel test"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
