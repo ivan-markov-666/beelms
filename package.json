@@ -4,6 +4,7 @@
   "scripts": {
     "test:regression": "pnpm -r --parallel test",
     "lint": "eslint . --ext .ts,.tsx --cache",
+    "build": "pnpm -r --parallel --if-present build",
     "format": "prettier --write ."
   },
   "devDependencies": {
