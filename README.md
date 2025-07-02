@@ -96,3 +96,21 @@ graph TD
   end
 ```
 
+---
+
+## CI/CD
+
+Проектът използва **GitHub Actions** за непрекъсната интеграция и доставка. Основният workflow файл се намира в `.github/workflows/ci.yml` и се изпълнява при всеки `push` и `pull request`.
+
+### Pipeline стъпки
+
+1. **Checkout** – Изтегля кода.
+2. **Setup Node & PNPM** – Инсталира Node.js 20 и pnpm.
+3. **Install** – Изпълнява `pnpm install --frozen-lockfile`, за да гарантира консистентност на зависимостите.
+4. **Lint** – Стартира `pnpm lint`, за да провери кода спрямо ESLint правила.
+5. **Build** – Изпълнява `pnpm build`, който рекурсивно стартира `build` скриптовете във всички пакети (ако са дефинирани).
+6. **Regression Suite** – Изпълнява `pnpm test:regression`, който стартира unit, integration и E2E тестове през всички пакети.
+
+Pipeline-ът действа като **quality gate** – ако някоя стъпка се провали, процесът спира и кодът не може да бъде слят в основния клон.
+
+

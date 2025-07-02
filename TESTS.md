@@ -2,6 +2,21 @@
 
 Този документ описва тестовете, включени в регресионния пакет на проекта (`test:regression`).
 
+## Regression Suite Overview
+
+`test:regression` е npm скрипт, дефиниран в коренния `package.json`, който изпълнява всички видове тестове (unit, integration, e2e) във всеки пакет на monorepo-то, използвайки **pnpm workspaces**. Всички тестове се стартират паралелно за бърза обратна връзка.
+
+### Стартиране локално
+
+```bash
+pnpm test:regression
+```
+
+### В CI Pipeline
+
+В GitHub Actions workflow-а (`ci.yml`) този скрипт се изпълнява автоматично след стъпката `build`. Ако някой тест се провали, pipeline-ът ще бъде маркиран като неуспешен и кодът няма да бъде слят.
+
+
 ## Unit Test: Environment Configuration Validation (Backend)
 
 Файл: `apps/backend/test/config-validation.spec.ts`
