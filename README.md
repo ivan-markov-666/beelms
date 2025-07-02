@@ -73,3 +73,26 @@ qa-platform/
     ```
 
     Тази команда ще изгради Docker image за `backend` приложението и ще стартира контейнери за него и за PostgreSQL базата данни. Backend сървърът ще бъде достъпен на `http://localhost:3000` (или на порта, който сте задали в `.env` файла).
+
+---
+
+## Управление на конфигурацията (Backend)
+
+Backend приложението използва NestJS `@nestjs/config` модул за централизирано управление и **валидация** на всички критични променливи на средата.
+
+1. Модулът `AppConfigModule` се зарежда глобално и използва `Joi` схема (`src/config/validation.ts`) за валидиране на:
+   - `DATABASE_URL` – задължително, валиден URI към PostgreSQL.
+   - `PORT` – незадължително, по подразбиране `3000`.
+2. Ако липсва задължителна променлива или стойността ѝ е невалидна, приложението **спира стартирането** и хвърля грешка.
+3. Всички `.env.example` файлове трябва да отразяват тази схема.
+
+```mermaid
+graph TD
+  subgraph Config Flow
+    ENV[.env / Host ENV] --> ConfigModule
+    ConfigModule --> ValidationSchema
+    ValidationSchema -->|OK| AppStart
+    ValidationSchema -->|Error| AppExit
+  end
+```
+
