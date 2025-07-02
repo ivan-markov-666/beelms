@@ -2,9 +2,20 @@
   "name": "qa-platform",
   "private": true,
   "scripts": {
-    "test:regression": "pnpm -r --parallel test"
+    "test:regression": "pnpm -r --parallel test",
+    "lint": "eslint . --ext .ts,.tsx --cache",
+    "format": "prettier --write ."
   },
   "devDependencies": {
-    "typescript": "^5.0.0"
+    "typescript": "~5.3.3",
+    "eslint": "^8.57.0",
+    "@typescript-eslint/parser": "^6.10.0",
+    "@typescript-eslint/eslint-plugin": "^6.10.0",
+    "eslint-plugin-react": "^7.33.1",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.1",
+    "prettier": "^3.2.5"
   }
 }
+
