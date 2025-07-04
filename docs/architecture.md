@@ -172,6 +172,45 @@ QA Обучителната Платформа използва **прагмат
 
 **RAM**: Минимум 2GB за PostgreSQL + 2-4GB за приложението
 
+### Local Development with Docker Compose
+
+За локална разработка **Docker Compose** осигурява напълно самодостатъчна среда със следните контейнери:
+
+| Service | Image | Purpose |
+|---------|-------|---------|
+| `postgres` | `postgres:15` | Основна релационна база данни |
+| `backend`  | Node 20 + NestJS | REST API, свързва се към `postgres` |
+
+Минималната конфигурация е описана в `docker-compose.yml`:
+
+```yaml
+postgres:
+  image: postgres:15
+  environment:
+    POSTGRES_DB: ${DB_NAME}
+    POSTGRES_USER: ${DB_USER}
+    POSTGRES_PASSWORD: ${DB_PASSWORD}
+  ports:
+    - "${DB_PORT}:5432"
+  volumes:
+    - postgres_data:/var/lib/postgresql/data
+  healthcheck:
+    test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
+    interval: 10s
+    retries: 5
+```
+
+Контейнерите споделят мрежова мрежа, затова бекендът достъпва БД чрез хоста `postgres`. Променливите на средата се съхраняват в кореновия `.env` (игнориран от Git) и примерният `.env.example`.
+
+**Стартиране**:
+```bash
+docker compose up -d
+```
+
+След като healthcheck-ът е „healthy“, NestJS може да се стартира локално или през собствения си контейнер.
+
+---
+
 ### Структура на Проекта
 
 **Решение за Структура**: **Monorepo**, управлявано с **pnpm workspaces**. Тази структура е оптимална за разработка с AI асистенти като WindSurf, тъй като предоставя пълен контекст на целия проект на едно място.

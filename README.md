@@ -52,27 +52,54 @@ qa-platform/
 
 ## Локална разработка с Docker
 
-За да стартирате проекта локално, е необходимо да имате инсталирани `Docker` и `Docker Compose`.
+Следните стъпки стартират **напълно самодостатъчна** дев среда (NestJS API + PostgreSQL) само с Docker.
 
-1.  **Конфигуриране на променливите на средата:**
+1. **Подготовка на `.env` файловете**
 
-    Първо, трябва да създадете `.env` файл в директорията `apps/backend`. Можете да копирате примерния файл:
+   В корена на репото има примерен `.env.example`. Копирайте го като `.env` и при нужда променете стойностите:
 
-    ```bash
-    cp apps/backend/.env.example apps/backend/.env
-    ```
+   ```bash
+   cp .env.example .env
+   ```
 
-    Файлът `.env` съдържа конфигурацията за връзка с базата данни и порта на приложението. Не го добавяйте в `git`.
+   Ключови променливи:
 
-2.  **Стартиране на средата:**
+   * `BACKEND_PORT` – портът на NestJS (по подразбиране `3000`)
+   * `DB_PORT` – портът на PostgreSQL, мапнат към хоста (`5432`)
+   * `DB_NAME`, `DB_USER`, `DB_PASSWORD` – данни за БД
 
-    След като сте конфигурирали променливите, стартирайте всички услуги с `docker-compose`:
+   Ако стартирате бекенда извън контейнера, копирайте и примерния файл в `apps/backend`:
 
-    ```bash
-    docker-compose up --build
-    ```
+   ```bash
+   cp apps/backend/.env.example apps/backend/.env
+   ```
 
-    Тази команда ще изгради Docker image за `backend` приложението и ще стартира контейнери за него и за PostgreSQL базата данни. Backend сървърът ще бъде достъпен на `http://localhost:3000` (или на порта, който сте задали в `.env` файла).
+2. **Стартиране / билд на контейнерите**
+
+   ```bash
+   docker compose up -d --build
+   ```
+
+   Командата ще:
+   * изгради `backend` image (виж `apps/backend/Dockerfile`)
+   * стартира `postgres` и `backend` контейнери
+   * изчака Postgres да стане `healthy` (health-check).
+
+3. **Полезни команди**
+
+   ```bash
+   docker compose ps          # Статус на контейнерите
+   docker compose logs -f     # Лайв логове
+   docker compose down        # Спиране и почистване
+   ```
+
+> Забележка: `.dockerignore` изключва локалните `node_modules` и build артефакти, ускорявайки build-а и предотвратявайки грешки с файлови права.
+
+Backend API трябва да е достъпен на `http://localhost:${BACKEND_PORT}`. Проверете със:
+
+```bash
+curl http://localhost:3000/health
+```
 
 ---
 

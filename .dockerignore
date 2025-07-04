@@ -1,0 +1,17 @@
+# Ignore node_modules and build artifacts
+apps/*/node_modules
+packages/*/node_modules
+node_modules
+**/dist
+**/.turbo
+# Git & IDE
+.git
+.vscode
+# Env files
+.env
+.env.*
+# Logs
+*.log
+# OS
+.DS_Store
+Thumbs.db

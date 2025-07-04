@@ -1,0 +1,8 @@
+{
+  "name": "@qa-platform/ui-components",
+  "version": "0.0.1",
+  "private": true,
+  "main": "index.tsx",
+  "types": "index.tsx",
+  "license": "MIT"
+}
