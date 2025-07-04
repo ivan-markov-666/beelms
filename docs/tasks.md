@@ -55,6 +55,23 @@
 
 ---
 
+---
+
+- **Task 1.1.6: Минимален Docker Compose за PostgreSQL**
+  - [ ] Добавяне / валидиране на `postgres` service в `docker-compose.yml` с:
+    - `image: postgres:15`
+    - Порт `5432`, експониран чрез `${DB_PORT}`
+    - Променливи `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, заредени от `.env`
+    - Персистентен `volume` `postgres_data`
+    - `healthcheck`, който използва `pg_isready` за проверка, че базата е готова
+  - [ ] Създаване на примерен файл **`.env.example`** в корена на проекта с ключовите променливи (`BACKEND_PORT`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`).
+  - [ ] Актуализиране на `apps/backend/.env.example`, така че `DATABASE_URL` да използва хоста `postgres`, а не `localhost` (важно за работа вътре в Docker мрежата).
+  - **Документация:**
+    - **architecture.md**: Добавяне на секция "Local Development with Docker Compose", описваща как да се стартират контейнерите и как бекендът се свързва към Postgres.
+    - **README.md** (по желание): Бърз старт с `docker compose up -d`.
+
+---
+
 ### Story 1.2: Core Data Models & Database Schema
 
 *As a developer, I want to establish the core database schema and data models, so that the application has a solid data foundation.*
