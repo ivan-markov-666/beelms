@@ -39,6 +39,33 @@ qa-platform/
 
 ---
 
+## Entity Relationship Diagram (Task 1.2.1)
+
+Следната диаграма показва връзките между основните таблици в базата данни:
+
+```mermaid
+graph TD
+  Category[Category] -->|1..n| Course[Course]
+  Course -->|1..n| Topic[Topic]
+  Topic -->|1| Test[Test]
+  Test -->|1..n| Question[Question]
+  User[User] -->|*| UserCourseProgress[UserCourseProgress]
+  User -->|*| UserProgress[UserProgress]
+  Course -->|1..n| UserCourseProgress
+  Topic -->|1..n| UserProgress
+  SystemSetting[SystemSetting]:::setting
+
+  classDef setting fill:#f2f2f2,stroke:#333,stroke-width:1px;
+```
+
+Диаграмата отразява:
+
+* **Category → Course → Topic → Test → Question** – йерархия на учебното съдържание.
+* **UserProgress / UserCourseProgress** – таблици за напредък на потребителя с композитни първични ключове.
+* **SystemSetting** – ключ-стойност конфигурация на системата.
+
+---
+
 ## TypeScript Конфигурация
 
 Проектът е изцяло написан на TypeScript, за да се осигури типова сигурност и по-добра поддръжка на кода. Конфигурацията е разделена на няколко файла:
@@ -122,6 +149,31 @@ graph TD
     ValidationSchema -->|Error| AppExit
   end
 ```
+
+---
+
+## Миграции на базата данни
+
+NestJS backend-ът използва **TypeORM** миграции, за да поддържа схемата на базата данни под контрол.
+
+### Генериране на нова миграция
+
+```bash
+# В корена на репото
+pnpm --filter @qa-platform/backend run migration:generate
+```
+
+Тази команда:
+1. Зарежда `src/data-source.ts`, който динамично избира **PostgreSQL** (ако `DATABASE_URL` е зададен) или in-memory **SQLite** при локална разработка.
+2. Сравнява метаданните на TypeORM entities със съществуващата схема и генерира нов файл в `apps/backend/src/database/migrations/` със суфикс `InitialMigration` или съответното име.
+
+### Прилагане на миграциите
+
+```bash
+pnpm --filter @qa-platform/backend run migration:run
+```
+
+Командата свързва към базата (по `DATABASE_URL`) и изпълнява всички неприлагани миграции. В CI pipeline-а това се случва автоматично (виж по-долу).
 
 ---
 
