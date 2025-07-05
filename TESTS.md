@@ -4,6 +4,20 @@
 
 ## Regression Suite Overview
 
+### Smoke Test – Миграции (Task 1.2.2)
+
+| Файл / Стъпка в CI | Цел |
+| ------------------ | ------------------------------------------------------------ |
+| `.github/workflows/ci.yml` – **Validate DB Migrations** | Стартира чист контейнер с PostgreSQL 15, задава `DATABASE_URL` и изпълнява `pnpm --filter @qa-platform/backend run migration:run`. Целта е да се гарантира, че всички миграции се изпълняват без синтактични или логически грешки върху празна база данни. Ако SQL е невалиден или липсва миграция, pipeline-ът ще се провали. |
+
+Локално можете да стартирате същата проверка с:
+
+```bash
+pnpm --filter @qa-platform/backend run migration:run
+```
+
+Това ще приложи миграциите към базата, посочена в `DATABASE_URL`.
+
 `test:regression` е npm скрипт, дефиниран в коренния `package.json`, който изпълнява всички видове тестове (unit, integration, e2e) във всеки пакет на monorepo-то, използвайки **pnpm workspaces**. Всички тестове се стартират паралелно за бърза обратна връзка.
 
 ### Стартиране локално

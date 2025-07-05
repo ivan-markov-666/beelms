@@ -7,7 +7,10 @@
     "start": "ts-node src/main.ts",
     "build": "tsc -p tsconfig.json",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js -d src/data-source.ts",
+    "migration:run": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js -d src/data-source.ts migration:run",
+    "migration:generate": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js -d src/data-source.ts migration:generate src/database/migrations/InitialMigration"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
@@ -17,6 +20,7 @@
     "joi": "^17.9.2",
     "pg": "^8.10.0",
     "reflect-metadata": "^0.1.13",
+    "dotenv": "^16.3.1",
     "rxjs": "^7.8.1",
     "typeorm": "^0.3.25"
   },
@@ -32,6 +36,8 @@
     "testcontainers": "^9.1.0",
     "ts-jest": "^29.1.0",
     "ts-node": "^10.9.1",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "@types/dotenv": "^8.2.0",
+    "tsconfig-paths": "^4.2.0"
   }
 }
