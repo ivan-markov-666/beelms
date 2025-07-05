@@ -8,7 +8,7 @@
 
 ### Story 1.1: Project Setup & Infrastructure
 
-*As a developer, I want to establish the basic project structure and development environment, so that the team can efficiently develop and deploy the application.*
+_As a developer, I want to establish the basic project structure and development environment, so that the team can efficiently develop and deploy the application._
 
 #### Задачи (Tasks):
 
@@ -74,7 +74,7 @@
 
 ### Story 1.2: Core Data Models & Database Schema
 
-*As a developer, I want to establish the core database schema and data models, so that the application has a solid data foundation.*
+_As a developer, I want to establish the core database schema and data models, so that the application has a solid data foundation._
 
 #### Задачи (Tasks):
 
@@ -115,7 +115,7 @@
 
 ### Story 1.3: Basic API Foundation
 
-*As a developer, I want to establish the basic NestJS API structure, so that frontend applications can communicate with the backend.*
+_As a developer, I want to establish the basic NestJS API structure, so that frontend applications can communicate with the backend._
 
 #### Задачи (Tasks):
 
@@ -164,7 +164,7 @@
 
 ### Story 1.4: Public Content API Endpoints
 
-*As a guest user, I want to access course and lesson content through API endpoints, so that I can browse educational content without registration.*
+_As a guest user, I want to access course and lesson content through API endpoints, so that I can browse educational content without registration._
 
 #### Задачи (Tasks):
 
@@ -205,7 +205,7 @@
 
 ### Story 2.1: User Registration
 
-*As a new user, I want to be able to register for an account, so that I can access personalized features.*
+_As a new user, I want to be able to register for an account, so that I can access personalized features._
 
 #### Задачи (Tasks):
 
@@ -256,7 +256,7 @@
 
 ### Story 2.2: User Login
 
-*As a registered user, I want to be able to log in to my account, so that I can access my personalized content and features.*
+_As a registered user, I want to be able to log in to my account, so that I can access my personalized content and features._
 
 #### Задачи (Tasks):
 
@@ -306,7 +306,7 @@
 
 ### Story 2.3: Secure Session & Access Control
 
-*As a logged-in user, I want my session to be secure and to be able to log out, so that my account is protected.*
+_As a logged-in user, I want my session to be secure and to be able to log out, so that my account is protected._
 
 #### Задачи (Tasks):
 
@@ -356,7 +356,7 @@
 
 ### Story 2.4: Role-Based Access Control (RBAC)
 
-*As an administrator, I want to have special permissions, so that I can manage the platform content and users.*
+_As an administrator, I want to have special permissions, so that I can manage the platform content and users._
 
 #### Задачи (Tasks):
 
@@ -396,7 +396,7 @@
 
 ### Story 3.1: User Dashboard
 
-*As a logged-in user, I want to see a personalized dashboard, so that I can easily view my enrolled courses and track my progress.*
+_As a logged-in user, I want to see a personalized dashboard, so that I can easily view my enrolled courses and track my progress._
 
 #### Задачи (Tasks):
 
@@ -434,7 +434,7 @@
 
 ### Story 3.2: Lesson Progress Tracking
 
-*As a logged-in user, I want to be able to mark lessons as complete, so that I can track my learning progress accurately.*
+_As a logged-in user, I want to be able to mark lessons as complete, so that I can track my learning progress accurately._
 
 #### Задачи (Tasks):
 
@@ -473,7 +473,7 @@
 
 ### Story 4.1: View Test & Questions
 
-*As a user, I want to be able to view the questions of a test, so that I can prepare to answer them.*
+_As a user, I want to be able to view the questions of a test, so that I can prepare to answer them._
 
 #### Задачи (Tasks):
 
@@ -501,7 +501,7 @@
 
 ### Story 4.2: Submit Test & View Results
 
-*As a user, I want to submit my answers and see my results, so that I can assess my knowledge.*
+_As a user, I want to submit my answers and see my results, so that I can assess my knowledge._
 
 #### Задачи (Tasks):
 
@@ -545,7 +545,7 @@
 
 ### Story 5.1: Course & Category Management
 
-*As an admin, I want to be able to create, update, and delete courses and categories, so that I can manage the educational content.*
+_As an admin, I want to be able to create, update, and delete courses and categories, so that I can manage the educational content._
 
 #### Задачи (Tasks):
 
@@ -588,7 +588,7 @@
 
 ### Story 5.2: Lesson & Content Management
 
-*As an admin, I want to be able to add, edit, and delete lessons (topics) within a course, so that I can structure the learning material.*
+_As an admin, I want to be able to add, edit, and delete lessons (topics) within a course, so that I can structure the learning material._
 
 #### Задачи (Tasks):
 
@@ -620,7 +620,7 @@
 
 ### Story 5.3: Test & Question Management
 
-*As an admin, I want to create and manage tests and their questions, so that I can assess user knowledge effectively.*
+_As an admin, I want to create and manage tests and their questions, so that I can assess user knowledge effectively._
 
 #### Задачи (Tasks):
 

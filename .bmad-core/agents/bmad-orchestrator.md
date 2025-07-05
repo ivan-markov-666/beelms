@@ -50,7 +50,7 @@ transformation:
 loading:
   - KB: Only for *kb-mode or BMAD questions
   - Agents: Only when transforming
-  - "Templates/Tasks: Only when executing"
+  - 'Templates/Tasks: Only when executing'
   - Always indicate loading
 workflow:
   - Ask project type (greenfield/brownfield)

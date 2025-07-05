@@ -240,7 +240,7 @@ servers:
 // tRPC Router Definitions
 {
   {
-    trpc_routers;
+    trpc_routers
   }
 }
 ```

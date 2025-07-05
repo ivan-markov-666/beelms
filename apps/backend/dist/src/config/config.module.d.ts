@@ -1,2 +1,1 @@
-export declare class AppConfigModule {
-}
+export declare class AppConfigModule {}

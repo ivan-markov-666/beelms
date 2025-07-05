@@ -4,7 +4,7 @@ import {
   PrimaryColumn,
   UpdateDateColumn,
   BaseEntity as TypeOrmBaseEntity,
-} from 'typeorm';
+} from 'typeorm'
 
 /**
  * Operational settings that can be updated at runtime via admin UI.
@@ -13,14 +13,14 @@ import {
 @Entity('system_settings')
 export class SystemSetting extends TypeOrmBaseEntity {
   @PrimaryColumn()
-  key!: string;
+  key!: string
 
   @Column({ type: 'text' })
-  value!: string;
+  value!: string
 
   @Column({ type: 'text', nullable: true })
-  description?: string;
+  description?: string
 
   @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt!: Date;
+  updatedAt!: Date
 }

@@ -1,7 +1,7 @@
-import { Column, Entity, OneToMany, Check } from 'typeorm';
-import { BaseEntity } from './base.entity';
-import { UserProgress } from './user-progress.entity';
-import { UserCourseProgress } from './user-course-progress.entity';
+import { Column, Entity, OneToMany, Check } from 'typeorm'
+import { BaseEntity } from './base.entity'
+import { UserProgress } from './user-progress.entity'
+import { UserCourseProgress } from './user-course-progress.entity'
 
 export enum UserRole {
   USER = 'user',
@@ -11,19 +11,19 @@ export enum UserRole {
 @Entity('users')
 export class User extends BaseEntity {
   @Column({ unique: true })
-  email!: string;
+  email!: string
 
   @Column()
-  password!: string;
+  password!: string
 
   @Column({ type: 'varchar', default: UserRole.USER, length: 20 })
   @Check(`role IN ('user', 'admin')`)
-  role!: UserRole;
+  role!: UserRole
 
   /* Relations */
   @OneToMany(() => UserProgress, (progress) => progress.user, { cascade: true })
-  progressRecords!: UserProgress[];
+  progressRecords!: UserProgress[]
 
   @OneToMany(() => UserCourseProgress, (progress) => progress.user, { cascade: true })
-  courseProgressRecords!: UserCourseProgress[];
+  courseProgressRecords!: UserCourseProgress[]
 }

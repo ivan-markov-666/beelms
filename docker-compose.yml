@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: apps/backend/Dockerfile
     ports:
-      - "${BACKEND_PORT}:${BACKEND_PORT}"
+      - '${BACKEND_PORT}:${BACKEND_PORT}'
     env_file:
       - ./apps/backend/.env
     depends_on:
@@ -18,7 +18,7 @@ services:
   postgres:
     image: postgres:15
     ports:
-      - "${DB_PORT}:5432"
+      - '${DB_PORT}:5432'
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}

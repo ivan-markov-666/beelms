@@ -1,19 +1,19 @@
-import { Column, Entity, ManyToOne } from 'typeorm';
-import { BaseEntity } from './base.entity';
-import { Test } from './test.entity';
+import { Column, Entity, ManyToOne } from 'typeorm'
+import { BaseEntity } from './base.entity'
+import { Test } from './test.entity'
 
 @Entity('questions')
 export class Question extends BaseEntity {
   @Column({ type: 'text' })
-  text!: string;
+  text!: string
 
   @Column({ type: 'simple-json' })
-  options!: string[];
+  options!: string[]
 
   @Column({ name: 'correct_answer_index' })
-  correctAnswerIndex!: number;
+  correctAnswerIndex!: number
 
   /* Relations */
   @ManyToOne(() => Test, (test) => test.questions, { onDelete: 'CASCADE' })
-  test!: Test;
+  test!: Test
 }

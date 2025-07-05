@@ -1,3 +1,2 @@
-import 'reflect-metadata';
-export declare class AppModule {
-}
+import 'reflect-metadata'
+export declare class AppModule {}

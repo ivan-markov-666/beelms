@@ -5,7 +5,7 @@ bundle:
 
 agents:
   - bmad-orchestrator
-  - "*"
+  - '*'
 
 workflows:
   - brownfield-fullstack
