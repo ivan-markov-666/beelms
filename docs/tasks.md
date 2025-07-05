@@ -68,7 +68,7 @@
   - [ ] Създаване на `UserProgress`, `UserCourseProgress`, и `SystemSetting` entities.
   - [ ] Дефиниране на всички релации (One-to-Many, Many-to-One) между entities.
   - [ ] Всички entities трябва да включват базови полета като `id` (uuid), `createdAt`, `updatedAt`.
-  - [ ] **Integration Test**: Добавяне на тест за ключови entities (`User`, `Course`), който проверява правилното записване и извличане от тестова база данни, както и коректността на релациите.
+  - [ ] **Integration Test**: Добавяне на тестове за всички entities, дефинирани в тази задача (напр. `User`, `Category`, `Course`, `Topic`, `Test`, `Question`, `UserProgress`, `UserCourseProgress`, `SystemSetting`), които проверяват правилното записване и извличане от тестова база данни, както и коректността на релациите.
   - **Документация:**
     - **README.md**: Добавяне на диаграма или описание на релациите между основните entities.
     - **TESTS.md**: Документиране на integration теста за entities, като се обясни, че той проверява CRUD операциите и релациите.

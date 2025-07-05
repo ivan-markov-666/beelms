@@ -32,3 +32,31 @@ pnpm test:regression
 
 Тестът създава in-memory NestJS модул, който зарежда `ConfigModule` със същата Joi схема (`validationSchema`), и очаква `compile()` да отхвърли промиса.
 
+---
+
+## Integration Tests: Core Entities (Task 1.2.1)
+
+Интеграционните тестове за задачата **1.2.1** гарантират, че всички TypeORM entities са правилно дефинирани, взаимносвързани и отговарят на заложените ограничения.
+
+| Файл | Основна цел |
+| ---- | ----------- |
+| `apps/backend/test/entities.integration.spec.ts` | Smoke-тест за пълната йерархия (User → Category → Course → Topic → Test → Question + SystemSetting). Проверява успешен `save` / `find` и коректност на релациите. |
+| `apps/backend/test/user-progress.integration.spec.ts` | Специфични сценарии за таблиците с композитен ключ `UserProgress` и `UserCourseProgress`: уникалност, cascade delete, bulk insert. |
+| `apps/backend/test/entities-constraints.integration.spec.ts` | Валидира UNIQUE (`User.email`, `Category.name`), CHECK (`User.role`), `updatedAt` timestamp, както и каскадна верига Category ➜ … ➜ Question. |
+| `apps/backend/test/entities-edge.integration.spec.ts` | Negative FK случаи, default стойности, повторно създаване на запис след изтриване, `Topic.content` update. |
+| `apps/backend/test/entities-coverage.integration.spec.ts` | Допълнителни ъглови случаи: cascade delete на `Course`, duplicate composite-PK за `UserCourseProgress`, големи стойности в `SystemSetting`, JSON сериализация на `Question.options`, транзакционен rollback. |
+
+### Команда за стартиране само на тези тестове
+
+```bash
+pnpm --filter backend test -- --runTestsByPath \
+  test/entities.integration.spec.ts \
+  test/user-progress.integration.spec.ts \
+  test/entities-constraints.integration.spec.ts \
+  test/entities-edge.integration.spec.ts \
+  test/entities-coverage.integration.spec.ts --runInBand
+```
+
+Всички тестове използват in-memory SQLite база (`DataSource` с `database: ':memory:'`), което ги прави бързи и изолирани от външни услуги.
+
+
