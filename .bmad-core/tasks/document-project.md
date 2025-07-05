@@ -343,24 +343,20 @@ Ask the user to review each completed document and use the advanced elicitation 
 [[LLM: After all documents are completed:
 
 1. Ensure all documents are created in the proper BMAD-expected locations:
-
    - Core docs in `docs/` (index.md, prd.md)
    - Architecture shards in `docs/architecture/` subdirectory
    - Create the `docs/architecture/` directory if it doesn't exist
 
 2. Create/update the master index documents:
-
    - Update `docs/index.md` to reference all documentation
    - Create `docs/architecture/index.md` listing all architecture shards
 
 3. Verify document cross-references:
-
    - Ensure all documents link to related documentation
    - Check that file paths match the actual project structure
    - Validate that examples reference real files in the project
 
 4. Provide maintenance guidance:
-
    - Document update triggers (when to update each doc)
    - Create a simple checklist for keeping docs current
    - Suggest automated validation approaches

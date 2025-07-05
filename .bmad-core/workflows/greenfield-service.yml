@@ -38,27 +38,27 @@ workflow:
       updates: prd.md (if needed)
       requires: architecture.md
       condition: architecture_suggests_prd_changes
-      notes: "If architect suggests story changes, update PRD and re-export the complete unredacted prd.md to docs/ folder."
+      notes: 'If architect suggests story changes, update PRD and re-export the complete unredacted prd.md to docs/ folder.'
 
     - agent: po
       validates: all_artifacts
       uses: po-master-checklist
-      notes: "Validates all documents for consistency and completeness. May require updates to any document."
+      notes: 'Validates all documents for consistency and completeness. May require updates to any document.'
 
     - agent: various
       updates: any_flagged_documents
       condition: po_checklist_issues
-      notes: "If PO finds issues, return to relevant agent to fix and re-export updated documents to docs/ folder."
+      notes: 'If PO finds issues, return to relevant agent to fix and re-export updated documents to docs/ folder.'
 
     - workflow_end:
       action: move_to_ide
-      notes: "All planning artifacts complete. Move to IDE environment to begin development. Explain to the user the IDE Development Workflow next steps: data#bmad-kb:IDE Development Workflow"
+      notes: 'All planning artifacts complete. Move to IDE environment to begin development. Explain to the user the IDE Development Workflow next steps: data#bmad-kb:IDE Development Workflow'
 
   # For Simple Services (Simple APIs, Single Purpose Services)
   simple_service_sequence:
     - step: service_scope
       action: assess complexity
-      notes: "First, assess if this needs full planning (use complex_service_sequence) or can be a simple API/service."
+      notes: 'First, assess if this needs full planning (use complex_service_sequence) or can be a simple API/service.'
 
     - agent: analyst
       creates: project-brief.md
@@ -70,11 +70,11 @@ workflow:
       creates: simple_epic OR single_story
       uses: create-epic OR create-story
       requires: project-brief.md
-      notes: "Create simple epic or story for API endpoints instead of full PRD for rapid development."
+      notes: 'Create simple epic or story for API endpoints instead of full PRD for rapid development.'
 
     - workflow_end:
       action: move_to_ide
-      notes: "Simple service defined. Move to IDE environment to begin development. Explain to the user the IDE Development Workflow next steps: data#bmad-kb:IDE Development Workflow"
+      notes: 'Simple service defined. Move to IDE environment to begin development. Explain to the user the IDE Development Workflow next steps: data#bmad-kb:IDE Development Workflow'
 
   flow_diagram: |
     ```mermaid
@@ -130,14 +130,14 @@ workflow:
 
   handoff_prompts:
     # Complex sequence prompts
-    analyst_to_pm: "Project brief is complete. Save it as docs/project-brief.md in your project, then create the PRD."
-    pm_to_architect: "PRD is ready. Save it as docs/prd.md in your project, then create the service architecture."
-    architect_review: "Architecture complete. Save it as docs/architecture.md. Do you suggest any changes to the PRD stories or need new stories added?"
-    architect_to_pm: "Please update the PRD with the suggested story changes, then re-export the complete prd.md to docs/."
-    updated_to_po: "All documents ready in docs/ folder. Please validate all artifacts for consistency."
-    po_issues: "PO found issues with [document]. Please return to [agent] to fix and re-save the updated document."
-    complex_complete: "All planning artifacts validated and saved in docs/ folder. Move to IDE environment to begin development."
+    analyst_to_pm: 'Project brief is complete. Save it as docs/project-brief.md in your project, then create the PRD.'
+    pm_to_architect: 'PRD is ready. Save it as docs/prd.md in your project, then create the service architecture.'
+    architect_review: 'Architecture complete. Save it as docs/architecture.md. Do you suggest any changes to the PRD stories or need new stories added?'
+    architect_to_pm: 'Please update the PRD with the suggested story changes, then re-export the complete prd.md to docs/.'
+    updated_to_po: 'All documents ready in docs/ folder. Please validate all artifacts for consistency.'
+    po_issues: 'PO found issues with [document]. Please return to [agent] to fix and re-save the updated document.'
+    complex_complete: 'All planning artifacts validated and saved in docs/ folder. Move to IDE environment to begin development.'
 
     # Simple sequence prompts
-    simple_analyst_to_pm: "Focused project brief complete. Save it as docs/project-brief.md, then create simple epic or story for API development."
-    simple_complete: "Simple service defined. Move to IDE environment to begin development."
+    simple_analyst_to_pm: 'Focused project brief complete. Save it as docs/project-brief.md, then create simple epic or story for API development.'
+    simple_complete: 'Simple service defined. Move to IDE environment to begin development.'

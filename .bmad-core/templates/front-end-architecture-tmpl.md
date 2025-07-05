@@ -7,7 +7,6 @@
 [[LLM: Before proceeding with frontend architecture design, check if the project is using a frontend starter template or existing codebase:
 
 1. Review the PRD, main architecture document, and brainstorming brief for mentions of:
-
    - Frontend starter templates (e.g., Create React App, Next.js, Vite, Vue CLI, Angular CLI, etc.)
    - UI kit or component library starters
    - Existing frontend projects being used as a foundation
@@ -15,7 +14,6 @@
    - Design system implementations
 
 2. If a frontend starter template or existing project is mentioned:
-
    - Ask the user to provide access via one of these methods:
      - Link to the starter template documentation
      - Upload/attach the project files (for small projects)
@@ -33,7 +31,6 @@
 - Use this analysis to ensure your frontend architecture aligns with the starter's patterns
 
 3. If no frontend starter is mentioned but this is a new UI, ensure we know what the ui language and framework is:
-
    - Based on the framework choice, suggest appropriate starters:
      - React: Create React App, Next.js, Vite + React
      - Vue: Vue CLI, Nuxt.js, Vite + Vue

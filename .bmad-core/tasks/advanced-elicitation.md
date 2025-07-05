@@ -17,7 +17,6 @@
 2. If the section contains Mermaid diagrams, explain each diagram briefly before offering elicitation options (e.g., "The component diagram shows the main system modules and their interactions. Notice how the API Gateway routes requests to different services.")
 
 3. If the section contains multiple distinct items (like multiple components, multiple patterns, etc.), inform the user they can apply elicitation actions to:
-
    - The entire section as a whole
    - Individual items within the section (specify which item when selecting an action)
 

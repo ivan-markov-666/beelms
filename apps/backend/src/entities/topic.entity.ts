@@ -1,26 +1,26 @@
-import { Column, Entity, ManyToOne, OneToOne, OneToMany } from 'typeorm';
-import { BaseEntity } from './base.entity';
-import { Course } from './course.entity';
-import { Test } from './test.entity';
-import { UserProgress } from './user-progress.entity';
+import { Column, Entity, ManyToOne, OneToOne, OneToMany } from 'typeorm'
+import { BaseEntity } from './base.entity'
+import { Course } from './course.entity'
+import { Test } from './test.entity'
+import { UserProgress } from './user-progress.entity'
 
 @Entity('topics')
 export class Topic extends BaseEntity {
   @Column()
-  title!: string;
+  title!: string
 
   @Column({ type: 'text' })
-  content!: string; // Markdown
+  content!: string // Markdown
 
   /* Relations */
   @ManyToOne(() => Course, (course) => course.topics, {
     onDelete: 'CASCADE',
   })
-  course!: Course;
+  course!: Course
 
   @OneToOne(() => Test, (test) => test.topic)
-  test!: Test;
+  test!: Test
 
   @OneToMany(() => UserProgress, (progress) => progress.topic)
-  progressRecords!: UserProgress[];
+  progressRecords!: UserProgress[]
 }

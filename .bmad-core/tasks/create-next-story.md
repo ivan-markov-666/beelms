@@ -42,7 +42,6 @@ To identify the next logical story based on project progress and epic definition
 
 - Review `docs/stories/` to find the highest-numbered story file.
 - **If a highest story file exists (`{lastEpicNum}.{lastStoryNum}.story.md`):**
-
   - Verify its `Status` is 'Done' (or equivalent).
   - If not 'Done', present an alert to the user:
 
@@ -153,7 +152,6 @@ Format references as: `[Source: architecture/{filename}.md#{section}]`
 - **`Dev Technical Guidance` section (CRITICAL):**
 
   [[LLM: This section MUST contain ONLY information extracted from the architecture shards. NEVER invent or assume technical details.]]
-
   - Include ALL relevant technical details gathered from Steps 3 and 4, organized by category:
     - **Previous Story Insights**: Key learnings or considerations from the previous story
     - **Data Models**: Specific schemas, validation rules, relationships [with source references]

@@ -5,9 +5,9 @@ import {
   ManyToOne,
   Column,
   BaseEntity as TypeOrmBaseEntity,
-} from 'typeorm';
-import { User } from './user.entity';
-import { Topic } from './topic.entity';
+} from 'typeorm'
+import { User } from './user.entity'
+import { Topic } from './topic.entity'
 
 /**
  * Junction table that tracks which user has completed which topic.
@@ -16,20 +16,20 @@ import { Topic } from './topic.entity';
 @Entity('user_progress')
 export class UserProgress extends TypeOrmBaseEntity {
   @PrimaryColumn('uuid', { name: 'user_id' })
-  userId!: string;
+  userId!: string
 
   @PrimaryColumn('uuid', { name: 'topic_id' })
-  topicId!: string;
+  topicId!: string
 
   @Column({ name: 'completed_at', type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
-  completedAt!: Date;
+  completedAt!: Date
 
   /* Relations */
   @ManyToOne(() => User, (user) => user.progressRecords, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
-  user!: User;
+  user!: User
 
   @ManyToOne(() => Topic, (topic) => topic.progressRecords, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'topic_id' })
-  topic!: Topic;
+  topic!: Topic
 }

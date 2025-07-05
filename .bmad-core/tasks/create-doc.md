@@ -9,7 +9,6 @@
 ### 1. Identify Template and Context
 
 - Determine which template to use (user-provided or list available for selection to user)
-
   - Agent-specific templates are listed in the agent's dependencies under `templates`. For each template listed, consider it a document the agent can create. So if an agent has:
 
     @{example}

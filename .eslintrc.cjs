@@ -19,12 +19,12 @@ module.exports = {
     jest: true,
   },
   overrides: [
-     {
-       files: ['apps/{admin,web}/**/*.{ts,tsx}'],
-       plugins: ['react', 'react-hooks'],
-       extends: ['plugin:react/recommended', 'plugin:react-hooks/recommended'],
-       settings: { react: { version: 'detect' } },
-     },
+    {
+      files: ['apps/{admin,web}/**/*.{ts,tsx}'],
+      plugins: ['react', 'react-hooks'],
+      extends: ['plugin:react/recommended', 'plugin:react-hooks/recommended'],
+      settings: { react: { version: 'detect' } },
+    },
     {
       files: ['apps/backend/**/*.ts'],
       parserOptions: {
@@ -34,4 +34,4 @@ module.exports = {
       extends: ['plugin:@typescript-eslint/recommended-requiring-type-checking'],
     },
   ],
-};
+}

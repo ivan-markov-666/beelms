@@ -66,7 +66,6 @@ If none, state "N/A - Greenfield project"
 [[LLM: Based on PRD requirements and technical assumptions, make a platform recommendation:
 
 1. Consider common patterns (not an exhaustive list, use your own best judgement and search the web as needed for emerging trends):
-
    - **Vercel + Supabase**: For rapid development with Next.js, built-in auth/storage
    - **AWS Full Stack**: For enterprise scale with Lambda, API Gateway, S3, Cognito
    - **Azure**: For .NET ecosystems or enterprise Microsoft environments
