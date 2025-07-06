@@ -71,3 +71,20 @@ pnpm --filter backend test -- --runTestsByPath \
 ```
 
 Всички тестове използват in-memory SQLite база (`DataSource` с `database: ':memory:'`), което ги прави бързи и изолирани от външни услуги.
+
+### Integration Test – Data Seeding (Task 1.2.3)
+
+| Файл | Цел |
+| ----- | ---- |
+| `apps/backend/test/seeders.integration.spec.ts` | Стартира празна in-memory база, изпълнява `seedDatabase` и проверява:
+  1. Създадени са ≥1 категория и admin потребител.
+  2. Изпълнението е идемпотентно – повторно пускане не добавя дублирания.
+  3. Общият брой е точно 5 категории и 11 потребителя (1 admin + 10 users).
+  4. Имената на категориите и email-ите на потребителите са уникални.|
+
+Стартиране само на този тест:
+
+```bash
+pnpm --filter @qa-platform/backend test -- --runTestsByPath test/seeders.integration.spec.ts
+```
+
