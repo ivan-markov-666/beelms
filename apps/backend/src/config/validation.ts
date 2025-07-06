@@ -11,4 +11,7 @@ export const validationSchema = Joi.object({
 
   DATABASE_URL: Joi.string().uri().required(),
   PORT: Joi.number().port().default(3000),
+
+  // Comma-separated list of allowed origins for CORS (e.g. http://localhost:3000,http://localhost:4200)
+  CORS_ORIGIN: Joi.string().optional(),
 })

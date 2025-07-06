@@ -103,6 +103,35 @@ graph TD
 
 ---
 
+## Глобални Middleware-и (Task 1.3.1)
+
+### ValidationPipe
+
+Backend-ът активира глобален `ValidationPipe` в `src/main.ts`, който гарантира, че всички входни данни отговарят на декларираните DTO класове:
+
+```ts
+app.useGlobalPipes(
+  new ValidationPipe({
+    transform: true,         // автоматично преобразува типове
+    whitelist: true,         // допуска само декларирани в DTO полета
+    forbidNonWhitelisted: true, // 400 Bad Request при непознати полета
+    validationError: { target: false },
+  }),
+)
+```
+
+### CORS
+
+Същият файл активира CORS с гъвкава политика. Разрешените origins се контролират чрез променливата на средата `CORS_ORIGIN` (списък, разделен със запетая). Ако не е зададена, се разрешава `*` (удобно за development).
+
+```ts
+app.enableCors({
+  origin: process.env.CORS_ORIGIN?.split(',') ?? true,
+  credentials: true,
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+})
+```
+
 ## Управление на конфигурацията (Backend)
 
 Backend приложението използва NestJS `@nestjs/config` модул за централизирано управление и **валидация** на всички критични променливи на средата.
@@ -110,6 +139,7 @@ Backend приложението използва NestJS `@nestjs/config` мод
 1. Модулът `AppConfigModule` се зарежда глобално и използва `Joi` схема (`src/config/validation.ts`) за валидиране на:
    - `DATABASE_URL` – задължително, валиден URI към PostgreSQL.
    - `PORT` – незадължително, по подразбиране `3000`.
+   - `CORS_ORIGIN` – *опционално*, списък от разрешени origins, разделени със запетая (напр. `http://localhost:3000,http://localhost:4200`). Ако не е зададено, в development се позволява `*`.
 2. Ако липсва задължителна променлива или стойността ѝ е невалидна, приложението **спира стартирането** и хвърля грешка.
 3. Всички `.env.example` файлове трябва да отразяват тази схема.
 

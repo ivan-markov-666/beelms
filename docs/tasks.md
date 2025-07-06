@@ -103,13 +103,25 @@ _As a developer, I want to establish the basic NestJS API structure, so that fro
 #### Задачи (Tasks):
 
 - **Task 1.3.1: Настройка на глобални модули и конфигурация**
-  - [ ] Инсталиране на `class-validator` и `class-transformer`.
-  - [ ] Конфигуриране на глобален `ValidationPipe` в `main.ts` за автоматична валидация на всички входящи DTO-та.
-  - [ ] Активиране на CORS (`enableCors()`) в `main.ts`, за да се позволи комуникация с frontend приложенията.
-  - [ ] **Integration Test**: Добавяне на тест, който изпраща заявка с невалидни данни (DTO) и проверява дали се връща `400 Bad Request`, за да се валидира, че `ValidationPipe` работи глобално.
+  - [ ] Инсталиране на `class-validator` и `class-transformer` (добавяне към `apps/backend/package.json`).
+  - [ ] Конфигуриране на глобален `ValidationPipe` в `main.ts` със следните задължителни опции:
+    - `transform: true` – автоматично преобразува входящите данни спрямо типовете в DTO-то.
+    - `whitelist: true` – допуска само декларираните в DTO свойства.
+    - `forbidNonWhitelisted: true` – връща `400` при непознати полета.
+    - `validationError: { target: false }` – не излага оригиналния обект в отговора при грешка.
+  - [ ] Активиране на CORS в `main.ts` със следната политика (примерен код):
+    ```ts
+    app.enableCors({
+      origin: process.env.CORS_ORIGIN?.split(',') ?? true,
+      credentials: true,
+      methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    })
+    ```
+  - [ ] Добавяне на променлива на средата `CORS_ORIGIN` и валидирането ѝ в `configSchema`.
+  - [ ] **Integration Test**: Създаване на тестов контролер `TestController` с `POST /test-dto`, който приема DTO `{ @IsEmail() email: string }`. Тестът изпраща `{ email: 'invalid' }` и очаква `400 Bad Request`, валидирайки глобалния `ValidationPipe`.
   - **Документация:**
-    - **README.md**: Описание на глобалния `ValidationPipe` и конфигурацията на CORS.
-    - **TESTS.md**: Документиране на Integration теста за глобалния `ValidationPipe`.
+    - **README.md**: Нова секция „Глобални Middleware-и“ със субсекции „ValidationPipe“ и „CORS“, включваща примерната конфигурация и описание на променливите на средата.
+    - **TESTS.md**: Добавяне на описание на Integration теста за глобалния `ValidationPipe`.
 
 - **Task 1.3.2: Имплементиране на Health Check Endpoint**
   - [ ] Инсталиране на `@nestjs/terminus`.

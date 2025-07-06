@@ -88,3 +88,10 @@ pnpm --filter backend test -- --runTestsByPath \
 pnpm --filter @qa-platform/backend test -- --runTestsByPath test/seeders.integration.spec.ts
 ```
 
+### Integration Test – Global ValidationPipe (Task 1.3.1)
+
+| Файл | Цел |
+| ----- | ---- |
+| `apps/backend/test/validation-pipe.integration.spec.ts` | Потвърждава, че глобалният `ValidationPipe` е активен: изпраща DTO с невалиден email към `/test-dto` и очаква HTTP 400 (Bad Request).
+
+
