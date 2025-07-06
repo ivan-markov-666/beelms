@@ -94,4 +94,8 @@ pnpm --filter @qa-platform/backend test -- --runTestsByPath test/seeders.integra
 | ----- | ---- |
 | `apps/backend/test/validation-pipe.integration.spec.ts` | Потвърждава, че глобалният `ValidationPipe` е активен: изпраща DTO с невалиден email към `/test-dto` и очаква HTTP 400 (Bad Request).
 
+### Integration Test – Health Check (Task 1.3.2)
 
+| Файл | Цел |
+| ----- | ---- |
+| `apps/backend/test/health.integration.spec.ts` | 1. `GET /health` ➜ 200, правилна JSON структура и `Cache-Control: no-store`.<br>2. `HEAD /health` ➜ 200, празно тяло.<br>3. Swagger спека съдържа `/health`.<br>4. При затворена DB връзка ➜ 503. |

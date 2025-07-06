@@ -132,6 +132,22 @@ app.enableCors({
 })
 ```
 
+## Health Check Endpoint (Task 1.3.2)
+
+Приложението предоставя стандартен health-check на адрес **`GET /health`** (и `HEAD /health`), реализиран с `@nestjs/terminus`.
+
+* Проверява достъпа до базата данни чрез `TypeOrmHealthIndicator`.
+* Връща JSON със структура:
+  ```json
+  {
+    "status": "ok",
+    "info": { "database": { "status": "up" } }
+  }
+  ```
+* При липса на връзка към DB връща **503 Service Unavailable** с `{ "status": "error" }`.
+* Хедъри: `Cache-Control: no-store`, `Content-Type: application/json`.
+* Endpoint-ът е публичен и **не е защитен** от бъдещи `AuthGuard`-ове.
+
 ## Управление на конфигурацията (Backend)
 
 Backend приложението използва NestJS `@nestjs/config` модул за централизирано управление и **валидация** на всички критични променливи на средата.

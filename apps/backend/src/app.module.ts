@@ -5,10 +5,12 @@ import 'reflect-metadata'
 import { AppConfigModule } from './config/config.module'
 
 import { TestController } from './test/test.controller'
+import { HealthModule } from './health/health.module'
 
 @Module({
   imports: [
     AppConfigModule,
+    HealthModule,
     // Configure the global TypeORM connection. The configuration is loaded at runtime
     // via Nest's ConfigService, which itself is provided by AppConfigModule.
     TypeOrmModule.forRootAsync({
