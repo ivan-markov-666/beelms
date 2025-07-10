@@ -124,6 +124,7 @@ pnpm --filter api uninstall express
 - [ ] `tsconfig.jest.json` за **apps/api** (Jest + ts-jest)
 - [ ] Пер-пакетни `tsconfig.json`, наследяващи `tsconfig.base.json`
 - [ ] Минимални `package.json` файлове за всички `apps/*` и `packages/*`, ако липсват
+- [ ] `.gitignore` с правила за node_modules, build/dists, IDE и env файлове
 - [ ] Документирани настройки (виж `docs/architecture/tsconfig-notes.md`)
 - [ ] Валидация на конфигурацията с всички пакети
 
