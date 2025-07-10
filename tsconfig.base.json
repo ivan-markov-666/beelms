@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json.bbnb.dev/tsconfig.schema.json",
+  "compilerOptions": {
+    /* Base directory to resolve non-relative module names */
+    "baseUrl": ".",
+
+    /* Language and Environment */
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+
+    /* Modules */
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+
+    /* Type Checking */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+
+    /* Path Mapping */
+    "paths": {
+      "@qa-platform/shared-types": ["packages/shared-types/src"],
+      "@qa-platform/ui-components": ["packages/ui-components/src"],
+      "@qa-platform/constants": ["packages/constants/src"],
+      "@api/*": ["apps/api/src/*"],
+      "@web/*": ["apps/web/src/*"],
+      "@admin/*": ["apps/admin/src/*"]
+    },
+
+    /* Output */
+    "outDir": "./dist",
+    "declaration": true,
+    "sourceMap": true,
+    "inlineSources": true,
+
+    /* JSX */
+    "jsx": "react-jsx",
+    "jsxImportSource": "@emotion/react"
+  },
+  "include": ["**/*.ts", "**/*.tsx", "**/*.d.ts", "**/*.js", "**/*.jsx"],
+  "exclude": ["node_modules", "dist", "build", "coverage", ".next", ".vscode"]
+}

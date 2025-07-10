@@ -138,12 +138,15 @@ Start with the story template, filling in what's known:
 ## Status: Draft
 
 ## Story
+
 As a {{user_type}},
 I want {{enhancement_capability}},
 so that {{value_delivered}}.
 
 ## Context Source
+
 [[LLM: Document where story requirements came from]]
+
 - Source Document: {{document name/type}}
 - Enhancement Type: {{single feature/bug fix/integration/etc}}
 - Existing System Impact: {{brief assessment}}
@@ -156,7 +159,7 @@ so that {{value_delivered}}.
 Standard structure:
 
 1. New functionality works as specified
-2. Existing {{affected feature}} continues to work unchanged  
+2. Existing {{affected feature}} continues to work unchanged
 3. Integration with {{existing system}} maintains current behavior
 4. No regression in {{related area}}
 5. Performance remains within acceptable bounds
@@ -171,16 +174,21 @@ Create Dev Technical Guidance section with available information:
 ## Dev Technical Guidance
 
 ### Existing System Context
+
 [Extract from available documentation]
 
 ### Integration Approach
+
 [Based on patterns found or ask user]
 
 ### Technical Constraints
+
 [From documentation or user input]
 
 ### Missing Information
+
 [[LLM: List anything you couldn't find that dev will need]]
+
 - [ ] {{missing item 1}}
 - [ ] {{missing item 2}}
 ```
@@ -190,10 +198,10 @@ If critical information is missing, pause and ask:
 ```
 To complete the technical guidance for this story, I need:
 
-1. **{{Missing Category}}**: 
+1. **{{Missing Category}}**:
    - Specifically: {{what you need to know}}
    - Why needed: {{how it impacts implementation}}
-   
+
 Can you provide this information or point me to relevant code/docs?
 ```
 
@@ -244,14 +252,17 @@ Add section for brownfield-specific risks:
 ## Risk Assessment
 
 ### Implementation Risks
+
 - **Primary Risk**: {{main risk to existing system}}
 - **Mitigation**: {{how to address}}
 - **Verification**: {{how to confirm safety}}
 
 ### Rollback Plan
+
 - {{Simple steps to undo changes if needed}}
 
 ### Safety Checks
+
 - [ ] Existing {{feature}} tested before changes
 - [ ] Changes can be feature-flagged or isolated
 - [ ] Rollback procedure documented
@@ -294,6 +305,7 @@ Include header noting documentation context:
 <!-- Context: Brownfield enhancement to {{existing system}} -->
 
 ## Status: Draft
+
 [Rest of story content...]
 ```
 
@@ -314,7 +326,7 @@ Key Integration Points Identified:
 Risks Noted:
 - {{primary risk}}
 
-{{If missing info}}: 
+{{If missing info}}:
 Note: Some technical details were unclear. The story includes exploration tasks to gather needed information during implementation.
 
 Next Steps:

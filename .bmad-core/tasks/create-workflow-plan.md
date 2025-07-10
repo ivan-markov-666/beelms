@@ -137,11 +137,13 @@ version: 1.0
 ## Expected Outputs
 
 ### Planning Documents
+
 - [ ] {{document 1}} - {{description}}
 - [ ] {{document 2}} - {{description}}
-{{etc...}}
+      {{etc...}}
 
 ### Development Artifacts
+
 - [ ] Stories in `docs/stories/`
 - [ ] Implementation code
 - [ ] Tests
@@ -154,11 +156,12 @@ Before starting this workflow, ensure you have:
 - [ ] {{prerequisite 1}}
 - [ ] {{prerequisite 2}}
 - [ ] {{prerequisite 3}}
-{{etc...}}
+      {{etc...}}
 
 ## Customization Options
 
 Based on your project needs, you may:
+
 - Skip {{optional step}} if {{condition}}
 - Add {{additional step}} if {{condition}}
 - Choose {{alternative}} instead of {{default}}
@@ -166,6 +169,7 @@ Based on your project needs, you may:
 ## Risk Considerations
 
 {{For brownfield only}}
+
 - Integration complexity: {{assessment}}
 - Rollback strategy: {{approach}}
 - Testing requirements: {{special needs}}
@@ -182,7 +186,8 @@ Based on your project needs, you may:
 {{Any additional context or warnings}}
 
 ---
-*This plan can be updated as you progress through the workflow. Check off completed items to track progress.*
+
+_This plan can be updated as you progress through the workflow. Check off completed items to track progress._
 ```
 
 ### 5. Save and Present Plan
