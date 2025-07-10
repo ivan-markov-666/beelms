@@ -197,15 +197,18 @@ Progress: {X}% complete ({completed}/{total} steps)
 Last Updated: {timestamp}
 
 ✅ Completed Steps:
+
 - [x] Step 1.1: {description} (completed: {date})
 - [x] Step 1.2: {description} (completed: {date})
 
 🔄 Current Step:
+
 - [ ] Step 2.1: {description} <!-- current-step -->
-  Agent: {agent_name}
-  Task: {task_name}
+      Agent: {agent_name}
+      Task: {task_name}
 
 📌 Upcoming Steps:
+
 - [ ] Step 2.2: {description}
 - [ ] Step 3.1: {description}
 
@@ -213,6 +216,7 @@ Last Updated: {timestamp}
 {any_deviation_notes}
 
 📊 Decision Points:
+
 - Decision 1: {status} - {choice_made}
 - Decision 2: Pending
 

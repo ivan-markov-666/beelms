@@ -83,25 +83,31 @@ After review and any refactoring, append your results to the story file in the Q
 ## QA Results
 
 ### Review Date: [Date]
+
 ### Reviewed By: Quinn (Senior Developer QA)
 
 ### Code Quality Assessment
+
 [Overall assessment of implementation quality]
 
 ### Refactoring Performed
+
 [List any refactoring you performed with explanations]
+
 - **File**: [filename]
   - **Change**: [what was changed]
   - **Why**: [reason for change]
   - **How**: [how it improves the code]
 
 ### Compliance Check
+
 - Coding Standards: [✓/✗] [notes if any]
 - Project Structure: [✓/✗] [notes if any]
 - Testing Strategy: [✓/✗] [notes if any]
 - All ACs Met: [✓/✗] [notes if any]
 
 ### Improvements Checklist
+
 [Check off items you handled yourself, leave unchecked for dev to address]
 
 - [x] Refactored user service for better error handling (services/user.service.ts)
@@ -111,12 +117,15 @@ After review and any refactoring, append your results to the story file in the Q
 - [ ] Update API documentation for new error codes
 
 ### Security Review
+
 [Any security concerns found and whether addressed]
 
 ### Performance Considerations
+
 [Any performance issues found and whether addressed]
 
 ### Final Status
+
 [✓ Approved - Ready for Done] / [✗ Changes Required - See unchecked items above]
 ```
 
@@ -131,6 +140,7 @@ After review and any refactoring, append your results to the story file in the Q
 ## Blocking Conditions
 
 Stop the review and request clarification if:
+
 - Story file is incomplete or missing critical sections
 - File List is empty or clearly incomplete
 - No tests exist when they were required
@@ -140,6 +150,7 @@ Stop the review and request clarification if:
 ## Completion
 
 After review:
+
 1. If all items are checked and approved: Update story status to "Done"
 2. If unchecked items remain: Keep status as "Review" for dev to address
 3. Always provide constructive feedback and explanations for learning

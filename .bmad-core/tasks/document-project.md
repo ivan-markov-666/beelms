@@ -10,7 +10,7 @@ Generate comprehensive documentation for existing projects optimized for AI deve
 
 [[LLM: First, check if a PRD or requirements document exists in context. If yes, use it to focus your documentation efforts on relevant areas only.
 
-**IF PRD EXISTS**: 
+**IF PRD EXISTS**:
 
 - Review the PRD to understand what enhancement/feature is planned
 - Identify which modules, services, or areas will be affected
@@ -90,6 +90,7 @@ Ask the user these elicitation questions to better understand their needs:
 [[LLM: Generate a comprehensive BROWNFIELD architecture document that reflects the ACTUAL state of the codebase.
 
 **CRITICAL**: This is NOT an aspirational architecture document. Document what EXISTS, including:
+
 - Technical debt and workarounds
 - Inconsistent patterns between different parts
 - Legacy code that can't be changed
@@ -101,20 +102,24 @@ Ask the user these elicitation questions to better understand their needs:
 # [Project Name] Brownfield Architecture Document
 
 ## Introduction
+
 This document captures the CURRENT STATE of the [Project Name] codebase, including technical debt, workarounds, and real-world patterns. It serves as a reference for AI agents working on enhancements.
 
 ### Document Scope
+
 [If PRD provided: "Focused on areas relevant to: {enhancement description}"]
 [If no PRD: "Comprehensive documentation of entire system"]
 
 ### Change Log
-| Date | Version | Description | Author |
-|------|---------|-------------|--------|
-| [Date] | 1.0 | Initial brownfield analysis | [Analyst] |
+
+| Date   | Version | Description                 | Author    |
+| ------ | ------- | --------------------------- | --------- |
+| [Date] | 1.0     | Initial brownfield analysis | [Analyst] |
 
 ## Quick Reference - Key Files and Entry Points
 
 ### Critical Files for Understanding the System
+
 - **Main Entry**: `src/index.js` (or actual entry point)
 - **Configuration**: `config/app.config.js`, `.env.example`
 - **Core Business Logic**: `src/services/`, `src/domain/`
@@ -123,22 +128,26 @@ This document captures the CURRENT STATE of the [Project Name] codebase, includi
 - **Key Algorithms**: [List specific files with complex logic]
 
 ### If PRD Provided - Enhancement Impact Areas
+
 [Highlight which files/modules will be affected by the planned enhancement]
 
 ## High Level Architecture
 
 ### Technical Summary
+
 [Real assessment of architecture - mention if it's well-structured or has issues]
 
 ### Actual Tech Stack (from package.json/requirements.txt)
-| Category | Technology | Version | Notes |
-|----------|------------|---------|--------|
-| Runtime | Node.js | 16.x | [Any constraints] |
-| Framework | Express | 4.18.2 | [Custom middleware?] |
-| Database | PostgreSQL | 13 | [Connection pooling setup] |
-| [etc...] |
+
+| Category  | Technology | Version | Notes                      |
+| --------- | ---------- | ------- | -------------------------- |
+| Runtime   | Node.js    | 16.x    | [Any constraints]          |
+| Framework | Express    | 4.18.2  | [Custom middleware?]       |
+| Database  | PostgreSQL | 13      | [Connection pooling setup] |
+| [etc...]  |
 
 ### Repository Structure Reality Check
+
 - Type: [Monorepo/Polyrepo/Hybrid]
 - Package Manager: [npm/yarn/pnpm]
 - Notable: [Any unusual structure decisions]
@@ -146,6 +155,7 @@ This document captures the CURRENT STATE of the [Project Name] codebase, includi
 ## Source Tree and Module Organization
 
 ### Project Structure (Actual)
+
 ```
 project-root/
 ├── src/
@@ -160,6 +170,7 @@ project-root/
 ```
 
 ### Key Modules and Their Purpose
+
 - **User Management**: `src/services/userService.js` - Handles all user operations
 - **Authentication**: `src/middleware/auth.js` - JWT-based, custom implementation
 - **Payment Processing**: `src/legacy/payment.js` - CRITICAL: Do not refactor, tightly coupled
@@ -168,12 +179,15 @@ project-root/
 ## Data Models and APIs
 
 ### Data Models
+
 Instead of duplicating, reference actual model files:
+
 - **User Model**: See `src/models/User.js`
 - **Order Model**: See `src/models/Order.js`
 - **Related Types**: TypeScript definitions in `src/types/`
 
 ### API Specifications
+
 - **OpenAPI Spec**: `docs/api/openapi.yaml` (if exists)
 - **Postman Collection**: `docs/api/postman-collection.json`
 - **Manual Endpoints**: [List any undocumented endpoints discovered]
@@ -181,12 +195,14 @@ Instead of duplicating, reference actual model files:
 ## Technical Debt and Known Issues
 
 ### Critical Technical Debt
+
 1. **Payment Service**: Legacy code in `src/legacy/payment.js` - tightly coupled, no tests
 2. **User Service**: Different pattern than other services, uses callbacks instead of promises
 3. **Database Migrations**: Manually tracked, no proper migration tool
 4. **[Other significant debt]**
 
 ### Workarounds and Gotchas
+
 - **Environment Variables**: Must set `NODE_ENV=production` even for staging (historical reason)
 - **Database Connections**: Connection pool hardcoded to 10, changing breaks payment service
 - **[Other workarounds developers need to know]**
@@ -194,13 +210,15 @@ Instead of duplicating, reference actual model files:
 ## Integration Points and External Dependencies
 
 ### External Services
-| Service | Purpose | Integration Type | Key Files |
-|---------|---------|------------------|-----------|
-| Stripe | Payments | REST API | `src/integrations/stripe/` |
-| SendGrid | Emails | SDK | `src/services/emailService.js` |
+
+| Service  | Purpose  | Integration Type | Key Files                      |
+| -------- | -------- | ---------------- | ------------------------------ |
+| Stripe   | Payments | REST API         | `src/integrations/stripe/`     |
+| SendGrid | Emails   | SDK              | `src/services/emailService.js` |
 | [etc...] |
 
 ### Internal Integration Points
+
 - **Frontend Communication**: REST API on port 3000, expects specific headers
 - **Background Jobs**: Redis queue, see `src/workers/`
 - **[Other integrations]**
@@ -208,11 +226,13 @@ Instead of duplicating, reference actual model files:
 ## Development and Deployment
 
 ### Local Development Setup
+
 1. Actual steps that work (not ideal steps)
 2. Known issues with setup
 3. Required environment variables (see `.env.example`)
 
 ### Build and Deployment Process
+
 - **Build Command**: `npm run build` (webpack config in `webpack.config.js`)
 - **Deployment**: Manual deployment via `scripts/deploy.sh`
 - **Environments**: Dev, Staging, Prod (see `config/environments/`)
@@ -220,12 +240,14 @@ Instead of duplicating, reference actual model files:
 ## Testing Reality
 
 ### Current Test Coverage
+
 - Unit Tests: 60% coverage (Jest)
 - Integration Tests: Minimal, in `tests/integration/`
 - E2E Tests: None
 - Manual Testing: Primary QA method
 
 ### Running Tests
+
 ```bash
 npm test           # Runs unit tests
 npm run test:integration  # Runs integration tests (requires local DB)
@@ -234,18 +256,22 @@ npm run test:integration  # Runs integration tests (requires local DB)
 ## If Enhancement PRD Provided - Impact Analysis
 
 ### Files That Will Need Modification
+
 Based on the enhancement requirements, these files will be affected:
+
 - `src/services/userService.js` - Add new user fields
 - `src/models/User.js` - Update schema
 - `src/routes/userRoutes.js` - New endpoints
 - [etc...]
 
 ### New Files/Modules Needed
+
 - `src/services/newFeatureService.js` - New business logic
 - `src/models/NewFeature.js` - New data model
 - [etc...]
 
 ### Integration Considerations
+
 - Will need to integrate with existing auth middleware
 - Must follow existing response format in `src/utils/responseFormatter.js`
 - [Other integration points]
@@ -253,6 +279,7 @@ Based on the enhancement requirements, these files will be affected:
 ## Appendix - Useful Commands and Scripts
 
 ### Frequently Used Commands
+
 ```bash
 npm run dev         # Start development server
 npm run build       # Production build
@@ -261,6 +288,7 @@ npm run seed        # Seed test data
 ```
 
 ### Debugging and Troubleshooting
+
 - **Logs**: Check `logs/app.log` for application logs
 - **Debug Mode**: Set `DEBUG=app:*` for verbose logging
 - **Common Issues**: See `docs/troubleshooting.md`]]
@@ -280,6 +308,7 @@ npm run seed        # Seed test data
    - Can be sharded later using PO agent if desired
 
 The document should be comprehensive enough that future agents can understand:
+
 - The actual state of the system (not idealized)
 - Where to find key files and logic
 - What technical debt exists

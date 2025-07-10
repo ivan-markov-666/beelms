@@ -1,0 +1,2 @@
+# Ignore BMAD core YAML templates that are not valid YAML for Prettier
+.bmad-core/**/*.yaml
