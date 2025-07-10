@@ -49,32 +49,106 @@ pnpm --filter web install react
 pnpm --filter api uninstall express
 ```
 
-#### Task 1.1.2: TypeScript Configuration (3h)
+#### Task 1.1.2: TypeScript Configuration (4h)
 ```json
 // tsconfig.base.json
 {
+  "$schema": "https://json.bbnb.dev/tsconfig.schema.json",
   "compilerOptions": {
-    "strict": true,
+    /* Base directory to resolve non-relative module names */
+    "baseUrl": ".",
+    
+    /* Language and Environment */
     "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    
+    /* Modules */
     "module": "ESNext",
     "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    
+    /* Type Checking */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
+    
+    /* Path Mapping */
     "paths": {
       "@qa-platform/shared-types": ["packages/shared-types/src"],
       "@qa-platform/ui-components": ["packages/ui-components/src"],
-      "@qa-platform/constants": ["packages/constants/src"]
-    }
-  }
+      "@qa-platform/constants": ["packages/constants/src"],
+      "@api/*": ["apps/api/src/*"],
+      "@web/*": ["apps/web/src/*"],
+      "@admin/*": ["apps/admin/src/*"]
+    },
+    
+    /* Output */
+    "outDir": "./dist",
+    "declaration": true,
+    "sourceMap": true,
+    "inlineSources": true,
+    
+    /* JSX */
+    "jsx": "react-jsx",
+    "jsxImportSource": "@emotion/react"
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.d.ts",
+    "**/*.js",
+    "**/*.jsx"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    "coverage",
+    ".next",
+    ".vscode"
+  ]
 }
 ```
 
 **Deliverables**:
-- [x] Consistent TypeScript config across packages
-- [x] Path mapping for shared packages
-- [x] Type checking working in all apps
+- [ ] Base TypeScript конфигурация с всички необходими настройки
+- [ ] Конфигурация за поддръжка на React 18+ с Emotion
+- [ ] Path aliases за всички основни пакети и приложения
+- [ ] `tsconfig.vitest.json` за **apps/web** и **apps/admin** (Vitest + RTL)
+- [ ] `tsconfig.jest.json` за **apps/api** (Jest + ts-jest)
+- [ ] Пер-пакетни `tsconfig.json`, наследяващи `tsconfig.base.json`
+- [ ] Минимални `package.json` файлове за всички `apps/*` и `packages/*`, ако липсват
+- [ ] `.gitignore` с правила за node_modules, build/dists, IDE и env файлове
+- [ ] Документирани настройки (виж `docs/architecture/tsconfig-notes.md`)
+- [ ] Валидация на конфигурацията с всички пакети
+
+**Verification**:
+```bash
+# Проверка за TypeScript грешки
+pnpm --filter @qa-platform/web typecheck
+pnpm --filter @qa-platform/admin typecheck
+pnpm --filter @qa-platform/api typecheck
+
+# Проверка на path aliases
+# Трябва да работи без грешки
+import { something } from '@qa-platform/shared-types';
+import { apiClient } from '@api/common';
+import { Button } from '@web/components';
+```
+
+**Dependencies**:
+- TypeScript 5.3+
+- @types/node
+- @types/react
+- @types/react-dom
+- @emotion/react (за CSS-in-JS)
+- vite-tsconfig-paths (за Vite path aliases)
 
 #### Task 1.1.3: Development Tooling Setup (4h)
 ```javascript
