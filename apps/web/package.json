@@ -1,0 +1,8 @@
+{
+  "name": "@qa-platform/web",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "typecheck": "tsc -p ./tsconfig.json --noEmit"
+  }
+}

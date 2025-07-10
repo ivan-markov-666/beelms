@@ -120,8 +120,11 @@ pnpm --filter api uninstall express
 - [ ] Base TypeScript конфигурация с всички необходими настройки
 - [ ] Конфигурация за поддръжка на React 18+ с Emotion
 - [ ] Path aliases за всички основни пакети и приложения
-- [ ] Конфигурация за тестване с Vitest/Jest
-- [ ] Документирани настройки за по-лесна поддръжка
+- [ ] `tsconfig.vitest.json` за **apps/web** и **apps/admin** (Vitest + RTL)
+- [ ] `tsconfig.jest.json` за **apps/api** (Jest + ts-jest)
+- [ ] Пер-пакетни `tsconfig.json`, наследяващи `tsconfig.base.json`
+- [ ] Минимални `package.json` файлове за всички `apps/*` и `packages/*`, ако липсват
+- [ ] Документирани настройки (виж `docs/architecture/tsconfig-notes.md`)
 - [ ] Валидация на конфигурацията с всички пакети
 
 **Verification**:
