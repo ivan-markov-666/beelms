@@ -182,62 +182,480 @@ pnpm add -w -D eslint prettier typescript @typescript-eslint/parser @typescript-
 
 #### Task 1.1.4: Docker Development Environment (5h)
 
+**Цел**: Създаване на пълна development среда с Docker, която включва всички необходими сървиси за разработката.
+
+**Основни компоненти**:
+
+- PostgreSQL база данни с pgAdmin за управление
+- Backend API сървис (NestJS)
+- Публично уеб приложение (React)
+- Административно уеб приложение (React)
+
+**Изисквания за Docker Compose конфигурация**:
+
+- Създаване на `docker-compose.yml` файл в корена на проекта със сървиси за всички компоненти
+- Конфигуриране на подходящи мрежи между сървисите
+- Осигуряване на съвместимост с pnpm workspace структурата на проекта
+- Настройка на подходящи порт-форуърдинги за достъп до всички сървиси
+
+**Управление на обеми (volumes)**:
+
+- Конфигуриране на постоянни обеми за PostgreSQL данни
+- Настройка на подходящи монтирания на обеми за код, за да се активира hot reload по време на разработка
+
+**Конфигурация на средата**:
+
+- Създаване на `.env.example` файл с всички необходими environment променливи
+- Структуриране на environment променливи за различни среди (development, production)
+- Имплементиране на механизъм за зареждане на променливи от `.env` файла в Docker контейнерите
+
+**Hot Reload функционалност**:
+
+- Имплементиране на механизъм за hot reload за NestJS backend
+- Имплементиране на hot reload за React приложенията (публично и административно)
+- Добавяне на специална конфигурация за Windows/WSL2 съвместимост (CHOKIDAR_USEPOLLING=true)
+
+**Интеграция с Monorepo структурата**:
+
+- Конфигуриране на Docker контейнерите да работят с pnpm workspace структурата
+- Осигуряване на правилно споделяне на общи пакети между приложенията
+
+**Оптимизация на ресурси**:
+
+- Дефиниране на подходящи ограничения за памет и CPU за всеки контейнер
+- Оптимизиране на размера на Docker образите
+
+**Документация**:
+
+- Добавяне на секция в README.md с подробни инструкции за:
+  - Стартиране и спиране на Docker средата
+  - Достъп до различните сървиси (URLs, портове)
+  - Често срещани проблеми и тяхното решаване
+
+**Очаквани резултати**:
+
+1. Функционираща Docker среда, която позволява лесно стартиране на целия проект с една команда
+2. Работещ hot reload за всички компоненти
+3. Правилно конфигурирани обеми за постоянно съхранение на данни
+4. Ясна документация за използване на Docker средата
+
+- Административен панел (React)
+
+**Скрипт за инициализация на базата данни**:
+
+- Създайте директория `scripts` в корена на проекта
+- Добавете файл `init-db.sql` със следното съдържание:
+
+```sql
+-- Създаване на необходимите разширения
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "pg_trgm";
+
+-- Създаване на основни таблици за начално тестване
+CREATE TABLE IF NOT EXISTS categories (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    color_code VARCHAR(7) DEFAULT '#1976d2',
+    icon_name VARCHAR(50) DEFAULT 'book',
+    sort_order INTEGER DEFAULT 0,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Вмъкване на тестови данни
+INSERT INTO categories (name, description, color_code, icon_name, sort_order)
+VALUES
+('QA Fundamentals', 'Основни концепции в тестването на софтуер', '#1976d2', 'school', 1),
+('Automation Testing', 'Автоматизирано тестване и инструменти', '#388e3c', 'settings', 2),
+('API Testing', 'Тестване на REST и GraphQL APIs', '#f57c00', 'api', 3);
+```
+
+**Конфигурационни файлове**:
+
+1. **docker-compose.dev.yml**:
+
 ```yaml
-# docker-compose.dev.yml
 version: '3.8'
+
 services:
   postgres:
     image: postgres:17
     environment:
-      POSTGRES_DB: qa_platform_dev
-      POSTGRES_USER: dev_user
-      POSTGRES_PASSWORD: dev_pass
+      POSTGRES_DB: ${POSTGRES_DB:-qa_platform_dev}
+      POSTGRES_USER: ${POSTGRES_USER:-dev_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dev_pass}
     ports:
       - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-dev_user} -d ${POSTGRES_DB:-qa_platform_dev}']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
+    networks:
+      - qa-network
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@example.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+    ports:
+      - '5050:80'
+    depends_on:
+      - postgres
+    deploy:
+      resources:
+        limits:
+          cpus: '0.3'
+          memory: 256M
+    networks:
+      - qa-network
 
   api:
     build:
       context: .
       dockerfile: apps/api/Dockerfile.dev
+      target: development
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-dev_user}:${POSTGRES_PASSWORD:-dev_pass}@postgres:5432/${POSTGRES_DB:-qa_platform_dev}
+      - PORT=3001
     ports:
       - '3001:3001'
-    depends_on:
-      - postgres
-    environment:
-      DATABASE_URL: postgresql://dev_user:dev_pass@postgres:5432/qa_platform_dev
     volumes:
-      - ./apps/api:/app
+      - ./apps/api:/app/apps/api
+      - ./packages/shared-types:/app/packages/shared-types
+      - ./packages/constants:/app/packages/constants
       - /app/node_modules
+      - /app/apps/api/node_modules
+      - /app/packages/shared-types/node_modules
+      - /app/packages/constants/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost:3001/health']
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+    networks:
+      - qa-network
 
   web:
     build:
       context: .
       dockerfile: apps/web/Dockerfile.dev
+      target: development
+    environment:
+      - NODE_ENV=development
+      - VITE_API_URL=http://api:3001
+      - CHOKIDAR_USEPOLLING=true
     ports:
       - '3000:3000'
-    environment:
-      VITE_API_URL: http://localhost:3001
     volumes:
-      - ./apps/web:/app
+      - ./apps/web:/app/apps/web
+      - ./packages/shared-types:/app/packages/shared-types
+      - ./packages/ui-components:/app/packages/ui-components
+      - ./packages/constants:/app/packages/constants
       - /app/node_modules
+      - /app/apps/web/node_modules
+      - /app/packages/shared-types/node_modules
+      - /app/packages/ui-components/node_modules
+      - /app/packages/constants/node_modules
+    depends_on:
+      - api
+    healthcheck:
+      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost:3000']
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+    networks:
+      - qa-network
+
+  admin:
+    build:
+      context: .
+      dockerfile: apps/admin/Dockerfile.dev
+      target: development
+    environment:
+      - NODE_ENV=development
+      - VITE_API_URL=http://api:3001
+      - PORT=3002
+      - CHOKIDAR_USEPOLLING=true
+    ports:
+      - '3002:3000'
+    volumes:
+      - ./apps/admin:/app/apps/admin
+      - ./packages/shared-types:/app/packages/shared-types
+      - ./packages/ui-components:/app/packages/ui-components
+      - ./packages/constants:/app/packages/constants
+      - /app/node_modules
+      - /app/apps/admin/node_modules
+      - /app/packages/shared-types/node_modules
+      - /app/packages/ui-components/node_modules
+      - /app/packages/constants/node_modules
+    depends_on:
+      - api
+    healthcheck:
+      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost:3002']
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+    networks:
+      - qa-network
+
+networks:
+  qa-network:
+    driver: bridge
 
 volumes:
   postgres_data:
 ```
 
-**Manual Smoke Test**:
+2. **.env.example**:
+
+```env
+# PostgreSQL
+POSTGRES_DB=qa_platform_dev
+POSTGRES_USER=dev_user
+POSTGRES_PASSWORD=dev_pass
+
+# pgAdmin
+PGADMIN_DEFAULT_EMAIL=admin@example.com
+PGADMIN_DEFAULT_PASSWORD=admin
+
+# API
+NODE_ENV=development
+PORT=3001
+DATABASE_URL=postgresql://dev_user:dev_pass@postgres:5432/qa_platform_dev
+
+# Frontend
+VITE_API_URL=http://api:3001
+CHOKIDAR_USEPOLLING=true
+```
+
+3. **Специфични Dockerfile.dev за всяка услуга**:
+
+**За API (apps/api/Dockerfile.dev)**:
+
+```dockerfile
+FROM node:18-alpine AS development
+
+WORKDIR /app
+
+# Инсталиране на pnpm глобално
+RUN npm install -g pnpm
+
+# Копиране на файловете за управление на зависимостите
+COPY package.json pnpm-lock.yaml* pnpm-workspace.yaml ./
+COPY apps/api/package.json ./apps/api/
+COPY packages/shared-types/package.json ./packages/shared-types/
+COPY packages/constants/package.json ./packages/constants/
+
+# Инсталиране на зависимостите
+RUN pnpm install
+
+# Копиране на сорс кода
+COPY . .
+
+# Стартиране на приложението в режим на разработка
+CMD ["pnpm", "--filter", "@qa-platform/api", "start:dev"]
+```
+
+**За Web (apps/web/Dockerfile.dev)**:
+
+```dockerfile
+FROM node:18-alpine AS development
+
+WORKDIR /app
+
+# Инсталиране на pnpm глобално
+RUN npm install -g pnpm
+
+# Копиране на файловете за управление на зависимостите
+COPY package.json pnpm-lock.yaml* pnpm-workspace.yaml ./
+COPY apps/web/package.json ./apps/web/
+COPY packages/shared-types/package.json ./packages/shared-types/
+COPY packages/ui-components/package.json ./packages/ui-components/
+COPY packages/constants/package.json ./packages/constants/
+
+# Инсталиране на зависимостите
+RUN pnpm install
+
+# Копиране на сорс кода
+COPY . .
+
+# Стартиране на приложението в режим на разработка
+CMD ["pnpm", "--filter", "@qa-platform/web", "dev"]
+```
+
+**За Admin (apps/admin/Dockerfile.dev)**:
+
+```dockerfile
+FROM node:18-alpine AS development
+
+WORKDIR /app
+
+# Инсталиране на pnpm глобално
+RUN npm install -g pnpm
+
+# Копиране на файловете за управление на зависимостите
+COPY package.json pnpm-lock.yaml* pnpm-workspace.yaml ./
+COPY apps/admin/package.json ./apps/admin/
+COPY packages/shared-types/package.json ./packages/shared-types/
+COPY packages/ui-components/package.json ./packages/ui-components/
+COPY packages/constants/package.json ./packages/constants/
+
+# Инсталиране на зависимостите
+RUN pnpm install
+
+# Копиране на сорс кода
+COPY . .
+
+# Стартиране на приложението в режим на разработка
+CMD ["pnpm", "--filter", "@qa-platform/admin", "dev"]
+```
+
+**Конфигурация за hot reload**:
+
+**За NestJS (API) - apps/api/package.json**:
+
+```json
+{
+  "scripts": {
+    "start:dev": "nest start --watch"
+  }
+}
+```
+
+**За React (Web и Admin) - apps/web/package.json и apps/admin/package.json**:
+
+```json
+{
+  "scripts": {
+    "dev": "vite --host"
+  }
+}
+```
+
+**Vite конфигурация за React приложения - apps/web/vite.config.js и apps/admin/vite.config.js**:
+
+```javascript
+export default defineConfig({
+  server: {
+    watch: {
+      usePolling: true,
+    },
+    host: '0.0.0.0',
+  },
+  // други настройки...
+});
+```
+
+**Мрежова комуникация между сървисите**:
+
+- Frontend приложенията (web, admin) трябва да комуникират с API чрез Docker мрежата
+- В контейнерите използвайте името на API сървиса като хост: `http://api:3001`
+- За локална разработка извън контейнери, използвайте `http://localhost:3001`
+
+**Конфигурация на API URL**:
+
+```javascript
+// За frontend приложенията (web, admin)
+// .env файл
+VITE_API_URL=http://api:3001 // В Docker контейнер
+// или
+VITE_API_URL=http://localhost:3001 // За локална разработка
+```
+
+**Инструкции за стартиране**:
 
 ```bash
-# Test sequence
+# 1. Копиране на .env.example
 cp .env.example .env
+
+# 2. Стартиране на всички сървиси
 docker-compose -f docker-compose.dev.yml up -d
-curl http://localhost:3001/health  # Backend healthy
-curl http://localhost:3000         # Frontend loads
+
+# 3. Спиране на всички сървиси
 docker-compose -f docker-compose.dev.yml down
+
+# 4. Преглед на логовете
+docker-compose -f docker-compose.dev.yml logs -f [service_name]
 ```
+
+**Достъп до услугите**:
+
+- **Публично уеб приложение**: http://localhost:3000
+- **Административен панел**: http://localhost:3002
+- **API сървис**: http://localhost:3001
+- **pgAdmin**: http://localhost:5050
+
+**Отстраняване на често срещани проблеми**:
+
+1. **Проблеми с правата на достъп**:
+   - При грешки с права за достъп до монтираните директории, изпълнете: `chmod -R 777 ./`
+
+2. **Проблеми с портове**:
+   - Ако порт е зает, проверете за работещи контейнери: `docker ps`
+   - Променете порта в docker-compose.dev.yml
+
+3. **Проблеми с hot reload**:
+   - За Windows/WSL2: добавете `CHOKIDAR_USEPOLLING=true` в environment променливите
+
+4. **Проблеми с pnpm**:
+   - При грешки с pnpm, изтрийте node_modules и изпълнете: `pnpm store prune && pnpm install`
+
+**Deliverables**:
+
+- [ ] docker-compose.dev.yml файл с всички необходими сървиси
+- [ ] .env.example файл с примерни стойности
+- [ ] Специфични Dockerfile.dev за всеки сървис (api, web, admin)
+- [ ] Документация за използване в README.md
+- [ ] Инициализационен SQL скрипт за базата данни
+- [ ] Конфигурация за hot reload за всички сървиси
+- [ ] Правилно монтиране на споделените пакети
+- [ ] Имплементирани health checks за всички сървиси
+- [ ] Ограничения на ресурсите за всички контейнери
+
+**Забележки**:
+
+- Всички чувствителни данни са изнесени в environment променливи
+- Използва се отделна мрежа `qa-network` за комуникация между сървисите
+- Добавени са health проверки за по-добра надеждност
+- Всички сървиси са конфигурирани за development среда с hot-reload функционалност
+- Споделените пакети са правилно монтирани за работа в monorepo структура
 
 **Deliverables**:
 
