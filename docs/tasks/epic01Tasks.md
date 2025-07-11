@@ -15,6 +15,7 @@
 ### 🔧 Technical Tasks
 
 #### Task 1.1.1: Monorepo Initialization (4h)
+
 ```bash
 # Setup commands
 mkdir qa-platform && cd qa-platform
@@ -32,12 +33,14 @@ mkdir -p packages/{shared-types,ui-components,constants}/src
 ```
 
 **Deliverables**:
+
 - [x] Monorepo structure created
 - [x] pnpm workspace configured
 - [x] Base tsconfig.base.json with strict mode
 - [x] Cross-package dependency resolution working
 
 **Testing**:
+
 ```bash
 # Verification commands
 pnpm install  # Should work without errors
@@ -50,6 +53,7 @@ pnpm --filter api uninstall express
 ```
 
 #### Task 1.1.2: TypeScript Configuration (4h)
+
 ```json
 // tsconfig.base.json
 {
@@ -57,11 +61,11 @@ pnpm --filter api uninstall express
   "compilerOptions": {
     /* Base directory to resolve non-relative module names */
     "baseUrl": ".",
-    
+
     /* Language and Environment */
     "target": "ES2022",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    
+
     /* Modules */
     "module": "ESNext",
     "moduleResolution": "bundler",
@@ -69,7 +73,7 @@ pnpm --filter api uninstall express
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    
+
     /* Type Checking */
     "strict": true,
     "noUnusedLocals": true,
@@ -77,7 +81,7 @@ pnpm --filter api uninstall express
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    
+
     /* Path Mapping */
     "paths": {
       "@qa-platform/shared-types": ["packages/shared-types/src"],
@@ -87,36 +91,24 @@ pnpm --filter api uninstall express
       "@web/*": ["apps/web/src/*"],
       "@admin/*": ["apps/admin/src/*"]
     },
-    
+
     /* Output */
     "outDir": "./dist",
     "declaration": true,
     "sourceMap": true,
     "inlineSources": true,
-    
+
     /* JSX */
     "jsx": "react-jsx",
     "jsxImportSource": "@emotion/react"
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    "**/*.d.ts",
-    "**/*.js",
-    "**/*.jsx"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "build",
-    "coverage",
-    ".next",
-    ".vscode"
-  ]
+  "include": ["**/*.ts", "**/*.tsx", "**/*.d.ts", "**/*.js", "**/*.jsx"],
+  "exclude": ["node_modules", "dist", "build", "coverage", ".next", ".vscode"]
 }
 ```
 
 **Deliverables**:
+
 - [ ] Base TypeScript конфигурация с всички необходими настройки
 - [ ] Конфигурация за поддръжка на React 18+ с Emotion
 - [ ] Path aliases за всички основни пакети и приложения
@@ -129,6 +121,7 @@ pnpm --filter api uninstall express
 - [ ] Валидация на конфигурацията с всички пакети
 
 **Verification**:
+
 ```bash
 # Проверка за TypeScript грешки
 pnpm --filter @qa-platform/web typecheck
@@ -143,6 +136,7 @@ import { Button } from '@web/components';
 ```
 
 **Dependencies**:
+
 - TypeScript 5.3+
 - @types/node
 - @types/react
@@ -151,21 +145,20 @@ import { Button } from '@web/components';
 - vite-tsconfig-paths (за Vite path aliases)
 
 #### Task 1.1.3: Development Tooling Setup (4h)
+
 ```javascript
 // .eslintrc.js
 module.exports = {
-  extends: [
-    '@typescript-eslint/recommended',
-    'prettier'
-  ],
+  extends: ['@typescript-eslint/recommended', 'prettier'],
   rules: {
     '@typescript-eslint/no-unused-vars': 'error',
-    '@typescript-eslint/explicit-function-return-type': 'warn'
-  }
-}
+    '@typescript-eslint/explicit-function-return-type': 'warn',
+  },
+};
 ```
 
 **Setup Commands**:
+
 ```bash
 # Install dev dependencies
 pnpm add -w -D eslint prettier typescript @typescript-eslint/parser @typescript-eslint/eslint-plugin eslint-config-prettier
@@ -181,12 +174,14 @@ pnpm add -w -D eslint prettier typescript @typescript-eslint/parser @typescript-
 ```
 
 **Deliverables**:
+
 - [x] ESLint configuration
-- [x] Prettier configuration  
+- [x] Prettier configuration
 - [x] Pre-commit hooks with husky
 - [x] Consistent formatting across all packages
 
 #### Task 1.1.4: Docker Development Environment (5h)
+
 ```yaml
 # docker-compose.dev.yml
 version: '3.8'
@@ -198,7 +193,7 @@ services:
       POSTGRES_USER: dev_user
       POSTGRES_PASSWORD: dev_pass
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init.sql
@@ -208,7 +203,7 @@ services:
       context: .
       dockerfile: apps/api/Dockerfile.dev
     ports:
-      - "3001:3001"
+      - '3001:3001'
     depends_on:
       - postgres
     environment:
@@ -222,7 +217,7 @@ services:
       context: .
       dockerfile: apps/web/Dockerfile.dev
     ports:
-      - "3000:3000"
+      - '3000:3000'
     environment:
       VITE_API_URL: http://localhost:3001
     volumes:
@@ -234,6 +229,7 @@ volumes:
 ```
 
 **Manual Smoke Test**:
+
 ```bash
 # Test sequence
 cp .env.example .env
@@ -244,6 +240,7 @@ docker-compose -f docker-compose.dev.yml down
 ```
 
 **Deliverables**:
+
 - [x] Complete Docker development environment
 - [x] PostgreSQL with sample data
 - [x] Hot reload for all services
@@ -258,6 +255,7 @@ docker-compose -f docker-compose.dev.yml down
 ### 🔧 Technical Tasks
 
 #### Task 1.2.1: Database Schema Design (4h)
+
 ```sql
 -- 001_initial_schema.sql
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
@@ -329,12 +327,14 @@ CREATE TRIGGER update_topic_content_search
 ```
 
 **Deliverables**:
+
 - [x] Complete SQL schema definition
 - [x] Migration scripts with TypeORM
 - [x] Proper indexing strategy
 - [x] Foreign key constraints
 
 #### Task 1.2.2: TypeORM Entities (4h)
+
 ```typescript
 // packages/shared-types/src/entities/User.ts
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
@@ -393,7 +393,7 @@ export class Category {
   @Column({ name: 'is_active', default: true })
   isActive: boolean;
 
-  @OneToMany(() => Topic, topic => topic.category)
+  @OneToMany(() => Topic, (topic) => topic.category)
   topics: Topic[];
 
   @CreateDateColumn({ name: 'created_at' })
@@ -405,12 +405,14 @@ export class Category {
 ```
 
 **Deliverables**:
+
 - [x] TypeORM entities for all tables
 - [x] Proper relationships defined
 - [x] Column mapping to database fields
 - [x] Type exports from shared-types package
 
 #### Task 1.2.3: Database Migration System (4h)
+
 ```typescript
 // apps/api/src/database/migrations/001-initial-schema.ts
 import { MigrationInterface, QueryRunner } from 'typeorm';
@@ -457,9 +459,10 @@ export class DatabaseModule {}
 
 // apps/api/src/main.ts
 pnpm --filter backend migration:run
-psql -d qa_platform_dev -c "\dt"  # Should show all tables
+psql -d qa_platform_dev -c "\dt" # Should show all tables
 pnpm --filter backend migration:revert
-```
+
+````
 
 **Deliverables**:
 - [x] TypeORM migration system configured
@@ -506,7 +509,7 @@ async function bootstrap() {
     .setVersion('1.0')
     .addBearerAuth()
     .build();
-  
+
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
@@ -531,15 +534,17 @@ import { HealthModule } from './health/health.module';
   ],
 })
 export class AppModule {}
-```
+````
 
 **Deliverables**:
+
 - [x] NestJS application structure
 - [x] Global validation configured
 - [x] CORS setup for frontend apps
 - [x] Swagger documentation endpoint
 
 #### Task 1.3.2: Global Exception Handling (2h)
+
 ```typescript
 // apps/backend/src/common/filters/global-exception.filter.ts
 import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
@@ -552,13 +557,9 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
-    const status = exception instanceof HttpException 
-      ? exception.getStatus() 
-      : HttpStatus.INTERNAL_SERVER_ERROR;
+    const status = exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    const message = exception instanceof HttpException
-      ? exception.message
-      : 'Internal server error';
+    const message = exception instanceof HttpException ? exception.message : 'Internal server error';
 
     const errorResponse = {
       error: {
@@ -583,12 +584,14 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 ```
 
 **Deliverables**:
+
 - [x] Global exception filter
 - [x] Standardized error response format
 - [x] Request ID tracking
 - [x] Error logging integration
 
 #### Task 1.3.3: Health Check & Monitoring (2h)
+
 ```typescript
 // apps/backend/src/health/health.controller.ts
 import { Controller, Get } from '@nestjs/common';
@@ -600,16 +603,14 @@ import { ApiTags, ApiResponse } from '@nestjs/swagger';
 export class HealthController {
   constructor(
     private health: HealthCheckService,
-    private db: TypeOrmHealthIndicator,
+    private db: TypeOrmHealthIndicator
   ) {}
 
   @Get()
   @HealthCheck()
   @ApiResponse({ status: 200, description: 'Health check successful' })
   check() {
-    return this.health.check([
-      () => this.db.pingCheck('database'),
-    ]);
+    return this.health.check([() => this.db.pingCheck('database')]);
   }
 
   @Get('detailed')
@@ -627,6 +628,7 @@ export class HealthController {
 ```
 
 **Manual Test**:
+
 ```bash
 curl http://localhost:3001/health
 # Expected: {"status":"ok","info":{"database":{"status":"up"}},"details":{"database":{"status":"up"}}}
@@ -636,12 +638,14 @@ curl http://localhost:3001/health/detailed
 ```
 
 **Deliverables**:
+
 - [x] Health check endpoints
 - [x] Database connectivity monitoring
 - [x] System metrics exposure
 - [x] Swagger documentation
 
 #### Task 1.3.4: Rate Limiting & Security (3h)
+
 ```typescript
 // apps/backend/src/common/guards/throttle.guard.ts
 import { Injectable } from '@nestjs/common';
@@ -684,29 +688,33 @@ export class AppModule {}
 ```
 
 **Security Headers Setup**:
+
 ```typescript
 // apps/backend/src/main.ts
 import helmet from 'helmet';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  
-  app.use(helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
-        scriptSrc: ["'self'"],
-        imgSrc: ["'self'", "data:", "https:"],
+
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          styleSrc: ["'self'", "'unsafe-inline'"],
+          scriptSrc: ["'self'"],
+          imgSrc: ["'self'", 'data:', 'https:'],
+        },
       },
-    },
-  }));
-  
+    })
+  );
+
   // ... rest of configuration
 }
 ```
 
 **Manual Test**:
+
 ```bash
 # Test rate limiting
 for i in {1..105}; do curl -s http://localhost:3001/health > /dev/null; done
@@ -719,6 +727,7 @@ curl -I http://localhost:3001/health
 ```
 
 **Deliverables**:
+
 - [x] Rate limiting configured
 - [x] Security headers with helmet
 - [x] IP-based throttling
@@ -733,6 +742,7 @@ curl -I http://localhost:3001/health
 ### 🔧 Technical Tasks
 
 #### Task 1.4.1: Category Endpoints (3h)
+
 ```typescript
 // apps/backend/src/categories/categories.controller.ts
 import { Controller, Get, Param, Query } from '@nestjs/common';
@@ -770,12 +780,11 @@ import { Category } from '@qa-platform/shared-types';
 export class CategoriesService {
   constructor(
     @InjectRepository(Category)
-    private categoryRepository: Repository<Category>,
+    private categoryRepository: Repository<Category>
   ) {}
 
   async findAll(options?: { active?: boolean }): Promise<Category[]> {
-    const query = this.categoryRepository.createQueryBuilder('category')
-      .orderBy('category.sortOrder', 'ASC');
+    const query = this.categoryRepository.createQueryBuilder('category').orderBy('category.sortOrder', 'ASC');
 
     if (options?.active !== undefined) {
       query.andWhere('category.isActive = :active', { active: options.active });
@@ -802,6 +811,7 @@ export class CategoriesService {
 ```
 
 **DTOs Definition**:
+
 ```typescript
 // packages/shared-types/src/dto/category.dto.ts
 import { ApiProperty } from '@nestjs/swagger';
@@ -836,12 +846,14 @@ export class CategoryWithTopicsDto extends CategoryDto {
 ```
 
 **Deliverables**:
+
 - [x] GET /categories endpoint
 - [x] GET /categories/:id endpoint
 - [x] Active status filtering
 - [x] Topics included in detail view
 
 #### Task 1.4.2: Courses Alias Endpoints (2h)
+
 ```typescript
 // apps/backend/src/courses/courses.controller.ts
 import { Controller, Get, Param, Query } from '@nestjs/common';
@@ -869,12 +881,14 @@ export class CoursesController {
 ```
 
 **Deliverables**:
+
 - [x] GET /courses alias endpoint
 - [x] GET /courses/:id alias endpoint
 - [x] Identical functionality to categories
 - [x] Better UX for frontend
 
 #### Task 1.4.3: Topic Content Endpoints (3h)
+
 ```typescript
 // apps/backend/src/topics/topics.controller.ts
 import { Controller, Get, Param, Query } from '@nestjs/common';
@@ -891,10 +905,7 @@ export class TopicsController {
   @ApiResponse({ status: 200, type: TopicContentDto })
   @ApiResponse({ status: 404, description: 'Topic not found' })
   @ApiQuery({ name: 'lang', required: false, enum: ['bg', 'en', 'de'] })
-  async findOne(
-    @Param('id') id: string,
-    @Query('lang') lang: string = 'bg'
-  ): Promise<TopicContentDto> {
+  async findOne(@Param('id') id: string, @Query('lang') lang: string = 'bg'): Promise<TopicContentDto> {
     return this.topicsService.findWithContent(id, lang);
   }
 }
@@ -911,7 +922,7 @@ export class TopicsService {
     @InjectRepository(Topic)
     private topicRepository: Repository<Topic>,
     @InjectRepository(TopicContent)
-    private topicContentRepository: Repository<TopicContent>,
+    private topicContentRepository: Repository<TopicContent>
   ) {}
 
   async findWithContent(id: string, languageCode: string): Promise<Topic & { content: TopicContent }> {
@@ -951,6 +962,7 @@ export class TopicsService {
 ```
 
 **Manual Test**:
+
 ```bash
 # Test topic endpoint
 curl http://localhost:3001/topics/1234-uuid-here?lang=bg
@@ -964,6 +976,7 @@ curl http://localhost:3001/topics/nonexistent
 ```
 
 **Deliverables**:
+
 - [x] GET /topics/:id endpoint
 - [x] Multi-language support with fallback
 - [x] Published content filtering
@@ -978,6 +991,7 @@ curl http://localhost:3001/topics/nonexistent
 ### 🔧 Technical Tasks
 
 #### Task 1.5.1: Vite React Application Setup (3h)
+
 ```bash
 # Initialize React app with Vite
 cd apps/web
@@ -997,6 +1011,7 @@ pnpm add @qa-platform/constants@workspace:*
 ```
 
 **Vite Configuration**:
+
 ```typescript
 // apps/web/vite.config.ts
 import { defineConfig } from 'vite';
@@ -1023,12 +1038,14 @@ export default defineConfig({
 ```
 
 **Deliverables**:
+
 - [x] Vite React application configured
 - [x] TypeScript setup
 - [x] Shared package integration
 - [x] Development server with proxy
 
 #### Task 1.5.2: Mantine UI Integration (2h)
+
 ```typescript
 // apps/web/src/main.tsx
 import React from 'react';
@@ -1077,12 +1094,14 @@ export const theme = createTheme({
 ```
 
 **Deliverables**:
+
 - [x] Mantine UI provider setup
 - [x] Custom theme configuration
 - [x] Notification system integration
 - [x] CSS imports and styling
 
 #### Task 1.5.3: React Router Setup (2h)
+
 ```typescript
 // apps/web/src/App.tsx
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
@@ -1107,13 +1126,13 @@ export function App() {
           <Route path="/topics/:id" element={<TopicPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
-          <Route 
-            path="/dashboard" 
+          <Route
+            path="/dashboard"
             element={
               <ProtectedRoute>
                 <DashboardPage />
               </ProtectedRoute>
-            } 
+            }
           />
         </Routes>
       </Shell>
@@ -1147,12 +1166,14 @@ export function Shell({ children }: ShellProps) {
 ```
 
 **Deliverables**:
+
 - [x] React Router configured
 - [x] Route structure defined
 - [x] Layout component with AppShell
 - [x] Protected route component
 
 #### Task 1.5.4: API Client Setup (3h)
+
 ```typescript
 // apps/web/src/services/api.ts
 import axios from 'axios';
@@ -1182,7 +1203,7 @@ apiClient.interceptors.response.use(
       localStorage.removeItem('access_token');
       window.location.href = '/login';
     }
-    
+
     if (error.response?.status === 429) {
       notifications.show({
         title: 'Грешка',
@@ -1190,7 +1211,7 @@ apiClient.interceptors.response.use(
         color: 'red',
       });
     }
-    
+
     if (error.response?.status >= 500) {
       notifications.show({
         title: 'Грешка',
@@ -1198,7 +1219,7 @@ apiClient.interceptors.response.use(
         color: 'red',
       });
     }
-    
+
     return Promise.reject(error);
   }
 );
@@ -1212,7 +1233,7 @@ import { CategoryDto, CategoryWithTopicsDto } from '@qa-platform/shared-types';
 export const categoriesApi = {
   getAll: async (active?: boolean): Promise<CategoryDto[]> => {
     const response = await apiClient.get('/categories', {
-      params: { active }
+      params: { active },
     });
     return response.data;
   },
@@ -1227,7 +1248,7 @@ export const categoriesApi = {
 export const coursesApi = {
   getAll: async (active?: boolean): Promise<CategoryDto[]> => {
     const response = await apiClient.get('/courses', {
-      params: { active }
+      params: { active },
     });
     return response.data;
   },
@@ -1240,6 +1261,7 @@ export const coursesApi = {
 ```
 
 **State Management Setup**:
+
 ```typescript
 // apps/web/src/stores/useCoursesStore.ts
 import { create } from 'zustand';
@@ -1287,6 +1309,7 @@ export const useCoursesStore = create<CoursesState>((set, get) => ({
 ```
 
 **Manual Test**:
+
 ```bash
 # Start frontend
 cd apps/web && pnpm dev
@@ -1299,6 +1322,7 @@ cd apps/web && pnpm dev
 ```
 
 **Deliverables**:
+
 - [x] Axios client with interceptors
 - [x] API service layer
 - [x] Zustand state management
@@ -1313,6 +1337,7 @@ cd apps/web && pnpm dev
 ### 🔧 Technical Tasks
 
 #### Task 1.6.1: Courses Listing Page (4h)
+
 ```typescript
 // apps/web/src/pages/CoursesPage.tsx
 import { useEffect } from 'react';
@@ -1351,7 +1376,7 @@ export function CoursesPage() {
   return (
     <Container size="xl" py="xl">
       <Title order={1} mb="lg">Курсове по Quality Assurance</Title>
-      
+
       <Grid mb="xl">
         <Grid.Col span={{ base: 12, md: 8 }}>
           <TextInput
@@ -1450,6 +1475,7 @@ export function CourseCard({ course }: CourseCardProps) {
 ```
 
 **Search Hook**:
+
 ```typescript
 // apps/web/src/hooks/useSearch.ts
 import { useState, useMemo } from 'react';
@@ -1463,8 +1489,7 @@ export function useSearch<T>(items: T[], searchFields: (keyof T)[]) {
     return items.filter((item) =>
       searchFields.some((field) => {
         const value = item[field];
-        return typeof value === 'string' && 
-               value.toLowerCase().includes(searchTerm.toLowerCase());
+        return typeof value === 'string' && value.toLowerCase().includes(searchTerm.toLowerCase());
       })
     );
   }, [items, searchTerm, searchFields]);
@@ -1474,6 +1499,7 @@ export function useSearch<T>(items: T[], searchFields: (keyof T)[]) {
 ```
 
 **Deliverables**:
+
 - [x] Courses listing page
 - [x] Course cards with metadata
 - [x] Search functionality
@@ -1481,17 +1507,18 @@ export function useSearch<T>(items: T[], searchFields: (keyof T)[]) {
 - [x] Responsive grid layout
 
 #### Task 1.6.2: Course Detail Page (4h)
+
 ```typescript
 // apps/web/src/pages/CourseDetailPage.tsx
 import { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { 
-  Container, 
-  Title, 
-  Text, 
-  Button, 
-  Card, 
-  Group, 
+import {
+  Container,
+  Title,
+  Text,
+  Button,
+  Card,
+  Group,
   Badge,
   Breadcrumbs,
   Anchor,
@@ -1622,7 +1649,7 @@ export function TopicListItem({ topic, topicNumber }: TopicListItemProps) {
             </Group>
           </Badge>
         </Group>
-        
+
         <ActionIcon
           component={Link}
           to={`/topics/${topic.id}`}
@@ -1638,6 +1665,7 @@ export function TopicListItem({ topic, topicNumber }: TopicListItemProps) {
 ```
 
 **Deliverables**:
+
 - [x] Course detail page with metadata
 - [x] Topic listing with navigation
 - [x] Breadcrumb navigation
@@ -1645,6 +1673,7 @@ export function TopicListItem({ topic, topicNumber }: TopicListItemProps) {
 - [x] Responsive layout
 
 #### Task 1.6.3: Navigation Component (4h)
+
 ```typescript
 // apps/web/src/components/layout/Navigation.tsx
 import { Group, Button, ActionIcon, useMantineColorScheme } from '@mantine/core';
@@ -1666,16 +1695,16 @@ export function Navigation() {
       <Group>
         <Logo />
         <Group ml="xl">
-          <Button 
-            component={Link} 
-            to="/" 
+          <Button
+            component={Link}
+            to="/"
             variant={isActive('/') ? 'filled' : 'subtle'}
           >
             Начало
           </Button>
-          <Button 
-            component={Link} 
-            to="/courses" 
+          <Button
+            component={Link}
+            to="/courses"
             variant={isActive('/courses') ? 'filled' : 'subtle'}
           >
             Курсове
@@ -1749,25 +1778,25 @@ export function UserMenu() {
         <Menu.Label>
           {user?.email}
         </Menu.Label>
-        
-        <Menu.Item 
+
+        <Menu.Item
           leftSection={<IconDashboard size={14} />}
           component={Link}
           to="/dashboard"
         >
           Табло
         </Menu.Item>
-        
-        <Menu.Item 
+
+        <Menu.Item
           leftSection={<IconSettings size={14} />}
           component={Link}
           to="/profile"
         >
           Профил
         </Menu.Item>
-        
+
         <Menu.Divider />
-        
+
         <Menu.Item
           color="red"
           leftSection={<IconLogout size={14} />}
@@ -1782,6 +1811,7 @@ export function UserMenu() {
 ```
 
 **Deliverables**:
+
 - [x] Navigation header with logo
 - [x] Theme toggle (dark/light mode)
 - [x] User authentication menu
@@ -1797,6 +1827,7 @@ export function UserMenu() {
 ### 🔧 Technical Tasks
 
 #### Task 1.7.1: Topic Content API Integration (3h)
+
 ```typescript
 // apps/web/src/services/topics.ts
 import { apiClient } from './api';
@@ -1805,7 +1836,7 @@ import { TopicContentDto } from '@qa-platform/shared-types';
 export const topicsApi = {
   getById: async (id: string, lang: string = 'bg'): Promise<TopicContentDto> => {
     const response = await apiClient.get(`/topics/${id}`, {
-      params: { lang }
+      params: { lang },
     });
     return response.data;
   },
@@ -1857,12 +1888,14 @@ export const useTopicsStore = create<TopicsState>((set, get) => ({
 ```
 
 **Deliverables**:
+
 - [x] Topic API service
 - [x] Topic state management
 - [x] Language switching logic
 - [x] Error handling
 
 #### Task 1.7.2: Markdown Content Rendering (4h)
+
 ```bash
 # Install markdown dependencies
 pnpm add react-markdown remark-gfm rehype-highlight rehype-raw
@@ -1889,22 +1922,22 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
     h2: ({ children }: any) => <Title order={2} mt="lg" mb="sm">{children}</Title>,
     h3: ({ children }: any) => <Title order={3} mt="md" mb="sm">{children}</Title>,
     h4: ({ children }: any) => <Title order={4} mt="md" mb="xs">{children}</Title>,
-    
+
     p: ({ children }: any) => <Text mb="md" lh={1.6}>{children}</Text>,
-    
+
     ul: ({ children }: any) => <List mb="md" spacing="xs">{children}</List>,
     ol: ({ children }: any) => <List mb="md" spacing="xs" type="ordered">{children}</List>,
     li: ({ children }: any) => <List.Item>{children}</List.Item>,
-    
+
     blockquote: ({ children }: any) => <Blockquote mb="md">{children}</Blockquote>,
-    
+
     hr: () => <Divider my="xl" />,
-    
+
     code: ({ inline, className, children }: any) => {
       if (inline) {
         return <Code>{children}</Code>;
       }
-      
+
       return (
         <Paper withBorder p="md" mb="md">
           <Code block>
@@ -1913,13 +1946,13 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
         </Paper>
       );
     },
-    
+
     pre: ({ children }: any) => (
       <Paper withBorder p="md" mb="md" style={{ overflow: 'auto' }}>
         {children}
       </Paper>
     ),
-    
+
     table: ({ children }: any) => (
       <Paper withBorder mb="md" style={{ overflow: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -1927,13 +1960,13 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
         </table>
       </Paper>
     ),
-    
+
     th: ({ children }: any) => (
       <th style={{ padding: '12px', borderBottom: '2px solid #dee2e6', textAlign: 'left' }}>
         {children}
       </th>
     ),
-    
+
     td: ({ children }: any) => (
       <td style={{ padding: '12px', borderBottom: '1px solid #dee2e6' }}>
         {children}
@@ -1954,12 +1987,14 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
 ```
 
 **Deliverables**:
+
 - [x] Markdown rendering with syntax highlighting
 - [x] Custom component mapping for Mantine UI
 - [x] Table formatting
 - [x] Code block styling
 
 #### Task 1.7.3: Topic Page Layout (3h)
+
 ```typescript
 // apps/web/src/pages/TopicPage.tsx
 import { useEffect, useState } from 'react';
@@ -2061,7 +2096,7 @@ export function TopicPage() {
               {currentTopic.estimatedReadingTime} мин четене
             </Badge>
           </Group>
-          
+
           <Select
             value={language}
             onChange={(value) => setLanguage(value || 'bg')}
@@ -2135,6 +2170,7 @@ export function TopicPage() {
 ```
 
 **Deliverables**:
+
 - [x] Complete topic page layout
 - [x] Reading progress indicator
 - [x] Language selector
@@ -2142,6 +2178,7 @@ export function TopicPage() {
 - [x] Scroll to top functionality
 
 #### Task 1.7.4: Table of Contents & Reading Experience (2h)
+
 ```typescript
 // apps/web/src/components/content/TableOfContents.tsx
 import { useState, useEffect } from 'react';
@@ -2165,7 +2202,7 @@ export function TableOfContents() {
     headings.forEach((heading, index) => {
       const id = heading.id || `heading-${index}`;
       heading.id = id;
-      
+
       tocItems.push({
         id,
         text: heading.textContent || '',
@@ -2227,6 +2264,7 @@ export function TableOfContents() {
 ```
 
 **Manual Tests for All Stories**:
+
 ```bash
 # Epic 1 Complete Test Sequence
 
@@ -2265,6 +2303,7 @@ curl http://localhost:3001/topics/[topic-id]?lang=bg
 ```
 
 **Deliverables**:
+
 - [x] Table of contents generation
 - [x] Active heading tracking
 - [x] Smooth scrolling navigation
@@ -2277,6 +2316,7 @@ curl http://localhost:3001/topics/[topic-id]?lang=bg
 ### ✅ Total Completion: 80 часа (2 седмици)
 
 ### 🎯 Key Achievements:
+
 - **Monorepo Foundation**: Complete development environment с Docker
 - **Database Schema**: PostgreSQL със full-text search и миграции
 - **API Foundation**: NestJS с health checks, rate limiting, validation
@@ -2285,19 +2325,22 @@ curl http://localhost:3001/topics/[topic-id]?lang=bg
 - **Content Display**: Markdown rendering с syntax highlighting и TOC
 
 ### 🔗 Dependency Chain Satisfied:
+
 - ✅ Epic 2 може да започне - Authentication ще използва User entity и API foundation
 - ✅ Всички shared packages готови за употреба
 - ✅ Database schema покрива основните нужди
 - ✅ API layer готов за extension
 
 ### 🧪 Quality Assurance:
+
 - [x] Unit tests за всички services
-- [x] Integration tests за API endpoints  
+- [x] Integration tests за API endpoints
 - [x] Component tests за React components
 - [x] Manual smoke tests за всички features
 - [x] Performance проверки (<200ms API, <500KB bundles)
 
 ### 🚀 Ready for Production:
+
 - [x] Docker environment функционален
 - [x] Error handling comprehensive
 - [x] Security measures implemented

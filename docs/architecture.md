@@ -14,10 +14,10 @@
 
 ### Change Log
 
-| Date | Version | Description | Author |
-|------|---------|-------------|--------|
-| 2024-12-XX | 1.0 | Initial architecture document | Winston (Architect) |
-| 2024-12-XX | 1.1 | BMad v4 restructuring | Winston (Architect) |
+| Date       | Version | Description                   | Author              |
+| ---------- | ------- | ----------------------------- | ------------------- |
+| 2024-12-XX | 1.0     | Initial architecture document | Winston (Architect) |
+| 2024-12-XX | 1.1     | BMad v4 restructuring         | Winston (Architect) |
 
 ## High Level Architecture
 
@@ -30,6 +30,7 @@ QA Обучителната Платформа използва **прагмат
 **PostgreSQL-Only Platform Decision**:
 
 **Предимства на PostgreSQL Подхода**:
+
 - **Надеждност и стабилност**: PostgreSQL предлага ACID compliance и надеждно съхранение на данни
 - **Производителност**: PostgreSQL осигурява бърз достъп до данни и реално време функционалност
 - **Мащабируемост**: Лесно разширяемо решение с възможност за бъдещ растеж
@@ -38,6 +39,7 @@ QA Обучителната Платформа използва **прагмат
 
 **Платформа**: VPS с Docker
 **Ключови Услуги**:
+
 - Nginx (reverse proxy & статично файлово обслужване)
 - **PostgreSQL** (основна база данни)
 - Docker Compose (опростена оркестрация)
@@ -98,6 +100,7 @@ graph TD
 **Предназначение**: Представлява регистрирани потребители в системата с minimal PII collection
 
 **Ключови Атрибути**:
+
 - id: UUID - Уникален идентификатор
 - email: string - Email адрес на потребителя (уникален)
 - passwordHash: string - bcrypt хеширана парола
@@ -106,6 +109,7 @@ graph TD
 - preferredLanguage: string - bg/en/de language preference
 
 **Relationships**:
+
 - One-to-many: UserProgress, TestAttempts, LearningPlanTopics, Bookmarks
 
 ### Category (Категория)
@@ -113,6 +117,7 @@ graph TD
 **Предназначение**: Организира теми в логически групи (QA Fundamentals, Automation, etc.)
 
 **Ключови Атрибути**:
+
 - id: UUID
 - name: string (уникален)
 - description: text
@@ -121,6 +126,7 @@ graph TD
 - sortOrder: number
 
 **Relationships**:
+
 - One-to-many: Topics
 
 ### Topic (Тема/Лекция)
@@ -128,6 +134,7 @@ graph TD
 **Предназначение**: Индивидуални единици обучително съдържание
 
 **Ключови Атрибути**:
+
 - id: UUID
 - categoryId: UUID (Foreign Key)
 - topicNumber: number (sequential)
@@ -136,6 +143,7 @@ graph TD
 - estimatedReadingTime: number (minutes)
 
 **Relationships**:
+
 - Many-to-one: Category
 - One-to-many: TopicContent
 - One-to-one: Test
@@ -145,6 +153,7 @@ graph TD
 **Предназначение**: Езиково-специфично съдържание с PostgreSQL full-text search
 
 **Ключови Атрибути**:
+
 - topicId: UUID + languageCode: string (composite key)
 - title: string (localized)
 - content: text (rich text)
@@ -154,12 +163,14 @@ graph TD
 ### Test & Question Models
 
 **Test**:
+
 - topicId: UUID (one-to-one with Topic)
 - title: string
 - passingPercentage: number (0-100)
 - maxAttempts: number
 
 **Question**:
+
 - testId: UUID
 - questionType: enum ('single', 'multiple')
 - questionText: text
@@ -170,36 +181,37 @@ graph TD
 
 ### REST API Endpoints
 
-| HTTP Method | Endpoint | Description | Access Level |
-|:------------|:---------|:------------|:-------------|
-| **Authentication** |
-| `POST` | `/auth/register` | Регистрация на нов потребител | **Публичен** |
-| `POST` | `/auth/login` | Вход на потребител и издаване на JWT | **Публичен** |
-| `POST` | `/auth/refresh` | Опресняване на access token | **Публичен** |
-| `POST` | `/auth/logout` | Излизане и изчистване на refresh token | **Нужен Логин** |
-| `GET` | `/auth/profile` | Вземане на профила на текущия потребител | **Нужен Логин** |
-| **Публично Съдържание** |
-| `GET` | `/categories` | Списък с всички категории | **Публичен** |
-| `GET` | `/courses` | Списък с всички курсове (с филтри) | **Публичен** |
-| `GET` | `/courses/:id` | Детайли за конкретен курс | **Публичен** |
-| `GET` | `/topics/:id` | Съдържание на конкретна лекция | **Публичен** |
+| HTTP Method                | Endpoint                  | Description                              | Access Level    |
+| :------------------------- | :------------------------ | :--------------------------------------- | :-------------- |
+| **Authentication**         |
+| `POST`                     | `/auth/register`          | Регистрация на нов потребител            | **Публичен**    |
+| `POST`                     | `/auth/login`             | Вход на потребител и издаване на JWT     | **Публичен**    |
+| `POST`                     | `/auth/refresh`           | Опресняване на access token              | **Публичен**    |
+| `POST`                     | `/auth/logout`            | Излизане и изчистване на refresh token   | **Нужен Логин** |
+| `GET`                      | `/auth/profile`           | Вземане на профила на текущия потребител | **Нужен Логин** |
+| **Публично Съдържание**    |
+| `GET`                      | `/categories`             | Списък с всички категории                | **Публичен**    |
+| `GET`                      | `/courses`                | Списък с всички курсове (с филтри)       | **Публичен**    |
+| `GET`                      | `/courses/:id`            | Детайли за конкретен курс                | **Публичен**    |
+| `GET`                      | `/topics/:id`             | Съдържание на конкретна лекция           | **Публичен**    |
 | **Потребителски Действия** |
-| `GET` | `/users/me/progress` | Агрегиран прогрес по курсове | **Нужен Логин** |
-| `POST` | `/topics/:id/complete` | Маркиране на лекция като завършена | **Нужен Логин** |
-| `POST` | `/tests/:id/submit` | Изпращане на отговори за тест | **Нужен Логин** |
-| `GET` | `/tests/results/:id` | Преглед на резултати от тест | **Нужен Логин** |
-| **Администрация** |
-| `GET` | `/admin/users` | Списък с всички потребители | **Само Админ** |
-| `PUT` | `/admin/users/:id` | Редакция на потребител | **Само Админ** |
-| `POST/PUT/DELETE` | `/admin/categories(/:id)` | CRUD за категории | **Само Админ** |
-| `POST/PUT/DELETE` | `/admin/topics(/:id)` | CRUD за лекции | **Само Админ** |
-| `POST/PUT/DELETE` | `/admin/tests(/:id)` | CRUD за тестове | **Само Админ** |
-| `GET` | `/admin/dashboard/stats` | Статистики за админ табло | **Само Админ** |
-| `GET/PUT` | `/admin/settings` | Системни настройки | **Само Админ** |
+| `GET`                      | `/users/me/progress`      | Агрегиран прогрес по курсове             | **Нужен Логин** |
+| `POST`                     | `/topics/:id/complete`    | Маркиране на лекция като завършена       | **Нужен Логин** |
+| `POST`                     | `/tests/:id/submit`       | Изпращане на отговори за тест            | **Нужен Логин** |
+| `GET`                      | `/tests/results/:id`      | Преглед на резултати от тест             | **Нужен Логин** |
+| **Администрация**          |
+| `GET`                      | `/admin/users`            | Списък с всички потребители              | **Само Админ**  |
+| `PUT`                      | `/admin/users/:id`        | Редакция на потребител                   | **Само Админ**  |
+| `POST/PUT/DELETE`          | `/admin/categories(/:id)` | CRUD за категории                        | **Само Админ**  |
+| `POST/PUT/DELETE`          | `/admin/topics(/:id)`     | CRUD за лекции                           | **Само Админ**  |
+| `POST/PUT/DELETE`          | `/admin/tests(/:id)`      | CRUD за тестове                          | **Само Админ**  |
+| `GET`                      | `/admin/dashboard/stats`  | Статистики за админ табло                | **Само Админ**  |
+| `GET/PUT`                  | `/admin/settings`         | Системни настройки                       | **Само Админ**  |
 
 ### Authentication Flow
 
 **Access + Refresh Token Pattern**:
+
 1. **Login**: Връща `access_token` в response body + `refresh_token` в httpOnly cookie
 2. **API Requests**: `Authorization: Bearer <access_token>` header
 3. **Token Refresh**: При 401 error, автоматично refresh чрез `/auth/refresh`
@@ -210,6 +222,7 @@ graph TD
 ### Backend Components
 
 **NestJS Backend API**
+
 - **Responsibility**: Централизирано API за всички операции
 - **Key Interfaces**: REST endpoints, Authentication guards, Database ORM
 - **Dependencies**: PostgreSQL, SendGrid, Sentry
@@ -218,18 +231,21 @@ graph TD
 ### Frontend Components
 
 **Публично React Приложение (apps/web)**
+
 - **Responsibility**: Потребителски интерфейс за курсове и регистрация
 - **Key Interfaces**: Public routes, User dashboard, Course viewer
 - **Dependencies**: Shared UI components, API client
 - **Technology Stack**: React, Mantine UI, Zustand
 
 **Административно React Приложение (apps/admin)**
+
 - **Responsibility**: Административен панел за управление на съдържание
 - **Key Interfaces**: CRUD forms, User management, System settings
 - **Dependencies**: Shared UI components, Admin API client
 - **Technology Stack**: React, Mantine UI, Zustand
 
 **Споделени Пакети**:
+
 - **packages/shared-types**: TypeScript интерфейси
 - **packages/ui-components**: Реusable React компоненти
 - **packages/constants**: API routes и константи
@@ -245,9 +261,11 @@ graph TD
 - **Rate Limits**: 100 emails/day (free plan)
 
 **Key Endpoints Used**:
+
 - `POST /mail/send` - Изпращане на имейл
 
-**Integration Notes**: 
+**Integration Notes**:
+
 - Дневен брояч в database за лимит управление
 - Graceful fallback при достигнат лимит
 - Конфигурируем лимит в admin панел
@@ -256,6 +274,7 @@ graph TD
 
 **Primary Provider**: SendGrid (100 emails/day free tier)
 **Backup Strategy**:
+
 - **Critical Emails** (password reset, account activation): Queue for retry with exponential backoff
 - **Rate Limit Management**: Database counter with soft limit at 90 emails/day
 - **Fallback Options**:
@@ -264,6 +283,7 @@ graph TD
   - Local SMTP configuration for development/emergency use
 
 **Email Priority Classification**:
+
 - **High Priority**: Password reset, account activation (require immediate delivery)
 - **Medium Priority**: Course completion notifications (can be delayed)
 - **Low Priority**: Marketing/newsletter emails (can be deferred)
@@ -416,6 +436,7 @@ CREATE TABLE user_progress (
 ### Component Architecture
 
 **Component Organization**:
+
 ```
 apps/web/src/
 ├── components/
@@ -431,6 +452,7 @@ apps/web/src/
 ```
 
 **Component Template**:
+
 ```typescript
 import React from 'react';
 import { Button } from '@mantine/core';
@@ -455,6 +477,7 @@ export const Component: React.FC<ComponentProps> = ({ title, onClick }) => {
 **Accessibility Framework**: Mantine UI built-in accessibility + custom enhancements
 
 **Key Requirements**:
+
 - **Keyboard Navigation**: Пълна keyboard accessibility за всички интерактивни елементи
 - **Screen Reader Support**: Proper ARIA labels и semantic HTML structure
 - **Color Contrast**: Минимум 4.5:1 contrast ratio за normal text, 3:1 за large text
@@ -462,21 +485,23 @@ export const Component: React.FC<ComponentProps> = ({ title, onClick }) => {
 - **Alternative Text**: Задължителни alt attributes за всички изображения
 
 **Testing Strategy**:
+
 - **Automated Testing**: axe-core integration в component tests
 - **Manual Testing**: Quarterly keyboard navigation и screen reader testing
-- **Tools**: 
+- **Tools**:
   - Browser: axe DevTools extension
   - Testing: @axe-core/react за автоматизирани проверки
   - Screen Reader: NVDA за Windows testing
 
 **Implementation**:
+
 ```typescript
 // Пример за accessibility-first компонент
-export const AccessibleButton: React.FC<ButtonProps> = ({ 
-  children, 
-  onClick, 
+export const AccessibleButton: React.FC<ButtonProps> = ({
+  children,
+  onClick,
   'aria-label': ariaLabel,
-  disabled = false 
+  disabled = false
 }) => {
   return (
     <Button
@@ -494,6 +519,7 @@ export const AccessibleButton: React.FC<ButtonProps> = ({
 ### State Management Architecture
 
 **State Structure**:
+
 ```typescript
 // Auth Store
 interface AuthState {
@@ -504,7 +530,7 @@ interface AuthState {
   refreshToken: () => Promise<void>;
 }
 
-// Courses Store  
+// Courses Store
 interface CoursesState {
   courses: Course[];
   selectedCourse: Course | null;
@@ -526,12 +552,14 @@ interface CoursesState {
 | `xl` | 1400px | Large desktop | Optimized spacing |
 
 **Mobile-First Approach**:
+
 - **Design Philosophy**: Progressive enhancement от mobile към desktop
 - **Touch Targets**: Минимум 44px × 44px за touch elements
 - **Navigation**: Collapsible navigation за mobile, full navigation за desktop
 - **Content Priority**: Essential content visible без horizontal scroll на mobile
 
 **Responsive Patterns**:
+
 ```typescript
 // Responsive layout component
 const ResponsiveLayout: React.FC = ({ children }) => {
@@ -560,6 +588,7 @@ const useResponsiveText = () => {
 ```
 
 **Platform-Specific Considerations**:
+
 - **Admin Panel**: Desktop-first design (предполага desktop usage)
 - **Public Site**: Mobile-first design (достъпност за всички потребители)
 - **Progressive Web App**: Service worker за offline functionality (future consideration)
@@ -567,6 +596,7 @@ const useResponsiveText = () => {
 ### UX State Management Patterns
 
 **Loading States**:
+
 ```typescript
 interface UIState {
   isLoading: boolean;
@@ -585,18 +615,21 @@ const LoadingStates = {
 ```
 
 **Error Handling UX**:
+
 - **Toast Notifications**: Mantine Notifications за временни съобщения
 - **Inline Errors**: Form field-specific грешки
 - **Page-Level Errors**: Error boundaries за critical failures
 - **Network Errors**: Automatic retry з visual feedback
 
 **Success Feedback**:
+
 - **Immediate Feedback**: Button state changes (loading → success)
 - **Confirmation Messages**: Toast notifications за successful actions
 - **Visual Cues**: Progress bars за multi-step processes
 - **Optimistic Updates**: Immediate UI updates с rollback при грешка
 
 **Implementation Example**:
+
 ```typescript
 const useApiCall = <T>(apiFunction: () => Promise<T>) => {
   const [state, setState] = useState<UIState>({
@@ -612,10 +645,10 @@ const useApiCall = <T>(apiFunction: () => Promise<T>) => {
       setState({ isLoading: false, error: null, success: 'Успешно!' });
       return result;
     } catch (error) {
-      setState({ 
-        isLoading: false, 
-        error: 'Възникна грешка. Моля, опитайте отново.', 
-        success: null 
+      setState({
+        isLoading: false,
+        error: 'Възникна грешка. Моля, опитайте отново.',
+        success: null,
       });
     }
   };
@@ -627,9 +660,10 @@ const useApiCall = <T>(apiFunction: () => Promise<T>) => {
 ### Routing Architecture
 
 **Route Organization**:
+
 ```
 / - Homepage
-/courses - All courses listing  
+/courses - All courses listing
 /courses/:id - Course details
 /topics/:id - Topic content
 /register - User registration
@@ -643,6 +677,7 @@ const useApiCall = <T>(apiFunction: () => Promise<T>) => {
 ### Frontend Services Layer
 
 **API Client Setup**:
+
 ```typescript
 import axios from 'axios';
 
@@ -682,6 +717,7 @@ apiClient.interceptors.response.use(
 ### Service Architecture
 
 **NestJS Service Organization**:
+
 ```
 src/
 ├── auth/                # Authentication module
@@ -697,18 +733,20 @@ src/
 ### Database Architecture
 
 **Schema Design**: PostgreSQL-focused релационна схема с оптимизации за:
+
 - Full-text search с tsvector индекси
 - Efficient user progress tracking
 - Multi-language content support
 - Audit trails за административни действия
 
 **Data Access Layer**:
+
 ```typescript
 @Injectable()
 export class TopicService {
   constructor(
     @InjectRepository(Topic)
-    private topicRepository: Repository<Topic>,
+    private topicRepository: Repository<Topic>
   ) {}
 
   async findWithContent(id: string, lang: string): Promise<Topic> {
@@ -724,6 +762,7 @@ export class TopicService {
 ### Authentication and Authorization
 
 **Auth Flow**:
+
 ```mermaid
 sequenceDiagram
     participant C as Client
@@ -740,6 +779,7 @@ sequenceDiagram
 ```
 
 **Authorization Guards**:
+
 ```typescript
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -747,8 +787,8 @@ export class RolesGuard implements CanActivate {
     const requiredRoles = this.reflector.get<string[]>('roles', context.getHandler());
     const request = context.switchToHttp().getRequest();
     const user = request.user;
-    
-    return requiredRoles.some(role => user.role === role);
+
+    return requiredRoles.some((role) => user.role === role);
   }
 }
 ```
@@ -762,6 +802,7 @@ export class RolesGuard implements CanActivate {
 ### Local Development Setup
 
 **Prerequisites**:
+
 ```bash
 # Install Node.js 18+
 node --version  # Should be 18+
@@ -774,6 +815,7 @@ psql --version  # Should be 15+
 ```
 
 **Initial Setup**:
+
 ```bash
 # Clone repository
 git clone <repository-url>
@@ -797,6 +839,7 @@ pnpm run seed
 ### Email Testing in Development
 
 **Local Development Email Setup**:
+
 ```bash
 # Development Environment Variables
 NODE_ENV=development
@@ -811,15 +854,18 @@ SMTP_PASS=
 ```
 
 **Email Testing Approaches**:
+
 1. **Console Mode** (default): Emails logged to console with full content
 2. **MailHog/MailCatcher**: Local email capture for UI testing
 3. **SendGrid Sandbox**: Test mode that doesn't send real emails
 
 **Email Templates Testing**:
+
 - Admin panel preview functionality for all email templates
 - Test email sending to administrator accounts only
 
 **Development Commands**:
+
 ```bash
 # Start all services in development
 pnpm dev
@@ -838,6 +884,7 @@ pnpm test:web               # Web app tests only
 ### Recommended Development Sequence
 
 **Phase 1: Foundation Infrastructure (Epic 1 - Weeks 1-2)**
+
 1. **Monorepo Setup**: Initialize pnpm workspace с shared packages structure
 2. **Database Foundation**: PostgreSQL schema, migrations, basic CRUD operations
 3. **Backend Core**: NestJS setup, authentication module, basic API endpoints
@@ -845,24 +892,28 @@ pnpm test:web               # Web app tests only
 5. **Development Tooling**: ESLint, Prettier, testing framework setup
 
 **Phase 2: Core User Features (Epic 2 - Weeks 3-4)**
+
 1. **Authentication Flow**: User registration, login, JWT token management
 2. **Public Content**: Categories и topics viewing без authentication
 3. **Content Management**: Basic CRUD в admin panel за categories/topics
 4. **Email Integration**: SendGrid setup за registration emails
 
 **Phase 3: Interactive Learning (Epic 3 - Weeks 5-6)**
+
 1. **User Progress**: Topic completion tracking, progress visualization
 2. **Test System**: Question/answer functionality, test results
 3. **User Dashboard**: Personal progress, completed courses overview
 4. **Advanced Admin**: User management, system statistics
 
 **Phase 4: Production Readiness (Epic 4 - Week 7)**
+
 1. **Performance Optimization**: Query optimization, caching, bundle optimization
 2. **Monitoring Integration**: Sentry setup, error tracking, performance monitoring
 3. **Deployment Pipeline**: CI/CD setup, Docker containerization
 4. **Security Hardening**: Rate limiting, input validation, security headers
 
 **Critical Dependencies per Phase**:
+
 - **Phase 1 → Phase 2**: Database schema + Authentication system
 - **Phase 2 → Phase 3**: User management + Content structure
 - **Phase 3 → Phase 4**: Core functionality + Test coverage
@@ -894,12 +945,14 @@ CORS_ORIGIN=http://localhost:3000,http://localhost:3002
 ### Deployment Strategy
 
 **Frontend Deployment**:
+
 - **Platform**: Nginx static file serving
 - **Build Command**: `pnpm build`
 - **Output Directory**: `dist/`
 - **CDN/Edge**: CloudFlare or similar
 
 **Backend Deployment**:
+
 - **Platform**: Docker container на VPS
 - **Build Command**: `pnpm build`
 - **Deployment Method**: Docker Compose
@@ -940,49 +993,56 @@ jobs:
 ### Deployment Approval Process
 
 **Automated Deployment Flow**:
+
 - **Development**: Fully automated при push към `develop` branch
-- **Staging**: Fully automated при push към `main` branch  
+- **Staging**: Fully automated при push към `main` branch
 - **Production**: Automated build + manual approval gate
 
 **Human Oversight Requirements**:
+
 - **Production Deployments**: Mandatory human approval преди deployment
 - **Database Migrations**: Human review на migration scripts преди production
 - **Environment Variables**: Human verification на production config changes
 - **Rollback Decisions**: Human-initiated, agent-executed rollback procedures
 
 **Monitoring and Verification**:
+
 - **Post-Deployment**: Human oversight на deployment success metrics за 15 минути
 - **Health Checks**: Automated health check със human notification при failures
 - **Performance Impact**: Human review на post-deployment performance metrics
 
 **Emergency Procedures**:
+
 - **Immediate Rollback**: Human authorization + automated execution
 - **Hotfix Deployment**: Expedited approval process за critical fixes
 - **Service Degradation**: Human escalation при automated alerts
 
 ### Environments
 
-| Environment | Frontend URL | Backend URL | Purpose |
-|------------|--------------|-------------|----------|
-| Development | http://localhost:3000 | http://localhost:3001 | Local development |
-| Staging | https://staging.qa-platform.com | https://api-staging.qa-platform.com | Pre-production testing |
-| Production | https://qa-platform.com | https://api.qa-platform.com | Live environment |
+| Environment | Frontend URL                    | Backend URL                         | Purpose                |
+| ----------- | ------------------------------- | ----------------------------------- | ---------------------- |
+| Development | http://localhost:3000           | http://localhost:3001               | Local development      |
+| Staging     | https://staging.qa-platform.com | https://api-staging.qa-platform.com | Pre-production testing |
+| Production  | https://qa-platform.com         | https://api.qa-platform.com         | Live environment       |
 
 ## Security and Performance
 
 ### Security Requirements
 
 **Frontend Security**:
+
 - CSP Headers: Строги Content Security Policy rules
 - XSS Prevention: Санитизация на всички user inputs
 - Secure Storage: Access tokens в памет, refresh tokens в httpOnly cookies
 
 **Backend Security**:
+
 - Input Validation: Всички входящи данни валидирани с class-validator
 - Rate Limiting: nestjs-throttler за protection от brute force
 - CORS Policy: Ограничени origins в production
 
 **Authentication Security**:
+
 - Token Storage: JWT access tokens в памет, refresh tokens в httpOnly cookies
 - Session Management: Stateless JWT approach с token rotation
 - Password Policy: bcrypt hashing с appropriate cost factor
@@ -990,11 +1050,13 @@ jobs:
 ### Performance Optimization
 
 **Frontend Performance**:
+
 - Bundle Size Target: < 500KB gzipped
 - Loading Strategy: Code splitting и lazy loading
 - Caching Strategy: Service Worker за static assets
 
 **Backend Performance**:
+
 - Response Time Target: < 200ms за API calls
 - Database Optimization: Правилни индекси и query optimization
 - Caching Strategy: In-memory caching за frequently accessed data
@@ -1004,15 +1066,17 @@ jobs:
 **Critical Path Dependencies**:
 
 **1. PostgreSQL Database Stability**
+
 - **Risk**: Database corruption или connection issues
 - **Impact**: Пълен system failure
-- **Mitigation**: 
+- **Mitigation**:
   - Daily automated backups с external storage
   - Connection pooling с retry logic
   - Health check endpoints за database connectivity
 
 **2. Authentication System Integrity**
-- **Risk**: JWT security vulnerabilities или token management issues  
+
+- **Risk**: JWT security vulnerabilities или token management issues
 - **Impact**: Security breach или user lockout
 - **Mitigation**:
   - Token rotation strategy
@@ -1020,6 +1084,7 @@ jobs:
   - Rate limiting на authentication endpoints
 
 **3. Shared Types Consistency**
+
 - **Risk**: Type mismatches между frontend и backend
 - **Impact**: Runtime errors, API communication failures
 - **Mitigation**:
@@ -1030,14 +1095,16 @@ jobs:
 **External Service Risks**:
 
 **4. SendGrid Email Service**
+
 - **Risk**: API rate limits (100 emails/day) или service downtime
 - **Impact**: Blocked user registration
-- **Mitigation**: 
+- **Mitigation**:
   - Email queue с retry mechanism
   - Admin notification при approaching limits
   - Alternative email delivery для critical emails
 
-**5. Sentry Monitoring Service**  
+**5. Sentry Monitoring Service**
+
 - **Risk**: Service outage или quota exceeded
 - **Impact**: Loss of error tracking (не блокира core functionality)
 - **Mitigation**:
@@ -1048,6 +1115,7 @@ jobs:
 **Development Dependencies**:
 
 **6. Monorepo Package Dependencies**
+
 - **Risk**: Version conflicts между packages
 - **Impact**: Build failures, runtime inconsistencies
 - **Mitigation**:
@@ -1070,6 +1138,7 @@ jobs:
 ### Test Organization
 
 **Frontend Tests**:
+
 ```
 apps/web/tests/
 ├── unit/
@@ -1082,6 +1151,7 @@ apps/web/tests/
 ```
 
 **Backend Tests**:
+
 ```
 apps/api/tests/
 ├── unit/
@@ -1094,6 +1164,7 @@ apps/api/tests/
 ```
 
 **E2E Tests**:
+
 ```
 tests/e2e/
 ├── auth/               # Authentication flows
@@ -1104,6 +1175,7 @@ tests/e2e/
 ### Test Examples
 
 **Frontend Component Test**:
+
 ```typescript
 import { render, screen } from '@testing-library/react';
 import { Button } from '@qa-platform/ui-components';
@@ -1117,6 +1189,7 @@ describe('Button Component', () => {
 ```
 
 **Backend API Test**:
+
 ```typescript
 import { Test } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
@@ -1143,6 +1216,7 @@ describe('AuthController (e2e)', () => {
 ```
 
 **E2E Test**:
+
 ```typescript
 import { test, expect } from '@playwright/test';
 
@@ -1151,10 +1225,10 @@ test('user can complete a topic', async ({ page }) => {
   await page.fill('[data-testid=email]', 'user@example.com');
   await page.fill('[data-testid=password]', 'password123');
   await page.click('[data-testid=login-button]');
-  
+
   await page.goto('/topics/intro-to-qa');
   await page.click('[data-testid=complete-topic]');
-  
+
   await expect(page.locator('[data-testid=completion-badge]')).toBeVisible();
 });
 ```
@@ -1171,14 +1245,14 @@ test('user can complete a topic', async ({ page }) => {
 
 ### Naming Conventions
 
-| Element | Frontend | Backend | Example |
-|---------|----------|---------|---------|
-| Components | PascalCase | - | `UserProfile.tsx` |
-| Hooks | camelCase with 'use' | - | `useAuth.ts` |
-| API Routes | - | kebab-case | `/api/user-profile` |
-| Database Tables | - | snake_case | `user_profiles` |
-| Services | PascalCase | PascalCase | `UserService` |
-| Interfaces | PascalCase | PascalCase | `CreateUserDto` |
+| Element         | Frontend             | Backend    | Example             |
+| --------------- | -------------------- | ---------- | ------------------- |
+| Components      | PascalCase           | -          | `UserProfile.tsx`   |
+| Hooks           | camelCase with 'use' | -          | `useAuth.ts`        |
+| API Routes      | -                    | kebab-case | `/api/user-profile` |
+| Database Tables | -                    | snake_case | `user_profiles`     |
+| Services        | PascalCase           | PascalCase | `UserService`       |
+| Interfaces      | PascalCase           | PascalCase | `CreateUserDto`     |
 
 ## Error Handling Strategy
 
@@ -1246,9 +1320,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse();
     const request = ctx.getRequest();
 
-    const status = exception instanceof HttpException 
-      ? exception.getStatus() 
-      : 500;
+    const status = exception instanceof HttpException ? exception.getStatus() : 500;
 
     const errorResponse = {
       error: {
@@ -1276,6 +1348,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 ### Key Metrics
 
 **PostgreSQL Metrics**:
+
 - Query performance (>100ms threshold)
 - Connection pool utilization
 - Cache hit ratio
@@ -1283,6 +1356,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 - Deadlocks and long-running transactions
 
 **Application Metrics**:
+
 - Request rates per endpoint
 - Authentication success/failure rates
 - API response times
@@ -1290,6 +1364,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 - Cache hit/miss ratios
 
 **User Experience Metrics**:
+
 - Core Web Vitals
 - Page load times
 - Time to interactive
@@ -1299,12 +1374,14 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 ### Backup and Recovery Strategy
 
 **Automated Backups**:
+
 - Ежедневни PostgreSQL backups с `pg_dump`
 - Encryption с `gpg` преди upload
 - External storage с `rclone` (Google Drive/Backblaze)
 - Automated backup verification
 
 **Recovery Procedures**:
+
 - Documented step-by-step recovery процес
 - Quarterly backup restore testing
 - RTO (Recovery Time Objective): 4 hours

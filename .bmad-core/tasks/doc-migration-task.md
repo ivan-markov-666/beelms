@@ -90,7 +90,6 @@ Epic content...
 ## 3) Success Metrics
 
 Content here...
-
 ```
 
 ### After (PRD):
@@ -99,22 +98,28 @@ Content here...
 # Product Requirements Document
 
 ## Executive Summary
+
 Content here...
 
 ## Functional Requirements Specs
+
 Content here...
 
 ## Epic 1
+
 ### User Management System
+
 Epic content...
 
 ## Epic 2
+
 ### Payment Processing
+
 Epic content...
 
 ## Success Metrics
-Content here...
 
+Content here...
 ```
 
 ### Before (Non-PRD):
@@ -123,9 +128,11 @@ Content here...
 # Architecture Document
 
 ## 1. System Overview
+
 Content...
 
 ## 2.1 Technical Stack & Tools
+
 Content...
 ```
 
@@ -135,9 +142,10 @@ Content...
 # Architecture Document
 
 ## System Overview
+
 Content...
 
 ## Technical Stack Tools
-Content...
 
+Content...
 ```
