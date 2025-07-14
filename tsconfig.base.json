@@ -1,5 +1,5 @@
 {
-  "$schema": "https://json.bbnb.dev/tsconfig.schema.json",
+  "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
     /* Base directory to resolve non-relative module names */
     "baseUrl": ".",

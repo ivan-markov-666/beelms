@@ -13,7 +13,7 @@ export class User {
    * Уникальный идентификатор пользователя
    */
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   /**
    * Email пользователя, используется для аутентификации
@@ -21,7 +21,7 @@ export class User {
   @Column({ unique: true })
   @IsEmail({}, { message: 'Невалиден имейл формат' })
   @IsNotEmpty({ message: 'Имейлът е задължителен' })
-  email: string;
+  email!: string;
 
   /**
    * Уникальное имя пользователя
@@ -29,7 +29,7 @@ export class User {
   @Column({ unique: true })
   @Length(3, 30, { message: 'Потребителското име трябва да е между 3 и 30 символа' })
   @Matches(/^[a-zA-Z0-9_-]+$/, { message: 'Разрешени са само латински букви, цифри, тире и долна черта' })
-  username: string;
+  username!: string;
 
   /**
    * Хеш пароля, никогда не возвращается в API ответах
@@ -37,7 +37,7 @@ export class User {
   @Column()
   @IsNotEmpty({ message: 'Паролата е задължителна' })
   @Exclude()
-  passwordHash: string;
+  passwordHash!: string;
 
   /**
    * Имя пользователя (необязательное)
@@ -65,21 +65,21 @@ export class User {
   })
   @Check(`"role" IN ('admin', 'instructor', 'student')`) // Добавляем Check constraint вместо enum
   @IsEnum(UserRole)
-  role: UserRole;
+  role!: UserRole;
 
   /**
    * Активирован ли аккаунт пользователя
    */
   @Column({ default: true })
   @IsBoolean()
-  isActive: boolean;
+  isActive!: boolean;
 
   /**
    * Предпочитаемый язык пользователя
    */
   @Column({ type: 'varchar', length: 2, default: 'bg' })
   @Check(`"preferredLanguage" IN ('bg', 'en', 'de')`)
-  preferredLanguage: string;
+  preferredLanguage!: string;
 
   /**
    * Дата и время последней авторизации
@@ -93,13 +93,13 @@ export class User {
    * Дата и время создания записи
    */
   @CreateDateColumn({ type: 'datetime' }) // Используем datetime для SQLite совместимости
-  createdAt: Date;
+  createdAt!: Date;
 
   /**
    * Дата и время последнего обновления записи
    */
   @UpdateDateColumn({ type: 'datetime' }) // Используем datetime для SQLite совместимости
-  updatedAt: Date;
+  updatedAt!: Date;
 
   /**
    * Возвращает полное имя пользователя

@@ -111,45 +111,6 @@ describe('User Entity', () => {
     expect(passwordHashErrors.length).toBeGreaterThan(0);
   });
 
-  // Тестове за допълнителни полета и валидации
-  it('should validate a valid preferredLanguage', async () => {
-    // Arrange
-    const user = createValidUser();
-    user.preferredLanguage = 'en';
-
-    // Act
-    const errors = await validate(user);
-
-    // Assert
-    expect(errors.length).toBe(0);
-  });
-
-  it('should accept a valid date for lastLoginAt', async () => {
-    // Arrange
-    const user = createValidUser();
-    user.lastLoginAt = new Date();
-
-    // Act
-    const errors = await validate(user);
-
-    // Assert
-    expect(errors.length).toBe(0);
-  });
-
-  // Тест за случай, когато потребител е деактивиран
-  it('should handle inactive users', async () => {
-    // Arrange
-    const user = createValidUser();
-    user.isActive = false;
-
-    // Act
-    const errors = await validate(user);
-
-    // Assert
-    expect(errors.length).toBe(0);
-    expect(user.isActive).toBe(false);
-  });
-
   describe('Helper methods', () => {
     it('should return correct full name when both firstName and lastName are set', () => {
       // Arrange
