@@ -1,7 +1,8 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, Check } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, Check, OneToMany } from 'typeorm';
 import { Exclude } from 'class-transformer';
 import { IsEmail, IsNotEmpty, Length, Matches, IsEnum, IsBoolean, IsOptional, IsDate } from 'class-validator';
 import { UserRole } from './user-role.enum';
+import { Topic } from './topic.entity';
 
 /**
  * Entity для пользователей в системе
@@ -133,4 +134,10 @@ export class User {
   isInstructor(): boolean {
     return this.role === UserRole.INSTRUCTOR;
   }
+
+  /**
+   * Темы, созданные пользователем (relation)
+   */
+  @OneToMany(() => Topic, (topic) => topic.createdBy)
+  createdTopics!: Topic[];
 }
