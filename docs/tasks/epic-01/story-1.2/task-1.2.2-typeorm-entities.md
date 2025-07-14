@@ -37,6 +37,91 @@
 
 8. Създаване на тестове за валидация на entity функционалностите
 
+## 📋 Разделяне на задачата
+
+За по-ефективна имплементация и тестване, задачата е разделена на 4 логични части:
+
+### Част 1: Базови потребителски данни и свързана инфраструктура
+
+**Файлове за имплементация:**
+
+- `shared-types/src/entities/user.entity.ts` - Entity за потребителите
+- `shared-types/src/entities/user-role.enum.ts` - Enum за потребителските роли
+- `shared-types/src/providers/fts-provider.interface.ts` - Интерфейс за FTS функционалност
+- `shared-types/src/providers/fts-provider.ts` - Factory функция за FTS
+- `shared-types/src/providers/sqlite-fts-provider.ts` - SQLite имплементация на FTS
+- `shared-types/src/providers/postgres-fts-provider.ts` - PostgreSQL имплементация на FTS
+
+**Тестове:**
+
+- `tests/unit/entities/user.entity.spec.ts` - Unit тестове за User entity
+
+### Част 2: Модел на категории и теми
+
+**Файлове за имплементация:**
+
+- `shared-types/src/entities/category.entity.ts` - Entity за категориите
+- `shared-types/src/entities/topic.entity.ts` - Entity за темите
+- `shared-types/src/entities/topic-content.entity.ts` - Entity за съдържанието на темите с FTS поддръжка
+
+**Тестове:**
+
+- `tests/unit/entities/category.entity.spec.ts` - Unit тестове за категориите
+- `tests/unit/entities/topic.entity.spec.ts` - Unit тестове за темите
+- `tests/unit/entities/topic-content.entity.spec.ts` - Unit тестове за съдържанието
+- `tests/integration/entities/content-categories-topics.spec.ts` - Интеграционни тестове за връзките
+
+### Част 3: Тестове и въпроси
+
+**Файлове за имплементация:**
+
+- `shared-types/src/entities/test.entity.ts` - Entity за тестовете
+- `shared-types/src/entities/question.entity.ts` - Entity за въпросите
+- `shared-types/src/entities/question-option.entity.ts` - Entity за опциите на въпросите
+- `shared-types/src/enums/question-type.enum.ts` - Enum за типовете въпроси
+
+**Тестове:**
+
+- `tests/unit/entities/test.entity.spec.ts`
+- `tests/unit/entities/question.entity.spec.ts`
+- `tests/unit/entities/question-option.entity.spec.ts`
+- `tests/integration/entities/tests-questions-options.spec.ts` - Интеграционни тестове за връзките
+
+### Част 4: Прогрес и завършване
+
+**Файлове за имплементация:**
+
+- `shared-types/src/entities/user-progress.entity.ts` - Entity за прогрес на потребителите
+- `shared-types/src/entities/test-attempt.entity.ts` - Entity за опитите за тестове
+- `shared-types/src/utils/test-database.utils.ts` - Помощни функции за тестване с бази данни
+
+**Тестове:**
+
+- `tests/unit/entities/user-progress.entity.spec.ts`
+- `tests/unit/entities/test-attempt.entity.spec.ts`
+- `tests/integration/entities/progress-tracking.spec.ts`
+- `tests/integration/entities/full-model.spec.ts` - Пълен интеграционен тест на всички entities
+
+За всяка част ще бъдат реализирани:
+
+1. **SQLite съвместимост**:
+   - Замяна на `type: 'enum'` с `type: 'varchar'` + `@Check` ограничения
+   - Замяна на `type: 'timestamptz'` с `type: 'datetime'`
+   - Замяна на `type: 'jsonb'` с `type: 'simple-json'`
+
+2. **Валидация**:
+   - Използване на class-validator декоратори
+   - JSDoc документация на всички полета и методи
+
+3. **Helper методи**:
+   - Полезни методи за работа с данните
+   - Getter методи за изчисляване на производни стойности
+
+4. **Тестове**:
+   - Unit тестове за всяко entity
+   - Интеграционни тестове за връзките между entities
+   - Интеграция с regression suite
+
 ## 📋 Код
 
 ### User Entity с коректни типове и SQLite съвместимост

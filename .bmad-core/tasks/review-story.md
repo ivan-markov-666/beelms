@@ -1,8 +1,6 @@
 # review-story
 
-When a developer marks a story as "Ready for Review", perform a comprehensive senior developer code review with the ability to refactor and improve code directly.
-
-[[LLM: QA Agent executing review-story task as Senior Developer]]
+When a developer agent marks a story as "Ready for Review", perform a comprehensive senior developer code review with the ability to refactor and improve code directly.
 
 ## Prerequisites
 

@@ -8,7 +8,7 @@ Generate comprehensive documentation for existing projects optimized for AI deve
 
 ### 1. Initial Project Analysis
 
-[[LLM: First, check if a PRD or requirements document exists in context. If yes, use it to focus your documentation efforts on relevant areas only.
+**CRITICAL:** First, check if a PRD or requirements document exists in context. If yes, use it to focus your documentation efforts on relevant areas only.
 
 **IF PRD EXISTS**:
 
@@ -56,11 +56,10 @@ Ask the user these elicitation questions to better understand their needs:
 - Are there any existing documentation standards or formats you prefer?
 - What level of technical detail should the documentation target? (junior developers, senior developers, mixed team)
 - Is there a specific feature or enhancement you're planning? (This helps focus documentation)
-  ]]
 
 ### 2. Deep Codebase Analysis
 
-[[LLM: Before generating documentation, conduct extensive analysis of the existing codebase:
+CRITICAL: Before generating documentation, conduct extensive analysis of the existing codebase:
 
 1. **Explore Key Areas**:
    - Entry points (main files, index files, app initializers)
@@ -83,7 +82,7 @@ Ask the user these elicitation questions to better understand their needs:
    - Document workarounds and technical debt
    - Note areas that differ from standard patterns
 
-**IF PRD PROVIDED**: Also analyze what would need to change for the enhancement]]
+**IF PRD PROVIDED**: Also analyze what would need to change for the enhancement
 
 ### 3. Core Documentation Generation
 
@@ -135,8 +134,6 @@ This document captures the CURRENT STATE of the [Project Name] codebase, includi
 
 ### Technical Summary
 
-[Real assessment of architecture - mention if it's well-structured or has issues]
-
 ### Actual Tech Stack (from package.json/requirements.txt)
 
 | Category  | Technology | Version | Notes                      |
@@ -144,7 +141,8 @@ This document captures the CURRENT STATE of the [Project Name] codebase, includi
 | Runtime   | Node.js    | 16.x    | [Any constraints]          |
 | Framework | Express    | 4.18.2  | [Custom middleware?]       |
 | Database  | PostgreSQL | 13      | [Connection pooling setup] |
-| [etc...]  |
+
+etc...
 
 ### Repository Structure Reality Check
 
@@ -156,7 +154,7 @@ This document captures the CURRENT STATE of the [Project Name] codebase, includi
 
 ### Project Structure (Actual)
 
-```
+```text
 project-root/
 ├── src/
 │   ├── controllers/     # HTTP request handlers
@@ -215,7 +213,8 @@ Instead of duplicating, reference actual model files:
 | -------- | -------- | ---------------- | ------------------------------ |
 | Stripe   | Payments | REST API         | `src/integrations/stripe/`     |
 | SendGrid | Emails   | SDK              | `src/services/emailService.js` |
-| [etc...] |
+
+etc...
 
 ### Internal Integration Points
 
@@ -295,8 +294,6 @@ npm run seed        # Seed test data
 
 ### 4. Document Delivery
 
-[[LLM: After generating the complete architecture document:
-
 1. **In Web UI (Gemini, ChatGPT, Claude)**:
    - Present the entire document in one response (or multiple if too long)
    - Tell user to copy and save as `docs/brownfield-architecture.md` or `docs/project-architecture.md`
@@ -317,7 +314,7 @@ The document should be comprehensive enough that future agents can understand:
 
 ### 5. Quality Assurance
 
-[[LLM: Before finalizing the document:
+CRITICAL: Before finalizing the document:
 
 1. **Accuracy Check**: Verify all technical details match the actual codebase
 2. **Completeness Review**: Ensure all major system components are documented
@@ -325,7 +322,7 @@ The document should be comprehensive enough that future agents can understand:
 4. **Clarity Assessment**: Check that explanations are clear for AI agents
 5. **Navigation**: Ensure document has clear section structure for easy reference
 
-Apply the advanced elicitation task after major sections to refine based on user feedback.]]
+Apply the advanced elicitation task after major sections to refine based on user feedback.
 
 ## Success Criteria
 
