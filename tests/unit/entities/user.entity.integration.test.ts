@@ -51,7 +51,7 @@ describe('User Entity Integration Tests', () => {
     expect(foundUser!.email).toBe('test@example.com');
     expect(foundUser!.username).toBe('testuser');
     expect(foundUser!.role).toBe(UserRole.STUDENT);
-    expect(foundUser!.fullName()).toBe('Test User');
+    expect(foundUser!.fullName).toBe('Test User');
   });
 
   it('should enforce unique email constraint', async () => {
@@ -120,8 +120,8 @@ describe('User Entity Integration Tests', () => {
     expect(updatedUser!.firstName).toBe('Updated');
     expect(updatedUser!.lastName).toBe('Person');
     expect(updatedUser!.role).toBe(UserRole.INSTRUCTOR);
-    expect(updatedUser!.fullName()).toBe('Updated Person');
+    expect(updatedUser!.fullName).toBe('Updated Person');
     expect(updatedUser!.isInstructor()).toBe(true);
-    expect(updatedUser!.isStudent()).toBe(false);
+    expect(updatedUser!.hasRole(UserRole.STUDENT)).toBe(false);
   });
 });
