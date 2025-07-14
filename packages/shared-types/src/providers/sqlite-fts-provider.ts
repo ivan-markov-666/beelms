@@ -40,12 +40,8 @@ export class SqliteFtsProvider implements IFullTextSearchProvider {
     }
     searchText += content;
 
-    // Нормализуем текст (нижний регистр, убираем специальные символы)
-    const normalized = searchText
-      .toLowerCase()
-      .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
+    // Нормализуем текст с помощью helper-функции
+    const normalized = this.normalizeToken(searchText);
 
     // Разбиваем на токены
     const tokens = normalized
@@ -60,6 +56,26 @@ export class SqliteFtsProvider implements IFullTextSearchProvider {
       );
 
     return tokens;
+  }
+
+  /**
+   * Normalize token: lowercase, remove punctuation, collapse spaces.
+   * Exposed for testability.
+   */
+  normalizeToken(token: string): string {
+    return token
+      .toLowerCase()
+      .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  /**
+   * Escape special LIKE pattern characters.
+   * @param term Raw term
+   */
+  escapeLikePattern(term: string): string {
+    return term.replace(/[%_]/g, (c) => `\\${c}`);
   }
 
   /**
@@ -81,8 +97,7 @@ export class SqliteFtsProvider implements IFullTextSearchProvider {
     // В SQLite мы не используем языковые конфигурации как в PostgreSQL,
     // поэтому languageCode игнорируется
     // Разбиваем запрос на слова
-    const terms = searchQuery
-      .toLowerCase()
+    const terms = this.normalizeToken(searchQuery)
       .split(' ')
       .filter((term) => term.length > 2);
 
@@ -96,8 +111,8 @@ export class SqliteFtsProvider implements IFullTextSearchProvider {
       (term) =>
         `(
         JSON_EXTRACT(${fieldName}, '$."${term}"') IS NOT NULL
-        OR title LIKE '%${term}%'
-        OR content LIKE '%${term}%'
+        OR title LIKE '%${this.escapeLikePattern(term)}%'
+        OR content LIKE '%${this.escapeLikePattern(term)}%'
       )`
     );
 
@@ -118,31 +133,12 @@ export class SqliteFtsProvider implements IFullTextSearchProvider {
    * @param fieldName Имя поля с поисковым вектором
    * @returns Строка SQL-выражения для ORDER BY
    */
-  generateRankingQuery(searchQuery: string, _languageCode: string, fieldName: string): string {
+  generateRankingQuery(_searchQuery: string, _languageCode: string, fieldName: string): string {
     // В SQLite мы не используем языковые конфигурации как в PostgreSQL,
     // поэтому languageCode игнорируется
-    // Для SQLite используем простое ранжирование на основе количества совпадений
-    const terms = searchQuery
-      .toLowerCase()
-      .split(' ')
-      .filter((term) => term.length > 2);
-
-    if (terms.length === 0) {
-      return '1'; // Пустое условие ранжирования
-    }
-
-    // Создаем выражение для подсчета совпадений (примитивное ранжирование для SQLite)
-    const termCounters = terms.map(
-      (term) =>
-        `CASE WHEN JSON_EXTRACT(${fieldName}, '$."${term}"') IS NOT NULL 
-       THEN CAST(JSON_EXTRACT(${fieldName}, '$."${term}"') AS INTEGER) ELSE 0 END`
-    );
-
-    // Добавляем больший вес для совпадений в заголовке
-    const titleMatches = terms.map((term) => `(CASE WHEN title LIKE '%${term}%' THEN 5 ELSE 0 END)`);
-
-    // Объединяем все для получения общего рейтинга
-    return `(${termCounters.join(' + ')}) + (${titleMatches.join(' + ')}) DESC`;
+    // В SQLite FTS5 можем използвать встроенную функцию bm25() для ранжирования
+    // Здесь предполагаем, что fieldName - это виртуальная колонка FTS5
+    return `bm25(${fieldName}) AS rank`;
   }
 
   /**

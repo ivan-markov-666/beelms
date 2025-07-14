@@ -51,8 +51,8 @@ export class Topic {
   @Column({ unique: true })
   @IsNotEmpty({ message: 'URL слъгът е задължителен' })
   @IsString()
-  @Matches(/^[a-z0-9-]+$/, {
-    message: 'Слъгът може да съдържа само малки латински букви, цифри и тирета',
+  @Matches(/^(?!.*--)[a-z0-9-]+$/, {
+    message: 'Слъгът може да съдържа само малки латински букви, цифри и тирета и без двойни тирета',
   })
   slug!: string;
 

@@ -71,7 +71,7 @@ export class PostgresFtsProvider implements IFullTextSearchProvider {
     const normalizedQuery = this.normalizeQuery(searchQuery);
 
     // Используем ts_rank_cd для ранжирования результатов с учетом расстояния между словами
-    return `ts_rank_cd(${fieldName}, to_tsquery('${language}', '${normalizedQuery}')) DESC`;
+    return `ts_rank_cd(${fieldName}, to_tsquery('${language}', '${normalizedQuery}')) AS rank`;
   }
 
   /**
