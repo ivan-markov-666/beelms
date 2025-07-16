@@ -7,7 +7,7 @@
   },
   "scripts": {
     "test": "pnpm test:all",
-    "test:all": "pnpm test:smoke && pnpm test:regression && pnpm test:unit",
+    "test:all": "pnpm test:smoke && jest --config=jest.config.js --coverage",
     "test:unit": "jest --config=jest.config.js --testPathPattern=tests/unit",
     "typecheck": "tsc --noEmit -p tsconfig.base.json",
     "lint": "eslint . --ext .ts,.tsx --max-warnings 0",
@@ -46,6 +46,7 @@
     "axios": "^1.4.0",
     "babel-jest": "^29.6.0",
     "better-sqlite3": "8.5.2",
+    "sql.js": "1.9.0",
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.0.0",
     "husky": "^8.0.0",
