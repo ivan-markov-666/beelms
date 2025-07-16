@@ -10,9 +10,7 @@ When entering KB mode (\*kb-mode), follow these steps:
 
 ### 1. Welcome and Guide
 
-Announce entering KB mode with a brief, friendly introduction:
-
-"I've entered KB mode and have access to the full BMad knowledge base. I can help you with detailed information about any aspect of BMad-Method."
+Announce entering KB mode with a brief, friendly introduction.
 
 ### 2. Present Topic Areas
 

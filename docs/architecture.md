@@ -146,6 +146,7 @@ graph TD
 
 - Many-to-one: Category
 - One-to-many: TopicContent
+- One-to-many: UserProgress
 - One-to-one: Test
 
 ### TopicContent (Многоезично Съдържание)
@@ -176,6 +177,48 @@ graph TD
 - questionText: text
 - explanation: text
 - sortOrder: number (critical for sequential display)
+
+### UserProgress (Прогрес на Потребител)
+
+**Предназначение**: Следи процента завършеност на конкретна лекция (Topic) от потребителя.
+
+**Ключови Атрибути**:
+
+- userId: UUID (FK към User)
+- topicId: UUID (FK към Topic)
+- progressPercent: number (0–100)
+- lastVisitAt: datetime
+
+**Relationships**:
+
+- Many-to-one: User
+- Many-to-one: Topic
+
+**Business Logic / Helper-и**:
+
+- `isCompleted()` – връща `true` при 100 %
+
+### TestAttempt (Опит за Тест)
+
+**Предназначение**: Съхранява резултатите от еднократен опит на потребител да реши тест.
+
+**Ключови Атрибути**:
+
+- testId: UUID (FK към Test)
+- userId: UUID (FK към User)
+- attemptNumber: number (1, 2 … N)
+- scorePercentage: number (0–100)
+- passed: boolean (изчислява се с helper)
+- createdAt: datetime
+
+**Relationships**:
+
+- Many-to-one: Test
+- Many-to-one: User
+
+**Business Logic / Helper-и**:
+
+- `evaluatePass()` – определя `passed` спрямо `Test.passingPercentage`
 
 ## API Specification
 
