@@ -3,6 +3,8 @@ import { Exclude } from 'class-transformer';
 import { IsEmail, IsNotEmpty, Length, Matches, IsEnum, IsBoolean, IsOptional, IsDate } from 'class-validator';
 import { UserRole } from './user-role.enum';
 import { Topic } from './topic.entity';
+import { UserProgress } from './user-progress.entity';
+import { TestAttempt } from './test-attempt.entity';
 
 /**
  * Entity для пользователей в системе
@@ -140,4 +142,10 @@ export class User {
    */
   @OneToMany(() => Topic, (topic) => topic.createdBy)
   createdTopics!: Topic[];
+
+  @OneToMany(() => UserProgress, (progress) => progress.user)
+  progresses!: UserProgress[];
+
+  @OneToMany(() => TestAttempt, (attempt) => attempt.user)
+  testAttempts!: TestAttempt[];
 }

@@ -15,6 +15,7 @@ import { IsNotEmpty, IsUUID, IsInt, Min, IsString, Length, Matches, IsBoolean, I
 import { Category } from './category.entity';
 import { TopicContent } from './topic-content.entity';
 import { Test } from './test.entity';
+import { UserProgress } from './user-progress.entity';
 import { User } from './user.entity';
 
 /**
@@ -81,6 +82,9 @@ export class Topic {
 
   @OneToOne(() => Test, (test: Test) => test.topic)
   test!: Test;
+
+  @OneToMany(() => UserProgress, (progress) => progress.topic, { cascade: true })
+  progresses!: UserProgress[];
 
   @CreateDateColumn({ type: 'datetime' })
   createdAt!: Date;

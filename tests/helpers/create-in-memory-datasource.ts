@@ -7,13 +7,15 @@ import { User } from '../../packages/shared-types/src/entities/user.entity';
 import { Test } from '../../packages/shared-types/src/entities/test.entity';
 import { Question } from '../../packages/shared-types/src/entities/question.entity';
 import { QuestionOption } from '../../packages/shared-types/src/entities/question-option.entity';
+import { UserProgress } from '../../packages/shared-types/src/entities/user-progress.entity';
+import { TestAttempt } from '../../packages/shared-types/src/entities/test-attempt.entity';
 
 export async function createInMemoryDataSource(): Promise<DataSource> {
   const ds = new DataSource({
     type: 'sqljs',
     // SQL.js keeps DB in-memory automatically
     location: ':memory:',
-    entities: [Category, Topic, TopicContent, User, Test, Question, QuestionOption],
+    entities: [Category, Topic, TopicContent, User, Test, Question, QuestionOption, UserProgress, TestAttempt],
     synchronize: true,
     dropSchema: true,
     logging: false,

@@ -13,6 +13,7 @@ import {
 import { IsInt, Min, Max, Length, IsUUID, IsBoolean, IsOptional } from 'class-validator';
 import { Topic } from './topic.entity';
 import { Question } from './question.entity';
+import { TestAttempt } from './test-attempt.entity';
 import { User } from './user.entity';
 
 /**
@@ -70,6 +71,9 @@ export class Test {
 
   @OneToMany(() => Question, (question: Question) => question.test, { cascade: true })
   questions!: Question[];
+
+  @OneToMany(() => TestAttempt, (attempt) => attempt.test)
+  attempts!: TestAttempt[];
 
   @ManyToOne(() => User, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'createdById' })
