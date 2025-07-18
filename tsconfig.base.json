@@ -28,7 +28,7 @@
 
     /* Path Mapping */
     "paths": {
-      "@qa-platform/shared-types": ["packages/shared-types/src"],
+      "@lms/shared-types": ["packages/shared-types/src"],
       "@qa-platform/ui-components": ["packages/ui-components/src"],
       "@qa-platform/constants": ["packages/constants/src"],
       "@api/*": ["apps/api/src/*"],

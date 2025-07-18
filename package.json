@@ -21,7 +21,17 @@
     "test:smoke": "sh ./tests/smoke/health-check.sh",
     "test:regression": "pnpm test:regression:api && pnpm test:regression:e2e",
     "test:regression:api": "jest --config=jest.config.js --testPathPattern=tests/regression/api",
-    "test:regression:e2e": "jest --config=jest.config.js --testPathPattern=tests/regression/e2e"
+    "test:regression:e2e": "jest --config=jest.config.js --testPathPattern=tests/regression/e2e",
+    "db:seed:dev": "pnpm --filter @lms/database db:seed:dev",
+    "db:seed:test": "pnpm --filter @lms/database db:seed:test",
+    "db:seed:prod": "pnpm --filter @lms/database db:seed:prod",
+    "db:seed:demo": "pnpm --filter @lms/database db:seed:demo",
+    "db:seed:status": "pnpm --filter @lms/database db:seed:status",
+    "db:docker:seed:dev": "pnpm --filter @lms/database docker:seed:dev",
+    "db:docker:seed:test": "pnpm --filter @lms/database docker:seed:test",
+    "db:docker:seed:prod": "pnpm --filter @lms/database docker:seed:prod",
+    "db:docker:demo": "pnpm --filter @lms/database docker:demo",
+    "db:docker:status": "pnpm --filter @lms/database docker:status"
   },
   "dependencies": {
     "@emotion/react": "^11.11.1",

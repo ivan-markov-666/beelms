@@ -116,3 +116,27 @@ pnpm test:regression:performance # Сано тестовете за произв
 ### Performance Тестове
 
 _Ще бъде допълнено с бъдещи тестове_
+
+### Database Seeding Tests
+
+#### Entity & Seeder Unit Tests
+
+- **Директория**: `/tests/unit/entities/*`
+- **Цел**: Валидация на помощните методи на ентититата, class-validator правила и seed логиката.
+- **Изпълнение**: `pnpm test`
+
+#### CLI Integration Tests
+
+- **Файл**: `/packages/database/src/cli/seed.integration.test.ts`
+- **Изпълнение**: `pnpm test` или `pnpm db:seed:dev run --dry-run`
+- **Покритие**:
+  - Парсинг на аргументи
+  - Валидация на среди (dev/test/prod)
+  - Коректни exit кодове
+
+#### Full Model Smoke Test
+
+- **Файл**: `/tests/integration/entities/full-model.test.ts`
+- **Цел**: Създава свързани записи (Users → Categories → Topics → Tests → Questions) и проверява foreign-key ограниченията.
+
+След изпълнение на `pnpm test` се показва обобщение на покритието (в момента 100 %).
