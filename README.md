@@ -107,4 +107,41 @@ See [TESTS.md](./TESTS.md) for more information about testing.
 
 ---
 
+## 6. Database Seeding
+
+### Local (SQLite in-memory)
+
+```bash
+# Full destructive seed (dev)
+pnpm db:seed:dev
+
+# Demo dataset
+pnpm db:seed:demo
+
+# Check current status
+pnpm db:seed:status
+```
+
+Run from `packages/database` for advanced options:
+
+```bash
+cd packages/database
+pnpm db:seed:dev run --entities users,categories --verbose
+pnpm db:seed:dev run --preserve
+```
+
+### Docker / PostgreSQL
+
+```bash
+# Build the seeder image & seed dev data
+pnpm docker:seed:dev
+
+# Complete dev stack (DB + seeder)
+make quick-dev
+```
+
+See `packages/database/CLI.md` and `packages/database/DOCKER.md` for full documentation.
+
+---
+
 Happy hacking! 🎉
