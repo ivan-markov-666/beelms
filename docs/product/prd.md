@@ -1,12 +1,10 @@
 # QA4Free – Product Requirements Document (PRD)
+_Роля: PM (Product Manager). Фаза: BMAD Planning / Solutioning. Описва какви изисквания трябва да покрие продуктът за първата MVP версия._
 
 ## 1. Цел и обхват
 
 Този документ описва продуктовите изисквания за **QA4Free** – онлайн платформа „Wikipedia за Quality Assurance + практическа среда за упражнения“.
-
-PRD-ът стъпва върху следните артефакти:
-- Product Brief – `docs/product/product-brief.md`
-- Системна архитектура – `docs/architecture/system-architecture.md`
+...
 - MVP функционалности по екрани/модули – `docs/architecture/mvp-feature-list.md`
 - API спецификация – `docs/architecture/openapi.yaml`
 

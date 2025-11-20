@@ -15,8 +15,8 @@
 - [ ] Product Brief – `docs/product/product-brief.md`
 - [ ] PRD – `docs/product/prd.md` (стъпва върху Product Brief, `docs/architecture/mvp-feature-list.md` и системната архитектура)
 - [ ] MVP feature list по екрани/модули – `docs/architecture/mvp-feature-list.md`
-- [ ] Модел на базата данни (ER диаграма + описания)
-- [ ] Технически изисквания / нефункционални изисквания (перфоманс, сигурност, GDPR и др.)
+- [ ] Модел на базата данни (ER диаграма + описания) – `docs/architecture/db-model.md`
+- [ ] Технически изисквания / нефункционални изисквания (перфоманс, сигурност, GDPR и др.) – вече описани в Product Brief §6, PRD §5 и секциите за GDPR/сигурност/технологичен стек в `docs/architecture/system-architecture.md`
 
 ### Фаза 2: Прототипи (около 1 седмица)
 
@@ -58,11 +58,13 @@
 
 ## 2. Свързани документи и артефакти
 
-- `idea/02.developmentProcess.md` – първоначален план за процеса.
-- `docs/product/product-brief.md` – какво представлява продуктът и MVP.
-- `docs/architecture/system-architecture.md` – техническа архитектура.
-- `docs/architecture/mvp-feature-list.md` – MVP по екрани/модули.
-- (в бъдеще) `docs/delivery/test-plan.md`, `docs/delivery/release-plan.md` и др.
+- `idea/02.developmentProcess.md` – първоначален (исторически) план за процеса.
+- `docs/product/product-brief.md` – продуктова визия и MVP от бизнес гледна точка (Analyst/PM).
+- `docs/product/prd.md` – продуктови изисквания за MVP (PM, BMAD PRD).
+- `docs/architecture/system-architecture.md` – техническа архитектура и нефункционални изисквания (Architect).
+- `docs/architecture/mvp-feature-list.md` – MVP по екрани/модули, мост между PRD и backlog (PM/Architect).
+- `docs/architecture/db-model.md` – модел на базата данни (ER диаграма) (Architect).
+- (в бъдеще) `docs/delivery/test-plan.md`, `docs/delivery/release-plan.md` – планове за тестване и издаване на софтуер.
 
 ## 3. Забележки
 
