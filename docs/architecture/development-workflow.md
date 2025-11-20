@@ -12,7 +12,8 @@
 Основни задачи:
 - [ ] Системна архитектура – `docs/architecture/system-architecture.md`
 - [ ] API документация (OpenAPI/Swagger спецификация за основните услуги)
-- [ ] Product Brief / PRD light – `docs/product/product-brief.md`
+- [ ] Product Brief – `docs/product/product-brief.md`
+- [ ] PRD – `docs/product/prd.md` (стъпва върху Product Brief, `docs/architecture/mvp-feature-list.md` и системната архитектура)
 - [ ] MVP feature list по екрани/модули – `docs/architecture/mvp-feature-list.md`
 - [ ] Модел на базата данни (ER диаграма + описания)
 - [ ] Технически изисквания / нефункционални изисквания (перфоманс, сигурност, GDPR и др.)
