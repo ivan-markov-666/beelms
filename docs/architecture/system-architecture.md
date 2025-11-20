@@ -92,6 +92,7 @@ C4Container
         Container(auth_service, "Услуга за автентикация", "NestJS", "Управление на потребители, сесии и GDPR съответствие")
         Container(wiki_service, "Wiki услуга", "NestJS", "Управление на Wiki съдържанието и версиите")
         Container(practical_env, "Практическа среда", "NestJS", "Управление на практически задачи и демо среда")
+        Container(training_api, "Training API", "NestJS", "Demo REST API само за упражнения по API/integration тестване, в отделен Docker контейнер")
         Container(metrics_service, "Метрики", "NestJS", "Събиране и анализ на потребителски данни")
     }
     
@@ -107,6 +108,7 @@ C4Container
     Rel(api_gateway, auth_service, "Автентикация", "HTTP")
     Rel(api_gateway, wiki_service, "Wiki заявки", "HTTP")
     Rel(api_gateway, practical_env, "Практически задачи", "HTTP")
+    Rel(api_gateway, training_api, "Training API заявки", "HTTP")
     Rel(api_gateway, metrics_service, "Метрики", "HTTP")
     
     Rel(auth_service, postgres, "Чете/Записва", "SQL")
@@ -335,7 +337,7 @@ C4Container
 
 2. **Поддържани технологии**
    - Web приложения (HTML, CSS, JavaScript) с различни UI елементи (бутони, drop-down списъци, текстови полета и др.) за упражнения по manual и UI automation тестване
-   - API тестване (REST) чрез примерен QA4Free Demo API, документиран със **Swagger/OpenAPI**, за упражнения по integration и API тестване
+   - API тестване (REST) чрез примерен QA4Free Training API (услугата `training-api` с ендпойнти под `/api/training/*`), документиран със **Swagger/OpenAPI**, за упражнения по integration и API тестване
    - Бази данни (SQL, NoSQL) за тестване на CRUD и data-driven сценарии
 
 3. **Интеграции**

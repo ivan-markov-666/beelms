@@ -1,0 +1,782 @@
+openapi: 3.1.0
+info:
+  title: QA4Free API
+  version: 0.1.0
+  description: |
+    OpenAPI спецификация за основните MVP услуги на QA4Free.
+
+servers:
+  - url: https://api.qa4free.com/api
+    description: Production (примерен домейн, с /api префикс)
+  - url: http://localhost:3000/api
+    description: Local development (с /api префикс)
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        code:
+          type: string
+        details:
+          type: object
+          additionalProperties: true
+
+    AuthToken:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        tokenType:
+          type: string
+          example: Bearer
+
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+          format: email
+        createdAt:
+          type: string
+          format: date-time
+
+    AdminUserSummary:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+          format: email
+        active:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+
+    WikiArticle:
+      type: object
+      properties:
+        id:
+          type: string
+        slug:
+          type: string
+        language:
+          type: string
+          example: bg
+        title:
+          type: string
+        content:
+          type: string
+        updatedAt:
+          type: string
+          format: date-time
+
+    WikiArticleInput:
+      type: object
+      properties:
+        slug:
+          type: string
+          description: Уникален идентификатор/част от URL-а за статията
+        language:
+          type: string
+          example: bg
+        title:
+          type: string
+        content:
+          type: string
+      required: [language, title, content]
+
+    WikiArticleVersion:
+      type: object
+      properties:
+        id:
+          type: string
+        articleId:
+          type: string
+        version:
+          type: integer
+        language:
+          type: string
+        title:
+          type: string
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        createdBy:
+          type: string
+          description: Идентификатор на потребителя, направил промяната
+
+    Task:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          description: Вид на задачата (ui, api, db и др.)
+        title:
+          type: string
+        description:
+          type: string
+        metadata:
+          type: object
+          additionalProperties: true
+
+    TaskResult:
+      type: object
+      properties:
+        taskId:
+          type: string
+        passed:
+          type: boolean
+        score:
+          type: number
+          format: float
+        feedback:
+          type: string
+
+    MetricsOverview:
+      type: object
+      properties:
+        totalUsers:
+          type: integer
+        totalArticles:
+          type: integer
+        totalCompletedTasks:
+          type: integer
+        topArticles:
+          type: array
+          items:
+            type: object
+            properties:
+              slug:
+                type: string
+              views:
+                type: integer
+
+    TrainingHelloResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Hello from training API"
+
+    TrainingEchoRequest:
+      type: object
+      properties:
+        message:
+          type: string
+      required: [message]
+
+    TrainingEchoResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Същото съобщение, върнато от сървъра
+        length:
+          type: integer
+          description: Дължина на съобщението
+
+security:
+  - bearerAuth: []
+
+paths:
+  ############################
+  # Auth Service
+  ############################
+
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Регистрация на нов потребител
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+              required: [email, password]
+      responses:
+        "201":
+          description: Успешна регистрация
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        "400":
+          description: Невалидни данни
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Вход на потребител
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+              required: [email, password]
+      responses:
+        "200":
+          description: Успешен вход
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthToken'
+        "401":
+          description: Невалидни идентификационни данни
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/forgot-password:
+    post:
+      tags: [Auth]
+      summary: Заявка за смяна на забравена парола
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+              required: [email]
+      responses:
+        "200":
+          description: Имейл с инструкции е изпратен (ако адресът съществува)
+        "400":
+          description: Невалидни данни
+
+  /auth/reset-password:
+    post:
+      tags: [Auth]
+      summary: Смяна на парола чрез токен
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+                newPassword:
+                  type: string
+              required: [token, newPassword]
+      responses:
+        "200":
+          description: Паролата е сменена успешно
+        "400":
+          description: Невалиден или изтекъл токен
+
+  /users/me:
+    get:
+      tags: [Account]
+      summary: Връща профилна информация за текущия потребител
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Профил на текущия потребител
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        "401":
+          description: Неоторизиран достъп
+
+    delete:
+      tags: [Account]
+      summary: Деактивиране/изтриване на акаунт на текущия потребител
+      security:
+        - bearerAuth: []
+      responses:
+        "204":
+          description: Акаунтът е деактивиран
+        "401":
+          description: Неоторизиран достъп
+
+  /users/me/export:
+    post:
+      tags: [Account]
+      summary: Заявка за експорт на лични данни (GDPR)
+      description: |
+        Стартира процес за генериране на архив с личните данни на текущия потребител.
+      security:
+        - bearerAuth: []
+      responses:
+        "202":
+          description: Заявката за експорт е приета
+        "401":
+          description: Неоторизиран достъп
+
+  /admin/users:
+    get:
+      tags: [Admin]
+      summary: Списък с потребители
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: q
+          schema:
+            type: string
+          description: Търсене по имейл
+      responses:
+        "200":
+          description: Списък с потребители
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AdminUserSummary'
+        "401":
+          description: Неоторизиран достъп
+
+  /admin/users/{id}:
+    patch:
+      tags: [Admin]
+      summary: Активиране/деактивиране на потребителски акаунт
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                active:
+                  type: boolean
+              required: [active]
+      responses:
+        "200":
+          description: Обновен потребител
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminUserSummary'
+        "401":
+          description: Неоторизиран достъп
+        "404":
+          description: Потребителят не е намерен
+
+  ############################
+  # Wiki Service
+  ############################
+
+  /wiki/articles:
+    get:
+      tags: [Wiki]
+      summary: Списък с Wiki статии
+      security: []
+      parameters:
+        - in: query
+          name: q
+          schema:
+            type: string
+          description: Търсене по заглавие/ключова дума
+        - in: query
+          name: lang
+          schema:
+            type: string
+          description: Код на езика (напр. bg, en)
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Списък със статии
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WikiArticle'
+
+  /wiki/articles/{slug}:
+    get:
+      tags: [Wiki]
+      summary: Връща една Wiki статия по slug
+      security: []
+      parameters:
+        - in: path
+          name: slug
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: lang
+          schema:
+            type: string
+          description: Код на езика (ако не е зададен, използва се по подразбиране)
+      responses:
+        "200":
+          description: Успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WikiArticle'
+        "404":
+          description: Статията не е намерена
+
+  ############################
+  # Admin Wiki (CRUD + версии)
+  ############################
+
+  /admin/wiki/articles:
+    get:
+      tags: [Admin, Wiki]
+      summary: Списък с Wiki статии за администрация
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: q
+          schema:
+            type: string
+          description: Търсене по заглавие/slug
+        - in: query
+          name: lang
+          schema:
+            type: string
+          description: Код на езика (напр. bg, en)
+      responses:
+        "200":
+          description: Списък със статии
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WikiArticle'
+        "401":
+          description: Неоторизиран достъп
+
+    post:
+      tags: [Admin, Wiki]
+      summary: Създаване на нова Wiki статия
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WikiArticleInput'
+      responses:
+        "201":
+          description: Статията е създадена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WikiArticle'
+        "400":
+          description: Невалидни данни
+        "401":
+          description: Неоторизиран достъп
+
+  /admin/wiki/articles/{id}:
+    put:
+      tags: [Admin, Wiki]
+      summary: Редакция на съществуваща Wiki статия
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WikiArticleInput'
+      responses:
+        "200":
+          description: Обновена статия
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WikiArticle'
+        "400":
+          description: Невалидни данни
+        "401":
+          description: Неоторизиран достъп
+        "404":
+          description: Статията не е намерена
+
+    delete:
+      tags: [Admin, Wiki]
+      summary: Деактивиране/скриване на Wiki статия
+      description: |
+        Маркира статията като неактивна, без да се трие окончателно от базата.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Статията е деактивирана
+        "401":
+          description: Неоторизиран достъп
+        "404":
+          description: Статията не е намерена
+
+  /admin/wiki/articles/{id}/versions:
+    get:
+      tags: [Admin, Wiki]
+      summary: История на версиите за дадена Wiki статия
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Списък с версии
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WikiArticleVersion'
+        "401":
+          description: Неоторизиран достъп
+        "404":
+          description: Статията не е намерена
+
+  /admin/wiki/articles/{id}/versions/{versionId}/restore:
+    post:
+      tags: [Admin, Wiki]
+      summary: Връщане към избрана версия на Wiki статия (rollback)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: versionId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Текущата версия е върната към избраната историческа версия
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WikiArticle'
+        "401":
+          description: Неоторизиран достъп
+        "404":
+          description: Статията или версията не са намерени
+
+  /admin/wiki/articles/{id}/versions/{versionId}:
+    delete:
+      tags: [Admin, Wiki]
+      summary: Изтриване на избрана версия на Wiki статия (без да се засяга текущата)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: versionId
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Версията е изтрита
+        "401":
+          description: Неоторизиран достъп
+        "404":
+          description: Статията или версията не са намерени
+
+  ############################
+  # Practical Environment – Tasks
+  ############################
+
+  /tasks/{id}:
+    get:
+      tags: [Practical]
+      summary: Връща описание на практическа задача
+      security: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Описание на задачата
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        "404":
+          description: Задачата не е намерена
+
+  /tasks/{id}/submit:
+    post:
+      tags: [Practical]
+      summary: Изпращане на решение за практическа задача
+      security: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Данни за решението. Структурата зависи от типа задача.
+              properties:
+                solution:
+                  type: string
+                  description: Свободен текст / код / стъпки.
+                metadata:
+                  type: object
+                  additionalProperties: true
+      responses:
+        "200":
+          description: Резултат от оценяването
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResult'
+        "400":
+          description: Невалидни данни
+
+  ############################
+  # Training API (Demo)
+  ############################
+
+  /training/ping:
+    get:
+      tags: [Training]
+      summary: Проверка на Training API (hello world)
+      security: []
+      responses:
+        "200":
+          description: Успешен отговор от Training API
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrainingHelloResponse'
+
+  /training/echo:
+    post:
+      tags: [Training]
+      summary: Ехо заявка за упражнение по API тестване
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TrainingEchoRequest'
+      responses:
+        "200":
+          description: Същото съобщение, върнато от Training API
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrainingEchoResponse'
+        "400":
+          description: Невалидни данни
+
+  ############################
+  # Admin / Metrics (MVP ниво)
+  ############################
+
+  /admin/metrics/overview:
+    get:
+      tags: [Admin]
+      summary: Базов преглед на метрики за администраторски табло
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Преглед на основни метрики
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetricsOverview'
+        "401":
+          description: Неоторизиран достъп
