@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sandbox UI - Date Picker - QA4Free</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-200 h-20">
+        <div class="max-w-7xl mx-auto px-4 h-full flex items-center justify-between">
+            <div class="flex items-center">
+                <a href="00-home.html" class="text-2xl font-bold text-green-600">QA4Free</a>
+            </div>
+            <nav class="hidden md:flex space-x-6">
+                <a href="03-wiki-list.html" class="text-gray-700 hover:text-green-600 transition">Wiki</a>
+                <a href="04-sandbox-textbox.html" class="text-green-600 font-semibold border-b-2 border-green-600 pb-1">Practical UI</a>
+                <a href="07-training-api.html" class="text-gray-700 hover:text-green-600 transition">Training API</a>
+            </nav>
+            <div class="flex items-center space-x-4">
+                <a href="01-login.html" class="text-gray-700 hover:text-green-600 transition">Login</a>
+                <a href="02-register.html" class="text-gray-700 hover:text-green-600 transition">Register</a>
+                <select class="border border-gray-300 rounded px-2 py-1 text-sm">
+                    <option>BG</option>
+                    <option>EN</option>
+                </select>
+            </div>
+            <button class="md:hidden">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow py-8">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex flex-col lg:flex-row gap-6">
+                <!-- Left Sidebar -->
+                <aside class="w-full lg:w-64 flex-shrink-0">
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sticky top-4">
+                        <h3 class="font-bold text-gray-900 mb-4">UI Elements</h3>
+                        <nav class="space-y-1">
+                            <a href="04-sandbox-textbox.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Text Box</a>
+                            <a href="17-sandbox-checkbox-radio.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Check Box &amp; Radio</a>
+                            <a href="18-sandbox-buttons.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Buttons</a>
+                            <a href="19-sandbox-links.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Links</a>
+                            <a href="20-sandbox-alerts.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Alerts</a>
+                            <a href="21-sandbox-modals.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Modal Dialogs</a>
+                            <a href="22-sandbox-upload-download.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Upload / Download</a>
+                            <a href="23-sandbox-date-picker.html" class="block px-3 py-2 bg-green-50 text-green-700 rounded-lg font-medium">Date Picker</a>
+                            <a href="24-sandbox-tabs.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Tabs</a>
+                            <a href="25-sandbox-select-menu.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Select Menu</a>
+                            <a href="26-sandbox-accordion.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Accordion</a>
+                            <a href="27-sandbox-slider.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Slider</a>
+                            <a href="28-sandbox-tooltips.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Tooltips</a>
+                            <a href="29-sandbox-autocomplete.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Auto Complete</a>
+                            <a href="30-sandbox-progress.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Progress Bar</a>
+                            <a href="31-sandbox-frames.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Frames / Windows</a>
+                            <a href="32-sandbox-dynamic-properties.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Dynamic Properties</a>
+                            <a href="33-sandbox-nested-frames.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Nested Frames</a>
+                            <a href="34-sandbox-menu.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Menu</a>
+                            <a href="35-sandbox-sortable.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Sortable</a>
+                            <a href="36-sandbox-selectable.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Selectable</a>
+                            <a href="37-sandbox-resizable.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Resizable</a>
+                            <a href="38-sandbox-droppable.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Droppable</a>
+                            <a href="39-sandbox-draggable.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Draggable</a>
+                            <a href="09-complex-form.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Complex Form</a>
+                            <a href="06-table-crud.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Table CRUD</a>
+                        </nav>
+                    </div>
+                </aside>
+
+                <!-- Main Content Area -->
+                <div class="flex-grow">
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+                        <!-- Page Header -->
+                        <div class="mb-8">
+                            <h1 class="text-3xl font-bold text-gray-900 mb-2">Date Picker Elements</h1>
+                            <p class="text-gray-600">Practice selecting dates, validating formats and working with min/max constraints</p>
+                        </div>
+
+                        <div class="space-y-8">
+                            <!-- 1. Text Input Date (dd/mm/yyyy) -->
+                            <section class="border border-gray-200 rounded-lg p-6">
+                                <h2 class="font-semibold text-gray-900 mb-2">1. Text Date Input (dd/mm/yyyy)</h2>
+                                <p class="text-sm text-gray-600 mb-4">Free text date input with basic format validation (client-side).</p>
+                                <div class="flex flex-col md:flex-row md:items-center md:space-x-4 space-y-3 md:space-y-0">
+                                    <input
+                                        id="date-text"
+                                        type="text"
+                                        placeholder="dd/mm/yyyy (e.g. 21/06/2025)"
+                                        class="w-full md:w-64 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                    />
+                                    <button
+                                        id="btn-validate-date-text"
+                                        onclick="validateTextDate()"
+                                        class="px-5 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition"
+                                    >
+                                        Validate
+                                    </button>
+                                </div>
+                                <p id="date-text-result" class="mt-3 text-sm text-gray-700">
+                                    Status: <span class="font-semibold text-gray-900">Not validated</span>
+                                </p>
+                            </section>
+
+                            <!-- 2. Native HTML5 Date Input -->
+                            <section class="border border-gray-200 rounded-lg p-6">
+                                <h2 class="font-semibold text-gray-900 mb-2">2. Native Date Input (HTML5)</h2>
+                                <p class="text-sm text-gray-600 mb-4">Standard browser date picker control.</p>
+                                <div class="flex flex-col md:flex-row md:items-center md:space-x-4 space-y-3 md:space-y-0">
+                                    <input
+                                        id="date-native"
+                                        type="date"
+                                        class="w-full md:w-64 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                    />
+                                    <button
+                                        id="btn-read-date-native"
+                                        onclick="readNativeDate()"
+                                        class="px-5 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition"
+                                    >
+                                        Read Value
+                                    </button>
+                                </div>
+                                <p id="date-native-result" class="mt-3 text-sm text-gray-700">
+                                    Selected date (ISO): <span class="font-semibold text-gray-900">None</span>
+                                </p>
+                            </section>
+
+                            <!-- 3. Date Range (min/max) -->
+                            <section class="border border-gray-200 rounded-lg p-6">
+                                <h2 class="font-semibold text-gray-900 mb-2">3. Date Range with Min/Max</h2>
+                                <p class="text-sm text-gray-600 mb-4">Start and end dates with min/max constraints (this year only).</p>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="date-range-start" class="block text-sm font-medium text-gray-700 mb-1">Start date</label>
+                                        <input
+                                            id="date-range-start"
+                                            type="date"
+                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label for="date-range-end" class="block text-sm font-medium text-gray-700 mb-1">End date</label>
+                                        <input
+                                            id="date-range-end"
+                                            type="date"
+                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                        />
+                                    </div>
+                                </div>
+                                <button
+                                    id="btn-validate-range"
+                                    onclick="validateDateRange()"
+                                    class="mt-4 px-5 py-2 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition"
+                                >
+                                    Validate Range
+                                </button>
+                                <p id="date-range-result" class="mt-3 text-sm text-gray-700">
+                                    Result: <span class="font-semibold text-gray-900">Not validated</span>
+                                </p>
+                            </section>
+
+                            <!-- 4. Disabled / Readonly Dates -->
+                            <section class="border border-gray-200 rounded-lg p-6">
+                                <h2 class="font-semibold text-gray-900 mb-2">4. Disabled / Read-only Date Inputs</h2>
+                                <p class="text-sm text-gray-600 mb-4">Examples of non-editable date fields.</p>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="date-disabled" class="block text-sm font-medium text-gray-700 mb-1">Disabled date</label>
+                                        <input
+                                            id="date-disabled"
+                                            type="date"
+                                            disabled
+                                            value="2025-01-01"
+                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label for="date-readonly" class="block text-sm font-medium text-gray-700 mb-1">Read-only date</label>
+                                        <input
+                                            id="date-readonly"
+                                            type="date"
+                                            readonly
+                                            value="2025-12-31"
+                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700"
+                                        />
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 py-6 mt-12">
+        <div class="max-w-7xl mx-auto px-4 text-center text-sm text-gray-600">
+            <a href="#" class="hover:text-green-600">About</a>
+            <span class="mx-2">|</span>
+            <a href="#" class="hover:text-green-600">Privacy/GDPR</a>
+            <span class="mx-2">|</span>
+            <a href="#" class="hover:text-green-600">Contact</a>
+            <span class="mx-2">|</span>
+            <a href="#" class="hover:text-green-600">GitHub</a>
+        </div>
+    </footer>
+
+    <script>
+        // Set min/max for current year on load
+        (function initDateConstraints() {
+            const year = new Date().getFullYear();
+            const min = year + '-01-01';
+            const max = year + '-12-31';
+            ['date-range-start', 'date-range-end'].forEach(function (id) {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.min = min;
+                    el.max = max;
+                }
+            });
+        })();
+
+        function validateTextDate() {
+            const input = document.getElementById('date-text');
+            const label = document.querySelector('#date-text-result span');
+            if (!input || !label) return;
+
+            const value = (input.value || '').trim();
+            if (!value) {
+                label.textContent = 'Empty value';
+                label.className = 'font-semibold text-red-600';
+                return;
+            }
+
+            const match = value.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+            if (!match) {
+                label.textContent = 'Invalid format (expected dd/mm/yyyy)';
+                label.className = 'font-semibold text-red-600';
+                return;
+            }
+
+            const day = parseInt(match[1], 10);
+            const month = parseInt(match[2], 10) - 1; // 0-based
+            const year = parseInt(match[3], 10);
+            const date = new Date(year, month, day);
+
+            if (
+                date.getFullYear() !== year ||
+                date.getMonth() !== month ||
+                date.getDate() !== day
+            ) {
+                label.textContent = 'Invalid calendar date';
+                label.className = 'font-semibold text-red-600';
+                return;
+            }
+
+            label.textContent = 'Valid date: ' + date.toDateString();
+            label.className = 'font-semibold text-green-600';
+        }
+
+        function readNativeDate() {
+            const input = document.getElementById('date-native');
+            const label = document.querySelector('#date-native-result span');
+            if (!input || !label) return;
+
+            if (!input.value) {
+                label.textContent = 'None';
+                label.className = 'font-semibold text-gray-900';
+            } else {
+                label.textContent = input.value;
+                label.className = 'font-semibold text-green-600';
+            }
+        }
+
+        function validateDateRange() {
+            const start = document.getElementById('date-range-start');
+            const end = document.getElementById('date-range-end');
+            const label = document.querySelector('#date-range-result span');
+            if (!start || !end || !label) return;
+
+            if (!start.value || !end.value) {
+                label.textContent = 'Please select both start and end date.';
+                label.className = 'font-semibold text-red-600';
+                return;
+            }
+
+            if (start.value > end.value) {
+                label.textContent = 'Invalid range: start date is after end date.';
+                label.className = 'font-semibold text-red-600';
+                return;
+            }
+
+            label.textContent = 'Valid range: ' + start.value + ' → ' + end.value;
+            label.className = 'font-semibold text-green-600';
+        }
+    </script>
+</body>
+</html>

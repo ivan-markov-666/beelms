@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Account - QA4Free</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-200 h-20">
+        <div class="max-w-7xl mx-auto px-4 h-full flex items-center justify-between">
+            <div class="flex items-center">
+                <a href="00-home.html" class="text-2xl font-bold text-green-600">QA4Free</a>
+            </div>
+            
+            <nav class="hidden md:flex space-x-6">
+                <a href="03-wiki-list.html" class="text-gray-700 hover:text-green-600 transition">Wiki</a>
+                <a href="04-sandbox-textbox.html" class="text-gray-700 hover:text-green-600 transition">Practical UI</a>
+                <a href="07-training-api.html" class="text-gray-700 hover:text-green-600 transition">Training API</a>
+            </nav>
+            
+            <div class="flex items-center space-x-4">
+                <div class="relative">
+                    <button class="flex items-center space-x-2 text-green-600 font-semibold">
+                        <span><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="720701170032170a131f021e175c111d1f">[email&#160;protected]</a></span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                </div>
+                <select class="border border-gray-300 rounded px-2 py-1 text-sm">
+                    <option>BG</option>
+                    <option>EN</option>
+                </select>
+            </div>
+            
+            <button class="md:hidden">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow py-12">
+        <div class="max-w-4xl mx-auto px-4">
+            <!-- Page Header -->
+            <div class="mb-8">
+                <h1 class="text-4xl font-bold text-gray-900 mb-2">Моят профил</h1>
+                <p class="text-gray-600">Управлявайте вашия акаунт и данни</p>
+            </div>
+            
+            <!-- Profile Information Section -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8 mb-6">
+                <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                    <svg class="w-6 h-6 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                    Профилна информация
+                </h2>
+                
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between py-3 border-b border-gray-100">
+                        <div>
+                            <label class="text-sm font-medium text-gray-700">Email адрес</label>
+                            <p class="text-gray-900 mt-1"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="b3c6c0d6c1f3d6cbd2dec3dfd69dd0dcde">[email&#160;protected]</a></p>
+                        </div>
+                        <button class="text-green-600 hover:text-green-700 text-sm font-medium">
+                            Промяна
+                        </button>
+                    </div>
+                    
+                    <div class="flex items-center justify-between py-3 border-b border-gray-100">
+                        <div>
+                            <label class="text-sm font-medium text-gray-700">Парола</label>
+                            <p class="text-gray-500 mt-1">••••••••</p>
+                        </div>
+                        <button class="text-green-600 hover:text-green-700 text-sm font-medium">
+                            Промяна
+                        </button>
+                    </div>
+                    
+                    <div class="flex items-center justify-between py-3">
+                        <div>
+                            <label class="text-sm font-medium text-gray-700">Дата на регистрация</label>
+                            <p class="text-gray-900 mt-1">15 януари 2025</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- GDPR - Data Export Section -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8 mb-6">
+                <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                    <svg class="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                    Експорт на данни (GDPR)
+                </h2>
+                
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                    <p class="text-sm text-blue-900">
+                        Можете да изтеглите всички ваши данни, съхранявани в системата. Експортът включва профилна информация, история на действията и други свързани данни.
+                    </p>
+                </div>
+                
+                <button class="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                    Експортирай моите данни
+                </button>
+            </div>
+            
+            <!-- GDPR - Delete/Deactivate Account Section -->
+            <div class="bg-white rounded-lg shadow-sm border border-red-200 p-8">
+                <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                    <svg class="w-6 h-6 mr-2 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    </svg>
+                    Изтриване на акаунт
+                </h2>
+                
+                <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                    <p class="text-sm text-red-900 font-medium mb-2">
+                        ⚠️ Внимание: Това действие е необратимо!
+                    </p>
+                    <p class="text-sm text-red-800">
+                        При изтриване на акаунта ще бъдат премахнати всички ваши данни от системата, включително профилна информация и история на действията. Това действие не може да бъде отменено.
+                    </p>
+                </div>
+                
+                <div class="space-y-3">
+                    <button 
+                        onclick="if(confirm('Сигурни ли сте, че искате да деактивирате акаунта си? Акаунтът ви няма да е достъпен, но данните ще бъдат запазени.')) alert('Акаунтът ще бъде деактивиран')"
+                        class="px-6 py-3 bg-orange-600 text-white rounded-lg font-semibold hover:bg-orange-700 transition flex items-center"
+                    >
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
+                        </svg>
+                        Деактивирай акаунта
+                    </button>
+                    
+                    <button 
+                        onclick="if(confirm('ПОСЛЕДНО ПРЕДУПРЕЖДЕНИЕ: Сигурни ли сте, че искате да изтриете акаунта си завинаги? Това действие е необратимо и всички ваши данни ще бъдат премахнати.')) alert('Акаунтът ще бъде изтрит')"
+                        class="px-6 py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition flex items-center"
+                    >
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                        Изтрий акаунта завинаги
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 py-6 mt-12">
+        <div class="max-w-7xl mx-auto px-4 text-center text-sm text-gray-600">
+            <a href="40-about.html" class="hover:text-green-600">About</a>
+            <span class="mx-2">|</span>
+            <a href="41-privacy-gdpr.html" class="hover:text-green-600">Privacy/GDPR</a>
+            <span class="mx-2">|</span>
+            <a href="42-contact.html" class="hover:text-green-600">Contact</a>
+        </div>
+    </footer>

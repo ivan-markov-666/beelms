@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sandbox UI - Upload & Download - QA4Free</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-200 h-20">
+        <div class="max-w-7xl mx-auto px-4 h-full flex items-center justify-between">
+            <div class="flex items-center">
+                <a href="00-home.html" class="text-2xl font-bold text-green-600">QA4Free</a>
+            </div>
+            <nav class="hidden md:flex space-x-6">
+                <a href="03-wiki-list.html" class="text-gray-700 hover:text-green-600 transition">Wiki</a>
+                <a href="04-sandbox-textbox.html" class="text-green-600 font-semibold border-b-2 border-green-600 pb-1">Practical UI</a>
+                <a href="07-training-api.html" class="text-gray-700 hover:text-green-600 transition">Training API</a>
+            </nav>
+            <div class="flex items-center space-x-4">
+                <a href="01-login.html" class="text-gray-700 hover:text-green-600 transition">Login</a>
+                <a href="02-register.html" class="text-gray-700 hover:text-green-600 transition">Register</a>
+                <select class="border border-gray-300 rounded px-2 py-1 text-sm">
+                    <option>BG</option>
+                    <option>EN</option>
+                </select>
+            </div>
+            <button class="md:hidden">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow py-8">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex flex-col lg:flex-row gap-6">
+                <!-- Left Sidebar -->
+                <aside class="w-full lg:w-64 flex-shrink-0">
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sticky top-4">
+                        <h3 class="font-bold text-gray-900 mb-4">UI Elements</h3>
+                        <nav class="space-y-1">
+                            <a href="04-sandbox-textbox.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Text Box</a>
+                            <a href="17-sandbox-checkbox-radio.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Check Box &amp; Radio</a>
+                            <a href="18-sandbox-buttons.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Buttons</a>
+                            <a href="19-sandbox-links.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Links</a>
+                            <a href="20-sandbox-alerts.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Alerts</a>
+                            <a href="21-sandbox-modals.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Modal Dialogs</a>
+                            <a href="22-sandbox-upload-download.html" class="block px-3 py-2 bg-green-50 text-green-700 rounded-lg font-medium">Upload / Download</a>
+                            <a href="23-sandbox-date-picker.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Date Picker</a>
+                            <a href="24-sandbox-tabs.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Tabs</a>
+                            <a href="25-sandbox-select-menu.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Select Menu</a>
+                            <a href="26-sandbox-accordion.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Accordion</a>
+                            <a href="27-sandbox-slider.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Slider</a>
+                            <a href="28-sandbox-tooltips.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Tooltips</a>
+                            <a href="29-sandbox-autocomplete.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Auto Complete</a>
+                            <a href="30-sandbox-progress.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Progress Bar</a>
+                            <a href="31-sandbox-frames.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Frames / Windows</a>
+                            <a href="32-sandbox-dynamic-properties.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Dynamic Properties</a>
+                            <a href="33-sandbox-nested-frames.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Nested Frames</a>
+                            <a href="34-sandbox-menu.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Menu</a>
+                            <a href="35-sandbox-sortable.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Sortable</a>
+                            <a href="36-sandbox-selectable.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Selectable</a>
+                            <a href="37-sandbox-resizable.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Resizable</a>
+                            <a href="38-sandbox-droppable.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Droppable</a>
+                            <a href="39-sandbox-draggable.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Draggable</a>
+                            <a href="09-complex-form.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Complex Form</a>
+                            <a href="06-table-crud.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Table CRUD</a>
+                        </nav>
+                    </div>
+                </aside>
+
+                <!-- Main Content Area -->
+                <div class="flex-grow">
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+                        <!-- Page Header -->
+                        <div class="mb-8">
+                            <h1 class="text-3xl font-bold text-gray-900 mb-2">Upload & Download Elements</h1>
+                            <p class="text-gray-600">Practice selecting files for upload, using drag & drop and testing download links</p>
+                        </div>
+
+                        <div class="space-y-8">
+                            <!-- 1. Single File Upload -->
+                            <section class="border border-gray-200 rounded-lg p-6">
+                                <h2 class="font-semibold text-gray-900 mb-2">1. Single File Upload</h2>
+                                <p class="text-sm text-gray-600 mb-4">Choose a single file and verify the selected file name and size.</p>
+                                <input
+                                    id="file-upload-single"
+                                    type="file"
+                                    onchange="handleSingleFileChange(event)"
+                                    class="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+                                />
+                                <p id="file-upload-single-result" class="mt-3 text-sm text-gray-700">
+                                    Selected file: <span class="font-semibold text-gray-900">None</span>
+                                </p>
+                            </section>
+
+                            <!-- 2. Multiple File Upload -->
+                            <section class="border border-gray-200 rounded-lg p-6">
+                                <h2 class="font-semibold text-gray-900 mb-2">2. Multiple File Upload</h2>
+                                <p class="text-sm text-gray-600 mb-4">Select multiple files at once and verify the list of selected files.</p>
+                                <input
+                                    id="file-upload-multiple"
+                                    type="file"
+                                    multiple
+                                    onchange="handleMultipleFileChange(event)"
+                                    class="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                                />
+                                <div class="mt-3 text-sm text-gray-700">
+                                    <p class="mb-1">Selected files:</p>
+                                    <ul id="file-upload-multiple-result" class="list-disc list-inside text-gray-800">
+                                        <li>No files selected</li>
+                                    </ul>
+                                </div>
+                            </section>
+
+                            <!-- 3. Drag & Drop Area -->
+                            <section class="border border-gray-200 rounded-lg p-6">
+                                <h2 class="font-semibold text-gray-900 mb-2">3. Drag & Drop Upload Area</h2>
+                                <p class="text-sm text-gray-600 mb-4">Drag and drop a file into the area below to simulate drag & drop upload behaviour.</p>
+                                <div
+                                    id="drop-zone"
+                                    ondragover="handleDragOver(event)"
+                                    ondragleave="handleDragLeave(event)"
+                                    ondrop="handleDrop(event)"
+                                    class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center text-gray-600 bg-gray-50 hover:border-green-500 hover:bg-green-50 transition"
+                                >
+                                    <p class="font-semibold mb-1">Drop files here</p>
+                                    <p class="text-xs text-gray-500">or drag files from your desktop onto this area</p>
+                                </div>
+                                <p id="drop-zone-result" class="mt-3 text-sm text-gray-700">
+                                    Dropped file: <span class="font-semibold text-gray-900">None</span>
+                                </p>
+                            </section>
+
+                            <!-- 4. Download Links -->
+                            <section class="border border-gray-200 rounded-lg p-6">
+                                <h2 class="font-semibold text-gray-900 mb-2">4. Download Links</h2>
+                                <p class="text-sm text-gray-600 mb-4">Test valid and broken download links.</p>
+                                <div class="space-y-3">
+                                    <div>
+                                        <a
+                                            id="download-valid"
+                                            href="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
+                                            download
+                                            class="inline-flex items-center text-green-600 hover:text-green-700 underline"
+                                        >
+                                            Download Sample PDF (valid)
+                                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4"></path>
+                                            </svg>
+                                        </a>
+                                    </div>
+                                    <div>
+                                        <a
+                                            id="download-broken"
+                                            href="/downloads/nonexistent-file.zip"
+                                            download
+                                            class="inline-flex items-center text-red-600 hover:text-red-700 underline"
+                                        >
+                                            Download Broken File (404 expected)
+                                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4"></path>
+                                            </svg>
+                                        </a>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 py-6 mt-12">
+        <div class="max-w-7xl mx-auto px-4 text-center text-sm text-gray-600">
+            <a href="#" class="hover:text-green-600">About</a>
+            <span class="mx-2">|</span>
+            <a href="#" class="hover:text-green-600">Privacy/GDPR</a>
+            <span class="mx-2">|</span>
+            <a href="#" class="hover:text-green-600">Contact</a>
+            <span class="mx-2">|</span>
+            <a href="#" class="hover:text-green-600">GitHub</a>
+        </div>
+    </footer>
+
+    <script>
+        function handleSingleFileChange(event) {
+            const file = event.target.files[0];
+            const label = document.querySelector('#file-upload-single-result span');
+            if (!label) return;
+
+            if (!file) {
+                label.textContent = 'None';
+            } else {
+                label.textContent = file.name + ' (' + file.size + ' bytes)';
+            }
+        }
+
+        function handleMultipleFileChange(event) {
+            const list = document.getElementById('file-upload-multiple-result');
+            if (!list) return;
+
+            const files = Array.from(event.target.files || []);
+            list.innerHTML = '';
+
+            if (files.length === 0) {
+                const li = document.createElement('li');
+                li.textContent = 'No files selected';
+                list.appendChild(li);
+                return;
+            }
+
+            files.forEach(function (file) {
+                const li = document.createElement('li');
+                li.textContent = file.name + ' (' + file.size + ' bytes)';
+                list.appendChild(li);
+            });
+        }
+
+        function handleDragOver(event) {
+            event.preventDefault();
+            const zone = document.getElementById('drop-zone');
+            if (zone) {
+                zone.classList.add('border-green-500', 'bg-green-50');
+            }
+        }
+
+        function handleDragLeave(event) {
+            event.preventDefault();
+            const zone = document.getElementById('drop-zone');
+            if (zone) {
+                zone.classList.remove('border-green-500', 'bg-green-50');
+            }
+        }
+
+        function handleDrop(event) {
+            event.preventDefault();
+            const zone = document.getElementById('drop-zone');
+            const label = document.querySelector('#drop-zone-result span');
+
+            if (zone) {
+                zone.classList.remove('border-green-500', 'bg-green-50');
+            }
+
+            if (!label) return;
+
+            const files = Array.from(event.dataTransfer.files || []);
+            if (files.length === 0) {
+                label.textContent = 'None (no files in drop event)';
+                return;
+            }
+
+            const first = files[0];
+            label.textContent = first.name + ' (' + first.size + ' bytes)';
+        }
+    </script>
+</body>
+</html>

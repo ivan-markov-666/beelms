@@ -156,8 +156,6 @@ components:
           type: integer
         totalArticles:
           type: integer
-        totalCompletedTasks:
-          type: integer
         topArticles:
           type: array
           items:
