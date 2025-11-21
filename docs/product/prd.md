@@ -171,11 +171,12 @@ API покритие (частично):
 
 ## 6. Зависимости и интеграции
 
-Основни зависимости:
-- Next.js frontend приложение.
-- NestJS backend услуги (auth, wiki, practical_env, training-api, metrics).
-- PostgreSQL и Redis.
-- Външна имейл услуга (за забравена парола и нотификации).
+ Основни зависимости:
+ - Next.js frontend приложение.
+ - NestJS backend услуги (auth, wiki, practical_env, training-api, metrics).
+ - PostgreSQL и Redis.
+ - RabbitMQ като message broker за асинхронни задачи и опашки.
+ - Външна имейл услуга (за забравена парола и нотификации).
 
 Интеграции (обобщени):
 - Frontend ↔ API Gateway (REST/HTTPS).
