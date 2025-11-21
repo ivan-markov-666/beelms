@@ -76,18 +76,19 @@ QA4Free е онлайн платформа за обучение и справо
 ## 6. Нефункционални изисквания и ограничения (high-level)
 
 ### 6.1. Технологичен стек (предпочитан)
-
-От idea/01.defina-idea:
-- Backend: **NestJS** (Node.js)
-- Frontend: **Next.js** (React)
-- Контейнери: **Docker**
-- Допълнителни технологии (ако не натоварват прекалено VPS-а):
+ 
+ От idea/01.defina-idea:
+ - Backend: **NestJS** (Node.js)
+ - Frontend: **Next.js** (React)
+ - Контейнери: **Docker**
+  - Деплой: **Docker Compose** върху една VPS машина, с отделни Docker контейнери за основните компоненти (frontend, backend услуги, PostgreSQL, Redis и др.)
+  - Допълнителни технологии (ако не натоварват прекалено VPS-а):
   - Redis (кеш, сесии)
+  - RabbitMQ (message broker за асинхронни задачи и опашки)
   - Winston + Prometheus + Grafana (логове и метрики)
   - Sentry (error tracking)
 
 ### 6.2. Инфраструктура и бюджет
-
 - Хостинг: **една VPS машина в Contabo** с:
   - 6 vCPU, 12GB RAM, 100 GB NVMe, 300 Mbit/s, неограничен трафик.
 - Очаквано начално натоварване: ниско, но с възможност за скалиране чрез по-мощен план.
