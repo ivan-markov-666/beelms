@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complex Registration Form - QA4Free</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-200 h-20">
+        <div class="max-w-7xl mx-auto px-4 h-full flex items-center justify-between">
+            <div class="flex items-center">
+                <a href="00-home.html" class="text-2xl font-bold text-green-600">QA4Free</a>
+            </div>
+            
+            <nav class="hidden md:flex space-x-6">
+                <a href="03-wiki-list.html" class="text-gray-700 hover:text-green-600 transition">Wiki</a>
+                <a href="04-sandbox-textbox.html" class="text-green-600 font-semibold border-b-2 border-green-600 pb-1">Practical UI</a>
+                <a href="07-training-api.html" class="text-gray-700 hover:text-green-600 transition">Training API</a>
+            </nav>
+            
+            <div class="flex items-center space-x-4">
+                <a href="01-login.html" class="text-gray-700 hover:text-green-600 transition">Login</a>
+                <a href="02-register.html" class="text-gray-700 hover:text-green-600 transition">Register</a>
+                <select class="border border-gray-300 rounded px-2 py-1 text-sm">
+                    <option>BG</option>
+                    <option>EN</option>
+                </select>
+            </div>
+            
+            <button class="md:hidden">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow py-8">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex flex-col lg:flex-row gap-6">
+                <!-- Left Sidebar -->
+                <aside class="w-full lg:w-64 flex-shrink-0">
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sticky top-4">
+                        <h3 class="font-bold text-gray-900 mb-4">UI Elements</h3>
+                        <nav class="space-y-1">
+                            <a href="04-sandbox-textbox.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Text Box</a>
+                            <a href="17-sandbox-checkbox-radio.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Check Box &amp; Radio</a>
+                            <a href="18-sandbox-buttons.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Buttons</a>
+                            <a href="19-sandbox-links.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Links</a>
+                            <a href="20-sandbox-alerts.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Alerts</a>
+                            <a href="21-sandbox-modals.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Modal Dialogs</a>
+                            <a href="22-sandbox-upload-download.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Upload / Download</a>
+                            <a href="23-sandbox-date-picker.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Date Picker</a>
+                            <a href="24-sandbox-tabs.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Tabs</a>
+                            <a href="25-sandbox-select-menu.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Select Menu</a>
+                            <a href="26-sandbox-accordion.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Accordion</a>
+                            <a href="27-sandbox-slider.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Slider</a>
+                            <a href="28-sandbox-tooltips.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Tooltips</a>
+                            <a href="29-sandbox-autocomplete.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Auto Complete</a>
+                            <a href="30-sandbox-progress.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Progress Bar</a>
+                            <a href="31-sandbox-frames.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Frames / Windows</a>
+                            <a href="32-sandbox-dynamic-properties.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Dynamic Properties</a>
+                            <a href="33-sandbox-nested-frames.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Nested Frames</a>
+                            <a href="34-sandbox-menu.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Menu</a>
+                            <a href="35-sandbox-sortable.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Sortable</a>
+                            <a href="36-sandbox-selectable.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Selectable</a>
+                            <a href="37-sandbox-resizable.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Resizable</a>
+                            <a href="38-sandbox-droppable.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Droppable</a>
+                            <a href="39-sandbox-draggable.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Draggable</a>
+                            <a href="09-complex-form.html" class="block px-3 py-2 bg-green-50 text-green-700 rounded-lg font-medium">Complex Form</a>
+                            <a href="06-table-crud.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Table CRUD</a>
+                        </nav>
+                    </div>
+                </aside>
+                
+                <!-- Main Content -->
+                <div class="flex-grow">
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+                        <!-- Header -->
+                        <div class="mb-8">
+                            <h1 class="text-3xl font-bold text-gray-900 mb-2">Complex Registration Form</h1>
+                            <p class="text-gray-600">Practice filling out a complex form with validation and data transformation. After submission, see how the data is transformed and displayed.</p>
+                        </div>
+                        
+                        <!-- Registration Form -->
+                        <form id="registration-form" class="space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- First Name -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2" for="first-name">
+                                        First Name <span class="text-red-500">*</span>
+                                    </label>
+                                    <input 
+                                        type="text" 
+                                        id="first-name"
+                                        name="firstName"
+                                        required
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                        placeholder="Enter your first name"
+                                    >
+                                </div>
+                                
+                                <!-- Last Name -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2" for="last-name">
+                                        Last Name <span class="text-red-500">*</span>
+                                    </label>
+                                    <input 
+                                        type="text" 
+                                        id="last-name"
+                                        name="lastName"
+                                        required
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                        placeholder="Enter your last name"
+                                    >
+                                </div>
+                            </div>
+                            
+                            <!-- Email -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2" for="email">
+                                    Email <span class="text-red-500">*</span>
+                                </label>
+                                <input 
+                                    type="email" 
+                                    id="email"
+                                    name="email"
+                                    required
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                    placeholder="your.email@example.com"
+                                >
+                            </div>
+                            
+                            <!-- Date of Birth -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2" for="dob">
+                                    Date of Birth <span class="text-red-500">*</span>
+                                </label>
+                                <input 
+                                    type="text" 
+                                    id="dob"
+                                    name="dob"
+                                    required
+                                    placeholder="dd/mm/yyyy (e.g., 21/06/2020)"
+                                    pattern="\d{2}/\d{2}/\d{4}"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                >
+                                <p class="text-xs text-gray-500 mt-1">Format: dd/mm/yyyy</p>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- Country -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2" for="country">
+                                        Country <span class="text-red-500">*</span>
+                                    </label>
+                                    <select 
+                                        id="country"
+                                        name="country"
+                                        required
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                    >
+                                        <option value="">Select a country</option>
+                                        <option value="Bulgaria">Bulgaria</option>
+                                        <option value="Germany">Germany</option>
+                                        <option value="United Kingdom">United Kingdom</option>
+                                        <option value="France">France</option>
+                                        <option value="Spain">Spain</option>
+                                        <option value="Italy">Italy</option>
+                                        <option value="USA">USA</option>
+                                        <option value="Canada">Canada</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Phone -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2" for="phone">
+                                        Phone Number
+                                    </label>
+                                    <input 
+                                        type="tel" 
+                                        id="phone"
+                                        name="phone"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                        placeholder="+359 888 123 456"
+                                    >
+                                </div>
+                            </div>
+                            
+                            <!-- Address -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2" for="address">
+                                    Address
+                                </label>
+                                <textarea 
+                                    id="address"
+                                    name="address"
+                                    rows="3"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                    placeholder="Enter your full address"
+                                ></textarea>
+                            </div>
+                            
+                            <!-- Terms & Conditions -->
+                            <div class="flex items-start">
+                                <input 
+                                    type="checkbox" 
+                                    id="terms"
+                                    name="terms"
+                                    required
+                                    class="w-4 h-4 mt-1 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                                >
+                                <label for="terms" class="ml-2 text-sm text-gray-700">
+                                    I agree to the <a href="#" class="text-green-600 hover:text-green-700">Terms & Conditions</a> and <a href="#" class="text-green-600 hover:text-green-700">Privacy Policy</a> <span class="text-red-500">*</span>
+                                </label>
+                            </div>
+                            
+                            <!-- Submit Button -->
+                            <button 
+                                type="submit"
+                                class="w-full md:w-auto px-8 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition"
+                            >
+                                Register
+                            </button>
+                        </form>
+                        
+                        <!-- Registration Result (Hidden initially) -->
+                        <div id="result-section" class="hidden mt-8 pt-8 border-t-2 border-gray-200">
+                            <div class="bg-green-50 border border-green-200 rounded-lg p-6 mb-6">
+                                <div class="flex items-center mb-4">
+                                    <svg class="w-6 h-6 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <h3 class="text-lg font-bold text-green-900">Registration Successful!</h3>
+                                </div>
+                                <p class="text-sm text-green-800">Your registration has been processed. Below you can see the transformed data.</p>
+                            </div>
+                            
+                            <h3 class="text-xl font-bold text-gray-900 mb-4">Registration Result</h3>
+                            
+                            <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 space-y-3">
+                                <div class="flex border-b border-gray-200 pb-3">
+                                    <span class="font-medium text-gray-700 w-40">Full Name:</span>
+                                    <span id="result-fullname" class="text-gray-900"></span>
+                                </div>
+                                <div class="flex border-b border-gray-200 pb-3">
+                                    <span class="font-medium text-gray-700 w-40">Email:</span>
+                                    <span id="result-email" class="text-gray-900"></span>
+                                </div>
+                                <div class="flex border-b border-gray-200 pb-3">
+                                    <span class="font-medium text-gray-700 w-40">Birth Date:</span>
+                                    <span id="result-dob" class="text-gray-900"></span>
+                                </div>
+                                <div class="flex border-b border-gray-200 pb-3">
+                                    <span class="font-medium text-gray-700 w-40">Country:</span>
+                                    <span id="result-country" class="text-gray-900"></span>
+                                </div>
+                                <div class="flex border-b border-gray-200 pb-3">
+                                    <span class="font-medium text-gray-700 w-40">Phone:</span>
+                                    <span id="result-phone" class="text-gray-900"></span>
+                                </div>
+                                <div class="flex">
+                                    <span class="font-medium text-gray-700 w-40">Address:</span>
+                                    <span id="result-address" class="text-gray-900"></span>
+                                </div>
+                            </div>
+                            
+                            <button 
+                                onclick="document.getElementById('registration-form').reset(); document.getElementById('result-section').classList.add('hidden')"
+                                class="mt-6 px-6 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition"
+                            >
+                                Register Another User
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 py-6 mt-12">
+        <div class="max-w-7xl mx-auto px-4 text-center text-sm text-gray-600">
+            <a href="40-about.html" class="hover:text-green-600">About</a>
+            <span class="mx-2">|</span>
+            <a href="41-privacy-gdpr.html" class="hover:text-green-600">Privacy/GDPR</a>
+            <span class="mx-2">|</span>
+            <a href="42-contact.html" class="hover:text-green-600">Contact</a>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('registration-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form values
+            const firstName = document.getElementById('first-name').value;
+            const lastName = document.getElementById('last-name').value;
+            const email = document.getElementById('email').value;
+            const dob = document.getElementById('dob').value;
+            const country = document.getElementById('country').value;
+            const phone = document.getElementById('phone').value || 'Not provided';
+            const address = document.getElementById('address').value || 'Not provided';
+            
+            // Transform date from dd/mm/yyyy to "DD Month YYYY"
+            const monthNames = ["January", "February", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November", "December"];
+            const dobParts = dob.split('/');
+            const transformedDob = `${dobParts[0]} ${monthNames[parseInt(dobParts[1]) - 1]} ${dobParts[2]}`;
+            
+            // Combine first and last name
+            const fullName = `${firstName} ${lastName}`;
+            
+            // Display results
+            document.getElementById('result-fullname').textContent = fullName;
+            document.getElementById('result-email').textContent = email;
+            document.getElementById('result-dob').textContent = transformedDob;
+            document.getElementById('result-country').textContent = country;
+            document.getElementById('result-phone').textContent = phone;
+            document.getElementById('result-address').textContent = address;
+            
+            // Show result section
+            document.getElementById('result-section').classList.remove('hidden');
+            
+            // Scroll to result
+            document.getElementById('result-section').scrollIntoView({ behavior: 'smooth' });
+        });
+    </script>
+</body>
+</html>

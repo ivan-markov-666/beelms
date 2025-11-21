@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QA4Free - UX Prototypes (Complete)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-green-50 to-blue-50 min-h-screen">
+    <div class="max-w-7xl mx-auto px-4 py-12">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-5xl font-bold text-gray-900 mb-4">QA4Free</h1>
+            <p class="text-xl text-gray-600 mb-2">Complete UX Design Prototypes - MVP Version</p>
+            <p class="text-sm text-gray-500">All 40 interactive HTML prototypes based on wireframe specifications</p>
+        </div>
+
+        <!-- Prototype Categories -->
+        <div class="space-y-8">
+            <!-- Home / Landing -->
+            <section class="bg-white rounded-xl shadow-lg p-8">
+                <div class="flex items-center mb-6">
+                    <svg class="w-8 h-8 text-green-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0h6" />
+                    </svg>
+                    <h2 class="text-2xl font-bold text-gray-900">Home / Landing (1)</h2>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <a href="00-home.html" class="group block p-6 border-2 border-gray-200 rounded-lg hover:border-green-500 hover:shadow-md transition">
+                        <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-green-600">Home / Landing</h3>
+                        <p class="text-sm text-gray-600">Overview of QA4Free with quick links to Wiki, Practical UI and Training API</p>
+                        <span class="text-xs text-gray-500 mt-2 block">SCR-HOME</span>
+                    </a>
+                </div>
+            </section>
+
+            <!-- Authentication Screens -->
+            <section class="bg-white rounded-xl shadow-lg p-8">
+                <div class="flex items-center mb-6">
+                    <svg class="w-8 h-8 text-green-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                    </svg>
+                    <h2 class="text-2xl font-bold text-gray-900">Authentication Screens (5)</h2>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <a href="01-login.html" class="group block p-6 border-2 border-gray-200 rounded-lg hover:border-green-500 hover:shadow-md transition">
+                        <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-green-600">Login</h3>
+                        <p class="text-sm text-gray-600">User authentication screen</p>
+                        <span class="text-xs text-gray-500 mt-2 block">SCR-LOGIN</span>
+                    </a>
+                    <a href="02-register.html" class="group block p-6 border-2 border-gray-200 rounded-lg hover:border-green-500 hover:shadow-md transition">
+                        <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-green-600">Register</h3>
+                        <p class="text-sm text-gray-600">New user registration</p>
+                        <span class="text-xs text-gray-500 mt-2 block">SCR-REGISTER</span>
+                    </a>
+                    <a href="11-forgot-password.html" class="group block p-6 border-2 border-gray-200 rounded-lg hover:border-green-500 hover:shadow-md transition">
+                        <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-green-600">Forgot Password</h3>
+                        <p class="text-sm text-gray-600">Password reset request</p>
+                        <span class="text-xs text-gray-500 mt-2 block">SCR-FORGOT</span>
+                    </a>
+                    <a href="12-reset-password.html" class="group block p-6 border-2 border-gray-200 rounded-lg hover:border-green-500 hover:shadow-md transition">
+                        <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-green-600">Reset Password</h3>
+                        <p class="text-sm text-gray-600">Set new password via email link</p>
+                        <span class="text-xs text-gray-500 mt-2 block">SCR-RESET</span>
+                    </a>
+                    <a href="08-account-profile.html" class="group block p-6 border-2 border-gray-200 rounded-lg hover:border-green-500 hover:shadow-md transition">
+                        <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-green-600">Account / Profile</h3>
+                        <p class="text-sm text-gray-600">User account management & GDPR</p>
+                        <span class="text-xs text-gray-500 mt-2 block">SCR-ACCOUNT</span>
+                    </a>
+                </div>
+            </section>
+
+            <!-- Wiki Screens -->
+            <section class="bg-white rounded-xl shadow-lg p-8">
+                <div class="flex items-center mb-6">
+                    <svg class="w-8 h-8 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                    </svg>
+                    <h2 class="text-2xl font-bold text-gray-900">Wiki Screens (2)</h2>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <a href="03-wiki-list.html" class="group block p-6 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:shadow-md transition">
+                        <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-blue-600">Wiki List</h3>
+                        <p class="text-sm text-gray-600">Browse and search articles</p>
+                        <span class="text-xs text-gray-500 mt-2 block">SCR-WIKI-LST</span>
+                    </a>
+                    <a href="13-wiki-article.html" class="group block p-6 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:shadow-md transition">
+                        <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-blue-600">Wiki Article</h3>
+                        <p class="text-sm text-gray-600">Individual article page with full content</p>
+                        <span class="text-xs text-gray-500 mt-2 block">SCR-WIKI-ART</span>
+                    </a>
+                </div>
+            </section>
+
+            <!-- Practical Environment -->
+            <section class="bg-white rounded-xl shadow-lg p-8">
+                <div class="flex items-center mb-6">
+                    <svg class="w-8 h-8 text-purple-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    </svg>
+                    <h2 class="text-2xl font-bold text-gray-900">Practical Environment (27)</h2>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <a href="04-sandbox-textbox.html" class="group block p-6 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:shadow-md transition">
+                        <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-purple-600">Sandbox UI - Text Box</h3>
+                        <p class="text-sm text-gray-600">Various text input elements (8 types)</p>
+                        <span class="text-xs text-gray-500 mt-2 block">SCR-SBX-UI</span>
+                    </a>
+                    <a href="17-sandbox-checkbox-radio.html" class="group block p-6 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:shadow-md transition">
+                        <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-purple-600">Sandbox UI - Check Box & Radio</h3>
+                        <p class="text-sm text-gray-600">Selection elements and groups</p>
+                        <span class="text-xs text-gray-500 mt-2 block">SCR-SBX-UI</span>
+                    </a>
+                    <a href="09-complex-form.html" class="group block p-6 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:shadow-md transition">
+                        <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-purple-600">Complex Registration Form</h3>
+                        <p class="text-sm text-gray-600">Advanced form with data transformation</p>
+                        <span class="text-xs text-gray-500 mt-2 block">SCR-SBX-UI</span>
+                    </a>
+                    <a href="06-table-crud.html" class="group block p-6 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:shadow-md transition">
+                        <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-purple-600">Table CRUD & Pagination</h3>
+                        <p class="text-sm text-gray-600">Interactive table operations (10/page)</p>
+                        <span class="text-xs text-gray-500 mt-2 block">SCR-SBX-UI</span>
+                    </a>
+                    <a href="07-training-api.html" class="group block p-6 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:shadow-md transition">
+                        <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-purple-600">Training API</h3>
+                        <p class="text-sm text-gray-600">Swagger UI for API testing practice</p>
+                        <span class="text-xs text-gray-500 mt-2 block">SCR-SBX-API</span>
+                    </a>
+                    <a href="18-sandbox-buttons.html" class="group block p-6 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:shadow-md transition">
+                        <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-purple-600">Sandbox UI - Buttons</h3>
+                        <p class="text-sm text-gray-600">Various button types, states and loading indicators</p>
+                        <span class="text-xs text-gray-500 mt-2 block">SCR-SBX-UI</span>
+                    </a>
+                    <a href="19-sandbox-links.html" class="group block p-6 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:shadow-md transition">
+                        <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-purple-600">Sandbox UI - Links & Images</h3>
+                        <p class="text-sm text-gray-600">Valid and broken links, different styles and broken images</p>
+                        <span class="text-xs text-gray-500 mt-2 block">SCR-SBX-UI</span>
+                    </a>
+                    <a href="20-sandbox-alerts.html" class="group block p-6 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:shadow-md transition">
+                        <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-purple-600">Sandbox UI - Alerts</h3>
+                        <p class="text-sm text-gray-600">JS alert, confirm, prompt, timers and chained dialogs</p>
+                        <span class="text-xs text-gray-500 mt-2 block">SCR-SBX-UI</span>
+                    </a>
+                    <a href="21-sandbox-modals.html" class="group block p-6 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:shadow-md transition">
+                        <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-purple-600">Sandbox UI - Modal Dialogs</h3>
+                        <p class="text-sm text-gray-600">Info, confirm and scrollable modals with overlay</p>
+                        <span class="text-xs text-gray-500 mt-2 block">SCR-SBX-UI</span>
+                    </a>
+                    <a href="22-sandbox-upload-download.html" class="group block p-6 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:shadow-md transition">
+                        <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-purple-600">Sandbox UI - Upload & Download</h3>
+                        <p class="text-sm text-gray-600">Single/multi file upload, drag & drop and downloads</p>
+                        <span class="text-xs text-gray-500 mt-2 block">SCR-SBX-UI</span>
+                    </a>
+                    <a href="23-sandbox-date-picker.html" class="group block p-6 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:shadow-md transition">
+                        <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-purple-600">Sandbox UI - Date Picker</h3>
+                        <p class="text-sm text-gray-600">Text and native date pickers with range validation</p>
+                        <span class="text-xs text-gray-500 mt-2 block">SCR-SBX-UI</span>
+                    </a>
+                    <a href="24-sandbox-tabs.html" class="group block p-6 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:shadow-md transition">
+                        <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-purple-600">Sandbox UI - Tabs</h3>
+                        <p class="text-sm text-gray-600">Horizontal and vertical tab navigation panels</p>
+                        <span class="text-xs text-gray-500 mt-2 block">SCR-SBX-UI</span>
+                    </a>
+                    <a href="25-sandbox-select-menu.html" class="group block p-6 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:shadow-md transition">
+                        <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-purple-600">Sandbox UI - Select Menu</h3>
+                        <p class="text-sm text-gray-600">Single, grouped, multi-select and disabled options</p>
+                        <span class="text-xs text-gray-500 mt-2 block">SCR-SBX-UI</span>
+                    </a>
+                    <a href="26-sandbox-accordion.html" class="group block p-6 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:shadow-md transition">
+                        <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-purple-600">Sandbox UI - Accordion</h3>
+                        <p class="text-sm text-gray-600">Multiple and single-open panels with nested content</p>
+                        <span class="text-xs text-gray-500 mt-2 block">SCR-SBX-UI</span>
+                    </a>
+                    <a href="27-sandbox-slider.html" class="group block p-6 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:shadow-md transition">
+                        <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-purple-600">Sandbox UI - Slider</h3>
+                        <p class="text-sm text-gray-600">Range sliders with different ranges and disabled state</p>
+                        <span class="text-xs text-gray-500 mt-2 block">SCR-SBX-UI</span>
+                    </a>
+                    <a href="28-sandbox-tooltips.html" class="group block p-6 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:shadow-md transition">
+                        <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-purple-600">Sandbox UI - Tooltips</h3>
+                        <p class="text-sm text-gray-600">Native and custom tooltips on buttons and form fields</p>
+                        <span class="text-xs text-gray-500 mt-2 block">SCR-SBX-UI</span>
+                    </a>
+                    <a href="29-sandbox-autocomplete.html" class="group block p-6 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:shadow-md transition">
+                        <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-purple-600">Sandbox UI - Auto Complete</h3>
+                        <p class="text-sm text-gray-600">Single and multi-select auto complete with tags</p>
+                        <span class="text-xs text-gray-500 mt-2 block">SCR-SBX-UI</span>
+                    </a>
+                    <a href="30-sandbox-progress.html" class="group block p-6 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:shadow-md transition">
+                        <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-purple-600">Sandbox UI - Progress Bar</h3>
+                        <p class="text-sm text-gray-600">Determinate, indeterminate and multi-step progress</p>
+                        <span class="text-xs text-gray-500 mt-2 block">SCR-SBX-UI</span>
+                    </a>
+                    <a href="31-sandbox-frames.html" class="group block p-6 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:shadow-md transition">
+                        <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-purple-600">Sandbox UI - Frames & Windows</h3>
+                        <p class="text-sm text-gray-600">Valid/broken iframes and new window/tab buttons</p>
+                        <span class="text-xs text-gray-500 mt-2 block">SCR-SBX-UI</span>
+                    </a>
+                    <a href="32-sandbox-dynamic-properties.html" class="group block p-6 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:shadow-md transition">
+                        <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-purple-600">Sandbox UI - Dynamic Properties</h3>
+                        <p class="text-sm text-gray-600">Color, visibility and timer-based property changes</p>
+                        <span class="text-xs text-gray-500 mt-2 block">SCR-SBX-UI</span>
+                    </a>
+                    <a href="33-sandbox-nested-frames.html" class="group block p-6 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:shadow-md transition">
+                        <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-purple-600">Sandbox UI - Nested Frames</h3>
+                        <p class="text-sm text-gray-600">Parent frame with nested child frame and multiple frames</p>
+                        <span class="text-xs text-gray-500 mt-2 block">SCR-SBX-UI</span>
+                    </a>
+                    <a href="34-sandbox-menu.html" class="group block p-6 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:shadow-md transition">
+                        <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-purple-600">Sandbox UI - Menu</h3>
+                        <p class="text-sm text-gray-600">Horizontal, dropdown and context menus</p>
+                        <span class="text-xs text-gray-500 mt-2 block">SCR-SBX-UI</span>
+                    </a>
+                    <a href="35-sandbox-sortable.html" class="group block p-6 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:shadow-md transition">
+                        <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-purple-600">Sandbox UI - Sortable</h3>
+                        <p class="text-sm text-gray-600">Reorderable list using move up/down controls</p>
+                        <span class="text-xs text-gray-500 mt-2 block">SCR-SBX-UI</span>
+                    </a>
+                    <a href="36-sandbox-selectable.html" class="group block p-6 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:shadow-md transition">
+                        <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-purple-600">Sandbox UI - Selectable</h3>
+                        <p class="text-sm text-gray-600">Single and multi-select lists and tiles</p>
+                        <span class="text-xs text-gray-500 mt-2 block">SCR-SBX-UI</span>
+                    </a>
+                    <a href="37-sandbox-resizable.html" class="group block p-6 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:shadow-md transition">
+                        <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-purple-600">Sandbox UI - Resizable</h3>
+                        <p class="text-sm text-gray-600">Resizable box and native resizable textarea</p>
+                        <span class="text-xs text-gray-500 mt-2 block">SCR-SBX-UI</span>
+                    </a>
+                    <a href="38-sandbox-droppable.html" class="group block p-6 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:shadow-md transition">
+                        <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-purple-600">Sandbox UI - Droppable</h3>
+                        <p class="text-sm text-gray-600">Drag items between drop zones</p>
+                        <span class="text-xs text-gray-500 mt-2 block">SCR-SBX-UI</span>
+                    </a>
+                    <a href="39-sandbox-draggable.html" class="group block p-6 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:shadow-md transition">
+                        <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-purple-600">Sandbox UI - Draggable</h3>
+                        <p class="text-sm text-gray-600">Draggable cards with last-drag tracking</p>
+                        <span class="text-xs text-gray-500 mt-2 block">SCR-SBX-UI</span>
+                    </a>
+                </div>
+            </section>
+
+            <!-- Admin Screens -->
+            <section class="bg-white rounded-xl shadow-lg p-8">
+                <div class="flex items-center mb-6">
+                    <svg class="w-8 h-8 text-red-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    <h2 class="text-2xl font-bold text-gray-900">Admin Screens (5)</h2>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <a href="05-admin-dashboard.html" class="group block p-6 border-2 border-gray-200 rounded-lg hover:border-red-500 hover:shadow-md transition">
+                        <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-red-600">Admin Dashboard</h3>
+                        <p class="text-sm text-gray-600">Overview with KPI cards and quick actions</p>
+                        <span class="text-xs text-gray-500 mt-2 block">SCR-ADMIN-DB</span>
+                    </a>
+                    <a href="10-admin-wiki.html" class="group block p-6 border-2 border-gray-200 rounded-lg hover:border-red-500 hover:shadow-md transition">
+                        <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-red-600">Admin Wiki Management</h3>
+                        <p class="text-sm text-gray-600">Manage articles and content</p>
+                        <span class="text-xs text-gray-500 mt-2 block">SCR-ADMIN-WK</span>
+                    </a>
+                    <a href="15-admin-wiki-versions.html" class="group block p-6 border-2 border-gray-200 rounded-lg hover:border-red-500 hover:shadow-md transition">
+                        <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-red-600">Admin Wiki Versions</h3>
+                        <p class="text-sm text-gray-600">Version history and diff comparison</p>
+                        <span class="text-xs text-gray-500 mt-2 block">SCR-ADMIN-WV</span>
+                    </a>
+                    <a href="14-admin-users.html" class="group block p-6 border-2 border-gray-200 rounded-lg hover:border-red-500 hover:shadow-md transition">
+                        <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-red-600">Admin Users</h3>
+                        <p class="text-sm text-gray-600">User management and activation</p>
+                        <span class="text-xs text-gray-500 mt-2 block">SCR-ADMIN-US</span>
+                    </a>
+                    <a href="16-admin-metrics.html" class="group block p-6 border-2 border-gray-200 rounded-lg hover:border-red-500 hover:shadow-md transition">
+                        <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-red-600">Admin Metrics</h3>
+                        <p class="text-sm text-gray-600">System usage statistics and charts</p>
+                        <span class="text-xs text-gray-500 mt-2 block">SCR-ADMIN-MT</span>
+                    </a>
+                </div>
+            </section>
+        </div>
+
+        <!-- Footer Info -->
+        <div class="mt-12 text-center">
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 max-w-3xl mx-auto">
+                <h3 class="font-bold text-gray-900 mb-3">✅ Complete Prototype Collection</h3>
+                <p class="text-sm text-gray-600 mb-4">
+                    All 40 HTML prototypes are now available, based on the UX Design document for QA4Free MVP.
+                    Every core screen from the specification has been implemented with full interactivity and responsive design.
+                </p>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                    <div class="p-3 bg-green-50 rounded-lg">
+                        <div class="text-2xl font-bold text-green-600">40</div>
+                        <div class="text-xs text-gray-600">Prototypes</div>
+                    </div>
+                    <div class="p-3 bg-blue-50 rounded-lg">
+                        <div class="text-2xl font-bold text-blue-600">100%</div>
+                        <div class="text-xs text-gray-600">Complete</div>
+                    </div>
+                    <div class="p-3 bg-purple-50 rounded-lg">
+                        <div class="text-2xl font-bold text-purple-600">100%</div>
+                        <div class="text-xs text-gray-600">Responsive</div>
+                    </div>
+                    <div class="p-3 bg-red-50 rounded-lg">
+                        <div class="text-2xl font-bold text-red-600">MVP</div>
+                        <div class="text-xs text-gray-600">Ready</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

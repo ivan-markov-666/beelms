@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QA4Free – UX Color Theme Visualizer (BMAD)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="max-w-6xl mx-auto px-4 py-10 space-y-10">
+        <!-- Header -->
+        <header class="space-y-2">
+            <h1 class="text-3xl font-bold text-gray-900">QA4Free – Color Theme Visualizer</h1>
+            <p class="text-gray-600 text-sm">BMAD UX артефакт, базиран на <code>docs/ux/design-system.md</code>. Показва основната палитра (Primary Green, Danger Red, неутрални) и примерни компоненти.</p>
+        </header>
+
+        <!-- Palette Overview -->
+        <section class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">1. Основна палитра</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Primary Green -->
+                <div class="border border-gray-200 rounded-lg overflow-hidden">
+                    <div class="h-20" style="background-color:#22C55E"></div>
+                    <div class="p-3 text-sm">
+                        <div class="font-semibold text-gray-900 mb-1">Primary Green</div>
+                        <div class="text-gray-600 mb-1">Основен акцент (Login, Register, primary actions)</div>
+                        <div class="text-xs text-gray-500">Tailwind: <code>green-500</code> • HEX: <code>#22C55E</code></div>
+                    </div>
+                </div>
+                <!-- Danger Red -->
+                <div class="border border-gray-200 rounded-lg overflow-hidden">
+                    <div class="h-20" style="background-color:#EF4444"></div>
+                    <div class="p-3 text-sm">
+                        <div class="font-semibold text-gray-900 mb-1">Danger Red</div>
+                        <div class="text-gray-600 mb-1">Destructive действия, грешки</div>
+                        <div class="text-xs text-gray-500">Tailwind: <code>red-500</code> • HEX: <code>#EF4444</code></div>
+                    </div>
+                </div>
+                <!-- Background / Surface -->
+                <div class="border border-gray-200 rounded-lg overflow-hidden">
+                    <div class="h-20 bg-gray-50 border-b border-gray-200 flex items-center justify-center text-xs text-gray-500">Background / Surface</div>
+                    <div class="p-3 text-sm space-y-1">
+                        <div><span class="font-semibold text-gray-900">Background</span> – <code>#F9FAFB</code> (gray-50)</div>
+                        <div><span class="font-semibold text-gray-900">Surface</span> – <code>#FFFFFF</code></div>
+                        <div><span class="font-semibold text-gray-900">Border</span> – <code>#E5E7EB</code> (gray-200)</div>
+                        <div><span class="font-semibold text-gray-900">Text Primary</span> – <code>#111827</code> (gray-900)</div>
+                        <div><span class="font-semibold text-gray-900">Text Secondary</span> – <code>#4B5563</code> (gray-600)</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Component Examples -->
+        <section class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">2. Примерни компоненти</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+                <!-- Buttons -->
+                <div>
+                    <h3 class="font-semibold text-gray-900 mb-2">Бутони</h3>
+                    <div class="space-y-2">
+                        <button class="px-4 py-2 rounded-md bg-green-500 hover:bg-green-600 text-white font-semibold text-sm">Primary Button</button>
+                        <button class="px-4 py-2 rounded-md border border-gray-200 bg-white text-gray-900 hover:bg-gray-50 text-sm">Secondary Button</button>
+                        <button class="px-4 py-2 rounded-md bg-red-500 hover:bg-red-600 text-white text-sm">Danger Button</button>
+                        <button class="px-4 py-2 rounded-md bg-green-500 text-white text-sm opacity-50 cursor-not-allowed">Disabled Primary</button>
+                    </div>
+                </div>
+                <!-- Form controls -->
+                <div>
+                    <h3 class="font-semibold text-gray-900 mb-2">Формови елементи</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 mb-1" for="ds-email">Email</label>
+                            <input id="ds-email" type="email" placeholder="you@example.com" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 mb-1" for="ds-password">Password (error state)</label>
+                            <input id="ds-password" type="password" class="w-full px-3 py-2 border border-red-500 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-sm" />
+                            <p class="mt-1 text-xs text-red-600">Паролата е твърде къса.</p>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <input id="ds-remember" type="checkbox" class="h-4 w-4 text-green-600 border-gray-300 rounded" />
+                            <label for="ds-remember" class="text-sm text-gray-700">Remember me</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Text & Messages -->
+        <section class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">3. Текст, линкове и съобщения</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+                <div class="space-y-2">
+                    <h3 class="font-semibold text-gray-900 mb-1">Текстови стилове</h3>
+                    <p class="text-2xl font-bold text-gray-900">H1 – Page title</p>
+                    <p class="text-xl font-semibold text-gray-900">H2 – Section title</p>
+                    <p class="text-sm text-gray-700">Body text – основен текстов стил за съдържание и описания.</p>
+                    <p class="text-xs text-gray-500">Caption – помощен текст, подсказки, вторични етикети.</p>
+                </div>
+                <div class="space-y-3">
+                    <h3 class="font-semibold text-gray-900 mb-1">Линкове и съобщения</h3>
+                    <p class="text-sm">
+                        <a href="#" class="text-green-600 hover:underline">Forgot password?</a>
+                    </p>
+                    <p class="text-sm text-red-600">Error: Невалидни креденшъли.</p>
+                    <p class="text-sm text-green-700">Success: Паролата е променена успешно.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer note -->
+        <footer class="text-xs text-gray-500 text-center pt-4 border-t border-gray-200">
+            BMAD UX артефакт • Тази страница служи като визуализатор на палитрата за QA4Free и е синхронизирана с <code>docs/ux/design-system.md</code>.
+        </footer>
+    </div>
+</body>
+</html>

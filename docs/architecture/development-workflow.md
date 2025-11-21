@@ -23,14 +23,14 @@
 Цел: да се валидират UX и основните потоци преди сериозна имплементация.
 
 Основни задачи:
-- [ ] Wireframes за основните екрани (Wiki, Login, Практическа среда UI/API, Admin).
+- [ ] Обобщаващ UX дизайн документ – `docs/ux/qa4free-ux-design.md` (описва основните екрани, навигацията, текстовите wireframes и плана за wireframes/flows/design system).
+- [ ] (по избор) Визуални wireframes за основните екрани (Wiki, Login, Практическа среда UI/API, Admin).
   - файлове: `docs/ux/wireframes/*.excalidraw` (напр. `wiki-wireframes.excalidraw`, `auth-wireframes.excalidraw`, `practical-env-wireframes.excalidraw`, `admin-wireframes.excalidraw`)
 - [ ] Описание на потребителските потоци (flows) за ключови сценарии.
-  - диаграми: `docs/ux/flows/*.excalidraw`
-  - текстово обобщение: `docs/ux/flows/qa4free-user-flows.md`
+  - (по избор) диаграми: `docs/ux/flows/*.excalidraw`
+  - (задължително) текстово обобщение: `docs/ux/flows/qa4free-user-flows.md`
 - [ ] Базова дизайн система (цветове, бутони, форми), съобразена с идеята за зелено/червено.
   - документ: `docs/ux/design-system.md`
-  - (по избор) обобщаващ UX документ: `docs/ux/qa4free-ux-design.md`
 
 ### Фаза 3: Разработка на MVP (4–6 седмици)
 
