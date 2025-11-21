@@ -11,12 +11,12 @@
 
 Основни задачи:
 - [ ] Системна архитектура – `docs/architecture/system-architecture.md`
-- [ ] API документация (OpenAPI/Swagger спецификация за основните услуги)
+- [ ] API документация (OpenAPI/Swagger спецификация за основните услуги) – файл `docs/architecture/openapi.yaml`
 - [ ] Product Brief – `docs/product/product-brief.md`
 - [ ] PRD – `docs/product/prd.md` (стъпва върху Product Brief, `docs/architecture/mvp-feature-list.md` и системната архитектура)
 - [ ] MVP feature list по екрани/модули – `docs/architecture/mvp-feature-list.md`
 - [ ] Модел на базата данни (ER диаграма + описания) – `docs/architecture/db-model.md`
-- [ ] Технически изисквания / нефункционални изисквания (перфоманс, сигурност, GDPR и др.) – вече описани в Product Brief §6, PRD §5 и секциите за GDPR/сигурност/технологичен стек в `docs/architecture/system-architecture.md`
+- [ ] Технически изисквания / нефункционални изисквания (перфоманс, сигурност, GDPR и др.) – вече описани в `docs/product/product-brief.md` §6, `docs/product/prd.md` §5 и секциите за GDPR/сигурност/технологичен стек в `docs/architecture/system-architecture.md`
 
 ### Фаза 2: Прототипи (около 1 седмица)
 
@@ -24,8 +24,13 @@
 
 Основни задачи:
 - [ ] Wireframes за основните екрани (Wiki, Login, Практическа среда UI/API, Admin).
+  - файлове: `docs/ux/wireframes/*.excalidraw` (напр. `wiki-wireframes.excalidraw`, `auth-wireframes.excalidraw`, `practical-env-wireframes.excalidraw`, `admin-wireframes.excalidraw`)
 - [ ] Описание на потребителските потоци (flows) за ключови сценарии.
+  - диаграми: `docs/ux/flows/*.excalidraw`
+  - текстово обобщение: `docs/ux/flows/qa4free-user-flows.md`
 - [ ] Базова дизайн система (цветове, бутони, форми), съобразена с идеята за зелено/червено.
+  - документ: `docs/ux/design-system.md`
+  - (по избор) обобщаващ UX документ: `docs/ux/qa4free-ux-design.md`
 
 ### Фаза 3: Разработка на MVP (4–6 седмици)
 
