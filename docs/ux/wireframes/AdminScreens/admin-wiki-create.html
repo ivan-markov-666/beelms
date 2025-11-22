@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Create Wiki Article - QA4Free</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col" data-layout="admin" data-page="admin-wiki-create">
+    <!-- Header -->
+    <header id="site-header"></header>
+
+    <!-- Main Content -->
+    <main class="flex-grow py-8">
+        <div class="max-w-4xl mx-auto px-4">
+            <!-- Breadcrumbs -->
+            <div class="flex items-center text-sm text-gray-500 mb-6">
+                <a href="admin-dashboard.html" class="hover:text-green-600">Admin</a>
+                <svg class="w-4 h-4 mx-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+                <a href="admin-wiki.html" class="hover:text-green-600">Wiki Management</a>
+                <svg class="w-4 h-4 mx-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+                <span class="text-gray-900">Create New Article</span>
+            </div>
+
+            <!-- Page Header -->
+            <div class="mb-8 flex items-center justify-between">
+                <div>
+                    <h1 class="text-4xl font-bold text-gray-900 mb-2">Create New Article</h1>
+                    <p class="text-gray-600">Define title, slug, languages, status and content for a new Wiki article</p>
+                </div>
+                <a href="admin-wiki.html" class="text-green-600 hover:text-green-700 text-sm font-medium flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                    Back to list
+                </a>
+            </div>
+
+            <!-- Create Form -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
+                <div class="grid grid-cols-1 gap-6">
+                    <!-- Basic Info -->
+                    <div>
+                        <h2 class="text-lg font-semibold text-gray-900 mb-4">Basic Information</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="wiki-title" class="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                                <input
+                                    id="wiki-title"
+                                    type="text"
+                                    placeholder="Introduction to Manual Testing"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                >
+                            </div>
+                            <div>
+                                <label for="wiki-slug" class="block text-sm font-medium text-gray-700 mb-1">Slug</label>
+                                <input
+                                    id="wiki-slug"
+                                    type="text"
+                                    placeholder="manual-testing-intro"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                >
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                            <div>
+                                <span class="block text-sm font-medium text-gray-700 mb-1">Languages</span>
+                                <div class="space-y-1 text-sm text-gray-700">
+                                    <label class="flex items-center space-x-2">
+                                        <input type="checkbox" class="w-4 h-4 text-green-600 border-gray-300 rounded" checked>
+                                        <span>BG</span>
+                                    </label>
+                                    <label class="flex items-center space-x-2">
+                                        <input type="checkbox" class="w-4 h-4 text-green-600 border-gray-300 rounded" checked>
+                                        <span>EN</span>
+                                    </label>
+                                    <label class="flex items-center space-x-2">
+                                        <input type="checkbox" class="w-4 h-4 text-green-600 border-gray-300 rounded">
+                                        <span>DE</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="wiki-status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                                <select
+                                    id="wiki-status"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm"
+                                >
+                                    <option value="active" selected>Active</option>
+                                    <option value="inactive">Inactive</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="wiki-id" class="block text-sm font-medium text-gray-700 mb-1">Article ID (read-only)</label>
+                                <input
+                                    id="wiki-id"
+                                    type="text"
+                                    disabled
+                                    placeholder="Auto-generated on save"
+                                    class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed text-sm"
+                                >
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Content -->
+                    <div>
+                        <h2 class="text-lg font-semibold text-gray-900 mb-4">Content</h2>
+                        <p class="text-sm text-gray-600 mb-3">
+                            Use this area to provide the main body of the article. In the real implementation this may be a rich text or markdown editor.
+                        </p>
+                        <textarea
+                            id="wiki-content"
+                            rows="12"
+                            placeholder="Manual testing is the process of manually verifying software for defects and issues..."
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm"
+                        ></textarea>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="mt-6 pt-6 border-t border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div class="text-sm text-gray-500">
+                        <p>Changes are not persisted in this prototype. Use this form for UI/UX and automation exercises.</p>
+                    </div>
+                    <div class="flex items-center space-x-3 justify-end">
+                        <a href="admin-wiki.html" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition">
+                            Cancel
+                        </a>
+                        <button
+                            type="button"
+                            class="px-6 py-2 bg-green-600 text-white rounded-lg font-semibold text-sm hover:bg-green-700 transition"
+                            onclick="alert('Demo only: article would be created')"
+                        >
+                            Save Article
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer id="site-footer"></footer>
+    <script src="../layout.js"></script>
+</body>
+</html>

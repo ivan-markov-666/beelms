@@ -142,7 +142,8 @@ Layout-ът трябва да бъде **responsive** (desktop / tablet / mobile
 | SCR-SBX-UI   | Sandbox UI (Practical UI)    | `/practice/ui`           | Гост, Потребител, Админ | Страница с богати UI елементи за manual/UI automation упражнения. |
 | SCR-SBX-API  | Training API (Swagger UI)    | `/practice/api`          | Гост, Потребител, Админ | Достъп до Swagger/OpenAPI на Training API за API/integration упражнения. |
 | SCR-ADMIN-DB | Admin Dashboard              | `/admin`                 | Админ                  | Основно табло с най-важните метрики и линкове към под-секции. |
-| SCR-ADMIN-WK | Admin Wiki Management        | `/admin/wiki`            | Админ                  | Управление на Wiki статии (създаване, редакция, деактивиране). |
+| SCR-ADMIN-WK | Admin Wiki Management        | `/admin/wiki`            | Админ                  | Управление на Wiki статии (списък, филтри, бързи действия). |
+| SCR-ADMIN-WE | Admin Wiki Edit/Create       | `/admin/wiki/new`, `/admin/wiki/[id]/edit` | Админ | Форма за създаване и редакция на Wiki статии (заглавие, slug, езици, статус, съдържание). |
 | SCR-ADMIN-WV | Admin Wiki Versions/History  | `/admin/wiki/[id]/versions` | Админ              | Преглед на история на версии, diff и връщане на предишни версии. |
 | SCR-ADMIN-US | Admin Users                  | `/admin/users`           | Админ                  | Списък с потребители, активиране/деактивиране на акаунти. |
 | SCR-ADMIN-MT | Admin Metrics Overview       | `/admin/metrics`         | Админ                  | Базови метрики за употреба на системата. |
@@ -632,12 +633,40 @@ Sandbox UI е отделен модул за упражнения по UI авт
   - Филтър по статус (Active / Inactive).
 - Таблица със статии:
   - Колони: Title, Slug, Language(s), Status (Active/Inactive), Last updated, Actions.
-- Бутон „Create new article“ (води към екран/форма за създаване или отваря модал).
+- Primary бутон „Create new article“ – в MVP **винаги води към отделен екран** `SCR-ADMIN-WE` (Admin Wiki Edit) в режим „create“.
 
 **Действия (Actions):**
-- Edit – редакция на избраната статия (заглавие, съдържание, езици и т.н.).
+- Create – „Create new article“ → `SCR-ADMIN-WE` (режим „create“).
+- Edit – отваря `SCR-ADMIN-WE` в режим „edit“ за избраната статия (заглавие, съдържание, езици и т.н.).
 - View versions/history – линк към `SCR-ADMIN-WV` за конкретната статия.
 - Deactivate / Activate – промяна на статуса, без твърдо изтриване.
+
+### 8.2.1. Admin Wiki Edit / Create (`SCR-ADMIN-WE`)
+
+**Цел:** Екран за създаване на нова Wiki статия и редакция на съществуваща.
+
+**Примерни route-ове:**
+- Create: `/admin/wiki/new`.
+- Edit: `/admin/wiki/[id]/edit`.
+
+**Структура (high-level):**
+- Заглавие на екрана:
+  - „Create new article“ (create режим).
+  - „Edit article“ + заглавие/ID (edit режим).
+- Breadcrumbs: Admin → Wiki → Create/Edit.
+- Основна форма със секции:
+  - **Основна информация**:
+    - Title (заглавие на статията за текущия език).
+    - Slug (URL идентификатор, уникален за статията).
+    - Languages – избор на езици (BG / EN / DE) за които статията има съдържание.
+    - Status – Active / Inactive.
+  - **Съдържание**:
+    - Основно поле за текст (textarea / markdown редактор – детайлът е извън обхвата на този документ).
+- Долна action зона с бутони:
+  - Primary: „Save“ (create/update).
+  - Secondary: „Cancel“ / „Back to list“ (връща към `SCR-ADMIN-WK` без да запазва).
+
+В MVP фокусът е върху **стабилен, отделен екран** с пълна форма (без модали), за да се улесни валидацията, съобщенията за грешки и навигацията (back/refresh).
 
 **Състояния:**
 - Списък с резултати.

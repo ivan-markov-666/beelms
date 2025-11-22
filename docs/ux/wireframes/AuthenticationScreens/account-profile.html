@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Account - QA4Free</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col" data-layout="public" data-page="account-profile">
+    <!-- Header -->
+    <header id="site-header"></header>
+
+    <!-- Main Content -->
+    <main class="flex-grow py-12">
+        <div class="max-w-4xl mx-auto px-4">
+            <!-- Page Header -->
+            <div class="mb-8">
+                <h1 class="text-4xl font-bold text-gray-900 mb-2">Моят профил</h1>
+                <p class="text-gray-600">Управлявайте вашия акаунт и данни</p>
+            </div>
+            
+            <!-- Profile Information Section -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8 mb-6">
+                <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                    <svg class="w-6 h-6 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                    Профилна информация
+                </h2>
+                
+                <div class="space-y-4">
+                    <!-- Email row -->
+                    <div class="py-3 border-b border-gray-100">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <label class="text-sm font-medium text-gray-700">Email адрес</label>
+                                <p class="text-gray-900 mt-1"><span id="email-value">user@example.com</span></p>
+                            </div>
+                            <button type="button" class="text-green-600 hover:text-green-700 text-sm font-medium" onclick="toggleEmailEdit()">
+                                Промяна
+                            </button>
+                        </div>
+                        <div id="email-edit" class="mt-3 hidden">
+                            <label for="email-input" class="block text-sm text-gray-700 mb-1">Нов email адрес</label>
+                            <input id="email-input" type="email" class="w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="new-email@example.com">
+                            <div class="mt-2 flex items-center gap-2">
+                                <button type="button" class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700" onclick="saveEmailChange()">
+                                    Запази
+                                </button>
+                                <button type="button" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200" onclick="cancelEmailChange()">
+                                    Отказ
+                                </button>
+                            </div>
+                            <p id="email-error" class="mt-2 text-sm text-red-600 hidden">Моля, въведете валиден email адрес.</p>
+                            <p id="email-success" class="mt-2 text-sm text-green-600 hidden">Email адресът е обновен (демо съобщение).</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Password row -->
+                    <div class="py-3 border-b border-gray-100">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <label class="text-sm font-medium text-gray-700">Парола</label>
+                                <p class="text-gray-500 mt-1">••••••••</p>
+                            </div>
+                            <button type="button" class="text-green-600 hover:text-green-700 text-sm font-medium" onclick="togglePasswordEdit()">
+                                Промяна
+                            </button>
+                        </div>
+                        <div id="password-edit" class="mt-3 hidden">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 max-w-2xl">
+                                <div>
+                                    <label for="current-password" class="block text-sm text-gray-700 mb-1">Текуща парола</label>
+                                    <input id="current-password" type="password" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                                </div>
+                                <div>
+                                    <label for="new-password" class="block text-sm text-gray-700 mb-1">Нова парола</label>
+                                    <input id="new-password" type="password" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                                </div>
+                                <div>
+                                    <label for="confirm-password" class="block text-sm text-gray-700 mb-1">Потвърждение</label>
+                                    <input id="confirm-password" type="password" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                                </div>
+                            </div>
+                            <div class="mt-2 flex items-center gap-2">
+                                <button type="button" class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700" onclick="savePasswordChange()">
+                                    Запази
+                                </button>
+                                <button type="button" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200" onclick="cancelPasswordChange()">
+                                    Отказ
+                                </button>
+                            </div>
+                            <p id="password-error" class="mt-2 text-sm text-red-600 hidden">Новата парола трябва да е поне 8 символа и двете полета да съвпадат.</p>
+                            <p id="password-success" class="mt-2 text-sm text-green-600 hidden">Паролата е обновена (демо съобщение).</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between py-3">
+                        <div>
+                            <label class="text-sm font-medium text-gray-700">Дата на регистрация</label>
+                            <p class="text-gray-900 mt-1">15 януари 2025</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- GDPR - Data Export Section -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8 mb-6">
+                <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                    <svg class="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                    Експорт на данни (GDPR)
+                </h2>
+                
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                    <p class="text-sm text-blue-900">
+                        Можете да изтеглите всички ваши данни, съхранявани в системата. Експортът включва профилна информация, история на действията и други свързани данни.
+                    </p>
+                </div>
+                
+                <button class="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition flex items-center" type="button" onclick="handleDataExport()">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                    Експортирай моите данни
+                </button>
+                <p id="export-feedback" class="mt-3 text-sm text-green-600 hidden">
+                    Заявката за експорт на данни е приета (демо съобщение, без реален файл).
+                </p>
+            </div>
+            
+            <!-- GDPR - Delete/Deactivate Account Section -->
+            <div class="bg-white rounded-lg shadow-sm border border-red-200 p-8">
+                <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                    <svg class="w-6 h-6 mr-2 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    </svg>
+                    Изтриване на акаунт
+                </h2>
+                
+                <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                    <p class="text-sm text-red-900 font-medium mb-2">
+                        ⚠️ Внимание: Това действие е необратимо!
+                    </p>
+                    <p class="text-sm text-red-800">
+                        При изтриване на акаунта ще бъдат премахнати всички ваши данни от системата, включително профилна информация и история на действията. Това действие не може да бъде отменено.
+                    </p>
+                </div>
+                
+                <div class="space-y-3">
+                    <button 
+                        onclick="if(confirm('Сигурни ли сте, че искате да деактивирате акаунта си? Акаунтът ви няма да е достъпен, но данните ще бъдат запазени.')) alert('Акаунтът ще бъде деактивиран')"
+                        class="px-6 py-3 bg-orange-600 text-white rounded-lg font-semibold hover:bg-orange-700 transition flex items-center"
+                    >
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
+                        </svg>
+                        Деактивирай акаунта
+                    </button>
+                    
+                    <button 
+                        onclick="if(confirm('ПОСЛЕДНО ПРЕДУПРЕЖДЕНИЕ: Сигурни ли сте, че искате да изтриете акаунта си завинаги? Това действие е необратимо и всички ваши данни ще бъдат премахнати.')) alert('Акаунтът ще бъде изтрит')"
+                        class="px-6 py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition flex items-center"
+                    >
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                        Изтрий акаунта завинаги
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer id="site-footer"></footer>
+    <script>
+        function toggleEmailEdit() {
+            var section = document.getElementById('email-edit');
+            var input = document.getElementById('email-input');
+            var display = document.getElementById('email-value');
+            var error = document.getElementById('email-error');
+            var success = document.getElementById('email-success');
+            if (!section || !input || !display) return;
+            var isHidden = section.classList.contains('hidden');
+            if (isHidden) {
+                input.value = display.textContent.trim();
+                input.focus();
+            }
+            section.classList.toggle('hidden');
+            if (error) error.classList.add('hidden');
+            if (success) success.classList.add('hidden');
+        }
+
+        function saveEmailChange() {
+            var section = document.getElementById('email-edit');
+            var input = document.getElementById('email-input');
+            var display = document.getElementById('email-value');
+            var error = document.getElementById('email-error');
+            var success = document.getElementById('email-success');
+            if (!section || !input || !display) return;
+            var value = input.value.trim();
+            var isValid = value && value.indexOf('@') !== -1 && value.indexOf('.') !== -1;
+            if (!isValid) {
+                if (error) error.classList.remove('hidden');
+                if (success) success.classList.add('hidden');
+                return;
+            }
+            display.textContent = value;
+            section.classList.add('hidden');
+            if (error) error.classList.add('hidden');
+            if (success) success.classList.remove('hidden');
+        }
+
+        function cancelEmailChange() {
+            var section = document.getElementById('email-edit');
+            var error = document.getElementById('email-error');
+            var success = document.getElementById('email-success');
+            if (section) section.classList.add('hidden');
+            if (error) error.classList.add('hidden');
+            if (success) success.classList.add('hidden');
+        }
+
+        function togglePasswordEdit() {
+            var section = document.getElementById('password-edit');
+            var current = document.getElementById('current-password');
+            var next = document.getElementById('new-password');
+            var confirmField = document.getElementById('confirm-password');
+            var error = document.getElementById('password-error');
+            var success = document.getElementById('password-success');
+            if (!section) return;
+            var isHidden = section.classList.contains('hidden');
+            if (isHidden) {
+                if (current) current.value = '';
+                if (next) next.value = '';
+                if (confirmField) confirmField.value = '';
+                if (error) error.classList.add('hidden');
+                if (success) success.classList.add('hidden');
+            }
+            section.classList.toggle('hidden');
+        }
+
+        function savePasswordChange() {
+            var section = document.getElementById('password-edit');
+            var next = document.getElementById('new-password');
+            var confirmField = document.getElementById('confirm-password');
+            var error = document.getElementById('password-error');
+            var success = document.getElementById('password-success');
+            if (!section || !next || !confirmField) return;
+            var newValue = next.value;
+            var confirmValue = confirmField.value;
+            var isValid = newValue && newValue.length >= 8 && newValue === confirmValue;
+            if (!isValid) {
+                if (error) error.classList.remove('hidden');
+                if (success) success.classList.add('hidden');
+                return;
+            }
+            section.classList.add('hidden');
+            if (error) error.classList.add('hidden');
+            if (success) success.classList.remove('hidden');
+        }
+
+        function cancelPasswordChange() {
+            var section = document.getElementById('password-edit');
+            var error = document.getElementById('password-error');
+            var success = document.getElementById('password-success');
+            if (section) section.classList.add('hidden');
+            if (error) error.classList.add('hidden');
+            if (success) success.classList.add('hidden');
+        }
+
+        function handleDataExport() {
+            var feedback = document.getElementById('export-feedback');
+            if (feedback) feedback.classList.remove('hidden');
+        }
+    </script>
+    <script src="../layout.js"></script>
+</body>
+</html>

@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sandbox UI - Modal Dialogs - QA4Free</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col" data-layout="public" data-page="sandbox-modals">
+    <!-- Header -->
+    <header id="site-header"></header>
+
+    <!-- Main Content -->
+    <main class="flex-grow py-8">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex flex-col lg:flex-row gap-6">
+                <!-- Left Sidebar -->
+                <aside class="w-full lg:w-64 flex-shrink-0">
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sticky top-4">
+                        <h3 class="font-bold text-gray-900 mb-4">UI Elements</h3>
+                        <nav class="space-y-1">
+                            <a href="04-sandbox-textbox.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Text Box</a>
+                            <a href="17-sandbox-checkbox-radio.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Check Box &amp; Radio</a>
+                            <a href="18-sandbox-buttons.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Buttons</a>
+                            <a href="19-sandbox-links.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Links</a>
+                            <a href="20-sandbox-alerts.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Alerts</a>
+                            <a href="21-sandbox-modals.html" class="block px-3 py-2 bg-green-50 text-green-700 rounded-lg font-medium">Modal Dialogs</a>
+                            <a href="22-sandbox-upload-download.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Upload / Download</a>
+                            <a href="23-sandbox-date-picker.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Date Picker</a>
+                            <a href="24-sandbox-tabs.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Tabs</a>
+                            <a href="25-sandbox-select-menu.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Select Menu</a>
+                            <a href="26-sandbox-accordion.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Accordion</a>
+                            <a href="27-sandbox-slider.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Slider</a>
+                            <a href="28-sandbox-tooltips.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Tooltips</a>
+                            <a href="29-sandbox-autocomplete.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Auto Complete</a>
+                            <a href="30-sandbox-progress.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Progress Bar</a>
+                            <a href="31-sandbox-frames.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Frames / Windows</a>
+                            <a href="32-sandbox-dynamic-properties.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Dynamic Properties</a>
+                            <a href="33-sandbox-nested-frames.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Nested Frames</a>
+                            <a href="34-sandbox-menu.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Menu</a>
+                            <a href="35-sandbox-sortable.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Sortable</a>
+                            <a href="36-sandbox-selectable.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Selectable</a>
+                            <a href="37-sandbox-resizable.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Resizable</a>
+                            <a href="38-sandbox-droppable.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Droppable</a>
+                            <a href="39-sandbox-draggable.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Draggable</a>
+                            <a href="09-complex-form.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Complex Form</a>
+                            <a href="06-table-crud.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Table CRUD</a>
+                        </nav>
+                    </div>
+                </aside>
+
+                <!-- Main Content Area -->
+                <div class="flex-grow">
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8 relative">
+                        <!-- Page Header -->
+                        <div class="mb-8">
+                            <h1 class="text-3xl font-bold text-gray-900 mb-2">Modal Dialogs</h1>
+                            <p class="text-gray-600">Practice opening, closing and interacting with custom modal dialogs</p>
+                        </div>
+
+                        <div class="space-y-8">
+                            <!-- 1. Basic Info Modal -->
+                            <section class="border border-gray-200 rounded-lg p-6">
+                                <h2 class="font-semibold text-gray-900 mb-2">1. Basic Information Modal</h2>
+                                <p class="text-sm text-gray-600 mb-4">Open a simple informational modal and close it using the close button or the overlay.</p>
+                                <button
+                                    id="btn-open-basic-modal"
+                                    onclick="openModal('basic-modal')"
+                                    class="px-6 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition"
+                                >
+                                    Open Basic Modal
+                                </button>
+                            </section>
+
+                            <!-- 2. Confirmation Modal -->
+                            <section class="border border-gray-200 rounded-lg p-6">
+                                <h2 class="font-semibold text-gray-900 mb-2">2. Confirmation Modal</h2>
+                                <p class="text-sm text-gray-600 mb-4">Use a modal dialog to confirm a potentially dangerous action.</p>
+                                <button
+                                    id="btn-open-confirm-modal"
+                                    onclick="openModal('confirm-modal')"
+                                    class="px-6 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition"
+                                >
+                                    Open Confirm Modal
+                                </button>
+                                <p class="mt-4 text-sm text-gray-700">
+                                    Last decision: <span id="confirm-modal-result" class="font-semibold text-gray-900">None</span>
+                                </p>
+                            </section>
+
+                            <!-- 3. Scrollable Content Modal -->
+                            <section class="border border-gray-200 rounded-lg p-6">
+                                <h2 class="font-semibold text-gray-900 mb-2">3. Scrollable Content Modal</h2>
+                                <p class="text-sm text-gray-600 mb-4">Open a taller modal with scrollable content to test scrolling inside dialogs.</p>
+                                <button
+                                    id="btn-open-scroll-modal"
+                                    onclick="openModal('scroll-modal')"
+                                    class="px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition"
+                                >
+                                    Open Scrollable Modal
+                                </button>
+                            </section>
+                        </div>
+
+                        <!-- Basic Info Modal -->
+                        <div
+                            id="basic-modal"
+                            class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden"
+                            onclick="handleOverlayClick(event, 'basic-modal')"
+                        >
+                            <div class="bg-white rounded-lg shadow-xl max-w-lg w-full p-6 relative" onclick="event.stopPropagation()">
+                                <button
+                                    type="button"
+                                    aria-label="Close"
+                                    class="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
+                                    onclick="closeModal('basic-modal')"
+                                >
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                                <h3 class="text-xl font-semibold text-gray-900 mb-2">Basic Modal Title</h3>
+                                <p class="text-sm text-gray-600 mb-4">
+                                    This is a simple modal window. You can close it by clicking the close button, pressing the overlay, or using automation.
+                                </p>
+                                <button
+                                    id="btn-basic-modal-close"
+                                    onclick="closeModal('basic-modal')"
+                                    class="px-5 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition"
+                                >
+                                    Close Modal
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Confirmation Modal -->
+                        <div
+                            id="confirm-modal"
+                            class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden"
+                            onclick="handleOverlayClick(event, 'confirm-modal')"
+                        >
+                            <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6 relative" onclick="event.stopPropagation()">
+                                <button
+                                    type="button"
+                                    aria-label="Close"
+                                    class="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
+                                    onclick="closeModal('confirm-modal')"
+                                >
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                                <h3 class="text-xl font-semibold text-gray-900 mb-2">Confirm Action</h3>
+                                <p class="text-sm text-gray-600 mb-4">
+                                    Are you sure you want to deactivate this demo account? This action cannot be undone.
+                                </p>
+                                <div class="flex justify-end space-x-3 mt-4">
+                                    <button
+                                        id="btn-confirm-cancel"
+                                        onclick="setConfirmResult('Cancelled')"
+                                        class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        id="btn-confirm-accept"
+                                        onclick="setConfirmResult('Confirmed')"
+                                        class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+                                    >
+                                        Deactivate
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Scrollable Modal -->
+                        <div
+                            id="scroll-modal"
+                            class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden"
+                            onclick="handleOverlayClick(event, 'scroll-modal')"
+                        >
+                            <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col" onclick="event.stopPropagation()">
+                                <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+                                    <h3 class="text-lg font-semibold text-gray-900">Scrollable Modal Content</h3>
+                                    <button
+                                        type="button"
+                                        aria-label="Close"
+                                        class="text-gray-400 hover:text-gray-600"
+                                        onclick="closeModal('scroll-modal')"
+                                    >
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="px-6 py-4 overflow-y-auto space-y-3 text-sm text-gray-700">
+                                    <p>
+                                        This modal contains a lot of text to demonstrate scrolling behaviour inside a dialog. Automated tests can verify that the content is scrollable
+                                        and that the header/footer remain visible.
+                                    </p>
+                                    <p>
+                                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur commodo justo nec massa placerat, non luctus odio pulvinar. Nulla facilisi.
+                                    </p>
+                                    <p>
+                                        Sed at arcu a libero laoreet finibus. Curabitur ornare, lectus in fermentum dictum, libero ipsum porta est, in faucibus lectus justo in augue.
+                                    </p>
+                                    <p>
+                                        Integer feugiat, lectus eget gravida tincidunt, lacus est convallis risus, id tincidunt turpis massa non est. Suspendisse euismod mi sed nulla
+                                        suscipit, a tincidunt mi faucibus.
+                                    </p>
+                                    <p>
+                                        Phasellus eget massa sed turpis sollicitudin interdum. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae;
+                                        Integer sit amet diam in urna tincidunt consectetur.
+                                    </p>
+                                    <p>
+                                        Quisque sodales, est eget tempor cursus, nibh sem sollicitudin elit, nec tincidunt lacus leo nec justo. Vivamus facilisis arcu non velit
+                                        scelerisque, at rutrum urna pulvinar.
+                                    </p>
+                                </div>
+                                <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+                                    <button
+                                        id="btn-scroll-modal-close"
+                                        onclick="closeModal('scroll-modal')"
+                                        class="px-5 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition"
+                                    >
+                                        Close
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer id="site-footer"></footer>
+
+    <script>
+        function openModal(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.classList.remove('hidden');
+            }
+        }
+
+        function closeModal(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.classList.add('hidden');
+            }
+        }
+
+        function handleOverlayClick(event, id) {
+            if (event.target.id === id) {
+                closeModal(id);
+            }
+        }
+
+        function setConfirmResult(result) {
+            const label = document.getElementById('confirm-modal-result');
+            if (label) {
+                label.textContent = result;
+            }
+            closeModal('confirm-modal');
+        }
+
+        // Optional: close modal on Escape key
+        document.addEventListener('keydown', function (event) {
+            if (event.key !== 'Escape') return;
+
+            ['basic-modal', 'confirm-modal', 'scroll-modal'].forEach(function (id) {
+                const el = document.getElementById(id);
+                if (el && !el.classList.contains('hidden')) {
+                    closeModal(id);
+                }
+            });
+        });
+    </script>
+    <script src="layout.js"></script>
+    <script src="sandbox-nav.js"></script>
+</body>
+</html>

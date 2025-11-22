@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sandbox UI - Tooltips - QA4Free</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col" data-layout="public" data-page="sandbox-tooltips">
+    <!-- Header -->
+    <header id="site-header"></header>
+
+    <!-- Main Content -->
+    <main class="flex-grow py-8">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex flex-col lg:flex-row gap-6">
+                <!-- Left Sidebar -->
+                <aside class="w-full lg:w-64 flex-shrink-0">
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sticky top-4">
+                        <h3 class="font-bold text-gray-900 mb-4">UI Elements</h3>
+                        <nav class="space-y-1">
+                            <a href="04-sandbox-textbox.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Text Box</a>
+                            <a href="17-sandbox-checkbox-radio.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Check Box & Radio</a>
+                            <a href="18-sandbox-buttons.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Buttons</a>
+                            <a href="19-sandbox-links.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Links</a>
+                            <a href="20-sandbox-alerts.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Alerts</a>
+                            <a href="21-sandbox-modals.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Modal Dialogs</a>
+                            <a href="22-sandbox-upload-download.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Upload / Download</a>
+                            <a href="23-sandbox-date-picker.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Date Picker</a>
+                            <a href="24-sandbox-tabs.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Tabs</a>
+                            <a href="25-sandbox-select-menu.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Select Menu</a>
+                            <a href="26-sandbox-accordion.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Accordion</a>
+                            <a href="27-sandbox-slider.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Slider</a>
+                            <a href="28-sandbox-tooltips.html" class="block px-3 py-2 bg-green-50 text-green-700 rounded-lg font-medium">Tooltips</a>
+                            <a href="09-complex-form.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Complex Form</a>
+                            <a href="06-table-crud.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Table CRUD</a>
+                        </nav>
+                    </div>
+                </aside>
+
+                <!-- Main Content Area -->
+                <div class="flex-grow">
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+                        <!-- Page Header -->
+                        <div class="mb-8">
+                            <h1 class="text-3xl font-bold text-gray-900 mb-2">Tooltip Elements</h1>
+                            <p class="text-gray-600">Practice working with native and custom tooltips on various elements</p>
+                        </div>
+
+                        <div class="space-y-8">
+                            <!-- 1. Native Title Attribute -->
+                            <section class="border border-gray-200 rounded-lg p-6">
+                                <h2 class="font-semibold text-gray-900 mb-2">1. Native Browser Tooltip (title attribute)</h2>
+                                <p class="text-sm text-gray-600 mb-4">Hover the button to see the native browser tooltip.</p>
+                                <button
+                                    id="tooltip-native-button"
+                                    title="This is a native browser tooltip via the title attribute."
+                                    class="px-6 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition"
+                                >
+                                    Hover me
+                                </button>
+                            </section>
+
+                            <!-- 2. Custom Tooltip (icon) -->
+                            <section class="border border-gray-200 rounded-lg p-6">
+                                <h2 class="font-semibold text-gray-900 mb-2">2. Custom Tooltip (Icon)</h2>
+                                <p class="text-sm text-gray-600 mb-4">Hover the info icon to show a custom tooltip element.</p>
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-sm text-gray-700">Password requirements</span>
+                                    <span class="relative inline-block group">
+                                        <span
+                                            id="tooltip-icon"
+                                            class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-600 text-white text-xs cursor-default"
+                                        >
+                                            i
+                                        </span>
+                                        <span
+                                            id="tooltip-icon-content"
+                                            class="absolute left-1/2 -translate-x-1/2 mt-2 w-56 px-3 py-2 rounded-md bg-gray-900 text-xs text-gray-100 shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity"
+                                        >
+                                            Password must be at least 8 characters long and contain a number.
+                                        </span>
+                                    </span>
+                                </div>
+                            </section>
+
+                            <!-- 3. Tooltip on Form Field -->
+                            <section class="border border-gray-200 rounded-lg p-6">
+                                <h2 class="font-semibold text-gray-900 mb-2">3. Tooltip on Form Field</h2>
+                                <p class="text-sm text-gray-600 mb-4">Custom tooltip triggered when hovering a help icon next to an input label.</p>
+                                <div class="space-y-2">
+                                    <label for="tooltip-email" class="flex items-center text-sm font-medium text-gray-700">
+                                        Email
+                                        <span class="relative inline-block ml-2 group">
+                                            <button
+                                                id="tooltip-email-icon"
+                                                type="button"
+                                                class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-gray-300 text-gray-700 text-[10px] focus:outline-none"
+                                            >
+                                                ?
+                                            </button>
+                                            <span
+                                                id="tooltip-email-content"
+                                                class="absolute left-1/2 -translate-x-1/2 mt-2 w-56 px-3 py-2 rounded-md bg-gray-900 text-xs text-gray-100 shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity"
+                                            >
+                                                Use a valid email format, e.g. user@example.com.
+                                            </span>
+                                        </span>
+                                    </label>
+                                    <input
+                                        id="tooltip-email"
+                                        type="email"
+                                        class="w-full md:w-80 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                        placeholder="user@example.com"
+                                    />
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer id="site-footer"></footer>
+    <script src="layout.js"></script>
+    <script src="sandbox-nav.js"></script>
+</body>
+</html>

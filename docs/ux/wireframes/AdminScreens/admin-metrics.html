@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Metrics Overview - QA4Free</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; }
+        .chart-bar {
+            transition: all 0.3s ease;
+        }
+        .chart-bar:hover {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col" data-layout="admin" data-page="admin-metrics">
+    <!-- Header -->
+    <header id="site-header"></header>
+
+    <!-- Main Content -->
+    <main class="flex-grow py-8">
+        <div class="max-w-7xl mx-auto px-4">
+            <!-- Breadcrumbs -->
+            <div class="flex items-center text-sm text-gray-500 mb-6">
+                <a href="admin-dashboard.html" class="hover:text-green-600">Admin</a>
+                <svg class="w-4 h-4 mx-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+                <span class="text-gray-900">Metrics Overview</span>
+            </div>
+            
+            <!-- Page Header -->
+            <div class="flex items-center justify-between mb-8">
+                <div>
+                    <h1 class="text-4xl font-bold text-gray-900 mb-2">Metrics Overview</h1>
+                    <p class="text-gray-600">System usage statistics and performance metrics</p>
+                </div>
+                <div class="flex space-x-3">
+                    <select class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 text-sm">
+                        <option>Last 7 days</option>
+                        <option>Last 30 days</option>
+                        <option>Last 3 months</option>
+                        <option>Last year</option>
+                    </select>
+                    <button class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm font-medium flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                        </svg>
+                        Export
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Key Metrics Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <!-- Total Users -->
+                <div class="bg-white rounded-lg border border-gray-200 p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-medium text-gray-600">Registered Users</h3>
+                        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="flex items-end justify-between">
+                        <div>
+                            <p class="text-3xl font-bold text-gray-900">1,247</p>
+                            <p class="text-sm text-green-600 mt-1">+12% vs last period</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Page Views -->
+                <div class="bg-white rounded-lg border border-gray-200 p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-medium text-gray-600">Total Page Views</h3>
+                        <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="flex items-end justify-between">
+                        <div>
+                            <p class="text-3xl font-bold text-gray-900">45,892</p>
+                            <p class="text-sm text-green-600 mt-1">+8.3% vs last period</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Wiki Articles -->
+                <div class="bg-white rounded-lg border border-gray-200 p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-medium text-gray-600">Wiki Articles</h3>
+                        <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="flex items-end justify-between">
+                        <div>
+                            <p class="text-3xl font-bold text-gray-900">87</p>
+                            <p class="text-sm text-blue-600 mt-1">42 active, 45 inactive</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Avg Session Time -->
+                <div class="bg-white rounded-lg border border-gray-200 p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-medium text-gray-600">Avg. Session Time</h3>
+                        <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="flex items-end justify-between">
+                        <div>
+                            <p class="text-3xl font-bold text-gray-900">8:24</p>
+                            <p class="text-sm text-orange-600 mt-1">minutes per session</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Charts Row -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <!-- User Growth Chart -->
+                <div class="bg-white rounded-lg border border-gray-200 p-6">
+                    <h3 class="text-lg font-bold text-gray-900 mb-6">User Registrations (Last 7 Days)</h3>
+                    <div class="flex items-end justify-between h-48 px-4">
+                        <div class="flex flex-col items-center flex-1">
+                            <div class="w-full bg-blue-500 rounded-t chart-bar" style="height: 45%;"></div>
+                            <span class="text-xs text-gray-600 mt-2">Mon</span>
+                            <span class="text-xs font-semibold text-gray-900">23</span>
+                        </div>
+                        <div class="flex flex-col items-center flex-1">
+                            <div class="w-full bg-blue-500 rounded-t chart-bar" style="height: 60%;"></div>
+                            <span class="text-xs text-gray-600 mt-2">Tue</span>
+                            <span class="text-xs font-semibold text-gray-900">31</span>
+                        </div>
+                        <div class="flex flex-col items-center flex-1">
+                            <div class="w-full bg-blue-500 rounded-t chart-bar" style="height: 75%;"></div>
+                            <span class="text-xs text-gray-600 mt-2">Wed</span>
+                            <span class="text-xs font-semibold text-gray-900">39</span>
+                        </div>
+                        <div class="flex flex-col items-center flex-1">
+                            <div class="w-full bg-blue-500 rounded-t chart-bar" style="height: 55%;"></div>
+                            <span class="text-xs text-gray-600 mt-2">Thu</span>
+                            <span class="text-xs font-semibold text-gray-900">28</span>
+                        </div>
+                        <div class="flex flex-col items-center flex-1">
+                            <div class="w-full bg-blue-500 rounded-t chart-bar" style="height: 90%;"></div>
+                            <span class="text-xs text-gray-600 mt-2">Fri</span>
+                            <span class="text-xs font-semibold text-gray-900">47</span>
+                        </div>
+                        <div class="flex flex-col items-center flex-1">
+                            <div class="w-full bg-blue-500 rounded-t chart-bar" style="height: 40%;"></div>
+                            <span class="text-xs text-gray-600 mt-2">Sat</span>
+                            <span class="text-xs font-semibold text-gray-900">21</span>
+                        </div>
+                        <div class="flex flex-col items-center flex-1">
+                            <div class="w-full bg-blue-500 rounded-t chart-bar" style="height: 35%;"></div>
+                            <span class="text-xs text-gray-600 mt-2">Sun</span>
+                            <span class="text-xs font-semibold text-gray-900">18</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Page Views Chart -->
+                <div class="bg-white rounded-lg border border-gray-200 p-6">
+                    <h3 class="text-lg font-bold text-gray-900 mb-6">Page Views (Last 7 Days)</h3>
+                    <div class="flex items-end justify-between h-48 px-4">
+                        <div class="flex flex-col items-center flex-1">
+                            <div class="w-full bg-green-500 rounded-t chart-bar" style="height: 65%;"></div>
+                            <span class="text-xs text-gray-600 mt-2">Mon</span>
+                            <span class="text-xs font-semibold text-gray-900">6.2k</span>
+                        </div>
+                        <div class="flex flex-col items-center flex-1">
+                            <div class="w-full bg-green-500 rounded-t chart-bar" style="height: 75%;"></div>
+                            <span class="text-xs text-gray-600 mt-2">Tue</span>
+                            <span class="text-xs font-semibold text-gray-900">7.1k</span>
+                        </div>
+                        <div class="flex flex-col items-center flex-1">
+                            <div class="w-full bg-green-500 rounded-t chart-bar" style="height: 85%;"></div>
+                            <span class="text-xs text-gray-600 mt-2">Wed</span>
+                            <span class="text-xs font-semibold text-gray-900">8.1k</span>
+                        </div>
+                        <div class="flex flex-col items-center flex-1">
+                            <div class="w-full bg-green-500 rounded-t chart-bar" style="height: 70%;"></div>
+                            <span class="text-xs text-gray-600 mt-2">Thu</span>
+                            <span class="text-xs font-semibold text-gray-900">6.7k</span>
+                        </div>
+                        <div class="flex flex-col items-center flex-1">
+                            <div class="w-full bg-green-500 rounded-t chart-bar" style="height: 95%;"></div>
+                            <span class="text-xs text-gray-600 mt-2">Fri</span>
+                            <span class="text-xs font-semibold text-gray-900">9.0k</span>
+                        </div>
+                        <div class="flex flex-col items-center flex-1">
+                            <div class="w-full bg-green-500 rounded-t chart-bar" style="height: 50%;"></div>
+                            <span class="text-xs text-gray-600 mt-2">Sat</span>
+                            <span class="text-xs font-semibold text-gray-900">4.8k</span>
+                        </div>
+                        <div class="flex flex-col items-center flex-1">
+                            <div class="w-full bg-green-500 rounded-t chart-bar" style="height: 45%;"></div>
+                            <span class="text-xs text-gray-600 mt-2">Sun</span>
+                            <span class="text-xs font-semibold text-gray-900">4.3k</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Top Content & Traffic Sources -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Top Wiki Articles -->
+                <div class="bg-white rounded-lg border border-gray-200 p-6">
+                    <h3 class="text-lg font-bold text-gray-900 mb-6">Top Wiki Articles (By Views)</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between pb-4 border-b border-gray-100">
+                            <div class="flex-1">
+                                <h4 class="font-medium text-gray-900 mb-1">API Testing Fundamentals</h4>
+                                <p class="text-xs text-gray-500">api-testing-fundamentals</p>
+                            </div>
+                            <div class="text-right ml-4">
+                                <p class="font-semibold text-gray-900">3,452</p>
+                                <p class="text-xs text-gray-500">views</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between pb-4 border-b border-gray-100">
+                            <div class="flex-1">
+                                <h4 class="font-medium text-gray-900 mb-1">Selenium UI Automation</h4>
+                                <p class="text-xs text-gray-500">selenium-ui-automation</p>
+                            </div>
+                            <div class="text-right ml-4">
+                                <p class="font-semibold text-gray-900">2,847</p>
+                                <p class="text-xs text-gray-500">views</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between pb-4 border-b border-gray-100">
+                            <div class="flex-1">
+                                <h4 class="font-medium text-gray-900 mb-1">Manual Testing Intro</h4>
+                                <p class="text-xs text-gray-500">manual-testing-intro</p>
+                            </div>
+                            <div class="text-right ml-4">
+                                <p class="font-semibold text-gray-900">2,591</p>
+                                <p class="text-xs text-gray-500">views</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between pb-4 border-b border-gray-100">
+                            <div class="flex-1">
+                                <h4 class="font-medium text-gray-900 mb-1">Test Case Design</h4>
+                                <p class="text-xs text-gray-500">test-case-design</p>
+                            </div>
+                            <div class="text-right ml-4">
+                                <p class="font-semibold text-gray-900">1,923</p>
+                                <p class="text-xs text-gray-500">views</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between">
+                            <div class="flex-1">
+                                <h4 class="font-medium text-gray-900 mb-1">Performance Testing</h4>
+                                <p class="text-xs text-gray-500">performance-testing-basics</p>
+                            </div>
+                            <div class="text-right ml-4">
+                                <p class="font-semibold text-gray-900">1,658</p>
+                                <p class="text-xs text-gray-500">views</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Traffic Sources -->
+                <div class="bg-white rounded-lg border border-gray-200 p-6">
+                    <h3 class="text-lg font-bold text-gray-900 mb-6">Traffic Sources</h3>
+                    <div class="space-y-5">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm font-medium text-gray-700">Direct</span>
+                                <span class="text-sm font-semibold text-gray-900">45%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-blue-500 h-2 rounded-full" style="width: 45%;"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm font-medium text-gray-700">Search Engines</span>
+                                <span class="text-sm font-semibold text-gray-900">32%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-green-500 h-2 rounded-full" style="width: 32%;"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm font-medium text-gray-700">Social Media</span>
+                                <span class="text-sm font-semibold text-gray-900">15%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-purple-500 h-2 rounded-full" style="width: 15%;"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm font-medium text-gray-700">Referrals</span>
+                                <span class="text-sm font-semibold text-gray-900">8%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-orange-500 h-2 rounded-full" style="width: 8%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 pt-6 border-t border-gray-200">
+                        <div class="grid grid-cols-2 gap-4 text-center">
+                            <div>
+                                <p class="text-2xl font-bold text-gray-900">2,847</p>
+                                <p class="text-xs text-gray-600">Total Sessions</p>
+                            </div>
+                            <div>
+                                <p class="text-2xl font-bold text-gray-900">63%</p>
+                                <p class="text-xs text-gray-600">Bounce Rate</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer id="site-footer"></footer>
+    <script src="../layout.js"></script>
+</body>
+</html>
