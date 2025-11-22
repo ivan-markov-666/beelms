@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sandbox UI - Accordion - QA4Free</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col" data-layout="public" data-page="sandbox-accordion">
+    <!-- Header -->
+    <header id="site-header"></header>
+
+    <!-- Main Content -->
+    <main class="flex-grow py-8">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex flex-col lg:flex-row gap-6">
+                <!-- Left Sidebar -->
+                <aside class="w-full lg:w-64 flex-shrink-0">
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sticky top-4">
+                        <h3 class="font-bold text-gray-900 mb-4">UI Elements</h3>
+                        <nav class="space-y-1">
+                            <a href="04-sandbox-textbox.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Text Box</a>
+                            <a href="17-sandbox-checkbox-radio.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Check Box & Radio</a>
+                            <a href="18-sandbox-buttons.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Buttons</a>
+                            <a href="19-sandbox-links.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Links</a>
+                            <a href="20-sandbox-alerts.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Alerts</a>
+                            <a href="21-sandbox-modals.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Modal Dialogs</a>
+                            <a href="22-sandbox-upload-download.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Upload / Download</a>
+                            <a href="23-sandbox-date-picker.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Date Picker</a>
+                            <a href="24-sandbox-tabs.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Tabs</a>
+                            <a href="25-sandbox-select-menu.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Select Menu</a>
+                            <a href="26-sandbox-accordion.html" class="block px-3 py-2 bg-green-50 text-green-700 rounded-lg font-medium">Accordion</a>
+                            <a href="27-sandbox-slider.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Slider</a>
+                            <a href="28-sandbox-tooltips.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Tooltips</a>
+                            <a href="09-complex-form.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Complex Form</a>
+                            <a href="06-table-crud.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Table CRUD</a>
+                        </nav>
+                    </div>
+                </aside>
+
+                <!-- Main Content Area -->
+                <div class="flex-grow">
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+                        <!-- Page Header -->
+                        <div class="mb-8">
+                            <h1 class="text-3xl font-bold text-gray-900 mb-2">Accordion Components</h1>
+                            <p class="text-gray-600">Practice expanding/collapsing content and validating accordion behaviour</p>
+                        </div>
+
+                        <div class="space-y-8">
+                            <!-- 1. Simple Accordion (Multiple Open) -->
+                            <section id="accordion-simple" class="border border-gray-200 rounded-lg p-6">
+                                <h2 class="font-semibold text-gray-900 mb-4">1. Simple Accordion (Multiple Sections Can Be Open)</h2>
+                                <div class="space-y-2">
+                                    <button
+                                        id="acc-simple-1-header"
+                                        class="w-full flex justify-between items-center px-4 py-2 bg-gray-50 rounded-lg text-left text-sm font-medium text-gray-900 hover:bg-gray-100"
+                                        type="button"
+                                        onclick="toggleAccordion('acc-simple-1')"
+                                    >
+                                        <span>What is QA4Free?</span>
+                                        <span class="ml-2 text-gray-500">+</span>
+                                    </button>
+                                    <div
+                                        id="acc-simple-1-body"
+                                        class="hidden px-4 pb-3 text-sm text-gray-700"
+                                    >
+                                        QA4Free is a demo project for practicing QA skills on realistic UI and API scenarios.
+                                    </div>
+
+                                    <button
+                                        id="acc-simple-2-header"
+                                        class="w-full flex justify-between items-center px-4 py-2 bg-gray-50 rounded-lg text-left text-sm font-medium text-gray-900 hover:bg-gray-100"
+                                        type="button"
+                                        onclick="toggleAccordion('acc-simple-2')"
+                                    >
+                                        <span>What can I test here?</span>
+                                        <span class="ml-2 text-gray-500">+</span>
+                                    </button>
+                                    <div
+                                        id="acc-simple-2-body"
+                                        class="hidden px-4 pb-3 text-sm text-gray-700"
+                                    >
+                                        You can test forms, tables, navigation, alerts, modals, file uploads, date pickers and more.
+                                    </div>
+                                </div>
+                            </section>
+
+                            <!-- 2. Single-open Accordion -->
+                            <section id="accordion-single" class="border border-gray-200 rounded-lg p-6">
+                                <h2 class="font-semibold text-gray-900 mb-4">2. Single-open Accordion (Only One Section Open)</h2>
+                                <div class="space-y-2">
+                                    <button
+                                        id="acc-single-1-header"
+                                        class="w-full flex justify-between items-center px-4 py-2 bg-gray-50 rounded-lg text-left text-sm font-medium text-gray-900 hover:bg-gray-100"
+                                        type="button"
+                                        data-group="acc-single"
+                                        onclick="toggleSingleAccordion('acc-single-1')"
+                                    >
+                                        <span>Step 1: Prepare test data</span>
+                                        <span class="ml-2 text-gray-500">+</span>
+                                    </button>
+                                    <div id="acc-single-1-body" class="hidden px-4 pb-3 text-sm text-gray-700">
+                                        Identify input values, edge cases and expected results for each scenario.
+                                    </div>
+
+                                    <button
+                                        id="acc-single-2-header"
+                                        class="w-full flex justify-between items-center px-4 py-2 bg-gray-50 rounded-lg text-left text-sm font-medium text-gray-900 hover:bg-gray-100"
+                                        type="button"
+                                        data-group="acc-single"
+                                        onclick="toggleSingleAccordion('acc-single-2')"
+                                    >
+                                        <span>Step 2: Execute tests</span>
+                                        <span class="ml-2 text-gray-500">+</span>
+                                    </button>
+                                    <div id="acc-single-2-body" class="hidden px-4 pb-3 text-sm text-gray-700">
+                                        Run tests manually or via automation scripts against the Sandbox UI.
+                                    </div>
+
+                                    <button
+                                        id="acc-single-3-header"
+                                        class="w-full flex justify-between items-center px-4 py-2 bg-gray-50 rounded-lg text-left text-sm font-medium text-gray-900 hover:bg-gray-100"
+                                        type="button"
+                                        data-group="acc-single"
+                                        onclick="toggleSingleAccordion('acc-single-3')"
+                                    >
+                                        <span>Step 3: Report results</span>
+                                        <span class="ml-2 text-gray-500">+</span>
+                                    </button>
+                                    <div id="acc-single-3-body" class="hidden px-4 pb-3 text-sm text-gray-700">
+                                        Document found issues, screenshots and reproduction steps.
+                                    </div>
+                                </div>
+                            </section>
+
+                            <!-- 3. Nested Content Accordion -->
+                            <section id="accordion-nested" class="border border-gray-200 rounded-lg p-6">
+                                <h2 class="font-semibold text-gray-900 mb-4">3. Accordion with Nested Content</h2>
+                                <button
+                                    id="acc-nested-1-header"
+                                    class="w-full flex justify-between items-center px-4 py-2 bg-gray-50 rounded-lg text-left text-sm font-medium text-gray-900 hover:bg-gray-100"
+                                    type="button"
+                                    onclick="toggleAccordion('acc-nested-1')"
+                                >
+                                    <span>Sample test checklist</span>
+                                    <span class="ml-2 text-gray-500">+</span>
+                                </button>
+                                <div id="acc-nested-1-body" class="hidden px-4 pb-3 text-sm text-gray-700">
+                                    <ul class="list-disc list-inside space-y-1">
+                                        <li>Verify all accordion sections are collapsed by default (where specified).</li>
+                                        <li>Verify clicking a header toggles only its own content.</li>
+                                        <li>Verify keyboard navigation (Tab/Enter/Space) works where applicable.</li>
+                                        <li>Verify content is visible/hidden correctly after multiple toggles.</li>
+                                    </ul>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer id="site-footer"></footer>
+
+    <script>
+        function toggleAccordion(baseId) {
+            var body = document.getElementById(baseId + '-body');
+            if (!body) return;
+            body.classList.toggle('hidden');
+        }
+
+        function toggleSingleAccordion(baseId) {
+            var ids = ['acc-single-1', 'acc-single-2', 'acc-single-3'];
+            ids.forEach(function (id) {
+                var body = document.getElementById(id + '-body');
+                if (!body) return;
+                if (id === baseId) {
+                    body.classList.toggle('hidden');
+                } else {
+                    body.classList.add('hidden');
+                }
+            });
+        }
+    </script>
+    <script src="layout.js"></script>
+    <script src="sandbox-nav.js"></script>
+</body>
+</html>

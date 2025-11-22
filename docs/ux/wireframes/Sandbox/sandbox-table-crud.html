@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Table CRUD & Pagination - QA4Free</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col" data-layout="public" data-page="table-crud">
+    <!-- Header -->
+    <header id="site-header"></header>
+
+    <!-- Main Content -->
+    <main class="flex-grow py-8">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex flex-col lg:flex-row gap-6">
+                <!-- Left Sidebar -->
+                <aside class="w-full lg:w-64 flex-shrink-0">
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sticky top-4">
+                        <h3 class="font-bold text-gray-900 mb-4">UI Elements</h3>
+                        <nav class="space-y-1">
+                            <a href="04-sandbox-textbox.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Text Box</a>
+                            <a href="17-sandbox-checkbox-radio.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Check Box &amp; Radio</a>
+                            <a href="18-sandbox-buttons.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Buttons</a>
+                            <a href="19-sandbox-links.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Links</a>
+                            <a href="20-sandbox-alerts.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Alerts</a>
+                            <a href="21-sandbox-modals.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Modal Dialogs</a>
+                            <a href="22-sandbox-upload-download.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Upload / Download</a>
+                            <a href="23-sandbox-date-picker.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Date Picker</a>
+                            <a href="24-sandbox-tabs.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Tabs</a>
+                            <a href="25-sandbox-select-menu.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Select Menu</a>
+                            <a href="26-sandbox-accordion.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Accordion</a>
+                            <a href="27-sandbox-slider.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Slider</a>
+                            <a href="28-sandbox-tooltips.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Tooltips</a>
+                            <a href="29-sandbox-autocomplete.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Auto Complete</a>
+                            <a href="30-sandbox-progress.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Progress Bar</a>
+                            <a href="31-sandbox-frames.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Frames / Windows</a>
+                            <a href="32-sandbox-dynamic-properties.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Dynamic Properties</a>
+                            <a href="33-sandbox-nested-frames.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Nested Frames</a>
+                            <a href="34-sandbox-menu.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Menu</a>
+                            <a href="35-sandbox-sortable.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Sortable</a>
+                            <a href="36-sandbox-selectable.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Selectable</a>
+                            <a href="37-sandbox-resizable.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Resizable</a>
+                            <a href="38-sandbox-droppable.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Droppable</a>
+                            <a href="39-sandbox-draggable.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Draggable</a>
+                            <a href="09-complex-form.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">Complex Form</a>
+                            <a href="06-table-crud.html" class="block px-3 py-2 bg-green-50 text-green-700 rounded-lg font-medium">Table CRUD</a>
+                        </nav>
+                    </div>
+                </aside>
+                
+                <!-- Main Content -->
+                <div class="flex-grow">
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+                        <!-- Header -->
+                        <div class="mb-8">
+                            <h1 class="text-3xl font-bold text-gray-900 mb-2">Table with CRUD & Pagination</h1>
+                            <p class="text-gray-600">Practice table interactions: add, edit, delete records and navigate through pages</p>
+                        </div>
+                        
+                        <!-- Add New Record Form -->
+                        <div class="border border-gray-200 rounded-lg p-6 mb-6 bg-gray-50">
+                            <h3 class="font-semibold text-gray-900 mb-4">Add New Record</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1" for="add-name">Name</label>
+                                    <input 
+                                        type="text" 
+                                        id="add-name"
+                                        placeholder="Enter name"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                    >
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1" for="add-email">Email</label>
+                                    <input 
+                                        type="email" 
+                                        id="add-email"
+                                        placeholder="Enter email"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                    >
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1" for="add-role">Role</label>
+                                    <select 
+                                        id="add-role"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                    >
+                                        <option value="">Select role</option>
+                                        <option value="user">User</option>
+                                        <option value="admin">Admin</option>
+                                        <option value="moderator">Moderator</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button 
+                                class="mt-4 px-6 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition"
+                                onclick="alert('Record would be added to table')"
+                            >
+                                Add Row
+                            </button>
+                        </div>
+                        
+                        <!-- Table -->
+                        <div class="overflow-x-auto">
+                            <table class="w-full border-collapse">
+                                <thead>
+                                    <tr class="bg-gray-50 border-b border-gray-200">
+                                        <th class="text-left px-4 py-3 text-sm font-semibold text-gray-700">ID</th>
+                                        <th class="text-left px-4 py-3 text-sm font-semibold text-gray-700">Name</th>
+                                        <th class="text-left px-4 py-3 text-sm font-semibold text-gray-700">Email</th>
+                                        <th class="text-left px-4 py-3 text-sm font-semibold text-gray-700">Role</th>
+                                        <th class="text-right px-4 py-3 text-sm font-semibold text-gray-700">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Row 1 -->
+                                    <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                        <td class="px-4 py-3 text-sm text-gray-900">1</td>
+                                        <td class="px-4 py-3 text-sm text-gray-900">John Smith</td>
+                                        <td class="px-4 py-3 text-sm text-gray-600"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="96fcf9fef8b8e5fbffe2fed6f3eef7fbe6faf3b8f5f9fb">[email&#160;protected]</a></td>
+                                        <td class="px-4 py-3 text-sm">
+                                            <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">User</span>
+                                        </td>
+                                        <td class="px-4 py-3 text-sm text-right">
+                                            <button class="text-blue-600 hover:text-blue-700 mr-3" onclick="alert('Edit record #1')">Edit</button>
+                                            <button class="text-red-600 hover:text-red-700" onclick="confirm('Delete this record?')">Delete</button>
+                                        </td>
+                                    </tr>
+                                    
+                                    <!-- Row 2 -->
+                                    <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                        <td class="px-4 py-3 text-sm text-gray-900">2</td>
+                                        <td class="px-4 py-3 text-sm text-gray-900">Maria Garcia</td>
+                                        <td class="px-4 py-3 text-sm text-gray-600"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="5e333f2c373f70391e3b263f332e323b703d3133">[email&#160;protected]</a></td>
+                                        <td class="px-4 py-3 text-sm">
+                                            <span class="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-medium">Admin</span>
+                                        </td>
+                                        <td class="px-4 py-3 text-sm text-right">
+                                            <button class="text-blue-600 hover:text-blue-700 mr-3" onclick="alert('Edit record #2')">Edit</button>
+                                            <button class="text-red-600 hover:text-red-700" onclick="confirm('Delete this record?')">Delete</button>
+                                        </td>
+                                    </tr>
+                                    
+                                    <!-- Row 3 -->
+                                    <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                        <td class="px-4 py-3 text-sm text-gray-900">3</td>
+                                        <td class="px-4 py-3 text-sm text-gray-900">Alex Johnson</td>
+                                        <td class="px-4 py-3 text-sm text-gray-600"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="ed8c818895c387ad88958c809d8188c38e8280">[email&#160;protected]</a></td>
+                                        <td class="px-4 py-3 text-sm">
+                                            <span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium">Moderator</span>
+                                        </td>
+                                        <td class="px-4 py-3 text-sm text-right">
+                                            <button class="text-blue-600 hover:text-blue-700 mr-3" onclick="alert('Edit record #3')">Edit</button>
+                                            <button class="text-red-600 hover:text-red-700" onclick="confirm('Delete this record?')">Delete</button>
+                                        </td>
+                                    </tr>
+                                    
+                                    <!-- Row 4 -->
+                                    <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                        <td class="px-4 py-3 text-sm text-gray-900">4</td>
+                                        <td class="px-4 py-3 text-sm text-gray-900">Sarah Lee</td>
+                                        <td class="px-4 py-3 text-sm text-gray-600"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="33405241525b1d5f565673564b525e435f561d505c5e">[email&#160;protected]</a></td>
+                                        <td class="px-4 py-3 text-sm">
+                                            <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">User</span>
+                                        </td>
+                                        <td class="px-4 py-3 text-sm text-right">
+                                            <button class="text-blue-600 hover:text-blue-700 mr-3" onclick="alert('Edit record #4')">Edit</button>
+                                            <button class="text-red-600 hover:text-red-700" onclick="confirm('Delete this record?')">Delete</button>
+                                        </td>
+                                    </tr>
+                                    
+                                    <!-- Row 5 -->
+                                    <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                        <td class="px-4 py-3 text-sm text-gray-900">5</td>
+                                        <td class="px-4 py-3 text-sm text-gray-900">Michael Brown</td>
+                                        <td class="px-4 py-3 text-sm text-gray-600"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="127f3c70607d657c52776a737f627e773c717d7f">[email&#160;protected]</a></td>
+                                        <td class="px-4 py-3 text-sm">
+                                            <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">User</span>
+                                        </td>
+                                        <td class="px-4 py-3 text-sm text-right">
+                                            <button class="text-blue-600 hover:text-blue-700 mr-3" onclick="alert('Edit record #5')">Edit</button>
+                                            <button class="text-red-600 hover:text-red-700" onclick="confirm('Delete this record?')">Delete</button>
+                                        </td>
+                                    </tr>
+                                    
+                                    <!-- Row 6 -->
+                                    <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                        <td class="px-4 py-3 text-sm text-gray-900">6</td>
+                                        <td class="px-4 py-3 text-sm text-gray-900">Emma Wilson</td>
+                                        <td class="px-4 py-3 text-sm text-gray-600"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="f89d959599d68fb89d80999588949dd69b9795">[email&#160;protected]</a></td>
+                                        <td class="px-4 py-3 text-sm">
+                                            <span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium">Moderator</span>
+                                        </td>
+                                        <td class="px-4 py-3 text-sm text-right">
+                                            <button class="text-blue-600 hover:text-blue-700 mr-3" onclick="alert('Edit record #6')">Edit</button>
+                                            <button class="text-red-600 hover:text-red-700" onclick="confirm('Delete this record?')">Delete</button>
+                                        </td>
+                                    </tr>
+                                    
+                                    <!-- Row 7 -->
+                                    <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                        <td class="px-4 py-3 text-sm text-gray-900">7</td>
+                                        <td class="px-4 py-3 text-sm text-gray-900">David Chen</td>
+                                        <td class="px-4 py-3 text-sm text-gray-600"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="9afeb4f9f2fff4daffe2fbf7eaf6ffb4f9f5f7">[email&#160;protected]</a></td>
+                                        <td class="px-4 py-3 text-sm">
+                                            <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">User</span>
+                                        </td>
+                                        <td class="px-4 py-3 text-sm text-right">
+                                            <button class="text-blue-600 hover:text-blue-700 mr-3" onclick="alert('Edit record #7')">Edit</button>
+                                            <button class="text-red-600 hover:text-red-700" onclick="confirm('Delete this record?')">Delete</button>
+                                        </td>
+                                    </tr>
+                                    
+                                    <!-- Row 8 -->
+                                    <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                        <td class="px-4 py-3 text-sm text-gray-900">8</td>
+                                        <td class="px-4 py-3 text-sm text-gray-900">Lisa Anderson</td>
+                                        <td class="px-4 py-3 text-sm text-gray-600"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="fc90958f9dd29dbc99849d918c9099d29f9391">[email&#160;protected]</a></td>
+                                        <td class="px-4 py-3 text-sm">
+                                            <span class="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-medium">Admin</span>
+                                        </td>
+                                        <td class="px-4 py-3 text-sm text-right">
+                                            <button class="text-blue-600 hover:text-blue-700 mr-3" onclick="alert('Edit record #8')">Edit</button>
+                                            <button class="text-red-600 hover:text-red-700" onclick="confirm('Delete this record?')">Delete</button>
+                                        </td>
+                                    </tr>
+                                    
+                                    <!-- Row 9 -->
+                                    <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                        <td class="px-4 py-3 text-sm text-gray-900">9</td>
+                                        <td class="px-4 py-3 text-sm text-gray-900">Tom Martinez</td>
+                                        <td class="px-4 py-3 text-sm text-gray-600"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="9eeaf1f3b0f3defbe6fff3eef2fbb0fdf1f3">[email&#160;protected]</a></td>
+                                        <td class="px-4 py-3 text-sm">
+                                            <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">User</span>
+                                        </td>
+                                        <td class="px-4 py-3 text-sm text-right">
+                                            <button class="text-blue-600 hover:text-blue-700 mr-3" onclick="alert('Edit record #9')">Edit</button>
+                                            <button class="text-red-600 hover:text-red-700" onclick="confirm('Delete this record?')">Delete</button>
+                                        </td>
+                                    </tr>
+                                    
+                                    <!-- Row 10 -->
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-4 py-3 text-sm text-gray-900">10</td>
+                                        <td class="px-4 py-3 text-sm text-gray-900">Nina Patel</td>
+                                        <td class="px-4 py-3 text-sm text-gray-600"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="19777077783769597c61787469757c377a7674">[email&#160;protected]</a></td>
+                                        <td class="px-4 py-3 text-sm">
+                                            <span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium">Moderator</span>
+                                        </td>
+                                        <td class="px-4 py-3 text-sm text-right">
+                                            <button class="text-blue-600 hover:text-blue-700 mr-3" onclick="alert('Edit record #10')">Edit</button>
+                                            <button class="text-red-600 hover:text-red-700" onclick="confirm('Delete this record?')">Delete</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Pagination -->
+                        <div class="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
+                            <p class="text-sm text-gray-600">
+                                Showing <span class="font-semibold">1-10</span> of <span class="font-semibold">24</span> results
+                            </p>
+                            <div class="flex items-center space-x-2">
+                                <button class="px-3 py-2 border border-gray-300 rounded-lg text-gray-500 hover:bg-gray-50 transition" disabled>
+                                    Previous
+                                </button>
+                                <button class="px-3 py-2 bg-green-600 text-white rounded-lg font-semibold">
+                                    1
+                                </button>
+                                <button class="px-3 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition">
+                                    2
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer id="site-footer"></footer>
+    <script src="layout.js"></script>
+    <script src="sandbox-nav.js"></script>
+</body>
+</html>
