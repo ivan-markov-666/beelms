@@ -45,7 +45,7 @@ erDiagram
     WIKI_ARTICLE {
         uuid id PK
         string slug           "уникален идентификатор в URL"
-        boolean is_active
+        string status         "draft | active | inactive"
         timestamp created_at
         timestamp updated_at
     }
@@ -115,6 +115,7 @@ erDiagram
 Моделът разделя логическата статия от нейните езикови и исторически версии.
 
 - `WikiArticle.slug` се използва в публичните URL и в API (`/api/wiki/articles/{slug}`).
+- `WikiArticle.status` указва състоянието на статията: `draft` (чернова, не се вижда публично), `active` (показва се в публичната Wiki) или `inactive` (скрита/деактивирана, но запазена в системата).
 - Всяка статия има една или повече версии (`WikiArticleVersion`).
 - Версиите са по език (`language`) и номер на версия (`version_number`).
 - Admin панелът работи основно с версиите (създаване, редакция, rollback).

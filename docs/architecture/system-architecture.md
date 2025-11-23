@@ -160,6 +160,54 @@ C4Container
 - **История на редакциите** - списък с всички версии
 - **API за управление на версиите** - REST ендпойнти за създаване, връщане и изтриване на версии
 
+## Wiki media storage (MVP)
+
+В допълнение към текстовото съдържание на статиите, Wiki модулът трябва да поддържа изображения (диаграми, скрийншотове и др.), които се вграждат в markdown съдържанието.
+
+### Логика и физическо съхранение
+
+- В **MVP** всички изображения за Wiki се съхраняват на **локална файлова система** на VPS машината, в директория/volume, споделен между:
+  - reverse proxy слоя (Nginx), който сервира статика;
+  - `wiki_service`, който записва/изтрива файлове при upload/delete.
+- Структура на пътищата в този storage (концептуално):
+
+  ```text
+  <media_root>/wiki/<article_slug>/<filename.ext>
+  например: /var/qa4free/media/wiki/manual-testing-intro/diagram-1.png
+  ```
+
+- За простота в MVP се приема, че `slug` е **стабилен идентификатор** на статията. Ако slug се промени, миграцията/преименуването на файловете се извършва ръчно или с помощен тул (post-MVP задача).
+
+### Публични URL-и и Nginx конфигурация
+
+- Публичните URL-и за изображенията имат формата:
+
+  ```text
+  /wiki/media/<article_slug>/<filename.ext>
+  ```
+
+- Nginx е конфигуриран така, че `location /wiki/media/` да сочи към файловата система под `<media_root>/wiki/`. По този начин frontend-ът може директно да вмъква тези URL-и в markdown съдържанието.
+
+### Upload/Delete поведение (Admin)
+
+- Upload на изображения се извършва през admin API:
+  - `POST /api/admin/wiki/articles/{id}/media` (multipart/form-data с `file`).
+  - `wiki_service` валидира типа (image/*) и размера на файла.
+  - Файлът се записва под `<media_root>/wiki/<slug>/...` с нормализирано име (`filename`).
+  - Отговорът връща структура `WikiMediaItem { filename, url }`, където `url` е директно използваем в markdown (напр. `![alt](/wiki/media/manual-testing-intro/diagram-1.png)`).
+
+- Изтриване на изображения:
+  - `DELETE /api/admin/wiki/articles/{id}/media/{filename}`.
+  - `wiki_service` намира и изтрива съответния файл от `<media_root>/wiki/<slug>/`.
+  - При успех връща HTTP 204.
+
+### Бъдеща миграция към object storage (post-MVP)
+
+- Архитектурата умишлено изолира media достъпа зад `wiki_service` и Nginx, за да позволи лесна миграция към object storage (напр. S3/Backblaze) в бъдеща версия:
+  - Публичният път `/wiki/media/<slug>/<filename>` може да се запази и да сочи към CDN/object storage.
+  - Само имплементацията на `WikiMediaItem` storage във `wiki_service` се сменя от локална файлова система към object storage SDK.
+  - Съществуващите markdown линкове остават валидни.
+
 ## GDPR съответствие
 
 ### Събирани данни

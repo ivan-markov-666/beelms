@@ -41,13 +41,22 @@
                     <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
                         Password
                     </label>
-                    <input 
-                        type="password" 
-                        id="password" 
-                        name="password"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                        placeholder="••••••••"
-                    >
+                    <div class="relative">
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password"
+                            class="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                            placeholder="••••••••"
+                        >
+                        <button 
+                            type="button" 
+                            onclick="toggleLoginPasswordVisibility()"
+                            class="absolute inset-y-0 right-0 px-3 flex items-center text-xs font-medium text-gray-500 hover:text-gray-700"
+                        >
+                            Show
+                        </button>
+                    </div>
                 </div>
                 
                 <!-- Remember Me -->
@@ -63,6 +72,10 @@
                     </label>
                 </div>
                 
+                <div class="bg-gray-50 border border-dashed border-gray-300 rounded-lg px-4 py-3 text-xs text-gray-600">
+                    CAPTCHA / reCAPTCHA (placeholder) – в реалната система се показва само след няколко последователни неуспешни опита за вход.
+                </div>
+
                 <!-- Submit Button -->
                 <button 
                     type="submit"
@@ -87,6 +100,17 @@
 
     <!-- Footer -->
     <footer id="site-footer"></footer>
+    <script>
+        function toggleLoginPasswordVisibility() {
+            var input = document.getElementById('password');
+            if (!input) return;
+            if (input.type === 'password') {
+                input.type = 'text';
+            } else {
+                input.type = 'password';
+            }
+        }
+    </script>
     <script src="../layout.js"></script>
 </body>
 </html>

@@ -79,6 +79,10 @@ components:
           type: string
         content:
           type: string
+        status:
+          type: string
+          description: Статус на статията (draft, active, inactive)
+          enum: [draft, active, inactive]
         updatedAt:
           type: string
           format: date-time
@@ -96,6 +100,10 @@ components:
           type: string
         content:
           type: string
+        status:
+          type: string
+          description: Статус на статията при създаване/редакция (draft, active, inactive)
+          enum: [draft, active, inactive]
       required: [language, title, content]
 
     WikiArticleVersion:
@@ -163,8 +171,16 @@ components:
             properties:
               slug:
                 type: string
-              views:
-                type: integer
+
+    WikiMediaItem:
+      type: object
+      properties:
+        filename:
+          type: string
+          description: Име на файла, уникално в рамките на статията
+        url:
+          type: string
+          description: Пълен URL за достъп до изображението (използва се в markdown съдържанието)
 
     TrainingHelloResponse:
       type: object
@@ -660,6 +676,96 @@ paths:
           description: Неоторизиран достъп
         "404":
           description: Статията или версията не са намерени
+
+  /admin/wiki/articles/{id}/media:
+    get:
+      tags: [Admin, Wiki]
+      summary: Списък с изображения (media) за дадена Wiki статия
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Списък с изображения, асоциирани със статията
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WikiMediaItem'
+        "401":
+          description: Неоторизиран достъп
+        "404":
+          description: Статията не е намерена
+
+    post:
+      tags: [Admin, Wiki]
+      summary: Качване на ново изображение (media) за дадена Wiki статия
+      description: |
+        Качва един файл (изображение), който впоследствие може да бъде рефериран от markdown съдържанието на статията.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+              required: [file]
+      responses:
+        "201":
+          description: Файлът е качен успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WikiMediaItem'
+        "400":
+          description: Невалидни данни (липсващ или неподдържан файл)
+        "401":
+          description: Неоторизиран достъп
+        "404":
+          description: Статията не е намерена
+
+  /admin/wiki/articles/{id}/media/{filename}:
+    delete:
+      tags: [Admin, Wiki]
+      summary: Изтриване на изображение, асоциирано с дадена Wiki статия
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: filename
+          required: true
+          schema:
+            type: string
+          description: Име на файла, което ще бъде изтрито за тази статия
+      responses:
+        "204":
+          description: Файлът е изтрит
+        "401":
+          description: Неоторизиран достъп
+        "404":
+          description: Статията или файлът не са намерени
 
   ############################
   # Practical Environment – Tasks

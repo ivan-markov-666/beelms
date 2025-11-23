@@ -122,6 +122,10 @@
                     </p>
                 </div>
                 
+                <div class="border border-gray-300 rounded-lg px-4 py-3 bg-gray-50 text-xs text-gray-600 mb-4">
+                    CAPTCHA / reCAPTCHA (placeholder за защита от ботове при заявка за експорт на лични данни)
+                </div>
+
                 <button class="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition flex items-center" type="button" onclick="handleDataExport()">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
@@ -139,7 +143,7 @@
                     <svg class="w-6 h-6 mr-2 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
                     </svg>
-                    Изтриване на акаунт
+                    Закриване на акаунта (изтриване)
                 </h2>
                 
                 <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
@@ -147,23 +151,14 @@
                         ⚠️ Внимание: Това действие е необратимо!
                     </p>
                     <p class="text-sm text-red-800">
-                        При изтриване на акаунта ще бъдат премахнати всички ваши данни от системата, включително профилна информация и история на действията. Това действие не може да бъде отменено.
+                        При закриване/изтриване на акаунта личните ви данни ще бъдат премахнати от системата, съгласно нашите правила за защита на данните и GDPR. Това действие е окончателно и не може да бъде отменено.
                     </p>
                 </div>
-                
+            
                 <div class="space-y-3">
                     <button 
-                        onclick="if(confirm('Сигурни ли сте, че искате да деактивирате акаунта си? Акаунтът ви няма да е достъпен, но данните ще бъдат запазени.')) alert('Акаунтът ще бъде деактивиран')"
-                        class="px-6 py-3 bg-orange-600 text-white rounded-lg font-semibold hover:bg-orange-700 transition flex items-center"
-                    >
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
-                        </svg>
-                        Деактивирай акаунта
-                    </button>
-                    
-                    <button 
-                        onclick="if(confirm('ПОСЛЕДНО ПРЕДУПРЕЖДЕНИЕ: Сигурни ли сте, че искате да изтриете акаунта си завинаги? Това действие е необратимо и всички ваши данни ще бъдат премахнати.')) alert('Акаунтът ще бъде изтрит')"
+                        type="button"
+                        onclick="openDeleteStep1Modal()"
                         class="px-6 py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition flex items-center"
                     >
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -175,6 +170,42 @@
             </div>
         </div>
     </main>
+
+    <!-- First Delete Confirmation Modal -->
+    <div id="delete-step1-modal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">Закриване на акаунта</h3>
+            <p class="text-sm text-gray-700 mb-4">
+                Акаунтът ви ще бъде завинаги закрит и изтрит. Това действие е необратимо и ще доведе до премахване на вашите лични данни съгласно нашите правила за защита на данните и GDPR.
+            </p>
+            <div class="flex justify-end gap-3">
+                <button type="button" class="px-4 py-2 text-sm rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100" onclick="closeDeleteStep1Modal()">
+                    Затвори
+                </button>
+                <button type="button" class="px-4 py-2 text-sm rounded-lg bg-red-600 text-white hover:bg-red-700" onclick="proceedToDeleteStep2()">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Second Delete Confirmation Modal -->
+    <div id="delete-step2-modal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">Потвърдете изтриването на акаунта</h3>
+            <p class="text-sm text-gray-700 mb-4">
+                Наистина ли искате акаунтът ви да бъде изтрит напълно? Това действие е окончателно и не може да бъде отменено.
+            </p>
+            <div class="flex justify-end gap-3">
+                <button type="button" class="px-4 py-2 text-sm rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100" onclick="closeDeleteStep2Modal()">
+                    Отказ
+                </button>
+                <button type="button" class="px-4 py-2 text-sm rounded-lg bg-red-600 text-white hover:bg-red-700" onclick="confirmFinalAccountDeletion()">
+                    Да, изтрий акаунта завинаги
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- Footer -->
     <footer id="site-footer"></footer>
@@ -276,6 +307,31 @@
         function handleDataExport() {
             var feedback = document.getElementById('export-feedback');
             if (feedback) feedback.classList.remove('hidden');
+        }
+
+        function openDeleteStep1Modal() {
+            var modal = document.getElementById('delete-step1-modal');
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function closeDeleteStep1Modal() {
+            var modal = document.getElementById('delete-step1-modal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function proceedToDeleteStep2() {
+            closeDeleteStep1Modal();
+            var modal = document.getElementById('delete-step2-modal');
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function closeDeleteStep2Modal() {
+            var modal = document.getElementById('delete-step2-modal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function confirmFinalAccountDeletion() {
+            window.location.href = 'account-deleted.html';
         }
     </script>
     <script src="../layout.js"></script>
