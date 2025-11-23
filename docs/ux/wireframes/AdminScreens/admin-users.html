@@ -24,6 +24,50 @@
                 </svg>
                 <span class="text-gray-900">Users Management</span>
             </div>
+
+            <!-- View User Modal (example, read-only; shown on View click in real app) -->
+            <div class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
+                <div class="bg-white rounded-lg shadow-xl max-w-lg w-full p-6">
+                    <div class="flex items-start justify-between mb-4">
+                        <div>
+                            <h2 class="text-xl font-bold text-gray-900 mb-1">User details</h2>
+                            <p class="text-sm text-gray-600">Read-only information about the selected account.</p>
+                        </div>
+                        <button class="text-gray-400 hover:text-gray-600" aria-label="Close">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="space-y-3 text-sm text-gray-700">
+                        <div class="flex justify-between">
+                            <span class="font-medium">Email:</span>
+                            <span>[email protected]</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium">User ID:</span>
+                            <span>1247</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium">Registration date:</span>
+                            <span>15 Jan 2025</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium">Status:</span>
+                            <span class="px-2 py-0.5 rounded bg-green-100 text-green-700 text-xs font-medium">Active</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium">Role:</span>
+                            <span class="px-2 py-0.5 rounded bg-blue-100 text-blue-700 text-xs font-medium">User</span>
+                        </div>
+                    </div>
+                    <div class="mt-6 flex justify-end">
+                        <button class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
             
             <!-- Page Header -->
             <div class="flex items-center justify-between mb-8">
@@ -164,7 +208,7 @@
                                     <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">User</span>
                                 </td>
                                 <td class="px-6 py-4 text-right">
-                                    <button class="text-blue-600 hover:text-blue-700 mr-3 text-sm font-medium">View</button>
+                                    <button class="text-blue-600 hover:text-blue-700 mr-3 text-sm font-medium" onclick="alert('Demo only – user details modal would open')">View</button>
                                     <button class="text-orange-600 hover:text-orange-700 text-sm font-medium" onclick="confirm('Deactivate this user?')">Deactivate</button>
                                 </td>
                             </tr>
@@ -190,7 +234,7 @@
                                     <span class="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-medium">Admin</span>
                                 </td>
                                 <td class="px-6 py-4 text-right">
-                                    <button class="text-blue-600 hover:text-blue-700 mr-3 text-sm font-medium">View</button>
+                                    <button class="text-blue-600 hover:text-blue-700 mr-3 text-sm font-medium" onclick="alert('Demo only – user details modal would open')">View</button>
                                     <button class="text-gray-400 text-sm font-medium cursor-not-allowed" disabled>Cannot deactivate</button>
                                 </td>
                             </tr>
@@ -242,7 +286,7 @@
                                     <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">User</span>
                                 </td>
                                 <td class="px-6 py-4 text-right">
-                                    <button class="text-blue-600 hover:text-blue-700 mr-3 text-sm font-medium">View</button>
+                                    <button class="text-blue-600 hover:text-blue-700 mr-3 text-sm font-medium" onclick="alert('Demo only – user details modal would open')">View</button>
                                     <button class="text-green-600 hover:text-green-700 text-sm font-medium" onclick="confirm('Activate this user?')">Activate</button>
                                 </td>
                             </tr>

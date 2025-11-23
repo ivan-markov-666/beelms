@@ -84,13 +84,6 @@
                             </svg>
                             <span>Последна редакция: <strong>15 януари 2025</strong></span>
                         </div>
-                        <div class="flex items-center">
-                            <svg class="w-4 h-4 mr-1.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                            </svg>
-                            <span><strong>2,847</strong> преглеждания</span>
-                        </div>
                     </div>
                 </header>
 
@@ -192,24 +185,16 @@
                 <footer class="mt-12 pt-8 border-t border-gray-200">
                     <div class="flex flex-wrap items-center justify-between gap-4">
                         <div>
-                            <p class="text-sm text-gray-600 mb-2">Беше ли полезна тази статия?</p>
-                            <div class="flex space-x-2">
-                                <button class="px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition text-sm font-medium">
-                                    👍 Да
-                                </button>
-                                <button class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-sm font-medium">
-                                    👎 Не
-                                </button>
-                            </div>
+                            <p id="share-feedback" class="text-xs text-green-700 hidden">Линкът към статията беше копиран в клипборда.</p>
                         </div>
                         <div class="flex space-x-2">
-                            <button class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm font-medium flex items-center">
+                            <button type="button" onclick="shareArticle()" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm font-medium flex items-center">
                                 <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
                                 </svg>
                                 Сподели
                             </button>
-                            <button class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm font-medium flex items-center">
+                            <button type="button" onclick="printArticle()" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm font-medium flex items-center">
                                 <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
                                 </svg>
@@ -219,30 +204,47 @@
                     </div>
                 </footer>
             </article>
-
-            <!-- Related Articles -->
-            <section class="mt-8">
-                <h3 class="text-xl font-bold text-gray-900 mb-4">Свързани статии</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <a href="#" class="block bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
-                        <h4 class="font-semibold text-gray-900 mb-2">Test Case Design</h4>
-                        <p class="text-sm text-gray-600">Техники за дизайн на ефективни тест кейсове</p>
-                    </a>
-                    <a href="#" class="block bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
-                        <h4 class="font-semibold text-gray-900 mb-2">UI Automation</h4>
-                        <p class="text-sm text-gray-600">Въведение в автоматизацията с Selenium</p>
-                    </a>
-                    <a href="#" class="block bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
-                        <h4 class="font-semibold text-gray-900 mb-2">Bug Reporting</h4>
-                        <p class="text-sm text-gray-600">Best practices за докладване на дефекти</p>
-                    </a>
-                </div>
-            </section>
         </div>
     </main>
 
     <!-- Footer -->
     <footer id="site-footer"></footer>
+    <script>
+        function showShareFeedback() {
+            var el = document.getElementById('share-feedback');
+            if (!el) return;
+            el.classList.remove('hidden');
+            setTimeout(function () {
+                el.classList.add('hidden');
+            }, 3000);
+        }
+
+        function shareArticle() {
+            var url = window.location.href;
+            var title = document.title || '';
+
+            if (navigator.share) {
+                navigator.share({ title: title, url: url }).catch(function () {
+                    // ignore
+                });
+                return;
+            }
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(url).then(function () {
+                    showShareFeedback();
+                }).catch(function () {
+                    alert('Линкът към статията: ' + url);
+                });
+            } else {
+                alert('Линкът към статията: ' + url);
+            }
+        }
+
+        function printArticle() {
+            window.print();
+        }
+    </script>
     <script src="../layout.js"></script>
 </body>
 </html>
