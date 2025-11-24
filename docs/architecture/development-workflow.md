@@ -37,6 +37,8 @@
 Цел: да реализираме MVP функционалностите от `docs/architecture/mvp-feature-list.md`.
  
  Основни задачи:
+ - [ ] Дефиниране и документиране на walking skeleton-и за MVP (вертикални slice-ове през FE+API+DB), започвайки с WS-1 – Guest → Wiki List → Wiki Article – `docs/delivery/walking-skeleton.md`
+ - [ ] Разбиване на walking skeleton-ите в backlog (epics → user stories → tasks) и създаване/поддръжка на issues в tracker-а
  - [ ] Настройка на средата за разработка
   - локална среда (Docker Compose за всички услуги – frontend, backend, PostgreSQL, Redis и др.)
   - базова структура на репото (frontend + backend)
@@ -59,8 +61,10 @@
  - [ ] Настройка на VPS (Docker, reverse proxy, TLS)
    - деплой на всички компоненти (frontend, backend услуги, PostgreSQL, Redis, RabbitMQ и др.) като отделни Docker контейнери чрез Docker Compose върху една VPS машина
  - [ ] CI/CD пайплайн (build, тестове, деплой)
-- [ ] Мониторинг и логване (Winston, Prometheus/Grafana, Sentry)
-- [ ] Backup стратегия (бекапи на базата данни, периодичност, ретенция)
+ - [ ] Test Plan за MVP – документ `docs/delivery/test-plan.md` (обхват, видове тестове, smoke/regression сценарии за основните потоци)
+ - [ ] Release Plan за MVP – документ `docs/delivery/release-plan.md` (критерии за release, стъпки за деплой и rollback, версияция)
+ - [ ] Мониторинг и логване (Winston, Prometheus/Grafana, Sentry)
+ - [ ] Backup стратегия (бекапи на базата данни, периодичност, ретенция)
 
 ## 2. Свързани документи и артефакти
 
@@ -70,6 +74,7 @@
 - `docs/architecture/system-architecture.md` – техническа архитектура и нефункционални изисквания (Architect).
 - `docs/architecture/mvp-feature-list.md` – MVP по екрани/модули, мост между PRD и backlog (PM/Architect).
 - `docs/architecture/db-model.md` – модел на базата данни (ER диаграма) (Architect).
+- `docs/delivery/walking-skeleton.md` – walking skeleton-и за MVP (Delivery, Tech Lead/Architect).
 - (в бъдеще) `docs/delivery/test-plan.md`, `docs/delivery/release-plan.md` – планове за тестване и издаване на софтуер.
 
 ## 3. Забележки
