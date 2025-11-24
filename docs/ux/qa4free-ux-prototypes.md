@@ -63,17 +63,29 @@ Sandbox UI (`SCR-SBX-UI`) е реализиран като множество с
 
 Примери за mapping (неизчерпателно изброяване):
 
-- Text inputs: `docs/ux/wireframes/Sandbox/sandbox-textbox.html`
-- Checkboxes и radio бутони: `docs/ux/wireframes/Sandbox/sandbox-checkbox-radio.html`
-- Buttons: `docs/ux/wireframes/Sandbox/sandbox-buttons.html`
-- Links / Broken links / Images: `docs/ux/wireframes/Sandbox/sandbox-links.html`
-- Modal dialogs: `docs/ux/wireframes/Sandbox/sandbox-modals.html`
-- Frames / Nested frames: `docs/ux/wireframes/Sandbox/sandbox-frames.html`, `sandbox-nested-frames.html`
-- Accordion, Tabs, Menu: `docs/ux/wireframes/Sandbox/sandbox-accordion.html`, `sandbox-tabs.html`, `sandbox-menu.html`
-- Draggable / Droppable / Sortable / Selectable / Resizable: съответните `sandbox-*.html` файлове в папка `Sandbox/`
-- Complex Form (Registration): `docs/ux/wireframes/Sandbox/sandbox-complex-form.html`
-- Table CRUD & Pagination: `docs/ux/wireframes/Sandbox/sandbox-table-crud.html`
-- Training API: `docs/ux/wireframes/Sandbox/sandbox-training-api.html`
+- Text inputs: `docs/ux/wireframes/Sandbox/sandbox-textbox.html` – страница „Text Box elements“ с няколко типа текстови полета (empty, prefilled, textarea, password, disabled, read-only, number, search) и Reset функционалност.
+- Checkboxes и radio бутони: `docs/ux/wireframes/Sandbox/sandbox-checkbox-radio.html` – групи checkbox-и и radio бутони с различни default/disabled състояния.
+- Buttons: `docs/ux/wireframes/Sandbox/sandbox-buttons.html` – различни видове бутони (primary/secondary/danger, enabled/disabled, loading състояния).
+- Links / Broken links / Images: `docs/ux/wireframes/Sandbox/sandbox-links.html` – валидни/счупени линкове, различни стилове (underline/hover-only), target атрибути, mailto/tel и изображения с нарочно счупени URL-и.
+- Upload & Download: `docs/ux/wireframes/Sandbox/sandbox-upload-download.html` – single/multiple file upload, drag & drop зона и два download линка (валиден PDF и счупен файл с очакван 404), описани в `qa4free-ux-design.md` §5.3.
+- Date Picker: `docs/ux/wireframes/Sandbox/sandbox-date-picker.html` – текстов `dd/mm/yyyy` input с валидация, native date input, диапазон със `min`/`max` за текущата година и примери за disabled/read-only date полета, описани в `qa4free-ux-design.md` §5.4.
+- Select Menu: `docs/ux/wireframes/Sandbox/sandbox-select-menu.html` – single select, grouped select (optgroups), multi-select и примерни disabled опции за планове, описани в `qa4free-ux-design.md` §5.6.
+- Modal dialogs: `docs/ux/wireframes/Sandbox/sandbox-modals.html` – custom модални прозорци (информационен, confirmation, scrollable), със затваряне през бутон, X, overlay и Escape.
+- Frames / Nested frames: `docs/ux/wireframes/Sandbox/sandbox-frames.html`, `sandbox-nested-frames.html` – примери за отделни и вложени iframes и бутони за отваряне на нов прозорец/таб.
+- Accordion и Menu: `docs/ux/wireframes/Sandbox/sandbox-accordion.html`, `sandbox-menu.html` – accordion панели и различни видове менюта (horizontal, dropdown, context), описани в `qa4free-ux-design.md` §5.7.
+- Tabs: `docs/ux/wireframes/Sandbox/sandbox-tabs.html` – basic horizontal tabs (Overview/Details/Logs) и vertical tabs (Profile/Settings/Security) с по един активен таб/панел във всеки момент, описани в `qa4free-ux-design.md` §5.5.
+- Draggable / Droppable / Sortable / Selectable / Resizable: съответните `sandbox-*.html` файлове в папка `Sandbox/` – елементи за drag & drop, пренареждане, селектиране и промяна на размер.
+- Complex Form (Registration): `docs/ux/wireframes/Sandbox/sandbox-complex-form.html` – комплексна регистрационна форма с трансформация на данни и секция „Registration result“.
+- Table CRUD & Pagination: `docs/ux/wireframes/Sandbox/sandbox-table-crud.html` – таблица с добавяне/редакция/изтриване на редове и пагинация (10 записа на страница).
+ - Training API: `docs/ux/wireframes/Sandbox/sandbox-training-api.html` – страница „Training API“ със вграден Swagger UI за Training API, описана концептуално в `qa4free-ux-design.md` §6.
+ - Text inputs: `docs/ux/wireframes/Sandbox/sandbox-textbox.html` – страница „Text Box elements“ с няколко типа текстови полета (empty, prefilled, textarea, password, disabled, read-only, number, search) и Reset функционалност.
+ - Checkboxes и radio бутони: `docs/ux/wireframes/Sandbox/sandbox-checkbox-radio.html` – групи checkbox-и и radio бутони с различни default/disabled състояния.
+ - Buttons: `docs/ux/wireframes/Sandbox/sandbox-buttons.html` – различни видове бутони (primary/secondary/danger, enabled/disabled, loading състояния).
+ - Links / Broken links / Images: `docs/ux/wireframes/Sandbox/sandbox-links.html` – валидни/счупени линкове, различни стилове (underline/hover-only), target атрибути, mailto/tel и изображения с нарочно счупени URL-и.
+ - Alerts (JS dialogs): `docs/ux/wireframes/Sandbox/sandbox-alerts.html` – JavaScript `alert`, `confirm` и `prompt` диалози, таймиран alert и комбиниран flow alert → confirm → prompt, описани концептуално в `qa4free-ux-design.md` §5 (пример за Alerts / Dialogs).
+ - Upload & Download: `docs/ux/wireframes/Sandbox/sandbox-upload-download.html` – single/multiple file upload, drag & drop зона и два download линка (валиден PDF и счупен файл с очакван 404), описани в `qa4free-ux-design.md` §5.3.
+ - Date Picker: `docs/ux/wireframes/Sandbox/sandbox-date-picker.html` – текстов `dd/mm/yyyy` input с валидация, native date input, диапазон със `min`/`max` за текущата година и примери за disabled/read-only date полета, описани в `qa4free-ux-design.md` §5.4.
+ - Select Menu: `docs/ux/wireframes/Sandbox/sandbox-select-menu.html` – single select, grouped select (optgroups), multi-select и примерни disabled опции за планове, описани в `qa4free-ux-design.md` §5.6.
 
 Точният списък от файлове в `Sandbox/` служи като **каталог на упражненията за UI автоматизация**, стъпващ върху описанията в `docs/ux/qa4free-ux-design.md` §5.
 
