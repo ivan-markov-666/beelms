@@ -25,6 +25,7 @@
 - UX Design – `docs/ux/qa4free-ux-design.md` (екрани SCR-WIKI-LST и SCR-WIKI-ART, глобален layout).
 - User Flows – `docs/ux/flows/qa4free-user-flows.md` (FLOW-WIKI-BROWSE, FLOW-WIKI-NOT-FOUND).
 - Walking skeleton – `docs/delivery/walking-skeleton.md` §2 WS-1.
+- MCP EPIC Map – `docs/backlog/MCP-EPIC-map.md` §5 (FR-WIKI → EPIC → Story traceability).
 
 ## Child user stories
 - [ ] STORY-WS1-FE-WIKI-LIST – Публичен списък със Wiki статии (/wiki).

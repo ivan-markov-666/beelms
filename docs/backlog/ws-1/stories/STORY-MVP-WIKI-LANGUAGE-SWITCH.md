@@ -41,5 +41,5 @@ _Забележка: Това story не е част от WS-1, а от EPIC-WIK
 
 ## Notes
 - В първия WS-1 vertical езикът може да остане фиксиран (напр. BG), както е описано в `docs/delivery/walking-skeleton.md` §2.3.1; това story дефинира следващата стъпка към пълното FR-WIKI-4 поведение.
-- Story-то е cross-cutting за EPIC-WIKI-PUBLIC и EPIC-CROSS-I18N и трябва да се планира заедно с общата i18n стратегия на приложението.
+- Parent Epics: `EPIC-WIKI-PUBLIC` и `EPIC-CROSS-I18N` – story-то е cross-cutting между тях и трябва да се планира заедно с общата i18n стратегия на приложението.
 - При наличие на page-level language filter на `/wiki` (виж `STORY-MVP-WIKI-SEARCH-FILTER`) глобалният language switcher задава предпочитания език на интерфейса и началния език за Wiki съдържанието, а филтърът на страницата може допълнително да стеснява резултатите; конкретното поведение при конфликт се уточнява в UX/flows.

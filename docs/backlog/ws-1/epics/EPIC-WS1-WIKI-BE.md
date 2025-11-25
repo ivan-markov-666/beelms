@@ -24,6 +24,7 @@
 - Walking skeleton – `docs/delivery/walking-skeleton.md` §2.3.2 и §2.3.3.
 - Product Brief – `docs/product/product-brief.md` (общ контекст и цели за QA платформата и Wiki).
 - PRD – `docs/product/prd.md` (функционални изисквания за Wiki/knowledge base частта, ако са налични).
+- MCP EPIC Map – `docs/backlog/MCP-EPIC-map.md` §5 (FR-WIKI → EPIC → Story traceability).
 
 ## Child user stories
 - [ ] STORY-WS1-BE-WIKI-LIST-ENDPOINT – `GET /api/wiki/articles` връща списък от активни Wiki статии.
@@ -37,6 +38,7 @@
 - **Assumptions:**
   - За WS-1 са нужни само read-only `GET` ендпойнти за Wiki (без create/edit/delete).
   - Wiki функционалността в WS-1 не включва административен интерфейс и сложни workflow-и за одобрение.
+  - За публичните ендпойнти в WS-1 се използва **последната публикувана езикова версия** на статията за съответния език (напр. `is_published = true` и най-нов `version_number`). Детайлната логика за управление на версиите (rollback, diff, изтриване на стари версии) се доуточнява в Admin EPIC-ите.
   - Основните продуктови изисквания за Wiki няма да претърпят значителни промени в рамките на този epic.
 
 ## Definition of Done (Epic)
