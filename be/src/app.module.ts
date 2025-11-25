@@ -4,6 +4,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { WikiArticle } from './wiki/wiki-article.entity';
 import { WikiArticleVersion } from './wiki/wiki-article-version.entity';
+import { WikiModule } from './wiki/wiki.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { WikiArticleVersion } from './wiki/wiki-article-version.entity';
       entities: [WikiArticle, WikiArticleVersion],
       synchronize: false,
     }),
+    WikiModule,
   ],
   controllers: [AppController],
   providers: [AppService],
