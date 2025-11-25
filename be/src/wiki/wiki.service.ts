@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { WikiArticle } from './wiki-article.entity';
 import { WikiArticleVersion } from './wiki-article-version.entity';
 import { WikiListItemDto } from './dto/wiki-list-item.dto';
+import { WikiArticleDetailDto } from './dto/wiki-article-detail.dto';
 
 @Injectable()
 export class WikiService {
@@ -59,5 +60,63 @@ export class WikiService {
     }
 
     return items;
+  }
+
+  async getArticleBySlug(
+    slug: string,
+    lang?: string,
+  ): Promise<WikiArticleDetailDto> {
+    const article = await this.articleRepo.findOne({
+      where: { slug, status: 'active' },
+      relations: ['versions'],
+    });
+
+    if (!article) {
+      throw new NotFoundException('Article not found');
+    }
+
+    const published = (article.versions ?? []).filter((v) => v.isPublished);
+    if (!published.length) {
+      throw new NotFoundException('Article not found');
+    }
+
+    let candidates = published;
+
+    if (lang) {
+      candidates = published.filter((v) => v.language === lang);
+    } else {
+      const defaultLang = 'bg';
+      const defaultCandidates = published.filter(
+        (v) => v.language === defaultLang,
+      );
+      if (defaultCandidates.length) {
+        candidates = defaultCandidates;
+      }
+    }
+
+    if (!candidates.length) {
+      throw new NotFoundException('Article not found');
+    }
+
+    candidates.sort((a, b) => {
+      const aTime = a.createdAt ? a.createdAt.getTime() : 0;
+      const bTime = b.createdAt ? b.createdAt.getTime() : 0;
+      return aTime - bTime;
+    });
+
+    const latest = candidates[candidates.length - 1];
+
+    const updatedAt =
+      latest.createdAt ?? article.updatedAt ?? article.createdAt ?? new Date();
+
+    return {
+      id: article.id,
+      slug: article.slug,
+      language: latest.language,
+      title: latest.title,
+      content: latest.content,
+      status: article.status,
+      updatedAt: updatedAt.toISOString(),
+    };
   }
 }

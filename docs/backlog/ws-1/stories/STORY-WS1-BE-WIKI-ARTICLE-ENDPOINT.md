@@ -1,6 +1,6 @@
 # STORY-WS1-BE-WIKI-ARTICLE-ENDPOINT – `GET /api/wiki/articles/{slug}` връща детайл за статия
 
-Status: Draft
+Status: Done
 
 ## Summary
 Като **frontend приложение** искам да имам ендпойнт `GET /api/wiki/articles/{slug}`, който връща детайл за конкретна активна Wiki статия по `slug`, за да покажа съдържанието й на `/wiki/[slug]`.
