@@ -1,5 +1,7 @@
 # STORY-MVP-WIKI-SEARCH-FILTER – Търсене и филтриране по език в Wiki списъка
 
+Status: Draft
+
 _Забележка: Това story не е част от WS-1, а от EPIC-WIKI-PUBLIC (MVP разширение на публичната Wiki)._ 
 
 ## Summary

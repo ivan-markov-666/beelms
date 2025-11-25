@@ -1,5 +1,7 @@
 # STORY-WS1-BE-WIKI-ARTICLE-ENDPOINT – `GET /api/wiki/articles/{slug}` връща детайл за статия
 
+Status: Draft
+
 ## Summary
 Като **frontend приложение** искам да имам ендпойнт `GET /api/wiki/articles/{slug}`, който връща детайл за конкретна активна Wiki статия по `slug`, за да покажа съдържанието й на `/wiki/[slug]`.
 
@@ -18,6 +20,7 @@
 - Ако **не** съществува такава статия или е неактивна:
   - API връща `404 Not Found`.
 - При вътрешна грешка API връща `5xx` код и общо съобщение за грешка.
+- След пускане на миграциите и seed-а от `STORY-WS1-BE-WIKI-DB-SEED`, ендпойнтът връща seed-натите примерни статии (напр. `getting-started`, `faq`) според горните правила.
 
 ## Dev Tasks
 - [ ] Добавяне на route/handler за `GET /api/wiki/articles/{slug}` в `WikiController`.

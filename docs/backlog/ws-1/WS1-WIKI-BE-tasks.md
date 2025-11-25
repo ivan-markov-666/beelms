@@ -10,6 +10,18 @@
 
 ---
 
+## WS1-BE-00 – BE skeleton и Docker инфраструктура
+- Story: подготвителна инфраструктура за WS-1 BE stories (не е отделно бизнес story).
+- Цел: да има базов NestJS/TypeORM BE проект в `be/`, който работи в Docker контейнер и е вързан към PostgreSQL контейнер за dev среда.
+
+**Checklist:**
+- [ ] Създаден е BE проект в папка `be/` (NestJS + TypeORM, PostgreSQL конфигурация).
+- [ ] Налични са Dockerfile за BE и `docker-compose` услуга за API + PostgreSQL (и други нужни зависимости за WS-1).
+- [ ] Имплементиран е базов health endpoint `GET /api/health`, достъпен през API контейнера.
+- [ ] Миграциите могат да се пускат успешно вътре в BE контейнера срещу dev PostgreSQL инстанцията.
+
+---
+
 ## WS1-BE-01 – DB модели и миграции за WikiArticle/WikiArticleVersion
 - Story: `STORY-WS1-BE-WIKI-DB-SEED`
 - Цел: да има коректни таблици и релации за WikiArticle/WikiArticleVersion според DB модела.

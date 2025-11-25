@@ -10,6 +10,7 @@
   - `GET /api/wiki/articles/{slug}` – детайл за конкретна статия.
 - TypeORM модели/репозита за `WikiArticle` и `WikiArticleVersion`.
 - Миграции за създаване на нужните таблици и началeн seed с примерни статии.
+- Docker-изолирана инфраструктура за Wiki BE: NestJS API в отделен контейнер и PostgreSQL база в отделен контейнер, оркестрирани чрез `docker-compose` за dev/WS-1 и бъдещ production.
 - Този epic **не** покрива (out of scope):
   - Административен UI за създаване/редакция на Wiki статии.
   - Сложни workflow-и за одобрение и версии на съдържанието.

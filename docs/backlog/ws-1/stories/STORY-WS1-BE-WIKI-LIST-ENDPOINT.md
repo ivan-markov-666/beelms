@@ -1,5 +1,7 @@
 # STORY-WS1-BE-WIKI-LIST-ENDPOINT – `GET /api/wiki/articles` връща списък от активни статии
 
+Status: Draft
+
 ## Summary
 Като **frontend приложение** искам да имам ендпойнт `GET /api/wiki/articles`, който връща списък от активни Wiki статии, за да покажа публичен списък на `/wiki`.
 

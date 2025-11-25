@@ -1,5 +1,7 @@
 # STORY-MVP-WIKI-LIST-PAGINATION – Пагинация на списъка със Wiki статии
 
+Status: Draft
+
 _Забележка: Това story не е част от WS-1, а от EPIC-WIKI-PUBLIC (MVP разширение на публичната Wiki)._ 
 
 ## Summary

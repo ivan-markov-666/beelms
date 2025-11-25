@@ -1,5 +1,7 @@
 # STORY-MVP-WIKI-LANGUAGE-SWITCH – Смяна на език за Wiki списък и статии
 
+Status: Draft
+
 _Забележка: Това story не е част от WS-1, а от EPIC-WIKI-PUBLIC (MVP разширение на публичната Wiki и мултиезичността)._ 
 
 ## Summary
