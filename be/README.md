@@ -114,6 +114,23 @@ npm run build
 npm run seed:wiki
 ```
 
+## Wiki public API (WS-1)
+
+After migrations and the Wiki seed have been applied, the following public endpoints are available for the walking skeleton:
+
+- `GET /api/wiki/articles` – returns a list of active Wiki articles.
+  - Optional query params: `page`, `pageSize`.
+- `GET /api/wiki/articles/{slug}` – returns a single active Wiki article by slug.
+  - Optional query param: `lang` (e.g. `bg`, `en`).
+
+Example requests (assuming Docker compose is running on `localhost:3000`):
+
+```bash
+curl http://localhost:3000/api/wiki/articles
+
+curl "http://localhost:3000/api/wiki/articles/getting-started?lang=bg"
+```
+
 ## Run tests
 
 ```bash
