@@ -44,9 +44,21 @@ _Роля: Analyst / PM / Architect. Ниво: MCP (целият продукт)
 
 ## 4. Бележки за планирaне и Walking Skeleton-и
 
-- WS-1 в момента покрива **тесен slice** от `EPIC-WIKI-PUBLIC` + част от `EPIC-WIKI-ADMIN` (DB/model/seed) и `EPIC-CROSS-I18N`.
-- Следващи Walking Skeleton-и / спринтове могат да се фокусират върху:
+ - WS-1 в момента покрива **тесен slice** от `EPIC-WIKI-PUBLIC` + част от `EPIC-WIKI-ADMIN` (DB/model/seed) и `EPIC-CROSS-I18N`.
+ - Следващи Walking Skeleton-и / спринтове могат да се фокусират върху:
   - Auth & Accounts (EPIC-AUTH-ACCOUNTS + EPIC-CROSS-SECURITY + EPIC-CROSS-GDPR-LEGAL).
   - Practical Env (UI/Training API + евентуално първи стъпки по EPIC-PRACTICE-TASKS).
   - Admin Portal и Metrics (EPIC-ADMIN-PORTAL + EPIC-CROSS-METRICS).
-- При нужда всеки EPIC от тази карта се детайлизира в отделен `EPIC-XXX-...md` файл с child stories в `docs/backlog/`, по същия шаблон, който вече използваме за WS-1 Wiki.
+ - При нужда всеки EPIC от тази карта се детайлизира в отделен `EPIC-XXX-...md` файл с child stories в `docs/backlog/`, по същия шаблон, който вече използваме за WS-1 Wiki.
+
+## 5. FR-WIKI → EPIC → Story traceability
+
+| FR ID | Кратко описание | Свързани EPIC-и | WS-1 EPIC-и / Stories | MVP Stories (извън WS-1) |
+| --- | --- | --- | --- | --- |
+| **FR-WIKI-1** | Публичен списък със статии (Guest/User, без акаунт) | EPIC-WIKI-PUBLIC | EPIC-WS1-WIKI-BE, EPIC-WS1-WIKI-FE; STORY-WS1-BE-WIKI-LIST-ENDPOINT; STORY-WS1-FE-WIKI-LIST; STORY-WS1-FE-WIKI-STATES; STORY-WS1-BE-WIKI-DB-SEED (поддържа реални данни) | – |
+| **FR-WIKI-2** | Търсене по заглавие/ключова дума и филтър по език в списъка | EPIC-WIKI-PUBLIC | – (извън обхвата на WS-1; виж out-of-scope секциите в EPIC-WS1-WIKI-BE/FE) | STORY-MVP-WIKI-SEARCH-FILTER |
+| **FR-WIKI-3** | Екран „Wiki статия“ с базово съдържание и действия „Сподели“/„Принтирай“ | EPIC-WIKI-PUBLIC | EPIC-WS1-WIKI-BE, EPIC-WS1-WIKI-FE; STORY-WS1-BE-WIKI-ARTICLE-ENDPOINT; STORY-WS1-FE-WIKI-ARTICLE; STORY-WS1-FE-WIKI-STATES; STORY-WS1-BE-WIKI-DB-SEED (поддържа реални данни) | STORY-MVP-WIKI-ARTICLE-ACTIONS (действия „Сподели“ и „Принтирай“) |
+| **FR-WIKI-4** | Превключване на език за Wiki статия и списък | EPIC-WIKI-PUBLIC, EPIC-CROSS-I18N | – (WS-1 може да използва фиксиран език, както е описано в `walking-skeleton.md`) | STORY-MVP-WIKI-LANGUAGE-SWITCH |
+| **FR-WIKI-5** | Публичните екрани показват само статии със статус `Active` | EPIC-WIKI-PUBLIC, EPIC-ADMIN-PORTAL | STORY-WS1-BE-WIKI-LIST-ENDPOINT; STORY-WS1-BE-WIKI-ARTICLE-ENDPOINT; STORY-WS1-BE-WIKI-DB-SEED; STORY-WS1-FE-WIKI-LIST; STORY-WS1-FE-WIKI-ARTICLE; STORY-WS1-FE-WIKI-STATES | – (Admin управление на статуса се покрива от бъдещи Admin stories под EPIC-ADMIN-PORTAL) |
+
+> Забележка: Тази таблица обхваща само FR-WIKI частта от PRD. Аналогични traceability таблици могат да бъдат добавени за FR-AUTH, FR-UI-DEMO, FR-API-DEMO и др., когато backlog-ът за тях бъде детайлизиран.

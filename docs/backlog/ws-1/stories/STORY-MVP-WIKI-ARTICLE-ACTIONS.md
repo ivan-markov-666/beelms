@@ -1,5 +1,7 @@
 # STORY-MVP-WIKI-ARTICLE-ACTIONS – Действия „Сподели“ и „Принтирай“ за Wiki статия
 
+Status: Draft
+
 _Забележка: Това story не е част от WS-1, а от EPIC-WIKI-PUBLIC (MVP разширение на публичната Wiki)._ 
 
 ## Summary
@@ -37,5 +39,6 @@ _Забележка: Това story не е част от WS-1, а от EPIC-WIK
 - [ ] (По избор) Snapshot/DOM тестове за наличието на action бутоните при активна статия.
 
 ## Notes
+- Parent Epic: `EPIC-WIKI-PUBLIC` (разширение на FR-WIKI-3 – действия „Сподели“ и „Принтирай“).
 - Това story надгражда `STORY-WS1-FE-WIKI-ARTICLE` (основна страница на статията) и може да се реализира в по-късен sprint след стабилизиране на базовия WS-1 flow.
 - Поведението и текстовете на бутоните трябва да са в синхрон с tone-of-voice и UX насоките в `docs/ux/qa4free-ux-design.md`.

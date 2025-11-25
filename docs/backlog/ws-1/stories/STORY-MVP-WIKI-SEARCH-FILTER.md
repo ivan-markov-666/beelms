@@ -1,5 +1,7 @@
 # STORY-MVP-WIKI-SEARCH-FILTER – Търсене и филтриране по език в Wiki списъка
 
+Status: Draft
+
 _Забележка: Това story не е част от WS-1, а от EPIC-WIKI-PUBLIC (MVP разширение на публичната Wiki)._ 
 
 ## Summary
@@ -43,6 +45,7 @@ _Забележка: Това story не е част от WS-1, а от EPIC-WIK
   - [ ] BE unit/integration тестове за новото филтриране в `WikiService`/репозиториото.
 
 ## Notes
+- Parent Epic: `EPIC-WIKI-PUBLIC` (разширение на FR-WIKI-2 – търсене и филтър по език).
 - Това story надгражда WS-1 и е част от по-широкия `EPIC-WIKI-PUBLIC` (виж `docs/backlog/MCP-EPIC-map.md`), но може да бъде планирано и изпълнено в отделен sprint след завършен базов WS-1 flow.
 - Детайлите за точния формат на query параметрите се синхронизират с OpenAPI (`docs/architecture/openapi.yaml`) и UX/Dev решението за „запазване на филтри при навигация“.
 - Language filter-ът на `/wiki` се разглежда като **локален филтър на екрана**, докато глобалният language switcher в header-а (виж `STORY-MVP-WIKI-LANGUAGE-SWITCH`) определя предпочитания език на интерфейса и началния набор от статии; конкретното поведение при комбинация от двата механизма се уточнява в UX/flows.

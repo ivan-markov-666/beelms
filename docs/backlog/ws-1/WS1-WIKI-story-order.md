@@ -35,10 +35,13 @@ _Роля: Tech Lead / Analyst. Цел: ясен ред за имплемент�
 7. **STORY-MVP-WIKI-SEARCH-FILTER**  
    Търсене и филтриране по език на `/wiki` + разширение на `GET /api/wiki/articles` с `q` и `lang`.
 
-8. **STORY-MVP-WIKI-LANGUAGE-SWITCH**  
+8. **STORY-MVP-WIKI-LIST-PAGINATION**  
+   Пагинация на списъка със статии на `/wiki`.
+
+9. **STORY-MVP-WIKI-LANGUAGE-SWITCH**  
    Global language switcher в header-а и поведение на `/wiki` и `/wiki/[slug]` при смяна на езика.
 
-9. **STORY-MVP-WIKI-ARTICLE-ACTIONS**  
+10. **STORY-MVP-WIKI-ARTICLE-ACTIONS**  
    Действия „Сподели“ и „Принтирай“ върху `/wiki/[slug]`.
 
 ---
@@ -46,4 +49,6 @@ _Роля: Tech Lead / Analyst. Цел: ясен ред за имплемент�
 ## 3. Бележки
 
 - Stories 1–6 реализират walking skeleton **WS-1 – Guest → Wiki List → Wiki Article**.
-- Stories 7–9 допълват пълния обхват на **FR-WIKI-2/3/4** от PRD върху стабилния WS-1 vertical.
+- Stories 7–10 допълват пълния обхват на **FR-WIKI-1/2/3/4** от PRD върху стабилния WS-1 vertical.
+- За WS-1 (stories 1–6) езикът на интерфейса и Wiki съдържанието може да бъде фиксиран (напр. BG), както е описано в `docs/delivery/walking-skeleton.md` – пълната multi-language логика и глобалният language switcher за Wiki се реализират в `STORY-MVP-WIKI-LANGUAGE-SWITCH`.
+- FR-WIKI-2 (търсене и филтър по език), FR-WIKI-3 (действия „Сподели“/„Принтирай“) и FR-WIKI-4 (превключване на език) се покриват основно от MVP stories 7–10 (`STORY-MVP-WIKI-SEARCH-FILTER`, `STORY-MVP-WIKI-LIST-PAGINATION`, `STORY-MVP-WIKI-LANGUAGE-SWITCH`, `STORY-MVP-WIKI-ARTICLE-ACTIONS`) и не са част от базовия WS-1 vertical.
