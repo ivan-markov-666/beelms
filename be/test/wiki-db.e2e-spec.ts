@@ -59,4 +59,20 @@ describe('Wiki DB migrations and seed (e2e)', () => {
 
     expect(faqLangs).toEqual(['bg']);
   });
+
+  it('has no duplicate versions for the same article, language and versionNumber', async () => {
+    const versionRepo = dataSource.getRepository(WikiArticleVersion);
+
+    const versions = await versionRepo.find({ relations: ['article'] });
+
+    const seenKeys = new Set<string>();
+
+    for (const v of versions) {
+      const slug = v.article.slug;
+      const key = `${slug}:${v.language}:${v.versionNumber}`;
+
+      expect(seenKeys.has(key)).toBe(false);
+      seenKeys.add(key);
+    }
+  });
 });

@@ -1,6 +1,6 @@
 # STORY-WS1-BE-WIKI-LIST-ENDPOINT – `GET /api/wiki/articles` връща списък от активни статии
 
-Status: Approved
+Status: Done
 
 ## Summary
 Като **frontend приложение** искам да имам ендпойнт `GET /api/wiki/articles`, който връща списък от активни Wiki статии, за да покажа публичен списък на `/wiki`.
@@ -24,12 +24,12 @@ Status: Approved
 - При вътрешна грешка ендпойнтът връща подходящ `5xx` статус код, така че frontend-ът да може да покаже общо **Error** състояние според `STORY-WS1-FE-WIKI-STATES`.
 
 ## Dev Tasks
-- [ ] Създаване на `WikiModule` (ако все още не съществува) и добавяне на контролер/route за `GET /api/wiki/articles`.
-- [ ] Имплементиране на `WikiService` метод, който чете от базата данни/репозиторито и филтрира по `status = active`.
-- [ ] Мапване на резултатите към DTO/response модел, подходящ за frontend.
-- [ ] Добавяне на базови unit тестове за `WikiService` метода.
-- [ ] (по избор) Интеграционен тест за `GET /api/wiki/articles` срещу test база.
-- [ ] Ръчно тестване чрез Swagger UI/Postman и през frontend-а на `/wiki`.
+- [x] Създаване на `WikiModule` (ако все още не съществува) и добавяне на контролер/route за `GET /api/wiki/articles`.
+- [x] Имплементиране на `WikiService` метод, който чете от базата данни/репозиторито и филтрира по `status = active`.
+- [x] Мапване на резултатите към DTO/response модел, подходящ за frontend.
+- [x] Добавяне на базови unit тестове за `WikiService` метода.
+- [x] (по избор) Интеграционен тест за `GET /api/wiki/articles` срещу test база.
+- [x] Ръчно тестване чрез Swagger UI/Postman и през frontend-а на `/wiki`.
 
 ## Notes
 - Зависимост от епика `EPIC-WS1-WIKI-BE` за налични и стабилни ендпойнти, както и от `STORY-WS1-BE-WIKI-DB-SEED` за реални данни в базата.
