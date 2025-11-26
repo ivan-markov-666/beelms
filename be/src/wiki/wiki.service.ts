@@ -18,6 +18,8 @@ export class WikiService {
   async getActiveArticlesList(
     page?: number,
     pageSize?: number,
+    q?: string,
+    lang?: string,
   ): Promise<WikiListItemDto[]> {
     const safePage = page && page > 0 ? page : 1;
     const safePageSize = pageSize && pageSize > 0 ? pageSize : 20;
@@ -40,15 +42,39 @@ export class WikiService {
         continue;
       }
 
-      published.sort((a, b) => {
+      let candidates = published;
+
+      const trimmedQ = q?.trim();
+      const hasSearch = !!trimmedQ;
+      const hasLangFilter = !!lang;
+
+      if (hasLangFilter) {
+        candidates = candidates.filter((v) => v.language === lang);
+      }
+
+      if (hasSearch && trimmedQ) {
+        const lowerQ = trimmedQ.toLowerCase();
+        candidates = candidates.filter((v) =>
+          (v.title ?? '').toLowerCase().includes(lowerQ),
+        );
+      }
+
+      if (!candidates.length) {
+        continue;
+      }
+
+      candidates.sort((a, b) => {
         const aTime = a.createdAt ? a.createdAt.getTime() : 0;
         const bTime = b.createdAt ? b.createdAt.getTime() : 0;
         return aTime - bTime;
       });
 
-      const latest = published[published.length - 1];
+      const latest = candidates[candidates.length - 1];
       const updatedAt =
-        latest.createdAt ?? article.updatedAt ?? article.createdAt ?? new Date();
+        latest.createdAt ??
+        article.updatedAt ??
+        article.createdAt ??
+        new Date();
 
       items.push({
         id: article.id,

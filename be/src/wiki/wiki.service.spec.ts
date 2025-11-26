@@ -72,6 +72,103 @@ describe('WikiService', () => {
     expect(first.title).toBe('Getting started with QA4Free');
   });
 
+  it('filters list by language when lang filter is provided', async () => {
+    const now = new Date();
+
+    (articleRepo.find as jest.Mock).mockResolvedValue([
+      {
+        id: '1',
+        slug: 'getting-started',
+        status: 'active',
+        createdAt: now,
+        updatedAt: now,
+        versions: [
+          {
+            language: 'bg',
+            title: 'Начало с QA4Free',
+            isPublished: true,
+            createdAt: new Date('2023-01-01T00:00:00Z'),
+          },
+          {
+            language: 'en',
+            title: 'Getting started with QA4Free',
+            isPublished: true,
+            createdAt: new Date('2023-01-02T00:00:00Z'),
+          },
+        ],
+      } as unknown as WikiArticle,
+    ]);
+
+    const result = (await service.getActiveArticlesList(
+      undefined,
+      undefined,
+      undefined,
+      'bg',
+    )) as {
+      slug: string;
+      language: string;
+      title: string;
+    }[];
+
+    expect(result).toHaveLength(1);
+    const first = result[0];
+    expect(first.slug).toBe('getting-started');
+    expect(first.language).toBe('bg');
+    expect(first.title).toBe('Начало с QA4Free');
+  });
+
+  it('filters list by search query when q filter is provided', async () => {
+    const now = new Date();
+
+    (articleRepo.find as jest.Mock).mockResolvedValue([
+      {
+        id: '1',
+        slug: 'getting-started',
+        status: 'active',
+        createdAt: now,
+        updatedAt: now,
+        versions: [
+          {
+            language: 'bg',
+            title: 'Начало с QA4Free',
+            isPublished: true,
+            createdAt: new Date('2023-01-01T00:00:00Z'),
+          },
+        ],
+      } as unknown as WikiArticle,
+      {
+        id: '2',
+        slug: 'faq',
+        status: 'active',
+        createdAt: now,
+        updatedAt: now,
+        versions: [
+          {
+            language: 'bg',
+            title: 'Често задавани въпроси (FAQ)',
+            isPublished: true,
+            createdAt: new Date('2023-01-01T00:00:00Z'),
+          },
+        ],
+      } as unknown as WikiArticle,
+    ]);
+
+    const result = (await service.getActiveArticlesList(
+      undefined,
+      undefined,
+      'начало',
+    )) as {
+      slug: string;
+      language: string;
+      title: string;
+    }[];
+
+    expect(result).toHaveLength(1);
+    const first = result[0];
+    expect(first.slug).toBe('getting-started');
+    expect(first.title).toBe('Начало с QA4Free');
+  });
+
   it('returns empty array when there are no active articles', async () => {
     (articleRepo.find as jest.Mock).mockResolvedValue([]);
 

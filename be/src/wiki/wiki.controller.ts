@@ -11,10 +11,12 @@ export class WikiController {
   async findAll(
     @Query('page') page?: string,
     @Query('pageSize') pageSize?: string,
+    @Query('q') q?: string,
+    @Query('lang') lang?: string,
   ): Promise<WikiListItemDto[]> {
     const pageNum = page ? Number(page) : undefined;
     const pageSizeNum = pageSize ? Number(pageSize) : undefined;
-    return this.wikiService.getActiveArticlesList(pageNum, pageSizeNum);
+    return this.wikiService.getActiveArticlesList(pageNum, pageSizeNum, q, lang);
   }
 
   @Get('articles/:slug')

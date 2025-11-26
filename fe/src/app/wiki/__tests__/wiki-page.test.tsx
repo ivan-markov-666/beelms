@@ -55,4 +55,32 @@ describe("WikiPage", () => {
       ),
     ).toBeInTheDocument();
   });
+
+  it("passes search and language filters to the API URL", async () => {
+    mockFetchOnce([]);
+
+    const ui = await WikiPage({
+      searchParams: { q: "начало", lang: "bg" },
+    });
+    render(ui);
+
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+    const [url] = (global.fetch as jest.Mock).mock.calls[0];
+    expect(url).toContain("/api/wiki/articles");
+    expect(url).toContain("q=%D0%BD%D0%B0%D1%87%D0%B0%D0%BB%D0%BE");
+    expect(url).toContain("lang=bg");
+  });
+
+  it("renders no-results state when filters are applied and there are no articles", async () => {
+    mockFetchOnce([]);
+
+    const ui = await WikiPage({
+      searchParams: { q: "няма-резултати" },
+    });
+    render(ui);
+
+    expect(
+      screen.getByText("Няма намерени статии според зададените критерии."),
+    ).toBeInTheDocument();
+  });
 });
