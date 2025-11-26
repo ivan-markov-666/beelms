@@ -6,7 +6,7 @@
 ## Scope (какво покрива този epic)
 - NestJS `AuthModule` и свързаните `AuthController` / `AuthService` и `UsersService` за публичните Auth flows.
 - Ендпойнти (минимален WS-2 scope):
-  - `POST /api/auth/register` – регистрация с имейл и парола.
+  - `POST /api/auth/register` – регистрация с имейл и парола, включително валидация на паролата според минимални правила за сигурност (PRD §4.2, MVP feature list §2.1).
   - `POST /api/auth/login` – вход с имейл и парола, издаване на JWT токен.
   - `POST /api/auth/forgot-password` – заявка за възстановяване на парола.
   - `POST /api/auth/reset-password` – задаване на нова парола чрез токен.
@@ -19,6 +19,8 @@
 
 Този epic **не** покрива (out of scope):
 - Пълен Admin панел за управление на потребители (това е част от `EPIC-ADMIN-PORTAL`).
+- Backend endpoint за logout (изход); в MVP logout се реализира чрез изтриване на JWT токена на frontend ниво (stateless auth, без отделен API endpoint в WS-2).
+- API за редакция/корекция на профилни данни; планирано е за отделен epic/story (Profile / Admin), в синхрон с FR-CROSS-2 от PRD.
 - Social login (Google, GitHub и др.).
 - MFA/2FA и по-сложни security механизми отвъд минимално нужните за MVP.
 - Пълна observability/metrics имплементация (освен каквото е нужно за basic logging и error tracking).
@@ -29,7 +31,7 @@
 - MVP Feature List – `docs/architecture/mvp-feature-list.md` (§2.1–2.4 Auth & Profile).
 - System Architecture – `docs/architecture/system-architecture.md` (компонент „Auth service“, сигурност, GDPR).
 - OpenAPI – `docs/architecture/openapi.yaml` (Auth и Users ендпойнти).
-- MCP EPIC Map – `docs/backlog/MCP-EPIC-map.md` (EPIC-AUTH-ACCOUNTS, EPIC-CROSS-SECURITY, EPIC-CROSS-GDPR-LEGAL).
+- MCP EPIC Map – `docs/backlog/MCP-EPIC-map.md` (EPIC-AUTH-ACCOUNTS, EPIC-CROSS-SECURITY, EPIC-CROSS-GDPR-LEGAL; security аспектите – CSRF/XSS/SQL injection, rate limiting и защита от brute-force – се реализират в синхрон с `EPIC-CROSS-SECURITY` и `system-architecture.md`).
 
 ## Child user stories
 - [ ] STORY-WS2-BE-AUTH-REGISTER-LOGIN – Регистрация и вход (API).
