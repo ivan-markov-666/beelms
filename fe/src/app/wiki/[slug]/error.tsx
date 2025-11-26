@@ -24,7 +24,7 @@ export default function WikiArticleError({ error, reset }: ErrorPageProps) {
         </p>
       </header>
 
-      <div className="flex gap-3">
+      <div className="mt-4 flex gap-3">
         <button
           type="button"
           onClick={reset}

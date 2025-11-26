@@ -35,7 +35,7 @@ export default async function WikiPage() {
     void error;
     return (
       <WikiMain>
-        <header>
+        <header className="space-y-2">
           <h1 className="text-3xl font-semibold text-zinc-900 dark:text-zinc-50">
             Wiki
           </h1>
@@ -50,7 +50,7 @@ export default async function WikiPage() {
   if (!articles.length) {
     return (
       <WikiMain>
-        <header>
+        <header className="space-y-2">
           <h1 className="text-3xl font-semibold text-zinc-900 dark:text-zinc-50">
             Wiki
           </h1>
@@ -64,7 +64,7 @@ export default async function WikiPage() {
 
   return (
     <WikiMain>
-      <header>
+      <header className="space-y-2">
         <h1 className="text-3xl font-semibold text-zinc-900 dark:text-zinc-50">
           Wiki
         </h1>
@@ -77,10 +77,13 @@ export default async function WikiPage() {
         {articles.map((article) => (
           <article
             key={article.id}
-            className="flex flex-col gap-1 px-4 py-3 first:rounded-t-xl last:rounded-b-xl hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors"
+            className="flex flex-col gap-2 px-4 py-4 first:rounded-t-xl last:rounded-b-xl hover:bg-zinc-50 dark:hover:bg-zinc-900 focus-within:bg-zinc-50 dark:focus-within:bg-zinc-900 transition-colors"
           >
             <h2 className="text-lg font-medium text-zinc-900 dark:text-zinc-50">
-              <Link href={`/wiki/${article.slug}`} className="hover:underline">
+              <Link
+                href={`/wiki/${article.slug}`}
+                className="hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 dark:focus-visible:ring-zinc-500 rounded"
+              >
                 {article.title}
               </Link>
             </h2>

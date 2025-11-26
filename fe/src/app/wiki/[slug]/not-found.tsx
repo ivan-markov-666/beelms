@@ -4,7 +4,7 @@ import { WikiBackLink } from "../_components/wiki-back-link";
 export default function WikiArticleNotFound() {
   return (
     <WikiMain>
-      <header className="space-y-2">
+      <header className="space-y-2 max-w-prose">
         <WikiBackLink />
         <h1 className="text-3xl font-semibold text-zinc-900 dark:text-zinc-50">
           Статията не е намерена
