@@ -1,14 +1,15 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { WikiService } from './wiki.service';
 import { WikiArticle } from './wiki-article.entity';
 import { WikiArticleVersion } from './wiki-article-version.entity';
 
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
+
 describe('WikiService', () => {
   let service: WikiService;
-  let articleRepo: Repository<WikiArticle>;
+  let articleRepo: { find: jest.Mock; findOne: jest.Mock };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -37,7 +38,7 @@ describe('WikiService', () => {
 
     await service.getActiveArticlesList();
 
-    expect(articleRepo.find).toHaveBeenCalledTimes(1);
+    expect(articleRepo.find as jest.Mock).toHaveBeenCalledTimes(1);
     const firstCall = (articleRepo.find as jest.Mock).mock.calls[0] as [
       {
         skip: number;
@@ -55,7 +56,7 @@ describe('WikiService', () => {
     await service.getActiveArticlesList(0, 0);
     await service.getActiveArticlesList(-1, -5);
 
-    expect(articleRepo.find).toHaveBeenCalledTimes(2);
+    expect(articleRepo.find as jest.Mock).toHaveBeenCalledTimes(2);
 
     const calls = (articleRepo.find as jest.Mock).mock.calls as [
       {
@@ -77,7 +78,7 @@ describe('WikiService', () => {
 
     await service.getActiveArticlesList(2, 10);
 
-    expect(articleRepo.find).toHaveBeenCalledTimes(1);
+    expect(articleRepo.find as jest.Mock).toHaveBeenCalledTimes(1);
     const firstCall = (articleRepo.find as jest.Mock).mock.calls[0] as [
       {
         skip: number;
