@@ -16,8 +16,21 @@ type WikiArticleDetail = {
   updatedAt: string;
 };
 
-async function fetchWikiArticle(slug: string): Promise<WikiArticleDetail> {
-  const res = await fetch(`${API_BASE_URL}/api/wiki/articles/${slug}`, {
+type WikiArticlePageSearchParams = {
+  lang?: string;
+};
+
+async function fetchWikiArticle(
+  slug: string,
+  lang?: string,
+): Promise<WikiArticleDetail> {
+  const url = new URL(`${API_BASE_URL}/api/wiki/articles/${slug}`);
+
+  if (lang) {
+    url.searchParams.set("lang", lang);
+  }
+
+  const res = await fetch(url.toString(), {
     cache: "no-store",
   });
 
@@ -34,10 +47,18 @@ async function fetchWikiArticle(slug: string): Promise<WikiArticleDetail> {
 
 export default async function WikiArticlePage({
   params,
+  searchParams,
 }: {
   params: { slug: string };
+  searchParams?: WikiArticlePageSearchParams | Promise<WikiArticlePageSearchParams>;
 }) {
-  const article = await fetchWikiArticle(params.slug);
+  const resolvedSearchParams =
+    ((await searchParams) ?? {}) as WikiArticlePageSearchParams;
+
+  const rawLang = resolvedSearchParams.lang ?? "";
+  const lang = rawLang || undefined;
+
+  const article = await fetchWikiArticle(params.slug, lang);
 
   return (
     <WikiMain>

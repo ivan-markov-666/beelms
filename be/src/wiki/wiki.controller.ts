@@ -16,7 +16,12 @@ export class WikiController {
   ): Promise<WikiListItemDto[]> {
     const pageNum = page ? Number(page) : undefined;
     const pageSizeNum = pageSize ? Number(pageSize) : undefined;
-    return this.wikiService.getActiveArticlesList(pageNum, pageSizeNum, q, lang);
+    return this.wikiService.getActiveArticlesList(
+      pageNum,
+      pageSizeNum,
+      q,
+      lang,
+    );
   }
 
   @Get('articles/:slug')

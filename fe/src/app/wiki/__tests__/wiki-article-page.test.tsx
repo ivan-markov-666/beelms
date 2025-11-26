@@ -51,6 +51,33 @@ describe("WikiArticlePage", () => {
     expect(screen.getByText("← Назад към Wiki")).toBeInTheDocument();
   });
 
+  it("passes lang query param to the API when provided", async () => {
+    mockFetchOnce(
+      {
+        id: "1",
+        slug: "getting-started",
+        language: "en",
+        title: "Getting started with QA4Free (EN)",
+        content: "Article content EN",
+        status: "active",
+        updatedAt: "2025-11-25T00:00:00.000Z",
+      },
+      true,
+      200,
+    );
+
+    const ui = await WikiArticlePage({
+      params: { slug: "getting-started" },
+      searchParams: { lang: "en" },
+    });
+    render(ui);
+
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+    const [url] = (global.fetch as jest.Mock).mock.calls[0];
+    expect(url).toContain("/api/wiki/articles/getting-started");
+    expect(url).toContain("lang=en");
+  });
+
   it("calls notFound when article is missing (404)", async () => {
     const notFoundMock = notFound as jest.Mock;
 

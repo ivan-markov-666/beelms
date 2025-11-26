@@ -1,4 +1,11 @@
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { WikiArticle } from './wiki-article.entity';
 
 @Entity('wiki_article_versions')
@@ -6,7 +13,9 @@ export class WikiArticleVersion {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => WikiArticle, (article) => article.versions, { onDelete: 'CASCADE' })
+  @ManyToOne(() => WikiArticle, (article) => article.versions, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'article_id' })
   article: WikiArticle;
 
