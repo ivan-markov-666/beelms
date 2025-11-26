@@ -59,7 +59,7 @@ npm run dev -- -p 3001
 
 ### Wiki FE tests
 
-This project includes basic tests for the Wiki list page.
+This project includes basic tests for the Wiki list and article pages, built on shared Wiki components in `src/app/wiki/_components`.
 
 To run them:
 

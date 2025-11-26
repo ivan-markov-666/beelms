@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { WikiMain } from "../_components/wiki-main";
+import { WikiBackLink } from "../_components/wiki-back-link";
 
 type ErrorPageProps = {
   error: Error & { digest?: string };
@@ -8,14 +10,11 @@ type ErrorPageProps = {
 };
 
 export default function WikiArticleError({ error, reset }: ErrorPageProps) {
+  void error;
   return (
-    <main className="mx-auto flex min-h-screen max-w-3xl flex-col gap-6 px-4 py-10">
+    <WikiMain>
       <header className="space-y-2">
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          <Link href="/wiki" className="hover:underline">
-            ← Назад към Wiki
-          </Link>
-        </p>
+        <WikiBackLink />
         <h1 className="text-3xl font-semibold text-zinc-900 dark:text-zinc-50">
           Възникна проблем при зареждане на статията
         </h1>
@@ -40,6 +39,6 @@ export default function WikiArticleError({ error, reset }: ErrorPageProps) {
           Към списъка със статии
         </Link>
       </div>
-    </main>
+    </WikiMain>
   );
 }
