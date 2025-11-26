@@ -1,6 +1,8 @@
+import { WikiMain } from "./_components/wiki-main";
+
 export default function Loading() {
   return (
-    <main className="mx-auto flex min-h-screen max-w-3xl flex-col gap-6 px-4 py-10">
+    <WikiMain>
       <header className="space-y-2">
         <div className="h-8 w-32 rounded bg-zinc-200 dark:bg-zinc-800 animate-pulse" />
         <div className="h-4 w-2/3 rounded bg-zinc-200 dark:bg-zinc-800 animate-pulse" />
@@ -16,6 +18,6 @@ export default function Loading() {
           </div>
         ))}
       </section>
-    </main>
+    </WikiMain>
   );
 }

@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { WikiMain } from "./_components/wiki-main";
+import { WikiArticleMeta } from "./_components/wiki-article-meta";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000";
 
@@ -30,8 +32,9 @@ export default async function WikiPage() {
   try {
     articles = await fetchWikiArticles();
   } catch (error) {
+    void error;
     return (
-      <main className="mx-auto flex min-h-screen max-w-3xl flex-col gap-6 px-4 py-10">
+      <WikiMain>
         <header>
           <h1 className="text-3xl font-semibold text-zinc-900 dark:text-zinc-50">
             Wiki
@@ -40,13 +43,13 @@ export default async function WikiPage() {
             Възникна проблем при зареждане на статиите. Опитайте отново по-късно.
           </p>
         </header>
-      </main>
+      </WikiMain>
     );
   }
 
   if (!articles.length) {
     return (
-      <main className="mx-auto flex min-h-screen max-w-3xl flex-col gap-6 px-4 py-10">
+      <WikiMain>
         <header>
           <h1 className="text-3xl font-semibold text-zinc-900 dark:text-zinc-50">
             Wiki
@@ -55,12 +58,12 @@ export default async function WikiPage() {
             Все още няма публикувани статии.
           </p>
         </header>
-      </main>
+      </WikiMain>
     );
   }
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-3xl flex-col gap-6 px-4 py-10">
+    <WikiMain>
       <header>
         <h1 className="text-3xl font-semibold text-zinc-900 dark:text-zinc-50">
           Wiki
@@ -71,34 +74,23 @@ export default async function WikiPage() {
       </header>
 
       <section className="mt-4 divide-y divide-zinc-200 dark:divide-zinc-800 border border-zinc-200 dark:border-zinc-800 rounded-xl bg-white dark:bg-zinc-950">
-        {articles.map((article) => {
-          const updatedDate = new Date(article.updatedAt);
-
-          return (
-            <article
-              key={article.id}
-              className="flex flex-col gap-1 px-4 py-3 first:rounded-t-xl last:rounded-b-xl hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors"
-            >
-              <h2 className="text-lg font-medium text-zinc-900 dark:text-zinc-50">
-                <Link
-                  href={`/wiki/${article.slug}`}
-                  className="hover:underline"
-                >
-                  {article.title}
-                </Link>
-              </h2>
-              <div className="flex flex-wrap items-center gap-3 text-sm text-zinc-500 dark:text-zinc-400">
-                <span className="uppercase tracking-wide text-xs font-semibold">
-                  {article.language}
-                </span>
-                <span>
-                  Последна редакция: {updatedDate.toLocaleDateString("bg-BG")}
-                </span>
-              </div>
-            </article>
-          );
-        })}
+        {articles.map((article) => (
+          <article
+            key={article.id}
+            className="flex flex-col gap-1 px-4 py-3 first:rounded-t-xl last:rounded-b-xl hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors"
+          >
+            <h2 className="text-lg font-medium text-zinc-900 dark:text-zinc-50">
+              <Link href={`/wiki/${article.slug}`} className="hover:underline">
+                {article.title}
+              </Link>
+            </h2>
+            <WikiArticleMeta
+              language={article.language}
+              updatedAt={article.updatedAt}
+            />
+          </article>
+        ))}
       </section>
-    </main>
+    </WikiMain>
   );
 }

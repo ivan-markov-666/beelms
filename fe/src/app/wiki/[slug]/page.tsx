@@ -1,5 +1,7 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
+import { WikiMain } from "../_components/wiki-main";
+import { WikiBackLink } from "../_components/wiki-back-link";
+import { WikiArticleMeta } from "../_components/wiki-article-meta";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000";
@@ -37,32 +39,22 @@ export default async function WikiArticlePage({
 }) {
   const article = await fetchWikiArticle(params.slug);
 
-  const updatedDate = new Date(article.updatedAt);
-
   return (
-    <main className="mx-auto flex min-h-screen max-w-3xl flex-col gap-6 px-4 py-10">
+    <WikiMain>
       <header className="space-y-2">
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          <Link href="/wiki" className="hover:underline">
-            ← Назад към Wiki
-          </Link>
-        </p>
+        <WikiBackLink />
         <h1 className="text-3xl font-semibold text-zinc-900 dark:text-zinc-50">
           {article.title}
         </h1>
-        <div className="flex flex-wrap items-center gap-3 text-sm text-zinc-500 dark:text-zinc-400">
-          <span className="uppercase tracking-wide text-xs font-semibold">
-            {article.language}
-          </span>
-          <span>
-            Последна редакция: {updatedDate.toLocaleDateString("bg-BG")}
-          </span>
-        </div>
+        <WikiArticleMeta
+          language={article.language}
+          updatedAt={article.updatedAt}
+        />
       </header>
 
       <article className="mt-4 whitespace-pre-line text-zinc-800 dark:text-zinc-100 leading-relaxed">
         {article.content}
       </article>
-    </main>
+    </WikiMain>
   );
 }
