@@ -41,6 +41,11 @@ For the WS-1 walking skeleton, the `/wiki` page in this Next.js app depends on t
 
 - `GET http://localhost:3000/api/wiki/articles`
 
+For the MVP Wiki search and language filter (`STORY-MVP-WIKI-SEARCH-FILTER`), the `/wiki` page also:
+
+- exposes a search input and language dropdown (BG/EN);
+- forwards the selected filters to the backend as `q` (search query) and `lang` (language) query parameters.
+
 To see real Wiki data on `/wiki`:
 
 1. Start the backend and database (see `be/README.md`), then apply migrations and the Wiki seed:

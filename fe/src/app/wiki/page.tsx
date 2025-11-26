@@ -2,6 +2,8 @@ import Link from "next/link";
 import { WikiMain } from "./_components/wiki-main";
 import { WikiArticleMeta } from "./_components/wiki-article-meta";
 
+export const dynamic = "force-dynamic";
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000";
 
 type WikiArticle = {
@@ -13,8 +15,25 @@ type WikiArticle = {
   updatedAt: string;
 };
 
-async function fetchWikiArticles(): Promise<WikiArticle[]> {
-  const res = await fetch(`${API_BASE_URL}/api/wiki/articles`, {
+type WikiSearchParams = {
+  q?: string;
+  lang?: string;
+};
+
+async function fetchWikiArticles(
+  params?: WikiSearchParams,
+): Promise<WikiArticle[]> {
+  const url = new URL(`${API_BASE_URL}/api/wiki/articles`);
+
+  if (params?.q && params.q.trim()) {
+    url.searchParams.set("q", params.q.trim());
+  }
+
+  if (params?.lang) {
+    url.searchParams.set("lang", params.lang);
+  }
+
+  const res = await fetch(url.toString(), {
     // For WS-1 we always want the latest data
     cache: "no-store",
   });
@@ -26,11 +45,79 @@ async function fetchWikiArticles(): Promise<WikiArticle[]> {
   return res.json();
 }
 
-export default async function WikiPage() {
+function WikiFiltersForm({
+  initialQ,
+  initialLang,
+}: {
+  initialQ: string;
+  initialLang: string;
+}) {
+  return (
+    <form
+      className="mt-4 flex flex-col gap-3 sm:mt-6 sm:flex-row sm:items-end sm:gap-4"
+      action="/wiki"
+      method="GET"
+    >
+      <div className="flex-1">
+        <label
+          htmlFor="q"
+          className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+        >
+          Търсене
+        </label>
+        <input
+          type="search"
+          id="q"
+          name="q"
+          defaultValue={initialQ}
+          className="mt-1 w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50 dark:focus:ring-zinc-500"
+        />
+      </div>
+      <div className="w-full sm:w-44">
+        <label
+          htmlFor="lang"
+          className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+        >
+          Език
+        </label>
+        <select
+          id="lang"
+          name="lang"
+          defaultValue={initialLang}
+          className="mt-1 w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50 dark:focus:ring-zinc-500"
+        >
+          <option value="">Всички езици</option>
+          <option value="bg">BG</option>
+          <option value="en">EN</option>
+        </select>
+      </div>
+    </form>
+  );
+}
+
+type WikiPageSearchParams = {
+  q?: string;
+  lang?: string;
+};
+
+export default async function WikiPage({
+  searchParams,
+}: {
+  searchParams?: WikiPageSearchParams | Promise<WikiPageSearchParams>;
+} = {}) {
+  const resolvedSearchParams =
+    ((await searchParams) ?? {}) as WikiPageSearchParams;
+
+  const rawQ = resolvedSearchParams.q ?? "";
+  const rawLang = resolvedSearchParams.lang ?? "";
+  const trimmedQ = rawQ.trim();
+  const lang = rawLang || undefined;
+  const hasFilters = Boolean(trimmedQ || lang);
+
   let articles: WikiArticle[] = [];
 
   try {
-    articles = await fetchWikiArticles();
+    articles = await fetchWikiArticles({ q: trimmedQ, lang });
   } catch (error) {
     void error;
     return (
@@ -55,8 +142,11 @@ export default async function WikiPage() {
             Wiki
           </h1>
           <p className="mt-2 text-zinc-600 dark:text-zinc-400">
-            Все още няма публикувани статии.
+            {hasFilters
+              ? "Няма намерени статии според зададените критерии."
+              : "Все още няма публикувани статии."}
           </p>
+          <WikiFiltersForm initialQ={rawQ} initialLang={rawLang} />
         </header>
       </WikiMain>
     );
@@ -71,6 +161,7 @@ export default async function WikiPage() {
         <p className="mt-2 text-zinc-600 dark:text-zinc-400">
           Публичен списък с Wiki статии.
         </p>
+        <WikiFiltersForm initialQ={rawQ} initialLang={rawLang} />
       </header>
 
       <section className="mt-4 divide-y divide-zinc-200 dark:divide-zinc-800 border border-zinc-200 dark:border-zinc-800 rounded-xl bg-white dark:bg-zinc-950">
