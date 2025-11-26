@@ -52,7 +52,7 @@ export default async function WikiArticlePage({
         />
       </header>
 
-      <article className="mt-4 whitespace-pre-line text-zinc-800 dark:text-zinc-100 leading-relaxed">
+      <article className="mt-6 max-w-prose whitespace-pre-line text-base text-zinc-800 dark:text-zinc-100 leading-relaxed">
         {article.content}
       </article>
     </WikiMain>
