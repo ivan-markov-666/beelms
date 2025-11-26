@@ -1,8 +1,8 @@
 # STORY-MVP-CROSS-I18N-FE-FOUNDATION – Основи на мултиезичността във FE (BG/EN)
 
-Status: Draft (Archived in WS-1)
+Status: Draft
 
-_Забележка: Този файл е архивирано копие в WS-1. Актуалната версия на story-то се намира в `docs/backlog/ws-2/stories/STORY-MVP-CROSS-I18N-FE-FOUNDATION.md` и е част от `EPIC-CROSS-I18N` (и частично `EPIC-WIKI-PUBLIC`), планирана за изпълнение в същия timeframe като WS-2._
+_Забележка: Това story не е част от WS-2 Auth walking skeleton, а от `EPIC-CROSS-I18N` (и частично `EPIC-WIKI-PUBLIC`) като cross-cutting MVP разширение на мултиезичността, планирано за изпълнение в същия timeframe като WS-2._
 
 ## Summary
 Като **гост** искам когато сменя езика от глобалния language switcher в header-а, не само Wiki съдържанието, но и основните елементи на интерфейса (навигация, заглавия в layout shell) да се показват на избрания език (BG/EN), за да имам последователно преживяване в целия сайт.
@@ -50,5 +50,5 @@ _Забележка: Този файл е архивирано копие в WS-
 - Това story стъпва върху вече имплементираното `STORY-MVP-WIKI-LANGUAGE-SWITCH` (глобален language switcher + Wiki поведение) и **разширява ефекта на избрания език върху общия UI**, без да променя backend API-та.
 - Необходими са координация и UX review, за да се уточни точният набор от елементи в layout/nav, които трябва да са преводими в рамките на MVP.
 - Препоръчително планиране:
-  - да се изпълни **след формалното приключване на WS-1** (walking skeleton за Wiki), като част от първата wave от EPIC-CROSS-I18N за MVP;
+  - да се изпълни **след формалното приключване на WS-1** (walking skeleton за Wiki) и базовия WS-2 Auth skeleton, като част от първата wave от EPIC-CROSS-I18N за MVP;
   - може да бъде комбинирано с ранни Auth/Practice екрани, за да има достатъчно UI, върху който мултиезичността да е видима.

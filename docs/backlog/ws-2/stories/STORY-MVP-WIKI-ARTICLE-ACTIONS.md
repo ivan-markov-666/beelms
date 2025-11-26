@@ -1,8 +1,8 @@
 # STORY-MVP-WIKI-ARTICLE-ACTIONS – Действия „Сподели“ и „Принтирай“ за Wiki статия
 
-Status: Draft (Archived in WS-1)
+Status: Draft
 
-_Забележка: Този файл е архивирано копие в WS-1. Актуалната версия на story-то се намира в `docs/backlog/ws-2/stories/STORY-MVP-WIKI-ARTICLE-ACTIONS.md` и е планирана за изпълнение в същия timeframe като WS-2 (EPIC-WIKI-PUBLIC)._ 
+_Забележка: Това story не е част от WS-2 Auth walking skeleton, а от `EPIC-WIKI-PUBLIC` (MVP разширение на публичната Wiki), планирано за изпълнение в същия timeframe като WS-2._ 
 
 ## Summary
 Като **гост** искам на страницата `/wiki/[slug]` да имам удобни действия „Сподели“ и „Принтирай“, за да мога лесно да споделям и отпечатвам съдържанието на Wiki статията.
@@ -40,5 +40,5 @@ _Забележка: Този файл е архивирано копие в WS-
 
 ## Notes
 - Parent Epic: `EPIC-WIKI-PUBLIC` (разширение на FR-WIKI-3 – действия „Сподели“ и „Принтирай“).
-- Това story надгражда `STORY-WS1-FE-WIKI-ARTICLE` (основна страница на статията) и може да се реализира в по-късен sprint след стабилизиране на базовия WS-1 flow.
+- Това story надгражда `STORY-WS1-FE-WIKI-ARTICLE` (основна страница на статията) и е планирано да се реализира в MVP спринт след WS-2 Auth walking skeleton.
 - Поведението и текстовете на бутоните трябва да са в синхрон с tone-of-voice и UX насоките в `docs/ux/qa4free-ux-design.md`.
