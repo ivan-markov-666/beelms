@@ -38,8 +38,7 @@ describe('WikiService', () => {
     await service.getActiveArticlesList();
 
     expect(articleRepo.find).toHaveBeenCalledTimes(1);
-    const firstCall = (articleRepo.find as jest.Mock).mock
-      .calls[0] as [
+    const firstCall = (articleRepo.find as jest.Mock).mock.calls[0] as [
       {
         skip: number;
         take: number;
@@ -58,8 +57,7 @@ describe('WikiService', () => {
 
     expect(articleRepo.find).toHaveBeenCalledTimes(2);
 
-    const calls = (articleRepo.find as jest.Mock).mock
-      .calls as [
+    const calls = (articleRepo.find as jest.Mock).mock.calls as [
       {
         skip: number;
         take: number;
@@ -80,8 +78,7 @@ describe('WikiService', () => {
     await service.getActiveArticlesList(2, 10);
 
     expect(articleRepo.find).toHaveBeenCalledTimes(1);
-    const firstCall = (articleRepo.find as jest.Mock).mock
-      .calls[0] as [
+    const firstCall = (articleRepo.find as jest.Mock).mock.calls[0] as [
       {
         skip: number;
         take: number;

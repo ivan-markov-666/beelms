@@ -50,9 +50,7 @@ describe('Wiki DB migrations and seed (e2e)', () => {
       .map((v) => v.language)
       .sort();
 
-    expect(gettingStartedLangs).toEqual(
-      expect.arrayContaining(['bg', 'en']),
-    );
+    expect(gettingStartedLangs).toEqual(expect.arrayContaining(['bg', 'en']));
 
     const faqVersions = versions.filter((v) => v.article.slug === 'faq');
     const faqLangs = faqVersions.map((v) => v.language).sort();

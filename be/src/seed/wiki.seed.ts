@@ -103,12 +103,10 @@ async function seedWiki() {
 
 seedWiki()
   .then(() => {
-    // eslint-disable-next-line no-console
     console.log('Wiki seed completed');
     process.exit(0);
   })
   .catch((err) => {
-    // eslint-disable-next-line no-console
     console.error('Wiki seed failed', err);
     process.exit(1);
   });
