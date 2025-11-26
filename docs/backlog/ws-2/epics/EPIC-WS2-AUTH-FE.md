@@ -10,13 +10,16 @@
   - `/auth/forgot-password` – страница за заявка за възстановяване на парола.
   - `/auth/reset-password` – страница за ресет на парола чрез токен.
   - `/profile` – страница „Моят профил“ с основна информация и действия (изтриване/експорт на акаунт).
+ - Logout действие (напр. бутон в header или в `/profile`), което изчиства локалния Auth state (JWT/сесия) и връща потребителя към публичен екран, без отделен backend logout endpoint (в синхрон с `EPIC-WS2-AUTH-BE`).
 - Използване на споделен layout компонент (header/footer) и базови UI компоненти (формови елементи, съобщения за грешка/успех) според `docs/ux/qa4free-ux-design.md` и design system-а.
 - Основни UX състояния за Auth екраните: loading / success / validation errors / server errors.
 - Интеграция с Auth API ендпойнтите от `EPIC-WS2-AUTH-BE`.
+- UI интеграция на anti-bot механизми (напр. reCAPTCHA widget или еквивалент) за критични форми (регистрация, заявка за забравена парола, експорт на данни), в синхрон с `EPIC-WS2-AUTH-BE`, PRD §4.2 (FR-AUTH-7) и `EPIC-CROSS-SECURITY`.
 
 Този epic **не** покрива (out of scope):
 - Пълен Account Settings център с напреднали настройки (notification prefs, multi-factor и др.).
 - Административни екрани за управление на потребители (част от Admin Portal).
+- Пълна мултиезичност на всички Auth екрани (извън базовия BG вариант за WS-2); това се реализира поетапно чрез `EPIC-CROSS-I18N`.
 - Пълна responsive/visual polish отвъд нуждите за WS-2 (допълнителни анимации, сложни form wizards и др.).
 
 ## Related BMAD artifacts
@@ -26,7 +29,7 @@
 - UX Design – `docs/ux/qa4free-ux-design.md` (екрани за регистрация, вход, профил, забравена/ресет парола).
 - User Flows – `docs/ux/flows/qa4free-user-flows.md` (flows за register/login/forgot/reset/profile/GDPR flows).
 - System Architecture – `docs/architecture/system-architecture.md` (frontend приложение, навигация, security/UX ограничения).
-- MCP EPIC Map – `docs/backlog/MCP-EPIC-map.md` (EPIC-AUTH-ACCOUNTS, EPIC-CROSS-I18N, EPIC-CROSS-GDPR-LEGAL).
+- MCP EPIC Map – `docs/backlog/MCP-EPIC-map.md` (EPIC-AUTH-ACCOUNTS, EPIC-CROSS-I18N, EPIC-CROSS-GDPR-LEGAL, EPIC-CROSS-SECURITY).
 
 ## Child user stories
 - [ ] STORY-WS2-FE-AUTH-REGISTER-LOGIN – UI за регистрация и вход.
@@ -47,6 +50,7 @@
 - Съществуват работещи страници за register/login/forgot/reset/profile, достъпни през основния frontend.
 - UX поведението на екраните съответства на релевантните UX/flows и PRD изисквания за Auth.
 - Всички форми имат базова клиентска и сървърна валидация, с ясни съобщения за грешка.
+- Потокът за закриване на акаунт реализира двустепенно потвърждение, а заявките за експорт на данни и забравена парола включват нужните anti-bot проверки (напр. CAPTCHA), в синхрон с PRD §4.2 и MVP feature list §2.3–2.4.
 - Реализирана е end-to-end интеграция с Auth API ендпойнтите от `EPIC-WS2-AUTH-BE` (без да се разчита на mock данни в основния flow).
 - Налични са поне базови FE/интеграционни тестове или ясен мануален чеклист за основните Auth сценарии.
 - Няма отворени критични (P0/P1) дефекти, свързани с Auth UX за WS-2.
