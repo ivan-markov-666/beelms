@@ -32,6 +32,66 @@ describe('WikiService', () => {
     articleRepo = module.get(getRepositoryToken(WikiArticle));
   });
 
+  it('uses default pagination when page and pageSize are not provided', async () => {
+    (articleRepo.find as jest.Mock).mockResolvedValue([]);
+
+    await service.getActiveArticlesList();
+
+    expect(articleRepo.find).toHaveBeenCalledTimes(1);
+    const firstCall = (articleRepo.find as jest.Mock).mock
+      .calls[0] as [
+      {
+        skip: number;
+        take: number;
+      },
+    ];
+    const options = firstCall[0];
+    expect(options.skip).toBe(0);
+    expect(options.take).toBe(20);
+  });
+
+  it('normalizes invalid page and pageSize to safe defaults', async () => {
+    (articleRepo.find as jest.Mock).mockResolvedValue([]);
+
+    await service.getActiveArticlesList(0, 0);
+    await service.getActiveArticlesList(-1, -5);
+
+    expect(articleRepo.find).toHaveBeenCalledTimes(2);
+
+    const calls = (articleRepo.find as jest.Mock).mock
+      .calls as [
+      {
+        skip: number;
+        take: number;
+      }[],
+    ];
+
+    for (let i = 0; i < calls.length; i += 1) {
+      const call = calls[i];
+      const options = call[0];
+      expect(options.skip).toBe(0);
+      expect(options.take).toBe(20);
+    }
+  });
+
+  it('calculates skip and take for given page and pageSize', async () => {
+    (articleRepo.find as jest.Mock).mockResolvedValue([]);
+
+    await service.getActiveArticlesList(2, 10);
+
+    expect(articleRepo.find).toHaveBeenCalledTimes(1);
+    const firstCall = (articleRepo.find as jest.Mock).mock
+      .calls[0] as [
+      {
+        skip: number;
+        take: number;
+      },
+    ];
+    const options = firstCall[0];
+    expect(options.skip).toBe(10);
+    expect(options.take).toBe(10);
+  });
+
   it('returns active articles with latest published version', async () => {
     const now = new Date();
 

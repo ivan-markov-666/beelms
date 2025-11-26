@@ -46,6 +46,18 @@ For the MVP Wiki search and language filter (`STORY-MVP-WIKI-SEARCH-FILTER`), th
 - exposes a search input and language dropdown (BG/EN);
 - forwards the selected filters to the backend as `q` (search query) and `lang` (language) query parameters.
 
+For the MVP Wiki list pagination (`STORY-MVP-WIKI-LIST-PAGINATION`), the `/wiki` page:
+
+- forwards `page` and `pageSize` query parameters to the backend;
+- uses a fixed `pageSize = 20` (see `PAGE_SIZE` constant in `src/app/wiki/page.tsx`);
+- shows pagination controls (Previous/Next + "Страница N") when there is more than one page or when you navigate to a page > 1.
+
+Useful manual test URLs (assuming FE is running on `http://localhost:3001`):
+
+- `http://localhost:3001/wiki` – first page, default filters;
+- `http://localhost:3001/wiki?page=2` – out-of-range page with empty result set;
+- `http://localhost:3001/wiki?q=Начало&lang=bg&page=2` – pagination combined with search and language filter.
+
 To see real Wiki data on `/wiki`:
 
 1. Start the backend and database (see `be/README.md`), then apply migrations and the Wiki seed:

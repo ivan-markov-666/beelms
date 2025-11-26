@@ -120,7 +120,7 @@ After migrations and the Wiki seed have been applied, the following public endpo
 
 - `GET /api/wiki/articles` – returns a list of active Wiki articles.
   - Optional query params:
-    - `page`, `pageSize` – pagination.
+    - `page`, `pageSize` – pagination (defaults: `page = 1`, `pageSize = 20`).
     - `q` – optional search query applied to article titles.
     - `lang` – optional language filter for the latest published version (e.g. `bg`, `en`).
 - `GET /api/wiki/articles/{slug}` – returns a single active Wiki article by slug.
@@ -134,6 +134,9 @@ curl http://localhost:3000/api/wiki/articles
 curl "http://localhost:3000/api/wiki/articles/getting-started?lang=bg"
 
 curl "http://localhost:3000/api/wiki/articles?q=Начало&lang=bg"
+
+# Explicit pagination (page 2, page size 10) combined with filters
+curl "http://localhost:3000/api/wiki/articles?q=Начало&lang=bg&page=2&pageSize=10"
 ```
 
 ## Run tests
