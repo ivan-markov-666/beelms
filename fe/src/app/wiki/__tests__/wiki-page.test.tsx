@@ -83,4 +83,48 @@ describe("WikiPage", () => {
       screen.getByText("Няма намерени статии според зададените критерии."),
     ).toBeInTheDocument();
   });
+
+  it("passes page and pageSize to the API URL", async () => {
+    mockFetchOnce([]);
+
+    const ui = await WikiPage({
+      searchParams: { page: "2" },
+    });
+    render(ui);
+
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+    const [url] = (global.fetch as jest.Mock).mock.calls[0];
+    expect(url).toContain("/api/wiki/articles");
+    expect(url).toContain("page=2");
+    expect(url).toContain("pageSize=20");
+  });
+
+  it("builds pagination links that preserve search and language filters", async () => {
+    mockFetchOnce([
+      {
+        id: "1",
+        slug: "getting-started",
+        language: "bg",
+        title: "Начало с QA4Free",
+        status: "active",
+        updatedAt: "2025-11-25T00:00:00.000Z",
+      },
+    ]);
+
+    const ui = await WikiPage({
+      searchParams: { q: "test", lang: "bg", page: "2" },
+    });
+    render(ui);
+
+    const prevLink = screen
+      .getByText("Предишна страница")
+      .closest("a");
+
+    expect(prevLink).not.toBeNull();
+
+    const href = prevLink?.getAttribute("href") ?? "";
+    expect(href).toContain("/wiki");
+    expect(href).toContain("q=test");
+    expect(href).toContain("lang=bg");
+  });
 });

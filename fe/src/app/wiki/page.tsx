@@ -4,7 +4,9 @@ import { WikiArticleMeta } from "./_components/wiki-article-meta";
 
 export const dynamic = "force-dynamic";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000";
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000";
+const PAGE_SIZE = 20;
 
 type WikiArticle = {
   id: string;
@@ -18,6 +20,8 @@ type WikiArticle = {
 type WikiSearchParams = {
   q?: string;
   lang?: string;
+  page?: number;
+  pageSize?: number;
 };
 
 async function fetchWikiArticles(
@@ -31,6 +35,14 @@ async function fetchWikiArticles(
 
   if (params?.lang) {
     url.searchParams.set("lang", params.lang);
+  }
+
+  if (typeof params?.page === "number") {
+    url.searchParams.set("page", String(params.page));
+  }
+
+  if (typeof params?.pageSize === "number") {
+    url.searchParams.set("pageSize", String(params.pageSize));
   }
 
   const res = await fetch(url.toString(), {
@@ -98,6 +110,7 @@ function WikiFiltersForm({
 type WikiPageSearchParams = {
   q?: string;
   lang?: string;
+  page?: string;
 };
 
 export default async function WikiPage({
@@ -110,14 +123,18 @@ export default async function WikiPage({
 
   const rawQ = resolvedSearchParams.q ?? "";
   const rawLang = resolvedSearchParams.lang ?? "";
+  const rawPage = resolvedSearchParams.page ?? "1";
   const trimmedQ = rawQ.trim();
   const lang = rawLang || undefined;
+  const parsedPage = Number.parseInt(rawPage, 10);
+  const page = Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1;
+  const pageSize = PAGE_SIZE;
   const hasFilters = Boolean(trimmedQ || lang);
 
   let articles: WikiArticle[] = [];
 
   try {
-    articles = await fetchWikiArticles({ q: trimmedQ, lang });
+    articles = await fetchWikiArticles({ q: trimmedQ, lang, page, pageSize });
   } catch (error) {
     void error;
     return (
@@ -135,6 +152,30 @@ export default async function WikiPage({
   }
 
   if (!articles.length) {
+    const hasNextPage = articles.length === pageSize;
+    const hasPrevPage = page > 1;
+
+    const buildPageHref = (targetPage: number) => {
+      const params = new URLSearchParams();
+
+      if (trimmedQ) {
+        params.set("q", trimmedQ);
+      }
+
+      if (rawLang) {
+        params.set("lang", rawLang);
+      }
+
+      if (targetPage > 1) {
+        params.set("page", String(targetPage));
+      }
+
+      const query = params.toString();
+      return query ? `/wiki?${query}` : "/wiki";
+    };
+
+    const shouldShowPagination = hasPrevPage || hasNextPage || page > 1;
+
     return (
       <WikiMain>
         <header className="space-y-2">
@@ -148,9 +189,67 @@ export default async function WikiPage({
           </p>
           <WikiFiltersForm initialQ={rawQ} initialLang={rawLang} />
         </header>
+
+        {shouldShowPagination && (
+          <nav className="mt-4 flex items-center justify-between text-sm text-zinc-600 dark:text-zinc-400">
+            {hasPrevPage ? (
+              <Link
+                href={buildPageHref(page - 1)}
+                className="rounded px-3 py-1 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 dark:focus-visible:ring-zinc-500"
+              >
+                Предишна страница
+              </Link>
+            ) : (
+              <span className="rounded px-3 py-1 opacity-50">
+                Предишна страница
+              </span>
+            )}
+
+            <span className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-xs font-medium text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200">
+              Страница {page}
+            </span>
+
+            {hasNextPage ? (
+              <Link
+                href={buildPageHref(page + 1)}
+                className="rounded px-3 py-1 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 dark:focus-visible:ring-zinc-500"
+              >
+                Следваща страница
+              </Link>
+            ) : (
+              <span className="rounded px-3 py-1 opacity-50">
+                Следваща страница
+              </span>
+            )}
+          </nav>
+        )}
       </WikiMain>
     );
   }
+
+  const hasNextPage = articles.length === pageSize;
+  const hasPrevPage = page > 1;
+
+  const buildPageHref = (targetPage: number) => {
+    const params = new URLSearchParams();
+
+    if (trimmedQ) {
+      params.set("q", trimmedQ);
+    }
+
+    if (rawLang) {
+      params.set("lang", rawLang);
+    }
+
+    if (targetPage > 1) {
+      params.set("page", String(targetPage));
+    }
+
+    const query = params.toString();
+    return query ? `/wiki?${query}` : "/wiki";
+  };
+
+  const shouldShowPagination = hasPrevPage || hasNextPage || page > 1;
 
   return (
     <WikiMain>
@@ -185,6 +284,40 @@ export default async function WikiPage({
           </article>
         ))}
       </section>
+
+      {shouldShowPagination && (
+        <nav className="mt-4 flex items-center justify-between text-sm text-zinc-600 dark:text-zinc-400">
+          {hasPrevPage ? (
+            <Link
+              href={buildPageHref(page - 1)}
+              className="rounded px-3 py-1 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 dark:focus-visible:ring-zinc-500"
+            >
+              Предишна страница
+            </Link>
+          ) : (
+            <span className="rounded px-3 py-1 opacity-50">
+              Предишна страница
+            </span>
+          )}
+
+          <span className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-xs font-medium text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200">
+            Страница {page}
+          </span>
+
+          {hasNextPage ? (
+            <Link
+              href={buildPageHref(page + 1)}
+              className="rounded px-3 py-1 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 dark:focus-visible:ring-zinc-500"
+            >
+              Следваща страница
+            </Link>
+          ) : (
+            <span className="rounded px-3 py-1 opacity-50">
+              Следваща страница
+            </span>
+          )}
+        </nav>
+      )}
     </WikiMain>
   );
 }
