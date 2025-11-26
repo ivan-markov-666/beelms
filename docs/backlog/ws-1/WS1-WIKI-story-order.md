@@ -48,12 +48,12 @@ _Роля: Tech Lead / Analyst. Цел: ясен ред за имплемент�
    Global language switcher в header-а и поведение на `/wiki` и `/wiki/[slug]` при смяна на езика.
 
 12. **STORY-MVP-WIKI-ARTICLE-ACTIONS**  
-   Действия „Сподели“ и „Принтирай“ върху `/wiki/[slug]`.
+   Действия „Сподели“ и „Принтирай“ върху `/wiki/[slug]` (EPIC-WIKI-PUBLIC), планирани за изпълнение в MVP спринт след WS-2; актуалното story се намира в `docs/backlog/ws-2/stories/STORY-MVP-WIKI-ARTICLE-ACTIONS.md`.
 
 ### Cross-cutting мултиезичност (след Wiki stories)
 
 13. **STORY-MVP-CROSS-I18N-FE-FOUNDATION**  
-   Основи на мултиезичността във FE (BG/EN) – глобалният header language switcher влияе и на общия UI (layout/nav), стъпвайки върху поведението от `STORY-MVP-WIKI-LANGUAGE-SWITCH` и `EPIC-CROSS-I18N`.
+   Основи на мултиезичността във FE (BG/EN) – глобалният header language switcher влияе и на общия UI (layout/nav), стъпвайки върху поведението от `STORY-MVP-WIKI-LANGUAGE-SWITCH` и `EPIC-CROSS-I18N`; планирано за изпълнение в същия timeframe като WS-2; актуалното story се намира в `docs/backlog/ws-2/stories/STORY-MVP-CROSS-I18N-FE-FOUNDATION.md`.
 
 ---
 
