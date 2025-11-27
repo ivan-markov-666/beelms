@@ -139,6 +139,29 @@ curl "http://localhost:3000/api/wiki/articles?q=Начало&lang=bg"
 curl "http://localhost:3000/api/wiki/articles?q=Начало&lang=bg&page=2&pageSize=10"
 ```
 
+## Auth API (WS-2)
+
+The Auth service implements the WS-2 walking skeleton for registration and login. The main public endpoints are:
+
+- `POST /api/auth/register`
+  - Request body: `{ "email": string, "password": string, "captchaToken?": string }`.
+  - On success, returns `201 Created` with a `UserProfile` object: `{ id, email, createdAt }`.
+  - On error, returns `409` for duplicate email or `400` for validation errors. Passwords are never returned in responses.
+- `POST /api/auth/login`
+  - Request body: `{ "email": string, "password": string }`.
+  - On success, returns `200 OK` with an `AuthToken` object: `{ accessToken, tokenType: "Bearer" }`.
+  - On error, returns `401 Unauthorized` with a generic "invalid credentials" message.
+
+### Auth configuration
+
+The Auth module is configured via environment variables:
+
+- `JWT_SECRET` – secret key used to sign JWT access tokens (default for local dev: `dev_jwt_secret_change_me`).
+- `JWT_EXPIRES_IN` – access token lifetime, e.g. `900s` or `15m` (default: `900s`).
+- `AUTH_REQUIRE_CAPTCHA` – when set to `true`, the `POST /api/auth/register` endpoint requires a non-empty `captchaToken` field in the request body.
+
+For full request/response schemas, see the OpenAPI spec in `docs/architecture/openapi.yaml`.
+
 ## Run tests
 
 ```bash
