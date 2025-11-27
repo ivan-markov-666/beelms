@@ -143,28 +143,19 @@
   - 404 при липсваща езикова версия на статията;
   - unit тестове за `LanguageSwitcher`, `/wiki` и `/wiki/[slug]`.
 
-### Фаза 2 – I18n foundation за UI текстове
+### Фаза 2 – I18n foundation + общ layout/nav (BG/EN)
 
-**Ново story (примерно): `STORY-MVP-CROSS-I18N-FE-FOUNDATION`**
+**Story: `STORY-MVP-CROSS-I18N-FE-FOUNDATION` (обединено foundation + layout/nav)**
 
 - Dev задачи (FE):
   - добавяне на `src/i18n/config.ts` и `src/i18n/messages.ts`;
   - въвеждане на `SupportedLang` + `normalizeLang` като централен helper;
   - имплементация на `useCurrentLang()` hook за client компоненти;
-  - smoke тестове за i18n helper-ите.
+  - smoke тестове за i18n helper-ите;
+  - адаптиране на основния публичен layout shell и навигацията да използват i18n речниците вместо твърди BG стрингове;
+  - осигуряване, че при различни стойности на `?lang=` (BG/EN) навигацията показва коректните преводи за основните менюта (Wiki, Practical UI, Training API, Login/Register, Account и др.).
 
-### Фаза 3 – Превод на общите UI елементи (layout, навигация)
-
-**Ново story: `STORY-MVP-CROSS-I18N-LAYOUT-NAV`**
-
-- Преводими елементи:
-  - основно меню (линкове към Wiki, Practice, Login и др.);
-  - заглавия и описания в общия layout shell, които не са специфични за отделен модул.
-- Поведение:
-  - всички тези текстове използват `t(currentLang, key)`;
-  - при смяна на езика през header-а се презарежда страницата с актуалните стрингове.
-
-### Фаза 4 – Превод на ключови екрани (примерен ред)
+### Фаза 3 – Превод на ключови екрани (примерен ред)
 
 - Story за Auth екрани (`/login`, `/register`):
   - форм labels, бутони, error messages → през i18n речника.
@@ -172,7 +163,7 @@
   - основни заглавия, подсказки и бутонни текстове.
 - При нужда – отделно story за public landing / home.
 
-### Фаза 5 – Персистиране на езика и SSR подобрения
+### Фаза 4 – Персистиране на езика и SSR подобрения
 
 **Ново story: `STORY-MVP-CROSS-I18N-PERSISTENCE`**
 

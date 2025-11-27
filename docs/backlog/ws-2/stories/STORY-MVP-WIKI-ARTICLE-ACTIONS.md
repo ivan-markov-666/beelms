@@ -36,7 +36,11 @@ _Забележка: Това story не е част от WS-2 Auth walking skel
 - [ ] Ръчно тестване на:
   - desktop браузър (Share fallback + Print диалог);
   - mobile браузър с Web Share API (ако е налично).
-- [ ] (По избор) Snapshot/DOM тестове за наличието на action бутоните при активна статия.
+- [ ] Snapshot/DOM тестове за наличието на action бутоните при активна статия.
+- [ ] FE тестове (с mocking на browser API-тата), които проверяват:
+  - че при клик на бутона „Принтирай“ се извиква `window.print()`;
+  - че при клик на бутона „Сподели“ с налично `navigator.share` се извиква Web Share API;
+  - че при липса на `navigator.share` и налично `navigator.clipboard` се изпълнява clipboard fallback (или при липса и на двете се показва alert с URL).
 
 ## Notes
 - Parent Epic: `EPIC-WIKI-PUBLIC` (разширение на FR-WIKI-3 – действия „Сподели“ и „Принтирай“).

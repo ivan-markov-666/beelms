@@ -92,4 +92,4 @@ npm test
 - The `/wiki` and `/wiki/[slug]` pages already consume this `lang` parameter and forward it to the backend Wiki API (see `STORY-MVP-WIKI-LANGUAGE-SWITCH`).
 - Future work for making other UI screens multi-language is tracked in:
   - `docs/architecture/epic-cross-i18n.md` – mini tech-spec for global language behaviour;
-  - `docs/backlog/ws-1/stories/STORY-MVP-CROSS-I18N-FE-FOUNDATION.md` – FE i18n foundation and layout/nav translations.
+  - `docs/backlog/ws-2/stories/STORY-MVP-CROSS-I18N-FE-FOUNDATION.md` – FE i18n foundation and layout/nav translations.
