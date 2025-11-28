@@ -93,3 +93,19 @@ npm test
 - Future work for making other UI screens multi-language is tracked in:
   - `docs/architecture/epic-cross-i18n.md` – mini tech-spec for global language behaviour;
   - `docs/backlog/ws-2/stories/STORY-MVP-CROSS-I18N-FE-FOUNDATION.md` – FE i18n foundation and layout/nav translations.
+
+## WS-2 Auth & Profile integration
+
+For the WS-2 Auth/Profile walking skeleton, the frontend depends on the Auth and Account API provided by the backend (see `be/README.md`):
+
+- `POST /api/auth/register` and `POST /api/auth/login` for registration and login.
+- `GET /api/users/me`, `PATCH /api/users/me`, `POST /api/users/me/change-password`,
+  `DELETE /api/users/me` and `POST /api/users/me/export` for the `/profile` page.
+
+The `/auth/login`, `/auth/register` and `/profile` routes in this app expect a running backend on `http://localhost:3000/api`. On successful login, the JWT access token is stored in `localStorage` under the key `qa4free_access_token`, which is then used by `/profile` to guard access and call the protected account endpoints.
+
+Basic manual flow (assuming the backend and database are running as described in `be/README.md`):
+
+1. Open `http://localhost:3001/auth/register` and create an account.
+2. Login via `http://localhost:3001/auth/login`.
+3. Navigate to `http://localhost:3001/profile` to view/update email, change password, export data, delete the account and log out.

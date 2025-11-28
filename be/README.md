@@ -191,7 +191,7 @@ The main endpoints are:
     - `401` when the JWT is missing/invalid.
 
 - `DELETE /api/users/me`
-  - Deactivates the current account (soft delete for WS-2 by setting `active = false`).
+  - Deactivates the current account (soft delete for WS-2 by setting `active = false` and anonymizing personal data such as the email and password hash, so the original email can be re-used for a new account in line with GDPR).
   - Success: `204 No Content`.
   - After deletion:
     - `GET /api/users/me` returns `404`.
