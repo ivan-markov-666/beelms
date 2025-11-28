@@ -76,6 +76,8 @@ export class AccountService {
     }
 
     user.active = false;
+    user.email = `deleted+${user.id}@deleted.qa4free.invalid`;
+    user.passwordHash = '';
     await this.usersRepo.save(user);
   }
 

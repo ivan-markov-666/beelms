@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { QueryFailedError, Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { User } from './user.entity';
@@ -40,9 +40,18 @@ export class AuthService {
       passwordHash,
       active: true,
     });
-    const saved = await this.usersRepo.save(user);
-
-    return this.toUserProfileDto(saved);
+    try {
+      const saved = await this.usersRepo.save(user);
+      return this.toUserProfileDto(saved);
+    } catch (error) {
+      if (
+        error instanceof QueryFailedError &&
+        (error as { code?: string }).code === '23505'
+      ) {
+        throw new ConflictException('Email already in use');
+      }
+      throw error;
+    }
   }
 
   async login(dto: LoginDto): Promise<AuthTokenDto> {

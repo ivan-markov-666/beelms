@@ -198,6 +198,8 @@ describe('AccountService', () => {
     expect(usersRepo.findOne).toHaveBeenCalledWith({ where: { id: 'user-id', active: true } });
     expect(usersRepo.save).toHaveBeenCalled();
     expect(user.active).toBe(false);
+    expect(user.email).toBe(`deleted+${user.id}@deleted.qa4free.invalid`);
+    expect(user.passwordHash).toBe('');
   });
 
   it('deleteAccount does nothing when user is already inactive or missing', async () => {

@@ -2,7 +2,7 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
-import { registerAndLogin } from './utils/auth-helpers';
+import { registerAndLogin, uniqueEmail } from './utils/auth-helpers';
 
 describe('Account endpoints (e2e)', () => {
   let app: INestApplication;
@@ -286,5 +286,92 @@ describe('Account endpoints (e2e)', () => {
       .post('/api/auth/login')
       .send({ email: updatedEmail, password: newPassword })
       .expect(401);
+  });
+
+  it('allows deleting an account and re-registering with the same email', async () => {
+    const email = uniqueEmail('delete-reregister');
+    const password = 'Password1234';
+
+    // 1) Initial registration
+    await request(app.getHttpServer())
+      .post('/api/auth/register')
+      .send({ email, password, captchaToken: 'test-captcha-token' })
+      .expect(201);
+
+    // 2) Login with the initial credentials
+    const login1 = await request(app.getHttpServer())
+      .post('/api/auth/login')
+      .send({ email, password })
+      .expect(200);
+
+    const accessToken1 = login1.body.accessToken as string;
+
+    // 3) Delete the account
+    await request(app.getHttpServer())
+      .delete('/api/users/me')
+      .set('Authorization', `Bearer ${accessToken1}`)
+      .expect(204);
+
+    // 4) Old credentials can no longer be used to login
+    await request(app.getHttpServer())
+      .post('/api/auth/login')
+      .send({ email, password })
+      .expect(401);
+
+    // 5) Re-register with the same email and password
+    await request(app.getHttpServer())
+      .post('/api/auth/register')
+      .send({ email, password, captchaToken: 'test-captcha-token' })
+      .expect(201);
+
+    // 6) Login with the same email/password now works again
+    const login2 = await request(app.getHttpServer())
+      .post('/api/auth/login')
+      .send({ email, password })
+      .expect(200);
+
+    const accessToken2 = login2.body.accessToken as string;
+
+    // 7) Delete the account again to keep the DB clean
+    await request(app.getHttpServer())
+      .delete('/api/users/me')
+      .set('Authorization', `Bearer ${accessToken2}`)
+      .expect(204);
+  });
+
+  it('allows changing password, logging in with the new password, and deleting the user', async () => {
+    const { email, password: oldPassword, accessToken } = await registerAndLogin(
+      app,
+      'change-password-login-delete',
+    );
+
+    const newPassword = 'ChangeAndDeletePass123';
+
+    // 1) Change password
+    await request(app.getHttpServer())
+      .post('/api/users/me/change-password')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({ currentPassword: oldPassword, newPassword })
+      .expect(200);
+
+    // 2) Old password should no longer work
+    await request(app.getHttpServer())
+      .post('/api/auth/login')
+      .send({ email, password: oldPassword })
+      .expect(401);
+
+    // 3) Login with the new password works
+    const loginRes = await request(app.getHttpServer())
+      .post('/api/auth/login')
+      .send({ email, password: newPassword })
+      .expect(200);
+
+    const newAccessToken = loginRes.body.accessToken as string;
+
+    // 4) Delete the user to keep the DB clean
+    await request(app.getHttpServer())
+      .delete('/api/users/me')
+      .set('Authorization', `Bearer ${newAccessToken}`)
+      .expect(204);
   });
 });

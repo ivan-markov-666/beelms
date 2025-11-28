@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { JwtModule } from '@nestjs/jwt';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { QueryFailedError, Repository } from 'typeorm';
 import {
   BadRequestException,
   ConflictException,
@@ -91,6 +91,26 @@ describe('AuthService', () => {
     };
 
     (usersRepo.findOne as jest.Mock).mockResolvedValue({ id: 'existing-id' } as User);
+
+    await expect(service.register(dto)).rejects.toBeInstanceOf(ConflictException);
+  });
+
+  it('maps unique constraint errors during register to ConflictException', async () => {
+    const dto: RegisterDto = {
+      email: 'race@example.com',
+      password: 'Password1234',
+    };
+
+    (usersRepo.findOne as jest.Mock).mockResolvedValue(undefined);
+    (usersRepo.create as jest.Mock).mockImplementation((data) => ({
+      ...data,
+      id: 'user-id',
+      createdAt: new Date('2024-01-01T00:00:00.000Z'),
+      updatedAt: new Date('2024-01-01T00:00:00.000Z'),
+    }));
+
+    const dbError = new QueryFailedError('', [], { code: '23505' } as any);
+    (usersRepo.save as jest.Mock).mockRejectedValue(dbError);
 
     await expect(service.register(dto)).rejects.toBeInstanceOf(ConflictException);
   });
