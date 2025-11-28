@@ -20,6 +20,47 @@ export class User {
   @Column({ type: 'boolean', default: true })
   active: boolean;
 
+  @Column({ name: 'email_verified', type: 'boolean', default: false })
+  emailVerified: boolean;
+
+  @Column({
+    name: 'email_verification_token',
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+  })
+  emailVerificationToken: string | null;
+
+  @Column({
+    name: 'email_verification_token_expires_at',
+    type: 'timestamp with time zone',
+    nullable: true,
+  })
+  emailVerificationTokenExpiresAt: Date | null;
+
+  @Column({
+    name: 'pending_email',
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+  })
+  pendingEmail: string | null;
+
+  @Column({
+    name: 'pending_email_verification_token',
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+  })
+  pendingEmailVerificationToken: string | null;
+
+  @Column({
+    name: 'pending_email_verification_token_expires_at',
+    type: 'timestamp with time zone',
+    nullable: true,
+  })
+  pendingEmailVerificationTokenExpiresAt: Date | null;
+
   @Column({
     name: 'reset_password_token',
     type: 'varchar',

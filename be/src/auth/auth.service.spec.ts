@@ -294,4 +294,79 @@ describe('AuthService', () => {
     await expect(service.resetPassword(dto)).rejects.toBeInstanceOf(BadRequestException);
     expect(usersRepo.save).not.toHaveBeenCalled();
   });
+
+  it('verifyEmail marks email as verified for a valid registration token', async () => {
+    const user: User = {
+      id: 'user-id',
+      email: 'test@example.com',
+      passwordHash: 'hash',
+      active: true,
+      emailVerified: false,
+      emailVerificationToken: 'verify-token',
+      emailVerificationTokenExpiresAt: new Date(Date.now() + 60 * 60 * 1000),
+      pendingEmail: null,
+      pendingEmailVerificationToken: null,
+      pendingEmailVerificationTokenExpiresAt: null,
+      resetPasswordToken: null,
+      resetPasswordTokenExpiresAt: null,
+      createdAt: new Date('2024-01-01T00:00:00.000Z'),
+      updatedAt: new Date('2024-01-01T00:00:00.000Z'),
+    } as unknown as User;
+
+    (usersRepo.findOne as jest.Mock).mockResolvedValue(user);
+    (usersRepo.save as jest.Mock).mockImplementation(async (u) => u);
+
+    await service.verifyEmail({ token: 'verify-token' } as any);
+
+    expect(usersRepo.findOne).toHaveBeenCalledWith({
+      where: [
+        { emailVerificationToken: 'verify-token', active: true },
+        { pendingEmailVerificationToken: 'verify-token', active: true },
+      ],
+    });
+    expect(user.emailVerified).toBe(true);
+    expect(user.emailVerificationToken).toBeNull();
+    expect(user.emailVerificationTokenExpiresAt).toBeNull();
+    expect(usersRepo.save).toHaveBeenCalledWith(user);
+  });
+
+  it('verifyEmail switches to pendingEmail for a valid pending email token', async () => {
+    const user: User = {
+      id: 'user-id',
+      email: 'old@example.com',
+      passwordHash: 'hash',
+      active: true,
+      emailVerified: false,
+      emailVerificationToken: null,
+      emailVerificationTokenExpiresAt: null,
+      pendingEmail: 'new@example.com',
+      pendingEmailVerificationToken: 'pending-token',
+      pendingEmailVerificationTokenExpiresAt: new Date(Date.now() + 60 * 60 * 1000),
+      resetPasswordToken: null,
+      resetPasswordTokenExpiresAt: null,
+      createdAt: new Date('2024-01-01T00:00:00.000Z'),
+      updatedAt: new Date('2024-01-01T00:00:00.000Z'),
+    } as unknown as User;
+
+    (usersRepo.findOne as jest.Mock).mockResolvedValue(user);
+    (usersRepo.save as jest.Mock).mockImplementation(async (u) => u);
+
+    await service.verifyEmail({ token: 'pending-token' } as any);
+
+    expect(user.email).toBe('new@example.com');
+    expect(user.pendingEmail).toBeNull();
+    expect(user.pendingEmailVerificationToken).toBeNull();
+    expect(user.pendingEmailVerificationTokenExpiresAt).toBeNull();
+    expect(user.emailVerified).toBe(true);
+    expect(usersRepo.save).toHaveBeenCalledWith(user);
+  });
+
+  it('verifyEmail throws BadRequestException for invalid token', async () => {
+    (usersRepo.findOne as jest.Mock).mockResolvedValue(null);
+
+    await expect(service.verifyEmail({ token: 'invalid-token' } as any)).rejects.toBeInstanceOf(
+      BadRequestException,
+    );
+    expect(usersRepo.save).not.toHaveBeenCalled();
+  });
 });

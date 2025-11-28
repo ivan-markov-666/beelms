@@ -323,6 +323,27 @@ paths:
         "400":
           description: Невалиден или изтекъл токен
 
+  /auth/verify-email:
+    post:
+      tags: [Auth]
+      summary: Потвърждение на имейл чрез verification токен
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+              required: [token]
+      responses:
+        "200":
+          description: Имейлът е потвърден успешно (регистрация или смяна на имейл)
+        "400":
+          description: Невалиден или изтекъл verification токен
+
   /users/me:
     get:
       tags: [Account]

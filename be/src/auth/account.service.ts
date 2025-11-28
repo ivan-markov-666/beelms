@@ -2,10 +2,13 @@ import { BadRequestException, ConflictException, Injectable, NotFoundException }
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
+import { randomBytes } from 'crypto';
 import { User } from './user.entity';
 import { UserProfileDto } from './dto/user-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { UserExportDto } from './dto/user-export.dto';
+
+const EMAIL_VERIFICATION_TOKEN_TTL_MS = 24 * 60 * 60 * 1000;
 
 @Injectable()
 export class AccountService {
@@ -35,13 +38,35 @@ export class AccountService {
       throw new NotFoundException('User not found');
     }
 
+    if (dto.email === user.email) {
+      return {
+        id: user.id,
+        email: user.email,
+        createdAt: user.createdAt.toISOString(),
+      };
+    }
+
     const existing = await this.usersRepo.findOne({ where: { email: dto.email, active: true } });
     if (existing && existing.id !== user.id) {
       throw new ConflictException('Email already in use');
     }
 
-    user.email = dto.email;
+    const verificationToken = randomBytes(32).toString('hex');
+
+    user.pendingEmail = dto.email;
+    user.pendingEmailVerificationToken = verificationToken;
+    user.pendingEmailVerificationTokenExpiresAt = new Date(
+      Date.now() + EMAIL_VERIFICATION_TOKEN_TTL_MS,
+    );
+
     const saved = await this.usersRepo.save(user);
+
+    if (process.env.NODE_ENV !== 'production') {
+      // eslint-disable-next-line no-console
+      console.log(
+        `[account] Email change requested for ${saved.email}. Verification link for new email (${dto.email}): /auth/verify-email?token=${verificationToken}`,
+      );
+    }
 
     return {
       id: saved.id,
