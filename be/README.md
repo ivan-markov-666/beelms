@@ -166,6 +166,13 @@ The Auth service implements the WS-2 walking skeleton for registration and login
     - invalidates the token (one-time use) by clearing the stored token and expiry.
   - On error (`400`): invalid or expired token, or invalid new password according to the same policy as registration.
 
+- `POST /api/auth/verify-email`
+  - Request body: `{ "token": string }`.
+  - On success (`200 OK`):
+    - when the token matches `emailVerificationToken` on a user and is not expired, marks the user's email as verified and clears the token fields;
+    - when the token matches `pendingEmailVerificationToken` and is not expired, applies the pending email change (`email` becomes `pendingEmail`), clears the pending fields and ensures the email is marked as verified.
+  - On error (`400`): invalid or expired verification token.
+
 ### Auth configuration
 
 The Auth module is configured via environment variables:
@@ -191,7 +198,11 @@ The main endpoints are:
 - `PATCH /api/users/me`
   - Updates basic profile information (currently only `email`).
   - Request body: `{ email: string }`.
-  - Success: `200 OK` with the updated profile `{ id, email, createdAt }`.
+  - Behaviour:
+    - when the new email is the same as the current one, returns the current profile unchanged;
+    - when the new email is different and free, sets `pendingEmail` and generates a verification token with a 24-hour TTL for the new address; the primary `email` remains unchanged until `/api/auth/verify-email` is called with the pending token;
+    - in non-production environments, the verification link for the new email is logged to the API logs instead of sending a real email.
+  - Success: `200 OK` with the current profile `{ id, email, createdAt }` (where `email` is still the old value until verification completes).
   - Errors:
     - `400` for invalid email format.
     - `409` when the new email is already used by another active account.
@@ -231,7 +242,10 @@ For full request/response schemas, see the OpenAPI spec in `docs/architecture/op
 2. Register a new user via `POST /api/auth/register`.
 3. Login via `POST /api/auth/login` and copy the returned `accessToken`.
 4. Call `GET /api/users/me` with `Authorization: Bearer <accessToken>` and verify the profile.
-5. Call `PATCH /api/users/me` to change `email` and verify the updated profile.
+5. Call `PATCH /api/users/me` to request an email change:
+   - inspect the API logs (in non-production) or the `users` table to obtain the `pendingEmailVerificationToken` for the test user;
+   - call `POST /api/auth/verify-email` with `{ "token": "<PENDING_EMAIL_TOKEN>" }`;
+   - call `GET /api/users/me` again and verify that the `email` field now reflects the new value.
 6. Call `POST /api/users/me/export` and verify the exported payload (and CAPTCHA behaviour when `ACCOUNT_EXPORT_REQUIRE_CAPTCHA=true`).
 7. Call `POST /api/users/me/change-password` and verify that logging in with the old password fails, while the new password works.
 8. Call `DELETE /api/users/me` and verify that `GET /api/users/me` returns `404` and `POST /api/auth/login` with the same credentials returns `401`.

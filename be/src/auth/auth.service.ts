@@ -16,8 +16,10 @@ import { UserProfileDto } from './dto/user-profile.dto';
 import { AuthTokenDto } from './dto/auth-token.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { VerifyEmailDto } from './dto/verify-email.dto';
 
 const RESET_PASSWORD_TOKEN_TTL_MS = 24 * 60 * 60 * 1000;
+const EMAIL_VERIFICATION_TOKEN_TTL_MS = 24 * 60 * 60 * 1000;
 
 @Injectable()
 export class AuthService {
@@ -44,9 +46,26 @@ export class AuthService {
       email: dto.email,
       passwordHash,
       active: true,
+      emailVerified: false,
     });
     try {
       const saved = await this.usersRepo.save(user);
+
+      const verificationToken = randomBytes(32).toString('hex');
+      saved.emailVerificationToken = verificationToken;
+      saved.emailVerificationTokenExpiresAt = new Date(
+        Date.now() + EMAIL_VERIFICATION_TOKEN_TTL_MS,
+      );
+
+      await this.usersRepo.save(saved);
+
+      if (process.env.NODE_ENV !== 'production') {
+        // eslint-disable-next-line no-console
+        console.log(
+          `[auth] Email verification requested for ${saved.email}. Verification link: /auth/verify-email?token=${verificationToken}`,
+        );
+      }
+
       return this.toUserProfileDto(saved);
     } catch (error) {
       if (
@@ -128,6 +147,54 @@ export class AuthService {
     user.passwordHash = passwordHash;
     user.resetPasswordToken = null;
     user.resetPasswordTokenExpiresAt = null;
+
+    await this.usersRepo.save(user);
+  }
+
+  async verifyEmail(dto: VerifyEmailDto): Promise<void> {
+    const token = dto.token;
+
+    const user = await this.usersRepo.findOne({
+      where: [
+        { emailVerificationToken: token, active: true },
+        { pendingEmailVerificationToken: token, active: true },
+      ],
+    });
+
+    if (!user) {
+      throw new BadRequestException('invalid or expired verification token');
+    }
+
+    const now = Date.now();
+
+    if (user.emailVerificationToken === token) {
+      if (
+        !user.emailVerificationTokenExpiresAt ||
+        user.emailVerificationTokenExpiresAt.getTime() < now
+      ) {
+        throw new BadRequestException('invalid or expired verification token');
+      }
+
+      user.emailVerified = true;
+      user.emailVerificationToken = null;
+      user.emailVerificationTokenExpiresAt = null;
+    } else if (user.pendingEmailVerificationToken === token) {
+      if (
+        !user.pendingEmailVerificationTokenExpiresAt ||
+        user.pendingEmailVerificationTokenExpiresAt.getTime() < now ||
+        !user.pendingEmail
+      ) {
+        throw new BadRequestException('invalid or expired verification token');
+      }
+
+      user.email = user.pendingEmail;
+      user.pendingEmail = null;
+      user.pendingEmailVerificationToken = null;
+      user.pendingEmailVerificationTokenExpiresAt = null;
+      user.emailVerified = true;
+    } else {
+      throw new BadRequestException('invalid or expired verification token');
+    }
 
     await this.usersRepo.save(user);
   }

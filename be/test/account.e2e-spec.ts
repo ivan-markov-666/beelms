@@ -1,11 +1,15 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
+import { User } from '../src/auth/user.entity';
 import { registerAndLogin, uniqueEmail } from './utils/auth-helpers';
 
 describe('Account endpoints (e2e)', () => {
   let app: INestApplication;
+  let userRepo: Repository<User>;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -21,6 +25,8 @@ describe('Account endpoints (e2e)', () => {
       }),
     );
     await app.init();
+
+    userRepo = app.get<Repository<User>>(getRepositoryToken(User));
   });
 
   afterAll(async () => {
@@ -44,7 +50,7 @@ describe('Account endpoints (e2e)', () => {
     await request(app.getHttpServer()).get('/api/users/me').expect(401);
   });
 
-  it('PATCH /api/users/me updates email for current user', async () => {
+  it('PATCH /api/users/me updates email for current user after verification', async () => {
     const { accessToken, email: oldEmail } = await registerAndLogin(app, 'update-email');
 
     const newEmail = oldEmail.replace('@', '+updated@');
@@ -55,7 +61,20 @@ describe('Account endpoints (e2e)', () => {
       .send({ email: newEmail })
       .expect(200);
 
-    expect(res.body).toHaveProperty('email', newEmail);
+    // Response still contains the old primary email until verification completes
+    expect(res.body).toHaveProperty('email', oldEmail);
+
+    const user = await userRepo.findOne({ where: { email: oldEmail, active: true } });
+    expect(user).toBeDefined();
+    expect(user!.pendingEmail).toBe(newEmail);
+    expect(user!.pendingEmailVerificationToken).toBeDefined();
+
+    const verifyToken = user!.pendingEmailVerificationToken as string;
+
+    await request(app.getHttpServer())
+      .post('/api/auth/verify-email')
+      .send({ token: verifyToken })
+      .expect(200);
 
     const meRes = await request(app.getHttpServer())
       .get('/api/users/me')
@@ -230,6 +249,18 @@ describe('Account endpoints (e2e)', () => {
       .patch('/api/users/me')
       .set('Authorization', `Bearer ${accessToken}`)
       .send({ email: updatedEmail })
+      .expect(200);
+
+    const user = await userRepo.findOne({ where: { email, active: true } });
+    expect(user).toBeDefined();
+    expect(user!.pendingEmail).toBe(updatedEmail);
+    expect(user!.pendingEmailVerificationToken).toBeDefined();
+
+    const verifyToken = user!.pendingEmailVerificationToken as string;
+
+    await request(app.getHttpServer())
+      .post('/api/auth/verify-email')
+      .send({ token: verifyToken })
       .expect(200);
 
     const me2 = await request(app.getHttpServer())

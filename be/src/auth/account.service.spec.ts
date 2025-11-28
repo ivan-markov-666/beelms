@@ -61,7 +61,7 @@ describe('AccountService', () => {
     await expect(service.getCurrentProfile('missing-id')).rejects.toBeInstanceOf(NotFoundException);
   });
 
-  it('updateEmail updates email when it is free', async () => {
+  it('updateEmail sets pendingEmail and verification token when new email is free', async () => {
     const user: User = {
       id: 'user-id',
       email: 'old@example.com',
@@ -85,7 +85,14 @@ describe('AccountService', () => {
       where: { email: dto.email, active: true },
     });
     expect(usersRepo.save).toHaveBeenCalled();
-    expect(result.email).toBe(dto.email);
+
+    const savedUser = (usersRepo.save as jest.Mock).mock.calls[0][0] as User;
+    expect(savedUser.pendingEmail).toBe(dto.email);
+    expect(savedUser.pendingEmailVerificationToken).toBeDefined();
+    expect(savedUser.pendingEmailVerificationTokenExpiresAt).toBeInstanceOf(Date);
+
+    // primary email remains unchanged until verification is completed
+    expect(result.email).toBe(user.email);
   });
 
   it('updateEmail throws NotFoundException when current user is missing', async () => {
