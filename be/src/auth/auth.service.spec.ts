@@ -12,6 +12,8 @@ import { AuthService } from './auth.service';
 import { User } from './user.entity';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -175,5 +177,121 @@ describe('AuthService', () => {
     (usersRepo.findOne as jest.Mock).mockResolvedValue(user);
 
     await expect(service.login(dto)).rejects.toBeInstanceOf(UnauthorizedException);
+  });
+
+  it('requires captcha when AUTH_REQUIRE_CAPTCHA is true for forgotPassword', async () => {
+    process.env.AUTH_REQUIRE_CAPTCHA = 'true';
+
+    const dto: ForgotPasswordDto = {
+      email: 'test@example.com',
+    };
+
+    await expect(service.forgotPassword(dto)).rejects.toBeInstanceOf(BadRequestException);
+    expect(usersRepo.findOne).not.toHaveBeenCalled();
+  });
+
+  it('does nothing when forgotPassword is called for unknown email', async () => {
+    const dto: ForgotPasswordDto = {
+      email: 'unknown@example.com',
+    };
+
+    (usersRepo.findOne as jest.Mock).mockResolvedValue(undefined);
+
+    await service.forgotPassword(dto);
+
+    expect(usersRepo.save).not.toHaveBeenCalled();
+  });
+
+  it('generates reset token and expiry when forgotPassword is called for existing email', async () => {
+    const dto: ForgotPasswordDto = {
+      email: 'test@example.com',
+    };
+
+    const user = {
+      id: 'user-id',
+      email: dto.email,
+      passwordHash: 'old-hash',
+      active: true,
+      createdAt: new Date('2024-01-01T00:00:00.000Z'),
+      updatedAt: new Date('2024-01-01T00:00:00.000Z'),
+    } as unknown as User;
+
+    (usersRepo.findOne as jest.Mock).mockResolvedValue(user);
+    (usersRepo.save as jest.Mock).mockImplementation(async (u) => u);
+
+    await service.forgotPassword(dto);
+
+    expect(usersRepo.findOne).toHaveBeenCalledWith({ where: { email: dto.email } });
+    expect(user.resetPasswordToken).toBeDefined();
+    expect(typeof user.resetPasswordToken).toBe('string');
+    expect(user.resetPasswordTokenExpiresAt).toBeInstanceOf(Date);
+    expect(user.resetPasswordTokenExpiresAt!.getTime()).toBeGreaterThan(Date.now());
+    expect(usersRepo.save).toHaveBeenCalledWith(user);
+  });
+
+  it('resets password for valid reset token', async () => {
+    const dto: ResetPasswordDto = {
+      token: 'reset-token',
+      newPassword: 'NewPassword1234',
+    };
+
+    const user = {
+      id: 'user-id',
+      email: 'test@example.com',
+      passwordHash: 'old-hash',
+      resetPasswordToken: dto.token,
+      resetPasswordTokenExpiresAt: new Date(Date.now() + 60 * 60 * 1000),
+      active: true,
+      createdAt: new Date('2024-01-01T00:00:00.000Z'),
+      updatedAt: new Date('2024-01-01T00:00:00.000Z'),
+    } as unknown as User;
+
+    (usersRepo.findOne as jest.Mock).mockResolvedValue(user);
+    (usersRepo.save as jest.Mock).mockImplementation(async (u) => u);
+
+    await service.resetPassword(dto);
+
+    expect(usersRepo.findOne).toHaveBeenCalledWith({
+      where: { resetPasswordToken: dto.token },
+    });
+    expect(user.passwordHash).not.toBe('old-hash');
+    expect(user.resetPasswordToken).toBeNull();
+    expect(user.resetPasswordTokenExpiresAt).toBeNull();
+    expect(usersRepo.save).toHaveBeenCalledWith(user);
+  });
+
+  it('throws BadRequestException when reset token is invalid', async () => {
+    const dto: ResetPasswordDto = {
+      token: 'invalid-token',
+      newPassword: 'NewPassword1234',
+    };
+
+    (usersRepo.findOne as jest.Mock).mockResolvedValue(null);
+
+    await expect(service.resetPassword(dto)).rejects.toBeInstanceOf(BadRequestException);
+    expect(usersRepo.save).not.toHaveBeenCalled();
+  });
+
+  it('throws BadRequestException when reset token is expired', async () => {
+    const dto: ResetPasswordDto = {
+      token: 'expired-token',
+      newPassword: 'NewPassword1234',
+    };
+
+    const user = {
+      id: 'user-id',
+      email: 'test@example.com',
+      passwordHash: 'old-hash',
+      resetPasswordToken: dto.token,
+      resetPasswordTokenExpiresAt: new Date(Date.now() - 60 * 60 * 1000),
+      active: true,
+      createdAt: new Date('2024-01-01T00:00:00.000Z'),
+      updatedAt: new Date('2024-01-01T00:00:00.000Z'),
+    } as unknown as User;
+
+    (usersRepo.findOne as jest.Mock).mockResolvedValue(user);
+
+    await expect(service.resetPassword(dto)).rejects.toBeInstanceOf(BadRequestException);
+    expect(usersRepo.save).not.toHaveBeenCalled();
   });
 });

@@ -99,6 +99,7 @@ npm test
 For the WS-2 Auth/Profile walking skeleton, the frontend depends on the Auth and Account API provided by the backend (see `be/README.md`):
 
 - `POST /api/auth/register` and `POST /api/auth/login` for registration and login.
+- `POST /api/auth/forgot-password` and `POST /api/auth/reset-password` for the forgot/reset password flow.
 - `GET /api/users/me`, `PATCH /api/users/me`, `POST /api/users/me/change-password`,
   `DELETE /api/users/me` and `POST /api/users/me/export` for the `/profile` page.
 
@@ -109,3 +110,19 @@ Basic manual flow (assuming the backend and database are running as described in
 1. Open `http://localhost:3001/auth/register` and create an account.
 2. Login via `http://localhost:3001/auth/login`.
 3. Navigate to `http://localhost:3001/profile` to view/update email, change password, export data, delete the account and log out.
+
+### WS-2 Forgot/Reset password flow
+
+The `/auth/forgot-password` and `/auth/reset-password` routes implement the UI for requesting and completing a password reset:
+
+- `/auth/forgot-password` shows a form with email and a simple anti-bot checkbox (placeholder for a real CAPTCHA). On submit it calls `POST /api/auth/forgot-password` and, on success, always shows a generic message ("Ако има акаунт с този имейл, ще изпратим инструкции за смяна на паролата.") without revealing whether the email exists.
+- `/auth/reset-password?token=...` shows a form for entering a new password and confirmation. On submit it calls `POST /api/auth/reset-password` with the token and the new password, shows a success message and then redirects back to `/auth/login` after a short delay.
+- When the reset link is invalid or expired, the page shows an error message and offers a link back to `/auth/forgot-password` so the user can request a new link.
+
+To test the full forgot/reset flow end-to-end in development:
+
+1. Ensure the backend is running with the Auth Forgot/Reset API enabled (see `be/README.md` and `STORY-WS2-BE-AUTH-FORGOT-RESET`).
+2. Open `http://localhost:3001/auth/forgot-password`, enter the email of an existing account, tick the anti-bot checkbox and submit the form.
+3. In the backend logs (dev environment), copy the password reset link that is logged for that email.
+4. Open the copied link in the browser (it will point to `/auth/reset-password?token=...` on the FE), enter a new password and submit.
+5. Verify that you can log in with the new password via `http://localhost:3001/auth/login` and that the old password no longer works.

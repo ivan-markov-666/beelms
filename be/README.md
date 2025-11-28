@@ -152,13 +152,27 @@ The Auth service implements the WS-2 walking skeleton for registration and login
   - On success, returns `200 OK` with an `AuthToken` object: `{ accessToken, tokenType: "Bearer" }`.
   - On error, returns `401 Unauthorized` with a generic "invalid credentials" message.
 
+- `POST /api/auth/forgot-password`
+  - Request body: `{ "email": string, "captchaToken?": string }`.
+  - When the email exists, the backend generates a cryptographically secure reset token with a validity of 24 hours and stores it on the user record. In the WS-2 walking skeleton, the reset link is **logged in the API logs in non-production environments** instead of sending a real email.
+  - When the email does not exist, the endpoint still returns `200 OK` with the same generic success shape (non-enumeration).
+  - On validation errors (invalid email, missing CAPTCHA when required) returns `400`.
+
+- `POST /api/auth/reset-password`
+  - Request body: `{ "token": string, "newPassword": string }`.
+  - On success (`200 OK`):
+    - validates that the token exists and is not expired (24-hour TTL);
+    - updates the user's bcrypt password hash;
+    - invalidates the token (one-time use) by clearing the stored token and expiry.
+  - On error (`400`): invalid or expired token, or invalid new password according to the same policy as registration.
+
 ### Auth configuration
 
 The Auth module is configured via environment variables:
 
 - `JWT_SECRET` – secret key used to sign JWT access tokens (default for local dev: `dev_jwt_secret_change_me`).
 - `JWT_EXPIRES_IN` – access token lifetime, e.g. `900s` or `15m` (default: `900s`).
-- `AUTH_REQUIRE_CAPTCHA` – when set to `true`, the `POST /api/auth/register` endpoint requires a non-empty `captchaToken` field in the request body.
+- `AUTH_REQUIRE_CAPTCHA` – when set to `true`, the `POST /api/auth/register` and `POST /api/auth/forgot-password` endpoints require a non-empty `captchaToken` field in the request body.
  - `FRONTEND_ORIGIN` – origin allowed by CORS for browser clients (default: `http://localhost:3001`), used by `app.enableCors` in `be/src/main.ts`.
 
 ### Account / Profile API (WS-2)

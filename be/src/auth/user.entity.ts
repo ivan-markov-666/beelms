@@ -20,6 +20,21 @@ export class User {
   @Column({ type: 'boolean', default: true })
   active: boolean;
 
+  @Column({
+    name: 'reset_password_token',
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+  })
+  resetPasswordToken: string | null;
+
+  @Column({
+    name: 'reset_password_token_expires_at',
+    type: 'timestamp with time zone',
+    nullable: true,
+  })
+  resetPasswordTokenExpiresAt: Date | null;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
