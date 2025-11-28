@@ -1,11 +1,15 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
+import { User } from '../src/auth/user.entity';
 import { registerAndLogin, uniqueEmail } from './utils/auth-helpers';
 
 describe('Auth endpoints (e2e)', () => {
   let app: INestApplication;
+  let userRepo: Repository<User>;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -21,6 +25,8 @@ describe('Auth endpoints (e2e)', () => {
       }),
     );
     await app.init();
+
+    userRepo = app.get<Repository<User>>(getRepositoryToken(User));
   });
 
   afterAll(async () => {
@@ -133,5 +139,58 @@ describe('Auth endpoints (e2e)', () => {
 
     expect(res.body).not.toHaveProperty('password');
     expect(res.body).not.toHaveProperty('passwordHash');
+  });
+
+  it('POST /api/auth/forgot-password always returns 200, even for unknown email', async () => {
+    const email = uniqueEmail('forgot-unknown');
+
+    await request(app.getHttpServer())
+      .post('/api/auth/forgot-password')
+      .send({ email })
+      .expect(200);
+  });
+
+  it('allows resetting password via forgot-password and reset-password flow', async () => {
+    const email = uniqueEmail('forgot-reset-flow');
+    const originalPassword = 'Password1234';
+
+    await request(app.getHttpServer())
+      .post('/api/auth/register')
+      .send({ email, password: originalPassword })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .post('/api/auth/forgot-password')
+      .send({ email })
+      .expect(200);
+
+    const user = await userRepo.findOne({ where: { email } });
+    expect(user).toBeDefined();
+    expect(user!.resetPasswordToken).toBeDefined();
+
+    const resetToken = user!.resetPasswordToken as string;
+    const newPassword = 'NewPassword1234';
+
+    await request(app.getHttpServer())
+      .post('/api/auth/reset-password')
+      .send({ token: resetToken, newPassword })
+      .expect(200);
+
+    await request(app.getHttpServer())
+      .post('/api/auth/login')
+      .send({ email, password: originalPassword })
+      .expect(401);
+
+    const loginRes = await request(app.getHttpServer())
+      .post('/api/auth/login')
+      .send({ email, password: newPassword })
+      .expect(200);
+
+    expect(loginRes.body).toHaveProperty('accessToken');
+
+    await request(app.getHttpServer())
+      .post('/api/auth/reset-password')
+      .send({ token: resetToken, newPassword: 'AnotherPassword1234' })
+      .expect(400);
   });
 });
