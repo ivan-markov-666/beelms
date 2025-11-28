@@ -2,6 +2,7 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
+import { registerAndLogin, uniqueEmail } from './utils/auth-helpers';
 
 describe('Auth endpoints (e2e)', () => {
   let app: INestApplication;
@@ -25,11 +26,6 @@ describe('Auth endpoints (e2e)', () => {
   afterAll(async () => {
     await app.close();
   });
-
-  const uniqueEmail = (suffix: string): string => {
-    const ts = Date.now();
-    return `auth-test-${suffix}-${ts}@example.com`;
-  };
 
   it('POST /api/auth/register creates a new user', async () => {
     const email = uniqueEmail('register-success');
@@ -116,21 +112,10 @@ describe('Auth endpoints (e2e)', () => {
   });
 
   it('POST /api/auth/login returns token for valid credentials', async () => {
-    const email = uniqueEmail('login-success');
-    const password = 'Password1234';
+    const { accessToken, tokenType } = await registerAndLogin(app, 'login-success');
 
-    await request(app.getHttpServer())
-      .post('/api/auth/register')
-      .send({ email, password })
-      .expect(201);
-
-    const res = await request(app.getHttpServer())
-      .post('/api/auth/login')
-      .send({ email, password })
-      .expect(200);
-
-    expect(res.body).toHaveProperty('accessToken');
-    expect(res.body).toHaveProperty('tokenType', 'Bearer');
+    expect(accessToken).toBeDefined();
+    expect(tokenType).toBe('Bearer');
   });
 
   it('POST /api/auth/login returns 401 for invalid credentials', async () => {

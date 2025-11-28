@@ -35,10 +35,10 @@ describe("RegisterPage", () => {
 
     render(<RegisterPage />);
 
-    const emailInput = screen.getByLabelText("Имейл");
-    const passwordInput = screen.getByLabelText("Парола");
-    const confirmPasswordInput = screen.getByLabelText("Потвърди паролата");
-    const submitButton = screen.getByRole("button", { name: "Регистрация" });
+    const emailInput = await screen.findByLabelText("Имейл");
+    const passwordInput = await screen.findByLabelText("Парола");
+    const confirmPasswordInput = await screen.findByLabelText("Потвърди паролата");
+    const submitButton = await screen.findByRole("button", { name: "Регистрация" });
 
     fireEvent.change(emailInput, { target: { value: "invalid-email" } });
     fireEvent.change(passwordInput, { target: { value: "short" } });
@@ -77,13 +77,13 @@ describe("RegisterPage", () => {
 
     render(<RegisterPage />);
 
-    const emailInput = screen.getByLabelText("Имейл");
-    const passwordInput = screen.getByLabelText("Парола");
-    const confirmPasswordInput = screen.getByLabelText("Потвърди паролата");
-    const termsCheckbox = screen.getByLabelText(
+    const emailInput = await screen.findByLabelText("Имейл");
+    const passwordInput = await screen.findByLabelText("Парола");
+    const confirmPasswordInput = await screen.findByLabelText("Потвърди паролата");
+    const termsCheckbox = await screen.findByLabelText(
       /Съгласен съм с Условията за ползване/i,
     );
-    const captchaCheckbox = screen.getByLabelText(
+    const captchaCheckbox = await screen.findByLabelText(
       /Не съм робот \(placeholder за CAPTCHA интеграция\)/i,
     );
     const submitButton = screen.getByRole("button", { name: "Регистрация" });

@@ -27,20 +27,55 @@ export default function RegisterPage() {
   const [formError, setFormError] = useState<string | null>(null);
   const [formSuccess, setFormSuccess] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true);
 
-  // Ако потребителят вече има запазен токен, го пренасочваме към Wiki,
-  // вместо да му показваме отново страницата за регистрация.
+  // Ако потребителят вече има запазен токен, правим кратка проверка към
+  // бекенда (`GET /api/users/me`). Ако токенът е валиден, го пренасочваме
+  // към началната страница, иначе чистим невалидния токен и показваме формата.
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    try {
-      const token = window.localStorage.getItem("qa4free_access_token");
-      if (token) {
-        router.replace("/wiki");
+    let isCancelled = false;
+
+    const checkSession = async () => {
+      try {
+        const token = window.localStorage.getItem("qa4free_access_token");
+        if (!token) {
+          return;
+        }
+
+        const res = await fetch(`${API_BASE_URL}/users/me`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!isCancelled && res.ok) {
+          router.replace("/");
+          return;
+        }
+
+        if (!res.ok && (res.status === 401 || res.status === 404)) {
+          try {
+            window.localStorage.removeItem("qa4free_access_token");
+          } catch {
+            // ignore localStorage errors
+          }
+        }
+      } catch {
+        // ignore network / parsing errors
+      } finally {
+        if (!isCancelled) {
+          setCheckingSession(false);
+        }
       }
-    } catch {
-      // ако localStorage не е достъпен, просто не правим redirect
-    }
+    };
+
+    void checkSession();
+
+    return () => {
+      isCancelled = true;
+    };
   }, [router]);
 
   const validate = (): boolean => {
@@ -127,6 +162,16 @@ export default function RegisterPage() {
       setSubmitting(false);
     }
   };
+
+  if (checkingSession) {
+    return (
+      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-8">
+        <main className="w-full max-w-md rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
+          <p className="text-sm text-zinc-600">Зареждане...</p>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-8">

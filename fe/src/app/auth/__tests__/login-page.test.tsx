@@ -30,21 +30,23 @@ describe("LoginPage", () => {
     window.localStorage.clear();
   });
 
-  it("renders email and password fields", () => {
+  it("renders email and password fields", async () => {
     render(<LoginPage />);
 
-    expect(screen.getByLabelText("Имейл")).toBeInTheDocument();
-    expect(screen.getByLabelText("Парола")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Вход" })).toBeInTheDocument();
+    expect(await screen.findByLabelText("Имейл")).toBeInTheDocument();
+    expect(await screen.findByLabelText("Парола")).toBeInTheDocument();
+    expect(
+      await screen.findByRole("button", { name: "Вход" }),
+    ).toBeInTheDocument();
   });
 
   it("shows validation errors and does not submit when email is invalid", async () => {
     global.fetch = jest.fn();
     render(<LoginPage />);
 
-    const emailInput = screen.getByLabelText("Имейл");
-    const passwordInput = screen.getByLabelText("Парола");
-    const submitButton = screen.getByRole("button", { name: "Вход" });
+    const emailInput = await screen.findByLabelText("Имейл");
+    const passwordInput = await screen.findByLabelText("Парола");
+    const submitButton = await screen.findByRole("button", { name: "Вход" });
 
     fireEvent.change(emailInput, { target: { value: "invalid-email" } });
     fireEvent.change(passwordInput, { target: { value: "password123" } });
