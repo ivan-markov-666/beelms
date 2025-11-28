@@ -159,8 +159,110 @@ The Auth module is configured via environment variables:
 - `JWT_SECRET` – secret key used to sign JWT access tokens (default for local dev: `dev_jwt_secret_change_me`).
 - `JWT_EXPIRES_IN` – access token lifetime, e.g. `900s` or `15m` (default: `900s`).
 - `AUTH_REQUIRE_CAPTCHA` – when set to `true`, the `POST /api/auth/register` endpoint requires a non-empty `captchaToken` field in the request body.
+ - `FRONTEND_ORIGIN` – origin allowed by CORS for browser clients (default: `http://localhost:3001`), used by `app.enableCors` in `be/src/main.ts`.
+
+### Account / Profile API (WS-2)
+
+All account endpoints are protected with JWT and are available under the `/api/users` prefix (the global Nest prefix is `api`). A valid access token from `POST /api/auth/login` must be sent as:
+
+`Authorization: Bearer <accessToken>`
+
+The main endpoints are:
+
+- `GET /api/users/me`
+  - Returns the current user's profile.
+  - Response body: `{ id, email, createdAt }`.
+  - Errors: `401` when the JWT is missing/invalid.
+
+- `PATCH /api/users/me`
+  - Updates basic profile information (currently only `email`).
+  - Request body: `{ email: string }`.
+  - Success: `200 OK` with the updated profile `{ id, email, createdAt }`.
+  - Errors:
+    - `400` for invalid email format.
+    - `409` when the new email is already used by another active account.
+
+- `POST /api/users/me/change-password`
+  - Changes the current user's password.
+  - Request body: `{ currentPassword: string, newPassword: string }` where `newPassword` must be at least 8 characters (same rules as registration).
+  - Success: `200 OK` with an empty body; the stored bcrypt hash is updated.
+  - Errors:
+    - `400` when the current password is wrong or the new password does not meet the policy.
+    - `401` when the JWT is missing/invalid.
+
+- `DELETE /api/users/me`
+  - Deactivates the current account (soft delete for WS-2 by setting `active = false`).
+  - Success: `204 No Content`.
+  - After deletion:
+    - `GET /api/users/me` returns `404`.
+    - `POST /api/auth/login` with the same credentials returns `401`.
+
+- `POST /api/users/me/export`
+  - Returns a minimal export of the current user's personal data.
+  - Request body: `{ captchaToken?: string }`.
+  - Success: `200 OK` with `{ id, email, createdAt, active }`.
+  - Errors:
+    - `400` when CAPTCHA is required but missing.
+    - `401` when the JWT is missing/invalid.
+
+The export endpoint is additionally controlled via:
+
+- `ACCOUNT_EXPORT_REQUIRE_CAPTCHA` – when set to `true`, `POST /api/users/me/export` requires a non-empty `captchaToken` field. This mirrors the behaviour of `AUTH_REQUIRE_CAPTCHA` for registration.
 
 For full request/response schemas, see the OpenAPI spec in `docs/architecture/openapi.yaml`.
+
+### Manual testing checklist – Auth + Account (WS-2)
+
+1. Start the backend and database (see Docker instructions above) and apply migrations/seed.
+2. Register a new user via `POST /api/auth/register`.
+3. Login via `POST /api/auth/login` and copy the returned `accessToken`.
+4. Call `GET /api/users/me` with `Authorization: Bearer <accessToken>` and verify the profile.
+5. Call `PATCH /api/users/me` to change `email` and verify the updated profile.
+6. Call `POST /api/users/me/export` and verify the exported payload (and CAPTCHA behaviour when `ACCOUNT_EXPORT_REQUIRE_CAPTCHA=true`).
+7. Call `POST /api/users/me/change-password` and verify that logging in with the old password fails, while the new password works.
+8. Call `DELETE /api/users/me` and verify that `GET /api/users/me` returns `404` and `POST /api/auth/login` with the same credentials returns `401`.
+
+### Example curl requests (local dev)
+
+Assuming the backend is running on `http://localhost:3000` and CAPTCHA is required for registration and export:
+
+```bash
+# Register
+curl -X POST http://localhost:3000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"user@example.com","password":"Password123","captchaToken":"dummy-captcha"}'
+
+# Login (note the accessToken from the response)
+curl -X POST http://localhost:3000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"user@example.com","password":"Password123"}'
+
+# Get current profile
+curl http://localhost:3000/api/users/me \
+  -H "Authorization: Bearer <ACCESS_TOKEN>"
+
+# Update email
+curl -X PATCH http://localhost:3000/api/users/me \
+  -H "Authorization: Bearer <ACCESS_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"email":"new-email@example.com"}'
+
+# Change password
+curl -X POST http://localhost:3000/api/users/me/change-password \
+  -H "Authorization: Bearer <ACCESS_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"currentPassword":"Password123","newPassword":"NewPassword456"}'
+
+# Export personal data
+curl -X POST http://localhost:3000/api/users/me/export \
+  -H "Authorization: Bearer <ACCESS_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"captchaToken":"dummy-captcha"}'
+
+# Delete account
+curl -X DELETE http://localhost:3000/api/users/me \
+  -H "Authorization: Bearer <ACCESS_TOKEN>"
+```
 
 ## Run tests
 
@@ -174,8 +276,11 @@ npm run test:e2e
 # test coverage
 npm run test:cov
 
-# regression suite (unit + e2e)
+# regression suite (unit + e2e + perf)
 npm run test:regression
+
+# performance test only (Auth + Account HTTP-only flow)
+npm run test:perf
 ```
 
 ## Deployment
