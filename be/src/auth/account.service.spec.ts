@@ -190,6 +190,7 @@ describe('AccountService', () => {
       email: 'test@example.com',
       passwordHash,
       active: true,
+      passwordLastChangedAt: null,
       createdAt: new Date('2024-01-01T00:00:00.000Z'),
       updatedAt: new Date('2024-01-01T00:00:00.000Z'),
     } as User;
@@ -206,6 +207,7 @@ describe('AccountService', () => {
     expect(user.passwordHash).not.toBe(passwordHash);
     const matchesNew = await bcrypt.compare(newPassword, user.passwordHash);
     expect(matchesNew).toBe(true);
+    expect(user.passwordLastChangedAt).toBeInstanceOf(Date);
   });
 
   it('changePassword throws NotFoundException when user is missing', async () => {
@@ -261,6 +263,8 @@ describe('AccountService', () => {
       ),
       resetPasswordToken: 'reset-token',
       resetPasswordTokenExpiresAt: new Date('2024-01-05T00:00:00.000Z'),
+      gdprErasureRequestedAt: null,
+      gdprErasureCompletedAt: null,
       createdAt: new Date('2024-01-01T00:00:00.000Z'),
       updatedAt: new Date('2024-01-01T00:00:00.000Z'),
     } as User;
@@ -288,6 +292,8 @@ describe('AccountService', () => {
     expect(user.resetPasswordTokenExpiresAt).toBeNull();
     expect(user.emailChangeVerificationCount).toBe(0);
     expect(user.emailChangeVerificationWindowStartedAt).toBeNull();
+    expect(user.gdprErasureRequestedAt).toBeInstanceOf(Date);
+    expect(user.gdprErasureCompletedAt).toBeInstanceOf(Date);
   });
 
   it('deleteAccount does nothing when user is already inactive or missing', async () => {
@@ -309,15 +315,21 @@ describe('AccountService', () => {
       active: true,
       createdAt: new Date('2024-01-01T00:00:00.000Z'),
       updatedAt: new Date('2024-01-01T00:00:00.000Z'),
+      lastExportRequestedAt: null,
+      lastExportDeliveredAt: null,
     } as User;
 
     (usersRepo.findOne as jest.Mock).mockResolvedValue(user);
+    (usersRepo.save as jest.Mock).mockImplementation(async (u: User) => u);
 
     const result = await service.exportData('user-id');
 
     expect(usersRepo.findOne).toHaveBeenCalledWith({
       where: { id: 'user-id', active: true },
     });
+    expect(usersRepo.save).toHaveBeenCalledWith(user);
+    expect(user.lastExportRequestedAt).toBeInstanceOf(Date);
+    expect(user.lastExportDeliveredAt).toBeInstanceOf(Date);
     expect(result).toEqual({
       id: 'user-id',
       email: 'test@example.com',

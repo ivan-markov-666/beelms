@@ -238,6 +238,17 @@ The export endpoint is additionally controlled via:
 
 - `ACCOUNT_EXPORT_REQUIRE_CAPTCHA` – when set to `true`, `POST /api/users/me/export` requires a non-empty `captchaToken` field. This mirrors the behaviour of `AUTH_REQUIRE_CAPTCHA` for registration.
 
+#### GDPR data lifecycle (internal)
+
+Internally, the Auth/Account services maintain additional timestamps on the `User` entity to support GDPR lifecycle and audit use cases:
+
+- `createdAt` – user creation time (existing field).
+- `passwordLastChangedAt` – last time the password was set or changed (updated on registration, password reset, and change-password).
+- `gdprErasureRequestedAt` / `gdprErasureCompletedAt` – when account erasure/anonymisation was requested and completed (set during `DELETE /api/users/me`).
+- `lastExportRequestedAt` / `lastExportDeliveredAt` – when a personal data export was requested and delivered (set during `POST /api/users/me/export`).
+
+These fields are **not exposed in the public WS-2 Auth/Account API responses** and are intended for internal reporting and future admin/audit tooling.
+
 For full request/response schemas, see the OpenAPI spec in `docs/architecture/openapi.yaml`.
 
 ### Manual testing checklist – Auth + Account (WS-2)
