@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { WikiMain } from "../_components/wiki-main";
 import { WikiBackLink } from "../_components/wiki-back-link";
 import { WikiArticleMeta } from "../_components/wiki-article-meta";
+import { WikiArticleActions } from "../_components/wiki-article-actions";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000";
@@ -71,6 +72,7 @@ export default async function WikiArticlePage({
           language={article.language}
           updatedAt={article.updatedAt}
         />
+        <WikiArticleActions title={article.title} />
       </header>
 
       <article className="mt-6 max-w-prose whitespace-pre-line text-base text-zinc-800 dark:text-zinc-100 leading-relaxed">
