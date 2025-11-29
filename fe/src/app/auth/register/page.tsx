@@ -2,6 +2,8 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useCurrentLang } from "../../../i18n/useCurrentLang";
+import { t } from "../../../i18n/t";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
@@ -16,6 +18,7 @@ type FieldErrors = {
 
 export default function RegisterPage() {
   const router = useRouter();
+  const lang = useCurrentLang();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -82,32 +85,40 @@ export default function RegisterPage() {
     const errors: FieldErrors = {};
 
     if (!email) {
-      errors.email = "Моля, въведете имейл.";
+      errors.email = t(lang, "auth", "registerErrorEmailRequired");
     } else {
       const emailRegex = /.+@.+\..+/;
       if (!emailRegex.test(email)) {
-        errors.email = "Моля, въведете валиден имейл адрес.";
+        errors.email = t(lang, "auth", "registerErrorEmailInvalid");
       }
     }
 
     if (!password) {
-      errors.password = "Моля, въведете парола.";
+      errors.password = t(lang, "auth", "registerErrorPasswordRequired");
     } else if (password.length < 8) {
-      errors.password = "Паролата трябва да е поне 8 символа.";
+      errors.password = t(lang, "auth", "registerErrorPasswordTooShort");
     }
 
     if (!confirmPassword) {
-      errors.confirmPassword = "Моля, потвърдете паролата.";
+      errors.confirmPassword = t(
+        lang,
+        "auth",
+        "registerErrorConfirmPasswordRequired",
+      );
     } else if (confirmPassword !== password) {
-      errors.confirmPassword = "Паролите не съвпадат.";
+      errors.confirmPassword = t(
+        lang,
+        "auth",
+        "registerErrorPasswordsMismatch",
+      );
     }
 
     if (!acceptTerms) {
-      errors.terms = "Необходимо е да приемете условията.";
+      errors.terms = t(lang, "auth", "registerErrorTermsRequired");
     }
 
     if (!captchaChecked) {
-      errors.captcha = "Моля, потвърдете, че не сте робот.";
+      errors.captcha = t(lang, "auth", "registerErrorCaptchaRequired");
     }
 
     setFieldErrors(errors);
@@ -140,24 +151,20 @@ export default function RegisterPage() {
 
       if (!res.ok) {
         if (res.status === 409) {
-          setFormError("Този имейл вече е регистриран.");
+          setFormError(t(lang, "auth", "registerErrorDuplicateEmail"));
         } else if (res.status === 400) {
-          setFormError(
-            "Данните не са валидни. Моля, проверете формата и опитайте отново.",
-          );
+          setFormError(t(lang, "auth", "registerErrorInvalidData"));
         } else {
-          setFormError("Регистрацията не успя. Моля, опитайте отново по-късно.");
+          setFormError(t(lang, "auth", "registerErrorGeneric"));
         }
       } else {
-        setFormSuccess(
-          "Регистрацията беше успешна. Моля, проверете имейла си и потвърдете адреса чрез получен линк. След това можете да влезете в акаунта си от страницата за вход.",
-        );
+        setFormSuccess(t(lang, "auth", "registerSuccess"));
         setTimeout(() => {
           router.push("/auth/login");
         }, 13000);
       }
     } catch {
-      setFormError("Възникна грешка при връзката със сървъра.");
+      setFormError(t(lang, "auth", "registerErrorNetwork"));
     } finally {
       setSubmitting(false);
     }
@@ -167,7 +174,9 @@ export default function RegisterPage() {
     return (
       <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-8">
         <main className="w-full max-w-md rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
-          <p className="text-sm text-zinc-600">Зареждане...</p>
+          <p className="text-sm text-zinc-600">
+            {t(lang, "auth", "registerLoading")}
+          </p>
         </main>
       </div>
     );
@@ -177,16 +186,16 @@ export default function RegisterPage() {
     <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-8">
       <main className="w-full max-w-md rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
         <h1 className="mb-2 text-2xl font-semibold text-zinc-900">
-          Регистрация
+          {t(lang, "auth", "registerTitle")}
         </h1>
         <p className="mb-6 text-sm text-zinc-600">
-          Създайте своя безплатен акаунт в QA4Free.
+          {t(lang, "auth", "registerSubtitle")}
         </p>
 
         <form className="space-y-4" onSubmit={handleSubmit} noValidate>
           <div className="space-y-1">
             <label htmlFor="email" className="block text-sm font-medium text-zinc-800">
-              Имейл
+              {t(lang, "auth", "registerEmailLabel")}
             </label>
             <input
               id="email"
@@ -207,7 +216,7 @@ export default function RegisterPage() {
               htmlFor="password"
               className="block text-sm font-medium text-zinc-800"
             >
-              Парола
+              {t(lang, "auth", "registerPasswordLabel")}
             </label>
             <input
               id="password"
@@ -228,7 +237,7 @@ export default function RegisterPage() {
               htmlFor="confirmPassword"
               className="block text-sm font-medium text-zinc-800"
             >
-              Потвърди паролата
+              {t(lang, "auth", "registerConfirmPasswordLabel")}
             </label>
             <input
               id="confirmPassword"
@@ -254,7 +263,7 @@ export default function RegisterPage() {
               disabled={submitting}
             />
             <label htmlFor="terms" className="text-xs text-zinc-700">
-              Съгласен съм с Условията за ползване и Политиката за поверителност.
+              {t(lang, "auth", "registerTermsLabel")}
             </label>
           </div>
           {fieldErrors.terms && (
@@ -272,7 +281,7 @@ export default function RegisterPage() {
                 disabled={submitting}
               />
               <label htmlFor="captcha" className="text-xs text-zinc-700">
-                Не съм робот (placeholder за CAPTCHA интеграция).
+                {t(lang, "auth", "registerCaptchaLabel")}
               </label>
             </div>
             {fieldErrors.captcha && (
@@ -296,18 +305,20 @@ export default function RegisterPage() {
             className="flex w-full items-center justify-center rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-70"
             disabled={submitting}
           >
-            {submitting ? "Изпращане..." : "Регистрация"}
+            {submitting
+              ? t(lang, "auth", "registerSubmitLoading")
+              : t(lang, "auth", "registerSubmit")}
           </button>
 
           <p className="text-xs text-zinc-600">
-            Вече имате акаунт?{" "}
+            {t(lang, "auth", "registerHasAccount")} {" "}
             <button
               type="button"
               className="text-zinc-900 underline underline-offset-2 hover:text-zinc-700"
               onClick={() => router.push("/auth/login")}
               disabled={submitting}
             >
-              Вход
+              {t(lang, "auth", "registerLoginLink")}
             </button>
           </p>
         </form>

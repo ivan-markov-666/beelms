@@ -16,6 +16,7 @@ describe("i18n t helper", () => {
           practice: "Практика",
           login: "Вход",
         },
+        auth: {},
         common: {},
       },
       en: {
@@ -24,6 +25,7 @@ describe("i18n t helper", () => {
           // practice липсва нарочно, за да форсираме fallback към BG
           login: "Sign in",
         },
+        auth: {},
         common: {},
       },
     } as unknown as Messages;
@@ -39,6 +41,7 @@ describe("i18n t helper", () => {
           practice: "Практика",
           login: "Вход",
         },
+        auth: {},
         common: {},
       },
       en: {
@@ -47,6 +50,7 @@ describe("i18n t helper", () => {
           practice: "Practice",
           login: "Sign in",
         },
+        auth: {},
         common: {},
       },
     };

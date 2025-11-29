@@ -2,6 +2,8 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useCurrentLang } from "../../../i18n/useCurrentLang";
+import { t } from "../../../i18n/t";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
@@ -13,6 +15,7 @@ type FieldErrors = {
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
+  const lang = useCurrentLang();
 
   const [email, setEmail] = useState("");
   const [captchaChecked, setCaptchaChecked] = useState(false);
@@ -25,16 +28,16 @@ export default function ForgotPasswordPage() {
     const errors: FieldErrors = {};
 
     if (!email) {
-      errors.email = "Моля, въведете имейл.";
+      errors.email = t(lang, "auth", "forgotErrorEmailRequired");
     } else {
       const emailRegex = /.+@.+\..+/;
       if (!emailRegex.test(email)) {
-        errors.email = "Моля, въведете валиден имейл адрес.";
+        errors.email = t(lang, "auth", "forgotErrorEmailInvalid");
       }
     }
 
     if (!captchaChecked) {
-      errors.captcha = "Моля, потвърдете, че не сте робот.";
+      errors.captcha = t(lang, "auth", "forgotErrorCaptchaRequired");
     }
 
     setFieldErrors(errors);
@@ -66,21 +69,15 @@ export default function ForgotPasswordPage() {
 
       if (!res.ok) {
         if (res.status === 400) {
-          setFormError(
-            "Данните не са валидни. Моля, проверете формата и опитайте отново.",
-          );
+          setFormError(t(lang, "auth", "forgotErrorInvalidData"));
         } else {
-          setFormError(
-            "Заявката за забравена парола не успя. Моля, опитайте отново по-късно.",
-          );
+          setFormError(t(lang, "auth", "forgotErrorGeneric"));
         }
       } else {
-        setFormSuccess(
-          "Ако има акаунт с този имейл, ще изпратим инструкции за смяна на паролата.",
-        );
+        setFormSuccess(t(lang, "auth", "forgotSuccess"));
       }
     } catch {
-      setFormError("Възникна грешка при връзката със сървъра.");
+      setFormError(t(lang, "auth", "forgotErrorNetwork"));
     } finally {
       setSubmitting(false);
     }
@@ -90,16 +87,16 @@ export default function ForgotPasswordPage() {
     <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-8">
       <main className="w-full max-w-md rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
         <h1 className="mb-2 text-2xl font-semibold text-zinc-900">
-          Забравена парола
+          {t(lang, "auth", "forgotTitle")}
         </h1>
         <p className="mb-6 text-sm text-zinc-600">
-          Въведете своя имейл, за да заявите смяна на паролата.
+          {t(lang, "auth", "forgotSubtitle")}
         </p>
 
         <form className="space-y-4" onSubmit={handleSubmit} noValidate>
           <div className="space-y-1">
             <label htmlFor="email" className="block text-sm font-medium text-zinc-800">
-              Имейл
+              {t(lang, "auth", "forgotEmailLabel")}
             </label>
             <input
               id="email"
@@ -126,7 +123,7 @@ export default function ForgotPasswordPage() {
                 disabled={submitting}
               />
               <label htmlFor="captcha" className="text-xs text-zinc-700">
-                Не съм робот (placeholder за CAPTCHA интеграция).
+                {t(lang, "auth", "forgotCaptchaLabel")}
               </label>
             </div>
             {fieldErrors.captcha && (
@@ -150,18 +147,20 @@ export default function ForgotPasswordPage() {
             className="flex w-full items-center justify-center rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-70"
             disabled={submitting}
           >
-            {submitting ? "Изпращане..." : "Изпрати линк за ресет"}
+            {submitting
+              ? t(lang, "auth", "forgotSubmitLoading")
+              : t(lang, "auth", "forgotSubmit")}
           </button>
 
           <p className="text-xs text-zinc-600">
-            Спомнихте си паролата?{" "}
+            {t(lang, "auth", "forgotHasPassword")} {" "}
             <button
               type="button"
               className="text-zinc-900 underline underline-offset-2 hover:text-zinc-700"
               onClick={() => router.push("/auth/login")}
               disabled={submitting}
             >
-              Върни се към вход
+              {t(lang, "auth", "forgotLoginLink")}
             </button>
           </p>
         </form>
