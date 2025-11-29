@@ -1,6 +1,8 @@
 import {
   BadRequestException,
   ConflictException,
+  HttpException,
+  HttpStatus,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -35,7 +37,9 @@ export class AuthService {
       throw new BadRequestException('captcha verification required');
     }
 
-    const existing = await this.usersRepo.findOne({ where: { email: dto.email } });
+    const existing = await this.usersRepo.findOne({
+      where: { email: dto.email },
+    });
     if (existing) {
       throw new ConflictException('Email already in use');
     }
@@ -60,7 +64,6 @@ export class AuthService {
       await this.usersRepo.save(saved);
 
       if (process.env.NODE_ENV !== 'production') {
-        // eslint-disable-next-line no-console
         console.log(
           `[auth] Email verification requested for ${saved.email}. Verification link: /auth/verify-email?token=${verificationToken}`,
         );
@@ -79,7 +82,9 @@ export class AuthService {
   }
 
   async login(dto: LoginDto): Promise<AuthTokenDto> {
-    const user = await this.usersRepo.findOne({ where: { email: dto.email, active: true } });
+    const user = await this.usersRepo.findOne({
+      where: { email: dto.email, active: true },
+    });
 
     if (!user) {
       throw new UnauthorizedException('invalid credentials');
@@ -106,7 +111,9 @@ export class AuthService {
     }
 
     const email = dto.email.toLowerCase().trim();
-    const user = await this.usersRepo.findOne({ where: { email } });
+    const user = await this.usersRepo.findOne({
+      where: { email },
+    });
 
     if (!user) {
       return;
@@ -122,7 +129,6 @@ export class AuthService {
     await this.usersRepo.save(user);
 
     if (process.env.NODE_ENV !== 'production') {
-      // eslint-disable-next-line no-console
       console.log(
         `[auth] Password reset requested for ${user.email}. Reset link: /auth/reset-password?token=${token}`,
       );
@@ -187,6 +193,25 @@ export class AuthService {
         throw new BadRequestException('invalid or expired verification token');
       }
 
+      const WINDOW_MS = 24 * 60 * 60 * 1000;
+
+      if (
+        !user.emailChangeVerificationWindowStartedAt ||
+        now - user.emailChangeVerificationWindowStartedAt.getTime() >= WINDOW_MS
+      ) {
+        user.emailChangeVerificationWindowStartedAt = new Date(now);
+        user.emailChangeVerificationCount = 0;
+      }
+
+      if (user.emailChangeVerificationCount >= 3) {
+        throw new HttpException(
+          'email change verification limit reached',
+          HttpStatus.TOO_MANY_REQUESTS,
+        );
+      }
+
+      user.emailChangeVerificationCount += 1;
+
       user.email = user.pendingEmail;
       user.pendingEmail = null;
       user.pendingEmailVerificationToken = null;
@@ -204,6 +229,8 @@ export class AuthService {
       id: user.id,
       email: user.email,
       createdAt: user.createdAt.toISOString(),
+      emailChangeLimitReached: false,
+      emailChangeLimitResetAt: null,
     };
   }
 }

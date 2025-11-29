@@ -62,6 +62,20 @@ export class User {
   pendingEmailVerificationTokenExpiresAt: Date | null;
 
   @Column({
+    name: 'email_change_verification_count',
+    type: 'integer',
+    default: 0,
+  })
+  emailChangeVerificationCount: number;
+
+  @Column({
+    name: 'email_change_verification_window_started_at',
+    type: 'timestamp with time zone',
+    nullable: true,
+  })
+  emailChangeVerificationWindowStartedAt: Date | null;
+
+  @Column({
     name: 'reset_password_token',
     type: 'varchar',
     length: 255,

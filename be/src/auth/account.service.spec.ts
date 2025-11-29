@@ -1,4 +1,8 @@
-import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -47,18 +51,54 @@ describe('AccountService', () => {
 
     const result = await service.getCurrentProfile('user-id');
 
-    expect(usersRepo.findOne).toHaveBeenCalledWith({ where: { id: 'user-id', active: true } });
+    expect(usersRepo.findOne).toHaveBeenCalledWith({
+      where: { id: 'user-id', active: true },
+    });
     expect(result).toEqual({
       id: 'user-id',
       email: 'test@example.com',
       createdAt: '2024-01-01T00:00:00.000Z',
+      emailChangeLimitReached: false,
+      emailChangeLimitResetAt: null,
     });
+  });
+
+  it('getCurrentProfile marks email change limit as reached when window is active and count >= 3', async () => {
+    const windowStart = new Date();
+
+    const user: User = {
+      id: 'user-id',
+      email: 'test@example.com',
+      passwordHash: 'hash',
+      active: true,
+      createdAt: new Date('2024-01-01T00:00:00.000Z'),
+      updatedAt: new Date('2024-01-01T00:00:00.000Z'),
+      emailChangeVerificationCount: 3,
+      emailChangeVerificationWindowStartedAt: windowStart,
+    } as User;
+
+    (usersRepo.findOne as jest.Mock).mockResolvedValue(user);
+
+    const nowSpy = jest
+      .spyOn(Date, 'now')
+      .mockReturnValue(windowStart.getTime() + 60 * 60 * 1000); // within 24h window
+
+    const result = await service.getCurrentProfile('user-id');
+
+    expect(result.emailChangeLimitReached).toBe(true);
+    expect(result.emailChangeLimitResetAt).toBe(
+      new Date(windowStart.getTime() + 24 * 60 * 60 * 1000).toISOString(),
+    );
+
+    nowSpy.mockRestore();
   });
 
   it('getCurrentProfile throws NotFoundException when user is not found', async () => {
     (usersRepo.findOne as jest.Mock).mockResolvedValue(undefined);
 
-    await expect(service.getCurrentProfile('missing-id')).rejects.toBeInstanceOf(NotFoundException);
+    await expect(
+      service.getCurrentProfile('missing-id'),
+    ).rejects.toBeInstanceOf(NotFoundException);
   });
 
   it('updateEmail sets pendingEmail and verification token when new email is free', async () => {
@@ -80,7 +120,9 @@ describe('AccountService', () => {
 
     const result = await service.updateEmail('user-id', dto);
 
-    expect(usersRepo.findOne).toHaveBeenNthCalledWith(1, { where: { id: 'user-id', active: true } });
+    expect(usersRepo.findOne).toHaveBeenNthCalledWith(1, {
+      where: { id: 'user-id', active: true },
+    });
     expect(usersRepo.findOne).toHaveBeenNthCalledWith(2, {
       where: { email: dto.email, active: true },
     });
@@ -89,7 +131,9 @@ describe('AccountService', () => {
     const savedUser = (usersRepo.save as jest.Mock).mock.calls[0][0] as User;
     expect(savedUser.pendingEmail).toBe(dto.email);
     expect(savedUser.pendingEmailVerificationToken).toBeDefined();
-    expect(savedUser.pendingEmailVerificationTokenExpiresAt).toBeInstanceOf(Date);
+    expect(savedUser.pendingEmailVerificationTokenExpiresAt).toBeInstanceOf(
+      Date,
+    );
 
     // primary email remains unchanged until verification is completed
     expect(result.email).toBe(user.email);
@@ -100,7 +144,9 @@ describe('AccountService', () => {
 
     (usersRepo.findOne as jest.Mock).mockResolvedValue(undefined);
 
-    await expect(service.updateEmail('missing-id', dto)).rejects.toBeInstanceOf(NotFoundException);
+    await expect(service.updateEmail('missing-id', dto)).rejects.toBeInstanceOf(
+      NotFoundException,
+    );
   });
 
   it('updateEmail throws ConflictException when email is already used by another user', async () => {
@@ -128,7 +174,9 @@ describe('AccountService', () => {
       .mockResolvedValueOnce(user) // current user
       .mockResolvedValueOnce(existing); // existing user with same email
 
-    await expect(service.updateEmail('user-id', dto)).rejects.toBeInstanceOf(ConflictException);
+    await expect(service.updateEmail('user-id', dto)).rejects.toBeInstanceOf(
+      ConflictException,
+    );
     expect(usersRepo.save).not.toHaveBeenCalled();
   });
 
@@ -151,7 +199,9 @@ describe('AccountService', () => {
 
     await service.changePassword('user-id', oldPassword, newPassword);
 
-    expect(usersRepo.findOne).toHaveBeenCalledWith({ where: { id: 'user-id', active: true } });
+    expect(usersRepo.findOne).toHaveBeenCalledWith({
+      where: { id: 'user-id', active: true },
+    });
     expect(usersRepo.save).toHaveBeenCalled();
     expect(user.passwordHash).not.toBe(passwordHash);
     const matchesNew = await bcrypt.compare(newPassword, user.passwordHash);
@@ -162,7 +212,11 @@ describe('AccountService', () => {
     (usersRepo.findOne as jest.Mock).mockResolvedValue(undefined);
 
     await expect(
-      service.changePassword('missing-id', 'OldPassword1234', 'NewPassword5678'),
+      service.changePassword(
+        'missing-id',
+        'OldPassword1234',
+        'NewPassword5678',
+      ),
     ).rejects.toBeInstanceOf(NotFoundException);
   });
 
@@ -202,7 +256,9 @@ describe('AccountService', () => {
 
     await service.deleteAccount('user-id');
 
-    expect(usersRepo.findOne).toHaveBeenCalledWith({ where: { id: 'user-id', active: true } });
+    expect(usersRepo.findOne).toHaveBeenCalledWith({
+      where: { id: 'user-id', active: true },
+    });
     expect(usersRepo.save).toHaveBeenCalled();
     expect(user.active).toBe(false);
     expect(user.email).toBe(`deleted+${user.id}@deleted.qa4free.invalid`);
@@ -214,7 +270,9 @@ describe('AccountService', () => {
 
     await service.deleteAccount('missing-id');
 
-    expect(usersRepo.findOne).toHaveBeenCalledWith({ where: { id: 'missing-id', active: true } });
+    expect(usersRepo.findOne).toHaveBeenCalledWith({
+      where: { id: 'missing-id', active: true },
+    });
     expect(usersRepo.save).not.toHaveBeenCalled();
   });
 
@@ -232,7 +290,9 @@ describe('AccountService', () => {
 
     const result = await service.exportData('user-id');
 
-    expect(usersRepo.findOne).toHaveBeenCalledWith({ where: { id: 'user-id', active: true } });
+    expect(usersRepo.findOne).toHaveBeenCalledWith({
+      where: { id: 'user-id', active: true },
+    });
     expect(result).toEqual({
       id: 'user-id',
       email: 'test@example.com',
@@ -244,6 +304,8 @@ describe('AccountService', () => {
   it('exportData throws NotFoundException when user is not found', async () => {
     (usersRepo.findOne as jest.Mock).mockResolvedValue(undefined);
 
-    await expect(service.exportData('missing-id')).rejects.toBeInstanceOf(NotFoundException);
+    await expect(service.exportData('missing-id')).rejects.toBeInstanceOf(
+      NotFoundException,
+    );
   });
 });

@@ -66,7 +66,9 @@ describe('AuthService', () => {
 
     const result = await service.register(dto);
 
-    expect(usersRepo.findOne).toHaveBeenCalledWith({ where: { email: dto.email } });
+    expect(usersRepo.findOne).toHaveBeenCalledWith({
+      where: { email: dto.email },
+    });
     expect(usersRepo.create).toHaveBeenCalled();
     expect(usersRepo.save).toHaveBeenCalled();
     expect(result.email).toBe(dto.email);
@@ -82,7 +84,9 @@ describe('AuthService', () => {
       password: 'Password1234',
     };
 
-    await expect(service.register(dto)).rejects.toBeInstanceOf(BadRequestException);
+    await expect(service.register(dto)).rejects.toBeInstanceOf(
+      BadRequestException,
+    );
     expect(usersRepo.findOne).not.toHaveBeenCalled();
   });
 
@@ -92,9 +96,13 @@ describe('AuthService', () => {
       password: 'Password1234',
     };
 
-    (usersRepo.findOne as jest.Mock).mockResolvedValue({ id: 'existing-id' } as User);
+    (usersRepo.findOne as jest.Mock).mockResolvedValue({
+      id: 'existing-id',
+    } as User);
 
-    await expect(service.register(dto)).rejects.toBeInstanceOf(ConflictException);
+    await expect(service.register(dto)).rejects.toBeInstanceOf(
+      ConflictException,
+    );
   });
 
   it('maps unique constraint errors during register to ConflictException', async () => {
@@ -114,7 +122,9 @@ describe('AuthService', () => {
     const dbError = new QueryFailedError('', [], { code: '23505' } as any);
     (usersRepo.save as jest.Mock).mockRejectedValue(dbError);
 
-    await expect(service.register(dto)).rejects.toBeInstanceOf(ConflictException);
+    await expect(service.register(dto)).rejects.toBeInstanceOf(
+      ConflictException,
+    );
   });
 
   it('logs in user with correct credentials', async () => {
@@ -153,7 +163,9 @@ describe('AuthService', () => {
 
     (usersRepo.findOne as jest.Mock).mockResolvedValue(null);
 
-    await expect(service.login(dto)).rejects.toBeInstanceOf(UnauthorizedException);
+    await expect(service.login(dto)).rejects.toBeInstanceOf(
+      UnauthorizedException,
+    );
   });
 
   it('throws UnauthorizedException when password is invalid', async () => {
@@ -176,7 +188,9 @@ describe('AuthService', () => {
 
     (usersRepo.findOne as jest.Mock).mockResolvedValue(user);
 
-    await expect(service.login(dto)).rejects.toBeInstanceOf(UnauthorizedException);
+    await expect(service.login(dto)).rejects.toBeInstanceOf(
+      UnauthorizedException,
+    );
   });
 
   it('requires captcha when AUTH_REQUIRE_CAPTCHA is true for forgotPassword', async () => {
@@ -186,7 +200,9 @@ describe('AuthService', () => {
       email: 'test@example.com',
     };
 
-    await expect(service.forgotPassword(dto)).rejects.toBeInstanceOf(BadRequestException);
+    await expect(service.forgotPassword(dto)).rejects.toBeInstanceOf(
+      BadRequestException,
+    );
     expect(usersRepo.findOne).not.toHaveBeenCalled();
   });
 
@@ -221,11 +237,15 @@ describe('AuthService', () => {
 
     await service.forgotPassword(dto);
 
-    expect(usersRepo.findOne).toHaveBeenCalledWith({ where: { email: dto.email } });
+    expect(usersRepo.findOne).toHaveBeenCalledWith({
+      where: { email: dto.email },
+    });
     expect(user.resetPasswordToken).toBeDefined();
     expect(typeof user.resetPasswordToken).toBe('string');
     expect(user.resetPasswordTokenExpiresAt).toBeInstanceOf(Date);
-    expect(user.resetPasswordTokenExpiresAt!.getTime()).toBeGreaterThan(Date.now());
+    expect(user.resetPasswordTokenExpiresAt!.getTime()).toBeGreaterThan(
+      Date.now(),
+    );
     expect(usersRepo.save).toHaveBeenCalledWith(user);
   });
 
@@ -268,7 +288,9 @@ describe('AuthService', () => {
 
     (usersRepo.findOne as jest.Mock).mockResolvedValue(null);
 
-    await expect(service.resetPassword(dto)).rejects.toBeInstanceOf(BadRequestException);
+    await expect(service.resetPassword(dto)).rejects.toBeInstanceOf(
+      BadRequestException,
+    );
     expect(usersRepo.save).not.toHaveBeenCalled();
   });
 
@@ -291,7 +313,9 @@ describe('AuthService', () => {
 
     (usersRepo.findOne as jest.Mock).mockResolvedValue(user);
 
-    await expect(service.resetPassword(dto)).rejects.toBeInstanceOf(BadRequestException);
+    await expect(service.resetPassword(dto)).rejects.toBeInstanceOf(
+      BadRequestException,
+    );
     expect(usersRepo.save).not.toHaveBeenCalled();
   });
 
@@ -341,7 +365,9 @@ describe('AuthService', () => {
       emailVerificationTokenExpiresAt: null,
       pendingEmail: 'new@example.com',
       pendingEmailVerificationToken: 'pending-token',
-      pendingEmailVerificationTokenExpiresAt: new Date(Date.now() + 60 * 60 * 1000),
+      pendingEmailVerificationTokenExpiresAt: new Date(
+        Date.now() + 60 * 60 * 1000,
+      ),
       resetPasswordToken: null,
       resetPasswordTokenExpiresAt: null,
       createdAt: new Date('2024-01-01T00:00:00.000Z'),
@@ -364,9 +390,9 @@ describe('AuthService', () => {
   it('verifyEmail throws BadRequestException for invalid token', async () => {
     (usersRepo.findOne as jest.Mock).mockResolvedValue(null);
 
-    await expect(service.verifyEmail({ token: 'invalid-token' } as any)).rejects.toBeInstanceOf(
-      BadRequestException,
-    );
+    await expect(
+      service.verifyEmail({ token: 'invalid-token' } as any),
+    ).rejects.toBeInstanceOf(BadRequestException);
     expect(usersRepo.save).not.toHaveBeenCalled();
   });
 });

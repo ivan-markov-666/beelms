@@ -41,9 +41,15 @@ describe('Account endpoints (e2e)', () => {
       .set('Authorization', `Bearer ${accessToken}`)
       .expect(200);
 
-    expect(res.body).toHaveProperty('id');
-    expect(res.body).toHaveProperty('email', email);
-    expect(typeof res.body.createdAt).toBe('string');
+    const body = res.body as {
+      id: string;
+      email: string;
+      createdAt: string;
+    };
+
+    expect(body).toHaveProperty('id');
+    expect(body).toHaveProperty('email', email);
+    expect(typeof body.createdAt).toBe('string');
   });
 
   it('GET /api/users/me returns 401 when Authorization header is missing', async () => {
@@ -51,7 +57,10 @@ describe('Account endpoints (e2e)', () => {
   });
 
   it('PATCH /api/users/me updates email for current user after verification', async () => {
-    const { accessToken, email: oldEmail } = await registerAndLogin(app, 'update-email');
+    const { accessToken, email: oldEmail } = await registerAndLogin(
+      app,
+      'update-email',
+    );
 
     const newEmail = oldEmail.replace('@', '+updated@');
 
@@ -64,7 +73,9 @@ describe('Account endpoints (e2e)', () => {
     // Response still contains the old primary email until verification completes
     expect(res.body).toHaveProperty('email', oldEmail);
 
-    const user = await userRepo.findOne({ where: { email: oldEmail, active: true } });
+    const user = await userRepo.findOne({
+      where: { email: oldEmail, active: true },
+    });
     expect(user).toBeDefined();
     expect(user!.pendingEmail).toBe(newEmail);
     expect(user!.pendingEmailVerificationToken).toBeDefined();
@@ -113,10 +124,11 @@ describe('Account endpoints (e2e)', () => {
   });
 
   it('POST /api/users/me/change-password changes password for current user', async () => {
-    const { email, password: oldPassword, accessToken } = await registerAndLogin(
-      app,
-      'change-password-success',
-    );
+    const {
+      email,
+      password: oldPassword,
+      accessToken,
+    } = await registerAndLogin(app, 'change-password-success');
 
     const newPassword = 'NewPassword5678';
 
@@ -138,12 +150,18 @@ describe('Account endpoints (e2e)', () => {
   });
 
   it('POST /api/users/me/change-password returns 400 for wrong current password', async () => {
-    const { accessToken } = await registerAndLogin(app, 'change-password-wrong-current');
+    const { accessToken } = await registerAndLogin(
+      app,
+      'change-password-wrong-current',
+    );
 
     await request(app.getHttpServer())
       .post('/api/users/me/change-password')
       .set('Authorization', `Bearer ${accessToken}`)
-      .send({ currentPassword: 'WrongPassword1234', newPassword: 'NewPassword5678' })
+      .send({
+        currentPassword: 'WrongPassword1234',
+        newPassword: 'NewPassword5678',
+      })
       .expect(400);
   });
 
@@ -168,7 +186,10 @@ describe('Account endpoints (e2e)', () => {
   });
 
   it('DELETE /api/users/me deactivates account and prevents further access', async () => {
-    const { email, password, accessToken } = await registerAndLogin(app, 'delete-me');
+    const { email, password, accessToken } = await registerAndLogin(
+      app,
+      'delete-me',
+    );
 
     await request(app.getHttpServer())
       .delete('/api/users/me')
@@ -191,7 +212,10 @@ describe('Account endpoints (e2e)', () => {
   });
 
   it('POST /api/users/me/export returns export data for current user', async () => {
-    const { email, accessToken } = await registerAndLogin(app, 'export-success');
+    const { email, accessToken } = await registerAndLogin(
+      app,
+      'export-success',
+    );
 
     const res = await request(app.getHttpServer())
       .post('/api/users/me/export')
@@ -199,20 +223,33 @@ describe('Account endpoints (e2e)', () => {
       .send({})
       .expect(200);
 
-    expect(res.body).toHaveProperty('id');
-    expect(res.body).toHaveProperty('email', email);
-    expect(typeof res.body.createdAt).toBe('string');
-    expect(res.body).toHaveProperty('active', true);
+    const body = res.body as {
+      id: string;
+      email: string;
+      createdAt: string;
+      active: boolean;
+    };
+
+    expect(body).toHaveProperty('id');
+    expect(body).toHaveProperty('email', email);
+    expect(typeof body.createdAt).toBe('string');
+    expect(body).toHaveProperty('active', true);
   });
 
   it('POST /api/users/me/export returns 401 when Authorization header is missing', async () => {
-    await request(app.getHttpServer()).post('/api/users/me/export').send({}).expect(401);
+    await request(app.getHttpServer())
+      .post('/api/users/me/export')
+      .send({})
+      .expect(401);
   });
 
   it('POST /api/users/me/export requires captcha when ACCOUNT_EXPORT_REQUIRE_CAPTCHA is true', async () => {
     process.env.ACCOUNT_EXPORT_REQUIRE_CAPTCHA = 'true';
 
-    const { email, accessToken } = await registerAndLogin(app, 'export-captcha');
+    const { email, accessToken } = await registerAndLogin(
+      app,
+      'export-captcha',
+    );
 
     await request(app.getHttpServer())
       .post('/api/users/me/export')
@@ -232,8 +269,72 @@ describe('Account endpoints (e2e)', () => {
     delete process.env.ACCOUNT_EXPORT_REQUIRE_CAPTCHA;
   });
 
+  it('enforces a 3-per-24h limit for email change verifications', async () => {
+    const { accessToken, email: originalEmail } = await registerAndLogin(
+      app,
+      'update-email-limit',
+    );
+
+    let currentEmail = originalEmail;
+
+    for (let i = 0; i < 3; i += 1) {
+      const newEmail = originalEmail.replace('@', `+limit${i}@`);
+
+      await request(app.getHttpServer())
+        .patch('/api/users/me')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ email: newEmail })
+        .expect(200);
+
+      const user = await userRepo.findOne({
+        where: { email: currentEmail, active: true },
+      });
+      expect(user).toBeDefined();
+      expect(user!.pendingEmail).toBe(newEmail);
+      expect(user!.pendingEmailVerificationToken).toBeDefined();
+
+      const verifyToken = user!.pendingEmailVerificationToken as string;
+
+      await request(app.getHttpServer())
+        .post('/api/auth/verify-email')
+        .send({ token: verifyToken })
+        .expect(200);
+
+      currentEmail = newEmail;
+    }
+
+    const meAfter = await request(app.getHttpServer())
+      .get('/api/users/me')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .expect(200);
+
+    const meAfterBody = meAfter.body as {
+      emailChangeLimitReached: boolean;
+      emailChangeLimitResetAt: string | null;
+    };
+
+    expect(meAfterBody).toHaveProperty('emailChangeLimitReached', true);
+    expect(typeof meAfterBody.emailChangeLimitResetAt).toBe('string');
+
+    const newEmail4 = originalEmail.replace('@', '+limit3@');
+
+    const res = await request(app.getHttpServer())
+      .patch('/api/users/me')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({ email: newEmail4 })
+      .expect(429);
+
+    expect(res.body).toHaveProperty(
+      'message',
+      'email change verification limit reached',
+    );
+  });
+
   it('INT-PA full happy path: profile view, update, change password, export, delete', async () => {
-    const { email, password, accessToken } = await registerAndLogin(app, 'int-pa-flow');
+    const { email, password, accessToken } = await registerAndLogin(
+      app,
+      'int-pa-flow',
+    );
 
     // 1) View profile
     const me1 = await request(app.getHttpServer())
@@ -290,7 +391,8 @@ describe('Account endpoints (e2e)', () => {
       .send({ email: updatedEmail, password: newPassword })
       .expect(200);
 
-    const newAccessToken = loginRes.body.accessToken as string;
+    const loginResBody = loginRes.body as { accessToken: string };
+    const newAccessToken = loginResBody.accessToken;
 
     // 4) Export data
     const exportRes = await request(app.getHttpServer())
@@ -335,7 +437,8 @@ describe('Account endpoints (e2e)', () => {
       .send({ email, password })
       .expect(200);
 
-    const accessToken1 = login1.body.accessToken as string;
+    const login1Body = login1.body as { accessToken: string };
+    const accessToken1 = login1Body.accessToken;
 
     // 3) Delete the account
     await request(app.getHttpServer())
@@ -361,7 +464,8 @@ describe('Account endpoints (e2e)', () => {
       .send({ email, password })
       .expect(200);
 
-    const accessToken2 = login2.body.accessToken as string;
+    const login2Body = login2.body as { accessToken: string };
+    const accessToken2 = login2Body.accessToken;
 
     // 7) Delete the account again to keep the DB clean
     await request(app.getHttpServer())
@@ -371,10 +475,11 @@ describe('Account endpoints (e2e)', () => {
   });
 
   it('allows changing password, logging in with the new password, and deleting the user', async () => {
-    const { email, password: oldPassword, accessToken } = await registerAndLogin(
-      app,
-      'change-password-login-delete',
-    );
+    const {
+      email,
+      password: oldPassword,
+      accessToken,
+    } = await registerAndLogin(app, 'change-password-login-delete');
 
     const newPassword = 'ChangeAndDeletePass123';
 
@@ -397,7 +502,8 @@ describe('Account endpoints (e2e)', () => {
       .send({ email, password: newPassword })
       .expect(200);
 
-    const newAccessToken = loginRes.body.accessToken as string;
+    const loginBody = loginRes.body as { accessToken: string };
+    const newAccessToken = loginBody.accessToken;
 
     // 4) Delete the user to keep the DB clean
     await request(app.getHttpServer())

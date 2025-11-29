@@ -10,6 +10,8 @@ type UserProfile = {
   id: string;
   email: string;
   createdAt: string;
+  emailChangeLimitReached: boolean;
+  emailChangeLimitResetAt: string | null;
 };
 
 type UserExport = {
@@ -33,6 +35,22 @@ function formatDate(dateIso: string): string {
   }
 }
 
+function formatDateTime(dateIso: string): string {
+  try {
+    const d = new Date(dateIso);
+    if (Number.isNaN(d.getTime())) return dateIso;
+    return d.toLocaleString("bg-BG", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch {
+    return dateIso;
+  }
+}
+
 export default function ProfilePage() {
   const router = useRouter();
 
@@ -46,6 +64,15 @@ export default function ProfilePage() {
   const [emailError, setEmailError] = useState<string | null>(null);
   const [emailSuccess, setEmailSuccess] = useState<string | null>(null);
   const [emailSubmitting, setEmailSubmitting] = useState(false);
+  const [emailLastSubmitted, setEmailLastSubmitted] = useState<string | null>(
+    null,
+  );
+  const [emailLastSubmittedAt, setEmailLastSubmittedAt] = useState<
+    number | null
+  >(null);
+  const [emailChangeLimitWarning, setEmailChangeLimitWarning] = useState<
+    string | null
+  >(null);
 
   const [passwordEditOpen, setPasswordEditOpen] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
@@ -124,6 +151,18 @@ export default function ProfilePage() {
     };
   }, [router]);
 
+  useEffect(() => {
+    if (!profile) return;
+
+    if (profile.emailChangeLimitReached) {
+      setEmailChangeLimitWarning(
+        "Достигнат е максималният брой потвърждения на нов имейл за последните 24 часа. Моля, опитайте отново след 24 часа.",
+      );
+    } else {
+      setEmailChangeLimitWarning(null);
+    }
+  }, [profile]);
+
   const handleLogout = () => {
     if (typeof window !== "undefined") {
       try {
@@ -148,6 +187,32 @@ export default function ProfilePage() {
       return;
     }
 
+    if (value === profile.email) {
+      setEmailError("Новият email съвпада с текущия email адрес.");
+      return;
+    }
+
+    if (emailChangeLimitWarning) {
+      setEmailError(emailChangeLimitWarning);
+      return;
+    }
+
+    const now = Date.now();
+
+    if (
+      emailLastSubmitted &&
+      value === emailLastSubmitted &&
+      emailLastSubmittedAt
+    ) {
+      const THROTTLE_MS = 60 * 1000;
+      if (now - emailLastSubmittedAt < THROTTLE_MS) {
+        setEmailSuccess(
+          "Вече изпратихме имейл за потвърждение на този адрес. Моля, използвайте най-новия получен линк или проверете пощата си. Може да заявите нов имейл отново след 60 секунди.",
+        );
+        return;
+      }
+    }
+
     setEmailSubmitting(true);
 
     try {
@@ -161,6 +226,14 @@ export default function ProfilePage() {
       });
 
       if (!res.ok) {
+        if (res.status === 429) {
+          const limitMessage =
+            "Достигнат е максималният брой потвърждения на нов имейл за последните 24 часа. Моля, опитайте отново след 24 часа.";
+          setEmailError(limitMessage);
+          setEmailChangeLimitWarning(limitMessage);
+          return;
+        }
+
         setEmailError(
           "Промяната на email не беше успешна. Моля, опитайте отново.",
         );
@@ -169,8 +242,11 @@ export default function ProfilePage() {
 
       const updated = (await res.json()) as UserProfile;
       setProfile(updated);
-      setEmailSuccess("Email адресът беше обновен успешно.");
-      setEmailEditOpen(false);
+      setEmailLastSubmitted(value);
+      setEmailLastSubmittedAt(now);
+      setEmailSuccess(
+        "Изпратихме имейл за потвърждение на новия адрес. Промяната ще влезе в сила след потвърждение.",
+      );
     } catch {
       setEmailError("Възникна грешка при връзката със сървъра.");
     } finally {
@@ -362,10 +438,31 @@ export default function ProfilePage() {
             <div className="border-b border-zinc-100 pb-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
-                    Email адрес
-                  </p>
+                  <div className="flex items-center gap-1">
+                    <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+                      Email адрес
+                    </p>
+                    <span
+                      className="cursor-help rounded-full border border-zinc-400 px-1 text-[10px] leading-none text-zinc-600"
+                      title="Можете да заявите до 3 успешни смени на имейл адрес за последните 24 часа. При достигане на лимита ще получавате съобщение при потвърждение на новия имейл и ще трябва да изчакате до 24 часа, преди да заявите нова промяна."
+                    >
+                      i
+                    </span>
+                  </div>
                   <p className="mt-1 text-sm text-zinc-900">{profile.email}</p>
+                  {emailChangeLimitWarning && !emailEditOpen && (
+                    <>
+                      <p className="mt-1 text-xs text-amber-700" role="alert">
+                        {emailChangeLimitWarning}
+                      </p>
+                      {profile.emailChangeLimitResetAt && (
+                        <p className="mt-0.5 text-[11px] text-amber-700">
+                          Лимитът ще бъде нулиран около{" "}
+                          {formatDateTime(profile.emailChangeLimitResetAt)}.
+                        </p>
+                      )}
+                    </>
+                  )}
                 </div>
                 <button
                   type="button"
@@ -409,6 +506,19 @@ export default function ProfilePage() {
                     <p className="text-xs text-emerald-600" role="status">
                       {emailSuccess}
                     </p>
+                  )}
+                  {emailChangeLimitWarning && (
+                    <>
+                      <p className="text-xs text-amber-700" role="alert">
+                        {emailChangeLimitWarning}
+                      </p>
+                      {profile.emailChangeLimitResetAt && (
+                        <p className="text-[11px] text-amber-700">
+                          Лимитът ще бъде нулиран около{" "}
+                          {formatDateTime(profile.emailChangeLimitResetAt)}.
+                        </p>
+                      )}
+                    </>
                   )}
                   <div className="flex items-center gap-2 pt-1">
                     <button
