@@ -49,6 +49,12 @@ describe("WikiArticlePage", () => {
     expect(screen.getByText("Начало с QA4Free")).toBeInTheDocument();
     expect(screen.getByText("Съдържание на статията")).toBeInTheDocument();
     expect(screen.getByText("← Назад към Wiki")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Сподели" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Принтирай" }),
+    ).toBeInTheDocument();
   });
 
   it("passes lang query param to the API when provided", async () => {
@@ -79,7 +85,7 @@ describe("WikiArticlePage", () => {
   });
 
   it("calls notFound when article is missing (404)", async () => {
-    const notFoundMock = notFound as jest.Mock;
+    const notFoundMock = notFound as unknown as jest.Mock;
 
     mockFetchOnce({}, false, 404);
 

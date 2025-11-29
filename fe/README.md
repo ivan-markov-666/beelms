@@ -52,6 +52,12 @@ For the MVP Wiki list pagination (`STORY-MVP-WIKI-LIST-PAGINATION`), the `/wiki`
 - uses a fixed `pageSize = 20` (see `PAGE_SIZE` constant in `src/app/wiki/page.tsx`);
 - shows pagination controls (Previous/Next + "Страница N") when there is more than one page or when you navigate to a page > 1.
 
+### 1.2. Екран „Wiki статия“
+
+- Действия върху статията:
+  - бутон „Сподели“ – използва Web Share API, когато е налично, за споделяне на URL адреса на статията, а при липсваща поддръжка пада обратно към копиране на линка в клипборда (или показване на URL в alert);
+  - бутон „Принтирай“ – отваря стандартния print диалог на браузъра за текущата статия.
+
 Useful manual test URLs (assuming FE is running on `http://localhost:3001`):
 
 - `http://localhost:3001/wiki` – first page, default filters;
