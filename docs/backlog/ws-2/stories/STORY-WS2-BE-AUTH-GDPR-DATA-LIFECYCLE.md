@@ -1,6 +1,5 @@
 # STORY-WS2-BE-AUTH-GDPR-DATA-LIFECYCLE – GDPR lifecycle & audit за потребителски акаунти
-
-Status: Draft
+Status: Done
 
 ## Summary
 Като **Data Protection Officer / администратор на системата** искам да имам **по-добра видимост и контрол върху lifecycle-а на потребителските данни** (създаване, смяна на парола, изтриване, експорт), така че да можем да докажем спазване на GDPR и да извършваме одити при нужда.
@@ -25,19 +24,19 @@ Status: Draft
 - Тези данни са достъпни през подходящ интерфейс (напр. admin API или вътрешен отчетен инструмент), но **не излагат чувствителни данни** към публичния FE.
 
 ## Dev Tasks
-- [ ] Дефиниране на нужните GDPR timestamps и/или audit модели:
-  - разширения на `User` (напр. `passwordLastChangedAt`, `lastExportRequestedAt` и др.);
-  - или отделна таблица `user_audit_events` с полета: `id`, `userId`, `eventType`, `createdAt`, `metadata(jsonb)`.
-- [ ] Миграции за новите полета/таблици.
-- [ ] Обновяване на съществуващите операции:
+- [x] Дефиниране на нужните GDPR timestamps върху `User` (WS-2 scope: без отделна audit таблица):
+  - разширения на `User` (напр. `passwordLastChangedAt`, `gdprErasureRequestedAt`, `gdprErasureCompletedAt`, `lastExportRequestedAt`, `lastExportDeliveredAt`);
+  - (опционална отделна таблица `user_audit_events` за по-късна фаза).
+- [x] Миграции за новите полета.
+- [x] Обновяване на съществуващите операции:
   - `register` – да инициализира новите полета (напр. `passwordLastChangedAt = createdAt`).
   - `changePassword` – да обновява `passwordLastChangedAt` и евентуално да добавя audit event.
   - `deleteAccount` – да сетва `gdprErasureRequestedAt`/`gdprErasureCompletedAt` (в синхрон с GDPR изтриването/анонимизацията).
   - `exportData` – да сетва `lastExportRequestedAt`/`lastExportDeliveredAt` и евентуално да добавя audit event.
-- [ ] Добавяне на вътрешен (auth/admin) endpoint или отчетен механизъм за извличане на GDPR lifecycle информация за даден потребител (без да се разкриват повече данни от необходимото).
-- [ ] Конфигуриране на подходящ retention policy за audit данните (ако е нужно) – напр. чистене след N години.
-- [ ] Unit тестове за новите полета и логика.
-- [ ] Integration тест(ове) за основния lifecycle (register → change password → export → delete) с проверка на timestamps / audit entries.
+- [ ] Добавяне на вътрешен (auth/admin) endpoint или отчетен механизъм за извличане на GDPR lifecycle информация за даден потребител (без да се разкриват повече данни от необходимото) – планирано за отделно story след WS-2 walking skeleton.
+- [ ] Конфигуриране на подходящ retention policy за audit данните (ако е нужно) – напр. чистене след N години (планирано за по-късен етап).
+- [x] Unit тестове за новите полета и логика.
+- [x] Integration тест(ове) за основния lifecycle (register → change password → export → delete) с проверка на поведенията и timestamps.
 
 ## Test Scenarios
 - **[INT-GDPR-LC-1] Password change lifecycle**

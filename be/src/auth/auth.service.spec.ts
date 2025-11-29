@@ -74,6 +74,10 @@ describe('AuthService', () => {
     expect(result.email).toBe(dto.email);
     expect(result.id).toBe('user-id');
     expect(result.createdAt).toBe('2024-01-01T00:00:00.000Z');
+
+    const createdArgs = (usersRepo.create as jest.Mock).mock
+      .calls[0][0] as Partial<User>;
+    expect(createdArgs.passwordLastChangedAt).toBeInstanceOf(Date);
   });
 
   it('requires captcha when AUTH_REQUIRE_CAPTCHA is true', async () => {
@@ -264,6 +268,7 @@ describe('AuthService', () => {
       active: true,
       createdAt: new Date('2024-01-01T00:00:00.000Z'),
       updatedAt: new Date('2024-01-01T00:00:00.000Z'),
+      passwordLastChangedAt: null,
     } as unknown as User;
 
     (usersRepo.findOne as jest.Mock).mockResolvedValue(user);
@@ -277,6 +282,7 @@ describe('AuthService', () => {
     expect(user.passwordHash).not.toBe('old-hash');
     expect(user.resetPasswordToken).toBeNull();
     expect(user.resetPasswordTokenExpiresAt).toBeNull();
+    expect(user.passwordLastChangedAt).toBeInstanceOf(Date);
     expect(usersRepo.save).toHaveBeenCalledWith(user);
   });
 

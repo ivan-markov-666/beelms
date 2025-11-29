@@ -90,6 +90,41 @@ export class User {
   })
   resetPasswordTokenExpiresAt: Date | null;
 
+  @Column({
+    name: 'password_last_changed_at',
+    type: 'timestamp with time zone',
+    nullable: true,
+  })
+  passwordLastChangedAt: Date | null;
+
+  @Column({
+    name: 'gdpr_erasure_requested_at',
+    type: 'timestamp with time zone',
+    nullable: true,
+  })
+  gdprErasureRequestedAt: Date | null;
+
+  @Column({
+    name: 'gdpr_erasure_completed_at',
+    type: 'timestamp with time zone',
+    nullable: true,
+  })
+  gdprErasureCompletedAt: Date | null;
+
+  @Column({
+    name: 'last_export_requested_at',
+    type: 'timestamp with time zone',
+    nullable: true,
+  })
+  lastExportRequestedAt: Date | null;
+
+  @Column({
+    name: 'last_export_delivered_at',
+    type: 'timestamp with time zone',
+    nullable: true,
+  })
+  lastExportDeliveredAt: Date | null;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

@@ -44,6 +44,7 @@ export class AuthService {
       throw new ConflictException('Email already in use');
     }
 
+    const now = new Date();
     const passwordHash = await bcrypt.hash(dto.password, 10);
 
     const user = this.usersRepo.create({
@@ -51,6 +52,7 @@ export class AuthService {
       passwordHash,
       active: true,
       emailVerified: false,
+      passwordLastChangedAt: now,
     });
     try {
       const saved = await this.usersRepo.save(user);
@@ -149,10 +151,12 @@ export class AuthService {
     }
 
     const passwordHash = await bcrypt.hash(dto.newPassword, 10);
+    const now = new Date();
 
     user.passwordHash = passwordHash;
     user.resetPasswordToken = null;
     user.resetPasswordTokenExpiresAt = null;
+    user.passwordLastChangedAt = now;
 
     await this.usersRepo.save(user);
   }

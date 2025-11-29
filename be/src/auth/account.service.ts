@@ -145,6 +145,7 @@ export class AccountService {
 
     const passwordHash = await bcrypt.hash(newPassword, 10);
     user.passwordHash = passwordHash;
+    user.passwordLastChangedAt = new Date();
     await this.usersRepo.save(user);
   }
 
@@ -158,9 +159,18 @@ export class AccountService {
       return;
     }
 
+    const now = new Date();
+
     user.active = false;
     user.email = `deleted+${user.id}@deleted.qa4free.invalid`;
     user.passwordHash = '';
+
+    if (!user.gdprErasureRequestedAt) {
+      user.gdprErasureRequestedAt = now;
+    }
+    if (!user.gdprErasureCompletedAt) {
+      user.gdprErasureCompletedAt = now;
+    }
 
     // Clear email verification and pending email state
     user.emailVerified = false;
@@ -189,6 +199,11 @@ export class AccountService {
     if (!user) {
       throw new NotFoundException('User not found');
     }
+
+    const now = new Date();
+    user.lastExportRequestedAt = now;
+    user.lastExportDeliveredAt = now;
+    await this.usersRepo.save(user);
 
     return {
       id: user.id,
