@@ -2,6 +2,8 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useCurrentLang } from "../../../i18n/useCurrentLang";
+import { t } from "../../../i18n/t";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
@@ -13,6 +15,7 @@ type FieldErrors = {
 
 export default function LoginPage() {
   const router = useRouter();
+  const lang = useCurrentLang();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -74,16 +77,16 @@ export default function LoginPage() {
     const errors: FieldErrors = {};
 
     if (!email) {
-      errors.email = "Моля, въведете имейл.";
+      errors.email = t(lang, "auth", "loginErrorEmailRequired");
     } else {
       const emailRegex = /.+@.+\..+/;
       if (!emailRegex.test(email)) {
-        errors.email = "Моля, въведете валиден имейл адрес.";
+        errors.email = t(lang, "auth", "loginErrorEmailInvalid");
       }
     }
 
     if (!password) {
-      errors.password = "Моля, въведете парола.";
+      errors.password = t(lang, "auth", "loginErrorPasswordRequired");
     }
 
     setFieldErrors(errors);
@@ -111,9 +114,9 @@ export default function LoginPage() {
 
       if (!res.ok) {
         if (res.status === 401) {
-          setFormError("Невалидни данни за вход.");
+          setFormError(t(lang, "auth", "loginErrorInvalidCredentials"));
         } else {
-          setFormError("Входът не успя. Моля, опитайте отново по-късно.");
+          setFormError(t(lang, "auth", "loginErrorGeneric"));
         }
       } else {
         const data = (await res.json()) as {
@@ -135,7 +138,7 @@ export default function LoginPage() {
         router.push("/wiki");
       }
     } catch {
-      setFormError("Възникна грешка при връзката със сървъра.");
+      setFormError(t(lang, "auth", "loginErrorNetwork"));
     } finally {
       setSubmitting(false);
     }
@@ -145,7 +148,9 @@ export default function LoginPage() {
     return (
       <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-8">
         <main className="w-full max-w-md rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
-          <p className="text-sm text-zinc-600">Зареждане...</p>
+          <p className="text-sm text-zinc-600">
+            {t(lang, "auth", "loginLoading")}
+          </p>
         </main>
       </div>
     );
@@ -154,15 +159,17 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-8">
       <main className="w-full max-w-md rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
-        <h1 className="mb-2 text-2xl font-semibold text-zinc-900">Вход</h1>
+        <h1 className="mb-2 text-2xl font-semibold text-zinc-900">
+          {t(lang, "auth", "loginTitle")}
+        </h1>
         <p className="mb-6 text-sm text-zinc-600">
-          Впишете се в своя акаунт в QA4Free.
+          {t(lang, "auth", "loginSubtitle")}
         </p>
 
         <form className="space-y-4" onSubmit={handleSubmit} noValidate>
           <div className="space-y-1">
             <label htmlFor="email" className="block text-sm font-medium text-zinc-800">
-              Имейл
+              {t(lang, "auth", "loginEmailLabel")}
             </label>
             <input
               id="email"
@@ -183,7 +190,7 @@ export default function LoginPage() {
               htmlFor="password"
               className="block text-sm font-medium text-zinc-800"
             >
-              Парола
+              {t(lang, "auth", "loginPasswordLabel")}
             </label>
             <input
               id="password"
@@ -210,7 +217,9 @@ export default function LoginPage() {
             className="flex w-full items-center justify-center rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-70"
             disabled={submitting}
           >
-            {submitting ? "Вписване..." : "Вход"}
+            {submitting
+              ? t(lang, "auth", "loginSubmitLoading")
+              : t(lang, "auth", "loginSubmit")}
           </button>
 
           <div className="flex items-center justify-between text-xs text-zinc-600">
@@ -220,7 +229,7 @@ export default function LoginPage() {
               onClick={() => router.push("/auth/forgot-password")}
               disabled={submitting}
             >
-              Забравена парола?
+              {t(lang, "auth", "loginForgotLink")}
             </button>
             <button
               type="button"
@@ -228,7 +237,7 @@ export default function LoginPage() {
               onClick={() => router.push("/auth/register")}
               disabled={submitting}
             >
-              Нямате акаунт?
+              {t(lang, "auth", "loginRegisterLink")}
             </button>
           </div>
         </form>

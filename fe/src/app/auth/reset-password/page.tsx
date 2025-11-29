@@ -2,6 +2,8 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useCurrentLang } from "../../../i18n/useCurrentLang";
+import { t } from "../../../i18n/t";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
@@ -14,6 +16,7 @@ type FieldErrors = {
 export default function ResetPasswordPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const lang = useCurrentLang();
 
   const token = searchParams.get("token") ?? "";
 
@@ -29,15 +32,27 @@ export default function ResetPasswordPage() {
     const errors: FieldErrors = {};
 
     if (!newPassword) {
-      errors.newPassword = "Моля, въведете нова парола.";
+      errors.newPassword = t(
+        lang,
+        "auth",
+        "resetErrorNewPasswordRequired",
+      );
     } else if (newPassword.length < 8) {
-      errors.newPassword = "Паролата трябва да е поне 8 символа.";
+      errors.newPassword = t(lang, "auth", "resetErrorNewPasswordTooShort");
     }
 
     if (!confirmNewPassword) {
-      errors.confirmNewPassword = "Моля, потвърдете новата парола.";
+      errors.confirmNewPassword = t(
+        lang,
+        "auth",
+        "resetErrorConfirmPasswordRequired",
+      );
     } else if (confirmNewPassword !== newPassword) {
-      errors.confirmNewPassword = "Паролите не съвпадат.";
+      errors.confirmNewPassword = t(
+        lang,
+        "auth",
+        "resetErrorPasswordsMismatch",
+      );
     }
 
     setFieldErrors(errors);
@@ -50,9 +65,7 @@ export default function ResetPasswordPage() {
     setFormSuccess(null);
 
     if (!token) {
-      setFormError(
-        "Линкът за смяна на паролата е невалиден или е изтекъл. Моля, заявете нов линк от екрана 'Забравена парола'.",
-      );
+      setFormError(t(lang, "auth", "resetErrorInvalidOrExpiredLink"));
       return;
     }
 
@@ -73,25 +86,19 @@ export default function ResetPasswordPage() {
 
       if (!res.ok) {
         if (res.status === 400) {
-          setFormError(
-            "Линкът за смяна на паролата е невалиден или е изтекъл. Моля, заявете нов линк от екрана 'Забравена парола'.",
-          );
+          setFormError(t(lang, "auth", "resetErrorInvalidOrExpiredLink"));
         } else {
-          setFormError(
-            "Смяната на паролата не успя. Моля, опитайте отново по-късно.",
-          );
+          setFormError(t(lang, "auth", "resetErrorGeneric"));
         }
       } else {
-        setFormSuccess(
-          "Паролата беше сменена успешно. Ще ви пренасочим към страницата за вход...",
-        );
+        setFormSuccess(t(lang, "auth", "resetSuccess"));
         setCompleted(true);
         setTimeout(() => {
           router.push("/auth/login");
         }, 1500);
       }
     } catch {
-      setFormError("Възникна грешка при връзката със сървъра.");
+      setFormError(t(lang, "auth", "resetErrorNetwork"));
     } finally {
       setSubmitting(false);
     }
@@ -101,10 +108,10 @@ export default function ResetPasswordPage() {
     <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-8">
       <main className="w-full max-w-md rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
         <h1 className="mb-2 text-2xl font-semibold text-zinc-900">
-          Смяна на парола
+          {t(lang, "auth", "resetTitle")}
         </h1>
         <p className="mb-6 text-sm text-zinc-600">
-          Въведете новата си парола (минимум 8 символа).
+          {t(lang, "auth", "resetSubtitle")}
         </p>
 
         <form className="space-y-4" onSubmit={handleSubmit} noValidate>
@@ -113,7 +120,7 @@ export default function ResetPasswordPage() {
               htmlFor="newPassword"
               className="block text-sm font-medium text-zinc-800"
             >
-              Нова парола
+              {t(lang, "auth", "resetNewPasswordLabel")}
             </label>
             <input
               id="newPassword"
@@ -134,7 +141,7 @@ export default function ResetPasswordPage() {
               htmlFor="confirmNewPassword"
               className="block text-sm font-medium text-zinc-800"
             >
-              Потвърди новата парола
+              {t(lang, "auth", "resetConfirmNewPasswordLabel")}
             </label>
             <input
               id="confirmNewPassword"
@@ -158,14 +165,14 @@ export default function ResetPasswordPage() {
                 {formError}
               </p>
               {formError ===
-                "Линкът за смяна на паролата е невалиден или е изтекъл. Моля, заявете нов линк от екрана 'Забравена парола'." && (
+                t(lang, "auth", "resetErrorInvalidOrExpiredLink") && (
                 <button
                   type="button"
                   className="text-xs text-zinc-900 underline underline-offset-2 hover:text-zinc-700"
                   onClick={() => router.push("/auth/forgot-password")}
                   disabled={submitting || completed}
                 >
-                  Към екрана „Забравена парола“
+                  {t(lang, "auth", "resetGoToForgotCta")}
                 </button>
               )}
             </div>
@@ -181,7 +188,7 @@ export default function ResetPasswordPage() {
                 onClick={() => router.push("/auth/login")}
                 disabled={submitting}
               >
-                Към страницата за вход
+                {t(lang, "auth", "resetSuccessLoginCta")}
               </button>
             </div>
           )}
@@ -191,18 +198,20 @@ export default function ResetPasswordPage() {
             className="flex w-full items-center justify-center rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-70"
             disabled={submitting || completed}
           >
-            {submitting ? "Смяна..." : "Смени паролата"}
+            {submitting
+              ? t(lang, "auth", "resetSubmitLoading")
+              : t(lang, "auth", "resetSubmit")}
           </button>
 
           <p className="text-xs text-zinc-600">
-            Вече помните паролата си?{" "}
+            {t(lang, "auth", "resetHasPassword")} {" "}
             <button
               type="button"
               className="text-zinc-900 underline underline-offset-2 hover:text-zinc-700"
               onClick={() => router.push("/auth/login")}
               disabled={submitting}
             >
-              Върни се към вход
+              {t(lang, "auth", "resetBackToLogin")}
             </button>
           </p>
         </form>

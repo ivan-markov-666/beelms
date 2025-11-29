@@ -12,9 +12,7 @@ jest.mock("next/navigation", () => {
       replace: jest.fn(),
       prefetch: jest.fn(),
     }),
-    useSearchParams: () => ({
-      get: (key: string) => (key === "token" ? "test-token" : null),
-    }),
+    useSearchParams: () => new URLSearchParams("token=test-token&lang=bg"),
   };
 });
 

@@ -163,6 +163,8 @@
   - основни заглавия, подсказки и бутонни текстове.
 - При нужда – отделно story за public landing / home.
 
+В рамките на WS-2 Auth walking skeleton, FE екраните `/auth/login`, `/auth/register`, `/auth/forgot-password` и `/auth/reset-password` вече са вързани към общия i18n слой и използват `auth` домейна в `src/i18n/messages.ts`, като показват преводими етикети, бутони и съобщения според глобалния `lang` параметър.
+
 ### Фаза 4 – Персистиране на езика и SSR подобрения
 
 **Ново story: `STORY-MVP-CROSS-I18N-PERSISTENCE`**
