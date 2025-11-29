@@ -1,6 +1,6 @@
 # STORY-MVP-CROSS-I18N-FE-FOUNDATION – Основи на мултиезичността във FE (BG/EN)
 
-Status: Draft
+Status: Implemented/In review
 
 _Забележка: Това story не е част от WS-2 Auth walking skeleton, а от `EPIC-CROSS-I18N` (и частично `EPIC-WIKI-PUBLIC`) като cross-cutting MVP разширение на мултиезичността, планирано за изпълнение в същия timeframe като WS-2._
 
@@ -32,23 +32,24 @@ _Забележка: Това story не е част от WS-2 Auth walking skel
 - Wiki списъкът и статиите запазват вече имплементираното поведение спрямо `STORY-MVP-WIKI-LANGUAGE-SWITCH` (включително 404 при липсваща езикова версия за статия).
 
 ## Dev Tasks
-- [ ] **Frontend – I18n foundation**
-  - [ ] Въвеждане на централен i18n конфиг (напр. `src/i18n/config.ts`) със:
+- [x] **Frontend – I18n foundation**
+  - [x] Въвеждане на централен i18n конфиг (напр. `src/i18n/config.ts`) със:
     - `SUPPORTED_LANGS = ["bg", "en"] as const;`
     - `SupportedLang` тип;
     - `DEFAULT_LANG` и функция `normalizeLang(raw): SupportedLang`.
-  - [ ] Добавяне на централен речник с преводими стрингове (напр. `src/i18n/messages.ts`), разделен по домейни (`nav`, `auth`, `wiki`, `common` и др.).
-  - [ ] Имплементиране на малък helper за превод (напр. `t(lang, key)` или типизиран еквивалент) и/или hook `useCurrentLang()` за client компоненти.
-- [ ] **Frontend – прилагане към layout/nav**
-  - [ ] Адаптиране на основния публичен layout shell и навигацията да използват i18n речниците вместо твърди BG стрингове.
-  - [ ] Осигуряване, че при различни стойности на `?lang=` (BG/EN) навигацията показва коректните преводи.
-- [ ] **Тестове**
-  - [ ] Unit тестове за `normalizeLang` и за i18n helper-а (`t`/`useCurrentLang`), включително fallback поведение при липсващ превод (използва се `DEFAULT_LANG`).
-  - [ ] Поне един FE тест (или snapshot тест), който проверява, че при `lang=bg`/`lang=en` навигацията показва различни надписи според речниците.
+  - [x] Добавяне на централен речник с преводими стрингове (напр. `src/i18n/messages.ts`), разделен по домейни (`nav`, `auth`, `wiki`, `common` и др.).
+  - [x] Имплементиране на малък helper за превод (напр. `t(lang, key)` или типизиран еквивалент) и/или hook `useCurrentLang()` за client компоненти.
+- [x] **Frontend – прилагане към layout/nav**
+  - [x] Адаптиране на основния публичен layout shell и навигацията да използват i18n речниците вместо твърди BG стрингове.
+  - [x] Осигуряване, че при различни стойности на `?lang=` (BG/EN) навигацията показва коректните преводи.
+- [x] **Тестове**
+  - [x] Unit тестове за `normalizeLang` и за i18n helper-а (`t`/`useCurrentLang`), включително fallback поведение при липсващ превод (използва се `DEFAULT_LANG`).
+  - [x] Поне един FE тест (или snapshot тест), който проверява, че при `lang=bg`/`lang=en` навигацията показва различни надписи според речниците.
 
 ## Notes
 - Това story стъпва върху вече имплементираното `STORY-MVP-WIKI-LANGUAGE-SWITCH` (глобален language switcher + Wiki поведение) и **разширява ефекта на избрания език върху общия UI**, без да променя backend API-та.
 - Необходими са координация и UX review, за да се уточни точният набор от елементи в layout/nav, които трябва да са преводими в рамките на MVP.
+- Реализация (MVP): FE използва централен i18n слой (`src/i18n/config.ts`, `src/i18n/messages.ts`, helper `t(...)` и hook `useCurrentLang()`), а глобалният `HeaderNav` в `RootLayout` показва линковете „Wiki“ и „Вход“/`"Sign in"` според избрания език.
 - Препоръчително планиране:
   - да се изпълни **след формалното приключване на WS-1** (walking skeleton за Wiki) и базовия WS-2 Auth skeleton, като част от първата wave от EPIC-CROSS-I18N за MVP;
   - може да бъде комбинирано с ранни Auth/Practice екрани, за да има достатъчно UI, върху който мултиезичността да е видима.
