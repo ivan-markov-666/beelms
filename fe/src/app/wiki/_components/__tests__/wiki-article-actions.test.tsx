@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
+import { act } from "react";
 import { WikiArticleActions } from "../wiki-article-actions";
 
 describe("WikiArticleActions", () => {
@@ -42,7 +43,9 @@ describe("WikiArticleActions", () => {
     render(<WikiArticleActions title="Shared article" />);
 
     const shareButton = screen.getByRole("button", { name: "Сподели" });
-    fireEvent.click(shareButton);
+    await act(async () => {
+      fireEvent.click(shareButton);
+    });
 
     expect(shareMock).toHaveBeenCalledWith({
       title: "Shared article",

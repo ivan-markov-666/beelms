@@ -1,17 +1,11 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-
-const SUPPORTED_LANGS = ["bg", "en"] as const;
-
-type SupportedLang = (typeof SUPPORTED_LANGS)[number];
-
-function normalizeLang(raw: string | null): SupportedLang {
-  if (raw === "en") {
-    return "en";
-  }
-  return "bg";
-}
+import {
+  SUPPORTED_LANGS,
+  type SupportedLang,
+  normalizeLang,
+} from "../../../i18n/config";
 
 export function LanguageSwitcher() {
   const router = useRouter();
