@@ -95,6 +95,41 @@ describe("ResetPasswordPage", () => {
     expect(global.fetch).toHaveBeenCalledTimes(1);
   });
 
+  it("shows a CTA button to go to login immediately after successful reset", async () => {
+    mockFetchOnce({}, true, 200);
+
+    render(<ResetPasswordPage />);
+
+    const newPasswordInput = await screen.findByLabelText("Нова парола");
+    const confirmNewPasswordInput = await screen.findByLabelText(
+      "Потвърди новата парола",
+    );
+    const submitButton = await screen.findByRole("button", {
+      name: "Смени паролата",
+    });
+
+    fireEvent.change(newPasswordInput, { target: { value: "Password1234" } });
+    fireEvent.change(confirmNewPasswordInput, {
+      target: { value: "Password1234" },
+    });
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(
+          "Паролата беше сменена успешно. Ще ви пренасочим към страницата за вход...",
+        ),
+      ).toBeInTheDocument();
+    });
+
+    const ctaButton = screen.getByRole("button", {
+      name: "Към страницата за вход",
+    });
+    fireEvent.click(ctaButton);
+
+    expect(mockPush).toHaveBeenCalledWith("/auth/login");
+  });
+
   it("shows error message when API returns 400 for invalid or expired token", async () => {
     mockFetchOnce({}, false, 400);
 

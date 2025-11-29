@@ -104,7 +104,7 @@ export default function ResetPasswordPage() {
           Смяна на парола
         </h1>
         <p className="mb-6 text-sm text-zinc-600">
-          Въведете новата си парола.
+          Въведете новата си парола (минимум 8 символа).
         </p>
 
         <form className="space-y-4" onSubmit={handleSubmit} noValidate>
@@ -153,7 +153,7 @@ export default function ResetPasswordPage() {
           </div>
 
           {formError && (
-            <div className="space-y-2">
+            <div className="space-y-2" aria-live="assertive">
               <p className="text-sm text-red-600" role="alert">
                 {formError}
               </p>
@@ -171,9 +171,19 @@ export default function ResetPasswordPage() {
             </div>
           )}
           {formSuccess && (
-            <p className="text-sm text-emerald-600" role="status">
-              {formSuccess}
-            </p>
+            <div className="space-y-2" aria-live="polite">
+              <p className="text-sm text-emerald-600" role="status">
+                {formSuccess}
+              </p>
+              <button
+                type="button"
+                className="text-xs text-zinc-900 underline underline-offset-2 hover:text-zinc-700"
+                onClick={() => router.push("/auth/login")}
+                disabled={submitting}
+              >
+                Към страницата за вход
+              </button>
+            </div>
           )}
 
           <button

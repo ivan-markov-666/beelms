@@ -126,3 +126,24 @@ To test the full forgot/reset flow end-to-end in development:
 3. In the backend logs (dev environment), copy the password reset link that is logged for that email.
 4. Open the copied link in the browser (it will point to `/auth/reset-password?token=...` on the FE), enter a new password and submit.
 5. Verify that you can log in with the new password via `http://localhost:3001/auth/login` and that the old password no longer works.
+
+### WS-2 Email verification flow (registration and change email)
+
+The email verification UX is implemented on top of the BE email verification API:
+
+- After successful registration on `/auth/register`, the page:
+  - calls `POST /api/auth/register`;
+  - shows a success message instructing the user to check their email and confirm the address via a verification link;
+  - redirects to `/auth/login`, where the user can log in with their credentials even if the email is not yet verified (MVP behaviour).
+- The `/auth/verify-email?token=...` page:
+  - reads the `token` query parameter and calls `POST /api/auth/verify-email`;
+  - on success shows a confirmation message and a CTA button:
+    - "Към профила" when a JWT access token is present in `localStorage`;
+    - "Към страницата за вход" otherwise;
+  - when the verification token is invalid or expired (`400`), shows a specific error message and a button back to `/auth/login` so the user can request a new link from their account;
+  - when the backend returns `429` (the 3-per-24h email change verification limit has been reached), shows a limit-reached message and guides the user to open their profile to see more details about when the limit will reset;
+  - on server/network errors shows a generic error message with a button back to the home page.
+- When the user changes their email from `/profile`:
+  - the UI sends `PATCH /api/users/me` with the new email address;
+  - shows a message that a verification email has been sent to the new address and that the change will take effect after confirmation via the verification link (handled again by `/auth/verify-email`);
+  - when the 3-per-24h limit is reached, the `/profile` page uses `emailChangeLimitReached` and `emailChangeLimitResetAt` from `GET /api/users/me` to show a clear warning and an approximate time when the limit will be reset.

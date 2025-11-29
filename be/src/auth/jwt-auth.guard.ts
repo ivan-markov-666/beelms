@@ -5,6 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import type { Request } from 'express';
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -21,22 +22,24 @@ export class JwtAuthGuard implements CanActivate {
     const httpContext = context.switchToHttp();
     const request = httpContext.getRequest<AuthenticatedRequest>();
 
-    const authHeader = request.headers['authorization'] ?? request.headers['Authorization'];
+    const rawAuthHeader =
+      request.headers['authorization'] ?? request.headers['Authorization'];
 
-    if (!authHeader || Array.isArray(authHeader)) {
+    if (typeof rawAuthHeader !== 'string') {
       throw new UnauthorizedException('Missing Authorization header');
     }
 
-    const [scheme, token] = authHeader.split(' ');
+    const [scheme, token] = rawAuthHeader.split(' ');
 
     if (!scheme || scheme.toLowerCase() !== 'bearer' || !token) {
       throw new UnauthorizedException('Invalid Authorization header format');
     }
 
     try {
-      const payload = await this.jwtService.verifyAsync<{ sub: string; email: string }>(
-        token,
-      );
+      const payload = await this.jwtService.verifyAsync<{
+        sub: string;
+        email: string;
+      }>(token);
 
       request.user = {
         userId: payload.sub,

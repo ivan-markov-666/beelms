@@ -65,7 +65,11 @@ export class AccountController {
       throw new Error('Authenticated user not found in request context');
     }
 
-    await this.accountService.changePassword(req.user.userId, dto.currentPassword, dto.newPassword);
+    await this.accountService.changePassword(
+      req.user.userId,
+      dto.currentPassword,
+      dto.newPassword,
+    );
   }
 
   @UseGuards(JwtAuthGuard)
@@ -90,7 +94,8 @@ export class AccountController {
       throw new Error('Authenticated user not found in request context');
     }
 
-    const requireCaptcha = process.env.ACCOUNT_EXPORT_REQUIRE_CAPTCHA === 'true';
+    const requireCaptcha =
+      process.env.ACCOUNT_EXPORT_REQUIRE_CAPTCHA === 'true';
     if (requireCaptcha && !dto.captchaToken) {
       throw new BadRequestException('captcha verification required');
     }

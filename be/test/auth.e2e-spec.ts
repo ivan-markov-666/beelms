@@ -44,11 +44,19 @@ describe('Auth endpoints (e2e)', () => {
       })
       .expect(201);
 
-    expect(res.body).toHaveProperty('id');
-    expect(res.body).toHaveProperty('email', email);
-    expect(typeof res.body.createdAt).toBe('string');
-    expect(res.body).not.toHaveProperty('password');
-    expect(res.body).not.toHaveProperty('passwordHash');
+    const body = res.body as {
+      id: string;
+      email: string;
+      createdAt: string;
+      password?: unknown;
+      passwordHash?: unknown;
+    };
+
+    expect(body).toHaveProperty('id');
+    expect(body).toHaveProperty('email', email);
+    expect(typeof body.createdAt).toBe('string');
+    expect(body).not.toHaveProperty('password');
+    expect(body).not.toHaveProperty('passwordHash');
   });
 
   it('POST /api/auth/register returns 409 for duplicate email', async () => {
@@ -118,7 +126,10 @@ describe('Auth endpoints (e2e)', () => {
   });
 
   it('POST /api/auth/login returns token for valid credentials', async () => {
-    const { accessToken, tokenType } = await registerAndLogin(app, 'login-success');
+    const { accessToken, tokenType } = await registerAndLogin(
+      app,
+      'login-success',
+    );
 
     expect(accessToken).toBeDefined();
     expect(tokenType).toBe('Bearer');
@@ -148,6 +159,38 @@ describe('Auth endpoints (e2e)', () => {
       .post('/api/auth/forgot-password')
       .send({ email })
       .expect(200);
+  });
+
+  it('POST /api/auth/verify-email verifies registration email and clears token', async () => {
+    const email = uniqueEmail('verify-email-register');
+
+    await request(app.getHttpServer())
+      .post('/api/auth/register')
+      .send({ email, password: 'Password1234' })
+      .expect(201);
+
+    const userBefore = await userRepo.findOne({ where: { email } });
+    expect(userBefore).toBeDefined();
+    expect(userBefore!.emailVerified).toBe(false);
+    expect(userBefore!.emailVerificationToken).toBeDefined();
+
+    const token = userBefore!.emailVerificationToken as string;
+
+    await request(app.getHttpServer())
+      .post('/api/auth/verify-email')
+      .send({ token })
+      .expect(200);
+
+    const userAfter = await userRepo.findOne({ where: { email } });
+    expect(userAfter).toBeDefined();
+    expect(userAfter!.emailVerified).toBe(true);
+    expect(userAfter!.emailVerificationToken).toBeNull();
+    expect(userAfter!.emailVerificationTokenExpiresAt).toBeNull();
+
+    await request(app.getHttpServer())
+      .post('/api/auth/verify-email')
+      .send({ token })
+      .expect(400);
   });
 
   it('allows resetting password via forgot-password and reset-password flow', async () => {

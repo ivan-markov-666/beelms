@@ -170,8 +170,10 @@ The Auth service implements the WS-2 walking skeleton for registration and login
   - Request body: `{ "token": string }`.
   - On success (`200 OK`):
     - when the token matches `emailVerificationToken` on a user and is not expired, marks the user's email as verified and clears the token fields;
-    - when the token matches `pendingEmailVerificationToken` and is not expired, applies the pending email change (`email` becomes `pendingEmail`), clears the pending fields and ensures the email is marked as verified.
-  - On error (`400`): invalid or expired verification token.
+    - when the token matches `pendingEmailVerificationToken` and is not expired, applies the pending email change (`email` becomes `pendingEmail`), clears the pending fields and ensures the email is marked as verified, subject to the email change verification limit described below.
+  - On error:
+    - `400` – invalid or expired verification token;
+    - `429` – the user has already completed 3 email change verifications in the last 24 hours (`"email change verification limit reached"`).
 
 ### Auth configuration
 
@@ -192,7 +194,9 @@ The main endpoints are:
 
 - `GET /api/users/me`
   - Returns the current user's profile.
-  - Response body: `{ id, email, createdAt }`.
+  - Response body: `{ id, email, createdAt, emailChangeLimitReached, emailChangeLimitResetAt }` where:
+    - `emailChangeLimitReached: boolean` – whether the 3-per-24h email change verification limit has been reached for the current user;
+    - `emailChangeLimitResetAt: string | null` – ISO timestamp indicating when the 24-hour window will reset (non-null only when the limit is currently reached).
   - Errors: `401` when the JWT is missing/invalid.
 
 - `PATCH /api/users/me`

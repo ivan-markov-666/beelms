@@ -23,8 +23,11 @@ export async function registerAndLogin(
     .send({ email, password, captchaToken: 'test-captcha-token' });
 
   if (registerRes.status !== 201) {
-    // eslint-disable-next-line no-console
-    console.error('registerAndLogin register failed', registerRes.status, registerRes.body);
+    console.error(
+      'registerAndLogin register failed',
+      registerRes.status,
+      registerRes.body,
+    );
     throw new Error(
       `registerAndLogin: expected 201 from /api/auth/register, got ${registerRes.status}: ${JSON.stringify(registerRes.body)}`,
     );
@@ -35,10 +38,15 @@ export async function registerAndLogin(
     .send({ email, password })
     .expect(200);
 
+  const body = res.body as {
+    accessToken: string;
+    tokenType: string;
+  };
+
   return {
     email,
     password,
-    accessToken: res.body.accessToken as string,
-    tokenType: res.body.tokenType as string,
+    accessToken: body.accessToken,
+    tokenType: body.tokenType,
   };
 }
