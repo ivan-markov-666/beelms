@@ -1,6 +1,6 @@
 # STORY-MVP-WIKI-ARTICLE-ACTIONS – Действия „Сподели“ и „Принтирай“ за Wiki статия
 
-Status: Draft
+Status: Done
 
 _Забележка: Това story не е част от WS-2 Auth walking skeleton, а от `EPIC-WIKI-PUBLIC` (MVP разширение на публичната Wiki), планирано за изпълнение в същия timeframe като WS-2._ 
 
@@ -30,17 +30,17 @@ _Забележка: Това story не е част от WS-2 Auth walking skel
   - се държат адекватно и на mobile (бутоните са достъпни и лесни за натискане).
 
 ## Dev Tasks
-- [ ] Имплементиране на UI за „Сподели“ и „Принтирай“ на `/wiki/[slug]` с използване на компоненти от design system-а.
-- [ ] Добавяне на логика за Web Share API + fallback сценарий за „Сподели“.
-- [ ] Настройване на подходящ print stylesheet или layout поведение, така че съдържанието на статията да се отпечатва четимо.
-- [ ] Ръчно тестване на:
-  - desktop браузър (Share fallback + Print диалог);
-  - mobile браузър с Web Share API (ако е налично).
-- [ ] Snapshot/DOM тестове за наличието на action бутоните при активна статия.
-- [ ] FE тестове (с mocking на browser API-тата), които проверяват:
-  - че при клик на бутона „Принтирай“ се извиква `window.print()`;
-  - че при клик на бутона „Сподели“ с налично `navigator.share` се извиква Web Share API;
-  - че при липса на `navigator.share` и налично `navigator.clipboard` се изпълнява clipboard fallback (или при липса и на двете се показва alert с URL).
+- [x] Имплементиране на UI за „Сподели“ и „Принтирай“ на `/wiki/[slug]` с използване на компоненти от design system-а.
+- [x] Добавяне на логика за Web Share API + fallback сценарий за „Сподели“.
+- [x] Настройване на подходящ print stylesheet или layout поведение, така че съдържанието на статията да се отпечатва четимо.
+- [x] Ръчно тестване на:
+  - [x] desktop браузър (Share fallback + Print диалог);
+  - [x] mobile браузър с Web Share API (ако е налично).
+- [x] Snapshot/DOM тестове за наличието на action бутоните при активна статия.
+- [x] FE тестове (с mocking на browser API-тата), които проверяват:
+  - [x] че при клик на бутона „Принтирай“ се извиква `window.print()`;
+  - [x] че при клик на бутона „Сподели“ с налично `navigator.share` се извиква Web Share API;
+  - [x] че при липса на `navigator.share` и налично `navigator.clipboard` се изпълнява clipboard fallback (или при липса и на двете се показва alert с URL).
 
 ## Notes
 - Parent Epic: `EPIC-WIKI-PUBLIC` (разширение на FR-WIKI-3 – действия „Сподели“ и „Принтирай“).

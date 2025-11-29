@@ -1,6 +1,6 @@
 # STORY-MVP-CROSS-I18N-FE-FOUNDATION – Основи на мултиезичността във FE (BG/EN)
 
-Status: Implemented/In review
+Status: Done
 
 _Забележка: Това story не е част от WS-2 Auth walking skeleton, а от `EPIC-CROSS-I18N` (и частично `EPIC-WIKI-PUBLIC`) като cross-cutting MVP разширение на мултиезичността, планирано за изпълнение в същия timeframe като WS-2._
 
