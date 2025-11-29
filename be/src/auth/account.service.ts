@@ -161,6 +161,23 @@ export class AccountService {
     user.active = false;
     user.email = `deleted+${user.id}@deleted.qa4free.invalid`;
     user.passwordHash = '';
+
+    // Clear email verification and pending email state
+    user.emailVerified = false;
+    user.emailVerificationToken = null;
+    user.emailVerificationTokenExpiresAt = null;
+    user.pendingEmail = null;
+    user.pendingEmailVerificationToken = null;
+    user.pendingEmailVerificationTokenExpiresAt = null;
+
+    // Clear reset password state
+    user.resetPasswordToken = null;
+    user.resetPasswordTokenExpiresAt = null;
+
+    // Reset email change verification counters
+    user.emailChangeVerificationCount = 0;
+    user.emailChangeVerificationWindowStartedAt = null;
+
     await this.usersRepo.save(user);
   }
 

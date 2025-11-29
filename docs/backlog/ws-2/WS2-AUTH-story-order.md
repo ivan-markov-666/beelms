@@ -38,6 +38,17 @@ _Роля: Tech Lead / Analyst. Цел: ясен ред за имплемент�
 8. **STORY-MVP-CROSS-I18N-FE-FOUNDATION**  
    FE i18n foundation (EPIC-CROSS-I18N) – централен i18n конфиг, речници и преводими layout/nav елементи, стъпващ върху глобалния `LanguageSwitcher` от `STORY-MVP-WIKI-LANGUAGE-SWITCH`.
 
+### Планирани WS-2 BE GDPR разширения (след базовия Auth/Profile skeleton)
+
+9. **STORY-WS2-BE-AUTH-GDPR-ACCOUNT-ERASURE**  
+   GDPR изтриване/анонимизиране на акаунт върху `DELETE /api/users/me` – надгражда базовия профилен BE flow с по-строга логика за "right to be forgotten".
+
+10. **STORY-WS2-BE-AUTH-GDPR-DATA-LIFECYCLE**  
+    GDPR lifecycle & audit за потребителските акаунти – timestamps/audit trail за ключови операции (register, change-password, export, delete) за нуждите на отчетност и одит.
+
+11. **STORY-WS2-BE-AUTH-TOKEN-REVOCATION**  
+    Ревокация на токени при смяна на парола/изтриване на акаунт чрез `tokenVersion`/`securityVersion` в JWT payload и проверки в `JwtAuthGuard`.
+
 ---
 
 ## 3. Бележки

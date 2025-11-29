@@ -247,6 +247,20 @@ describe('AccountService', () => {
       email: 'test@example.com',
       passwordHash: 'hash',
       active: true,
+      emailVerified: true,
+      emailVerificationToken: 'verify-token',
+      emailVerificationTokenExpiresAt: new Date('2024-01-02T00:00:00.000Z'),
+      pendingEmail: 'pending@example.com',
+      pendingEmailVerificationToken: 'pending-token',
+      pendingEmailVerificationTokenExpiresAt: new Date(
+        '2024-01-03T00:00:00.000Z',
+      ),
+      emailChangeVerificationCount: 2,
+      emailChangeVerificationWindowStartedAt: new Date(
+        '2024-01-04T00:00:00.000Z',
+      ),
+      resetPasswordToken: 'reset-token',
+      resetPasswordTokenExpiresAt: new Date('2024-01-05T00:00:00.000Z'),
       createdAt: new Date('2024-01-01T00:00:00.000Z'),
       updatedAt: new Date('2024-01-01T00:00:00.000Z'),
     } as User;
@@ -263,6 +277,17 @@ describe('AccountService', () => {
     expect(user.active).toBe(false);
     expect(user.email).toBe(`deleted+${user.id}@deleted.qa4free.invalid`);
     expect(user.passwordHash).toBe('');
+
+    expect(user.emailVerified).toBe(false);
+    expect(user.emailVerificationToken).toBeNull();
+    expect(user.emailVerificationTokenExpiresAt).toBeNull();
+    expect(user.pendingEmail).toBeNull();
+    expect(user.pendingEmailVerificationToken).toBeNull();
+    expect(user.pendingEmailVerificationTokenExpiresAt).toBeNull();
+    expect(user.resetPasswordToken).toBeNull();
+    expect(user.resetPasswordTokenExpiresAt).toBeNull();
+    expect(user.emailChangeVerificationCount).toBe(0);
+    expect(user.emailChangeVerificationWindowStartedAt).toBeNull();
   });
 
   it('deleteAccount does nothing when user is already inactive or missing', async () => {
