@@ -124,6 +124,8 @@ async function runSingleFlow(iteration) {
     throw new Error(`POST /users/me/export failed (status ${exportRes.status})`);
   }
 
+  const newPassword = `${password}X`;
+
   const t5 = Date.now();
   const { res: changePwdRes } = await jsonFetch(
     `${API_BASE_URL}/users/me/change-password`,
@@ -132,7 +134,7 @@ async function runSingleFlow(iteration) {
       headers: authHeaders,
       body: JSON.stringify({
         currentPassword: password,
-        newPassword: `${password}X`,
+        newPassword,
       }),
     },
   );
@@ -144,10 +146,29 @@ async function runSingleFlow(iteration) {
     );
   }
 
+  const { res: reloginRes, body: reloginBody } = await jsonFetch(
+    `${API_BASE_URL}/auth/login`,
+    {
+      method: "POST",
+      body: JSON.stringify({ email, password: newPassword }),
+    },
+  );
+
+  if (!reloginRes.ok || !reloginBody?.accessToken) {
+    throw new Error(
+      `Re-login after password change failed (status ${reloginRes.status}) or missing accessToken`,
+    );
+  }
+
+  const newToken = reloginBody.accessToken;
+  const newAuthHeaders = {
+    Authorization: `Bearer ${newToken}`,
+  };
+
   const t6 = Date.now();
   const { res: deleteRes } = await jsonFetch(`${API_BASE_URL}/users/me`, {
     method: "DELETE",
-    headers: authHeaders,
+    headers: newAuthHeaders,
   });
   timings.deleteMs = Date.now() - t6;
 

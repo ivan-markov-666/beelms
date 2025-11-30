@@ -146,6 +146,7 @@ export class AccountService {
     const passwordHash = await bcrypt.hash(newPassword, 10);
     user.passwordHash = passwordHash;
     user.passwordLastChangedAt = new Date();
+    user.tokenVersion += 1;
     await this.usersRepo.save(user);
   }
 

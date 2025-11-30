@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { JwtModule } from '@nestjs/jwt';
+import { JwtModule, JwtService } from '@nestjs/jwt';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { QueryFailedError, Repository } from 'typeorm';
 import {
@@ -18,6 +18,7 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 describe('AuthService', () => {
   let service: AuthService;
   let usersRepo: jest.Mocked<Repository<User>>;
+  let jwtService: JwtService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -42,6 +43,7 @@ describe('AuthService', () => {
 
     service = module.get<AuthService>(AuthService);
     usersRepo = module.get(getRepositoryToken(User));
+    jwtService = module.get<JwtService>(JwtService);
   });
 
   afterEach(() => {
@@ -144,6 +146,7 @@ describe('AuthService', () => {
       email: dto.email,
       passwordHash,
       active: true,
+      tokenVersion: 3,
       createdAt: new Date('2024-01-01T00:00:00.000Z'),
       updatedAt: new Date('2024-01-01T00:00:00.000Z'),
     } as User;
@@ -157,6 +160,16 @@ describe('AuthService', () => {
     });
     expect(result.accessToken).toBeDefined();
     expect(result.tokenType).toBe('Bearer');
+
+    const payload = await jwtService.verifyAsync<{
+      sub: string;
+      email: string;
+      tokenVersion: number;
+    }>(result.accessToken);
+
+    expect(payload.sub).toBe(user.id);
+    expect(payload.email).toBe(user.email);
+    expect(payload.tokenVersion).toBe(user.tokenVersion);
   });
 
   it('throws UnauthorizedException when user is not found', async () => {

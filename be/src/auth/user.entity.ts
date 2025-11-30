@@ -20,6 +20,9 @@ export class User {
   @Column({ type: 'boolean', default: true })
   active: boolean;
 
+  @Column({ name: 'token_version', type: 'integer', default: 0 })
+  tokenVersion: number;
+
   @Column({ name: 'email_verified', type: 'boolean', default: false })
   emailVerified: boolean;
 

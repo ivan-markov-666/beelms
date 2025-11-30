@@ -191,6 +191,7 @@ describe('AccountService', () => {
       passwordHash,
       active: true,
       passwordLastChangedAt: null,
+      tokenVersion: 0,
       createdAt: new Date('2024-01-01T00:00:00.000Z'),
       updatedAt: new Date('2024-01-01T00:00:00.000Z'),
     } as User;
@@ -208,6 +209,7 @@ describe('AccountService', () => {
     const matchesNew = await bcrypt.compare(newPassword, user.passwordHash);
     expect(matchesNew).toBe(true);
     expect(user.passwordLastChangedAt).toBeInstanceOf(Date);
+    expect(user.tokenVersion).toBe(1);
   });
 
   it('changePassword throws NotFoundException when user is missing', async () => {

@@ -5,7 +5,10 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import type { Request } from 'express';
+import { User } from './user.entity';
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -16,7 +19,11 @@ interface AuthenticatedRequest extends Request {
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-  constructor(private readonly jwtService: JwtService) {}
+  constructor(
+    private readonly jwtService: JwtService,
+    @InjectRepository(User)
+    private readonly usersRepo: Repository<User>,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const httpContext = context.switchToHttp();
@@ -39,11 +46,20 @@ export class JwtAuthGuard implements CanActivate {
       const payload = await this.jwtService.verifyAsync<{
         sub: string;
         email: string;
+        tokenVersion: number;
       }>(token);
 
+      const user = await this.usersRepo.findOne({
+        where: { id: payload.sub },
+      });
+
+      if (!user || !user.active || user.tokenVersion !== payload.tokenVersion) {
+        throw new UnauthorizedException('Invalid or expired token');
+      }
+
       request.user = {
-        userId: payload.sub,
-        email: payload.email,
+        userId: user.id,
+        email: user.email,
       };
 
       return true;
