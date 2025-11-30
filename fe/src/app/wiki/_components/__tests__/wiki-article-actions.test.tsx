@@ -26,7 +26,7 @@ describe("WikiArticleActions", () => {
   });
 
   it("renders Share and Print buttons", () => {
-    render(<WikiArticleActions title="Test article" />);
+    render(<WikiArticleActions title="Test article" lang="bg" />);
 
     expect(screen.getByRole("button", { name: "Сподели" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Принтирай" })).toBeInTheDocument();
@@ -40,7 +40,7 @@ describe("WikiArticleActions", () => {
       writable: true,
     });
 
-    render(<WikiArticleActions title="Shared article" />);
+    render(<WikiArticleActions title="Shared article" lang="bg" />);
 
     const shareButton = screen.getByRole("button", { name: "Сподели" });
     await act(async () => {
@@ -66,7 +66,7 @@ describe("WikiArticleActions", () => {
       writable: true,
     });
 
-    render(<WikiArticleActions title="Clipboard article" />);
+    render(<WikiArticleActions title="Clipboard article" lang="bg" />);
 
     const shareButton = screen.getByRole("button", { name: "Сподели" });
     fireEvent.click(shareButton);
@@ -93,7 +93,7 @@ describe("WikiArticleActions", () => {
     const alertMock = jest.fn();
     window.alert = alertMock;
 
-    render(<WikiArticleActions title="Alert article" />);
+    render(<WikiArticleActions title="Alert article" lang="bg" />);
 
     const shareButton = screen.getByRole("button", { name: "Сподели" });
     fireEvent.click(shareButton);
@@ -107,7 +107,7 @@ describe("WikiArticleActions", () => {
     const printMock = jest.fn();
     window.print = printMock;
 
-    render(<WikiArticleActions title="Print article" />);
+    render(<WikiArticleActions title="Print article" lang="bg" />);
 
     const printButton = screen.getByRole("button", { name: "Принтирай" });
     fireEvent.click(printButton);

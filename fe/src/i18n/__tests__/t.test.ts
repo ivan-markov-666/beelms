@@ -18,6 +18,7 @@ describe("i18n t helper", () => {
         },
         auth: {},
         common: {},
+        wiki: {},
       },
       en: {
         nav: {
@@ -27,6 +28,17 @@ describe("i18n t helper", () => {
         },
         auth: {},
         common: {},
+        wiki: {},
+      },
+      de: {
+        nav: {
+          wiki: "Wiki",
+          practice: "Praxis",
+          login: "Anmelden",
+        },
+        auth: {},
+        common: {},
+        wiki: {},
       },
     } as unknown as Messages;
 
@@ -43,6 +55,7 @@ describe("i18n t helper", () => {
         },
         auth: {},
         common: {},
+        wiki: {},
       },
       en: {
         nav: {
@@ -52,6 +65,17 @@ describe("i18n t helper", () => {
         },
         auth: {},
         common: {},
+        wiki: {},
+      },
+      de: {
+        nav: {
+          wiki: "Wiki",
+          practice: "Praxis",
+          login: "Anmelden",
+        },
+        auth: {},
+        common: {},
+        wiki: {},
       },
     };
 

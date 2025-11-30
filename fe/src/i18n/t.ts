@@ -3,7 +3,7 @@ import { messages, type Messages } from "./messages";
 
 export function t(
   lang: SupportedLang,
-  domain: "nav" | "auth" | "common",
+  domain: "nav" | "auth" | "common" | "wiki",
   key: string,
   dicts: Messages = messages,
 ): string {

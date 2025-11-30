@@ -98,6 +98,25 @@ async function seedWiki() {
     },
   ]);
 
+  await ensureArticleWithVersions('qa4free-overview', 'active', [
+    {
+      language: 'bg',
+      title: 'Какво е QA4Free',
+      content:
+        'Тази статия дава по-детайлен обзор на платформата QA4Free – каква е целта й, за кого е предназначена и какви раздели включва Wiki-то и практическите задачи.',
+      versionNumber: 1,
+      changeSummary: 'Първоначална версия на обзорната статия за QA4Free (BG).',
+    },
+    {
+      language: 'en',
+      title: 'What is QA4Free',
+      content:
+        'This article gives a more detailed overview of the QA4Free platform – what it aims to solve, who it is for and how the Wiki and practice sections are organised.',
+      versionNumber: 1,
+      changeSummary: 'Initial overview article for the QA4Free platform (EN).',
+    },
+  ]);
+
   await SeedDataSource.destroy();
 }
 

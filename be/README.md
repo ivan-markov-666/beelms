@@ -102,7 +102,8 @@ docker compose exec api npm run seed:wiki
 This will insert:
 
 - an `active` article with slug `getting-started` with BG and EN versions;
-- an `active` article with slug `faq` with a BG version.
+- an `active` article with slug `faq` with a BG version;
+- an `active` article with slug `qa4free-overview` with BG and EN versions (high-level overview of the QA4Free platform).
 
 The seed script is idempotent and can be safely executed multiple times.
 
