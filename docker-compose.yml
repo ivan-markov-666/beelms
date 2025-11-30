@@ -32,5 +32,17 @@ services:
       - "3000:3000"
     # Работим с Node 24 LTS чрез be/Dockerfile (node:24-alpine)
 
+  training-api:
+    build:
+      context: ./training-api
+      dockerfile: Dockerfile
+    container_name: qa4free-training-api
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      PORT: 4000
+    ports:
+      - "4000:4000"
+
 volumes:
   db-data:

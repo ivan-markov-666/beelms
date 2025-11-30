@@ -187,24 +187,43 @@ components:
       properties:
         message:
           type: string
-          example: "Hello from training API"
+          example: "pong"
+        timestamp:
+          type: string
+          format: date-time
+          description: ISO timestamp, когато сървърът е обработил ping заявката
 
     TrainingEchoRequest:
       type: object
       properties:
-        message:
-          type: string
-      required: [message]
+        value:
+          description: Произволна JSON стойност за упражнения по API/integration тестване
+          oneOf:
+            - type: string
+            - type: number
+            - type: boolean
+            - type: object
+            - type: array
+      required: [value]
 
     TrainingEchoResponse:
       type: object
       properties:
-        message:
+        value:
+          description: Стойността, върната от Training API, 1:1 с изпратената
+          oneOf:
+            - type: string
+            - type: number
+            - type: boolean
+            - type: object
+            - type: array
+        receivedAt:
           type: string
-          description: Същото съобщение, върнато от сървъра
-        length:
-          type: integer
-          description: Дължина на съобщението
+          format: date-time
+          description: ISO timestamp, когато сървърът е получил заявката
+        requestId:
+          type: string
+          description: Идентификатор на заявката за нуждите на упражнението
 
 security:
   - bearerAuth: []
@@ -855,11 +874,11 @@ paths:
   /training/ping:
     get:
       tags: [Training]
-      summary: Проверка на Training API (hello world)
+      summary: Проверка на Training API (ping/pong)
       security: []
       responses:
         "200":
-          description: Успешен отговор от Training API
+          description: Успешен ping отговор от Training API с текущ timestamp
           content:
             application/json:
               schema:
@@ -868,7 +887,7 @@ paths:
   /training/echo:
     post:
       tags: [Training]
-      summary: Ехо заявка за упражнение по API тестване
+      summary: Ехо заявка за упражнение по API/integration тестване
       security: []
       requestBody:
         required: true
@@ -878,13 +897,13 @@ paths:
               $ref: '#/components/schemas/TrainingEchoRequest'
       responses:
         "200":
-          description: Същото съобщение, върнато от Training API
+          description: Ехо на изпратената стойност + receivedAt + requestId
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/TrainingEchoResponse'
         "400":
-          description: Невалидни данни
+          description: Невалидни данни (липсващо или невалидно поле value)
 
   ############################
   # Admin / Metrics (MVP ниво)
