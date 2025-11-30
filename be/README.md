@@ -223,7 +223,7 @@ The main endpoints are:
   - Deactivates the current account (soft delete for WS-2 by setting `active = false` and anonymizing personal data such as the email and password hash, so the original email can be re-used for a new account in line with GDPR).
   - Success: `204 No Content`.
   - After deletion:
-    - `GET /api/users/me` returns `404`.
+    - `GET /api/users/me` with the old access token returns `401` (the token is no longer accepted).
     - `POST /api/auth/login` with the same credentials returns `401`.
 
 - `POST /api/users/me/export`
@@ -249,6 +249,21 @@ Internally, the Auth/Account services maintain additional timestamps on the `Use
 
 These fields are **not exposed in the public WS-2 Auth/Account API responses** and are intended for internal reporting and future admin/audit tooling.
 
+#### Token revocation (internal)
+
+For security, JWT access tokens embed a `tokenVersion` value derived from the `User` entity. On each authenticated request, the `JwtAuthGuard`:
+
+- verifies the JWT signature;
+- loads the user by `sub` from the database;
+- checks that the user is active and that `payload.tokenVersion === user.tokenVersion`.
+
+This means that:
+
+- after `POST /api/users/me/change-password`, the user's `tokenVersion` is incremented and all previously issued tokens become invalid across all protected endpoints;
+- after `DELETE /api/users/me`, the user is marked inactive and any existing tokens for that user are rejected with `401 Unauthorized`.
+
+This mechanism is internal and does not change the public Auth API shapes (the login response remains `{ accessToken, tokenType }`).
+
 For full request/response schemas, see the OpenAPI spec in `docs/architecture/openapi.yaml`.
 
 ### Manual testing checklist – Auth + Account (WS-2)
@@ -263,7 +278,7 @@ For full request/response schemas, see the OpenAPI spec in `docs/architecture/op
    - call `GET /api/users/me` again and verify that the `email` field now reflects the new value.
 6. Call `POST /api/users/me/export` and verify the exported payload (and CAPTCHA behaviour when `ACCOUNT_EXPORT_REQUIRE_CAPTCHA=true`).
 7. Call `POST /api/users/me/change-password` and verify that logging in with the old password fails, while the new password works.
-8. Call `DELETE /api/users/me` and verify that `GET /api/users/me` returns `404` and `POST /api/auth/login` with the same credentials returns `401`.
+8. Call `DELETE /api/users/me` and verify that `GET /api/users/me` with the old access token returns `401` and `POST /api/auth/login` with the same credentials returns `401`.
 
 ### Example curl requests (local dev)
 

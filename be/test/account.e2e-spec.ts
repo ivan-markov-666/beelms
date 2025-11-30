@@ -199,7 +199,7 @@ describe('Account endpoints (e2e)', () => {
     await request(app.getHttpServer())
       .get('/api/users/me')
       .set('Authorization', `Bearer ${accessToken}`)
-      .expect(404);
+      .expect(401);
 
     await request(app.getHttpServer())
       .post('/api/auth/login')
@@ -209,6 +209,49 @@ describe('Account endpoints (e2e)', () => {
 
   it('DELETE /api/users/me returns 401 when Authorization header is missing', async () => {
     await request(app.getHttpServer()).delete('/api/users/me').expect(401);
+  });
+
+  it('revokes old tokens after password change', async () => {
+    const {
+      email,
+      password: oldPassword,
+      accessToken,
+    } = await registerAndLogin(app, 'token-revocation-change-password');
+
+    // Old token works before password change
+    await request(app.getHttpServer())
+      .get('/api/users/me')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .expect(200);
+
+    const newPassword = 'RevocationPassword123';
+
+    // Change password with the current token
+    await request(app.getHttpServer())
+      .post('/api/users/me/change-password')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({ currentPassword: oldPassword, newPassword })
+      .expect(200);
+
+    // The same old token is now rejected by protected endpoints
+    await request(app.getHttpServer())
+      .get('/api/users/me')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .expect(401);
+
+    // New login issues a fresh token that works
+    const loginRes = await request(app.getHttpServer())
+      .post('/api/auth/login')
+      .send({ email, password: newPassword })
+      .expect(200);
+
+    const loginBody = loginRes.body as { accessToken: string };
+    const newAccessToken = loginBody.accessToken;
+
+    await request(app.getHttpServer())
+      .get('/api/users/me')
+      .set('Authorization', `Bearer ${newAccessToken}`)
+      .expect(200);
   });
 
   it('POST /api/users/me/export returns export data for current user', async () => {
@@ -413,7 +456,7 @@ describe('Account endpoints (e2e)', () => {
     await request(app.getHttpServer())
       .get('/api/users/me')
       .set('Authorization', `Bearer ${newAccessToken}`)
-      .expect(404);
+      .expect(401);
 
     await request(app.getHttpServer())
       .post('/api/auth/login')

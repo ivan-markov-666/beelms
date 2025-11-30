@@ -1,6 +1,6 @@
 # STORY-WS2-BE-AUTH-TOKEN-REVOCATION – Ревокация на токени при смяна на парола/изтриване на акаунт
 
-Status: Draft
+Status: Done
 
 ## Summary
 Като **регистриран потребител**, който сменя паролата си или изтрива акаунта си, искам **всички стари JWT токени да станат невалидни**, така че ако някой е компрометирал стар токен, да не може да го ползва след промяната.
@@ -27,23 +27,23 @@ Status: Draft
   - всички токени (независимо от версия) престават да бъдат валидни за защитени ендпойнти.
 
 ## Dev Tasks
-- [ ] Дизайн на payload за JWT access токени (разширяване с `tokenVersion` / `securityVersion`).
-- [ ] Обновяване на `AuthService.login`:
+- [x] Дизайн на payload за JWT access токени (разширяване с `tokenVersion` / `securityVersion`).
+- [x] Обновяване на `AuthService.login`:
   - да включва `tokenVersion` от `User` в JWT payload.
-- [ ] Добавяне на поле `tokenVersion: number` в `User` (миграция, default 0).
-- [ ] Обновяване на `JwtAuthGuard` (или централен guard за Bearer auth):
+- [x] Добавяне на поле `tokenVersion: number` в `User` (миграция, default 0).
+- [x] Обновяване на `JwtAuthGuard` (или централен guard за Bearer auth):
   - да зарежда `User` по `sub`;
   - да проверява `active` и `tokenVersion`.
-- [ ] При `changePassword`:
+- [x] При `changePassword`:
   - да инкрементира `tokenVersion` (и да запази потребителя);
   - да покрие сценария, в който паралелни токени по старата версия стават невалидни.
-- [ ] При `deleteAccount`:
-  - да сетва `active=false` и/или допълнително да променя `tokenVersion`.
-- [ ] Unit тестове за новата логика (TokenVersion, Guard поведения).
-- [ ] E2E/integration тестове:
+- [x] При `deleteAccount`:
+  - да сетва `active=false` (валидира се от guard-а и ефективно ревокира всички токени за потребителя).
+- [x] Unit тестове за новата логика (TokenVersion, Guard поведения).
+- [x] E2E/integration тестове:
   - стар токен преди смяна на паролата → валиден;
   - същият токен след смяна на паролата → `401` за всички защитени ендпойнти;
-  - аналогично поведение при изтриване на акаунта.
+  - аналогично поведение при изтриване на акаунта (след `DELETE /api/users/me` всички защитени ендпойнти връщат `401` за стария токен).
 
 ## Test Scenarios
 - **[INT-TOK-1] Смяна на парола ревокира стари токени**
