@@ -3,6 +3,7 @@ import { WikiMain } from "../_components/wiki-main";
 import { WikiBackLink } from "../_components/wiki-back-link";
 import { WikiArticleMeta } from "../_components/wiki-article-meta";
 import { WikiArticleActions } from "../_components/wiki-article-actions";
+import { normalizeLang, type SupportedLang } from "../../../i18n/config";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000";
@@ -46,20 +47,24 @@ async function fetchWikiArticle(
   return res.json();
 }
 
-export default async function WikiArticlePage({
-  params,
-  searchParams,
-}: {
-  params: { slug: string };
-  searchParams?: WikiArticlePageSearchParams | Promise<WikiArticlePageSearchParams>;
-}) {
+export default async function WikiArticlePage(
+  props: {
+    params: { slug: string } | Promise<{ slug: string }>;
+    searchParams?:
+      | WikiArticlePageSearchParams
+      | Promise<WikiArticlePageSearchParams>;
+  },
+) {
+  // Next 15 can provide params/searchParams as Promises, so we need to unwrap them.
+  const resolvedParams = await props.params;
   const resolvedSearchParams =
-    ((await searchParams) ?? {}) as WikiArticlePageSearchParams;
+    ((await props.searchParams) ?? {}) as WikiArticlePageSearchParams;
 
-  const rawLang = resolvedSearchParams.lang ?? "";
-  const lang = rawLang || undefined;
+  const rawLang = resolvedSearchParams.lang ?? null;
+  const uiLang: SupportedLang = normalizeLang(rawLang);
+  const apiLang = rawLang || undefined;
 
-  const article = await fetchWikiArticle(params.slug, lang);
+  const article = await fetchWikiArticle(resolvedParams.slug, apiLang);
 
   return (
     <WikiMain>
@@ -72,7 +77,7 @@ export default async function WikiArticlePage({
           language={article.language}
           updatedAt={article.updatedAt}
         />
-        <WikiArticleActions title={article.title} />
+        <WikiArticleActions title={article.title} lang={uiLang} />
       </header>
 
       <article className="mt-6 max-w-prose whitespace-pre-line text-base text-zinc-800 dark:text-zinc-100 leading-relaxed">

@@ -2,7 +2,7 @@ import { DEFAULT_LANG, SUPPORTED_LANGS, normalizeLang } from "../../i18n/config"
 
 describe("i18n config", () => {
   it("defines supported languages", () => {
-    expect(SUPPORTED_LANGS).toEqual(["bg", "en"]);
+    expect(SUPPORTED_LANGS).toEqual(["bg", "en", "de"]);
   });
 
   it("normalizes null/undefined to DEFAULT_LANG", () => {
@@ -13,6 +13,7 @@ describe("i18n config", () => {
   it("normalizes known languages", () => {
     expect(normalizeLang("bg")).toBe("bg");
     expect(normalizeLang("en")).toBe("en");
+    expect(normalizeLang("de")).toBe("de");
   });
 
   it("falls back to DEFAULT_LANG for unknown values", () => {

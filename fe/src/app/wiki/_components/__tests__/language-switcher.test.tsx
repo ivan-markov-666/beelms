@@ -39,7 +39,7 @@ describe("LanguageSwitcher", () => {
     expect((select as HTMLSelectElement).value).toBe("en");
 
     const options = screen.getAllByRole("option").map((opt) => opt.textContent);
-    expect(options).toEqual(["BG", "EN"]);
+    expect(options).toEqual(["BG", "EN", "DE"]);
   });
 
   it("updates lang and removes page param when switching language on /wiki", () => {
