@@ -2,6 +2,7 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 import { AppModule } from '../app.module';
+import { setupSwagger } from '../swagger';
 
 describe('Training API (e2e)', () => {
   let app: INestApplication;
@@ -19,6 +20,7 @@ describe('Training API (e2e)', () => {
         forbidNonWhitelisted: true,
       }),
     );
+    setupSwagger(app);
     await app.init();
   });
 
@@ -52,5 +54,14 @@ describe('Training API (e2e)', () => {
       .post('/api/training/echo')
       .send({})
       .expect(400);
+  });
+
+  it('GET /api/training/docs returns Swagger UI', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/api/training/docs')
+      .expect(200);
+
+    expect(res.text).toContain('Swagger UI');
+    expect(res.text).toContain('Training API');
   });
 });
