@@ -50,6 +50,12 @@ export function HeaderNav() {
         >
           {t(lang, "nav", "practice")}
         </Link> */}
+        <Link
+          href="/practice/api-demo"
+          className="font-medium hover:text-zinc-950 dark:hover:text-white"
+        >
+          {t(lang, "nav", "practice")}
+        </Link>
         {hasToken === false && (
           <Link
             href="/auth/login"

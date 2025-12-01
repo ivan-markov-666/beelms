@@ -153,4 +153,46 @@ The email verification UX is implemented on top of the BE email verification API
 - When the user changes their email from `/profile`:
   - the UI sends `PATCH /api/users/me` with the new email address;
   - shows a message that a verification email has been sent to the new address and that the change will take effect after confirmation via the verification link (handled again by `/auth/verify-email`);
-  - when the 3-per-24h limit is reached, the `/profile` page uses `emailChangeLimitReached` and `emailChangeLimitResetAt` from `GET /api/users/me` to show a clear warning and an approximate time when the limit will be reset.
+  - when the 3-per-24h limit is reached, the `/profile` page uses `emailChangeLimitReached` and `emailChangeLimitResetAt` from `GET /api/users/me` to show a clear warning and an approximate time when the limit will reset.
+
+## WS-3 Training API intro page
+
+The `/practice/api-demo` route introduces the public Training API and links to its Swagger UI:
+
+- It is a public page, available to both guests and authenticated users.
+- It does not call the Training API directly in WS-3 – it focuses on documentation and example test scenarios.
+
+Useful manual test URLs (assuming FE is running on `http://localhost:3001` and `training-api` on `http://localhost:4000`):
+
+- `http://localhost:3001/practice/api-demo?lang=bg`
+- `http://localhost:3001/practice/api-demo?lang=en`
+
+On the page, verify that:
+
+- the page title shows "API Demo / Training API";
+- the header navigation item "Практика" / "Practice" points to `/practice/api-demo`;
+- the primary button links to the Training API Swagger UI (default: `http://localhost:4000/api/training/docs`);
+- the list of example scenarios matches the `GET /api/training/ping` and `POST /api/training/echo` behaviour described in `docs/architecture/openapi.yaml`.
+
+Configuration:
+
+- The Swagger UI URL is controlled via the `NEXT_PUBLIC_TRAINING_API_SWAGGER_URL` environment variable.
+- When this variable is not set, the FE uses the local dev fallback `http://localhost:4000/api/training/docs`.
+
+## WS-3 UI Demo page (tasks)
+
+The `/practice/ui-demo` route provides a sandbox UI screen with example tasks for practicing manual and UI automation testing:
+
+- The page is public and focuses on frontend-only interactions (no backend state in WS-3).
+- It contains a clearly visible "Примерни задачи" section with at least 5 tasks.
+- Each task is formulated so that it can be executed using only the elements on the page and is suitable for both manual and automated tests.
+
+Useful manual test URL (assuming FE is running on `http://localhost:3001`):
+
+- `http://localhost:3001/practice/ui-demo?lang=bg`
+
+On the page, verify that:
+
+- the page title shows "UI Demo" and explains the purpose of the screen;
+- the "Примерни задачи" section is easy to spot and is rendered as a numbered list;
+- there are at least 5 tasks covering buttons, text inputs, dropdowns, checkboxes/radios and a table/list with a Reset behavior (as implemented by `STORY-WS3-FE-UI-DEMO-PAGE`).
