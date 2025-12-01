@@ -29,6 +29,7 @@ export class AccountService {
       id: user.id,
       email: user.email,
       createdAt: user.createdAt.toISOString(),
+      role: user.role,
       emailChangeLimitReached: false,
       emailChangeLimitResetAt: null,
     };
