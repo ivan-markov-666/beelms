@@ -107,16 +107,99 @@ WS-1 е фокусиран върху **публичното четене на W
 
 ---
 
-## 3. Бъдещи walking skeleton-и (примерна рамка)
+## 3. WS-3 – Practical Environment (Training API + UI Demo)
 
-Тази секция очертава потенциални следващи verticals, които могат да бъдат описани в отделни под-секции (WS-2, WS-3 и т.н.):
+### 3.1. Кратко описание
+
+**Сценарий:**
+
+1. Гост потребител отваря `/practice/ui-demo` от глобалната навигация "Практика".
+2. На екрана вижда:
+   - кратко обяснение за Practical Environment;
+   - sandbox UI с бутони, текстови полета, dropdown, чекбоксове/радио бутони и малка таблица;
+   - секция „Примерни задачи“, която описва как да използва тези елементи за manual и UI automation упражнения.
+3. По избор потребителят може да отвори `/practice/api-demo`, за да види Training API intro и линк към Swagger UI на Training API.
+
+**Технически:**
+
+- Next.js frontend:
+  - страници `/practice/ui-demo` и `/practice/api-demo`;
+  - глобална навигация "Практика" → `/practice/ui-demo`;
+  - в WS-3 UI Demo екранът е изцяло FE-only (без директни BE заявки).
+- Training API backend:
+  - самостоятелен NestJS service `training-api` с глобален prefix `/api/training`;
+  - ендпойнти:
+    - `GET /api/training/ping`;
+    - `POST /api/training/echo`;
+  - Swagger UI на `/api/training/docs`.
+
+### 3.2. Свързани артефакти и изисквания
+
+WS-3 Practical Env стъпва върху следните BMAD артефакти:
+
+- **PRD** – `docs/product/prd.md` §4.3 (FR-UI-DEMO-1..3 и FR-TRAINING-API-1..2).
+- **MVP feature list** – `docs/architecture/mvp-feature-list.md` §3.1 (Practical UI Demo + Training API).
+- **System Architecture** – `docs/architecture/system-architecture.md` (компоненти за Practical Environment).
+- **OpenAPI спецификация** – `docs/architecture/openapi.yaml`:
+  - `GET /api/training/ping`;
+  - `POST /api/training/echo`.
+- **EPIC-и**:
+  - `docs/backlog/ws-3/epics/EPIC-WS3-PRACTICAL-API-DEMO.md`;
+  - `docs/backlog/ws-3/epics/EPIC-WS3-PRACTICAL-UI-DEMO.md`.
+- **Stories (WS-3 Practical Env)** – в `docs/backlog/ws-3/stories/`:
+  - BE Training API minimal + Swagger stories;
+  - `STORY-WS3-FE-TRAINING-API-INTRO` (страница `/practice/api-demo`);
+  - `STORY-WS3-FE-UI-DEMO-TASKS` (текстови примерни задачи);
+  - `STORY-WS3-FE-UI-DEMO-PAGE` (UI елементи + Reset логика и навигация).
+
+### 3.3. Обхват по слоеве
+
+#### Frontend (Next.js)
+
+- `/practice/ui-demo`:
+  - използва глобалния layout (header + footer) и i18n навигация;
+  - показва header с обяснение за Practical Env;
+  - съдържа sandbox секция с:
+    - поне 3 различни бутона (primary/secondary/disabled) и бутон Reset;
+    - текстови полета с валидация и съобщения за грешка;
+    - dropdown "Ниво на трудност" с няколко опции;
+    - група чекбоксове + радио бутони с текстово обобщение на избора;
+    - малка таблица/списък с "демо задачи" и филтър по трудност.
+  - съдържа секция „Примерни задачи“, която описва примерни QA упражнения върху тези елементи.
+- `/practice/api-demo`:
+  - представя Training API и сочи към Swagger UI на Training API;
+  - описва примерни сценарии за тестване на `GET /api/training/ping` и `POST /api/training/echo`.
+- Глобален header nav:
+  - елементът "Практика" / "Practice" води към `/practice/ui-demo`.
+
+#### Backend (Training API service)
+
+- Самостоятелно NestJS приложение `training-api`:
+  - модул и контролер за ping/echo eндпойнтите;
+  - базова валидация на входните данни за echo;
+  - интегриран Swagger UI за dev/demo.
+
+#### База данни
+
+- WS-3 Practical Env skeleton **не изисква** отделен DB модел – Training API е stateless (echo/ping), а UI Demo е изцяло frontend-only.
+
+### 3.4. Необхват за WS-3
+
+- Няма реални training сесии, прогрес или запазване на данни в база.
+- Няма auth/permissions за Practical Env (екраните са публични).
+- Няма сложни backend сценарии извън ping/echo.
+- Няма пълни end-to-end сценарии между Wiki/Auth/Practical Env – WS-3 се фокусира върху самостоятелен Practical Env vertical.
+
+---
+
+## 4. Бъдещи walking skeleton-и (примерна рамка)
+
+Тази секция очертава потенциални следващи verticals, които могат да бъдат описани в отделни под-секции (WS-2, WS-4 и т.н.):
 
 - **WS-2 – Auth & Account skeleton**
   - Guest → Login → Account → Logout (минимален flow за FR-AUTH).
   - Demo & Test Checklist – `docs/sprint-artifacts/WS2-auth-demo-checklist.md`.
-- **WS-3 – Sandbox UI skeleton**
-  - Guest → Practical UI → Text Box / Complex Form страници (основна навигация и един-два ключови екрана).
 - **WS-4 – Admin skeleton**
   - Admin login → Admin Dashboard → Admin Wiki List (read-only първоначално).
 
-Конкретните дефиниции за WS-2+ могат да се добавят, когато екипът реши приоритетния ред на verticals. Във всички случаи **WS-1 остава първия skeleton**, който отключва реалната разработка на MVP.
+Конкретните дефиниции за WS-4+ могат да се добавят, когато екипът реши приоритетния ред на verticals. Във всички случаи **WS-1 остава първия skeleton**, който отключва реалната разработка на MVP.
