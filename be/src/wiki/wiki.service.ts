@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { WikiArticle } from './wiki-article.entity';
 import { WikiArticleVersion } from './wiki-article-version.entity';
 import { WikiListItemDto } from './dto/wiki-list-item.dto';
+import { AdminWikiListItemDto } from './dto/admin-wiki-list-item.dto';
 import { WikiArticleDetailDto } from './dto/wiki-article-detail.dto';
 
 @Injectable()
@@ -81,6 +82,78 @@ export class WikiService {
         slug: article.slug,
         language: latest.language,
         title: latest.title,
+        updatedAt: updatedAt.toISOString(),
+      });
+    }
+
+    return items;
+  }
+
+  async getAdminArticlesList(
+    page?: number,
+    pageSize?: number,
+    q?: string,
+    lang?: string,
+  ): Promise<AdminWikiListItemDto[]> {
+    const safePage = page && page > 0 ? page : 1;
+    const safePageSize = pageSize && pageSize > 0 ? pageSize : 20;
+    const skip = (safePage - 1) * safePageSize;
+    const take = safePageSize;
+
+    const articles = await this.articleRepo.find({
+      relations: ['versions'],
+      order: { updatedAt: 'DESC' },
+      skip,
+      take,
+    });
+
+    const items: AdminWikiListItemDto[] = [];
+
+    for (const article of articles) {
+      const versions = article.versions ?? [];
+      if (!versions.length) {
+        continue;
+      }
+
+      let candidates = versions;
+
+      const trimmedQ = q?.trim();
+      const hasSearch = !!trimmedQ;
+      const hasLangFilter = !!lang;
+
+      if (hasLangFilter) {
+        candidates = candidates.filter((v) => v.language === lang);
+      }
+
+      if (hasSearch && trimmedQ) {
+        const lowerQ = trimmedQ.toLowerCase();
+        candidates = candidates.filter((v) =>
+          (v.title ?? '').toLowerCase().includes(lowerQ),
+        );
+      }
+
+      if (!candidates.length) {
+        continue;
+      }
+
+      candidates.sort((a, b) => {
+        const aTime = a.createdAt ? a.createdAt.getTime() : 0;
+        const bTime = b.createdAt ? b.createdAt.getTime() : 0;
+        return aTime - bTime;
+      });
+
+      const latest = candidates[candidates.length - 1];
+      const updatedAt =
+        latest.createdAt ??
+        article.updatedAt ??
+        article.createdAt ??
+        new Date();
+
+      items.push({
+        id: article.id,
+        slug: article.slug,
+        title: latest.title,
+        status: article.status,
         updatedAt: updatedAt.toISOString(),
       });
     }

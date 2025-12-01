@@ -4,11 +4,16 @@ import { WikiArticle } from './wiki-article.entity';
 import { WikiArticleVersion } from './wiki-article-version.entity';
 import { WikiService } from './wiki.service';
 import { WikiController } from './wiki.controller';
+import { AuthModule } from '../auth/auth.module';
+import { AdminWikiController } from './admin-wiki.controller';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([WikiArticle, WikiArticleVersion])],
+  imports: [
+    TypeOrmModule.forFeature([WikiArticle, WikiArticleVersion]),
+    AuthModule,
+  ],
   providers: [WikiService],
-  controllers: [WikiController],
+  controllers: [WikiController, AdminWikiController],
   exports: [WikiService],
 })
 export class WikiModule {}

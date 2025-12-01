@@ -20,6 +20,9 @@ export class User {
   @Column({ type: 'boolean', default: true })
   active: boolean;
 
+  @Column({ name: 'role', type: 'varchar', length: 20, default: 'user' })
+  role: string;
+
   @Column({ name: 'token_version', type: 'integer', default: 0 })
   tokenVersion: number;
 

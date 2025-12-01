@@ -1,6 +1,6 @@
 # STORY-WS4-BE-ADMIN-WIKI-LIST-MINIMAL – Минимален admin endpoint за Wiki list (read-only)
 
-Status: Planned
+Status: Done
 
 ## Summary
 Като **администратор**, искам **admin endpoint за списък с Wiki статии**, за да мога да виждам всички статии (вкл. inactive/draft) в администраторския интерфейс.
@@ -20,13 +20,13 @@ Status: Planned
 - Има базово филтриране/пагинация (може да ползва съществуващата Wiki логика, ако е налична).
 
 ## Dev Tasks
-- [ ] Добавяне на admin-facing метод в Wiki service / нов Admin Wiki service (според архитектурата).
-- [ ] Добавяне на BE route/controller за `GET /api/admin/wiki/articles`.
-- [ ] Ограничаване на достъпа до endpoint-а само за потребители с admin роля (reuse на WS-2 guard/interceptor).
-- [ ] Unit тестове за service слоя (филтриране, сортиране).
-- [ ] E2E тест, който:
-  - [ ] симулира admin потребител;
-  - [ ] извиква `GET /api/admin/wiki/articles` и проверява, че връща очакваните полета и статуси.
+- [x] Добавяне на admin-facing метод в Wiki service / нов Admin Wiki service (според архитектурата).
+- [x] Добавяне на BE route/controller за `GET /api/admin/wiki/articles`.
+- [x] Ограничаване на достъпа до endpoint-а само за потребители с admin роля (reuse на WS-2 guard/interceptor).
+- [x] Unit тестове за service слоя (филтриране, сортиране).
+- [x] E2E тест, който:
+  - [x] симулира admin потребител;
+  - [x] извиква `GET /api/admin/wiki/articles` и проверява, че връща очакваните полета и статуси.
 
 ## Notes
 - Това е read-only story – никакви промени по съдържанието на статиите.
