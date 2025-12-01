@@ -170,7 +170,6 @@ Useful manual test URLs (assuming FE is running on `http://localhost:3001` and `
 On the page, verify that:
 
 - the page title shows "API Demo / Training API";
-- the header navigation item "Практика" / "Practice" points to `/practice/api-demo`;
 - the primary button links to the Training API Swagger UI (default: `http://localhost:4000/api/training/docs`);
 - the list of example scenarios matches the `GET /api/training/ping` and `POST /api/training/echo` behaviour described in `docs/architecture/openapi.yaml`.
 
@@ -186,6 +185,7 @@ The `/practice/ui-demo` route provides a sandbox UI screen with example tasks fo
 - The page is public and focuses on frontend-only interactions (no backend state in WS-3).
 - It contains a clearly visible "Примерни задачи" section with at least 5 tasks.
 - Each task is formulated so that it can be executed using only the elements on the page and is suitable for both manual and automated tests.
+ - The main header navigation item "Практика" / "Practice" points to `/practice/ui-demo`.
 
 Useful manual test URL (assuming FE is running on `http://localhost:3001`):
 
@@ -195,4 +195,5 @@ On the page, verify that:
 
 - the page title shows "UI Demo" and explains the purpose of the screen;
 - the "Примерни задачи" section is easy to spot and is rendered as a numbered list;
-- there are at least 5 tasks covering buttons, text inputs, dropdowns, checkboxes/radios and a table/list with a Reset behavior (as implemented by `STORY-WS3-FE-UI-DEMO-PAGE`).
+- there are at least 5 tasks covering buttons, text inputs, dropdowns, checkboxes/radios and a table/list with a Reset behavior (as implemented by `STORY-WS3-FE-UI-DEMO-PAGE`);
+- the sandbox UI below the header includes buttons, text fields, a dropdown, a checkbox/radio group and a small table that react to user input, and the Reset button restores their default state without a page reload.

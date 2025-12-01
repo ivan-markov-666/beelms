@@ -6,7 +6,7 @@ describe("UiDemoPage", () => {
     render(<UiDemoPage />);
 
     expect(
-      screen.getByRole("heading", { name: /UI Demo/i }),
+      screen.getByRole("heading", { level: 1, name: /UI Demo/i }),
     ).toBeInTheDocument();
 
     expect(
