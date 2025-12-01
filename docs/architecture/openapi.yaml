@@ -59,6 +59,9 @@ components:
         email:
           type: string
           format: email
+        role:
+          type: string
+          description: Роля на потребителя (напр. "user", "admin")
         active:
           type: boolean
         createdAt:
@@ -416,6 +419,18 @@ paths:
           schema:
             type: string
           description: Търсене по имейл
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+          description: Номер на страницата (за странициране на списъка)
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+            default: 20
+          description: Брой потребители на страница
       responses:
         "200":
           description: Списък с потребители
