@@ -235,6 +235,52 @@ describe('WikiService', () => {
     expect(result).toEqual([]);
   });
 
+  it('getAdminArticlesList uses default pagination when page and pageSize are not provided', async () => {
+    (articleRepo.find as jest.Mock).mockResolvedValue([]);
+
+    await service.getAdminArticlesList();
+
+    expect(articleRepo.find as jest.Mock).toHaveBeenCalledTimes(1);
+    const firstCall = (articleRepo.find as jest.Mock).mock.calls[0] as [
+      {
+        skip: number;
+        take: number;
+      },
+    ];
+    const options = firstCall[0];
+    expect(options.skip).toBe(0);
+    expect(options.take).toBe(20);
+  });
+
+  it('getAdminArticlesList returns articles with status and updatedAt', async () => {
+    const now = new Date();
+
+    (articleRepo.find as jest.Mock).mockResolvedValue([
+      {
+        id: '1',
+        slug: 'getting-started',
+        status: 'active',
+        createdAt: now,
+        updatedAt: now,
+        versions: [
+          {
+            language: 'bg',
+            title: 'Начало с QA4Free (draft)',
+            isPublished: false,
+            createdAt: now,
+          },
+        ],
+      } as unknown as WikiArticle,
+    ]);
+
+    const result = await service.getAdminArticlesList();
+
+    expect(result).toHaveLength(1);
+    const first = result[0] as { status: string; updatedAt: string };
+    expect(first.status).toBe('active');
+    expect(typeof first.updatedAt).toBe('string');
+  });
+
   it('skips articles without published versions', async () => {
     (articleRepo.find as jest.Mock).mockResolvedValue([
       {

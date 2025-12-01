@@ -1,5 +1,7 @@
 # EPIC-WS3-PRACTICAL-API-DEMO – Training API (минимален Demo API + Swagger)
 
+Status: Done
+
 ## Summary
 Този epic обхваща backend/API частта на WS-3 walking skeleton за **Practical Environment – API Demo / Training API**: минимален NestJS Training API с ping/echo ендпойнти и публичен Swagger UI за упражнения по API/integration тестване.
 
@@ -31,9 +33,9 @@ Out of scope за този epic (за post-MVP / бъдещи WS):
 - MCP EPIC Map – `docs/backlog/MCP-EPIC-map.md` (EPIC-PRACTICE-API-DEMO, EPIC-PRACTICE-TASKS).
 
 ## Child user stories
-- [ ] STORY-WS3-BE-TRAINING-API-MINIMAL – Минимален Training API с ping/echo ендпойнти.
-- [ ] STORY-WS3-BE-TRAINING-API-SWAGGER – Swagger/OpenAPI документация и UI за Training API.
-- [ ] STORY-WS3-FE-TRAINING-API-INTRO – FE екран „API Demo / Training API“ с линк към Swagger и примерни упражнения.
+- [x] STORY-WS3-BE-TRAINING-API-MINIMAL – Минимален Training API с ping/echo ендпойнти.
+- [x] STORY-WS3-BE-TRAINING-API-SWAGGER – Swagger/OpenAPI документация и UI за Training API.
+- [x] STORY-WS3-FE-TRAINING-API-INTRO – FE екран „API Demo / Training API“ с линк към Swagger и примерни упражнения.
 
 ## Risks / Assumptions
 - **Risks:**
