@@ -208,7 +208,15 @@ For the WS-4 Admin skeleton, the frontend provides a minimal Admin area that dep
   - only when `role === "admin"` does the Admin shell render its children.
 - Inside the Admin shell, the header navigation includes:
   - a link to the Admin home (`/admin`);
-  - a placeholder link to the Admin Wiki list (`/admin/wiki`), which will be wired to the backend Admin Wiki API in subsequent WS-4 stories.
+  - a link to the Admin Wiki list (`/admin/wiki`), which renders a read-only list of Wiki articles for administrators.
 - In the global header navigation (`HeaderNav`):
   - the **Admin** link (pointing to `/admin`) is shown **only** for authenticated users whose profile role is `admin`;
   - guests and non-admin users never see the Admin link in the global navigation.
+
+The `/admin/wiki` page:
+
+- calls the protected backend endpoint `GET /api/admin/wiki/articles` using the stored `qa4free_access_token`;
+- renders a table with `Slug`, `Title`, `Status` and `Updated` columns;
+- visually distinguishes article statuses (e.g. Active, Draft, Archived) via colored badges;
+- links each article slug to the public `/wiki/[slug]` page (opened in a new tab);
+- shows a clear error message when the Admin Wiki list cannot be loaded.
