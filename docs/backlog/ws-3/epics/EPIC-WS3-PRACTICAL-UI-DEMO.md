@@ -1,5 +1,7 @@
 # EPIC-WS3-PRACTICAL-UI-DEMO – Practical UI Demo (Sandbox UI страници)
 
+Status: Done
+
 ## Summary
 Този epic обхваща frontend частта на WS-3 walking skeleton за **Practical Environment – UI Demo**: Next.js страници с богата комбинация от HTML елементи, reset на състоянието и ясно описани примерни задачи за manual и UI automation тестване.
 
@@ -34,8 +36,8 @@ Out of scope за този epic (ще се покрият в бъдещи WS/epi
 - MCP EPIC Map – `docs/backlog/MCP-EPIC-map.md` (EPIC-PRACTICE-UI-DEMO).
 
 ## Child user stories
-- [ ] STORY-WS3-FE-UI-DEMO-PAGE – Екран с UI елементи и reset за упражнения.
-- [ ] STORY-WS3-FE-UI-DEMO-TASKS – Текстови примерни задачи и UX copy за упражненията.
+- [x] STORY-WS3-FE-UI-DEMO-PAGE – Екран с UI елементи и reset за упражнения.
+- [x] STORY-WS3-FE-UI-DEMO-TASKS – Текстови примерни задачи и UX copy за упражненията.
 
 ## Risks / Assumptions
 - **Risks:**
