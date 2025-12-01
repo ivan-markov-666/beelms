@@ -1,3 +1,5 @@
+import { UiDemoSandbox } from "./_components/ui-demo-sandbox";
+
 export default function UiDemoPage() {
   return (
     <main className="mx-auto flex min-h-screen max-w-3xl flex-col gap-8 px-4 py-10">
@@ -14,6 +16,8 @@ export default function UiDemoPage() {
           контекст.
         </p>
       </header>
+
+      <UiDemoSandbox />
 
       <section className="space-y-3 text-sm text-zinc-700 dark:text-zinc-200">
         <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">

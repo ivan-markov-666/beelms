@@ -43,15 +43,8 @@ export function HeaderNav() {
         >
           {t(lang, "nav", "wiki")}
         </Link>
-        {/* Placeholder for future practice section route */}
-        {/* <Link
-          href="/practice"
-          className="font-medium hover:text-zinc-950 dark:hover:text-white"
-        >
-          {t(lang, "nav", "practice")}
-        </Link> */}
         <Link
-          href="/practice/api-demo"
+          href="/practice/ui-demo"
           className="font-medium hover:text-zinc-950 dark:hover:text-white"
         >
           {t(lang, "nav", "practice")}
