@@ -45,6 +45,18 @@ describe("HeaderNav i18n", () => {
 
     window.localStorage.setItem("qa4free_access_token", "test-token");
 
+    // stub fetch for profile check
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        id: "user-id",
+        email: "user@example.com",
+        createdAt: "2024-01-01T00:00:00.000Z",
+        role: "user",
+      }),
+    } as unknown as Response);
+
     render(<HeaderNav />);
 
     await waitFor(() => {
@@ -54,5 +66,68 @@ describe("HeaderNav i18n", () => {
     });
 
     window.localStorage.removeItem("qa4free_access_token");
+  });
+
+  it("shows Admin link only for admin user", async () => {
+    useSearchParamsMock.mockReturnValue(makeSearchParams("lang=en"));
+    usePathnameMock.mockReturnValue("/wiki");
+
+    window.localStorage.setItem("qa4free_access_token", "test-token");
+
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        id: "admin-id",
+        email: "admin@example.com",
+        createdAt: "2024-01-01T00:00:00.000Z",
+        role: "admin",
+      }),
+    } as unknown as Response);
+
+    render(<HeaderNav />);
+
+    expect(await screen.findByRole("link", { name: "Admin" })).toBeInTheDocument();
+
+    window.localStorage.removeItem("qa4free_access_token");
+  });
+
+  it("does not show Admin link for non-admin user", async () => {
+    useSearchParamsMock.mockReturnValue(makeSearchParams("lang=en"));
+    usePathnameMock.mockReturnValue("/wiki");
+
+    window.localStorage.setItem("qa4free_access_token", "test-token");
+
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        id: "user-id",
+        email: "user@example.com",
+        createdAt: "2024-01-01T00:00:00.000Z",
+        role: "user",
+      }),
+    } as unknown as Response);
+
+    render(<HeaderNav />);
+
+    await waitFor(() => {
+      expect(screen.queryByRole("link", { name: "Admin" })).not.toBeInTheDocument();
+    });
+
+    window.localStorage.removeItem("qa4free_access_token");
+  });
+
+  it("does not show Admin link when token is missing", async () => {
+    useSearchParamsMock.mockReturnValue(makeSearchParams("lang=en"));
+    usePathnameMock.mockReturnValue("/wiki");
+
+    global.fetch = jest.fn();
+
+    render(<HeaderNav />);
+
+    await waitFor(() => {
+      expect(screen.queryByRole("link", { name: "Admin" })).not.toBeInTheDocument();
+    });
   });
 });

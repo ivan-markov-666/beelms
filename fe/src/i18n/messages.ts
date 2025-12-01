@@ -5,6 +5,7 @@ type DomainMessages = {
     wiki: string;
     practice: string;
     login: string;
+    admin: string;
   };
   auth: Record<string, string>;
   common: Record<string, string>;
@@ -21,6 +22,7 @@ export const messages: Messages = {
       wiki: "Wiki",
       practice: "Практика",
       login: "Вход",
+      admin: "Admin",
     },
     auth: {
       loginTitle: "Вход",
@@ -136,6 +138,7 @@ export const messages: Messages = {
       wiki: "Wiki",
       practice: "Practice",
       login: "Sign in",
+      admin: "Admin",
     },
     auth: {
       loginTitle: "Sign in",
@@ -251,6 +254,7 @@ export const messages: Messages = {
       wiki: "Wiki",
       practice: "Praxis",
       login: "Anmelden",
+      admin: "Admin",
     },
     auth: {
       loginTitle: "Anmelden",
