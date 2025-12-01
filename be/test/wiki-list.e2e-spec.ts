@@ -53,7 +53,7 @@ describe('Wiki list endpoint (e2e)', () => {
     const allSlugs = [...page1, ...page2].map((item) => item.slug);
 
     expect(allSlugs).toEqual(
-      expect.arrayContaining(['getting-started', 'faq']),
+      expect.arrayContaining(['qa4free-overview', 'faq']),
     );
   });
 
