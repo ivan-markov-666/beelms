@@ -197,3 +197,18 @@ On the page, verify that:
 - the "Примерни задачи" section is easy to spot and is rendered as a numbered list;
 - there are at least 5 tasks covering buttons, text inputs, dropdowns, checkboxes/radios and a table/list with a Reset behavior (as implemented by `STORY-WS3-FE-UI-DEMO-PAGE`);
 - the sandbox UI below the header includes buttons, text fields, a dropdown, a checkbox/radio group and a small table that react to user input, and the Reset button restores their default state without a page reload.
+
+## WS-4 Admin shell & navigation
+
+For the WS-4 Admin skeleton, the frontend provides a minimal Admin area that depends on the backend Auth/Profile API (including the `role` field from `GET /api/users/me`).
+
+- The `/admin` route uses a dedicated Admin layout and is **guarded on the client side**:
+  - when there is **no** `qa4free_access_token` in `localStorage`, the user is redirected to `/auth/login`;
+  - when a token is present but `GET /api/users/me` returns a non-admin role, the page renders a simple "Access denied" (403-style) message without further redirects;
+  - only when `role === "admin"` does the Admin shell render its children.
+- Inside the Admin shell, the header navigation includes:
+  - a link to the Admin home (`/admin`);
+  - a placeholder link to the Admin Wiki list (`/admin/wiki`), which will be wired to the backend Admin Wiki API in subsequent WS-4 stories.
+- In the global header navigation (`HeaderNav`):
+  - the **Admin** link (pointing to `/admin`) is shown **only** for authenticated users whose profile role is `admin`;
+  - guests and non-admin users never see the Admin link in the global navigation.
