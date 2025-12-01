@@ -4,6 +4,7 @@ type DomainMessages = {
   nav: {
     wiki: string;
     practice: string;
+    practiceApi: string;
     login: string;
     admin: string;
   };
@@ -21,6 +22,7 @@ export const messages: Messages = {
     nav: {
       wiki: "Wiki",
       practice: "Практика",
+      practiceApi: "API Demo",
       login: "Вход",
       admin: "Admin",
     },
@@ -137,6 +139,7 @@ export const messages: Messages = {
     nav: {
       wiki: "Wiki",
       practice: "Practice",
+      practiceApi: "API Demo",
       login: "Sign in",
       admin: "Admin",
     },
@@ -253,6 +256,7 @@ export const messages: Messages = {
     nav: {
       wiki: "Wiki",
       practice: "Praxis",
+      practiceApi: "API Demo",
       login: "Anmelden",
       admin: "Admin",
     },
