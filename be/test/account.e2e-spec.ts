@@ -45,11 +45,14 @@ describe('Account endpoints (e2e)', () => {
       id: string;
       email: string;
       createdAt: string;
+      role: string;
     };
 
     expect(body).toHaveProperty('id');
     expect(body).toHaveProperty('email', email);
     expect(typeof body.createdAt).toBe('string');
+    expect(body).toHaveProperty('role');
+    expect(typeof body.role).toBe('string');
   });
 
   it('GET /api/users/me returns 401 when Authorization header is missing', async () => {

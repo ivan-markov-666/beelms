@@ -195,7 +195,8 @@ The main endpoints are:
 
 - `GET /api/users/me`
   - Returns the current user's profile.
-  - Response body: `{ id, email, createdAt, emailChangeLimitReached, emailChangeLimitResetAt }` where:
+  - Response body: `{ id, email, createdAt, role, emailChangeLimitReached, emailChangeLimitResetAt }` where:
+    - `role: string` – the current user's role (e.g. `"user"` or `"admin"`).
     - `emailChangeLimitReached: boolean` – whether the 3-per-24h email change verification limit has been reached for the current user;
     - `emailChangeLimitResetAt: string | null` – ISO timestamp indicating when the 24-hour window will reset (non-null only when the limit is currently reached).
   - Errors: `401` when the JWT is missing/invalid.

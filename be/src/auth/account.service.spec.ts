@@ -43,6 +43,7 @@ describe('AccountService', () => {
       email: 'test@example.com',
       passwordHash: 'hash',
       active: true,
+      role: 'user',
       createdAt: new Date('2024-01-01T00:00:00.000Z'),
       updatedAt: new Date('2024-01-01T00:00:00.000Z'),
     } as User;
@@ -58,6 +59,7 @@ describe('AccountService', () => {
       id: 'user-id',
       email: 'test@example.com',
       createdAt: '2024-01-01T00:00:00.000Z',
+      role: 'user',
       emailChangeLimitReached: false,
       emailChangeLimitResetAt: null,
     });
