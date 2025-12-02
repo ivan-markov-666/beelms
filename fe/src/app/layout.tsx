@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { LanguageSwitcher } from "./wiki/_components/language-switcher";
 import { HeaderNav } from "./_components/header-nav";
+import { SiteFooter } from "./_components/site-footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,6 +35,7 @@ export default function RootLayout({
           <LanguageSwitcher />
         </div>
         {children}
+        <SiteFooter />
       </body>
     </html>
   );
