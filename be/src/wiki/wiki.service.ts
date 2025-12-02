@@ -6,6 +6,7 @@ import { WikiArticleVersion } from './wiki-article-version.entity';
 import { WikiListItemDto } from './dto/wiki-list-item.dto';
 import { AdminWikiListItemDto } from './dto/admin-wiki-list-item.dto';
 import { WikiArticleDetailDto } from './dto/wiki-article-detail.dto';
+import { AdminUpdateWikiArticleDto } from './dto/admin-update-wiki-article.dto';
 
 @Injectable()
 export class WikiService {
@@ -214,6 +215,65 @@ export class WikiService {
       language: latest.language,
       title: latest.title,
       content: latest.content,
+      status: article.status,
+      updatedAt: updatedAt.toISOString(),
+    };
+  }
+
+  async adminUpdateArticle(
+    id: string,
+    dto: AdminUpdateWikiArticleDto,
+    userId: string | null,
+  ): Promise<WikiArticleDetailDto> {
+    const article = await this.articleRepo.findOne({
+      where: { id },
+      relations: ['versions'],
+    });
+
+    if (!article) {
+      throw new NotFoundException('Article not found');
+    }
+
+    article.status = dto.status;
+    await this.articleRepo.save(article);
+
+    const existingVersions = await this.versionRepo.find({
+      where: {
+        article: { id: article.id },
+        language: dto.language,
+      },
+      relations: ['article'],
+    });
+
+    const nextVersionNumber =
+      existingVersions.length > 0
+        ? Math.max(...existingVersions.map((v) => v.versionNumber ?? 0)) + 1
+        : 1;
+
+    const version = this.versionRepo.create({
+      article,
+      language: dto.language,
+      title: dto.title,
+      content: dto.content,
+      versionNumber: nextVersionNumber,
+      createdByUserId: userId,
+      isPublished: dto.status === 'active',
+    });
+
+    const savedVersion = await this.versionRepo.save(version);
+
+    const updatedAt =
+      savedVersion.createdAt ??
+      article.updatedAt ??
+      article.createdAt ??
+      new Date();
+
+    return {
+      id: article.id,
+      slug: article.slug,
+      language: savedVersion.language,
+      title: savedVersion.title,
+      content: savedVersion.content,
       status: article.status,
       updatedAt: updatedAt.toISOString(),
     };

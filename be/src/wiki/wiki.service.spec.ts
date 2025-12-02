@@ -9,7 +9,8 @@ import { WikiArticleVersion } from './wiki-article-version.entity';
 
 describe('WikiService', () => {
   let service: WikiService;
-  let articleRepo: { find: jest.Mock; findOne: jest.Mock };
+  let articleRepo: { find: jest.Mock; findOne: jest.Mock; save: jest.Mock };
+  let versionRepo: { find: jest.Mock; save: jest.Mock; create: jest.Mock };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -20,17 +21,23 @@ describe('WikiService', () => {
           useValue: {
             find: jest.fn(),
             findOne: jest.fn(),
+            save: jest.fn(),
           },
         },
         {
           provide: getRepositoryToken(WikiArticleVersion),
-          useValue: {},
+          useValue: {
+            find: jest.fn(),
+            save: jest.fn(),
+            create: jest.fn((entity) => entity),
+          },
         },
       ],
     }).compile();
 
     service = module.get(WikiService);
     articleRepo = module.get(getRepositoryToken(WikiArticle));
+    versionRepo = module.get(getRepositoryToken(WikiArticleVersion));
   });
 
   it('uses default pagination when page and pageSize are not provided', async () => {
@@ -477,5 +484,125 @@ describe('WikiService', () => {
     await expect(service.getArticleBySlug('getting-started')).rejects.toThrow(
       'DB error',
     );
+  });
+
+  describe('adminUpdateArticle', () => {
+    it('updates article status and creates a new version with incremented versionNumber', async () => {
+      const now = new Date('2023-01-10T00:00:00Z');
+
+      (articleRepo.findOne as jest.Mock).mockResolvedValue({
+        id: '1',
+        slug: 'getting-started',
+        status: 'draft',
+        createdAt: now,
+        updatedAt: now,
+        versions: [],
+      } as unknown as WikiArticle);
+
+      (versionRepo.find as jest.Mock).mockResolvedValue([
+        {
+          versionNumber: 1,
+          language: 'bg',
+        } as unknown as WikiArticleVersion,
+      ]);
+
+      const savedCreatedAt = new Date('2023-01-11T00:00:00Z');
+
+      (versionRepo.save as jest.Mock).mockImplementation(
+        async (entity: Partial<WikiArticleVersion>) => ({
+          id: 'v2-id',
+          ...entity,
+          createdAt: savedCreatedAt,
+        }),
+      );
+
+      const dto = {
+        language: 'bg',
+        title: 'Нова BG версия',
+        content: 'ново съдържание',
+        status: 'active',
+      };
+
+      const result = await service.adminUpdateArticle('1', dto, 'admin-id');
+
+      expect(articleRepo.findOne).toHaveBeenCalledTimes(1);
+      expect(articleRepo.save).toHaveBeenCalledTimes(1);
+
+      expect(versionRepo.find).toHaveBeenCalledTimes(1);
+
+      expect(versionRepo.save).toHaveBeenCalledTimes(1);
+      const savedArg = (versionRepo.save as jest.Mock).mock
+        .calls[0][0] as WikiArticleVersion;
+      expect(savedArg.versionNumber).toBe(2);
+      expect(savedArg.language).toBe('bg');
+      expect(savedArg.title).toBe('Нова BG версия');
+      expect(savedArg.content).toBe('ново съдържание');
+      expect(savedArg.createdByUserId).toBe('admin-id');
+      expect(savedArg.isPublished).toBe(true);
+
+      expect(result.slug).toBe('getting-started');
+      expect(result.language).toBe('bg');
+      expect(result.title).toBe('Нова BG версия');
+      expect(result.content).toBe('ново съдържание');
+      expect(result.status).toBe('active');
+      expect(result.updatedAt).toBe(savedCreatedAt.toISOString());
+    });
+
+    it('throws NotFoundException when article does not exist', async () => {
+      (articleRepo.findOne as jest.Mock).mockResolvedValue(undefined);
+
+      await expect(
+        service.adminUpdateArticle(
+          'missing-id',
+          {
+            language: 'bg',
+            title: 't',
+            content: 'c',
+            status: 'draft',
+          },
+          null,
+        ),
+      ).rejects.toBeInstanceOf(NotFoundException);
+    });
+
+    it('starts versionNumber from 1 when there are no existing versions for language', async () => {
+      const now = new Date('2023-01-10T00:00:00Z');
+
+      (articleRepo.findOne as jest.Mock).mockResolvedValue({
+        id: '2',
+        slug: 'faq',
+        status: 'draft',
+        createdAt: now,
+        updatedAt: now,
+        versions: [],
+      } as unknown as WikiArticle);
+
+      (versionRepo.find as jest.Mock).mockResolvedValue([]);
+
+      (versionRepo.save as jest.Mock).mockImplementation(
+        async (entity: Partial<WikiArticleVersion>) => ({
+          id: 'v1-id',
+          ...entity,
+          createdAt: now,
+        }),
+      );
+
+      await service.adminUpdateArticle(
+        '2',
+        {
+          language: 'bg',
+          title: 'FAQ BG ново заглавие',
+          content: 'FAQ BG ново съдържание',
+          status: 'draft',
+        },
+        'admin-id',
+      );
+
+      expect(versionRepo.save).toHaveBeenCalledTimes(1);
+      const savedArg = (versionRepo.save as jest.Mock).mock
+        .calls[0][0] as WikiArticleVersion;
+      expect(savedArg.versionNumber).toBe(1);
+      expect(savedArg.isPublished).toBe(false);
+    });
   });
 });
