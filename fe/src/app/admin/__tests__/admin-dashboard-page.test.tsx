@@ -1,0 +1,84 @@
+import { render, screen, waitFor } from "@testing-library/react";
+import * as nextNavigation from "next/navigation";
+import AdminHomePage from "../page";
+
+jest.mock("next/navigation", () => ({
+  useSearchParams: jest.fn(),
+}));
+
+const useSearchParamsMock = nextNavigation.useSearchParams as jest.Mock;
+
+function makeSearchParams(query: string) {
+  return new URLSearchParams(query) as unknown as URLSearchParams;
+}
+
+describe("AdminHomePage (Dashboard)", () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+    window.localStorage.clear();
+    useSearchParamsMock.mockReturnValue(makeSearchParams("lang=bg"));
+  });
+
+  it("renders metrics card with total users from API", async () => {
+    window.localStorage.setItem("qa4free_access_token", "test-token");
+
+    global.fetch = jest.fn().mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        totalUsers: 42,
+        totalArticles: 0,
+        topArticles: [],
+      }),
+    } as unknown as Response);
+
+    render(<AdminHomePage />);
+
+    expect(await screen.findByText("Админ табло")).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(screen.getByText("Общ брой потребители")).toBeInTheDocument();
+      expect(screen.getByText("42")).toBeInTheDocument();
+    });
+  });
+
+  it("shows error message when metrics API call fails", async () => {
+    window.localStorage.setItem("qa4free_access_token", "test-token");
+
+    global.fetch = jest.fn().mockResolvedValueOnce({
+      ok: false,
+      status: 500,
+      json: async () => ({}),
+    } as unknown as Response);
+
+    render(<AdminHomePage />);
+
+    expect(
+      await screen.findByText("Неуспешно зареждане на метрики."),
+    ).toBeInTheDocument();
+  });
+
+  it("renders quick links to admin wiki and users", async () => {
+    window.localStorage.setItem("qa4free_access_token", "test-token");
+
+    global.fetch = jest.fn().mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        totalUsers: 1,
+        totalArticles: 0,
+        topArticles: [],
+      }),
+    } as unknown as Response);
+
+    render(<AdminHomePage />);
+
+    await screen.findByText("Общ брой потребители");
+
+    const wikiLink = screen.getByRole("link", { name: "Към Admin Wiki" });
+    const usersLink = screen.getByRole("link", { name: "Към Admin Users" });
+
+    expect(wikiLink).toHaveAttribute("href", "/admin/wiki");
+    expect(usersLink).toHaveAttribute("href", "/admin/users");
+  });
+});
