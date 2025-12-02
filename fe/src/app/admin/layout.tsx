@@ -126,6 +126,12 @@ export default function AdminLayout({
             >
               Admin Wiki
             </Link>
+            <Link
+              href="/admin/users"
+              className="font-medium text-zinc-700 hover:text-zinc-950"
+            >
+              Admin Users
+            </Link>
           </nav>
         </header>
         <main>{children}</main>

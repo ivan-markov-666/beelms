@@ -6,10 +6,11 @@ import { WikiService } from './wiki.service';
 import { WikiController } from './wiki.controller';
 import { AuthModule } from '../auth/auth.module';
 import { AdminWikiController } from './admin-wiki.controller';
+import { User } from '../auth/user.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([WikiArticle, WikiArticleVersion]),
+    TypeOrmModule.forFeature([WikiArticle, WikiArticleVersion, User]),
     AuthModule,
   ],
   providers: [WikiService],

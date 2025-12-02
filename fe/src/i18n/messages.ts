@@ -125,7 +125,28 @@ export const messages: Messages = {
         "Паролата беше сменена успешно. Ще ви пренасочим към страницата за вход...",
       resetGoToForgotCta: "Към екрана „Забравена парола“",
     },
-    common: {},
+    common: {
+      adminUsersTitle: "Admin Users",
+      adminUsersSubtitle:
+        "Списък с потребители и статус на акаунта (active/inactive).",
+      adminUsersSearchPlaceholder: "Търсене по email...",
+      adminUsersSearchButton: "Търси",
+      adminUsersLoading: "Зареждане на списъка...",
+      adminUsersError:
+        "Възникна грешка при зареждане на списъка с потребители.",
+      adminUsersNoData: "Няма потребители за показване.",
+      adminUsersToggleError:
+        "Неуспешно обновяване на статуса на потребителя. Моля, опитайте отново.",
+      adminUsersNoToken:
+        "Липсва достъп до Admin API. Моля, влезте отново като администратор.",
+      adminUsersColEmail: "Email",
+      adminUsersColRole: "Role",
+      adminUsersColActive: "Active",
+      adminUsersColCreated: "Created",
+      adminUsersStatusActive: "Active",
+      adminUsersStatusInactive: "Inactive",
+      adminUsersStatusUpdating: "Обновяване...",
+    },
     wiki: {
       articleShareButton: "Сподели",
       articlePrintButton: "Принтирай",
@@ -243,7 +264,28 @@ export const messages: Messages = {
       resetGoToForgotCta:
         'Go to the "Forgot password" screen',
     },
-    common: {},
+    common: {
+      adminUsersTitle: "Admin Users",
+      adminUsersSubtitle:
+        "List of users and account status (active/inactive).",
+      adminUsersSearchPlaceholder: "Search by email...",
+      adminUsersSearchButton: "Search",
+      adminUsersLoading: "Loading users...",
+      adminUsersError:
+        "An error occurred while loading the users list.",
+      adminUsersNoData: "No users to display.",
+      adminUsersToggleError:
+        "Failed to update user status. Please try again.",
+      adminUsersNoToken:
+        "No access to the Admin API. Please sign in again as an administrator.",
+      adminUsersColEmail: "Email",
+      adminUsersColRole: "Role",
+      adminUsersColActive: "Active",
+      adminUsersColCreated: "Created",
+      adminUsersStatusActive: "Active",
+      adminUsersStatusInactive: "Inactive",
+      adminUsersStatusUpdating: "Updating...",
+    },
     wiki: {
       articleShareButton: "Share",
       articlePrintButton: "Print",
