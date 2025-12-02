@@ -146,6 +146,15 @@ export const messages: Messages = {
       adminUsersStatusActive: "Active",
       adminUsersStatusInactive: "Inactive",
       adminUsersStatusUpdating: "Обновяване...",
+      adminDashboardTitle: "Админ табло",
+      adminDashboardSubtitle:
+        "Кратък преглед на основните метрики и секции в Admin зоната.",
+      adminDashboardMetricsTitle: "Общ брой потребители",
+      adminDashboardMetricsLoading: "Зареждане на метриките...",
+      adminDashboardMetricsError: "Неуспешно зареждане на метрики.",
+      adminDashboardLinksTitle: "Админ секции",
+      adminDashboardGoToWiki: "Към Admin Wiki",
+      adminDashboardGoToUsers: "Към Admin Users",
     },
     wiki: {
       articleShareButton: "Сподели",
@@ -285,6 +294,15 @@ export const messages: Messages = {
       adminUsersStatusActive: "Active",
       adminUsersStatusInactive: "Inactive",
       adminUsersStatusUpdating: "Updating...",
+      adminDashboardTitle: "Admin Dashboard",
+      adminDashboardSubtitle:
+        "Quick overview of key metrics and admin sections.",
+      adminDashboardMetricsTitle: "Total users",
+      adminDashboardMetricsLoading: "Loading metrics...",
+      adminDashboardMetricsError: "Failed to load metrics.",
+      adminDashboardLinksTitle: "Admin sections",
+      adminDashboardGoToWiki: "Go to Admin Wiki",
+      adminDashboardGoToUsers: "Go to Admin Users",
     },
     wiki: {
       articleShareButton: "Share",
