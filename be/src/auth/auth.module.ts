@@ -10,6 +10,8 @@ import { JwtAuthGuard } from './jwt-auth.guard';
 import { AdminGuard } from './admin.guard';
 import { AdminUsersService } from './admin-users.service';
 import { AdminUsersController } from './admin-users.controller';
+import { AdminMetricsService } from './admin-metrics.service';
+import { AdminMetricsController } from './admin-metrics.controller';
 
 @Module({
   imports: [
@@ -27,8 +29,14 @@ import { AdminUsersController } from './admin-users.controller';
     JwtAuthGuard,
     AdminGuard,
     AdminUsersService,
+    AdminMetricsService,
   ],
-  controllers: [AuthController, AccountController, AdminUsersController],
+  controllers: [
+    AuthController,
+    AccountController,
+    AdminUsersController,
+    AdminMetricsController,
+  ],
   exports: [
     AuthService,
     AccountService,
