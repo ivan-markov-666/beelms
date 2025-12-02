@@ -133,4 +133,69 @@ describe('Admin Wiki edit endpoint (e2e)', () => {
       })
       .expect(403);
   });
+
+  it('PUT /api/admin/wiki/articles/:id returns 404 for non-existing article', async () => {
+    const { email, accessToken } = await registerAndLogin(
+      app,
+      'admin-wiki-edit-404',
+    );
+
+    const user = await userRepo.findOne({ where: { email } });
+    expect(user).toBeDefined();
+
+    if (!user) {
+      throw new Error('User not found after registerAndLogin');
+    }
+
+    user.role = 'admin';
+    await userRepo.save(user);
+
+    await request(app.getHttpServer())
+      .put('/api/admin/wiki/articles/00000000-0000-0000-0000-000000000000')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({
+        language: 'bg',
+        title: 't',
+        content: 'c',
+        status: 'draft',
+      })
+      .expect(404);
+  });
+
+  it('PUT /api/admin/wiki/articles/:id returns 400 for invalid body', async () => {
+    const { email, accessToken } = await registerAndLogin(
+      app,
+      'admin-wiki-edit-400',
+    );
+
+    const user = await userRepo.findOne({ where: { email } });
+    expect(user).toBeDefined();
+
+    if (!user) {
+      throw new Error('User not found after registerAndLogin');
+    }
+
+    user.role = 'admin';
+    await userRepo.save(user);
+
+    const article = await articleRepo.findOne({
+      where: { slug: 'getting-started' },
+    });
+    expect(article).toBeDefined();
+
+    if (!article) {
+      throw new Error('Article "getting-started" not found in seed data');
+    }
+
+    await request(app.getHttpServer())
+      .put(`/api/admin/wiki/articles/${article.id}`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({
+        language: 'bg',
+        // missing title should trigger validation error (400)
+        content: 'c',
+        status: 'active',
+      })
+      .expect(400);
+  });
 });

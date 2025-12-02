@@ -7,6 +7,7 @@ import { WikiListItemDto } from './dto/wiki-list-item.dto';
 import { AdminWikiListItemDto } from './dto/admin-wiki-list-item.dto';
 import { WikiArticleDetailDto } from './dto/wiki-article-detail.dto';
 import { AdminUpdateWikiArticleDto } from './dto/admin-update-wiki-article.dto';
+import { AdminWikiArticleVersionDto } from './dto/admin-wiki-article-version.dto';
 
 @Injectable()
 export class WikiService {
@@ -261,6 +262,99 @@ export class WikiService {
     });
 
     const savedVersion = await this.versionRepo.save(version);
+
+    const updatedAt =
+      savedVersion.createdAt ??
+      article.updatedAt ??
+      article.createdAt ??
+      new Date();
+
+    return {
+      id: article.id,
+      slug: article.slug,
+      language: savedVersion.language,
+      title: savedVersion.title,
+      content: savedVersion.content,
+      status: article.status,
+      updatedAt: updatedAt.toISOString(),
+    };
+  }
+
+  async getArticleVersionsForAdmin(
+    articleId: string,
+  ): Promise<AdminWikiArticleVersionDto[]> {
+    const article = await this.articleRepo.findOne({
+      where: { id: articleId },
+    });
+
+    if (!article) {
+      throw new NotFoundException('Article not found');
+    }
+
+    const versions = await this.versionRepo.find({
+      where: { article: { id: articleId } },
+      relations: ['article'],
+      order: { createdAt: 'DESC', versionNumber: 'DESC' },
+    });
+
+    return versions.map((v) => ({
+      id: v.id,
+      version: v.versionNumber,
+      language: v.language,
+      title: v.title,
+      createdAt: v.createdAt
+        ? v.createdAt.toISOString()
+        : new Date().toISOString(),
+      createdBy: v.createdByUserId ?? null,
+    }));
+  }
+
+  async restoreArticleVersionForAdmin(
+    articleId: string,
+    versionId: string,
+    userId: string | null,
+  ): Promise<WikiArticleDetailDto> {
+    const article = await this.articleRepo.findOne({
+      where: { id: articleId },
+    });
+
+    if (!article) {
+      throw new NotFoundException('Article not found');
+    }
+
+    const targetVersion = await this.versionRepo.findOne({
+      where: { id: versionId, article: { id: articleId } },
+      relations: ['article'],
+    });
+
+    if (!targetVersion) {
+      throw new NotFoundException('Version not found');
+    }
+
+    const existingVersions = await this.versionRepo.find({
+      where: {
+        article: { id: article.id },
+        language: targetVersion.language,
+      },
+      relations: ['article'],
+    });
+
+    const nextVersionNumber =
+      existingVersions.length > 0
+        ? Math.max(...existingVersions.map((v) => v.versionNumber ?? 0)) + 1
+        : 1;
+
+    const newVersion = this.versionRepo.create({
+      article,
+      language: targetVersion.language,
+      title: targetVersion.title,
+      content: targetVersion.content,
+      versionNumber: nextVersionNumber,
+      createdByUserId: userId,
+      isPublished: article.status === 'active',
+    });
+
+    const savedVersion = await this.versionRepo.save(newVersion);
 
     const updatedAt =
       savedVersion.createdAt ??
