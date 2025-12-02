@@ -46,6 +46,9 @@ describe("AdminLayout", () => {
     expect(
       screen.getByRole("link", { name: "Admin Wiki" }),
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Admin Users" }),
+    ).toBeInTheDocument();
   });
 
   it("redirects to login when token is missing", async () => {
