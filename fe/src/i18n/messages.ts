@@ -155,6 +155,16 @@ export const messages: Messages = {
       adminDashboardLinksTitle: "Админ секции",
       adminDashboardGoToWiki: "Към Admin Wiki",
       adminDashboardGoToUsers: "Към Admin Users",
+      legalFooterDisclaimer:
+        "QA4Free е учебна платформа. Вижте страниците за Условия за ползване и Политика за поверителност за повече детайли.",
+      legalFooterPrivacyLink: "Политика за поверителност (Privacy/GDPR)",
+      legalFooterTermsLink: "Условия за ползване",
+      legalPrivacyTitle: "Политика за поверителност и GDPR",
+      legalPrivacyIntro:
+        "Тази страница обобщава какви лични данни обработва QA4Free и за какви цели, в съответствие с GDPR.",
+      legalTermsTitle: "Условия за ползване",
+      legalTermsIntro:
+        "Тази страница описва основните правила за коректно и етично използване на QA4Free като учебна платформа.",
     },
     wiki: {
       articleShareButton: "Сподели",
@@ -303,6 +313,16 @@ export const messages: Messages = {
       adminDashboardLinksTitle: "Admin sections",
       adminDashboardGoToWiki: "Go to Admin Wiki",
       adminDashboardGoToUsers: "Go to Admin Users",
+      legalFooterDisclaimer:
+        "QA4Free is a learning platform. See the Terms of Use and Privacy Policy pages for more details.",
+      legalFooterPrivacyLink: "Privacy Policy (GDPR)",
+      legalFooterTermsLink: "Terms of Use",
+      legalPrivacyTitle: "Privacy Policy and GDPR",
+      legalPrivacyIntro:
+        "This page summarizes what personal data QA4Free processes and for what purposes, in line with GDPR.",
+      legalTermsTitle: "Terms of Use",
+      legalTermsIntro:
+        "This page outlines the key rules for fair and ethical use of QA4Free as a learning platform.",
     },
     wiki: {
       articleShareButton: "Share",
