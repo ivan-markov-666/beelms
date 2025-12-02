@@ -2,6 +2,8 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
+  Post,
   Param,
   Put,
   Query,
@@ -15,6 +17,7 @@ import { AdminGuard } from '../auth/admin.guard';
 import { AdminWikiListItemDto } from './dto/admin-wiki-list-item.dto';
 import { AdminUpdateWikiArticleDto } from './dto/admin-update-wiki-article.dto';
 import { WikiArticleDetailDto } from './dto/wiki-article-detail.dto';
+import { AdminWikiArticleVersionDto } from './dto/admin-wiki-article-version.dto';
 
 @Controller('admin/wiki')
 @UseGuards(JwtAuthGuard, AdminGuard)
@@ -42,5 +45,27 @@ export class AdminWikiController {
   ): Promise<WikiArticleDetailDto> {
     const userId = req.user?.userId ?? null;
     return this.wikiService.adminUpdateArticle(id, dto, userId);
+  }
+
+  @Get('articles/:id/versions')
+  async getArticleVersions(
+    @Param('id') id: string,
+  ): Promise<AdminWikiArticleVersionDto[]> {
+    return this.wikiService.getArticleVersionsForAdmin(id);
+  }
+
+  @Post('articles/:id/versions/:versionId/restore')
+  @HttpCode(200)
+  async restoreArticleVersion(
+    @Param('id') id: string,
+    @Param('versionId') versionId: string,
+    @Req() req: Request & { user?: { userId: string } },
+  ): Promise<WikiArticleDetailDto> {
+    const userId = req.user?.userId ?? null;
+    return this.wikiService.restoreArticleVersionForAdmin(
+      id,
+      versionId,
+      userId,
+    );
   }
 }

@@ -140,6 +140,39 @@ curl "http://localhost:3000/api/wiki/articles?q=Начало&lang=bg"
 curl "http://localhost:3000/api/wiki/articles?q=Начало&lang=bg&page=2&pageSize=10"
 ```
 
+## Admin Wiki API (WS-4/WS-6)
+
+The Admin Wiki endpoints are protected with JWT and require a user with role `admin`. They are used by the Admin Portal to manage wiki content and versions.
+
+The first Admin Wiki edit endpoint implemented in WS-6 is:
+
+- `PUT /api/admin/wiki/articles/{id}` – edits an existing Wiki article and creates a new version for the specified language.
+  - Request body: `{ language: string, title: string, content: string, status: "draft" | "active" | "inactive" }`.
+  - Behaviour:
+    - updates the article status (`draft`, `active`, or `inactive`);
+    - creates a new `WikiArticleVersion` record with the provided `language`, `title` and `content`;
+    - when `status = "active"`, the new version is marked as published.
+  - Responses:
+    - `200 OK` – returns the updated article details (`id`, `slug`, `language`, `title`, `content`, `status`, `updatedAt`);
+    - `400 Bad Request` – validation errors in the request body (missing/invalid fields, unsupported status);
+    - `401 Unauthorized` – missing or invalid JWT access token;
+    - `403 Forbidden` – the user is authenticated but does not have the `admin` role;
+    - `404 Not Found` – article with the given `id` does not exist.
+
+Example request (local dev):
+
+```bash
+curl -X PUT "http://localhost:3000/api/admin/wiki/articles/<ARTICLE_ID>" \
+  -H "Authorization: Bearer <ACCESS_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "language": "bg",
+    "title": "Начало с QA4Free (admin редакция)",
+    "content": "Обновено съдържание от администратор",
+    "status": "active"
+  }'
+```
+
 ## Auth API (WS-2)
 
 The Auth service implements the WS-2 walking skeleton for registration and login. The main public endpoints are:

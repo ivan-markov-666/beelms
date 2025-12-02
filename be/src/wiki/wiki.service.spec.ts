@@ -10,7 +10,12 @@ import { WikiArticleVersion } from './wiki-article-version.entity';
 describe('WikiService', () => {
   let service: WikiService;
   let articleRepo: { find: jest.Mock; findOne: jest.Mock; save: jest.Mock };
-  let versionRepo: { find: jest.Mock; save: jest.Mock; create: jest.Mock };
+  let versionRepo: {
+    find: jest.Mock;
+    findOne: jest.Mock;
+    save: jest.Mock;
+    create: jest.Mock;
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -28,6 +33,7 @@ describe('WikiService', () => {
           provide: getRepositoryToken(WikiArticleVersion),
           useValue: {
             find: jest.fn(),
+            findOne: jest.fn(),
             save: jest.fn(),
             create: jest.fn((entity) => entity),
           },
@@ -603,6 +609,145 @@ describe('WikiService', () => {
         .calls[0][0] as WikiArticleVersion;
       expect(savedArg.versionNumber).toBe(1);
       expect(savedArg.isPublished).toBe(false);
+    });
+  });
+
+  describe('getArticleVersionsForAdmin', () => {
+    it('returns versions list for existing article', async () => {
+      (articleRepo.findOne as jest.Mock).mockResolvedValue({
+        id: 'article-1',
+      } as WikiArticle);
+
+      const now = new Date('2023-01-01T00:00:00Z');
+
+      (versionRepo.find as jest.Mock).mockResolvedValue([
+        {
+          id: 'v1',
+          versionNumber: 1,
+          language: 'bg',
+          title: 'Title 1',
+          createdAt: now,
+          createdByUserId: 'admin-id',
+        } as unknown as WikiArticleVersion,
+      ]);
+
+      const result = await service.getArticleVersionsForAdmin('article-1');
+
+      expect(articleRepo.findOne).toHaveBeenCalledTimes(1);
+      expect(versionRepo.find).toHaveBeenCalledTimes(1);
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual({
+        id: 'v1',
+        version: 1,
+        language: 'bg',
+        title: 'Title 1',
+        createdAt: now.toISOString(),
+        createdBy: 'admin-id',
+      });
+    });
+
+    it('throws NotFoundException when article does not exist', async () => {
+      (articleRepo.findOne as jest.Mock).mockResolvedValue(undefined);
+
+      await expect(
+        service.getArticleVersionsForAdmin('missing-id'),
+      ).rejects.toBeInstanceOf(NotFoundException);
+    });
+  });
+
+  describe('restoreArticleVersionForAdmin', () => {
+    it('creates a new version based on target version and returns updated article detail', async () => {
+      const now = new Date('2023-01-01T00:00:00Z');
+
+      (articleRepo.findOne as jest.Mock).mockResolvedValue({
+        id: 'article-1',
+        slug: 'getting-started',
+        status: 'active',
+        createdAt: now,
+        updatedAt: now,
+      } as unknown as WikiArticle);
+
+      (versionRepo.findOne as jest.Mock).mockResolvedValue({
+        id: 'target-version',
+        language: 'bg',
+        title: 'Rollback title',
+        content: 'Rollback content',
+      } as unknown as WikiArticleVersion);
+
+      (versionRepo.find as jest.Mock).mockResolvedValue([
+        { versionNumber: 1 } as WikiArticleVersion,
+      ]);
+
+      const savedCreatedAt = new Date('2023-01-02T00:00:00Z');
+
+      (versionRepo.save as jest.Mock).mockImplementation(
+        async (entity: Partial<WikiArticleVersion>) => ({
+          id: 'new-version-id',
+          ...entity,
+          createdAt: savedCreatedAt,
+        }),
+      );
+
+      const result = await service.restoreArticleVersionForAdmin(
+        'article-1',
+        'target-version',
+        'admin-id',
+      );
+
+      expect(articleRepo.findOne).toHaveBeenCalledTimes(1);
+      expect(versionRepo.findOne).toHaveBeenCalledTimes(1);
+      expect(versionRepo.find).toHaveBeenCalledTimes(1);
+      expect(versionRepo.save).toHaveBeenCalledTimes(1);
+
+      const savedArg = (versionRepo.save as jest.Mock).mock
+        .calls[0][0] as WikiArticleVersion;
+      expect(savedArg.versionNumber).toBe(2);
+      expect(savedArg.language).toBe('bg');
+      expect(savedArg.title).toBe('Rollback title');
+      expect(savedArg.content).toBe('Rollback content');
+      expect(savedArg.createdByUserId).toBe('admin-id');
+      expect(savedArg.isPublished).toBe(true);
+
+      expect(result.slug).toBe('getting-started');
+      expect(result.language).toBe('bg');
+      expect(result.title).toBe('Rollback title');
+      expect(result.content).toBe('Rollback content');
+      expect(result.status).toBe('active');
+      expect(result.updatedAt).toBe(savedCreatedAt.toISOString());
+    });
+
+    it('throws NotFoundException when article does not exist', async () => {
+      (articleRepo.findOne as jest.Mock).mockResolvedValue(undefined);
+
+      await expect(
+        service.restoreArticleVersionForAdmin(
+          'missing-article',
+          'version-id',
+          'admin-id',
+        ),
+      ).rejects.toBeInstanceOf(NotFoundException);
+    });
+
+    it('throws NotFoundException when version does not exist', async () => {
+      const now = new Date('2023-01-01T00:00:00Z');
+
+      (articleRepo.findOne as jest.Mock).mockResolvedValue({
+        id: 'article-1',
+        slug: 'getting-started',
+        status: 'active',
+        createdAt: now,
+        updatedAt: now,
+      } as unknown as WikiArticle);
+
+      (versionRepo.findOne as jest.Mock).mockResolvedValue(undefined);
+
+      await expect(
+        service.restoreArticleVersionForAdmin(
+          'article-1',
+          'missing-version',
+          'admin-id',
+        ),
+      ).rejects.toBeInstanceOf(NotFoundException);
     });
   });
 });
