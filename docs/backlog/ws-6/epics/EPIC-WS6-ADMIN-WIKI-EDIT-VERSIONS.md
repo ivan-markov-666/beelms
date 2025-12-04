@@ -1,6 +1,6 @@
 # EPIC-WS6-ADMIN-WIKI-EDIT-VERSIONS – Admin Wiki редакция и версии
 
-Status: Planned
+Status: Done
 
 ## Summary
 Този epic дефинира WS-6 walking skeleton за **Admin управление на Wiki съдържание**: минимален, но реален vertical, в който администратор може да редактира Wiki статии и да управлява версиите им (преглед на история и rollback към предишна версия), стъпвайки върху вече наличните WS-1 Wiki, WS-2 Auth/Profile и WS-4 Admin Wiki read-only vertical-и.
@@ -39,10 +39,10 @@ Out of scope за този epic (за бъдещи WS/epics):
 - WS-4 epic – `docs/backlog/ws-4/epics/EPIC-WS4-ADMIN-WIKI.md` (Admin Wiki read-only skeleton).
 
 ## Child user stories
-- [ ] STORY-WS6-BE-ADMIN-WIKI-EDIT-MINIMAL – Минимален Admin Wiki edit endpoint с версииране.
-- [ ] STORY-WS6-BE-ADMIN-WIKI-VERSIONS-LIST-ROLLBACK – Списък с версии и rollback ендпойнт.
-- [ ] STORY-WS6-FE-ADMIN-WIKI-EDIT-PAGE – FE екран за редакция на статия в Admin зоната.
-- [ ] STORY-WS6-FE-ADMIN-WIKI-VERSIONS-UI – FE UI за история на версиите и rollback действие.
+- [x] STORY-WS6-BE-ADMIN-WIKI-EDIT-MINIMAL – Минимален Admin Wiki edit endpoint с версииране.
+- [x] STORY-WS6-BE-ADMIN-WIKI-VERSIONS-LIST-ROLLBACK – Списък с версии и rollback ендпойнт.
+- [x] STORY-WS6-FE-ADMIN-WIKI-EDIT-PAGE – FE екран за редакция на статия в Admin зоната.
+- [x] STORY-WS6-FE-ADMIN-WIKI-VERSIONS-UI – FE UI за история на версиите и rollback действие.
 
 ## Risks / Assumptions
 - **Risks:**

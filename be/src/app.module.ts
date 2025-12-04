@@ -7,6 +7,7 @@ import { WikiArticleVersion } from './wiki/wiki-article-version.entity';
 import { WikiModule } from './wiki/wiki.module';
 import { AuthModule } from './auth/auth.module';
 import { User } from './auth/user.entity';
+import { TrainingModule } from './training/training.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { User } from './auth/user.entity';
     }),
     WikiModule,
     AuthModule,
+    TrainingModule,
   ],
   controllers: [AppController],
   providers: [AppService],
