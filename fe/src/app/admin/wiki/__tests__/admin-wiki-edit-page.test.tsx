@@ -352,4 +352,119 @@ describe("AdminWikiEditPage", () => {
 
     confirmSpy.mockRestore();
   });
+
+  it("shows error message when versions list fails to load", async () => {
+    window.localStorage.setItem("qa4free_access_token", "test-token");
+
+    const initialArticle = makeArticle();
+
+    const fetchMock = jest
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => initialArticle,
+      } as unknown as Response)
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        json: async () => ({}),
+      } as unknown as Response);
+
+    global.fetch = fetchMock as unknown as typeof fetch;
+
+    render(<AdminWikiEditPage />);
+
+    expect(
+      await screen.findByText("Възникна грешка при зареждане на версиите."),
+    ).toBeInTheDocument();
+  });
+
+  it("shows not-found error message when restore returns 404", async () => {
+    window.localStorage.setItem("qa4free_access_token", "test-token");
+
+    const initialArticle = makeArticle();
+    const versions = [makeVersion()];
+
+    const fetchMock = jest
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => initialArticle,
+      } as unknown as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => versions,
+      } as unknown as Response)
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 404,
+        json: async () => ({}),
+      } as unknown as Response);
+
+    global.fetch = fetchMock as unknown as typeof fetch;
+
+    const confirmSpy = jest
+      .spyOn(window, "confirm")
+      .mockImplementation(() => true);
+
+    render(<AdminWikiEditPage />);
+
+    const rollbackButton = await screen.findByRole("button", { name: "Върни" });
+    rollbackButton.click();
+
+    expect(
+      await screen.findByText(
+        "Избраната версия или статия не беше намерена.",
+      ),
+    ).toBeInTheDocument();
+
+    confirmSpy.mockRestore();
+  });
+
+  it("shows validation error message when restore returns 400", async () => {
+    window.localStorage.setItem("qa4free_access_token", "test-token");
+
+    const initialArticle = makeArticle();
+    const versions = [makeVersion()];
+
+    const fetchMock = jest
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => initialArticle,
+      } as unknown as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => versions,
+      } as unknown as Response)
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 400,
+        json: async () => ({}),
+      } as unknown as Response);
+
+    global.fetch = fetchMock as unknown as typeof fetch;
+
+    const confirmSpy = jest
+      .spyOn(window, "confirm")
+      .mockImplementation(() => true);
+
+    render(<AdminWikiEditPage />);
+
+    const rollbackButton = await screen.findByRole("button", { name: "Върни" });
+    rollbackButton.click();
+
+    expect(
+      await screen.findByText(
+        "Невалидна заявка за връщане към версия. Моля, опитайте отново.",
+      ),
+    ).toBeInTheDocument();
+
+    confirmSpy.mockRestore();
+  });
 });
