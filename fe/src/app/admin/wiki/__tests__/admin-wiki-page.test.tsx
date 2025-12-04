@@ -42,6 +42,12 @@ describe("AdminWikiPage", () => {
     expect(link).not.toBeNull();
     expect(link).toHaveAttribute("href", "/wiki/getting-started");
     expect(link).toHaveAttribute("target", "_blank");
+
+    const editLink = screen.getByRole("link", { name: "Редактирай" });
+    expect(editLink).toHaveAttribute(
+      "href",
+      "/admin/wiki/getting-started/edit",
+    );
   });
 
   it("shows empty state when there are no articles", async () => {

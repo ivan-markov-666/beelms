@@ -162,6 +162,7 @@ export default function AdminWikiPage() {
                 <th className="px-3 py-2 align-middle">Title</th>
                 <th className="px-3 py-2 align-middle">Status</th>
                 <th className="px-3 py-2 align-middle">Updated</th>
+                <th className="px-3 py-2 align-middle">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -195,6 +196,14 @@ export default function AdminWikiPage() {
                     </td>
                     <td className="px-3 py-2 align-middle text-zinc-700">
                       {formatDateTime(article.updatedAt)}
+                    </td>
+                    <td className="px-3 py-2 align-middle text-right">
+                      <Link
+                        href={`/admin/wiki/${article.slug}/edit`}
+                        className="text-sm font-medium text-emerald-700 hover:text-emerald-900 hover:underline"
+                      >
+                        Редактирай
+                      </Link>
                     </td>
                   </tr>
                 );
