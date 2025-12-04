@@ -220,3 +220,25 @@ The `/admin/wiki` page:
 - visually distinguishes article statuses (e.g. Active, Draft, Archived) via colored badges;
 - links each article slug to the public `/wiki/[slug]` page (opened in a new tab);
 - shows a clear error message when the Admin Wiki list cannot be loaded.
+
+## WS-6 Admin Wiki edit page
+
+For WS-6, the Admin Wiki area adds a minimal but real edit UI for Wiki articles:
+
+- the `/admin/wiki` list includes a **"Редактирай"** link for each article, which points to `/admin/wiki/[slug]/edit`;
+- the edit page is available only to authenticated admin users (guarded by the same Admin layout and `qa4free_access_token` logic as the rest of `/admin`);
+- on the edit page, admins can change:
+  - `language` (dropdown: `bg` / `en`);
+  - `title` (text input);
+  - `content` (textarea);
+  - `status` (dropdown: `draft` / `active` / `inactive`);
+- on first load, the page fetches the current article details from the public Wiki API (`GET /api/wiki/articles/{slug}`) with `cache: "no-store"`;
+- on save, it calls the protected Admin Wiki endpoint `PUT /api/admin/wiki/articles/{id}` with the updated values and:
+  - shows a success message and updates the form with the latest data on `200 OK`;
+  - shows a specific message for `400` validation errors;
+  - shows a generic error message for network/server errors.
+
+Useful manual test URLs (assuming FE on `http://localhost:3001` and BE on `http://localhost:3000`):
+
+- `http://localhost:3001/admin/wiki` – Admin Wiki list (requires admin user);
+- `http://localhost:3001/admin/wiki/getting-started/edit` – edit page for the seeded "getting-started" article.
