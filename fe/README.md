@@ -238,6 +238,23 @@ For WS-6, the Admin Wiki area adds a minimal but real edit UI for Wiki articles:
   - shows a specific message for `400` validation errors;
   - shows a generic error message for network/server errors.
 
+### Admin Wiki versions UI
+
+On the same `/admin/wiki/[slug]/edit` page, WS-6 also provides a minimal versions UI:
+
+- below the edit form there is a **"Версии на статията"** table backed by `GET /api/admin/wiki/articles/{id}/versions` (using the stored `qa4free_access_token`);
+- each row shows:
+  - `version` (e.g. `v1`, `v2`);
+  - `language`;
+  - `title`;
+  - `createdAt` (formatted as local date/time);
+  - `createdBy` (or `—` when missing);
+- for every version there is a **"Върни"** action which:
+  - asks for confirmation with a simple `window.confirm` dialog;
+  - on confirm calls `POST /api/admin/wiki/articles/{id}/versions/{versionId}/restore` with the admin JWT;
+  - on success shows "Статията беше върната към избраната версия.", updates the edit form with the restored article and refreshes the versions list;
+  - on 400/404/500 shows a clear error message without да оставя страницата в неконсистентно състояние.
+
 Useful manual test URLs (assuming FE on `http://localhost:3001` and BE on `http://localhost:3000`):
 
 - `http://localhost:3001/admin/wiki` – Admin Wiki list (requires admin user);
