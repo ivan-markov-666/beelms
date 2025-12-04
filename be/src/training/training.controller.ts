@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Post } from '@nestjs/common';
 import { TrainingService } from './training.service';
 
 @Controller('training')
@@ -11,6 +11,7 @@ export class TrainingController {
   }
 
   @Post('echo')
+  @HttpCode(200)
   echo(@Body() body: unknown) {
     return this.trainingService.echo(body);
   }

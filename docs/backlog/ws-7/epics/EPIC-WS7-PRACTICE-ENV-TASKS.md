@@ -42,7 +42,7 @@ Out of scope за този epic (за бъдещи WS/epics):
 
 ## Child user stories
 - [x] STORY-WS7-BE-TRAINING-API-MINIMAL – Минимален Training API (ping/echo) за API упражнения.
-- [ ] STORY-WS7-BE-TASKS-MINIMAL – Минимални Tasks endpoints за зареждане и submit на задача.
+- [x] STORY-WS7-BE-TASKS-MINIMAL – Минимални Tasks endpoints за зареждане и submit на задача.
 - [ ] STORY-WS7-FE-PRACTICE-UI-PAGE – Practice UI страница за manual/UI automation упражнения.
 - [ ] STORY-WS7-FE-PRACTICE-API-DEMO-PAGE – Practice API demo страница, която стъпва върху Training API.
 

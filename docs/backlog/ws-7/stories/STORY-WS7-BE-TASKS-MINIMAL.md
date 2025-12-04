@@ -1,6 +1,6 @@
 # STORY-WS7-BE-TASKS-MINIMAL – Минимални Tasks endpoints (load + submit)
 
-Status: Planned
+Status: Done
 
 ## Summary
 Като **потребител/курсист** искам да мога **да зареждам примерни практичeски задачи и да подавам решенията си към тях**, за да получавам базов автоматичен feedback за това дали решението ми е коректно.
@@ -34,13 +34,13 @@ Status: Planned
 - Endpoint-ите са описани в `openapi.yaml` с коректни request/response схеми.
 
 ## Dev Tasks
-- [ ] Дизайн на минимален "Tasks" модул (entities/DTOs/service/controller) за WS-7.
-- [ ] Имплементация на `GET /api/tasks/{id}` за зареждане на дефиниция на задача (от in-memory колекция, seed таблица или конфигурационни файлове).
-- [ ] Имплементация на `POST /api/tasks/{id}/submit` с опростен evaluation pipeline (напр. string compare за отговор).
-- [ ] Добавяне на 1–2 примерни задачи в seed/fixture данни.
-- [ ] Обновяване на `openapi.yaml` с Tasks endpoints и payload-и.
-- [ ] Unit тестове за evaluation логиката и service слоя (успешно/грешно решение, липсваща задача).
-- [ ] E2E тестове за Tasks endpoints (load + submit + basic error cases).
+- [x] Дизайн на минимален "Tasks" модул (entities/DTOs/service/controller) за WS-7.
+- [x] Имплементация на `GET /api/tasks/{id}` за зареждане на дефиниция на задача (от in-memory колекция, seed таблица или конфигурационни файлове).
+- [x] Имплементация на `POST /api/tasks/{id}/submit` с опростен evaluation pipeline (напр. string compare за отговор).
+- [x] Добавяне на 1–2 примерни задачи в seed/fixture данни.
+- [x] Обновяване на `openapi.yaml` с Tasks endpoints и payload-и.
+- [x] Unit тестове за evaluation логиката и service слоя (успешно/грешно решение, липсваща задача).
+- [x] E2E тестове за Tasks endpoints (load + submit + basic error cases).
 
 ## Notes
 - За WS-7 **не е необходимо** сложен scoring/leaderboard – целта е да има реален, но опростен flow за зареждане и оценяване на задача.
