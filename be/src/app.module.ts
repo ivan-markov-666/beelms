@@ -8,6 +8,7 @@ import { WikiModule } from './wiki/wiki.module';
 import { AuthModule } from './auth/auth.module';
 import { User } from './auth/user.entity';
 import { TrainingModule } from './training/training.module';
+import { TasksModule } from './tasks/tasks.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { TrainingModule } from './training/training.module';
     WikiModule,
     AuthModule,
     TrainingModule,
+    TasksModule,
   ],
   controllers: [AppController],
   providers: [AppService],
