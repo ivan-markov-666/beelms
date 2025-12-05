@@ -369,7 +369,7 @@ export default function ProfilePage() {
         }
       }
 
-      router.replace("/auth/login");
+      router.replace("/auth/account-deleted");
     } catch {
       setDeleteError("Възникна грешка при връзката със сървъра.");
     } finally {
@@ -411,13 +411,13 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-8 bg-zinc-50">
+    <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-gray-50 px-4 py-12">
       <main className="w-full max-w-4xl space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-semibold text-zinc-900">Моят профил</h1>
+            <h1 className="mb-2 text-4xl font-bold text-zinc-900">Моят профил</h1>
             <p className="text-sm text-zinc-600">
-              Управлявайте вашия акаунт и данни.
+              Управлявайте вашия акаунт и данни
             </p>
           </div>
           <button
@@ -427,11 +427,27 @@ export default function ProfilePage() {
           >
             Изход
           </button>
-        </div>
-
-        <section className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
-          <h2 className="mb-4 text-lg font-semibold text-zinc-900">
-            Профилна информация
+        </div>        <section className="rounded-lg border border-gray-200 bg-white p-8 shadow-sm">
+          <h2 className="mb-6 flex items-center text-xl font-bold text-gray-900">
+            <span
+              aria-hidden="true"
+              className="mr-2 inline-flex h-6 w-6 items-center justify-center text-green-600"
+            >
+              <svg
+                className="h-6 w-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                />
+              </svg>
+            </span>
+            <span>Профилна информация</span>
           </h2>
 
           <div className="space-y-4">
@@ -466,7 +482,7 @@ export default function ProfilePage() {
                 </div>
                 <button
                   type="button"
-                  className="text-xs font-medium text-emerald-700 hover:text-emerald-800"
+                  className="text-xs font-medium text-green-700 hover:text-green-800"
                   onClick={() => {
                     setEmailInput(profile.email);
                     setEmailEditOpen((open) => !open);
@@ -503,7 +519,7 @@ export default function ProfilePage() {
                     </p>
                   )}
                   {emailSuccess && (
-                    <p className="text-xs text-emerald-600" role="status">
+                    <p className="text-xs text-green-600" role="status">
                       {emailSuccess}
                     </p>
                   )}
@@ -523,7 +539,7 @@ export default function ProfilePage() {
                   <div className="flex items-center gap-2 pt-1">
                     <button
                       type="submit"
-                      className="rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-emerald-700 disabled:opacity-70"
+                      className="rounded-md bg-green-600 px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-green-700 disabled:opacity-70"
                       disabled={emailSubmitting}
                     >
                       Запази
@@ -627,7 +643,7 @@ export default function ProfilePage() {
                     </p>
                   )}
                   {passwordSuccess && (
-                    <p className="text-xs text-emerald-600" role="status">
+                    <p className="text-xs text-green-600" role="status">
                       {passwordSuccess}
                     </p>
                   )}
@@ -669,20 +685,59 @@ export default function ProfilePage() {
             </div>
           </div>
         </section>
-
-        <section className="rounded-lg border border-blue-200 bg-white p-6 shadow-sm">
-          <h2 className="mb-3 text-lg font-semibold text-zinc-900">
-            Експорт на данни (GDPR)
+        <section className="rounded-lg border border-gray-200 bg-white p-8 shadow-sm">
+          <h2 className="mb-4 flex items-center text-xl font-bold text-gray-900">
+            <span
+              aria-hidden="true"
+              className="mr-2 inline-flex h-6 w-6 items-center justify-center text-blue-600"
+            >
+              <svg
+                className="h-6 w-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                />
+              </svg>
+            </span>
+            <span>Експорт на данни (GDPR)</span>
           </h2>
-          <p className="mb-3 text-xs text-zinc-600">
-            Можете да заявите експорт на вашите лични данни, съхранявани в системата.
-          </p>
+          <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-4">
+            <p className="text-sm text-blue-900">
+              Можете да изтеглите всички ваши данни, съхранявани в системата.
+              Експортът включва профилна информация, история на действията и
+              други свързани данни.
+            </p>
+          </div>
+          <div className="mb-4 rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-xs text-gray-600">
+            CAPTCHA / reCAPTCHA (placeholder за защита от ботове при заявка
+            за експорт на лични данни)
+          </div>
           <button
             type="button"
             onClick={handleExport}
-            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 disabled:opacity-70"
+            className="flex items-center rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:opacity-70"
             disabled={exportSubmitting}
           >
+            <svg
+              className="mr-2 h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+              />
+            </svg>
             Експортирай моите данни
           </button>
           {exportError && (
@@ -691,7 +746,7 @@ export default function ProfilePage() {
             </p>
           )}
           {exportSuccess && (
-            <p className="mt-2 text-xs text-emerald-600" role="status">
+            <p className="mt-2 text-xs text-green-600" role="status">
               {exportSuccess}
             </p>
           )}
@@ -718,21 +773,61 @@ export default function ProfilePage() {
           )}
         </section>
 
-        <section className="rounded-lg border border-red-200 bg-white p-6 shadow-sm">
-          <h2 className="mb-3 text-lg font-semibold text-zinc-900">
-            Закриване на акаунта (изтриване)
+        <section className="rounded-lg border border-red-200 bg-white p-8 shadow-sm">
+          <h2 className="mb-4 flex items-center text-xl font-bold text-gray-900">
+            <span
+              aria-hidden="true"
+              className="mr-2 inline-flex h-6 w-6 items-center justify-center text-red-600"
+            >
+              <svg
+                className="h-6 w-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 9v2m0 4h.01M5.062 19h13.876A2 2 0 0021 16.34L13.732 4a2 2 0 00-3.464 0L3 16.34A2 2 0 005.062 19z"
+                />
+              </svg>
+            </span>
+            <span>Закриване на акаунта (изтриване)</span>
           </h2>
-          <p className="mb-3 text-xs text-red-700">
-            Това действие е окончателно и не може да бъде отменено.
-          </p>
+          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-4">
+            <p className="mb-2 text-sm font-medium text-red-900">
+              ⚠️ Внимание: Това действие е необратимо!
+            </p>
+            <p className="text-sm text-red-800">
+              При закриване/изтриване на акаунта личните ви данни ще бъдат
+              премахнати от системата, съгласно нашите правила за защита на
+              данните и GDPR. Това действие е окончателно и не може да бъде
+              отменено.
+            </p>
+          </div>
           <button
             type="button"
             onClick={() => {
               setDeleteStep1Open(true);
               setDeleteError(null);
             }}
-            className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700"
+            className="flex items-center rounded-lg bg-red-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-red-700"
           >
+            <svg
+              className="mr-2 h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+              />
+            </svg>
             Изтрий акаунта завинаги
           </button>
           {deleteError && (

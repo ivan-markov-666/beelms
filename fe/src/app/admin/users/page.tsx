@@ -172,7 +172,7 @@ export default function AdminUsersPage() {
           />
           <button
             type="submit"
-            className="rounded-md bg-emerald-600 px-3 py-1 text-sm font-medium text-white hover:bg-emerald-700"
+            className="rounded-md bg-green-600 px-3 py-1 text-sm font-medium text-white hover:bg-green-700"
           >
             {t(lang, "common", "adminUsersSearchButton")}
           </button>
@@ -246,7 +246,7 @@ export default function AdminUsersPage() {
                           }
                           className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${
                             user.active
-                              ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                              ? "border-green-200 bg-green-50 text-green-700"
                               : "border-zinc-200 bg-zinc-50 text-zinc-600"
                           } ${isTogglingThis ? "opacity-70" : ""}`}
                         >

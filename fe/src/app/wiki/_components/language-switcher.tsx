@@ -43,7 +43,7 @@ export function LanguageSwitcher() {
         onChange={(event) =>
           handleChange(event.target.value as SupportedLang)
         }
-        className="rounded-md border border-zinc-300 bg-zinc-50 px-2 py-1 text-xs font-medium text-zinc-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:focus:ring-zinc-500"
+        className="rounded-md border border-gray-300 bg-white px-2 py-1 text-xs font-medium text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
       >
         {SUPPORTED_LANGS.map((lang) => (
           <option key={lang} value={lang}>

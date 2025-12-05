@@ -11,6 +11,7 @@ type MetricsOverview = {
   totalUsers: number;
   totalArticles: number;
   topArticles: Array<{ slug: string }>;
+  usersChangePercentSinceLastMonth: number | null;
 };
 
 describe('Admin Metrics endpoint (e2e)', () => {
@@ -65,6 +66,10 @@ describe('Admin Metrics endpoint (e2e)', () => {
     expect(body.totalUsers).toBeGreaterThanOrEqual(1);
     expect(typeof body.totalArticles).toBe('number');
     expect(Array.isArray(body.topArticles)).toBe(true);
+    expect(
+      body.usersChangePercentSinceLastMonth === null ||
+        typeof body.usersChangePercentSinceLastMonth === 'number',
+    ).toBe(true);
   });
 
   it('GET /api/admin/metrics/overview returns 401 without token', async () => {

@@ -105,116 +105,161 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-8">
-      <main className="w-full max-w-md rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
-        <h1 className="mb-2 text-2xl font-semibold text-zinc-900">
+    <div className="flex min-h-[calc(100vh-5rem)] items-start justify-center px-4 py-12">
+      <main className="w-full max-w-md">
+        <h1 className="mb-2 text-3xl font-bold text-gray-900">
           {t(lang, "auth", "resetTitle")}
         </h1>
-        <p className="mb-6 text-sm text-zinc-600">
+        <p className="mb-6 text-sm text-gray-600">
           {t(lang, "auth", "resetSubtitle")}
         </p>
 
-        <form className="space-y-4" onSubmit={handleSubmit} noValidate>
-          <div className="space-y-1">
-            <label
-              htmlFor="newPassword"
-              className="block text-sm font-medium text-zinc-800"
-            >
-              {t(lang, "auth", "resetNewPasswordLabel")}
-            </label>
-            <input
-              id="newPassword"
-              type="password"
-              autoComplete="new-password"
-              className="block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 shadow-sm focus:border-zinc-800 focus:outline-none focus:ring-1 focus:ring-zinc-800"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              disabled={submitting || completed}
-            />
-            {fieldErrors.newPassword && (
-              <p className="text-xs text-red-600">{fieldErrors.newPassword}</p>
-            )}
-          </div>
+        <div className="mb-6 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800">
+          {t(lang, "auth", "resetInfoMessage")}
+        </div>
 
-          <div className="space-y-1">
-            <label
-              htmlFor="confirmNewPassword"
-              className="block text-sm font-medium text-zinc-800"
-            >
-              {t(lang, "auth", "resetConfirmNewPasswordLabel")}
-            </label>
-            <input
-              id="confirmNewPassword"
-              type="password"
-              autoComplete="new-password"
-              className="block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 shadow-sm focus:border-zinc-800 focus:outline-none focus:ring-1 focus:ring-zinc-800"
-              value={confirmNewPassword}
-              onChange={(e) => setConfirmNewPassword(e.target.value)}
-              disabled={submitting}
-            />
-            {fieldErrors.confirmNewPassword && (
-              <p className="text-xs text-red-600">
-                {fieldErrors.confirmNewPassword}
+        <section className="rounded-lg border border-gray-200 bg-white p-8 shadow-sm">
+          <form className="space-y-6" onSubmit={handleSubmit} noValidate>
+            <div className="space-y-1">
+              <label
+                htmlFor="newPassword"
+                className="block text-sm font-medium text-gray-800"
+              >
+                {t(lang, "auth", "resetNewPasswordLabel")} {" "}
+                <span className="text-red-500">*</span>
+              </label>
+              <input
+                id="newPassword"
+                type="password"
+                autoComplete="new-password"
+                placeholder="********"
+                className="block w-full rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-green-600 focus:outline-none focus:ring-1 focus:ring-green-600"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                disabled={submitting || completed}
+              />
+              {fieldErrors.newPassword && (
+                <p className="text-xs text-red-600">{fieldErrors.newPassword}</p>
+              )}
+              <p className="mt-1 text-xs text-gray-500">
+                {t(
+                  lang,
+                  "auth",
+                  "resetPasswordRequirementsItemMinLength",
+                )}
               </p>
-            )}
-          </div>
+            </div>
 
-          {formError && (
-            <div className="space-y-2" aria-live="assertive">
-              <p className="text-sm text-red-600" role="alert">
-                {formError}
-              </p>
-              {formError ===
-                t(lang, "auth", "resetErrorInvalidOrExpiredLink") && (
-                <button
-                  type="button"
-                  className="text-xs text-zinc-900 underline underline-offset-2 hover:text-zinc-700"
-                  onClick={() => router.push("/auth/forgot-password")}
-                  disabled={submitting || completed}
-                >
-                  {t(lang, "auth", "resetGoToForgotCta")}
-                </button>
+            <div className="space-y-1">
+              <label
+                htmlFor="confirmNewPassword"
+                className="block text-sm font-medium text-gray-800"
+              >
+                {t(lang, "auth", "resetConfirmNewPasswordLabel")} {" "}
+                <span className="text-red-500">*</span>
+              </label>
+              <input
+                id="confirmNewPassword"
+                type="password"
+                autoComplete="new-password"
+                placeholder="********"
+                className="block w-full rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-green-600 focus:outline-none focus:ring-1 focus:ring-green-600"
+                value={confirmNewPassword}
+                onChange={(e) => setConfirmNewPassword(e.target.value)}
+                disabled={submitting}
+              />
+              {fieldErrors.confirmNewPassword && (
+                <p className="text-xs text-red-600">
+                  {fieldErrors.confirmNewPassword}
+                </p>
               )}
             </div>
-          )}
-          {formSuccess && (
-            <div className="space-y-2" aria-live="polite">
-              <p className="text-sm text-emerald-600" role="status">
-                {formSuccess}
+
+            <div className="rounded-lg bg-gray-50 p-4">
+              <p className="mb-2 text-xs font-medium text-gray-700">
+                {t(lang, "auth", "resetPasswordRequirementsTitle")}
               </p>
-              <button
-                type="button"
-                className="text-xs text-zinc-900 underline underline-offset-2 hover:text-zinc-700"
-                onClick={() => router.push("/auth/login")}
-                disabled={submitting}
-              >
-                {t(lang, "auth", "resetSuccessLoginCta")}
-              </button>
+              <ul className="space-y-1 text-xs text-gray-600">
+                <li className="flex items-center gap-2">
+                  <span aria-hidden="true" className="text-green-500">
+                    ●
+                  </span>
+                  {t(
+                    lang,
+                    "auth",
+                    "resetPasswordRequirementsItemMinLength",
+                  )}
+                </li>
+                <li className="flex items-center gap-2">
+                  <span aria-hidden="true" className="text-emerald-500">
+                    ●
+                  </span>
+                  {t(
+                    lang,
+                    "auth",
+                    "resetPasswordRequirementsItemRecommendation",
+                  )}
+                </li>
+              </ul>
             </div>
-          )}
 
-          <button
-            type="submit"
-            className="flex w-full items-center justify-center rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-70"
-            disabled={submitting || completed}
-          >
-            {submitting
-              ? t(lang, "auth", "resetSubmitLoading")
-              : t(lang, "auth", "resetSubmit")}
-          </button>
+            {formError && (
+              <div className="space-y-2" aria-live="assertive">
+                <p className="text-sm text-red-600" role="alert">
+                  {formError}
+                </p>
+                {formError ===
+                  t(lang, "auth", "resetErrorInvalidOrExpiredLink") && (
+                  <button
+                    type="button"
+                    className="text-xs text-gray-900 underline underline-offset-2 hover:text-gray-700"
+                    onClick={() => router.push("/auth/forgot-password")}
+                    disabled={submitting || completed}
+                  >
+                    {t(lang, "auth", "resetGoToForgotCta")}
+                  </button>
+                )}
+              </div>
+            )}
+            {formSuccess && (
+              <div className="space-y-2" aria-live="polite">
+                <p className="text-sm text-green-600" role="status">
+                  {formSuccess}
+                </p>
+                <button
+                  type="button"
+                  className="text-xs text-gray-900 underline underline-offset-2 hover:text-gray-700"
+                  onClick={() => router.push("/auth/login")}
+                  disabled={submitting}
+                >
+                  {t(lang, "auth", "resetSuccessLoginCta")}
+                </button>
+              </div>
+            )}
 
-          <p className="text-xs text-zinc-600">
-            {t(lang, "auth", "resetHasPassword")} {" "}
             <button
-              type="button"
-              className="text-zinc-900 underline underline-offset-2 hover:text-zinc-700"
-              onClick={() => router.push("/auth/login")}
-              disabled={submitting}
+              type="submit"
+              className="w-full rounded-lg bg-green-600 py-3 text-sm font-semibold text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-70"
+              disabled={submitting || completed}
             >
-              {t(lang, "auth", "resetBackToLogin")}
+              {submitting
+                ? t(lang, "auth", "resetSubmitLoading")
+                : t(lang, "auth", "resetSubmit")}
             </button>
-          </p>
-        </form>
+          </form>
+        </section>
+
+        <div className="mt-6 flex items-center justify-center text-xs text-green-700">
+          <button
+            type="button"
+            className="inline-flex cursor-pointer items-center gap-1 hover:text-green-800"
+            onClick={() => router.push("/auth/login")}
+            disabled={submitting}
+          >
+            <span aria-hidden="true">←</span>
+            <span>{t(lang, "auth", "resetBackToLogin")}</span>
+          </button>
+        </div>
       </main>
     </div>
   );

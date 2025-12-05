@@ -34,20 +34,16 @@ describe("ForgotPasswordPage", () => {
 
     render(<ForgotPasswordPage />);
 
-    const emailInput = await screen.findByLabelText("Имейл");
+    const emailInput = await screen.findByLabelText("Email адрес");
     const submitButton = await screen.findByRole("button", {
-      name: "Изпрати линк за ресет",
+      name: "Изпрати линк за смяна",
     });
 
     fireEvent.change(emailInput, { target: { value: "invalid-email" } });
-    // не маркираме CAPTCHA
     fireEvent.click(submitButton);
 
     expect(
       await screen.findByText("Моля, въведете валиден имейл адрес."),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText("Моля, потвърдете, че не сте робот."),
     ).toBeInTheDocument();
 
     expect(global.fetch).not.toHaveBeenCalled();
@@ -58,16 +54,12 @@ describe("ForgotPasswordPage", () => {
 
     render(<ForgotPasswordPage />);
 
-    const emailInput = await screen.findByLabelText("Имейл");
-    const captchaCheckbox = await screen.findByLabelText(
-      /Не съм робот \(placeholder за CAPTCHA интеграция\)/i,
-    );
+    const emailInput = await screen.findByLabelText("Email адрес");
     const submitButton = screen.getByRole("button", {
-      name: "Изпрати линк за ресет",
+      name: "Изпрати линк за смяна",
     });
 
     fireEvent.change(emailInput, { target: { value: "user@example.com" } });
-    fireEvent.click(captchaCheckbox);
     fireEvent.click(submitButton);
 
     await waitFor(() => {
@@ -86,16 +78,12 @@ describe("ForgotPasswordPage", () => {
 
     render(<ForgotPasswordPage />);
 
-    const emailInput = await screen.findByLabelText("Имейл");
-    const captchaCheckbox = await screen.findByLabelText(
-      /Не съм робот \(placeholder за CAPTCHA интеграция\)/i,
-    );
+    const emailInput = await screen.findByLabelText("Email адрес");
     const submitButton = screen.getByRole("button", {
-      name: "Изпрати линк за ресет",
+      name: "Изпрати линк за смяна",
     });
 
     fireEvent.change(emailInput, { target: { value: "user@example.com" } });
-    fireEvent.click(captchaCheckbox);
     fireEvent.click(submitButton);
 
     await waitFor(() => {

@@ -366,7 +366,7 @@ export default function AdminWikiEditPage() {
 
   return (
     <div className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
-      <div className="mb-4 flex items-center justify-between gap-4">
+      <div className="mb-4 flex items-center justify_between gap-4">
         <div>
           <h2 className="mb-1 text-xl font-semibold text-zinc-900">
             Редакция на Wiki статия
@@ -377,7 +377,7 @@ export default function AdminWikiEditPage() {
         </div>
         <Link
           href="/admin/wiki"
-          className="text-sm font-medium text-emerald-700 hover:text-emerald-900 hover:underline"
+          className="text-sm font-medium text-green-700 hover:text-green-900 hover:underline"
         >
           ← Назад към Admin Wiki
         </Link>
@@ -396,7 +396,7 @@ export default function AdminWikiEditPage() {
       )}
 
       {!loading && success && (
-        <div className="mb-4 rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+        <div className="mb-4 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
           {success}
         </div>
       )}
@@ -414,7 +414,7 @@ export default function AdminWikiEditPage() {
                 </label>
                 <select
                   id="language"
-                  className="block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                  className="block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
                   value={form.language}
                   onChange={handleChange("language")}
                 >
@@ -432,7 +432,7 @@ export default function AdminWikiEditPage() {
                 </label>
                 <select
                   id="status"
-                  className="block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                  className="block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
                   value={form.status}
                   onChange={handleChange("status")}
                 >
@@ -453,7 +453,7 @@ export default function AdminWikiEditPage() {
               <input
                 id="title"
                 type="text"
-                className="block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                className="block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
                 value={form.title}
                 onChange={handleChange("title")}
               />
@@ -468,7 +468,7 @@ export default function AdminWikiEditPage() {
               </label>
               <textarea
                 id="content"
-                className="block min-h-[200px] w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                className="block min-h-[200px] w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
                 value={form.content}
                 onChange={handleChange("content")}
               />
@@ -484,7 +484,7 @@ export default function AdminWikiEditPage() {
               <button
                 type="submit"
                 disabled={saving}
-                className="inline-flex items-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-70"
+                className="inline-flex items-center rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {saving ? "Запазване..." : "Запази"}
               </button>
@@ -558,7 +558,7 @@ export default function AdminWikiEditPage() {
                             type="button"
                             onClick={() => handleRollback(version.id)}
                             disabled={rollbackVersionId === version.id}
-                            className="text-sm font-medium text-emerald-700 hover:text-emerald-900 disabled:cursor-not-allowed disabled:opacity-70"
+                            className="text-sm font-medium text-green-700 hover:text-green-900 disabled:cursor-not-allowed disabled:opacity-70"
                           >
                             {rollbackVersionId === version.id
                               ? "Връщане..."

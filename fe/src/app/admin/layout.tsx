@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 const API_BASE_URL =
@@ -104,38 +103,8 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-zinc-50 px-4 py-6">
-      <div className="mx-auto flex max-w-6xl flex-col gap-6">
-        <header className="flex items-center justify-between rounded-lg border border-zinc-200 bg-white px-4 py-3 shadow-sm">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">
-              Admin
-            </p>
-            <h1 className="text-lg font-semibold text-zinc-900">Admin зона</h1>
-          </div>
-          <nav className="flex items-center gap-3 text-sm">
-            <Link
-              href="/admin"
-              className="font-medium text-zinc-700 hover:text-zinc-950"
-            >
-              Начало
-            </Link>
-            <Link
-              href="/admin/wiki"
-              className="font-medium text-zinc-700 hover:text-zinc-950"
-            >
-              Admin Wiki
-            </Link>
-            <Link
-              href="/admin/users"
-              className="font-medium text-zinc-700 hover:text-zinc-950"
-            >
-              Admin Users
-            </Link>
-          </nav>
-        </header>
-        <main>{children}</main>
-      </div>
+    <div className="min-h-[calc(100vh-4rem)] bg-gray-50 py-8">
+      <main className="mx-auto max-w-7xl px-4">{children}</main>
     </div>
   );
 }

@@ -121,7 +121,7 @@ export function TrainingApiPlayground() {
             type="button"
             onClick={handleSendPing}
             disabled={pingLoading}
-            className="inline-flex items-center justify-center rounded-md bg-emerald-600 px-4 py-2 text-xs font-medium text-white shadow-sm transition hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70 dark:ring-offset-zinc-900"
+            className="inline-flex items-center justify-center rounded-md bg-green-600 px-4 py-2 text-xs font-medium text-white shadow-sm transition hover:bg-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70 dark:ring-offset-zinc-900"
           >
             {pingLoading ? "Изпращане..." : "Изпрати ping"}
           </button>
@@ -147,13 +147,13 @@ export function TrainingApiPlayground() {
             value={echoInput}
             onChange={(e) => setEchoInput(e.target.value)}
             rows={3}
-            className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-xs shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
+            className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-xs shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
           />
           <button
             type="button"
             onClick={handleSendEcho}
             disabled={echoLoading}
-            className="inline-flex items-center justify-center rounded-md bg-emerald-600 px-4 py-2 text-xs font-medium text-white shadow-sm transition hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70 dark:ring-offset-zinc-900"
+            className="inline-flex items-center justify-center rounded-md bg-green-600 px-4 py-2 text-xs font-medium text-white shadow-sm transition hover:bg-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70 dark:ring-offset-zinc-900"
           >
             {echoLoading ? "Изпращане..." : "Изпрати echo"}
           </button>
