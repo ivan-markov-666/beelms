@@ -1,3 +1,5 @@
+import { TrainingApiPlayground } from "./_components/training-api-playground";
+
 const TRAINING_SWAGGER_URL =
   process.env.NEXT_PUBLIC_TRAINING_API_SWAGGER_URL ??
   "http://localhost:4000/api/training/docs";
@@ -51,8 +53,8 @@ export default function ApiDemoPage() {
           <li>
             <span className="font-medium">Ping – базов health check.</span> 
             Изпратете <code>GET /api/training/ping</code> от Swagger UI и
-            проверете, че връща <code>200 OK</code> и поле <code>message =
-            &apos;pong&apos;</code>.
+            проверете, че връща <code>200 OK</code> и поле <code>status =
+            &apos;ok&apos;</code>.
           </li>
           <li>
             <span className="font-medium">Echo – позитивен сценарий.</span> 
@@ -78,6 +80,54 @@ export default function ApiDemoPage() {
           </li>
         </ol>
       </section>
+
+      <section className="space-y-3 text-sm text-zinc-700 dark:text-zinc-200">
+        <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
+          Примерни curl заявки и JSON отговори
+        </h2>
+
+        <div className="space-y-2">
+          <p className="font-medium">Ping пример</p>
+          <p className="text-xs text-zinc-600 dark:text-zinc-300">
+            Примерна заявка към публичния Training API (локален dev пример с
+            порт <code>4000</code>):
+          </p>
+          <pre className="overflow-auto rounded-md bg-zinc-950 p-2 text-[11px] text-zinc-100 dark:bg-black">
+            <code>
+              {`curl -X GET "http://localhost:4000/api/training/ping"`}
+            </code>
+          </pre>
+          <p className="text-xs text-zinc-600 dark:text-zinc-300">
+            Примерен JSON отговор (може да варира според реалната имплементация
+            на Training API):
+          </p>
+          <pre className="overflow-auto rounded-md bg-zinc-950 p-2 text-[11px] text-zinc-100 dark:bg-black">
+            <code>{`{ "status": "ok" }`}</code>
+          </pre>
+        </div>
+
+        <div className="space-y-2">
+          <p className="font-medium">Echo пример</p>
+          <p className="text-xs text-zinc-600 dark:text-zinc-300">
+            Примерна <code>POST</code> заявка към echo ендпойнта с JSON payload:
+          </p>
+          <pre className="overflow-auto rounded-md bg-zinc-950 p-2 text-[11px] text-zinc-100 dark:bg-black">
+            <code>
+              {`curl -X POST "http://localhost:4000/api/training/echo" \
+  -H "Content-Type: application/json" \
+  -d '{ "message": "hello", "count": 3 }'`}
+            </code>
+          </pre>
+          <p className="text-xs text-zinc-600 dark:text-zinc-300">
+            Примерен JSON отговор (echo връща същото body):
+          </p>
+          <pre className="overflow-auto rounded-md bg-zinc-950 p-2 text-[11px] text-zinc-100 dark:bg-black">
+            <code>{`{ "message": "hello", "count": 3 }`}</code>
+          </pre>
+        </div>
+      </section>
+
+      <TrainingApiPlayground />
     </main>
   );
 }

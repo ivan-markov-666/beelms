@@ -173,6 +173,11 @@ On the page, verify that:
 - the primary button links to the Training API Swagger UI (default: `http://localhost:4000/api/training/docs`);
 - the list of example scenarios matches the `GET /api/training/ping` and `POST /api/training/echo` behaviour described in `docs/architecture/openapi.yaml`.
 
+In **WS-7**, the same `/practice/api-demo` page is extended with:
+
+- additional static examples showing full `curl` commands and sample JSON responses for `GET /api/training/ping` and `POST /api/training/echo`;
+- a small interactive Training API playground that can send real ping/echo requests via the backend base URL configured by `NEXT_PUBLIC_API_BASE_URL`.
+
 Configuration:
 
 - The Swagger UI URL is controlled via the `NEXT_PUBLIC_TRAINING_API_SWAGGER_URL` environment variable.
