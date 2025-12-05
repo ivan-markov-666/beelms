@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { LanguageSwitcher } from "./wiki/_components/language-switcher";
 import { HeaderNav } from "./_components/header-nav";
 import { SiteFooter } from "./_components/site-footer";
 
@@ -30,12 +29,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <div className="flex items-center justify-between px-4 py-3">
+        <div className="flex min-h-screen flex-col bg-gray-50">
           <HeaderNav />
-          <LanguageSwitcher />
+          <div className="flex-1">{children}</div>
+          <SiteFooter />
         </div>
-        {children}
-        <SiteFooter />
       </body>
     </html>
   );

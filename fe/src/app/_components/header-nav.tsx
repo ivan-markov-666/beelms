@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCurrentLang } from "../../i18n/useCurrentLang";
 import { t } from "../../i18n/t";
+import { LanguageSwitcher } from "../wiki/_components/language-switcher";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
@@ -81,43 +82,63 @@ export function HeaderNav() {
   }, [pathname]);
 
   return (
-    <header className="flex items-center justify-between border-b border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100">
-      <nav className="flex items-center gap-4">
-        <Link
-          href="/wiki"
-          className="font-medium hover:text-zinc-950 dark:hover:text-white"
-        >
-          {t(lang, "nav", "wiki")}
-        </Link>
-        <Link
-          href="/practice/ui-demo"
-          className="font-medium hover:text-zinc-950 dark:hover:text-white"
-        >
-          {t(lang, "nav", "practice")}
-        </Link>
-        <Link
-          href="/practice/api-demo"
-          className="font-medium hover:text-zinc-950 dark:hover:text-white"
-        >
-          {t(lang, "nav", "practiceApi")}
-        </Link>
-        {isAdmin === true && (
-          <Link
-            href="/admin"
-            className="font-medium hover:text-zinc-950 dark:hover:text-white"
-          >
-            {t(lang, "nav", "admin")}
+    <header className="bg-white border-b border-gray-200">
+      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4">
+        <div className="flex items-center">
+          <Link href="/" className="text-2xl font-bold text-emerald-600">
+            QA4Free
           </Link>
-        )}
-        {hasToken === false && (
+        </div>
+
+        <nav className="hidden items-center space-x-6 text-sm text-gray-700 md:flex">
           <Link
-            href="/auth/login"
-            className="font-medium hover:text-zinc-950 dark:hover:text-white"
+            href="/wiki"
+            className="hover:text-green-600"
           >
-            {t(lang, "nav", "login")}
+            {t(lang, "nav", "wiki")}
           </Link>
-        )}
-      </nav>
+          <Link
+            href="/practice/ui-demo"
+            className="hover:text-green-600"
+          >
+            {t(lang, "nav", "practice")}
+          </Link>
+          <Link
+            href="/practice/api-demo"
+            className="hover:text-green-600"
+          >
+            {t(lang, "nav", "practiceApi")}
+          </Link>
+          {isAdmin === true && (
+            <Link
+              href="/admin"
+              className="hover:text-green-600"
+            >
+              {t(lang, "nav", "admin")}
+            </Link>
+          )}
+        </nav>
+
+        <div className="flex items-center gap-4 text-sm text-gray-700">
+          {hasToken === false && (
+            <>
+              <Link
+                href="/auth/login"
+                className="hover:text-green-600"
+              >
+                {t(lang, "nav", "login")}
+              </Link>
+              <Link
+                href="/auth/register"
+                className="hover:text-green-600"
+              >
+                {t(lang, "nav", "register")}
+              </Link>
+            </>
+          )}
+          <LanguageSwitcher />
+        </div>
+      </div>
     </header>
   );
 }

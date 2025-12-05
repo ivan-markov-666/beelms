@@ -6,6 +6,7 @@ type DomainMessages = {
     practice: string;
     practiceApi: string;
     login: string;
+    register: string;
     admin: string;
   };
   auth: Record<string, string>;
@@ -24,6 +25,7 @@ export const messages: Messages = {
       practice: "Практика",
       practiceApi: "API Demo",
       login: "Вход",
+      register: "Регистрация",
       admin: "Admin",
     },
     auth: {
@@ -165,6 +167,8 @@ export const messages: Messages = {
       legalTermsTitle: "Условия за ползване",
       legalTermsIntro:
         "Тази страница описва основните правила за коректно и етично използване на QA4Free като учебна платформа.",
+      footerAboutLink: "About",
+      footerContactLink: "Contact",
     },
     wiki: {
       articleShareButton: "Сподели",
@@ -181,6 +185,7 @@ export const messages: Messages = {
       practice: "Practice",
       practiceApi: "API Demo",
       login: "Sign in",
+      register: "Register",
       admin: "Admin",
     },
     auth: {
@@ -323,6 +328,8 @@ export const messages: Messages = {
       legalTermsTitle: "Terms of Use",
       legalTermsIntro:
         "This page outlines the key rules for fair and ethical use of QA4Free as a learning platform.",
+      footerAboutLink: "About",
+      footerContactLink: "Contact",
     },
     wiki: {
       articleShareButton: "Share",
@@ -338,6 +345,7 @@ export const messages: Messages = {
       practice: "Praxis",
       practiceApi: "API Demo",
       login: "Anmelden",
+      register: "Registrieren",
       admin: "Admin",
     },
     auth: {
@@ -415,7 +423,10 @@ export const messages: Messages = {
       resetSuccess: "Dein Passwort wurde erfolgreich geändert. Wir leiten dich gleich zur Login-Seite weiter...",
       resetGoToForgotCta: "Zum Bildschirm \"Passwort vergessen\"",
     },
-    common: {},
+    common: {
+      footerAboutLink: "Über",
+      footerContactLink: "Kontakt",
+    },
     wiki: {
       articleShareButton: "Teilen",
       articlePrintButton: "Drucken",
