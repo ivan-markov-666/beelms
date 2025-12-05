@@ -18,15 +18,19 @@ describe("SiteFooter", () => {
     useSearchParamsMock.mockReturnValue(makeSearchParams("lang=bg"));
   });
 
-  it("renders footer links to legal pages", () => {
+  it("renders footer links matching wireframe navigation", () => {
     render(<SiteFooter />);
 
+    const aboutLink = screen.getByRole("link", {
+      name: "About",
+    });
     const privacyLink = screen.getByRole("link", {
       name: "Политика за поверителност (Privacy/GDPR)",
     });
-    const termsLink = screen.getByRole("link", { name: "Условия за ползване" });
+    const contactLink = screen.getByRole("link", { name: "Contact" });
 
+    expect(aboutLink).toHaveAttribute("href", "/about");
     expect(privacyLink).toHaveAttribute("href", "/legal/privacy");
-    expect(termsLink).toHaveAttribute("href", "/legal/terms");
+    expect(contactLink).toHaveAttribute("href", "/contact");
   });
 });
