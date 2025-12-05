@@ -85,11 +85,11 @@ export const messages: Messages = {
       registerLoading: "Зареждане...",
       forgotTitle: "Забравена парола",
       forgotSubtitle:
-        "Въведете своя имейл, за да заявите смяна на паролата.",
-      forgotEmailLabel: "Имейл",
+        "Въведете вашия email адрес и ще ви изпратим линк за смяна на паролата.",
+      forgotEmailLabel: "Email адрес",
       forgotCaptchaLabel:
         "Не съм робот (placeholder за CAPTCHA интеграция).",
-      forgotSubmit: "Изпрати линк за ресет",
+      forgotSubmit: "Изпрати линк за смяна",
       forgotSubmitLoading: "Изпращане...",
       forgotHasPassword: "Спомнихте си паролата?",
       forgotLoginLink: "Върни се към вход",
@@ -105,6 +105,10 @@ export const messages: Messages = {
         "Възникна грешка при връзката със сървъра.",
       forgotSuccess:
         "Ако има акаунт с този имейл, ще изпратим инструкции за смяна на паролата.",
+      forgotResetLinkInfo:
+        "Линкът за смяна на паролата е валиден 24 часа",
+      forgotCaptchaPlaceholder:
+        "CAPTCHA / reCAPTCHA (placeholder за защита от ботове при заявка за смяна на парола)",
       resetTitle: "Смяна на парола",
       resetSubtitle: "Въведете новата си парола (минимум 8 символа).",
       resetNewPasswordLabel: "Нова парола",
