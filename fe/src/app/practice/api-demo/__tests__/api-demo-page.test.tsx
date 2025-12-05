@@ -17,5 +17,17 @@ describe("ApiDemoPage", () => {
       "href",
       "http://localhost:4000/api/training/docs",
     );
+
+    expect(
+      screen.getByRole("heading", {
+        name: /Примерни сценарии за упражнения/i,
+      }),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByRole("heading", {
+        name: /Интерактивен Training API playground/i,
+      }),
+    ).toBeInTheDocument();
   });
 });

@@ -1,6 +1,6 @@
 # EPIC-WS7-PRACTICE-ENV-TASKS – Practical Environment (UI, Training API, Tasks)
 
-Status: Planned
+Status: Done
 
 ## Summary
 Този epic дефинира WS-7 walking skeleton за **Практическа среда (Practical Env)**: минимален, но реален vertical, в който потребителят може:
@@ -43,8 +43,8 @@ Out of scope за този epic (за бъдещи WS/epics):
 ## Child user stories
 - [x] STORY-WS7-BE-TRAINING-API-MINIMAL – Минимален Training API (ping/echo) за API упражнения.
 - [x] STORY-WS7-BE-TASKS-MINIMAL – Минимални Tasks endpoints за зареждане и submit на задача.
- - [x] STORY-WS7-FE-PRACTICE-UI-PAGE – Practice UI страница за manual/UI automation упражнения.
- - [ ] STORY-WS7-FE-PRACTICE-API-DEMO-PAGE – Practice API demo страница, която стъпва върху Training API.
+- [x] STORY-WS7-FE-PRACTICE-UI-PAGE – Practice UI страница за manual/UI automation упражнения.
+- [x] STORY-WS7-FE-PRACTICE-API-DEMO-PAGE – Practice API demo страница, която стъпва върху Training API.
 
 ## Risks / Assumptions
 - **Risks:**
