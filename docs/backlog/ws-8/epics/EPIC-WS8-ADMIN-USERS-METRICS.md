@@ -33,10 +33,14 @@ WS-8 **не въвежда нови FR изисквания**, а реализи
 - Backend:
   - `GET /api/admin/metrics/overview` – минимален payload с поне едно поле:
     - `totalUsers` – общ брой регистрирани потребители.
+    - `usersChangePercentSinceLastMonth` – процент промяна на общия брой
+      потребители спрямо края на предходния календарен месец (по `createdAt`).
   - Endpoint-ът е guard-нат само за admin потребители.
 - Frontend:
   - Страница `/admin` се държи като **Dashboard**, а не само като shell:
     - summary card „Общ брой потребители: X“, захранван от metrics endpoint-а;
+    - динамичен лейбъл за процент промяна спрямо миналия месец, базиран на
+      `usersChangePercentSinceLastMonth`.
     - бързи линкове към `/admin/wiki` и `/admin/users`.
 
 ### 3. Legal / GDPR страници
@@ -68,6 +72,10 @@ WS-8 използва следните вече дефинирани WS-5 storie
 - **Admin Metrics (BE/FE)**
   - `STORY-WS5-BE-ADMIN-METRICS-MINIMAL` – минимален Admin Metrics endpoint `GET /api/admin/metrics/overview` с `totalUsers`.
   - `STORY-WS5-FE-ADMIN-DASHBOARD` – `/admin` като Dashboard със summary card и линкове.
+  - `STORY-WS8-BE-ADMIN-METRICS-MONTHLY-CHANGE` – разширение на `MetricsOverview`
+    с `usersChangePercentSinceLastMonth` и реално изчисление в BE.
+  - `STORY-WS8-FE-ADMIN-DASHBOARD-MONTHLY-CHANGE` – показване на динамичния
+    процент в Admin Dashboard вместо статичен текст.
 
 - **Legal страници (FE)**
   - `STORY-WS5-FE-LEGAL-PAGES` – статични `/legal/privacy` и `/legal/terms` + линкове във footer/header.

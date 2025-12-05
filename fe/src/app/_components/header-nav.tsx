@@ -85,7 +85,7 @@ export function HeaderNav() {
     <header className="bg-white border-b border-gray-200">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4">
         <div className="flex items-center">
-          <Link href="/" className="text-2xl font-bold text-emerald-600">
+          <Link href="/" className="text-2xl font-bold text-green-600">
             QA4Free
           </Link>
         </div>

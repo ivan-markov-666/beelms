@@ -167,7 +167,7 @@ export function UiDemoSandbox() {
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
+              className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
             />
             {errors.name && (
               <p className="text-xs text-red-600 dark:text-red-400">
@@ -187,7 +187,7 @@ export function UiDemoSandbox() {
               id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
+              className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
             />
             {errors.email && (
               <p className="text-xs text-red-600 dark:text-red-400">
@@ -209,7 +209,7 @@ export function UiDemoSandbox() {
               onChange={(e) =>
                 setDifficulty(e.target.value as "easy" | "medium" | "hard")
               }
-              className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
+              className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
             >
               <option value="easy">Лесно</option>
               <option value="medium">Средно</option>
@@ -270,13 +270,13 @@ export function UiDemoSandbox() {
         <button
           type="button"
           onClick={handleSave}
-          className="inline-flex items-center justify-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:ring-offset-zinc-900"
+          className="inline-flex items-center justify-center rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2 dark:ring-offset-zinc-900"
         >
           Запази
         </button>
         <button
           type="button"
-          className="inline-flex items-center justify-center rounded-md border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-800 shadow-sm transition hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50 dark:hover:bg-zinc-900 dark:ring-offset-zinc-900"
+          className="inline-flex items-center justify-center rounded-md border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-800 shadow-sm transition hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50 dark:hover:bg-zinc-900 dark:ring-offset-zinc-900"
         >
           Преглед
         </button>
@@ -297,7 +297,7 @@ export function UiDemoSandbox() {
       </div>
 
       {saveMessage && (
-        <p className="text-xs text-emerald-700 dark:text-emerald-400">
+        <p className="text-xs text-green-700 dark:text-green-400">
           {saveMessage}
         </p>
       )}
@@ -327,7 +327,7 @@ export function UiDemoSandbox() {
                   e.target.value as "all" | "easy" | "medium" | "hard",
                 )
               }
-              className="rounded-md border border-zinc-300 bg-white px-2 py-1 text-xs shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
+              className="rounded-md border border-zinc-300 bg-white px-2 py-1 text-xs shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
             >
               <option value="all">Всички</option>
               <option value="easy">Лесни</option>
@@ -374,8 +374,8 @@ export function UiDemoSandbox() {
         </table>
       </div>
 
-      <div className="space-y-2 rounded-lg border border-dashed border-emerald-300 bg-emerald-50/40 p-3 text-xs text-zinc-800 dark:border-emerald-700 dark:bg-emerald-950 dark:text-zinc-100">
-        <p className="text-[11px] font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-400">
+      <div className="space-y-2 rounded-lg border border-dashed border-green-300 bg-green-50/40 p-3 text-xs text-zinc-800 dark:border-green-700 dark:bg-green-950 dark:text-zinc-100">
+        <p className="text-[11px] font-semibold uppercase tracking-wide text-green-700 dark:text-green-400">
           Примерна задача от Tasks API
         </p>
         {taskLoading && <p>Зареждане на примерна задача...</p>}

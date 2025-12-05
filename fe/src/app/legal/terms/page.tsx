@@ -20,7 +20,7 @@ export default async function TermsPage({
   return (
     <main className="mx-auto flex min-h-screen max-w-3xl flex-col gap-8 px-4 py-10">
       <header className="space-y-3">
-        <p className="text-xs font-semibold uppercase tracking-wide text-emerald-600">
+        <p className="text-xs font-semibold uppercase tracking-wide text-green-600">
           Legal / Terms
         </p>
         <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">

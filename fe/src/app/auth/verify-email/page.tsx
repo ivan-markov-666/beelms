@@ -171,7 +171,7 @@ export default function VerifyEmailPage() {
           <p
             className={`text-sm ${
               status === "success"
-                ? "text-emerald-600"
+                ? "text-green-600"
                 : status === "invalid_or_expired" || status === "missing_token"
                 ? "text-amber-700"
                 : "text-red-600"

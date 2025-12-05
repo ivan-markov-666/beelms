@@ -181,7 +181,8 @@ export default function LoginPage() {
                 id="email"
                 type="email"
                 autoComplete="email"
-                className="block w-full rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600"
+                placeholder="your@email.com"
+                className="block w-full rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-green-600 focus:outline-none focus:ring-1 focus:ring-green-600"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={submitting}
@@ -196,14 +197,16 @@ export default function LoginPage() {
                 htmlFor="password"
                 className="block text-sm font-medium text-gray-800"
               >
-                {t(lang, "auth", "loginPasswordLabel")}
+                {t(lang, "auth", "loginPasswordLabel")} {" "}
+                <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <input
                   id="password"
                   type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
-                  className="block w-full rounded-lg border border-gray-300 px-4 py-2 pr-12 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600"
+                  placeholder="********"
+                  className="block w-full rounded-lg border border-gray-300 px-4 py-2 pr-12 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-green-600 focus:outline-none focus:ring-1 focus:ring-green-600"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={submitting}
@@ -231,7 +234,7 @@ export default function LoginPage() {
               <input
                 id="remember"
                 type="checkbox"
-                className="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                className="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500"
                 checked={rememberMe}
                 onChange={(event) => setRememberMe(event.target.checked)}
                 disabled={submitting}
@@ -250,7 +253,7 @@ export default function LoginPage() {
 
             <button
               type="submit"
-              className="w-full rounded-lg bg-emerald-600 py-3 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-70"
+              className="w-full rounded-lg bg-green-600 py-3 text-sm font-semibold text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-70"
               disabled={submitting}
             >
               {submitting
@@ -263,7 +266,7 @@ export default function LoginPage() {
         <div className="mt-6 space-y-3 text-center text-xs text-gray-600">
           <button
             type="button"
-            className="cursor-pointer text-emerald-700 hover:text-emerald-800"
+            className="cursor-pointer text-green-700 hover:text-green-800"
             onClick={() => router.push("/auth/forgot-password")}
             disabled={submitting}
           >
@@ -273,7 +276,7 @@ export default function LoginPage() {
             {t(lang, "auth", "loginRegisterLink")} {" "}
             <button
               type="button"
-              className="cursor-pointer font-semibold text-emerald-700 hover:text-emerald-800"
+              className="cursor-pointer font-semibold text-green-700 hover:text-green-800"
               onClick={() => router.push("/auth/register")}
               disabled={submitting}
             >

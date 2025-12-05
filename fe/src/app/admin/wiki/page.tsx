@@ -37,7 +37,7 @@ function getStatusBadge(status: string): { label: string; className: string } {
     return {
       label: "Active",
       className:
-        "border-emerald-200 bg-emerald-50 text-emerald-700",
+        "border-green-200 bg-green-50 text-green-700",
     };
   }
 
@@ -200,7 +200,7 @@ export default function AdminWikiPage() {
                     <td className="px-3 py-2 align-middle text-right">
                       <Link
                         href={`/admin/wiki/${article.slug}/edit`}
-                        className="text-sm font-medium text-emerald-700 hover:text-emerald-900 hover:underline"
+                        className="text-sm font-medium text-green-700 hover:text-green-900 hover:underline"
                       >
                         Редактирай
                       </Link>

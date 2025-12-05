@@ -99,7 +99,8 @@ export default function ForgotPasswordPage() {
                 id="email"
                 type="email"
                 autoComplete="email"
-                className="block w-full rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600"
+                placeholder="your@email.com"
+                className="block w-full rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-green-600 focus:outline-none focus:ring-1 focus:ring-green-600"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={submitting}
@@ -122,14 +123,14 @@ export default function ForgotPasswordPage() {
               </p>
             )}
             {formSuccess && (
-              <p className="text-sm text-emerald-600" role="status">
+              <p className="text-sm text-green-600" role="status">
                 {formSuccess}
               </p>
             )}
 
             <button
               type="submit"
-              className="w-full rounded-lg bg-emerald-600 py-3 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-70"
+              className="w-full rounded-lg bg-green-600 py-3 text-sm font-semibold text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-70"
               disabled={submitting}
             >
               {submitting
@@ -139,10 +140,10 @@ export default function ForgotPasswordPage() {
           </form>
         </section>
 
-        <div className="mt-6 flex items-center justify-center text-xs text-emerald-700">
+        <div className="mt-6 flex items-center justify-center text-xs text-green-700">
           <button
             type="button"
-            className="inline-flex cursor-pointer items-center gap-1 hover:text-emerald-800"
+            className="inline-flex cursor-pointer items-center gap-1 hover:text-green-800"
             onClick={() => router.push("/auth/login")}
             disabled={submitting}
           >

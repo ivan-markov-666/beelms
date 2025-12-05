@@ -78,16 +78,12 @@ describe("ForgotPasswordPage", () => {
 
     render(<ForgotPasswordPage />);
 
-    const emailInput = await screen.findByLabelText("Имейл");
-    const captchaCheckbox = await screen.findByLabelText(
-      /Не съм робот \(placeholder за CAPTCHA интеграция\)/i,
-    );
+    const emailInput = await screen.findByLabelText("Email адрес");
     const submitButton = screen.getByRole("button", {
-      name: "Изпрати линк за ресет",
+      name: "Изпрати линк за смяна",
     });
 
     fireEvent.change(emailInput, { target: { value: "user@example.com" } });
-    fireEvent.click(captchaCheckbox);
     fireEvent.click(submitButton);
 
     await waitFor(() => {

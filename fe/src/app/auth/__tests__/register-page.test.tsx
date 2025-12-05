@@ -39,12 +39,14 @@ describe("RegisterPage", () => {
     const emailInput = await screen.findByLabelText("Имейл");
     const passwordInput = await screen.findByLabelText("Парола");
     const confirmPasswordInput = await screen.findByLabelText("Потвърди паролата");
-    const submitButton = await screen.findByRole("button", { name: "Регистрация" });
+    const submitButton = await screen.findByRole("button", {
+      name: "Регистрация",
+    });
 
     fireEvent.change(emailInput, { target: { value: "invalid-email" } });
     fireEvent.change(passwordInput, { target: { value: "short" } });
     fireEvent.change(confirmPasswordInput, { target: { value: "different" } });
-    // не маркираме Terms и CAPTCHA
+    // не маркираме Terms
 
     fireEvent.click(submitButton);
 
@@ -57,9 +59,6 @@ describe("RegisterPage", () => {
     expect(screen.getByText("Паролите не съвпадат.")).toBeInTheDocument();
     expect(
       screen.getByText("Необходимо е да приемете условията."),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText("Моля, потвърдете, че не сте робот."),
     ).toBeInTheDocument();
 
     expect(global.fetch).not.toHaveBeenCalled();
@@ -84,9 +83,6 @@ describe("RegisterPage", () => {
     const termsCheckbox = await screen.findByLabelText(
       /Съгласен съм с Условията за ползване/i,
     );
-    const captchaCheckbox = await screen.findByLabelText(
-      /Не съм робот \(placeholder за CAPTCHA интеграция\)/i,
-    );
     const submitButton = screen.getByRole("button", { name: "Регистрация" });
 
     fireEvent.change(emailInput, { target: { value: "user@example.com" } });
@@ -95,7 +91,6 @@ describe("RegisterPage", () => {
       target: { value: "password123" },
     });
     fireEvent.click(termsCheckbox);
-    fireEvent.click(captchaCheckbox);
 
     fireEvent.click(submitButton);
 
@@ -121,9 +116,6 @@ describe("RegisterPage", () => {
     const termsCheckbox = screen.getByLabelText(
       /Съгласен съм с Условията за ползване/i,
     );
-    const captchaCheckbox = screen.getByLabelText(
-      /Не съм робот \(placeholder за CAPTCHA интеграция\)/i,
-    );
     const submitButton = screen.getByRole("button", { name: "Регистрация" });
 
     fireEvent.change(emailInput, { target: { value: "user@example.com" } });
@@ -132,7 +124,6 @@ describe("RegisterPage", () => {
       target: { value: "password123" },
     });
     fireEvent.click(termsCheckbox);
-    fireEvent.click(captchaCheckbox);
 
     fireEvent.click(submitButton);
 
