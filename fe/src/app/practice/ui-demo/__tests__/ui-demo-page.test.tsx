@@ -13,6 +13,10 @@ describe("UiDemoPage", () => {
       screen.getByRole("heading", { name: /Примерни задачи/i }),
     ).toBeInTheDocument();
 
+    expect(
+      screen.getByText(/Примерна задача от Tasks API/i),
+    ).toBeInTheDocument();
+
     const items = screen.getAllByRole("listitem");
     expect(items.length).toBeGreaterThanOrEqual(5);
   });

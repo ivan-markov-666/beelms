@@ -1,6 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
 
 type DemoItem = {
   id: number;
@@ -41,6 +44,62 @@ export function UiDemoSandbox() {
     "all" | "easy" | "medium" | "hard"
   >("all");
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
+  const [taskTitle, setTaskTitle] = useState<string | null>(null);
+  const [taskDescription, setTaskDescription] = useState<string | null>(null);
+  const [taskLoading, setTaskLoading] = useState(false);
+  const [taskError, setTaskError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadTask = async () => {
+      if (typeof fetch === "undefined") {
+        setTaskError("Tasks API не е достъпен в тази среда.");
+        return;
+      }
+
+      setTaskLoading(true);
+      setTaskError(null);
+
+      try {
+        const res = await fetch(`${API_BASE_URL}/tasks/string-hello-world`);
+
+        if (!res.ok) {
+          throw new Error("Tasks API request failed");
+        }
+
+        const data = (await res.json()) as {
+          title?: string;
+          description?: string;
+        };
+
+        if (cancelled) {
+          return;
+        }
+
+        setTaskTitle(data.title ?? null);
+        setTaskDescription(data.description ?? null);
+      } catch {
+        if (cancelled) {
+          return;
+        }
+
+        setTaskError("Неуспешно зареждане на примерната задача.");
+        setTaskTitle(null);
+        setTaskDescription(null);
+      } finally {
+        if (!cancelled) {
+          setTaskLoading(false);
+        }
+      }
+    };
+
+    void loadTask();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const filteredItems = useMemo(() => {
     if (filterDifficulty === "all") return DEMO_ITEMS;
@@ -313,6 +372,33 @@ export function UiDemoSandbox() {
             )}
           </tbody>
         </table>
+      </div>
+
+      <div className="space-y-2 rounded-lg border border-dashed border-emerald-300 bg-emerald-50/40 p-3 text-xs text-zinc-800 dark:border-emerald-700 dark:bg-emerald-950 dark:text-zinc-100">
+        <p className="text-[11px] font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-400">
+          Примерна задача от Tasks API
+        </p>
+        {taskLoading && <p>Зареждане на примерна задача...</p>}
+        {taskError && (
+          <p className="text-xs text-red-600 dark:text-red-400">{taskError}</p>
+        )}
+        {!taskLoading && !taskError && taskTitle && (
+          <div className="space-y-1">
+            <p className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
+              {taskTitle}
+            </p>
+            {taskDescription && (
+              <p className="text-xs text-zinc-700 dark:text-zinc-300">
+                {taskDescription}
+              </p>
+            )}
+          </div>
+        )}
+        {!taskLoading && !taskError && !taskTitle && (
+          <p className="text-xs text-zinc-500 dark:text-zinc-400">
+            Няма заредена примерна задача в момента.
+          </p>
+        )}
       </div>
     </section>
   );

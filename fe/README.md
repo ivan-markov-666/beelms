@@ -198,6 +198,11 @@ On the page, verify that:
 - there are at least 5 tasks covering buttons, text inputs, dropdowns, checkboxes/radios and a table/list with a Reset behavior (as implemented by `STORY-WS3-FE-UI-DEMO-PAGE`);
 - the sandbox UI below the header includes buttons, text fields, a dropdown, a checkbox/radio group and a small table that react to user input, and the Reset button restores their default state without a page reload.
 
+In **WS-7**, the same `/practice/ui-demo` page is extended with a small Tasks API panel:
+
+- the panel labeled "Примерна задача от Tasks API" calls `GET /api/tasks/string-hello-world` (via the backend on `http://localhost:3000/api`) and renders the task title and description;
+- when the backend or Tasks API is not available, the panel shows a clear error message while the rest of the UI demo remains fully functional.
+
 ## WS-4 Admin shell & navigation
 
 For the WS-4 Admin skeleton, the frontend provides a minimal Admin area that depends on the backend Auth/Profile API (including the `role` field from `GET /api/users/me`).
