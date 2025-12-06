@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useCurrentLang } from "../../../i18n/useCurrentLang";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
 
-const PAGE_SIZE = 5;
+const PAGE_SIZE = 10;
 
 type AdminWikiArticle = {
   id: string;
@@ -62,6 +63,7 @@ function getStatusBadge(status: string): { label: string; className: string } {
 }
 
 export default function AdminWikiPage() {
+  const headerLang = useCurrentLang();
   const [articles, setArticles] = useState<AdminWikiArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -75,6 +77,20 @@ export default function AdminWikiPage() {
   const [statusUpdateError, setStatusUpdateError] = useState<string | null>(
     null,
   );
+  const [deleteArticleStep1Id, setDeleteArticleStep1Id] =
+    useState<string | null>(null);
+  const [deleteArticleStep2Id, setDeleteArticleStep2Id] =
+    useState<string | null>(null);
+  const [deleteArticleError, setDeleteArticleError] = useState<string | null>(
+    null,
+  );
+  const [deleteArticleSubmitting, setDeleteArticleSubmitting] =
+    useState(false);
+
+  const deleteArticleTarget =
+    deleteArticleStep2Id == null
+      ? null
+      : articles.find((article) => article.id === deleteArticleStep2Id) ?? null;
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -96,8 +112,14 @@ export default function AdminWikiPage() {
           }
           return;
         }
+        const effectiveLang = (languageFilter || headerLang || "").toLowerCase();
 
-        const res = await fetch(`${API_BASE_URL}/admin/wiki/articles`, {
+        let url = `${API_BASE_URL}/admin/wiki/articles`;
+        if (effectiveLang) {
+          url += `?lang=${encodeURIComponent(effectiveLang)}`;
+        }
+
+        const res = await fetch(url, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -132,7 +154,7 @@ export default function AdminWikiPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [languageFilter, headerLang]);
 
   useEffect(() => {
     if (!articles.length) {
@@ -478,6 +500,7 @@ export default function AdminWikiPage() {
                   const isInactive = normalizedStatus === "inactive";
                   const canToggleStatus =
                     normalizedStatus === "active" || normalizedStatus === "inactive";
+                  const isActive = normalizedStatus === "active";
 
                   return (
                     <tr key={article.id} className="hover:bg-gray-50">
@@ -549,6 +572,18 @@ export default function AdminWikiPage() {
                               : "Deactivate"}
                           </button>
                         )}
+                        <button
+                          type="button"
+                          disabled={isActive}
+                          className={`ml-3 font-medium ${
+                            isActive
+                              ? "cursor-not-allowed text-gray-400"
+                              : "text-red-600 hover:text-red-700"
+                          }`}
+                          onClick={() => setDeleteArticleStep1Id(article.id)}
+                        >
+                          Delete
+                        </button>
                       </td>
                     </tr>
                   );
@@ -605,6 +640,149 @@ export default function AdminWikiPage() {
             </div>
           </div>
         </section>
+      )}
+      {deleteArticleStep1Id && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
+            <h3 className="mb-2 text-base font-semibold text-gray-900">
+              Изтриване на статия
+            </h3>
+            <p className="mb-4 text-sm text-gray-700">
+              Тази статия ще бъде завинаги премахната заедно с всички нейни
+              версии. Това действие е необратимо и може да повлияе на
+              проследимостта на промените.
+            </p>
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                className="rounded-md border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-800 hover:bg-gray-50"
+                onClick={() => setDeleteArticleStep1Id(null)}
+              >
+                Затвори
+              </button>
+              <button
+                type="button"
+                className="rounded-md bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700"
+                onClick={() => {
+                  setDeleteArticleStep2Id(deleteArticleStep1Id);
+                  setDeleteArticleStep1Id(null);
+                }}
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {deleteArticleStep2Id && deleteArticleTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
+            <h3 className="mb-2 text-base font-semibold text-gray-900">
+              Потвърдете изтриването на статията
+            </h3>
+            <p className="mb-3 text-sm text-gray-700">
+              Наистина ли искате да изтриете тази статия? Това действие е
+              окончателно и не може да бъде отменено.
+            </p>
+            <p className="mb-3 text-xs text-gray-600">
+              Заглавие: <span className="font-semibold">{deleteArticleTarget.title}</span>
+              <br />
+              Slug: <span className="font-mono">{deleteArticleTarget.slug}</span>
+              <br />
+              Последно обновена на {formatDateTime(deleteArticleTarget.updatedAt)}.
+            </p>
+            {deleteArticleError && (
+              <p className="mb-3 text-xs text-red-600" role="alert">
+                {deleteArticleError}
+              </p>
+            )}
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                className="rounded-md border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-800 hover:bg-gray-50 disabled:opacity-70"
+                onClick={() => setDeleteArticleStep2Id(null)}
+                disabled={deleteArticleSubmitting}
+              >
+                Отказ
+              </button>
+              <button
+                type="button"
+                className="rounded-md bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700 disabled:opacity-70"
+                onClick={async () => {
+                  if (typeof window === "undefined") return;
+                  if (!deleteArticleStep2Id) return;
+
+                  setDeleteArticleError(null);
+                  setDeleteArticleSubmitting(true);
+
+                  try {
+                    const token = window.localStorage.getItem(
+                      "qa4free_access_token",
+                    );
+                    if (!token) {
+                      setDeleteArticleError(
+                        "Липсва достъп до Admin API. Моля, влезте отново като администратор.",
+                      );
+                      setDeleteArticleSubmitting(false);
+                      return;
+                    }
+
+                    const res = await fetch(
+                      `${API_BASE_URL}/admin/wiki/articles/${encodeURIComponent(
+                        deleteArticleStep2Id,
+                      )}`,
+                      {
+                        method: "DELETE",
+                        headers: {
+                          Authorization: `Bearer ${token}`,
+                        },
+                      },
+                    );
+
+                    if (!res.ok) {
+                      if (res.status === 400) {
+                        setDeleteArticleError(
+                          "Статията не може да бъде изтрита, защото е активна. Първо я деактивирайте.",
+                        );
+                      } else if (res.status === 404) {
+                        setDeleteArticleError(
+                          "Статията не беше намерена.",
+                        );
+                      } else {
+                        setDeleteArticleError(
+                          "Възникна грешка при изтриване на статията.",
+                        );
+                      }
+                      setDeleteArticleSubmitting(false);
+                      return;
+                    }
+
+                    setArticles((current) =>
+                      current.filter(
+                        (article) => article.id !== deleteArticleStep2Id,
+                      ),
+                    );
+                    setLanguagesByArticleId((current) => {
+                      const next = { ...current };
+                      delete next[deleteArticleStep2Id];
+                      return next;
+                    });
+                    setDeleteArticleStep2Id(null);
+                  } catch {
+                    setDeleteArticleError(
+                      "Възникна грешка при изтриване на статията.",
+                    );
+                  } finally {
+                    setDeleteArticleSubmitting(false);
+                  }
+                }}
+                disabled={deleteArticleSubmitting}
+              >
+                Да, изтрий статията
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

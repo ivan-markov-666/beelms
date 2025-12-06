@@ -84,6 +84,12 @@ export class AdminWikiController {
     await this.wikiService.adminUpdateArticleStatus(id, dto.status);
   }
 
+  @Delete('articles/:id')
+  @HttpCode(204)
+  async deleteArticle(@Param('id') id: string): Promise<void> {
+    await this.wikiService.adminDeleteArticle(id);
+  }
+
   @Patch('articles/:id/draft-autosave')
   @HttpCode(204)
   async autosaveDraft(
@@ -115,6 +121,15 @@ export class AdminWikiController {
       versionId,
       userId,
     );
+  }
+
+  @Delete('articles/:id/versions/:versionId')
+  @HttpCode(204)
+  async deleteArticleVersion(
+    @Param('id') id: string,
+    @Param('versionId') versionId: string,
+  ): Promise<void> {
+    await this.wikiService.adminDeleteArticleVersion(id, versionId);
   }
 
   @Get('articles/:id/media')

@@ -6,9 +6,10 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import * as fs from 'fs';
 import * as path from 'path';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { WikiArticle } from './wiki-article.entity';
 import { WikiArticleVersion } from './wiki-article-version.entity';
+import { User } from '../auth/user.entity';
 import { WikiListItemDto } from './dto/wiki-list-item.dto';
 import { AdminWikiListItemDto } from './dto/admin-wiki-list-item.dto';
 import { WikiArticleDetailDto } from './dto/wiki-article-detail.dto';
@@ -63,6 +64,8 @@ export class WikiService {
     private readonly articleRepo: Repository<WikiArticle>,
     @InjectRepository(WikiArticleVersion)
     private readonly versionRepo: Repository<WikiArticleVersion>,
+    @InjectRepository(User)
+    private readonly usersRepo: Repository<User>,
   ) {}
 
   async getActiveArticlesList(
@@ -623,16 +626,45 @@ export class WikiService {
       order: { createdAt: 'DESC', versionNumber: 'DESC' },
     });
 
-    return versions.map((v) => ({
-      id: v.id,
-      version: v.versionNumber,
-      language: v.language,
-      title: v.title,
-      createdAt: v.createdAt
+    const userIds = Array.from(
+      new Set(
+        versions
+          .map((v) => v.createdByUserId)
+          .filter((id): id is string => !!id),
+      ),
+    );
+
+    let userMap = new Map<string, string>();
+
+    if (userIds.length > 0) {
+      const users = await this.usersRepo.find({
+        where: { id: In(userIds) },
+      });
+
+      userMap = new Map(users.map((u) => [u.id, u.email]));
+    }
+
+    return versions.map((v) => {
+      const createdAt = v.createdAt
         ? v.createdAt.toISOString()
-        : new Date().toISOString(),
-      createdBy: v.createdByUserId ?? null,
-    }));
+        : new Date().toISOString();
+
+      const createdByUserId = v.createdByUserId;
+      const createdBy =
+        createdByUserId != null
+          ? (userMap.get(createdByUserId) ?? createdByUserId)
+          : null;
+
+      return {
+        id: v.id,
+        version: v.versionNumber,
+        language: v.language,
+        title: v.title,
+        content: v.content,
+        createdAt,
+        createdBy,
+      };
+    });
   }
 
   async restoreArticleVersionForAdmin(
@@ -683,5 +715,55 @@ export class WikiService {
       status: article.status,
       updatedAt: updatedAt.toISOString(),
     };
+  }
+
+  async adminDeleteArticle(id: string): Promise<void> {
+    const article = await this.articleRepo.findOne({ where: { id } });
+
+    if (!article) {
+      throw new NotFoundException('Article not found');
+    }
+
+    if (article.status === 'active') {
+      throw new BadRequestException(
+        'Cannot delete an active article; set status to inactive first',
+      );
+    }
+
+    await this.articleRepo.remove(article);
+  }
+
+  async adminDeleteArticleVersion(
+    articleId: string,
+    versionId: string,
+  ): Promise<void> {
+    const article = await this.articleRepo.findOne({
+      where: { id: articleId },
+      relations: ['versions'],
+    });
+
+    if (!article) {
+      throw new NotFoundException('Article not found');
+    }
+
+    const versions = article.versions ?? [];
+
+    if (!versions.length) {
+      throw new NotFoundException('Version not found');
+    }
+
+    const versionToDelete = versions.find((v) => v.id === versionId);
+
+    if (!versionToDelete) {
+      throw new NotFoundException('Version not found');
+    }
+
+    if (versions.length <= 1) {
+      throw new BadRequestException(
+        'Cannot delete the last remaining version of this article',
+      );
+    }
+
+    await this.versionRepo.remove(versionToDelete);
   }
 }
