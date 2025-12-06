@@ -6,6 +6,8 @@ import Link from "next/link";
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
 
+const PAGE_SIZE = 5;
+
 type AdminWikiArticle = {
   id: string;
   slug: string;
@@ -18,12 +20,10 @@ function formatDateTime(dateIso: string): string {
   try {
     const d = new Date(dateIso);
     if (Number.isNaN(d.getTime())) return dateIso;
-    return d.toLocaleString("bg-BG", {
+    return d.toLocaleDateString("bg-BG", {
       year: "numeric",
       month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
+      day: "2-digit",
     });
   } catch {
     return dateIso;
@@ -48,9 +48,9 @@ function getStatusBadge(status: string): { label: string; className: string } {
     };
   }
 
-  if (normalized === "archived") {
+  if (normalized === "inactive") {
     return {
-      label: "Archived",
+      label: "Inactive",
       className: "border-zinc-200 bg-zinc-50 text-zinc-600",
     };
   }
@@ -65,6 +65,16 @@ export default function AdminWikiPage() {
   const [articles, setArticles] = useState<AdminWikiArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [languageFilter, setLanguageFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [languagesByArticleId, setLanguagesByArticleId] = useState<
+    Record<string, string[]>
+  >({});
+  const [statusUpdatingId, setStatusUpdatingId] = useState<string | null>(null);
+  const [statusUpdateError, setStatusUpdateError] = useState<string | null>(
+    null,
+  );
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -124,21 +134,297 @@ export default function AdminWikiPage() {
     };
   }, []);
 
-  return (
-    <div className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
-      <div className="mb-4 flex items-center justify-between gap-4">
-        <div>
-          <h2 className="mb-1 text-xl font-semibold text-zinc-900">
-            Admin Wiki
-          </h2>
-          <p className="text-sm text-zinc-600">
-            Read-only списък с Wiki статии за администратори.
-          </p>
-        </div>
-      </div>
+  useEffect(() => {
+    if (!articles.length) {
+      setLanguagesByArticleId({});
+      return;
+    }
 
+    if (typeof window === "undefined") return;
+
+    let cancelled = false;
+
+    type AdminWikiArticleVersion = {
+      id: string;
+      version: number;
+      language: string;
+      title: string;
+      createdAt: string;
+      createdBy: string | null;
+    };
+
+    const loadLanguages = async () => {
+      try {
+        const token = window.localStorage.getItem("qa4free_access_token");
+        if (!token) {
+          return;
+        }
+
+        const entries = await Promise.all(
+          articles.map(async (article) => {
+            try {
+              const res = await fetch(
+                `${API_BASE_URL}/admin/wiki/articles/${encodeURIComponent(
+                  article.id,
+                )}/versions`,
+                {
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                  },
+                },
+              );
+
+              if (!res.ok) {
+                return [article.id, [] as string[]] as const;
+              }
+
+              const data = (await res.json()) as AdminWikiArticleVersion[];
+              const uniqueLangs = Array.from(
+                new Set(
+                  (data ?? [])
+                    .map((version) => version.language)
+                    .filter((lng): lng is string => !!lng),
+                ),
+              );
+
+              return [article.id, uniqueLangs] as const;
+            } catch {
+              return [article.id, [] as string[]] as const;
+            }
+          }),
+        );
+
+        if (cancelled) return;
+
+        const next: Record<string, string[]> = {};
+        for (const [id, langs] of entries) {
+          next[id] = langs;
+        }
+        setLanguagesByArticleId(next);
+      } catch {
+        if (!cancelled) {
+          setLanguagesByArticleId({});
+        }
+      }
+    };
+
+    void loadLanguages();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [articles]);
+
+  const trimmedSearch = search.trim().toLowerCase();
+
+  const filteredArticles = articles.filter((article) => {
+    if (trimmedSearch) {
+      const inTitle = (article.title ?? "").toLowerCase().includes(trimmedSearch);
+      const inSlug = (article.slug ?? "").toLowerCase().includes(trimmedSearch);
+      if (!inTitle && !inSlug) {
+        return false;
+      }
+    }
+
+    if (statusFilter) {
+      if (article.status.toLowerCase() !== statusFilter) {
+        return false;
+      }
+    }
+
+    if (languageFilter) {
+      const langs = languagesByArticleId[article.id] ?? [];
+      if (!langs.some((lng) => lng.toLowerCase() === languageFilter)) {
+        return false;
+      }
+    }
+
+    return true;
+  });
+
+  const hasArticles = !loading && !error && filteredArticles.length > 0;
+  const noArticles = !loading && !error && filteredArticles.length === 0;
+
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const totalArticles = filteredArticles.length;
+  const totalPages = totalArticles > 0 ? Math.ceil(totalArticles / PAGE_SIZE) : 1;
+  const safeCurrentPage = Math.min(Math.max(currentPage, 1), totalPages);
+  const startIndex = (safeCurrentPage - 1) * PAGE_SIZE;
+  const endIndex = startIndex + PAGE_SIZE;
+  const pageArticles = filteredArticles.slice(startIndex, endIndex);
+  const showingFrom = totalArticles === 0 ? 0 : startIndex + 1;
+  const showingTo = Math.min(endIndex, totalArticles);
+
+  const handleToggleStatus = async (article: AdminWikiArticle) => {
+    if (typeof window === "undefined") return;
+
+    setStatusUpdateError(null);
+    setStatusUpdatingId(article.id);
+
+    const current = article.status.toLowerCase();
+    if (current !== "active" && current !== "inactive") {
+      setStatusUpdatingId(null);
+      return;
+    }
+    const nextStatus = current === "inactive" ? "active" : "inactive";
+
+    const previousArticles = articles;
+    const optimistic = articles.map((item) =>
+      item.id === article.id ? { ...item, status: nextStatus } : item,
+    );
+    setArticles(optimistic);
+
+    try {
+      const token = window.localStorage.getItem("qa4free_access_token");
+      if (!token) {
+        throw new Error("missing-token");
+      }
+
+      const res = await fetch(
+        `${API_BASE_URL}/admin/wiki/articles/${encodeURIComponent(
+          article.id,
+        )}/status`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ status: nextStatus }),
+        },
+      );
+
+      if (!res.ok) {
+        throw new Error(`failed-${res.status}`);
+      }
+    } catch {
+      setArticles(previousArticles);
+      setStatusUpdateError(
+        "Възникна грешка при промяна на статуса на статията.",
+      );
+    } finally {
+      setStatusUpdatingId(null);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Breadcrumbs and page header */}
+      <section className="space-y-4">
+        <div className="flex items-center text-sm text-gray-500">
+          <Link href="/admin" className="hover:text-green-600">
+            Admin
+          </Link>
+          <svg
+            className="mx-2 h-4 w-4 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 5l7 7-7 7"
+            />
+          </svg>
+          <span className="text-gray-900">Wiki Management</span>
+        </div>
+
+        <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
+          <div>
+            <h1 className="mb-2 text-3xl font-bold text-gray-900 md:text-4xl">
+              Wiki Management
+            </h1>
+            <p className="text-gray-600">
+              Manage all wiki articles, versions, and content
+            </p>
+          </div>
+          <Link
+            href="/admin/wiki/create"
+            className="inline-flex items-center rounded-lg bg-green-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-green-700"
+          >
+            <svg
+              className="mr-2 h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 4v16m8-8H4"
+              />
+            </svg>
+            Create New Article
+          </Link>
+        </div>
+      </section>
+
+      {/* Filters */}
+      <section className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+          <div className="md:col-span-2">
+            <div className="relative">
+              <svg
+                className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+              <input
+                type="text"
+                placeholder="Search by title or slug..."
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                className="w-full rounded-lg border border-gray-300 py-2 pl-10 pr-4 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
+            </div>
+          </div>
+
+          <div>
+            <select
+              value={languageFilter}
+              onChange={(event) => setLanguageFilter(event.target.value)}
+              className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
+            >
+              <option value="">All Languages</option>
+              <option value="bg">Bulgarian</option>
+              <option value="en">English</option>
+              <option value="de">German</option>
+            </select>
+          </div>
+
+          <div>
+            <select
+              value={statusFilter}
+              onChange={(event) => setStatusFilter(event.target.value)}
+              className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
+            >
+              <option value="">All Status</option>
+              <option value="draft">Draft</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      {/* Content state messages */}
       {loading && (
-        <p className="text-sm text-zinc-600">Зареждане на списъка...</p>
+        <p className="text-sm text-gray-600">Зареждане на списъка...</p>
       )}
 
       {!loading && error && (
@@ -147,70 +433,178 @@ export default function AdminWikiPage() {
         </p>
       )}
 
-      {!loading && !error && articles.length === 0 && (
-        <p className="text-sm text-zinc-600">
-          Няма Wiki статии за показване.
+      {statusUpdateError && (
+        <p className="text-sm text-red-600" role="alert">
+          {statusUpdateError}
         </p>
       )}
 
-      {!loading && !error && articles.length > 0 && (
-        <div className="overflow-x-auto">
-          <table className="min-w-full table-fixed border-collapse text-sm">
-            <thead>
-              <tr className="border-b border-zinc-200 bg-zinc-50 text-left text-xs font-medium uppercase tracking-wide text-zinc-500">
-                <th className="px-3 py-2 align-middle">Slug</th>
-                <th className="px-3 py-2 align-middle">Title</th>
-                <th className="px-3 py-2 align-middle">Status</th>
-                <th className="px-3 py-2 align-middle">Updated</th>
-                <th className="px-3 py-2 align-middle">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {articles.map((article) => {
-                const badge = getStatusBadge(article.status);
+      {noArticles && !error && (
+        <p className="text-sm text-gray-600">Няма Wiki статии за показване.</p>
+      )}
+
+      {hasArticles && (
+        <section className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="border-b border-gray-200 bg-gray-50">
+                <tr>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                    Title
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                    Slug
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                    Languages
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                    Status
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                    Last Updated
+                  </th>
+                  <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {pageArticles.map((article) => {
+                  const badge = getStatusBadge(article.status);
+                  const langs = languagesByArticleId[article.id] ?? [];
+                  const isUpdating = statusUpdatingId === article.id;
+                  const normalizedStatus = article.status.toLowerCase();
+                  const isInactive = normalizedStatus === "inactive";
+                  const canToggleStatus =
+                    normalizedStatus === "active" || normalizedStatus === "inactive";
+
+                  return (
+                    <tr key={article.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 align-top">
+                        <div className="font-medium text-gray-900">
+                          {article.title}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          ID: {article.id}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 align-middle text-sm text-gray-600">
+                        {article.slug}
+                      </td>
+                      <td className="px-6 py-4 align-middle">
+                        {langs.length > 0 ? (
+                          <div className="flex flex-wrap gap-1">
+                            {langs.map((lng) => (
+                              <span
+                                key={lng}
+                                className="rounded bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700"
+                              >
+                                {lng.toUpperCase()}
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="text-xs text-gray-400">—</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 align-middle">
+                        <span
+                          className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${badge.className}`}
+                        >
+                          {badge.label}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 align-middle text-sm text-gray-600">
+                        {formatDateTime(article.updatedAt)}
+                      </td>
+                      <td className="px-6 py-4 align-middle text-right text-sm">
+                        <Link
+                          href={`/admin/wiki/${article.slug}/edit`}
+                          className="mr-3 font-medium text-blue-600 hover:text-blue-700"
+                        >
+                          Edit
+                        </Link>
+                        <Link
+                          href={`/admin/wiki/${article.slug}/edit#versions`}
+                          className="mr-3 font-medium text-purple-600 hover:text-purple-700"
+                        >
+                          Versions
+                        </Link>
+                        {canToggleStatus && (
+                          <button
+                            type="button"
+                            disabled={isUpdating}
+                            onClick={() => void handleToggleStatus(article)}
+                            className={`font-medium ${
+                              isInactive
+                                ? "text-green-600 hover:text-green-700"
+                                : "text-orange-600 hover:text-orange-700"
+                            } ${isUpdating ? "cursor-not-allowed opacity-60" : ""}`}
+                          >
+                            {isUpdating
+                              ? "Updating..."
+                              : isInactive
+                              ? "Activate"
+                              : "Deactivate"}
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="flex items-center justify-between border-t border-gray-200 px-6 py-4">
+            <p className="text-sm text-gray-600">
+              Showing <span className="font-semibold">{showingFrom}</span>
+              -
+              <span className="font-semibold">{showingTo}</span> of{" "}
+              <span className="font-semibold">{totalArticles}</span> articles
+            </p>
+            <div className="flex items-center space-x-2">
+              <button
+                type="button"
+                onClick={() => setCurrentPage((page) => Math.max(page - 1, 1))}
+                className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-500 disabled:cursor-not-allowed disabled:opacity-60"
+                disabled={safeCurrentPage === 1}
+              >
+                Previous
+              </button>
+              {Array.from({ length: totalPages }, (_, index) => {
+                const pageNumber = index + 1;
+                const isActive = pageNumber === safeCurrentPage;
 
                 return (
-                  <tr
-                    key={article.id}
-                    className="border-b border-zinc-100 last:border-b-0 hover:bg-zinc-50"
+                  <button
+                    key={pageNumber}
+                    type="button"
+                    onClick={() => setCurrentPage(pageNumber)}
+                    className={
+                      isActive
+                        ? "rounded-lg bg-green-600 px-3 py-2 text-sm font-semibold text-white"
+                        : "rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                    }
                   >
-                    <td className="px-3 py-2 align-middle font-mono text-xs text-zinc-700">
-                      <Link
-                        href={`/wiki/${article.slug}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="hover:underline"
-                      >
-                        {article.slug}
-                      </Link>
-                    </td>
-                    <td className="px-3 py-2 align-middle text-zinc-900">
-                      {article.title}
-                    </td>
-                    <td className="px-3 py-2 align-middle">
-                      <span
-                        className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${badge.className}`}
-                      >
-                        {badge.label}
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 align-middle text-zinc-700">
-                      {formatDateTime(article.updatedAt)}
-                    </td>
-                    <td className="px-3 py-2 align-middle text-right">
-                      <Link
-                        href={`/admin/wiki/${article.slug}/edit`}
-                        className="text-sm font-medium text-green-700 hover:text-green-900 hover:underline"
-                      >
-                        Редактирай
-                      </Link>
-                    </td>
-                  </tr>
+                    {pageNumber}
+                  </button>
                 );
               })}
-            </tbody>
-          </table>
-        </div>
+              <button
+                type="button"
+                onClick={() =>
+                  setCurrentPage((page) => Math.min(page + 1, totalPages))
+                }
+                className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 disabled:cursor-not-allowed disabled:opacity-60"
+                disabled={safeCurrentPage === totalPages}
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        </section>
       )}
     </div>
   );

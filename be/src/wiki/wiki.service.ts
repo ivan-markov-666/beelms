@@ -97,16 +97,9 @@ export class WikiService {
     q?: string,
     lang?: string,
   ): Promise<AdminWikiListItemDto[]> {
-    const safePage = page && page > 0 ? page : 1;
-    const safePageSize = pageSize && pageSize > 0 ? pageSize : 20;
-    const skip = (safePage - 1) * safePageSize;
-    const take = safePageSize;
-
     const articles = await this.articleRepo.find({
       relations: ['versions'],
       order: { updatedAt: 'DESC' },
-      skip,
-      take,
     });
 
     const items: AdminWikiListItemDto[] = [];
@@ -219,6 +212,17 @@ export class WikiService {
       status: article.status,
       updatedAt: updatedAt.toISOString(),
     };
+  }
+
+  async adminUpdateArticleStatus(id: string, status: string): Promise<void> {
+    const article = await this.articleRepo.findOne({ where: { id } });
+
+    if (!article) {
+      throw new NotFoundException('Article not found');
+    }
+
+    article.status = status;
+    await this.articleRepo.save(article);
   }
 
   async adminUpdateArticle(

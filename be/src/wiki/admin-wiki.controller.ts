@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   HttpCode,
+  Patch,
   Post,
   Param,
   Put,
@@ -18,6 +19,7 @@ import { AdminWikiListItemDto } from './dto/admin-wiki-list-item.dto';
 import { AdminUpdateWikiArticleDto } from './dto/admin-update-wiki-article.dto';
 import { WikiArticleDetailDto } from './dto/wiki-article-detail.dto';
 import { AdminWikiArticleVersionDto } from './dto/admin-wiki-article-version.dto';
+import { AdminUpdateWikiStatusDto } from './dto/admin-update-wiki-status.dto';
 
 @Controller('admin/wiki')
 @UseGuards(JwtAuthGuard, AdminGuard)
@@ -45,6 +47,15 @@ export class AdminWikiController {
   ): Promise<WikiArticleDetailDto> {
     const userId = req.user?.userId ?? null;
     return this.wikiService.adminUpdateArticle(id, dto, userId);
+  }
+
+  @Patch('articles/:id/status')
+  @HttpCode(204)
+  async updateArticleStatus(
+    @Param('id') id: string,
+    @Body() dto: AdminUpdateWikiStatusDto,
+  ): Promise<void> {
+    await this.wikiService.adminUpdateArticleStatus(id, dto.status);
   }
 
   @Get('articles/:id/versions')
