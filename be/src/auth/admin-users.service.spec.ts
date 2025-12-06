@@ -68,7 +68,11 @@ describe('AdminUsersService', () => {
 
     (qb.getMany as jest.Mock).mockResolvedValue(users);
 
-    const result = await service.getAdminUsersList(undefined, undefined, undefined);
+    const result = await service.getAdminUsersList(
+      undefined,
+      undefined,
+      undefined,
+    );
 
     expect(usersRepo.createQueryBuilder).toHaveBeenCalledWith('user');
     expect(qb.skip).toHaveBeenCalledWith(0); // (page 1 - 1) * 20 default pageSize
@@ -89,9 +93,9 @@ describe('AdminUsersService', () => {
     await service.getAdminUsersList(2, 10, ' Test@Example.COM ');
 
     expect(qb.where).toHaveBeenCalledTimes(1);
-    const [condition, params] = (qb.where as jest.Mock).mock.calls[0];
-    expect(condition).toBe('LOWER(user.email) LIKE :q');
-    expect(params).toEqual({ q: '%test@example.com%' });
+    expect(qb.where).toHaveBeenCalledWith('LOWER(user.email) LIKE :q', {
+      q: '%test@example.com%',
+    });
     expect(qb.skip).toHaveBeenCalledWith((2 - 1) * 10);
     expect(qb.take).toHaveBeenCalledWith(10);
   });

@@ -9,7 +9,12 @@ import { WikiArticleVersion } from './wiki-article-version.entity';
 
 describe('WikiService', () => {
   let service: WikiService;
-  let articleRepo: { find: jest.Mock; findOne: jest.Mock; save: jest.Mock };
+  let articleRepo: {
+    find: jest.Mock;
+    findOne: jest.Mock;
+    save: jest.Mock;
+    create: jest.Mock;
+  };
   let versionRepo: {
     find: jest.Mock;
     findOne: jest.Mock;
@@ -27,6 +32,7 @@ describe('WikiService', () => {
             find: jest.fn(),
             findOne: jest.fn(),
             save: jest.fn(),
+            create: jest.fn((entity) => entity),
           },
         },
         {
@@ -656,7 +662,7 @@ describe('WikiService', () => {
   });
 
   describe('restoreArticleVersionForAdmin', () => {
-    it('creates a new version based on target version and returns updated article detail', async () => {
+    it('updates the target version as the current one and returns updated article detail', async () => {
       const now = new Date('2023-01-01T00:00:00Z');
 
       (articleRepo.findOne as jest.Mock).mockResolvedValue({
@@ -673,10 +679,6 @@ describe('WikiService', () => {
         title: 'Rollback title',
         content: 'Rollback content',
       } as unknown as WikiArticleVersion);
-
-      (versionRepo.find as jest.Mock).mockResolvedValue([
-        { versionNumber: 1 } as WikiArticleVersion,
-      ]);
 
       const savedCreatedAt = new Date('2023-01-02T00:00:00Z');
 
@@ -696,12 +698,11 @@ describe('WikiService', () => {
 
       expect(articleRepo.findOne).toHaveBeenCalledTimes(1);
       expect(versionRepo.findOne).toHaveBeenCalledTimes(1);
-      expect(versionRepo.find).toHaveBeenCalledTimes(1);
       expect(versionRepo.save).toHaveBeenCalledTimes(1);
 
       const savedArg = (versionRepo.save as jest.Mock).mock
         .calls[0][0] as WikiArticleVersion;
-      expect(savedArg.versionNumber).toBe(2);
+      expect(savedArg.versionNumber).toBe(1);
       expect(savedArg.language).toBe('bg');
       expect(savedArg.title).toBe('Rollback title');
       expect(savedArg.content).toBe('Rollback content');
