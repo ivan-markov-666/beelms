@@ -181,6 +181,18 @@ export const messages: Messages = {
       adminUsersStatsLoading: "Зареждане на статистиките за потребителите...",
       adminUsersStatsError:
         "Възникна грешка при зареждане на статистиките за потребителите.",
+      adminWikiStatsTotal: "Общо Wiki статии",
+      adminWikiStatsActive: "Активни",
+      adminWikiStatsDraft: "Чернови",
+      adminWikiStatsInactive: "Неактивни",
+      adminWikiStatsActiveHelper:
+        "Само активните статии са видими за потребителите в публичното Wiki.",
+      adminWikiStatsTotalHelper:
+        "Всички Wiki статии (активни, чернови и неактивни).",
+      adminWikiStatsDraftHelper:
+        "Чернови – видими само в Admin Wiki, докато не станат активни.",
+      adminWikiStatsInactiveHelper:
+        "Неактивни – скрити от публичното Wiki, могат да бъдат активирани отново.",
       adminDashboardTitle: "Админ табло",
       adminDashboardSubtitle:
         "Системен преглед и инструменти за управление.",
@@ -195,6 +207,7 @@ export const messages: Messages = {
       adminDashboardTabWiki: "Wiki",
       adminDashboardTabUsers: "Потребители",
       adminDashboardTabMetrics: "Метрики",
+      adminDashboardTabActivity: "Активност",
       adminDashboardCardUsersTitle: "Регистрирани потребители",
       adminDashboardCardUsersTrend: "+12% спрямо миналия месец",
       adminDashboardCardUsersTrendSuffix: "спрямо миналия месец",
@@ -226,6 +239,67 @@ export const messages: Messages = {
       adminDashboardRecentItem4Prefix: "Деактивиран е потребител:",
       adminDashboardRecentItem4Detail: "[email protected]",
       adminDashboardRecentItem4Time: "Преди 2 дни",
+      adminDashboardRecentActivityViewAll: "Виж всички",
+      adminActivityTitle: "Активност",
+      adminActivitySubtitle:
+        "Последни промени във Wiki статиите и потребителските акаунти.",
+      adminActivitySearchPlaceholder:
+        "Търсене по обект, извършител или тип...",
+      adminActivityFilterTypeLabel: "Тип",
+      adminActivityFilterActionLabel: "Действие",
+      adminActivityFilterTypeAll: "Всички типове",
+      adminActivityFilterTypeWiki: "Wiki",
+      adminActivityFilterTypeUser: "Потребители",
+      adminActivityFilterActionAll: "Всички действия",
+      adminActivityFilterActionArticleCreated: "Създадена статия",
+      adminActivityFilterActionArticleUpdated: "Обновена статия",
+      adminActivityFilterActionUserRegistered: "Регистриран потребител",
+      adminActivityFilterActionUserDeactivated: "Деактивиран потребител",
+      adminActivityLoading: "Зареждане на последната активност...",
+      adminActivityError:
+        "Възникна грешка при зареждане на последната активност.",
+      adminActivityEmpty: "Няма записана активност за показване.",
+      adminActivityColTime: "Време",
+      adminActivityColType: "Тип",
+      adminActivityColAction: "Действие",
+      adminActivityColSubject: "Обект",
+      adminActivityColActor: "Извършител",
+      adminActivityTypeWiki: "Wiki",
+      adminActivityTypeUser: "Потребител",
+      adminActivityActionArticleCreated: "Създадена статия",
+      adminActivityActionArticleUpdated: "Обновена статия",
+      adminActivityActionUserRegistered: "Регистриран потребител",
+      adminActivityActionUserDeactivated: "Деактивиран потребител",
+      adminActivityFilterRangeAll: "Всички периоди",
+      adminActivityFilterRangeLastDay: "Последен ден",
+      adminActivityFilterRangeLastWeek: "Последна седмица",
+      adminActivityFilterRangeLastMonth: "Последен месец",
+      adminActivityFilterRangeLastYear: "Последна година",
+      adminActivityFilterRangeCustom: "Период по избор",
+      adminActivityFilterRangeFrom: "От дата",
+      adminActivityFilterRangeTo: "До дата",
+      adminActivityFooterCountPrefix: "Показани",
+      adminActivityFooterCountOf: "от",
+      adminActivityFooterCountSuffix:
+        "записа в избрания период и филтри",
+      adminActivityExportButton: "Експорт на всички (CSV)",
+      adminMetricsUsersTrendTitle:
+        "Нови потребители по месеци (последни периоди)",
+      adminMetricsUserActivityTitle: "Активност за избрания период",
+      adminMetricsUserActivityRegisteredLink:
+        "Виж потребителите (Users)",
+      adminMetricsUserActivityDeactivatedLink:
+        "Виж деактивираните (Users)",
+      adminMetricsUserActivityArticleCreatedLink:
+        "Виж новите статии (Wiki)",
+      adminMetricsUserActivityArticleUpdatedLink:
+        "Виж обновените статии (Wiki)",
+      adminMetricsNetUsersChangeZero:
+        "Няма нетна промяна в броя потребители за избрания период.",
+      adminMetricsNetUsersChangePositiveSuffix:
+        "нетни нови потребители за избрания период.",
+      adminMetricsNetUsersChangeNegativeSuffix:
+        "нетни загубени потребители за избрания период.",
       legalFooterDisclaimer:
         "QA4Free е учебна платформа. Вижте страниците за Условия за ползване и Политика за поверителност за повече детайли.",
       legalFooterPrivacyLink: "Политика за поверителност (Privacy/GDPR)",
@@ -411,6 +485,18 @@ export const messages: Messages = {
       adminUsersStatsLoading: "Loading user statistics...",
       adminUsersStatsError:
         "An error occurred while loading user statistics.",
+      adminWikiStatsTotal: "Total articles",
+      adminWikiStatsActive: "Active",
+      adminWikiStatsDraft: "Draft",
+      adminWikiStatsInactive: "Inactive",
+      adminWikiStatsActiveHelper:
+        "Only active articles are visible in the public Wiki.",
+      adminWikiStatsTotalHelper:
+        "All wiki articles (active, draft and inactive).",
+      adminWikiStatsDraftHelper:
+        "Drafts – visible only in Admin Wiki until they are published.",
+      adminWikiStatsInactiveHelper:
+        "Inactive – hidden from the public Wiki but can be reactivated.",
       adminDashboardTitle: "Admin Dashboard",
       adminDashboardSubtitle: "System overview and management tools",
       adminDashboardMetricsTitle: "Total users",
@@ -424,6 +510,7 @@ export const messages: Messages = {
       adminDashboardTabWiki: "Wiki",
       adminDashboardTabUsers: "Users",
       adminDashboardTabMetrics: "Metrics",
+      adminDashboardTabActivity: "Activity",
       adminDashboardCardUsersTitle: "Registered Users",
       adminDashboardCardUsersTrend: "+12% from last month",
       adminDashboardCardUsersTrendSuffix: "from last month",
@@ -455,6 +542,66 @@ export const messages: Messages = {
       adminDashboardRecentItem4Prefix: "User deactivated:",
       adminDashboardRecentItem4Detail: "[email protected]",
       adminDashboardRecentItem4Time: "2 days ago",
+      adminDashboardRecentActivityViewAll: "View all",
+      adminActivityTitle: "Activity log",
+      adminActivitySubtitle:
+        "Recent changes in wiki articles and user accounts.",
+      adminActivitySearchPlaceholder:
+        "Search by subject, actor or type...",
+      adminActivityFilterTypeLabel: "Type",
+      adminActivityFilterActionLabel: "Action",
+      adminActivityFilterTypeAll: "All types",
+      adminActivityFilterTypeWiki: "Wiki",
+      adminActivityFilterTypeUser: "Users",
+      adminActivityFilterActionAll: "All actions",
+      adminActivityFilterActionArticleCreated: "Article created",
+      adminActivityFilterActionArticleUpdated: "Article updated",
+      adminActivityFilterActionUserRegistered: "User registered",
+      adminActivityFilterActionUserDeactivated: "User deactivated",
+      adminActivityLoading: "Loading recent activity...",
+      adminActivityError: "Failed to load recent activity.",
+      adminActivityEmpty: "There is no activity to display.",
+      adminActivityColTime: "Time",
+      adminActivityColType: "Type",
+      adminActivityColAction: "Action",
+      adminActivityColSubject: "Subject",
+      adminActivityColActor: "Actor",
+      adminActivityTypeWiki: "Wiki",
+      adminActivityTypeUser: "User",
+      adminActivityActionArticleCreated: "Article created",
+      adminActivityActionArticleUpdated: "Article updated",
+      adminActivityActionUserRegistered: "User registered",
+      adminActivityActionUserDeactivated: "User deactivated",
+      adminActivityFilterRangeAll: "All time",
+      adminActivityFilterRangeLastDay: "Last day",
+      adminActivityFilterRangeLastWeek: "Last week",
+      adminActivityFilterRangeLastMonth: "Last month",
+      adminActivityFilterRangeLastYear: "Last year",
+      adminActivityFilterRangeCustom: "Custom period",
+      adminActivityFilterRangeFrom: "From date",
+      adminActivityFilterRangeTo: "To date",
+      adminActivityFooterCountPrefix: "Showing",
+      adminActivityFooterCountOf: "of",
+      adminActivityFooterCountSuffix:
+        "entries for selected period and filters",
+      adminActivityExportButton: "Export all (CSV)",
+      adminMetricsUsersTrendTitle:
+        "New users per month (recent periods)",
+      adminMetricsUserActivityTitle: "Activity for selected period",
+      adminMetricsUserActivityRegisteredLink:
+        "View users (Users)",
+      adminMetricsUserActivityDeactivatedLink:
+        "View deactivated (Users)",
+      adminMetricsUserActivityArticleCreatedLink:
+        "View new articles (Wiki)",
+      adminMetricsUserActivityArticleUpdatedLink:
+        "View updated articles (Wiki)",
+      adminMetricsNetUsersChangeZero:
+        "No net change in users for the selected period.",
+      adminMetricsNetUsersChangePositiveSuffix:
+        "net new users for the selected period.",
+      adminMetricsNetUsersChangeNegativeSuffix:
+        "net lost users for the selected period.",
       legalFooterDisclaimer:
         "QA4Free is a learning platform. See the Terms of Use and Privacy Policy pages for more details.",
       legalFooterPrivacyLink: "Privacy Policy (GDPR)",
@@ -587,6 +734,18 @@ export const messages: Messages = {
       accountDeletedSecondaryCta: "Zu den Wiki-Artikeln",
     },
     common: {
+      adminWikiStatsTotal: "Wiki-Artikel gesamt",
+      adminWikiStatsActive: "Aktiv",
+      adminWikiStatsDraft: "Entwürfe",
+      adminWikiStatsInactive: "Inaktiv",
+      adminWikiStatsActiveHelper:
+        "Nur aktive Artikel sind im öffentlichen Wiki sichtbar.",
+      adminWikiStatsTotalHelper:
+        "Alle Wiki-Artikel (aktiv, Entwurf und inaktiv).",
+      adminWikiStatsDraftHelper:
+        "Entwürfe – nur im Admin-Wiki sichtbar, bis sie veröffentlicht werden.",
+      adminWikiStatsInactiveHelper:
+        "Inaktiv – im öffentlichen Wiki ausgeblendet, kann wieder aktiviert werden.",
       adminDashboardTitle: "Admin-Dashboard",
       adminDashboardSubtitle:
         "Systemübersicht und Administrationswerkzeuge.",
@@ -602,6 +761,7 @@ export const messages: Messages = {
       adminDashboardTabWiki: "Wiki",
       adminDashboardTabUsers: "Benutzer",
       adminDashboardTabMetrics: "Metriken",
+      adminDashboardTabActivity: "Aktivitäten",
       adminDashboardCardUsersTitle: "Registrierte Benutzer",
       adminDashboardCardUsersTrend: "+12 % im Vergleich zum Vormonat",
       adminDashboardCardUsersTrendSuffix: "im Vergleich zum Vormonat",
@@ -634,6 +794,67 @@ export const messages: Messages = {
       adminDashboardRecentItem4Prefix: "Benutzer deaktiviert:",
       adminDashboardRecentItem4Detail: "[email protected]",
       adminDashboardRecentItem4Time: "Vor 2 Tagen",
+      adminDashboardRecentActivityViewAll: "Alle anzeigen",
+      adminActivityTitle: "Aktivitätsprotokoll",
+      adminActivitySubtitle:
+        "Neueste Änderungen an Wiki-Artikeln und Benutzerkonten.",
+      adminActivitySearchPlaceholder:
+        "Suche nach Objekt, Akteur oder Typ...",
+      adminActivityFilterTypeLabel: "Typ",
+      adminActivityFilterActionLabel: "Aktion",
+      adminActivityFilterTypeAll: "Alle Typen",
+      adminActivityFilterTypeWiki: "Wiki",
+      adminActivityFilterTypeUser: "Benutzer",
+      adminActivityFilterActionAll: "Alle Aktionen",
+      adminActivityFilterActionArticleCreated: "Artikel erstellt",
+      adminActivityFilterActionArticleUpdated: "Artikel aktualisiert",
+      adminActivityFilterActionUserRegistered: "Benutzer registriert",
+      adminActivityFilterActionUserDeactivated: "Benutzer deaktiviert",
+      adminActivityLoading: "Letzte Aktivitäten werden geladen...",
+      adminActivityError:
+        "Beim Laden der letzten Aktivitäten ist ein Fehler aufgetreten.",
+      adminActivityEmpty: "Es sind keine Aktivitäten zum Anzeigen vorhanden.",
+      adminActivityColTime: "Zeit",
+      adminActivityColType: "Typ",
+      adminActivityColAction: "Aktion",
+      adminActivityColSubject: "Objekt",
+      adminActivityColActor: "Akteur",
+      adminActivityTypeWiki: "Wiki",
+      adminActivityTypeUser: "Benutzer",
+      adminActivityActionArticleCreated: "Artikel erstellt",
+      adminActivityActionArticleUpdated: "Artikel aktualisiert",
+      adminActivityActionUserRegistered: "Benutzer registriert",
+      adminActivityActionUserDeactivated: "Benutzer deaktiviert",
+      adminActivityFilterRangeAll: "Gesamter Zeitraum",
+      adminActivityFilterRangeLastDay: "Letzter Tag",
+      adminActivityFilterRangeLastWeek: "Letzte Woche",
+      adminActivityFilterRangeLastMonth: "Letzter Monat",
+      adminActivityFilterRangeLastYear: "Letztes Jahr",
+      adminActivityFilterRangeCustom: "Benutzerdefinierter Zeitraum",
+      adminActivityFilterRangeFrom: "Von Datum",
+      adminActivityFilterRangeTo: "Bis Datum",
+      adminActivityFooterCountPrefix: "Es werden",
+      adminActivityFooterCountOf: "von",
+      adminActivityFooterCountSuffix:
+        "Einträgen für den ausgewählten Zeitraum und die Filter angezeigt",
+      adminActivityExportButton: "Alle exportieren (CSV)",
+      adminMetricsUsersTrendTitle:
+        "Neue Benutzer pro Monat (letzte Zeiträume)",
+      adminMetricsUserActivityTitle: "Aktivität für den ausgewählten Zeitraum",
+      adminMetricsUserActivityRegisteredLink:
+        "Benutzer anzeigen (Users)",
+      adminMetricsUserActivityDeactivatedLink:
+        "Deaktivierte anzeigen (Users)",
+      adminMetricsUserActivityArticleCreatedLink:
+        "Neue Artikel anzeigen (Wiki)",
+      adminMetricsUserActivityArticleUpdatedLink:
+        "Aktualisierte Artikel anzeigen (Wiki)",
+      adminMetricsNetUsersChangeZero:
+        "Keine Nettoänderung der Benutzerzahl für den ausgewählten Zeitraum.",
+      adminMetricsNetUsersChangePositiveSuffix:
+        "Netto-Neunutzer im ausgewählten Zeitraum.",
+      adminMetricsNetUsersChangeNegativeSuffix:
+        "Netto-Verlust an Nutzern im ausgewählten Zeitraum.",
       footerAboutLink: "Über",
       footerContactLink: "Kontakt",
     },
