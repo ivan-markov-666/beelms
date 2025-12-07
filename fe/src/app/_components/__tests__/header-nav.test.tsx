@@ -2,13 +2,22 @@ import { render, screen, waitFor } from "@testing-library/react";
 import * as nextNavigation from "next/navigation";
 import { HeaderNav } from "../header-nav";
 
-jest.mock("next/navigation", () => ({
-  useSearchParams: jest.fn(),
-  usePathname: jest.fn(),
-}));
+jest.mock("next/navigation", () => {
+  const actual = jest.requireActual("next/navigation");
+  return {
+    ...actual,
+    useSearchParams: jest.fn(),
+    usePathname: jest.fn(),
+    useRouter: jest.fn(),
+  };
+});
 
 const useSearchParamsMock = nextNavigation.useSearchParams as jest.Mock;
 const usePathnameMock = nextNavigation.usePathname as jest.Mock;
+const useRouterMock = nextNavigation.useRouter as jest.Mock;
+
+// Provide a default router object so LanguageSwitcher can call router.push safely
+useRouterMock.mockReturnValue({ push: jest.fn() });
 
 function makeSearchParams(query: string) {
   return new URLSearchParams(query) as unknown as URLSearchParams;

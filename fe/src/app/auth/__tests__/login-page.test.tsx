@@ -35,7 +35,7 @@ describe("LoginPage", () => {
     render(<LoginPage />);
 
     expect(await screen.findByLabelText("Имейл")).toBeInTheDocument();
-    expect(await screen.findByLabelText("Парола")).toBeInTheDocument();
+    expect(await screen.findByLabelText(/Парола/)).toBeInTheDocument();
     expect(
       await screen.findByRole("button", { name: "Вход" }),
     ).toBeInTheDocument();
@@ -46,7 +46,7 @@ describe("LoginPage", () => {
     render(<LoginPage />);
 
     const emailInput = await screen.findByLabelText("Имейл");
-    const passwordInput = await screen.findByLabelText("Парола");
+    const passwordInput = await screen.findByLabelText(/Парола/);
     const submitButton = await screen.findByRole("button", { name: "Вход" });
 
     fireEvent.change(emailInput, { target: { value: "invalid-email" } });
@@ -65,7 +65,7 @@ describe("LoginPage", () => {
     render(<LoginPage />);
 
     const emailInput = screen.getByLabelText("Имейл");
-    const passwordInput = screen.getByLabelText("Парола");
+    const passwordInput = screen.getByLabelText(/Парола/);
     const submitButton = screen.getByRole("button", { name: "Вход" });
 
     fireEvent.change(emailInput, { target: { value: "user@example.com" } });
@@ -87,7 +87,7 @@ describe("LoginPage", () => {
     render(<LoginPage />);
 
     const emailInput = screen.getByLabelText("Имейл");
-    const passwordInput = screen.getByLabelText("Парола");
+    const passwordInput = screen.getByLabelText(/Парола/);
     const submitButton = screen.getByRole("button", { name: "Вход" });
 
     fireEvent.change(emailInput, { target: { value: "user@example.com" } });

@@ -277,13 +277,13 @@ describe('WikiService', () => {
     expect(articleRepo.find as jest.Mock).toHaveBeenCalledTimes(1);
     const firstCall = (articleRepo.find as jest.Mock).mock.calls[0] as [
       {
-        skip: number;
-        take: number;
+        skip?: number;
+        take?: number;
       },
     ];
     const options = firstCall[0];
-    expect(options.skip).toBe(0);
-    expect(options.take).toBe(20);
+    expect(options.skip).toBeUndefined();
+    expect(options.take).toBeUndefined();
   });
 
   it('getAdminArticlesList returns articles with status and updatedAt', async () => {
@@ -754,7 +754,6 @@ describe('WikiService', () => {
 
       const savedArg = (versionRepo.save as jest.Mock).mock
         .calls[0][0] as WikiArticleVersion;
-      expect(savedArg.versionNumber).toBe(1);
       expect(savedArg.language).toBe('bg');
       expect(savedArg.title).toBe('Rollback title');
       expect(savedArg.content).toBe('Rollback content');

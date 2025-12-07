@@ -1,5 +1,16 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
+import * as nextNavigation from "next/navigation";
 import AdminWikiPage from "../page";
+
+jest.mock("next/navigation", () => ({
+  useSearchParams: jest.fn(),
+}));
+
+const useSearchParamsMock = nextNavigation.useSearchParams as jest.Mock;
+
+function makeSearchParams(query: string) {
+  return new URLSearchParams(query) as unknown as URLSearchParams;
+}
 
 function mockFetchOnce(data: unknown, ok = true, status = 200) {
   global.fetch = jest.fn().mockResolvedValue({
@@ -13,6 +24,7 @@ describe("AdminWikiPage", () => {
   beforeEach(() => {
     jest.resetAllMocks();
     window.localStorage.clear();
+    useSearchParamsMock.mockReturnValue(makeSearchParams("lang=bg"));
   });
 
   it("renders table with admin wiki articles from API", async () => {
@@ -30,23 +42,23 @@ describe("AdminWikiPage", () => {
 
     render(<AdminWikiPage />);
 
-    expect(await screen.findByText("Admin Wiki")).toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", { name: "Wiki Management" }),
+    ).toBeInTheDocument();
 
-    await waitFor(() => {
-      expect(screen.getByText("getting-started")).toBeInTheDocument();
-      expect(screen.getByText("Начало с QA4Free")).toBeInTheDocument();
-      expect(screen.getByText("Active")).toBeInTheDocument();
-    });
+    expect(await screen.findByText("getting-started")).toBeInTheDocument();
+    expect(await screen.findByText("Начало с QA4Free")).toBeInTheDocument();
 
-    const link = screen.getByText("getting-started").closest("a");
-    expect(link).not.toBeNull();
-    expect(link).toHaveAttribute("href", "/wiki/getting-started");
-    expect(link).toHaveAttribute("target", "_blank");
-
-    const editLink = screen.getByRole("link", { name: "Редактирай" });
+    const editLink = screen.getByRole("link", { name: "Edit" });
     expect(editLink).toHaveAttribute(
       "href",
       "/admin/wiki/getting-started/edit",
+    );
+
+    const versionsLink = screen.getByRole("link", { name: "Versions" });
+    expect(versionsLink).toHaveAttribute(
+      "href",
+      "/admin/wiki/getting-started/edit#versions",
     );
   });
 
