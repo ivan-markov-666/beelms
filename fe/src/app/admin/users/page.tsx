@@ -7,6 +7,7 @@ import {
   useState,
 } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useCurrentLang } from "../../../i18n/useCurrentLang";
 import { t } from "../../../i18n/t";
 
@@ -66,6 +67,7 @@ function getUserInitials(email: string): string {
 
 export default function AdminUsersPage() {
   const lang = useCurrentLang();
+  const searchParams = useSearchParams();
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -79,6 +81,24 @@ export default function AdminUsersPage() {
   const [stats, setStats] = useState<AdminUsersStats | null>(null);
   const [statsError, setStatsError] = useState<string | null>(null);
   const [statsLoading, setStatsLoading] = useState(false);
+  const [didInitFromQuery, setDidInitFromQuery] = useState(false);
+
+  useEffect(() => {
+    if (didInitFromQuery) return;
+
+    const statusParam = (searchParams.get("status") ?? "").toLowerCase();
+    const roleParam = (searchParams.get("role") ?? "").toLowerCase();
+
+    if (statusParam === "active" || statusParam === "deactivated") {
+      setStatusFilter(statusParam);
+    }
+
+    if (roleParam === "user" || roleParam === "admin") {
+      setRoleFilter(roleParam);
+    }
+
+    setDidInitFromQuery(true);
+  }, [searchParams, didInitFromQuery]);
 
   const loadUsers = useCallback(
     async (options?: {
@@ -349,38 +369,118 @@ export default function AdminUsersPage() {
         )}
 
         {stats && !statsError && (
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
             <div className="rounded-lg border border-zinc-200 bg-white p-4">
-              <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
-                {t(lang, "common", "adminUsersStatsTotal")}
-              </p>
-              <p className="mt-1 text-2xl font-semibold text-zinc-900">
-                {stats.totalUsers}
-              </p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+                    {t(lang, "common", "adminUsersStatsTotal")}
+                  </p>
+                  <p className="mt-1 text-2xl font-semibold text-zinc-900">
+                    {stats.totalUsers}
+                  </p>
+                </div>
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50">
+                  <svg
+                    className="h-5 w-5 text-blue-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M17 20v-2a4 4 0 00-4-4H7a4 4 0 00-4 4v2m18 0v-2a4 4 0 00-3-3.87M9 10a4 4 0 110-8 4 4 0 010 8zm6 0a4 4 0 10-.88-7.88"
+                    />
+                  </svg>
+                </div>
+              </div>
             </div>
             <div className="rounded-lg border border-zinc-200 bg-white p-4">
-              <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
-                {t(lang, "common", "adminUsersStatsActive")}
-              </p>
-              <p className="mt-1 text-2xl font-semibold text-green-700">
-                {stats.activeUsers}
-              </p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+                    {t(lang, "common", "adminUsersStatsActive")}
+                  </p>
+                  <p className="mt-1 text-2xl font-semibold text-green-700">
+                    {stats.activeUsers}
+                  </p>
+                </div>
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-50">
+                  <svg
+                    className="h-5 w-5 text-green-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12l2 2 4-4m5 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                </div>
+              </div>
             </div>
             <div className="rounded-lg border border-zinc-200 bg-white p-4">
-              <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
-                {t(lang, "common", "adminUsersStatsDeactivated")}
-              </p>
-              <p className="mt-1 text-2xl font-semibold text-orange-600">
-                {stats.deactivatedUsers}
-              </p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+                    {t(lang, "common", "adminUsersStatsDeactivated")}
+                  </p>
+                  <p className="mt-1 text-2xl font-semibold text-orange-600">
+                    {stats.deactivatedUsers}
+                  </p>
+                </div>
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-50">
+                  <svg
+                    className="h-5 w-5 text-orange-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M18.364 5.636L5.636 18.364M5.636 5.636L18.364 18.364"
+                    />
+                  </svg>
+                </div>
+              </div>
             </div>
             <div className="rounded-lg border border-zinc-200 bg-white p-4">
-              <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
-                {t(lang, "common", "adminUsersStatsAdmins")}
-              </p>
-              <p className="mt-1 text-2xl font-semibold text-purple-700">
-                {stats.adminUsers}
-              </p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+                    {t(lang, "common", "adminUsersStatsAdmins")}
+                  </p>
+                  <p className="mt-1 text-2xl font-semibold text-purple-700">
+                    {stats.adminUsers}
+                  </p>
+                </div>
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-50">
+                  <svg
+                    className="h-5 w-5 text-purple-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 2l7 4v6c0 5-3.5 9.5-7 10-3.5-.5-7-5-7-10V6l7-4zm0 0v20"
+                    />
+                  </svg>
+                </div>
+              </div>
             </div>
           </div>
         )}

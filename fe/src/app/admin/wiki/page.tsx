@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useCurrentLang } from "../../../i18n/useCurrentLang";
+import { t } from "../../../i18n/t";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
@@ -64,6 +66,7 @@ function getStatusBadge(status: string): { label: string; className: string } {
 
 export default function AdminWikiPage() {
   const headerLang = useCurrentLang();
+  const searchParams = useSearchParams();
   const [articles, setArticles] = useState<AdminWikiArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -86,6 +89,7 @@ export default function AdminWikiPage() {
   );
   const [deleteArticleSubmitting, setDeleteArticleSubmitting] =
     useState(false);
+  const [didInitFromQuery, setDidInitFromQuery] = useState(false);
 
   const deleteArticleTarget =
     deleteArticleStep2Id == null
@@ -93,6 +97,18 @@ export default function AdminWikiPage() {
       : articles.find((article) => article.id === deleteArticleStep2Id) ?? null;
 
   useEffect(() => {
+    if (!didInitFromQuery) {
+      const statusParam = (searchParams.get("status") ?? "").toLowerCase();
+      if (
+        statusParam === "draft" ||
+        statusParam === "active" ||
+        statusParam === "inactive"
+      ) {
+        setStatusFilter(statusParam);
+      }
+      setDidInitFromQuery(true);
+    }
+
     if (typeof window === "undefined") return;
 
     let cancelled = false;
@@ -154,7 +170,7 @@ export default function AdminWikiPage() {
     return () => {
       cancelled = true;
     };
-  }, [languageFilter, headerLang]);
+  }, [languageFilter, headerLang, didInitFromQuery, searchParams]);
 
   useEffect(() => {
     if (!articles.length) {
@@ -330,6 +346,17 @@ export default function AdminWikiPage() {
     }
   };
 
+  const metricsTotalArticles = articles.length;
+  const metricsActiveArticles = articles.filter(
+    (article) => article.status.toLowerCase() === "active",
+  ).length;
+  const metricsDraftArticles = articles.filter(
+    (article) => article.status.toLowerCase() === "draft",
+  ).length;
+  const metricsInactiveArticles = articles.filter(
+    (article) => article.status.toLowerCase() === "inactive",
+  ).length;
+
   return (
     <div className="space-y-6">
       {/* Breadcrumbs and page header */}
@@ -386,6 +413,136 @@ export default function AdminWikiPage() {
           </Link>
         </div>
       </section>
+
+      {/* Stats cards */}
+      {!loading && !error && metricsTotalArticles > 0 && (
+        <section className="grid grid-cols-1 gap-4 md:grid-cols-4">
+          <div className="rounded-lg border border-gray-200 bg-white p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                  {t(headerLang, "common", "adminWikiStatsTotal")}
+                </p>
+                <p className="mt-1 text-2xl font-semibold text-gray-900">
+                  {metricsTotalArticles}
+                </p>
+                <p className="mt-1 text-[11px] text-gray-500">
+                  {t(headerLang, "common", "adminWikiStatsTotalHelper")}
+                </p>
+              </div>
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50">
+                <svg
+                  className="h-5 w-5 text-blue-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 4h16v4H4zM4 10h9v4H4zM4 16h16v4H4z"
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
+          <div className="rounded-lg border border-gray-200 bg-white p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                  {t(headerLang, "common", "adminWikiStatsActive")}
+                </p>
+                <p className="mt-1 text-2xl font-semibold text-green-700">
+                  {metricsActiveArticles}
+                </p>
+                <p className="mt-1 text-[11px] text-gray-500">
+                  {t(headerLang, "common", "adminWikiStatsActiveHelper")}
+                </p>
+              </div>
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-50">
+                <svg
+                  className="h-5 w-5 text-green-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12l2 2 4-4m5 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
+          <div className="rounded-lg border border-gray-200 bg-white p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                  {t(headerLang, "common", "adminWikiStatsDraft")}
+                </p>
+                <p className="mt-1 text-2xl font-semibold text-amber-700">
+                  {metricsDraftArticles}
+                </p>
+                <p className="mt-1 text-[11px] text-gray-500">
+                  {t(headerLang, "common", "adminWikiStatsDraftHelper")}
+                </p>
+              </div>
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-50">
+                <svg
+                  className="h-5 w-5 text-amber-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15.232 5.232l3.536 3.536M4 13.5V19h5.5L19 9.5l-5.5-5.5L4 13.5z"
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
+          <div className="rounded-lg border border-gray-200 bg-white p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                  {t(headerLang, "common", "adminWikiStatsInactive")}
+                </p>
+                <p className="mt-1 text-2xl font-semibold text-gray-700">
+                  {metricsInactiveArticles}
+                </p>
+                <p className="mt-1 text-[11px] text-gray-500">
+                  {t(headerLang, "common", "adminWikiStatsInactiveHelper")}
+                </p>
+              </div>
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100">
+                <svg
+                  className="h-5 w-5 text-gray-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 8v4l3 3m5-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Filters */}
       <section className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">

@@ -15,50 +15,62 @@ type MetricsOverview = {
   usersChangePercentSinceLastMonth: number | null;
 };
 
-type RecentActivityItem = {
-  id: string;
-  dotClass: string;
-  prefixKey: string;
-  detailKey: string;
-  timeKey: string;
+type ActivityType = "wiki" | "user";
+type ActivityAction =
+  | "article_created"
+  | "article_updated"
+  | "user_registered"
+  | "user_deactivated";
+
+type AdminActivityItem = {
+  occurredAt: string;
+  type: ActivityType;
+  action: ActivityAction;
+  entityId: string;
+  entityLabel: string;
+  actorLabel: string | null;
 };
 
-const STATIC_RECENT_ACTIVITY: RecentActivityItem[] = [
-  {
-    id: "article-created",
-    dotClass: "bg-green-500",
-    prefixKey: "adminDashboardRecentItem1Prefix",
-    detailKey: "adminDashboardRecentItem1Detail",
-    timeKey: "adminDashboardRecentItem1Time",
-  },
-  {
-    id: "user-registered",
-    dotClass: "bg-blue-500",
-    prefixKey: "adminDashboardRecentItem2Prefix",
-    detailKey: "adminDashboardRecentItem2Detail",
-    timeKey: "adminDashboardRecentItem2Time",
-  },
-  {
-    id: "article-updated",
-    dotClass: "bg-yellow-500",
-    prefixKey: "adminDashboardRecentItem3Prefix",
-    detailKey: "adminDashboardRecentItem3Detail",
-    timeKey: "adminDashboardRecentItem3Time",
-  },
-  {
-    id: "user-deactivated",
-    dotClass: "bg-red-500",
-    prefixKey: "adminDashboardRecentItem4Prefix",
-    detailKey: "adminDashboardRecentItem4Detail",
-    timeKey: "adminDashboardRecentItem4Time",
-  },
-];
+function formatActivityDateTime(value: string): string {
+  try {
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return value;
+    return d.toLocaleString("bg-BG", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch {
+    return value;
+  }
+}
+
+function getActivityDotClass(action: ActivityAction): string {
+  if (action === "article_created") return "bg-green-500";
+  if (action === "user_registered") return "bg-blue-500";
+  if (action === "article_updated") return "bg-yellow-500";
+  if (action === "user_deactivated") return "bg-red-500";
+  return "bg-gray-400";
+}
+
+function getActivityPrefixKey(action: ActivityAction): string {
+  if (action === "article_created") return "adminDashboardRecentItem1Prefix";
+  if (action === "user_registered") return "adminDashboardRecentItem2Prefix";
+  if (action === "article_updated") return "adminDashboardRecentItem3Prefix";
+  if (action === "user_deactivated") return "adminDashboardRecentItem4Prefix";
+  return "adminDashboardRecentItem1Prefix";
+}
 
 export default function AdminHomePage() {
   const lang = useCurrentLang();
   const [metrics, setMetrics] = useState<MetricsOverview | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activity, setActivity] = useState<AdminActivityItem[]>([]);
+  const [activityLoading, setActivityLoading] = useState(true);
+  const [activityError, setActivityError] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -110,6 +122,62 @@ export default function AdminHomePage() {
     };
 
     void loadMetrics();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [lang]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    let cancelled = false;
+
+    const loadActivity = async () => {
+      setActivityLoading(true);
+      setActivityError(null);
+
+      try {
+        const token = window.localStorage.getItem("qa4free_access_token");
+        if (!token) {
+          if (!cancelled) {
+            setActivity([]);
+            setActivityLoading(false);
+          }
+          return;
+        }
+
+        const res = await fetch(`${API_BASE_URL}/admin/activity`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!res.ok) {
+          if (!cancelled) {
+            setActivityError(
+              t(lang, "common", "adminDashboardMetricsError"),
+            );
+            setActivityLoading(false);
+          }
+          return;
+        }
+
+        const data = (await res.json()) as AdminActivityItem[];
+
+        if (cancelled) return;
+
+        setActivity(Array.isArray(data) ? data.slice(0, 4) : []);
+        setActivityLoading(false);
+      } catch {
+        if (!cancelled) {
+          setActivityError(t(lang, "common", "adminDashboardMetricsError"));
+          setActivityLoading(false);
+        }
+      }
+    };
+
+    void loadActivity();
 
     return () => {
       cancelled = true;
@@ -201,6 +269,14 @@ export default function AdminHomePage() {
               className="inline-block border-b-2 border-transparent pb-3 text-gray-600 transition hover:border-green-400 hover:text-green-700"
             >
               {t(lang, "common", "adminDashboardTabMetrics")}
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/admin/activity"
+              className="inline-block border-b-2 border-transparent pb-3 text-gray-600 transition hover:border-green-400 hover:text-green-700"
+            >
+              {t(lang, "common", "adminDashboardTabActivity")}
             </Link>
           </li>
         </ul>
@@ -429,36 +505,70 @@ export default function AdminHomePage() {
 
       {/* Recent Activity */}
       <section className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-        <h2 className="mb-4 text-xl font-bold text-gray-900">
-          {t(lang, "common", "adminDashboardRecentActivityTitle")}
-        </h2>
-        <div className="space-y-4">
-          {STATIC_RECENT_ACTIVITY.map((item, index) => (
-            <div
-              key={item.id}
-              className={`flex items-start space-x-3 ${
-                index !== STATIC_RECENT_ACTIVITY.length - 1
-                  ? "border-b border-gray-100 pb-4"
-                  : ""
-              }`}
-            >
-              <div
-                className={`mt-2 h-2 w-2 rounded-full ${item.dotClass}`}
-              />
-              <div className="flex-grow">
-                <p className="text-sm text-gray-900">
-                  <span className="font-semibold">
-                    {t(lang, "common", item.prefixKey)}
-                  </span>{" "}
-                  {t(lang, "common", item.detailKey)}
-                </p>
-                <p className="mt-1 text-xs text-gray-500">
-                  {t(lang, "common", item.timeKey)}
-                </p>
-              </div>
-            </div>
-          ))}
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-xl font-bold text-gray-900">
+            {t(lang, "common", "adminDashboardRecentActivityTitle")}
+          </h2>
+          <Link
+            href="/admin/activity"
+            className="text-sm font-medium text-green-700 hover:text-green-800"
+          >
+            {t(lang, "common", "adminDashboardRecentActivityViewAll")}
+          </Link>
         </div>
+
+        {activityLoading && !activityError && (
+          <p className="text-sm text-gray-500">
+            Задържане на последните събития...
+          </p>
+        )}
+
+        {!activityLoading && activityError && (
+          <p className="text-sm text-red-600" role="alert">
+            {activityError}
+          </p>
+        )}
+
+        {!activityLoading && !activityError && activity.length === 0 && (
+          <p className="text-sm text-gray-500">
+            Няма записана активност за показване.
+          </p>
+        )}
+
+        {!activityLoading && !activityError && activity.length > 0 && (
+          <div className="space-y-4">
+            {activity.map((item, index) => {
+              const dotClass = getActivityDotClass(item.action);
+              const prefixKey = getActivityPrefixKey(item.action);
+
+              return (
+                <div
+                  key={`${item.occurredAt}-${item.type}-${item.action}-${item.entityId}-${index}`}
+                  className={`flex items-start space-x-3 ${
+                    index !== activity.length - 1
+                      ? "border-b border-gray-100 pb-4"
+                      : ""
+                  }`}
+                >
+                  <div
+                    className={`mt-2 h-2 w-2 rounded-full ${dotClass}`}
+                  />
+                  <div className="flex-grow">
+                    <p className="text-sm text-gray-900">
+                      <span className="font-semibold">
+                        {t(lang, "common", prefixKey)}
+                      </span>{" "}
+                      {item.entityLabel}
+                    </p>
+                    <p className="mt-1 text-xs text-gray-500">
+                      {formatActivityDateTime(item.occurredAt)}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </section>
     </div>
   );

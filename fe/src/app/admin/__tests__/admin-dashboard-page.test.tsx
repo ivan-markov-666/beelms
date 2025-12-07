@@ -22,15 +22,35 @@ describe("AdminHomePage (Dashboard)", () => {
   it("renders metrics card with total users from API", async () => {
     window.localStorage.setItem("qa4free_access_token", "test-token");
 
-    global.fetch = jest.fn().mockResolvedValueOnce({
-      ok: true,
-      status: 200,
-      json: async () => ({
-        totalUsers: 42,
-        totalArticles: 0,
-        topArticles: [],
-      }),
-    } as unknown as Response);
+    global.fetch = jest.fn().mockImplementation((input: RequestInfo) => {
+      const url = typeof input === "string" ? input : String(input);
+
+      if (url.includes("/admin/metrics/overview")) {
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: async () => ({
+            totalUsers: 42,
+            totalArticles: 0,
+            topArticles: [],
+          }),
+        } as unknown as Response);
+      }
+
+      if (url.includes("/admin/activity")) {
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: async () => [],
+        } as unknown as Response);
+      }
+
+      return Promise.resolve({
+        ok: true,
+        status: 200,
+        json: async () => ({}),
+      } as unknown as Response);
+    });
 
     render(<AdminHomePage />);
 
@@ -45,11 +65,31 @@ describe("AdminHomePage (Dashboard)", () => {
   it("shows error message when metrics API call fails", async () => {
     window.localStorage.setItem("qa4free_access_token", "test-token");
 
-    global.fetch = jest.fn().mockResolvedValueOnce({
-      ok: false,
-      status: 500,
-      json: async () => ({}),
-    } as unknown as Response);
+    global.fetch = jest.fn().mockImplementation((input: RequestInfo) => {
+      const url = typeof input === "string" ? input : String(input);
+
+      if (url.includes("/admin/metrics/overview")) {
+        return Promise.resolve({
+          ok: false,
+          status: 500,
+          json: async () => ({}),
+        } as unknown as Response);
+      }
+
+      if (url.includes("/admin/activity")) {
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: async () => [],
+        } as unknown as Response);
+      }
+
+      return Promise.resolve({
+        ok: true,
+        status: 200,
+        json: async () => ({}),
+      } as unknown as Response);
+    });
 
     render(<AdminHomePage />);
 
@@ -61,15 +101,35 @@ describe("AdminHomePage (Dashboard)", () => {
   it("renders quick links to admin wiki and users", async () => {
     window.localStorage.setItem("qa4free_access_token", "test-token");
 
-    global.fetch = jest.fn().mockResolvedValueOnce({
-      ok: true,
-      status: 200,
-      json: async () => ({
-        totalUsers: 1,
-        totalArticles: 0,
-        topArticles: [],
-      }),
-    } as unknown as Response);
+    global.fetch = jest.fn().mockImplementation((input: RequestInfo) => {
+      const url = typeof input === "string" ? input : String(input);
+
+      if (url.includes("/admin/metrics/overview")) {
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: async () => ({
+            totalUsers: 1,
+            totalArticles: 0,
+            topArticles: [],
+          }),
+        } as unknown as Response);
+      }
+
+      if (url.includes("/admin/activity")) {
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: async () => [],
+        } as unknown as Response);
+      }
+
+      return Promise.resolve({
+        ok: true,
+        status: 200,
+        json: async () => ({}),
+      } as unknown as Response);
+    });
 
     render(<AdminHomePage />);
 
