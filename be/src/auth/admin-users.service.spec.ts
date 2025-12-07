@@ -22,6 +22,7 @@ describe('AdminUsersService', () => {
       skip: jest.fn().mockReturnThis(),
       take: jest.fn().mockReturnThis(),
       where: jest.fn().mockReturnThis(),
+      andWhere: jest.fn().mockReturnThis(),
       getMany: jest.fn(),
     } as unknown as jest.Mocked<SelectQueryBuilder<User>>;
 
@@ -34,6 +35,7 @@ describe('AdminUsersService', () => {
             createQueryBuilder: jest.fn().mockReturnValue(qb),
             findOne: jest.fn(),
             save: jest.fn(),
+            count: jest.fn(),
           },
         },
       ],
@@ -68,7 +70,11 @@ describe('AdminUsersService', () => {
 
     (qb.getMany as jest.Mock).mockResolvedValue(users);
 
-    const result = await service.getAdminUsersList(undefined, undefined, undefined);
+    const result = await service.getAdminUsersList(
+      undefined,
+      undefined,
+      undefined,
+    );
 
     expect(usersRepo.createQueryBuilder).toHaveBeenCalledWith('user');
     expect(qb.skip).toHaveBeenCalledWith(0); // (page 1 - 1) * 20 default pageSize
@@ -89,11 +95,38 @@ describe('AdminUsersService', () => {
     await service.getAdminUsersList(2, 10, ' Test@Example.COM ');
 
     expect(qb.where).toHaveBeenCalledTimes(1);
-    const [condition, params] = (qb.where as jest.Mock).mock.calls[0];
-    expect(condition).toBe('LOWER(user.email) LIKE :q');
-    expect(params).toEqual({ q: '%test@example.com%' });
+    expect(qb.where).toHaveBeenCalledWith('LOWER(user.email) LIKE :q', {
+      q: '%test@example.com%',
+    });
     expect(qb.skip).toHaveBeenCalledWith((2 - 1) * 10);
     expect(qb.take).toHaveBeenCalledWith(10);
+  });
+
+  it('getAdminUsersList applies active status filter when status is active without q', async () => {
+    (qb.getMany as jest.Mock).mockResolvedValue([]);
+
+    await service.getAdminUsersList(1, 20, undefined, 'active');
+
+    expect(qb.where).toHaveBeenCalledWith('user.active = :active', {
+      active: true,
+    });
+    expect(qb.andWhere).not.toHaveBeenCalled();
+  });
+
+  it('getAdminUsersList combines q, status and role filters', async () => {
+    (qb.getMany as jest.Mock).mockResolvedValue([]);
+
+    await service.getAdminUsersList(1, 20, ' ADMIN ', 'deactivated', 'admin');
+
+    expect(qb.where).toHaveBeenCalledWith('LOWER(user.email) LIKE :q', {
+      q: '%admin%',
+    });
+    expect(qb.andWhere).toHaveBeenCalledWith('user.active = :active', {
+      active: false,
+    });
+    expect(qb.andWhere).toHaveBeenCalledWith('user.role = :role', {
+      role: 'admin',
+    });
   });
 
   it('updateUserActive updates active flag when user exists', async () => {
@@ -122,5 +155,30 @@ describe('AdminUsersService', () => {
     await expect(service.updateUserActive('missing-id', false)).rejects.toThrow(
       'User not found',
     );
+  });
+
+  it('getAdminUsersStats returns aggregated counts', async () => {
+    (usersRepo.count as jest.Mock)
+      .mockResolvedValueOnce(10) // total
+      .mockResolvedValueOnce(7) // active
+      .mockResolvedValueOnce(3); // admins
+
+    const result = await service.getAdminUsersStats();
+
+    expect(usersRepo.count).toHaveBeenCalledTimes(3);
+    expect(usersRepo.count).toHaveBeenNthCalledWith(1);
+    expect(usersRepo.count).toHaveBeenNthCalledWith(2, {
+      where: { active: true },
+    });
+    expect(usersRepo.count).toHaveBeenNthCalledWith(3, {
+      where: { role: 'admin' },
+    });
+
+    expect(result).toEqual({
+      totalUsers: 10,
+      activeUsers: 7,
+      deactivatedUsers: 3,
+      adminUsers: 3,
+    });
   });
 });

@@ -12,7 +12,7 @@ export class TrainingController {
 
   @Post('echo')
   @HttpCode(200)
-  echo(@Body() body: unknown) {
+  echo(@Body() body: unknown): unknown {
     return this.trainingService.echo(body);
   }
 }

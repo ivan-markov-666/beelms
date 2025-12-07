@@ -174,6 +174,13 @@ export const messages: Messages = {
       adminUsersStatusActive: "Active",
       adminUsersStatusInactive: "Inactive",
       adminUsersStatusUpdating: "Обновяване...",
+      adminUsersStatsTotal: "Общо потребители",
+      adminUsersStatsActive: "Активни",
+      adminUsersStatsDeactivated: "Изтрити/деактивирани",
+      adminUsersStatsAdmins: "Админи",
+      adminUsersStatsLoading: "Зареждане на статистиките за потребителите...",
+      adminUsersStatsError:
+        "Възникна грешка при зареждане на статистиките за потребителите.",
       adminDashboardTitle: "Админ табло",
       adminDashboardSubtitle:
         "Системен преглед и инструменти за управление.",
@@ -397,6 +404,13 @@ export const messages: Messages = {
       adminUsersStatusActive: "Active",
       adminUsersStatusInactive: "Inactive",
       adminUsersStatusUpdating: "Updating...",
+      adminUsersStatsTotal: "Total users",
+      adminUsersStatsActive: "Active",
+      adminUsersStatsDeactivated: "Deleted / inactive",
+      adminUsersStatsAdmins: "Admins",
+      adminUsersStatsLoading: "Loading user statistics...",
+      adminUsersStatsError:
+        "An error occurred while loading user statistics.",
       adminDashboardTitle: "Admin Dashboard",
       adminDashboardSubtitle: "System overview and management tools",
       adminDashboardMetricsTitle: "Total users",

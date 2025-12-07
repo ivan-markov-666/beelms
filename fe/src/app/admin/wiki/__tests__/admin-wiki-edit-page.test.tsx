@@ -57,6 +57,8 @@ describe("AdminWikiEditPage", () => {
   });
 
   it("renders edit form with loaded article data", async () => {
+    window.localStorage.setItem("qa4free_access_token", "test-token");
+
     const article = makeArticle();
 
     const fetchMock = jest
@@ -102,20 +104,35 @@ describe("AdminWikiEditPage", () => {
 
     const fetchMock = jest
       .fn()
+      // load article
       .mockResolvedValueOnce({
         ok: true,
         status: 200,
         json: async () => initialArticle,
       } as unknown as Response)
+      // load media
       .mockResolvedValueOnce({
         ok: true,
         status: 200,
         json: async () => [],
       } as unknown as Response)
+      // load versions (initial)
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => [],
+      } as unknown as Response)
+      // PUT update
       .mockResolvedValueOnce({
         ok: true,
         status: 200,
         json: async () => updatedArticle,
+      } as unknown as Response)
+      // reload versions after save
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => [],
       } as unknown as Response);
 
     global.fetch = fetchMock as unknown as typeof fetch;
@@ -212,6 +229,11 @@ describe("AdminWikiEditPage", () => {
       .mockResolvedValueOnce({
         ok: true,
         status: 200,
+        json: async () => [],
+      } as unknown as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
         json: async () => versions,
       } as unknown as Response);
 
@@ -241,6 +263,11 @@ describe("AdminWikiEditPage", () => {
       makeVersion({
         id: "version-1",
         version: 1,
+        title: "Първа версия",
+      }),
+      makeVersion({
+        id: "version-2",
+        version: 2,
         title: "Стара версия",
       }),
     ];
@@ -255,6 +282,11 @@ describe("AdminWikiEditPage", () => {
         ok: true,
         status: 200,
         json: async () => initialArticle,
+      } as unknown as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => [],
       } as unknown as Response)
       .mockResolvedValueOnce({
         ok: true,
@@ -313,7 +345,10 @@ describe("AdminWikiEditPage", () => {
     window.localStorage.setItem("qa4free_access_token", "test-token");
 
     const initialArticle = makeArticle();
-    const versions = [makeVersion()];
+    const versions = [
+      makeVersion({ id: "version-1", version: 1, title: "Първа версия" }),
+      makeVersion({ id: "version-2", version: 2, title: "Втора версия" }),
+    ];
 
     const fetchMock = jest
       .fn()
@@ -321,6 +356,11 @@ describe("AdminWikiEditPage", () => {
         ok: true,
         status: 200,
         json: async () => initialArticle,
+      } as unknown as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => [],
       } as unknown as Response)
       .mockResolvedValueOnce({
         ok: true,
@@ -384,7 +424,10 @@ describe("AdminWikiEditPage", () => {
     window.localStorage.setItem("qa4free_access_token", "test-token");
 
     const initialArticle = makeArticle();
-    const versions = [makeVersion()];
+    const versions = [
+      makeVersion({ id: "version-1", version: 1, title: "Първа версия" }),
+      makeVersion({ id: "version-2", version: 2, title: "Втора версия" }),
+    ];
 
     const fetchMock = jest
       .fn()
@@ -392,6 +435,11 @@ describe("AdminWikiEditPage", () => {
         ok: true,
         status: 200,
         json: async () => initialArticle,
+      } as unknown as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => [],
       } as unknown as Response)
       .mockResolvedValueOnce({
         ok: true,
@@ -428,7 +476,10 @@ describe("AdminWikiEditPage", () => {
     window.localStorage.setItem("qa4free_access_token", "test-token");
 
     const initialArticle = makeArticle();
-    const versions = [makeVersion()];
+    const versions = [
+      makeVersion({ id: "version-1", version: 1, title: "Първа версия" }),
+      makeVersion({ id: "version-2", version: 2, title: "Втора версия" }),
+    ];
 
     const fetchMock = jest
       .fn()
@@ -436,6 +487,11 @@ describe("AdminWikiEditPage", () => {
         ok: true,
         status: 200,
         json: async () => initialArticle,
+      } as unknown as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => [],
       } as unknown as Response)
       .mockResolvedValueOnce({
         ok: true,

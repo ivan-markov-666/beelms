@@ -41,14 +41,13 @@ describe("AdminLayout", () => {
       </AdminLayout>,
     );
 
-    expect(await screen.findByText("Admin зона")).toBeInTheDocument();
-    expect(screen.getByText("Admin content")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText("Admin content")).toBeInTheDocument();
+    });
     expect(
-      screen.getByRole("link", { name: "Admin Wiki" }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: "Admin Users" }),
-    ).toBeInTheDocument();
+      screen.queryByText("Нямате достъп до Admin зоната"),
+    ).not.toBeInTheDocument();
+    expect(mockReplace).not.toHaveBeenCalled();
   });
 
   it("redirects to login when token is missing", async () => {

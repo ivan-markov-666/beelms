@@ -120,6 +120,23 @@ erDiagram
 - Версиите са по език (`language`) и номер на версия (`version_number`).
 - Admin панелът работи основно с версиите (създаване, редакция, rollback).
 
+#### 3.2.1. Admin Wiki потоци върху модела
+
+- **Списък /admin/wiki**
+  - използва `WikiArticle` + последната версия по `created_at` за избрания език, за да показва `title`, `status` и `updatedAt`.
+- **Създаване на статия (/admin/wiki/create, POST /api/admin/wiki/articles)**
+  - създава един запис в `WIKI_ARTICLE` (slug + status);
+  - за всеки избран език създава по един запис в `WIKI_ARTICLE_VERSION` с `version_number = 1`;
+  - `is_published = true` само когато `status = 'active'`.
+- **Редакция на съдържание (/admin/wiki/[slug]/edit, PUT /api/admin/wiki/articles/{id})**
+  - не променя съществуващите записи, а добавя **нова версия** в `WIKI_ARTICLE_VERSION` със `version_number = max+1` за дадения език;
+  - актуализира `status` на `WIKI_ARTICLE` (draft/active/inactive) и флага `is_published` на новата версия.
+- **Промяна на статус само (PATCH /api/admin/wiki/articles/{id}/status)**
+  - актуализира само колоната `status` в `WIKI_ARTICLE` без да създава нова версия.
+- **История и rollback**
+  - `GET /api/admin/wiki/articles/{id}/versions` чете всички редове от `WIKI_ARTICLE_VERSION` за даден `article_id`;
+  - `POST /api/admin/wiki/articles/{id}/versions/{versionId}/restore` създава **нова** версия, базирана на съдържанието на избраната историческа версия ("rollback"), с увеличен `version_number`.
+
 ### 3.3. Task и TaskResult
 
 - `Task` описва практическа задача (заглавие, описание, тип, трудност и др.).

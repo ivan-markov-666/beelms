@@ -34,9 +34,9 @@ describe("ResetPasswordPage", () => {
 
     render(<ResetPasswordPage />);
 
-    const newPasswordInput = await screen.findByLabelText("Нова парола");
+    const newPasswordInput = await screen.findByLabelText(/Нова парола/);
     const confirmNewPasswordInput = await screen.findByLabelText(
-      "Потвърди новата парола",
+      /Потвърди новата парола/,
     );
     const submitButton = await screen.findByRole("button", {
       name: "Смени паролата",
@@ -61,9 +61,9 @@ describe("ResetPasswordPage", () => {
 
     render(<ResetPasswordPage />);
 
-    const newPasswordInput = await screen.findByLabelText("Нова парола");
+    const newPasswordInput = await screen.findByLabelText(/Нова парола/);
     const confirmNewPasswordInput = await screen.findByLabelText(
-      "Потвърди новата парола",
+      /Потвърди новата парола/,
     );
     const submitButton = await screen.findByRole("button", {
       name: "Смени паролата",
@@ -98,9 +98,9 @@ describe("ResetPasswordPage", () => {
 
     render(<ResetPasswordPage />);
 
-    const newPasswordInput = await screen.findByLabelText("Нова парола");
+    const newPasswordInput = await screen.findByLabelText(/Нова парола/);
     const confirmNewPasswordInput = await screen.findByLabelText(
-      "Потвърди новата парола",
+      /Потвърди новата парола/,
     );
     const submitButton = await screen.findByRole("button", {
       name: "Смени паролата",
@@ -133,9 +133,9 @@ describe("ResetPasswordPage", () => {
 
     render(<ResetPasswordPage />);
 
-    const newPasswordInput = await screen.findByLabelText("Нова парола");
+    const newPasswordInput = await screen.findByLabelText(/Нова парола/);
     const confirmNewPasswordInput = await screen.findByLabelText(
-      "Потвърди новата парола",
+      /Потвърди новата парола/,
     );
     const submitButton = await screen.findByRole("button", {
       name: "Смени паролата",
@@ -170,9 +170,9 @@ describe("ResetPasswordPage", () => {
 
     render(<ResetPasswordPage />);
 
-    const newPasswordInput = await screen.findByLabelText("Нова парола");
+    const newPasswordInput = await screen.findByLabelText(/Нова парола/);
     const confirmNewPasswordInput = await screen.findByLabelText(
-      "Потвърди новата парола",
+      /Потвърди новата парола/,
     );
     const submitButton = await screen.findByRole("button", {
       name: "Смени паролата",

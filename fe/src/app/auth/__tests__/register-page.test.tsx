@@ -36,9 +36,9 @@ describe("RegisterPage", () => {
 
     render(<RegisterPage />);
 
-    const emailInput = await screen.findByLabelText("Имейл");
-    const passwordInput = await screen.findByLabelText("Парола");
-    const confirmPasswordInput = await screen.findByLabelText("Потвърди паролата");
+    const emailInput = await screen.findByLabelText(/Имейл/);
+    const passwordInput = await screen.findByLabelText(/Парола/);
+    const confirmPasswordInput = await screen.findByLabelText(/Потвърди паролата/);
     const submitButton = await screen.findByRole("button", {
       name: "Регистрация",
     });
@@ -77,12 +77,12 @@ describe("RegisterPage", () => {
 
     render(<RegisterPage />);
 
-    const emailInput = await screen.findByLabelText("Имейл");
-    const passwordInput = await screen.findByLabelText("Парола");
-    const confirmPasswordInput = await screen.findByLabelText("Потвърди паролата");
-    const termsCheckbox = await screen.findByLabelText(
-      /Съгласен съм с Условията за ползване/i,
-    );
+    const emailInput = await screen.findByLabelText(/Имейл/);
+    const passwordInput = await screen.findByLabelText(/Парола/);
+    const confirmPasswordInput = await screen.findByLabelText(/Потвърди паролата/);
+    const termsCheckbox = await screen.findByRole("checkbox", {
+      name: /Съгласен съм с/i,
+    });
     const submitButton = screen.getByRole("button", { name: "Регистрация" });
 
     fireEvent.change(emailInput, { target: { value: "user@example.com" } });
@@ -110,12 +110,10 @@ describe("RegisterPage", () => {
 
     render(<RegisterPage />);
 
-    const emailInput = screen.getByLabelText("Имейл");
-    const passwordInput = screen.getByLabelText("Парола");
-    const confirmPasswordInput = screen.getByLabelText("Потвърди паролата");
-    const termsCheckbox = screen.getByLabelText(
-      /Съгласен съм с Условията за ползване/i,
-    );
+    const emailInput = screen.getByLabelText(/Имейл/);
+    const passwordInput = screen.getByLabelText(/Парола/);
+    const confirmPasswordInput = screen.getByLabelText(/Потвърди паролата/);
+    const termsCheckbox = screen.getByRole("checkbox", { name: /Съгласен съм с/i });
     const submitButton = screen.getByRole("button", { name: "Регистрация" });
 
     fireEvent.change(emailInput, { target: { value: "user@example.com" } });

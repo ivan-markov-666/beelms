@@ -8,8 +8,8 @@ export class TrainingService {
 
   // Echoes back whatever body was sent. This is useful for API exercises
   // where the client needs to verify request/response handling.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  echo(body: any): any {
+
+  echo<T>(body: T): T {
     return body;
   }
 }

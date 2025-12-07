@@ -117,7 +117,7 @@ describe("WikiPage", () => {
     render(ui);
 
     const prevLink = screen
-      .getByText("Предишна страница")
+      .getByText("Предишна")
       .closest("a");
 
     expect(prevLink).not.toBeNull();

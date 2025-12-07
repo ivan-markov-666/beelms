@@ -37,7 +37,7 @@ describe('AdminMetricsService', () => {
 
     const result: MetricsOverview = await service.getOverview();
 
-    expect(usersRepo.count).toHaveBeenCalledTimes(1);
+    expect(usersRepo.count).toHaveBeenCalledTimes(2);
     expect(result.totalUsers).toBe(5);
     expect(result.totalArticles).toBe(0);
     expect(Array.isArray(result.topArticles)).toBe(true);

@@ -34,10 +34,10 @@ describe("AdminHomePage (Dashboard)", () => {
 
     render(<AdminHomePage />);
 
-    expect(await screen.findByText("Админ табло")).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: /Админ табло/ })).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(screen.getByText("Общ брой потребители")).toBeInTheDocument();
+      expect(screen.getByText("Регистрирани потребители")).toBeInTheDocument();
       expect(screen.getByText("42")).toBeInTheDocument();
     });
   });
@@ -73,10 +73,10 @@ describe("AdminHomePage (Dashboard)", () => {
 
     render(<AdminHomePage />);
 
-    await screen.findByText("Общ брой потребители");
+    await screen.findByText("Регистрирани потребители");
 
-    const wikiLink = screen.getByRole("link", { name: "Към Admin Wiki" });
-    const usersLink = screen.getByRole("link", { name: "Към Admin Users" });
+    const wikiLink = screen.getByRole("link", { name: "Wiki" });
+    const usersLink = screen.getByRole("link", { name: "Потребители" });
 
     expect(wikiLink).toHaveAttribute("href", "/admin/wiki");
     expect(usersLink).toHaveAttribute("href", "/admin/users");
