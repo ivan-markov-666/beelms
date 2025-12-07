@@ -48,6 +48,16 @@ describe("AdminUsersPage", () => {
           },
         ],
       },
+      {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          totalUsers: 1,
+          activeUsers: 1,
+          deactivatedUsers: 0,
+          adminUsers: 1,
+        }),
+      },
     ]);
 
     render(<AdminUsersPage />);
@@ -72,6 +82,16 @@ describe("AdminUsersPage", () => {
         status: 200,
         json: async () => [],
       },
+      {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          totalUsers: 0,
+          activeUsers: 0,
+          deactivatedUsers: 0,
+          adminUsers: 0,
+        }),
+      },
     ]);
 
     render(<AdminUsersPage />);
@@ -90,6 +110,16 @@ describe("AdminUsersPage", () => {
         status: 500,
         json: async () => [],
       },
+      {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          totalUsers: 0,
+          activeUsers: 0,
+          deactivatedUsers: 0,
+          adminUsers: 0,
+        }),
+      },
     ]);
 
     render(<AdminUsersPage />);
@@ -104,11 +134,31 @@ describe("AdminUsersPage", () => {
   it("filters users by email when search is submitted", async () => {
     window.localStorage.setItem("qa4free_access_token", "test-token");
 
-    const fetchMock = jest.fn().mockResolvedValueOnce({
-      ok: true,
-      status: 200,
-      json: async () => [],
-    } as unknown as Response);
+    const fetchMock = jest
+      .fn()
+      // initial users list
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => [],
+      } as unknown as Response)
+      // stats
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          totalUsers: 0,
+          activeUsers: 0,
+          deactivatedUsers: 0,
+          adminUsers: 0,
+        }),
+      } as unknown as Response)
+      // filtered users list
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => [],
+      } as unknown as Response);
 
     global.fetch = fetchMock;
 
@@ -147,6 +197,17 @@ describe("AdminUsersPage", () => {
           },
         ],
       } as unknown as Response)
+      // stats GET
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          totalUsers: 1,
+          activeUsers: 1,
+          deactivatedUsers: 0,
+          adminUsers: 1,
+        }),
+      } as unknown as Response)
       // PATCH
       .mockResolvedValueOnce({
         ok: true,
@@ -173,7 +234,7 @@ describe("AdminUsersPage", () => {
       ).toBeInTheDocument();
     });
 
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock).toHaveBeenCalledTimes(3);
     expect(fetchMock).toHaveBeenLastCalledWith(
       expect.stringContaining("/admin/users/1"),
       expect.objectContaining({ method: "PATCH" }),
@@ -198,6 +259,17 @@ describe("AdminUsersPage", () => {
             createdAt: "2025-11-25T00:00:00.000Z",
           },
         ],
+      } as unknown as Response)
+      // stats GET
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          totalUsers: 1,
+          activeUsers: 1,
+          deactivatedUsers: 0,
+          adminUsers: 1,
+        }),
       } as unknown as Response)
       // failing PATCH
       .mockResolvedValueOnce({
@@ -227,6 +299,150 @@ describe("AdminUsersPage", () => {
       ).toBeInTheDocument();
     });
 
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+  });
+
+  it("calls API with status filter when status dropdown changes", async () => {
+    window.localStorage.setItem("qa4free_access_token", "test-token");
+
+    const fetchMock = jest
+      .fn()
+      // initial users list
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => [],
+      } as unknown as Response)
+      // stats
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          totalUsers: 0,
+          activeUsers: 0,
+          deactivatedUsers: 0,
+          adminUsers: 0,
+        }),
+      } as unknown as Response)
+      // users list with status filter
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => [],
+      } as unknown as Response);
+
+    global.fetch = fetchMock;
+
+    render(<AdminUsersPage />);
+
+    await screen.findByText("Admin Users");
+
+    const statusSelect = await screen.findByDisplayValue("All Status");
+    fireEvent.change(statusSelect, { target: { value: "active" } });
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenLastCalledWith(
+        expect.stringContaining("status=active"),
+        expect.any(Object),
+      );
+    });
+  });
+
+  it("calls API with role filter when role dropdown changes", async () => {
+    window.localStorage.setItem("qa4free_access_token", "test-token");
+
+    const fetchMock = jest
+      .fn()
+      // initial users list
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => [],
+      } as unknown as Response)
+      // stats
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          totalUsers: 0,
+          activeUsers: 0,
+          deactivatedUsers: 0,
+          adminUsers: 0,
+        }),
+      } as unknown as Response)
+      // users list with role filter
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => [],
+      } as unknown as Response);
+
+    global.fetch = fetchMock;
+
+    render(<AdminUsersPage />);
+
+    await screen.findByText("Admin Users");
+
+    const roleSelect = await screen.findByDisplayValue("All Roles");
+    fireEvent.change(roleSelect, { target: { value: "admin" } });
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenLastCalledWith(
+        expect.stringContaining("role=admin"),
+        expect.any(Object),
+      );
+    });
+  });
+
+  it("renders avatar initials, ID and View action in the table", async () => {
+    window.localStorage.setItem("qa4free_access_token", "test-token");
+
+    mockFetchSequence([
+      {
+        ok: true,
+        status: 200,
+        json: async () => [
+          {
+            id: "1",
+            email: "john.doe@example.com",
+            role: "admin",
+            active: true,
+            createdAt: "2025-11-25T00:00:00.000Z",
+          },
+        ],
+      },
+      {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          totalUsers: 1,
+          activeUsers: 1,
+          deactivatedUsers: 0,
+          adminUsers: 1,
+        }),
+      },
+    ]);
+
+    const alertSpy = jest
+      .spyOn(window, "alert")
+      .mockImplementation(() => undefined);
+
+    render(<AdminUsersPage />);
+
+    expect(
+      await screen.findByText("john.doe@example.com"),
+    ).toBeInTheDocument();
+
+    // Avatar initials derived from local part of email
+    expect(screen.getByText("JD")).toBeInTheDocument();
+
+    // ID label under the email
+    expect(screen.getByText("ID: 1")).toBeInTheDocument();
+
+    const viewButton = screen.getByRole("button", { name: "View" });
+    fireEvent.click(viewButton);
+
+    expect(alertSpy).toHaveBeenCalledTimes(1);
+    alertSpy.mockRestore();
   });
 });
