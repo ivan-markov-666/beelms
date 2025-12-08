@@ -3,7 +3,10 @@ export class WikiArticleDetailDto {
   slug: string;
   language: string;
   title: string;
+  subtitle?: string;
   content: string;
   status: string;
+  articleStatus?: string;
+  languageStatus?: string;
   updatedAt: string;
 }

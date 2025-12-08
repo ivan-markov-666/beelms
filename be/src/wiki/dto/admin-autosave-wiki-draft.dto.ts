@@ -12,4 +12,8 @@ export class AdminAutosaveWikiDraftDto {
   @IsString()
   @IsOptional()
   content?: string;
+
+  @IsString()
+  @IsOptional()
+  subtitle?: string;
 }

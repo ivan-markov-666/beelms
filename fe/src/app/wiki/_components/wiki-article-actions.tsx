@@ -47,7 +47,7 @@ export function WikiArticleActions({ title, lang }: WikiArticleActionsProps) {
       <div className="flex flex-wrap gap-2">
         <button
           type="button"
-          className="inline-flex items-center rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-800 shadow-sm hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:ring-offset-1 dark:border-zinc-600 dark:text-zinc-50 dark:hover:bg-zinc-800"
+          className="inline-flex items-center rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-xs font-medium text-zinc-800 shadow-sm hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:ring-offset-1"
           onClick={handleShare}
         >
           {t(lang, "wiki", "articleShareButton")}

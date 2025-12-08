@@ -3,7 +3,9 @@ export class AdminWikiArticleVersionDto {
   version: number;
   language: string;
   title: string;
+  subtitle?: string;
   content: string;
   createdAt: string;
   createdBy: string | null;
+  status: string;
 }

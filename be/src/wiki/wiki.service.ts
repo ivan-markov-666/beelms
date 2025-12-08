@@ -253,13 +253,28 @@ export class WikiService {
     const updatedAt =
       latest.createdAt ?? article.updatedAt ?? article.createdAt ?? new Date();
 
+    const articleStatus = article.status;
+    const isLangPublished = !!latest.isPublished;
+    let languageStatus = articleStatus;
+
+    if (articleStatus === 'inactive') {
+      languageStatus = 'inactive';
+    } else if (isLangPublished) {
+      languageStatus = 'active';
+    } else {
+      languageStatus = 'draft';
+    }
+
     return {
       id: article.id,
       slug: article.slug,
       language: latest.language,
       title: latest.title,
+      subtitle: latest.subtitle ?? undefined,
       content: latest.content,
-      status: article.status,
+      status: articleStatus,
+      articleStatus,
+      languageStatus,
       updatedAt: updatedAt.toISOString(),
     };
   }
@@ -311,13 +326,28 @@ export class WikiService {
     const updatedAt =
       latest.createdAt ?? article.updatedAt ?? article.createdAt ?? new Date();
 
+    const articleStatus = article.status;
+    const isLangPublished = !!latest.isPublished;
+    let languageStatus = articleStatus;
+
+    if (articleStatus === 'inactive') {
+      languageStatus = 'inactive';
+    } else if (isLangPublished) {
+      languageStatus = 'active';
+    } else {
+      languageStatus = 'draft';
+    }
+
     return {
       id: article.id,
       slug: article.slug,
       language: latest.language,
       title: latest.title,
+      subtitle: latest.subtitle ?? undefined,
       content: latest.content,
-      status: article.status,
+      status: articleStatus,
+      articleStatus,
+      languageStatus,
       updatedAt: updatedAt.toISOString(),
     };
   }
@@ -386,7 +416,47 @@ export class WikiService {
     const mediaDir = buildWikiArticleMediaDir(article.slug);
     await fs.promises.mkdir(mediaDir, { recursive: true });
 
-    const filename = sanitizeFilename(file.originalname || 'image');
+    const incomingSize =
+      typeof file.size === 'number' ? file.size : file.buffer.length;
+
+    const originalName = file.originalname || 'image';
+    const ext = path.extname(originalName).toLowerCase();
+    const base = path.basename(originalName, ext);
+    const safeBase = base
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/gi, '-')
+      .replace(/^-+|-+$/g, '');
+    const finalBase = safeBase || 'file';
+
+    const existingFiles = await fs.promises.readdir(mediaDir);
+
+    for (const existingName of existingFiles) {
+      const existingExt = path.extname(existingName).toLowerCase();
+      if (existingExt !== ext) {
+        continue;
+      }
+
+      const existingBase = path.basename(existingName, existingExt);
+      const existingBaseWithoutSuffix = existingBase.replace(/-\d+$/, '');
+      if (existingBaseWithoutSuffix !== finalBase) {
+        continue;
+      }
+
+      const existingPath = path.join(mediaDir, existingName);
+      const stat = await fs.promises.stat(existingPath);
+      if (!stat.isFile() || stat.size !== incomingSize) {
+        continue;
+      }
+
+      const existingBuffer = await fs.promises.readFile(existingPath);
+      if (existingBuffer.equals(file.buffer)) {
+        throw new BadRequestException(
+          'Изображение със същото име и размер вече е качено за тази статия.',
+        );
+      }
+    }
+
+    const filename = sanitizeFilename(originalName);
     const filePath = path.join(mediaDir, filename);
 
     await fs.promises.writeFile(filePath, file.buffer);
@@ -448,6 +518,7 @@ export class WikiService {
         article: savedArticle,
         language: content.language,
         title: content.title,
+        subtitle: content.subtitle ?? null,
         content: content.content,
         versionNumber: 1,
         createdByUserId: userId,
@@ -464,13 +535,28 @@ export class WikiService {
       savedArticle.createdAt ??
       new Date();
 
+    const articleStatus = savedArticle.status;
+    const isLangPublished = !!primaryVersion.isPublished;
+    let languageStatus = articleStatus;
+
+    if (articleStatus === 'inactive') {
+      languageStatus = 'inactive';
+    } else if (isLangPublished) {
+      languageStatus = 'active';
+    } else {
+      languageStatus = 'draft';
+    }
+
     return {
       id: savedArticle.id,
       slug: savedArticle.slug,
       language: primaryVersion.language,
       title: primaryVersion.title,
+      subtitle: primaryVersion.subtitle ?? undefined,
       content: primaryVersion.content,
-      status: savedArticle.status,
+      status: articleStatus,
+      articleStatus,
+      languageStatus,
       updatedAt: updatedAt.toISOString(),
     };
   }
@@ -510,37 +596,92 @@ export class WikiService {
       },
       relations: ['article'],
     });
+    let primaryVersion: WikiArticleVersion;
 
-    const nextVersionNumber =
-      existingVersions.length > 0
-        ? Math.max(...existingVersions.map((v) => v.versionNumber ?? 0)) + 1
-        : 1;
+    if (existingVersions.length > 0) {
+      // Вземаме най-новата версия по versionNumber за езика
+      const latestExisting = existingVersions.reduce((latest, current) => {
+        const latestVersion = latest.versionNumber ?? 0;
+        const currentVersion = current.versionNumber ?? 0;
+        return currentVersion > latestVersion ? current : latest;
+      }, existingVersions[0]);
 
-    const version = this.versionRepo.create({
-      article,
-      language: dto.language,
-      title: dto.title,
-      content: dto.content,
-      versionNumber: nextVersionNumber,
-      createdByUserId: userId,
-      isPublished: dto.status === 'active',
-    });
+      const currentTitle = latestExisting.title ?? '';
+      const currentSubtitle = latestExisting.subtitle ?? '';
+      const currentContent = latestExisting.content ?? '';
+      const newSubtitle = dto.subtitle ?? '';
 
-    const savedVersion = await this.versionRepo.save(version);
+      const isContentChanged =
+        currentTitle !== dto.title ||
+        currentSubtitle !== newSubtitle ||
+        currentContent !== dto.content;
+
+      if (isContentChanged) {
+        const nextVersionNumber =
+          Math.max(...existingVersions.map((v) => v.versionNumber ?? 0)) + 1;
+
+        const version = this.versionRepo.create({
+          article,
+          language: dto.language,
+          title: dto.title,
+          subtitle: dto.subtitle ?? null,
+          content: dto.content,
+          versionNumber: nextVersionNumber,
+          createdByUserId: userId,
+          isPublished: dto.status === 'active',
+        });
+
+        primaryVersion = await this.versionRepo.save(version);
+      } else {
+        // Само статусът се е променил – не създаваме нова версия,
+        // а обновяваме isPublished на последната версия за езика.
+        latestExisting.isPublished = dto.status === 'active';
+        primaryVersion = await this.versionRepo.save(latestExisting);
+      }
+    } else {
+      // Няма версии за този език – задължително създаваме първа версия.
+      const version = this.versionRepo.create({
+        article,
+        language: dto.language,
+        title: dto.title,
+        subtitle: dto.subtitle ?? null,
+        content: dto.content,
+        versionNumber: 1,
+        createdByUserId: userId,
+        isPublished: dto.status === 'active',
+      });
+
+      primaryVersion = await this.versionRepo.save(version);
+    }
 
     const updatedAt =
-      savedVersion.createdAt ??
+      primaryVersion.createdAt ??
       article.updatedAt ??
       article.createdAt ??
       new Date();
 
+    const articleStatus = article.status;
+    const isLangPublished = !!primaryVersion.isPublished;
+    let languageStatus = articleStatus;
+
+    if (articleStatus === 'inactive') {
+      languageStatus = 'inactive';
+    } else if (isLangPublished) {
+      languageStatus = 'active';
+    } else {
+      languageStatus = 'draft';
+    }
+
     return {
       id: article.id,
       slug: article.slug,
-      language: savedVersion.language,
-      title: savedVersion.title,
-      content: savedVersion.content,
-      status: article.status,
+      language: primaryVersion.language,
+      title: primaryVersion.title,
+      subtitle: primaryVersion.subtitle ?? undefined,
+      content: primaryVersion.content,
+      status: articleStatus,
+      articleStatus,
+      languageStatus,
       updatedAt: updatedAt.toISOString(),
     };
   }
@@ -582,6 +723,7 @@ export class WikiService {
         article,
         language,
         title: dto.title ?? '',
+        subtitle: dto.subtitle ?? null,
         content: dto.content ?? '',
         versionNumber: 1,
         createdByUserId: userId,
@@ -600,6 +742,10 @@ export class WikiService {
 
     if (typeof dto.content === 'string') {
       latest.content = dto.content;
+    }
+
+    if (typeof dto.subtitle === 'string') {
+      latest.subtitle = dto.subtitle;
     }
 
     if (userId) {
@@ -644,6 +790,8 @@ export class WikiService {
       userMap = new Map(users.map((u) => [u.id, u.email]));
     }
 
+    const articleStatus = article.status;
+
     return versions.map((v) => {
       const createdAt = v.createdAt
         ? v.createdAt.toISOString()
@@ -655,14 +803,27 @@ export class WikiService {
           ? (userMap.get(createdByUserId) ?? createdByUserId)
           : null;
 
+      const isLangPublished = !!v.isPublished;
+      let status = articleStatus;
+
+      if (articleStatus === 'inactive') {
+        status = 'inactive';
+      } else if (isLangPublished) {
+        status = 'active';
+      } else {
+        status = 'draft';
+      }
+
       return {
         id: v.id,
         version: v.versionNumber,
         language: v.language,
         title: v.title,
+        subtitle: v.subtitle ?? undefined,
         content: v.content,
         createdAt,
         createdBy,
+        status,
       };
     });
   }
@@ -706,13 +867,27 @@ export class WikiService {
     const updatedAt =
       savedVersion.createdAt ?? article.updatedAt ?? article.createdAt ?? now;
 
+    const articleStatus = article.status;
+    const isLangPublished = !!savedVersion.isPublished;
+    let languageStatus = articleStatus;
+
+    if (articleStatus === 'inactive') {
+      languageStatus = 'inactive';
+    } else if (isLangPublished) {
+      languageStatus = 'active';
+    } else {
+      languageStatus = 'draft';
+    }
+
     return {
       id: article.id,
       slug: article.slug,
       language: savedVersion.language,
       title: savedVersion.title,
       content: savedVersion.content,
-      status: article.status,
+      status: articleStatus,
+      articleStatus,
+      languageStatus,
       updatedAt: updatedAt.toISOString(),
     };
   }

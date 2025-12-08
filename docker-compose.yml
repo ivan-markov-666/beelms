@@ -28,8 +28,11 @@ services:
       DB_NAME: qa4free
       DB_USER: qa4free
       DB_PASSWORD: qa4free
+      MEDIA_ROOT: /usr/src/app/media
     ports:
       - "3000:3000"
+    volumes:
+      - wiki-media:/usr/src/app/media
     # Работим с Node 24 LTS чрез be/Dockerfile (node:24-alpine)
 
   training-api:
@@ -46,3 +49,4 @@ services:
 
 volumes:
   db-data:
+  wiki-media:

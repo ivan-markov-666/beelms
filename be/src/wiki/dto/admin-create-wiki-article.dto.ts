@@ -2,6 +2,7 @@ import {
   ArrayMinSize,
   IsIn,
   IsNotEmpty,
+  IsOptional,
   IsString,
   ValidateNested,
 } from 'class-validator';
@@ -15,6 +16,10 @@ export class AdminCreateWikiArticleContentDto {
   @IsString()
   @IsNotEmpty()
   title: string;
+
+  @IsString()
+  @IsOptional()
+  subtitle?: string;
 
   @IsString()
   @IsNotEmpty()
