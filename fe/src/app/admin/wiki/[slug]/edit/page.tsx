@@ -4,6 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import { diffWords, type Change } from "diff";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
 
 const ADMIN_API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
@@ -13,14 +16,18 @@ type WikiArticleDetail = {
   slug: string;
   language: string;
   title: string;
+  subtitle?: string;
   content: string;
   status: string;
+  articleStatus?: string;
+  languageStatus?: string;
   updatedAt: string;
 };
 
 type FormState = {
   language: string;
   title: string;
+  subtitle: string;
   content: string;
   status: string;
 };
@@ -30,15 +37,39 @@ type AdminWikiArticleVersion = {
   version: number;
   language: string;
   title: string;
+  subtitle?: string;
   content: string;
   createdAt: string;
   createdBy: string | null;
+  status: string;
 };
 
 type MediaItem = {
   filename: string;
   url: string;
 };
+
+const VERSIONS_PAGE_SIZE = 10;
+
+function normalizeMarkdownContent(raw: string): string {
+  if (!raw) {
+    return raw;
+  }
+
+  const trimmed = raw.trim();
+
+  if (!trimmed.startsWith("```")) {
+    return raw;
+  }
+
+  const match = trimmed.match(/^```[a-zA-Z0-9]*\s+([\s\S]*?)\s*```$/);
+
+  if (!match || match.length < 2) {
+    return raw;
+  }
+
+  return match[1];
+}
 
 function formatDateTime(dateIso: string): string {
   try {
@@ -108,6 +139,7 @@ export default function AdminWikiEditPage() {
   const [versions, setVersions] = useState<AdminWikiArticleVersion[]>([]);
   const [versionsLoading, setVersionsLoading] = useState(false);
   const [versionsError, setVersionsError] = useState<string | null>(null);
+  const [versionsPage, setVersionsPage] = useState(1);
   const [rollbackVersionId, setRollbackVersionId] = useState<string | null>(
     null,
   );
@@ -133,6 +165,14 @@ export default function AdminWikiEditPage() {
   const [deleteVersionError, setDeleteVersionError] = useState<string | null>(
     null,
   );
+  const [selectedVersionIdsForDelete, setSelectedVersionIdsForDelete] =
+    useState<string[]>([]);
+  const [bulkDeleteStep1Open, setBulkDeleteStep1Open] = useState(false);
+  const [bulkDeleteStep2Open, setBulkDeleteStep2Open] = useState(false);
+  const [bulkDeleteSubmitting, setBulkDeleteSubmitting] = useState(false);
+  const [bulkDeleteError, setBulkDeleteError] = useState<string | null>(null);
+  const [viewVersionId, setViewVersionId] = useState<string | null>(null);
+  const [previewExpanded, setPreviewExpanded] = useState(false);
 
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
   const [mediaLoading, setMediaLoading] = useState(false);
@@ -193,6 +233,7 @@ export default function AdminWikiEditPage() {
             const emptyForm: FormState = {
               language: langToLoad,
               title: "",
+              subtitle: "",
               content: "",
               status: "draft",
             };
@@ -218,11 +259,13 @@ export default function AdminWikiEditPage() {
         const data = (await res.json()) as WikiArticleDetail;
 
         setArticleId(data.id);
+        const effectiveStatus = data.languageStatus ?? data.status ?? "draft";
         const loadedForm: FormState = {
           language: data.language ?? currentLanguage ?? "bg",
           title: data.title ?? "",
+          subtitle: data.subtitle ?? "",
           content: data.content ?? "",
-          status: data.status ?? "draft",
+          status: effectiveStatus,
         };
         setForm(loadedForm);
         setLastSavedForm(loadedForm);
@@ -381,9 +424,10 @@ export default function AdminWikiEditPage() {
     setForm((current) =>
       current
         ? { ...current, language: newLang }
-        : { language: newLang, title: "", content: "", status: "draft" },
+        : { language: newLang, title: "", subtitle: "", content: "", status: "draft" },
     );
     setCurrentLanguage(newLang);
+    setVersionsPage(1);
     setCompareSelectionIds([]);
     setComparison(null);
     setCompareError(null);
@@ -406,6 +450,7 @@ export default function AdminWikiEditPage() {
     (!lastSavedForm ||
       form.language !== lastSavedForm.language ||
       form.title !== lastSavedForm.title ||
+      form.subtitle !== lastSavedForm.subtitle ||
       form.content !== lastSavedForm.content ||
       form.status !== lastSavedForm.status);
 
@@ -466,6 +511,7 @@ export default function AdminWikiEditPage() {
             body: JSON.stringify({
               language: form.language,
               title: form.title,
+              subtitle: form.subtitle,
               content: form.content,
             }),
           },
@@ -520,6 +566,7 @@ export default function AdminWikiEditPage() {
           body: JSON.stringify({
             language: form.language,
             title: form.title,
+            subtitle: form.subtitle,
             content: form.content,
             status: form.status,
           }),
@@ -546,11 +593,15 @@ export default function AdminWikiEditPage() {
 
       const updated = (await res.json()) as WikiArticleDetail;
 
+      const effectiveStatus =
+        updated.languageStatus ?? updated.status ?? form.status;
+
       const savedForm: FormState = {
         language: updated.language ?? form.language,
         title: updated.title ?? form.title,
+        subtitle: updated.subtitle ?? form.subtitle,
         content: updated.content ?? form.content,
-        status: updated.status ?? form.status,
+        status: effectiveStatus,
       };
 
       setForm(savedForm);
@@ -625,7 +676,32 @@ export default function AdminWikiEditPage() {
       );
 
       if (!res.ok) {
-        setMediaError("Възникна грешка при качване на изображението.");
+        try {
+          const errorData: unknown = await res.json();
+          let backendMessage: string | null = null;
+
+          if (
+            errorData &&
+            typeof errorData === "object" &&
+            "message" in errorData
+          ) {
+            const message = (errorData as { message?: unknown }).message;
+            if (typeof message === "string") {
+              backendMessage = message;
+            } else if (Array.isArray(message)) {
+              backendMessage = message
+                .filter((part): part is string => typeof part === "string")
+                .join(" ");
+            }
+          }
+
+          setMediaError(
+            backendMessage ??
+              "Възникна грешка при качване на изображението.",
+          );
+        } catch {
+          setMediaError("Възникна грешка при качване на изображението.");
+        }
         setUploading(false);
         return;
       }
@@ -662,6 +738,14 @@ export default function AdminWikiEditPage() {
     }
 
     if (typeof window === "undefined") {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      "Сигурни ли сте, че искате да изтриете това изображение?",
+    );
+
+    if (!confirmed) {
       return;
     }
 
@@ -800,11 +884,15 @@ export default function AdminWikiEditPage() {
       const updated = (await res.json()) as WikiArticleDetail;
 
       setForm((current) => {
+        const effectiveStatus =
+          updated.languageStatus ?? updated.status ?? current?.status ?? "draft";
+
         const restoredForm: FormState = {
           language: updated.language ?? current?.language ?? "bg",
           title: updated.title ?? current?.title ?? "",
+          subtitle: updated.subtitle ?? current?.subtitle ?? "",
           content: updated.content ?? current?.content ?? "",
-          status: updated.status ?? current?.status ?? "draft",
+          status: effectiveStatus,
         };
         setLastSavedForm(restoredForm);
         return restoredForm;
@@ -882,10 +970,43 @@ export default function AdminWikiEditPage() {
     ? versions.filter((v) => v.language === form.language)
     : versions;
 
+  const totalVisibleVersions = visibleVersions.length;
+  const totalVersionsPages =
+    totalVisibleVersions === 0
+      ? 1
+      : Math.ceil(totalVisibleVersions / VERSIONS_PAGE_SIZE);
+
+  const currentVersionsPage =
+    versionsPage < 1
+      ? 1
+      : versionsPage > totalVersionsPages
+        ? totalVersionsPages
+        : versionsPage;
+
+  const paginatedVersions = visibleVersions.slice(
+    (currentVersionsPage - 1) * VERSIONS_PAGE_SIZE,
+    currentVersionsPage * VERSIONS_PAGE_SIZE,
+  );
+
   const deleteVersionTarget =
     deleteVersionStep2Id == null
       ? null
       : versions.find((v) => v.id === deleteVersionStep2Id) ?? null;
+
+  const viewVersionTarget =
+    viewVersionId == null
+      ? null
+      : versions.find((v) => v.id === viewVersionId) ?? null;
+
+  const selectedVersionsOnPageForDelete = paginatedVersions.filter((v) =>
+    selectedVersionIdsForDelete.includes(v.id),
+  );
+
+  const isAllPageSelectedForDelete =
+    paginatedVersions.length > 0 &&
+    selectedVersionsOnPageForDelete.length === paginatedVersions.length;
+
+  const hasAnySelectedForDelete = selectedVersionIdsForDelete.length > 0;
 
   return (
     <div className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
@@ -989,6 +1110,22 @@ export default function AdminWikiEditPage() {
 
             <div className="space-y-1">
               <label
+                htmlFor="subtitle"
+                className="block text-sm font-medium text-zinc-800"
+              >
+                Подзаглавие (по избор)
+              </label>
+              <input
+                id="subtitle"
+                type="text"
+                className="block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                value={form.subtitle}
+                onChange={handleChange("subtitle")}
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label
                 htmlFor="content"
                 className="block text-sm font-medium text-zinc-800"
               >
@@ -996,11 +1133,54 @@ export default function AdminWikiEditPage() {
               </label>
               <textarea
                 id="content"
-                className="block min-h-[200px] w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                className="block min-h-[60vh] w-full resize-y rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
                 value={form.content}
                 onChange={handleChange("content")}
               />
             </div>
+
+            <section
+              aria-label="Преглед на съдържанието"
+              className="space-y-2 rounded-md border border-zinc-200 bg-zinc-50 p-3"
+            >
+              <button
+                type="button"
+                className="mb-2 flex w-full items-center justify-between gap-2 text-left"
+                onClick={() => setPreviewExpanded((value) => !value)}
+              >
+                <h3 className="text-sm font-semibold text-zinc-900">
+                  Преглед (както в публичната Wiki)
+                </h3>
+                <span className="text-xs font-medium text-zinc-700 hover:text-zinc-900">
+                  {previewExpanded ? "Скрий прегледа" : "Покажи прегледа"}
+                </span>
+              </button>
+              {previewExpanded && (
+                <div className="rounded-md bg-white px-4 py-3">
+                  <header className="space-y-1 border-b border-zinc-100 pb-3">
+                    <h1 className="text-2xl font-bold text-zinc-900">
+                      {form.title.trim().length > 0
+                        ? form.title
+                        : "(без заглавие)"}
+                    </h1>
+                    {form.subtitle.trim().length > 0 && (
+                      <p className="text-sm text-zinc-600">{form.subtitle}</p>
+                    )}
+                  </header>
+                  <article
+                    className="wiki-markdown mt-3 text-sm leading-relaxed"
+                    style={{ color: "#111827" }}
+                  >
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      rehypePlugins={[rehypeRaw]}
+                    >
+                      {normalizeMarkdownContent(form.content)}
+                    </ReactMarkdown>
+                  </article>
+                </div>
+              )}
+            </section>
 
             <div className="flex items-center justify-end gap-3 pt-2">
               <Link
@@ -1030,7 +1210,7 @@ export default function AdminWikiEditPage() {
               </button>
             </div>
             {isDirty && (
-              <p className="pt-1 text-right text-xs text-zinc-500">
+              <p className="pt-2 text-right text-sm font-semibold text-orange-600">
                 Има незапазени промени.
               </p>
             )}
@@ -1106,7 +1286,15 @@ export default function AdminWikiEditPage() {
                       key={item.filename}
                       className="flex items-center justify-between gap-2"
                     >
-                      <span className="break-all">{item.url}</span>
+                      <div className="flex items-center gap-2">
+                        <img
+                          src={item.url}
+                          alt={item.filename}
+                          className="h-10 w-10 rounded border border-zinc-200 bg-white object-cover"
+                          loading="lazy"
+                        />
+                        <span className="break-all">{item.url}</span>
+                      </div>
                       <div className="flex flex-shrink-0 items-center gap-2">
                         <button
                           type="button"
@@ -1134,9 +1322,11 @@ export default function AdminWikiEditPage() {
             aria-label="Версии на статията"
             className="border-t border-zinc-200 pt-4"
           >
-            <h3 className="mb-2 text-sm font-semibold text-zinc-900">
-              Версии на статията
-            </h3>
+            <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+              <h3 className="text-sm font-semibold text-zinc-900">
+                Версии на статията
+              </h3>
+            </div>
 
             {versionsLoading && (
               <p className="text-sm text-zinc-600">
@@ -1150,13 +1340,13 @@ export default function AdminWikiEditPage() {
               </p>
             )}
 
-            {!versionsLoading && !versionsError && visibleVersions.length === 0 && (
+            {!versionsLoading && !versionsError && totalVisibleVersions === 0 && (
               <p className="text-sm text-zinc-600">
                 Няма налични версии за този език.
               </p>
             )}
 
-            {!versionsLoading && !versionsError && visibleVersions.length > 0 && (
+            {!versionsLoading && !versionsError && totalVisibleVersions > 0 && (
               <div className="overflow-x-auto">
                 <table className="mt-2 min-w-full table-fixed border-collapse text-sm">
                   <thead>
@@ -1164,9 +1354,36 @@ export default function AdminWikiEditPage() {
                       <th className="px-3 py-2 align-middle text-center">
                         Сравни
                       </th>
+                      <th className="px-3 py-2 align-middle text-center">
+                        <input
+                          type="checkbox"
+                          className="h-4 w-4 rounded border-zinc-300 text-red-600 focus:ring-red-500"
+                          checked={isAllPageSelectedForDelete}
+                          onChange={(event) => {
+                            const checked = event.target.checked;
+                            if (checked) {
+                              setSelectedVersionIdsForDelete((current) => {
+                                const next = new Set(current);
+                                for (const v of paginatedVersions) {
+                                  next.add(v.id);
+                                }
+                                return Array.from(next);
+                              });
+                            } else {
+                              setSelectedVersionIdsForDelete((current) =>
+                                current.filter(
+                                  (id) =>
+                                    !paginatedVersions.some((v) => v.id === id),
+                                ),
+                              );
+                            }
+                          }}
+                        />
+                      </th>
                       <th className="px-3 py-2 align-middle">Версия</th>
                       <th className="px-3 py-2 align-middle">Език</th>
                       <th className="px-3 py-2 align-middle">Заглавие</th>
+                      <th className="px-3 py-2 align-middle">Подзаглавие</th>
                       <th className="px-3 py-2 align-middle">Създадена на</th>
                       <th className="px-3 py-2 align-middle">Създадена от</th>
                       <th className="px-3 py-2 align-middle text-right">
@@ -1175,7 +1392,7 @@ export default function AdminWikiEditPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {visibleVersions.map((version) => (
+                    {paginatedVersions.map((version) => (
                       <tr
                         key={version.id}
                         className="border-b border-zinc-100 last:border-b-0 hover:bg-zinc-50"
@@ -1188,14 +1405,43 @@ export default function AdminWikiEditPage() {
                             onChange={() => handleToggleCompare(version)}
                           />
                         </td>
+                        <td className="px-3 py-2 align-middle text-center">
+                          <input
+                            type="checkbox"
+                            className="h-4 w-4 rounded border-zinc-300 text-red-600 focus:ring-red-500"
+                            checked={selectedVersionIdsForDelete.includes(
+                              version.id,
+                            )}
+                            onChange={(event) => {
+                              const checked = event.target.checked;
+                              setSelectedVersionIdsForDelete((current) => {
+                                if (checked) {
+                                  if (current.includes(version.id)) {
+                                    return current;
+                                  }
+                                  return [...current, version.id];
+                                }
+
+                                return current.filter((id) => id !== version.id);
+                              });
+                            }}
+                          />
+                        </td>
                         <td className="px-3 py-2 align-middle text-zinc-900">
-                          v{version.version}
+                          <div className="flex items-center gap-2">
+                            <span>v{version.version}</span>
+                          </div>
                         </td>
                         <td className="px-3 py-2 align-middle text-zinc-900">
                           {version.language}
                         </td>
                         <td className="px-3 py-2 align-middle text-zinc-900">
                           {version.title}
+                        </td>
+                        <td className="px-3 py-2 align-middle text-zinc-700">
+                          {version.subtitle && version.subtitle.trim().length > 0
+                            ? version.subtitle
+                            : "—"}
                         </td>
                         <td className="px-3 py-2 align-middle text-zinc-700">
                           {formatDateTime(version.createdAt)}
@@ -1205,6 +1451,13 @@ export default function AdminWikiEditPage() {
                         </td>
                         <td className="px-3 py-2 align-middle text-right">
                           <div className="flex items-center justify-end gap-3">
+                            <button
+                              type="button"
+                              onClick={() => setViewVersionId(version.id)}
+                              className="text-xs font-medium text-zinc-700 hover:text-zinc-900"
+                            >
+                              Преглед
+                            </button>
                             {latestVersionIdsByLang[version.language] ===
                             version.id ? (
                               <span className="text-xs font-semibold text-zinc-500">
@@ -1247,14 +1500,82 @@ export default function AdminWikiEditPage() {
                       <span className="text-red-600">{compareError}</span>
                     )}
                   </div>
-                  <button
-                    type="button"
-                    onClick={handleCompareSelected}
-                    disabled={compareSelectionIds.length !== 2}
-                    className="inline-flex items-center rounded-md bg-green-600 px-4 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-70"
-                  >
-                    Сравни избраните версии
-                  </button>
+                  <div className="flex flex-wrap items-center gap-2 text-xs">
+                    <span className="text-zinc-500">
+                      Страница {currentVersionsPage} от {totalVersionsPages} (
+                      {totalVisibleVersions} версии)
+                    </span>
+                    {totalVersionsPages > 1 && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setVersionsPage((page) => Math.max(1, page - 1))
+                          }
+                          disabled={currentVersionsPage <= 1}
+                          className="rounded-md border border-zinc-300 px-2 py-1 text-xs font-medium text-zinc-700 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          Предишна
+                        </button>
+                        <div className="flex items-center gap-1">
+                          {Array.from(
+                            { length: totalVersionsPages },
+                            (_, index) => index + 1,
+                          ).map((pageNumber) => {
+                            const isCurrent = pageNumber === currentVersionsPage;
+                            return (
+                              <button
+                                key={pageNumber}
+                                type="button"
+                                onClick={() => setVersionsPage(pageNumber)}
+                                className={`rounded-md border px-2 py-1 text-xs font-medium ${
+                                  isCurrent
+                                    ? "border-green-600 bg-green-600 text-white"
+                                    : "border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50"
+                                }`}
+                              >
+                                {pageNumber}
+                              </button>
+                            );
+                          })}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setVersionsPage((page) =>
+                              Math.min(totalVersionsPages, page + 1),
+                            )
+                          }
+                          disabled={currentVersionsPage >= totalVersionsPages}
+                          className="rounded-md border border-zinc-300 px-2 py-1 text-xs font-medium text-zinc-700 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          Следваща
+                        </button>
+                      </>
+                    )}
+                    <button
+                      type="button"
+                      onClick={handleCompareSelected}
+                      disabled={compareSelectionIds.length !== 2}
+                      className="inline-flex items-center rounded-md bg-green-600 px-4 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-70"
+                    >
+                      Сравни избраните версии
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!hasAnySelectedForDelete) {
+                          return;
+                        }
+                        setBulkDeleteError(null);
+                        setBulkDeleteStep1Open(true);
+                      }}
+                      disabled={!hasAnySelectedForDelete}
+                      className="inline-flex items-center rounded-md bg-red-600 px-4 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-70"
+                    >
+                      Изтрий избраните
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
@@ -1303,6 +1624,12 @@ export default function AdminWikiEditPage() {
                       {comparison.left.title}
                     </span>
                   </div>
+                  <div className="mb-1 text-[11px]">
+                    <span className="font-semibold text-red-700">Подзаглавие:</span>{" "}
+                    <span className="whitespace-pre-wrap break-words">
+                      {comparison.left.subtitle ?? "—"}
+                    </span>
+                  </div>
                   <div className="whitespace-pre-wrap break-words text-[11px] leading-relaxed">
                     {comparison.left.content}
                   </div>
@@ -1327,6 +1654,15 @@ export default function AdminWikiEditPage() {
                       {renderDiff(comparison.left.title, comparison.right.title)}
                     </span>
                   </div>
+                  <div className="mb-1 text-[11px]">
+                    <span className="font-semibold text-green-700">Подзаглавие:</span>{" "}
+                    <span className="whitespace-pre-wrap break-words">
+                      {renderDiff(
+                        comparison.left.subtitle ?? "",
+                        comparison.right.subtitle ?? "",
+                      )}
+                    </span>
+                  </div>
                   <div className="whitespace-pre-wrap break-words text-[11px] leading-relaxed">
                     {renderDiff(comparison.left.content, comparison.right.content)}
                   </div>
@@ -1343,6 +1679,60 @@ export default function AdminWikiEditPage() {
                 = добавен текст.
               </p>
             </section>
+          )}
+          {viewVersionTarget && (
+            <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 px-4">
+              <div className="w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-lg bg-white p-6 shadow-xl">
+                <div className="mb-3 flex items-start justify-between gap-4">
+                  <div>
+                    <h3 className="mb-1 text-base font-semibold text-zinc-900">
+                      Преглед на версия v{viewVersionTarget.version} ({
+                        viewVersionTarget.language
+                      })
+                    </h3>
+                    <p className="text-xs text-zinc-600">
+                      Създадена на {formatDateTime(viewVersionTarget.createdAt)}
+                      {viewVersionTarget.createdBy
+                        ? ` от ${viewVersionTarget.createdBy}`
+                        : ""}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setViewVersionId(null)}
+                    className="text-xs font-medium text-zinc-600 hover:text-zinc-900"
+                  >
+                    Затвори
+                  </button>
+                </div>
+                <div className="rounded-md border border-zinc-200 bg-zinc-50 px-4 py-3">
+                  <header className="space-y-1 border-b border-zinc-100 pb-3">
+                    <h1 className="text-xl font-bold text-zinc-900">
+                      {viewVersionTarget.title.trim().length > 0
+                        ? viewVersionTarget.title
+                        : "(без заглавие)"}
+                    </h1>
+                    {viewVersionTarget.subtitle &&
+                      viewVersionTarget.subtitle.trim().length > 0 && (
+                        <p className="text-sm text-zinc-600">
+                          {viewVersionTarget.subtitle}
+                        </p>
+                      )}
+                  </header>
+                  <article
+                    className="wiki-markdown mt-3 text-sm leading-relaxed"
+                    style={{ color: "#111827" }}
+                  >
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      rehypePlugins={[rehypeRaw]}
+                    >
+                      {normalizeMarkdownContent(viewVersionTarget.content)}
+                    </ReactMarkdown>
+                  </article>
+                </div>
+              </div>
+            </div>
           )}
           {deleteVersionStep1Id && (
             <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 px-4">
@@ -1493,6 +1883,151 @@ export default function AdminWikiEditPage() {
                   disabled={deleteVersionSubmitting}
                 >
                   Да, изтрий версията
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        {bulkDeleteStep1Open && hasAnySelectedForDelete && (
+          <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 px-4">
+            <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
+              <h3 className="mb-2 text-base font-semibold text-zinc-900">
+                Изтриване на избрани версии
+              </h3>
+              <p className="mb-4 text-sm text-zinc-700">
+                Ще бъдат завинаги премахнати {selectedVersionIdsForDelete.length}
+                {" "}
+                версии от историята на статията. Това действие е необратимо и
+                може да повлияе на проследимостта на промените.
+              </p>
+              <div className="flex justify-end gap-2">
+                <button
+                  type="button"
+                  className="rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-800 hover:bg-zinc-50"
+                  onClick={() => setBulkDeleteStep1Open(false)}
+                >
+                  Затвори
+                </button>
+                <button
+                  type="button"
+                  className="rounded-md bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700"
+                  onClick={() => {
+                    setBulkDeleteError(null);
+                    setBulkDeleteStep1Open(false);
+                    setBulkDeleteStep2Open(true);
+                  }}
+                >
+                  OK
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        {bulkDeleteStep2Open && hasAnySelectedForDelete && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+            <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
+              <h3 className="mb-2 text-base font-semibold text-zinc-900">
+                Потвърдете изтриването на избраните версии
+              </h3>
+              <p className="mb-3 text-sm text-zinc-700">
+                Наистина ли искате да изтриете избраните версии? Това действие е
+                окончателно и не може да бъде отменено.
+              </p>
+              {bulkDeleteError && (
+                <p className="mb-3 text-xs text-red-600" role="alert">
+                  {bulkDeleteError}
+                </p>
+              )}
+              <div className="flex justify-end gap-2">
+                <button
+                  type="button"
+                  className="rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-800 hover:bg-zinc-50 disabled:opacity-70"
+                  onClick={() => {
+                    if (bulkDeleteSubmitting) {
+                      return;
+                    }
+                    setBulkDeleteStep2Open(false);
+                    setBulkDeleteError(null);
+                  }}
+                  disabled={bulkDeleteSubmitting}
+                >
+                  Отказ
+                </button>
+                <button
+                  type="button"
+                  className="rounded-md bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700 disabled:opacity-70"
+                  onClick={async () => {
+                    if (!articleId || selectedVersionIdsForDelete.length === 0) {
+                      return;
+                    }
+
+                    if (typeof window === "undefined") {
+                      return;
+                    }
+
+                    setBulkDeleteError(null);
+                    setBulkDeleteSubmitting(true);
+
+                    try {
+                      const token =
+                        window.localStorage.getItem("qa4free_access_token");
+                      if (!token) {
+                        setBulkDeleteError(
+                          "Липсва достъп до Admin API. Моля, влезте отново като администратор.",
+                        );
+                        setBulkDeleteSubmitting(false);
+                        return;
+                      }
+
+                      let failedCount = 0;
+
+                      for (const versionId of selectedVersionIdsForDelete) {
+                        try {
+                          const res = await fetch(
+                            `${ADMIN_API_BASE_URL}/admin/wiki/articles/${encodeURIComponent(
+                              articleId,
+                            )}/versions/${encodeURIComponent(versionId)}`,
+                            {
+                              method: "DELETE",
+                              headers: {
+                                Authorization: `Bearer ${token}`,
+                              },
+                            },
+                          );
+
+                          if (!res.ok) {
+                            failedCount += 1;
+                          }
+                        } catch {
+                          failedCount += 1;
+                        }
+                      }
+
+                      if (failedCount > 0) {
+                        setBulkDeleteError(
+                          "Някои версии не можаха да бъдат изтрити. Списъкът с версии ще бъде обновен.",
+                        );
+                      } else {
+                        setBulkDeleteError(null);
+                      }
+
+                      setBulkDeleteStep2Open(false);
+                      setSelectedVersionIdsForDelete([]);
+                      setCompareSelectionIds([]);
+                      setComparison(null);
+                      setCompareError(null);
+                      setVersionsReloadKey((value) => value + 1);
+                    } catch {
+                      setBulkDeleteError(
+                        "Възникна грешка при изтриване на избраните версии.",
+                      );
+                    } finally {
+                      setBulkDeleteSubmitting(false);
+                    }
+                  }}
+                  disabled={bulkDeleteSubmitting}
+                >
+                  Да, изтрий избраните версии
                 </button>
               </div>
             </div>

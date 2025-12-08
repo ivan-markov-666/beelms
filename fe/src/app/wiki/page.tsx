@@ -112,7 +112,16 @@ function WikiFiltersForm({
           <option value="">Всички езици</option>
           <option value="bg">Български</option>
           <option value="en">English</option>
+          <option value="de">Deutsch</option>
         </select>
+      </div>
+      <div className="w-full md:w-auto">
+        <button
+          type="submit"
+          className="inline-flex w-full items-center justify-center rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1 md:w-auto"
+        >
+          Търси
+        </button>
       </div>
     </form>
   );

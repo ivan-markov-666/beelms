@@ -4,6 +4,9 @@ import { WikiBackLink } from "../_components/wiki-back-link";
 import { WikiArticleMeta } from "../_components/wiki-article-meta";
 import { WikiArticleActions } from "../_components/wiki-article-actions";
 import { normalizeLang, type SupportedLang } from "../../../i18n/config";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000";
@@ -13,10 +16,33 @@ type WikiArticleDetail = {
   slug: string;
   language: string;
   title: string;
+  subtitle?: string;
   content: string;
   status: string;
   updatedAt: string;
 };
+
+function normalizeMarkdownContent(raw: string): string {
+  if (!raw) {
+    return raw;
+  }
+
+  const trimmed = raw.trim();
+
+  if (!trimmed.startsWith("```")) {
+    return raw;
+  }
+
+  // Опитваме се да match-нем цялото съдържание като един fenced блок:
+  // ```md\n...\n```
+  const match = trimmed.match(/^```[a-zA-Z0-9]*\s+([\s\S]*?)\s*```$/);
+
+  if (!match || match.length < 2) {
+    return raw;
+  }
+
+  return match[1];
+}
 
 type WikiArticlePageSearchParams = {
   lang?: string;
@@ -66,13 +92,18 @@ export default async function WikiArticlePage(
 
   const article = await fetchWikiArticle(resolvedParams.slug, apiLang);
 
+  const markdownContent = normalizeMarkdownContent(article.content);
+
   return (
     <WikiMain>
       <header className="space-y-2">
         <WikiBackLink />
-        <h1 className="text-3xl font-semibold text-zinc-900 dark:text-zinc-50">
+        <h1 className="text-4xl font-bold text-zinc-900">
           {article.title}
         </h1>
+        {article.subtitle && (
+          <p className="text-lg text-zinc-600">{article.subtitle}</p>
+        )}
         <WikiArticleMeta
           language={article.language}
           updatedAt={article.updatedAt}
@@ -80,8 +111,16 @@ export default async function WikiArticlePage(
         <WikiArticleActions title={article.title} lang={uiLang} />
       </header>
 
-      <article className="mt-6 max-w-prose whitespace-pre-line text-base text-zinc-800 dark:text-zinc-100 leading-relaxed">
-        {article.content}
+      <article
+        className="wiki-markdown mt-6 max-w-prose text-base leading-relaxed"
+        style={{ color: "#111827" }}
+      >
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          rehypePlugins={[rehypeRaw]}
+        >
+          {markdownContent}
+        </ReactMarkdown>
       </article>
     </WikiMain>
   );

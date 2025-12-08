@@ -79,10 +79,11 @@ npm run start:dev
 ```bash
 cd fe
 npm install        # само първия път
-npm run dev
+npm run dev -- -p 3001
 ```
 
-- FE обикновено слуша на `http://localhost:3001` (виж `package.json` / `next.config.js`).
+- FE слуша на `http://localhost:3001` (виж `package.json` / `next.config.js`).
+  Ако искаш друг порт, можеш да го промениш с `npm run dev -- -p <PORT>`.
 - В `.env.local` на FE (или по подразбиране) `NEXT_PUBLIC_API_BASE_URL` трябва да сочи към BE:
 
 ```bash
@@ -141,6 +142,60 @@ docker compose down
 ```
 
 Това спира `db`, `api` и `training-api` и премахва контейнерите. Volume-ът за Postgres (`db-data`) остава, освен ако не го изтриеш изрично.
+
+### 3.4. Миграции на базата (TypeORM + Docker)
+
+Схемата на базата за BE се управлява с TypeORM миграции, конфигурирани в `be/data-source.ts`.
+Миграциите се създават локално (на хоста), а най-често се изпълняват през `api` контейнера.
+
+#### Генериране на нова миграция (пример: добавяне на нова колона)
+
+1. Увери се, че Postgres (`db` service) върви:
+
+   ```bash
+   docker compose up -d db
+   ```
+
+2. От папка `be/` генерирай миграция според променения код (entities):
+
+   ```bash
+   cd be
+   npm run typeorm -- migration:generate src/migrations/AddSomethingDescriptive
+   ```
+
+   Това създава нов `.ts` файл в `be/src/migrations/` (име с таймстемп).
+
+3. По желание – commit-вай миграционните файлове в Git заедно с промяната по entity-тата.
+
+#### Пускане на миграциите през Docker (стандартен път)
+
+Обичайният workflow за apply на всички pending миграции към Docker базата е:
+
+1. Увери се, че контейнерите са билднати/пуснати:
+
+   ```bash
+   docker compose up -d db api
+   ```
+
+2. Пусни всички чакащи миграции **с една команда**:
+
+   ```bash
+   docker compose exec api npm run migration:run
+   ```
+
+Това изпълнява `npm run migration:run` вътре в `api` контейнера срещу `qa4free` базата (Postgres контейнер `db`).
+
+#### Комбинирана команда: миграции + Wiki seed (по избор)
+
+За локален setup, след промени по схемата, често искаме и да seed-нем Wiki:
+
+```bash
+docker compose exec api sh -c "npm run migration:run && npm run seed:wiki"
+```
+
+Това:
+- прилага всички миграции;
+- пуска `seed:wiki` (идемпотентен; може да се вика многократно).
 
 ---
 

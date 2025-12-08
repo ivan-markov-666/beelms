@@ -25,6 +25,9 @@ export class WikiArticleVersion {
   @Column({ type: 'varchar', length: 255 })
   title: string;
 
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  subtitle: string | null;
+
   @Column({ type: 'text' })
   content: string;
 

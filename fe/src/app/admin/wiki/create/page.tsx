@@ -15,6 +15,7 @@ type LangContentState = Record<
   LangCode,
   {
     title: string;
+    subtitle: string;
     content: string;
   }
 >;
@@ -32,9 +33,9 @@ export default function AdminWikiCreatePage() {
     "draft",
   );
   const [contentByLang, setContentByLang] = useState<LangContentState>({
-    bg: { title: "", content: "" },
-    en: { title: "", content: "" },
-    de: { title: "", content: "" },
+    bg: { title: "", subtitle: "", content: "" },
+    en: { title: "", subtitle: "", content: "" },
+    de: { title: "", subtitle: "", content: "" },
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -55,6 +56,16 @@ export default function AdminWikiCreatePage() {
       [lang]: {
         ...current[lang],
         title: value,
+      },
+    }));
+  };
+
+  const handleChangeSubtitle = (lang: LangCode, value: string) => {
+    setContentByLang((current) => ({
+      ...current,
+      [lang]: {
+        ...current[lang],
+        subtitle: value,
       },
     }));
   };
@@ -104,6 +115,7 @@ export default function AdminWikiCreatePage() {
     const contents = activeLangs.map((lang) => ({
       language: lang,
       title: contentByLang[lang].title,
+      subtitle: contentByLang[lang].subtitle || undefined,
       content: contentByLang[lang].content,
     }));
 
@@ -380,6 +392,23 @@ export default function AdminWikiCreatePage() {
                       >
                         {lang.toUpperCase()}
                       </span>
+                    </div>
+                    <div className="mb-3">
+                      <label
+                        htmlFor={`wiki-subtitle-${lang}`}
+                        className="mb-1 block text-sm font-medium text-gray-700"
+                      >
+                        Subtitle ({lang.toUpperCase()}) – optional
+                      </label>
+                      <input
+                        id={`wiki-subtitle-${lang}`}
+                        type="text"
+                        value={content.subtitle}
+                        onChange={(event) =>
+                          handleChangeSubtitle(lang, event.target.value)
+                        }
+                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
+                      />
                     </div>
                     <div className="mb-3">
                       <label

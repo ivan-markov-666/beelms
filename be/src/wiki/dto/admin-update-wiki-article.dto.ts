@@ -1,4 +1,4 @@
-import { IsIn, IsNotEmpty, IsString } from 'class-validator';
+import { IsIn, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class AdminUpdateWikiArticleDto {
   @IsString()
@@ -8,6 +8,10 @@ export class AdminUpdateWikiArticleDto {
   @IsString()
   @IsNotEmpty()
   content: string;
+
+  @IsString()
+  @IsOptional()
+  subtitle?: string;
 
   @IsString()
   @IsNotEmpty()
