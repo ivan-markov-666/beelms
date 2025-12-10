@@ -46,7 +46,7 @@ npm run start:prod
 
 ## Dockerized development environment
 
-The QA4Free backend is primarily intended to run in Docker together with a PostgreSQL database.
+The beelms backend in this QA4Free example is primarily intended to run in Docker together with a PostgreSQL database.
 
 From the project root (`d:\Projects\qa-4-free`):
 
