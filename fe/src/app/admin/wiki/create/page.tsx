@@ -7,78 +7,13 @@ import { useRouter } from "next/navigation";
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
 
-type LangCode = "bg" | "en" | "de";
-
-type LangSelectionState = Record<LangCode, boolean>;
-
-type LangContentState = Record<
-  LangCode,
-  {
-    title: string;
-    subtitle: string;
-    content: string;
-  }
->;
-
 export default function AdminWikiCreatePage() {
   const router = useRouter();
-  const [languages, setLanguages] = useState<LangSelectionState>({
-    bg: true,
-    en: false,
-    de: false,
-  });
-
   const [slug, setSlug] = useState("");
-  const [status, setStatus] = useState<"draft" | "active" | "inactive">(
-    "draft",
-  );
-  const [contentByLang, setContentByLang] = useState<LangContentState>({
-    bg: { title: "", subtitle: "", content: "" },
-    en: { title: "", subtitle: "", content: "" },
-    de: { title: "", subtitle: "", content: "" },
-  });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-
   const [articleId, setArticleId] = useState<string | null>(null);
-
-  const handleToggleLang = (lang: LangCode) => {
-    setLanguages((current) => ({
-      ...current,
-      [lang]: !current[lang],
-    }));
-  };
-
-  const handleChangeTitle = (lang: LangCode, value: string) => {
-    setContentByLang((current) => ({
-      ...current,
-      [lang]: {
-        ...current[lang],
-        title: value,
-      },
-    }));
-  };
-
-  const handleChangeSubtitle = (lang: LangCode, value: string) => {
-    setContentByLang((current) => ({
-      ...current,
-      [lang]: {
-        ...current[lang],
-        subtitle: value,
-      },
-    }));
-  };
-
-  const handleChangeContent = (lang: LangCode, value: string) => {
-    setContentByLang((current) => ({
-      ...current,
-      [lang]: {
-        ...current[lang],
-        content: value,
-      },
-    }));
-  };
 
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (
     event,
@@ -88,17 +23,10 @@ export default function AdminWikiCreatePage() {
     setError(null);
     setSuccess(null);
 
-    const activeLangs = (Object.keys(languages) as LangCode[]).filter(
-      (lang) => languages[lang],
-    );
+    const trimmedSlug = slug.trim();
 
-    if (!slug.trim()) {
+    if (!trimmedSlug) {
       setError("Моля, въведете slug за статията.");
-      return;
-    }
-
-    if (activeLangs.length === 0) {
-      setError("Моля, изберете поне един език за съдържанието.");
       return;
     }
 
@@ -112,12 +40,13 @@ export default function AdminWikiCreatePage() {
       return;
     }
 
-    const contents = activeLangs.map((lang) => ({
-      language: lang,
-      title: contentByLang[lang].title,
-      subtitle: contentByLang[lang].subtitle || undefined,
-      content: contentByLang[lang].content,
-    }));
+    const contents = [
+      {
+        language: "bg",
+        title: trimmedSlug,
+        content: `# ${trimmedSlug}`,
+      },
+    ];
 
     setSaving(true);
 
@@ -128,7 +57,7 @@ export default function AdminWikiCreatePage() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ slug: slug.trim(), status, contents }),
+        body: JSON.stringify({ slug: trimmedSlug, status: "draft", contents }),
       });
 
       if (res.status === 400) {
@@ -163,10 +92,6 @@ export default function AdminWikiCreatePage() {
       setSaving(false);
     }
   };
-
-  const selectedLanguages: LangCode[] = (Object.keys(
-    languages,
-  ) as LangCode[]).filter((lang) => languages[lang]);
 
   return (
     <div className="space-y-6">
@@ -216,8 +141,8 @@ export default function AdminWikiCreatePage() {
             Create New Article
           </h1>
           <p className="text-gray-600">
-            Define title, slug, languages, status and content for a new Wiki
-            article
+            Въведете само slug за нова Wiki статия. Език, статус и съдържание
+            се настройват по-късно в страницата за редакция.
           </p>
         </div>
         <Link
@@ -255,32 +180,6 @@ export default function AdminWikiCreatePage() {
           </p>
         )}
         <form className="grid grid-cols-1 gap-6" onSubmit={handleSubmit}>
-          {/* Languages */}
-          <div>
-            <h2 className="mb-4 text-lg font-semibold text-gray-900">
-              Languages
-            </h2>
-            <p className="mb-3 text-sm text-gray-600">
-              Select the languages for this article. For each selected language a
-              separate content block will appear below.
-            </p>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-              <div className="space-y-1 text-sm text-gray-700">
-                {(["bg", "en", "de"] as LangCode[]).map((lang) => (
-                  <label key={lang} className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      checked={languages[lang]}
-                      onChange={() => handleToggleLang(lang)}
-                      className="h-4 w-4 rounded border-gray-300 text-green-600"
-                    />
-                    <span className="uppercase">{lang}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          </div>
-
           {/* Basic Information */}
           <div>
             <h2 className="mb-4 text-lg font-semibold text-gray-900">
@@ -303,26 +202,6 @@ export default function AdminWikiCreatePage() {
                   className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
                 />
               </div>
-              <div>
-                <label
-                  htmlFor="wiki-status"
-                  className="mb-1 block text-sm font-medium text-gray-700"
-                >
-                  Status
-                </label>
-                <select
-                  id="wiki-status"
-                  value={status}
-                  onChange={(event) =>
-                    setStatus(event.target.value as "draft" | "active" | "inactive")
-                  }
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
-                >
-                  <option value="draft">Draft</option>
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                </select>
-              </div>
             </div>
             <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
               <div className="md:col-span-3 md:max-w-xs">
@@ -343,115 +222,6 @@ export default function AdminWikiCreatePage() {
               </div>
             </div>
           </div>
-
-          {/* Content by language */}
-          <div>
-            <h2 className="mb-4 text-lg font-semibold text-gray-900">
-              Content by language
-            </h2>
-            <p className="mb-3 text-sm text-gray-600">
-              For each selected language, fill in a localized title and main
-              body of the article.
-            </p>
-
-            <div className="space-y-6">
-              {selectedLanguages.map((lang) => {
-                const content = contentByLang[lang];
-
-                const headerLabel =
-                  lang === "bg" ? "BG content" : lang === "en" ? "EN content" : "DE content";
-
-                const badgeClasses =
-                  lang === "bg"
-                    ? "bg-green-100 text-green-800"
-                    : lang === "en"
-                    ? "bg-blue-100 text-blue-800"
-                    : "bg-gray-100 text-gray-800";
-
-                const titleLabel =
-                  lang === "bg" ? "Title (BG)" : lang === "en" ? "Title (EN)" : "Title (DE)";
-
-                const contentLabel =
-                  lang === "bg"
-                    ? "Content (BG)"
-                    : lang === "en"
-                    ? "Content (EN)"
-                    : "Content (DE)";
-
-                return (
-                  <div
-                    key={lang}
-                    className="rounded-lg border border-gray-200 p-4"
-                  >
-                    <div className="mb-3 flex items-center justify-between">
-                      <h3 className="text-md font-semibold text-gray-900">
-                        {headerLabel}
-                      </h3>
-                      <span
-                        className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${badgeClasses}`}
-                      >
-                        {lang.toUpperCase()}
-                      </span>
-                    </div>
-                    <div className="mb-3">
-                      <label
-                        htmlFor={`wiki-subtitle-${lang}`}
-                        className="mb-1 block text-sm font-medium text-gray-700"
-                      >
-                        Subtitle ({lang.toUpperCase()}) – optional
-                      </label>
-                      <input
-                        id={`wiki-subtitle-${lang}`}
-                        type="text"
-                        value={content.subtitle}
-                        onChange={(event) =>
-                          handleChangeSubtitle(lang, event.target.value)
-                        }
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
-                      />
-                    </div>
-                    <div className="mb-3">
-                      <label
-                        htmlFor={`wiki-title-${lang}`}
-                        className="mb-1 block text-sm font-medium text-gray-700"
-                      >
-                        {titleLabel}
-                      </label>
-                      <input
-                        id={`wiki-title-${lang}`}
-                        type="text"
-                        value={content.title}
-                        onChange={(event) =>
-                          handleChangeTitle(lang, event.target.value)
-                        }
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
-                      />
-                    </div>
-                    <div>
-                      <label
-                        htmlFor={`wiki-content-${lang}`}
-                        className="mb-1 block text-sm font-medium text-gray-700"
-                      >
-                        {contentLabel}
-                      </label>
-                      <textarea
-                        id={`wiki-content-${lang}`}
-                        rows={8}
-                        value={content.content}
-                        onChange={(event) =>
-                          handleChangeContent(lang, event.target.value)
-                        }
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          
-
           {/* Actions */}
           <div className="mt-4 flex items-center justify-between gap-4 border-t border-gray-200 pt-6">
             <div className="flex flex-col text-sm text-gray-500">

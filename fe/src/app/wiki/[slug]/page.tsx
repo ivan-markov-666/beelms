@@ -4,9 +4,7 @@ import { WikiBackLink } from "../_components/wiki-back-link";
 import { WikiArticleMeta } from "../_components/wiki-article-meta";
 import { WikiArticleActions } from "../_components/wiki-article-actions";
 import { normalizeLang, type SupportedLang } from "../../../i18n/config";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import rehypeRaw from "rehype-raw";
+import { WikiMarkdown } from "../_components/wiki-markdown";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000";
@@ -34,14 +32,21 @@ function normalizeMarkdownContent(raw: string): string {
   }
 
   // Опитваме се да match-нем цялото съдържание като един fenced блок:
-  // ```md\n...\n```
-  const match = trimmed.match(/^```[a-zA-Z0-9]*\s+([\s\S]*?)\s*```$/);
+  // ```lang\n...\n```
+  const match = trimmed.match(/^```([a-zA-Z0-9]*)\s+([\s\S]*?)\s*```$/);
 
-  if (!match || match.length < 2) {
+  if (!match || match.length < 3) {
     return raw;
   }
 
-  return match[1];
+  const fenceLang = match[1];
+  const inner = match[2];
+
+  if (fenceLang === "mermaid") {
+    return raw;
+  }
+
+  return inner;
 }
 
 type WikiArticlePageSearchParams = {
@@ -112,15 +117,10 @@ export default async function WikiArticlePage(
       </header>
 
       <article
-        className="wiki-markdown mt-6 max-w-prose text-base leading-relaxed"
+        className="wiki-markdown mt-6 w-full max-w-4xl text-base leading-relaxed"
         style={{ color: "#111827" }}
       >
-        <ReactMarkdown
-          remarkPlugins={[remarkGfm]}
-          rehypePlugins={[rehypeRaw]}
-        >
-          {markdownContent}
-        </ReactMarkdown>
+        <WikiMarkdown content={markdownContent} />
       </article>
     </WikiMain>
   );

@@ -4,9 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { diffWords, type Change } from "diff";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import rehypeRaw from "rehype-raw";
+import { WikiMarkdown } from "../../../../wiki/_components/wiki-markdown";
 
 const ADMIN_API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
@@ -62,13 +60,20 @@ function normalizeMarkdownContent(raw: string): string {
     return raw;
   }
 
-  const match = trimmed.match(/^```[a-zA-Z0-9]*\s+([\s\S]*?)\s*```$/);
+  const match = trimmed.match(/^```([a-zA-Z0-9]*)\s+([\s\S]*?)\s*```$/);
 
-  if (!match || match.length < 2) {
+  if (!match || match.length < 3) {
     return raw;
   }
 
-  return match[1];
+  const fenceLang = match[1];
+  const inner = match[2];
+
+  if (fenceLang === "mermaid") {
+    return raw;
+  }
+
+  return inner;
 }
 
 function formatDateTime(dateIso: string): string {
@@ -998,15 +1003,29 @@ export default function AdminWikiEditPage() {
       ? null
       : versions.find((v) => v.id === viewVersionId) ?? null;
 
-  const selectedVersionsOnPageForDelete = paginatedVersions.filter((v) =>
-    selectedVersionIdsForDelete.includes(v.id),
+  const deletablePaginatedVersions = paginatedVersions.filter(
+    (v) => latestVersionIdsByLang[v.language] !== v.id,
+  );
+
+  const selectedDeletableOnPageForDelete = deletablePaginatedVersions.filter(
+    (v) => selectedVersionIdsForDelete.includes(v.id),
   );
 
   const isAllPageSelectedForDelete =
-    paginatedVersions.length > 0 &&
-    selectedVersionsOnPageForDelete.length === paginatedVersions.length;
+    deletablePaginatedVersions.length > 0 &&
+    selectedDeletableOnPageForDelete.length ===
+      deletablePaginatedVersions.length;
 
   const hasAnySelectedForDelete = selectedVersionIdsForDelete.length > 0;
+
+  const publicWikiHref =
+    slug != null
+      ? `/wiki/${encodeURIComponent(slug)}${
+          form?.language
+            ? `?lang=${encodeURIComponent(form.language)}`
+            : ""
+        }`
+      : null;
 
   return (
     <div className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
@@ -1019,12 +1038,24 @@ export default function AdminWikiEditPage() {
             Преглед и редакция на съдържанието на избрана Wiki статия.
           </p>
         </div>
-        <Link
-          href="/admin/wiki"
-          className="text-sm font-medium text-green-700 hover:text-green-900 hover:underline"
-        >
-          ← Назад към Admin Wiki
-        </Link>
+        <div className="flex flex-col items-end gap-1 text-right">
+          {publicWikiHref && (
+            <Link
+              href={publicWikiHref}
+              className="text-xs font-medium text-blue-700 hover:text-blue-900 hover:underline"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Отвори публичната страница
+            </Link>
+          )}
+          <Link
+            href="/admin/wiki"
+            className="text-sm font-medium text-green-700 hover:text-green-900 hover:underline"
+          >
+            ← Назад към Admin Wiki
+          </Link>
+        </div>
       </div>
 
       {loading && (
@@ -1137,6 +1168,12 @@ export default function AdminWikiEditPage() {
                 value={form.content}
                 onChange={handleChange("content")}
               />
+              <p className="text-xs text-zinc-500">
+                За диаграми използвайте fenced code block с език{" "}
+                <code>mermaid</code>, напр.:{" "}
+                <code>{"```mermaid ... ```"}</code>. Диаграмите ще се виждат в
+                прегледа и в публичната Wiki.
+              </p>
             </div>
 
             <section
@@ -1171,12 +1208,9 @@ export default function AdminWikiEditPage() {
                     className="wiki-markdown mt-3 text-sm leading-relaxed"
                     style={{ color: "#111827" }}
                   >
-                    <ReactMarkdown
-                      remarkPlugins={[remarkGfm]}
-                      rehypePlugins={[rehypeRaw]}
-                    >
-                      {normalizeMarkdownContent(form.content)}
-                    </ReactMarkdown>
+                    <WikiMarkdown
+                      content={normalizeMarkdownContent(form.content)}
+                    />
                   </article>
                 </div>
               )}
@@ -1357,14 +1391,15 @@ export default function AdminWikiEditPage() {
                       <th className="px-3 py-2 align-middle text-center">
                         <input
                           type="checkbox"
-                          className="h-4 w-4 rounded border-zinc-300 text-red-600 focus:ring-red-500"
+                          className="h-4 w-4 rounded border-zinc-300 text-red-600 focus:ring-red-500 disabled:cursor-not-allowed disabled:opacity-60"
                           checked={isAllPageSelectedForDelete}
+                          disabled={deletablePaginatedVersions.length === 0}
                           onChange={(event) => {
                             const checked = event.target.checked;
                             if (checked) {
                               setSelectedVersionIdsForDelete((current) => {
                                 const next = new Set(current);
-                                for (const v of paginatedVersions) {
+                                for (const v of deletablePaginatedVersions) {
                                   next.add(v.id);
                                 }
                                 return Array.from(next);
@@ -1392,103 +1427,113 @@ export default function AdminWikiEditPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {paginatedVersions.map((version) => (
-                      <tr
-                        key={version.id}
-                        className="border-b border-zinc-100 last:border-b-0 hover:bg-zinc-50"
-                      >
-                        <td className="px-3 py-2 align-middle text-center">
-                          <input
-                            type="checkbox"
-                            className="h-4 w-4 rounded border-zinc-300 text-green-600 focus:ring-green-500"
-                            checked={compareSelectionIds.includes(version.id)}
-                            onChange={() => handleToggleCompare(version)}
-                          />
-                        </td>
-                        <td className="px-3 py-2 align-middle text-center">
-                          <input
-                            type="checkbox"
-                            className="h-4 w-4 rounded border-zinc-300 text-red-600 focus:ring-red-500"
-                            checked={selectedVersionIdsForDelete.includes(
-                              version.id,
-                            )}
-                            onChange={(event) => {
-                              const checked = event.target.checked;
-                              setSelectedVersionIdsForDelete((current) => {
-                                if (checked) {
-                                  if (current.includes(version.id)) {
-                                    return current;
-                                  }
-                                  return [...current, version.id];
-                                }
+                    {paginatedVersions.map((version) => {
+                      const isLatestForLanguage =
+                        latestVersionIdsByLang[version.language] === version.id;
 
-                                return current.filter((id) => id !== version.id);
-                              });
-                            }}
-                          />
-                        </td>
-                        <td className="px-3 py-2 align-middle text-zinc-900">
-                          <div className="flex items-center gap-2">
-                            <span>v{version.version}</span>
-                          </div>
-                        </td>
-                        <td className="px-3 py-2 align-middle text-zinc-900">
-                          {version.language}
-                        </td>
-                        <td className="px-3 py-2 align-middle text-zinc-900">
-                          {version.title}
-                        </td>
-                        <td className="px-3 py-2 align-middle text-zinc-700">
-                          {version.subtitle && version.subtitle.trim().length > 0
-                            ? version.subtitle
-                            : "—"}
-                        </td>
-                        <td className="px-3 py-2 align-middle text-zinc-700">
-                          {formatDateTime(version.createdAt)}
-                        </td>
-                        <td className="px-3 py-2 align-middle text-zinc-700">
-                          {version.createdBy ?? "—"}
-                        </td>
-                        <td className="px-3 py-2 align-middle text-right">
-                          <div className="flex items-center justify-end gap-3">
-                            <button
-                              type="button"
-                              onClick={() => setViewVersionId(version.id)}
-                              className="text-xs font-medium text-zinc-700 hover:text-zinc-900"
-                            >
-                              Преглед
-                            </button>
-                            {latestVersionIdsByLang[version.language] ===
-                            version.id ? (
-                              <span className="text-xs font-semibold text-zinc-500">
-                                Текуща версия
-                              </span>
-                            ) : (
+                      return (
+                        <tr
+                          key={version.id}
+                          className="border-b border-zinc-100 last:border-b-0 hover:bg-zinc-50"
+                        >
+                          <td className="px-3 py-2 align-middle text-center">
+                            <input
+                              type="checkbox"
+                              className="h-4 w-4 rounded border-zinc-300 text-green-600 focus:ring-green-500"
+                              checked={compareSelectionIds.includes(version.id)}
+                              onChange={() => handleToggleCompare(version)}
+                            />
+                          </td>
+                          <td className="px-3 py-2 align-middle text-center">
+                            <input
+                              type="checkbox"
+                              className="h-4 w-4 rounded border-zinc-300 text-red-600 focus:ring-red-500 disabled:cursor-not-allowed disabled:opacity-60"
+                              checked={selectedVersionIdsForDelete.includes(
+                                version.id,
+                              )}
+                              disabled={isLatestForLanguage}
+                              onChange={(event) => {
+                                const checked = event.target.checked;
+                                setSelectedVersionIdsForDelete((current) => {
+                                  if (checked) {
+                                    if (current.includes(version.id)) {
+                                      return current;
+                                    }
+                                    return [...current, version.id];
+                                  }
+
+                                  return current.filter((id) => id !== version.id);
+                                });
+                              }}
+                            />
+                          </td>
+                          <td className="px-3 py-2 align-middle text-zinc-900">
+                            <div className="flex items-center gap-2">
+                              <span>v{version.version}</span>
+                            </div>
+                          </td>
+                          <td className="px-3 py-2 align-middle text-zinc-900">
+                            {version.language}
+                          </td>
+                          <td className="px-3 py-2 align-middle text-zinc-900">
+                            {version.title}
+                          </td>
+                          <td className="px-3 py-2 align-middle text-zinc-700">
+                            {version.subtitle && version.subtitle.trim().length > 0
+                              ? version.subtitle
+                              : "—"}
+                          </td>
+                          <td className="px-3 py-2 align-middle text-zinc-700">
+                            {formatDateTime(version.createdAt)}
+                          </td>
+                          <td className="px-3 py-2 align-middle text-zinc-700">
+                            {version.createdBy ?? "—"}
+                          </td>
+                          <td className="px-3 py-2 align-middle text-right">
+                            <div className="flex items-center justify-end gap-3">
                               <button
                                 type="button"
-                                onClick={() => handleRollback(version.id)}
-                                disabled={rollbackVersionId === version.id}
-                                className="text-sm font-medium text-green-700 hover:text-green-900 disabled:cursor-not-allowed disabled:opacity-70"
+                                onClick={() => setViewVersionId(version.id)}
+                                className="text-xs font-medium text-zinc-700 hover:text-zinc-900"
                               >
-                                {rollbackVersionId === version.id
-                                  ? "Връщане..."
-                                  : "Върни"}
+                                Преглед
                               </button>
-                            )}
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setDeleteVersionError(null);
-                                setDeleteVersionStep1Id(version.id);
-                              }}
-                              className="text-xs font-medium text-red-600 hover:text-red-700"
-                            >
-                              Изтрий
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                              {latestVersionIdsByLang[version.language] ===
+                              version.id ? (
+                                <span className="text-xs font-semibold text-zinc-500">
+                                  Текуща версия
+                                </span>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => handleRollback(version.id)}
+                                  disabled={rollbackVersionId === version.id}
+                                  className="text-sm font-medium text-green-700 hover:text-green-900 disabled:cursor-not-allowed disabled:opacity-70"
+                                >
+                                  {rollbackVersionId === version.id
+                                    ? "Връщане..."
+                                    : "Върни"}
+                                </button>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (isLatestForLanguage) {
+                                    return;
+                                  }
+                                  setDeleteVersionError(null);
+                                  setDeleteVersionStep1Id(version.id);
+                                }}
+                                disabled={isLatestForLanguage}
+                                className="text-xs font-medium text-red-600 hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                              >
+                                Изтрий
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
                 <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
@@ -1723,12 +1768,11 @@ export default function AdminWikiEditPage() {
                     className="wiki-markdown mt-3 text-sm leading-relaxed"
                     style={{ color: "#111827" }}
                   >
-                    <ReactMarkdown
-                      remarkPlugins={[remarkGfm]}
-                      rehypePlugins={[rehypeRaw]}
-                    >
-                      {normalizeMarkdownContent(viewVersionTarget.content)}
-                    </ReactMarkdown>
+                    <WikiMarkdown
+                      content={normalizeMarkdownContent(
+                        viewVersionTarget.content,
+                      )}
+                    />
                   </article>
                 </div>
               </div>
@@ -1768,72 +1812,82 @@ export default function AdminWikiEditPage() {
             </div>
           )}
           {deleteVersionStep2Id && deleteVersionTarget && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-            <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
-              <h3 className="mb-2 text-base font-semibold text-zinc-900">
-                Потвърдете изтриването на версията
-              </h3>
-              <p className="mb-3 text-sm text-zinc-700">
-                Наистина ли искате да изтриете тази версия? Това действие е
-                окончателно и не може да бъде отменено.
-              </p>
-              <p className="mb-3 text-xs text-zinc-600">
-                Версия v{deleteVersionTarget.version} ({deleteVersionTarget.language})
-                , създадена на {formatDateTime(deleteVersionTarget.createdAt)}.
-              </p>
-              {deleteVersionError && (
-                <p className="mb-3 text-xs text-red-600" role="alert">
-                  {deleteVersionError}
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+              <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
+                <h3 className="mb-2 text-base font-semibold text-zinc-900">
+                  Потвърдете изтриването на версията
+                </h3>
+                <p className="mb-3 text-sm text-zinc-700">
+                  Наистина ли искате да изтриете тази версия? Това действие е
+                  окончателно и не може да бъде отменено.
                 </p>
-              )}
-              <div className="flex justify-end gap-2">
-                <button
-                  type="button"
-                  className="rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-800 hover:bg-zinc-50 disabled:opacity-70"
-                  onClick={() => setDeleteVersionStep2Id(null)}
-                  disabled={deleteVersionSubmitting}
-                >
-                  Отказ
-                </button>
-                <button
-                  type="button"
-                  className="rounded-md bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700 disabled:opacity-70"
-                  onClick={async () => {
-                    if (!articleId || !deleteVersionStep2Id) {
-                      return;
-                    }
-
-                    if (typeof window === "undefined") {
-                      return;
-                    }
-
-                    setDeleteVersionError(null);
-                    setDeleteVersionSubmitting(true);
-
-                    try {
-                      const token =
-                        window.localStorage.getItem("qa4free_access_token");
-                      if (!token) {
-                        setDeleteVersionError(
-                          "Липсва достъп до Admin API. Моля, влезте отново като администратор.",
-                        );
-                        setDeleteVersionSubmitting(false);
+                <p className="mb-3 text-xs text-zinc-600">
+                  Версия v{deleteVersionTarget.version} ({deleteVersionTarget.language})
+                  , създадена на {formatDateTime(deleteVersionTarget.createdAt)}.
+                </p>
+                {deleteVersionError && (
+                  <p className="mb-3 text-xs text-red-600" role="alert">
+                    {deleteVersionError}
+                  </p>
+                )}
+                <div className="flex justify-end gap-2">
+                  <button
+                    type="button"
+                    className="rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-800 hover:bg-zinc-50 disabled:opacity-70"
+                    onClick={() => setDeleteVersionStep2Id(null)}
+                    disabled={deleteVersionSubmitting}
+                  >
+                    Отказ
+                  </button>
+                  <button
+                    type="button"
+                    className="rounded-md bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700 disabled:opacity-70"
+                    onClick={async () => {
+                      if (!articleId || !deleteVersionStep2Id || !deleteVersionTarget) {
                         return;
                       }
 
-                      const res = await fetch(
-                        `${ADMIN_API_BASE_URL}/admin/wiki/articles/${encodeURIComponent(
-                          articleId,
-                        )}/versions/${encodeURIComponent(
-                          deleteVersionStep2Id,
-                        )}`,
-                        {
-                          method: "DELETE",
-                          headers: {
-                            Authorization: `Bearer ${token}`,
+                      if (
+                        latestVersionIdsByLang[deleteVersionTarget.language] ===
+                        deleteVersionTarget.id
+                      ) {
+                        setDeleteVersionError(
+                          "Текущата активна версия не може да бъде изтрита.",
+                        );
+                        return;
+                      }
+
+                      if (typeof window === "undefined") {
+                        return;
+                      }
+
+                      setDeleteVersionError(null);
+                      setDeleteVersionSubmitting(true);
+
+                      try {
+                        const token =
+                          window.localStorage.getItem("qa4free_access_token");
+                        if (!token) {
+                          setDeleteVersionError(
+                            "Липсва достъп до Admin API. Моля, влезте отново като администратор.",
+                          );
+                          setDeleteVersionSubmitting(false);
+                          return;
+                        }
+
+                        const res = await fetch(
+                          `${ADMIN_API_BASE_URL}/admin/wiki/articles/${encodeURIComponent(
+                            articleId,
+                          )}/versions/${encodeURIComponent(
+                            deleteVersionStep2Id,
+                          )}`,
+                          {
+                            method: "DELETE",
+                            headers: {
+                              Authorization: `Bearer ${token}`,
+                            },
                           },
-                        },
-                      );
+                        );
 
                       if (!res.ok) {
                         if (res.status === 400) {

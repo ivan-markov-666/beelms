@@ -1,6 +1,6 @@
-# QA4Free – Dev & Local Docker Setup
+# beelms (QA4Free example) – Dev & Local Docker Setup
 
-Това репо съдържа примерна платформа **QA4Free**:
+Това репо съдържа примерна инсталация на core рамката **beelms**, конфигурирана като тренировъчна платформа **QA4Free**:
 - Next.js frontend (FE)
 - NestJS API (BE)
 - Training API (отделен NestJS service за упражнения)
