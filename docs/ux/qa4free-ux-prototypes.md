@@ -1,5 +1,7 @@
 # QA4Free – UX Prototypes & Wireframes (MVP)
 
+> Бележка (beelms): Този документ индексира UX прототипите за QA4Free като конкретна инстанция върху core рамката **beelms**.
+
 _Роля: UX Designer / Analyst. Фаза: BMAD Phase 2 – Prototypes. Този документ служи като индекс на UX прототипите (wireframes и потоци) за MVP версията на QA4Free._
 
 ## 1. Обхват и свързани документи
