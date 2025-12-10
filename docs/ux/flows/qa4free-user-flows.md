@@ -1,5 +1,7 @@
 # QA4Free – User Flows (MVP)
 
+> Бележка (beelms): Тук са описани key user flows за продукта QA4Free като примерна инстанция, изградена върху core рамката **beelms**.
+
 _Роля: UX Designer / Analyst. Фаза: BMAD Phase 2 – Prototypes. Този документ описва ключовите потребителски потоци (user flows) за MVP версията на QA4Free._
 
 ## 1. Обхват и цел

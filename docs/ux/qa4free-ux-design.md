@@ -1,5 +1,7 @@
 # QA4Free – UX Design (MVP)
 
+> Бележка (beelms): Този UX дизайн описва MVP версията на продукта QA4Free като примерна инстанция, стъпила върху core рамката **beelms**.
+
 _Роля: UX Designer. Фаза: BMAD Phase 2 – Prototypes. Този документ описва основния UX за MVP версията на QA4Free (навигация, основни екрани и текстови wireframes за Auth частта)._ 
 
 ## 1. Обхват и цели
