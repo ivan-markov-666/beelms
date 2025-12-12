@@ -16,7 +16,6 @@ import {
 } from '@nestjs/common';
 import type { Request } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { memoryStorage } from 'multer';
 import { WikiService } from './wiki.service';
 import type { WikiUploadedFile } from './wiki.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -138,11 +137,7 @@ export class AdminWikiController {
   }
 
   @Post('articles/:id/media')
-  @UseInterceptors(
-    FileInterceptor('file', {
-      storage: memoryStorage(),
-    }),
-  )
+  @UseInterceptors(FileInterceptor('file'))
   @HttpCode(201)
   async uploadArticleMedia(
     @Param('id') id: string,
