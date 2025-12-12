@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -9,6 +10,8 @@ import { AuthModule } from './auth/auth.module';
 import { User } from './auth/user.entity';
 import { TrainingModule } from './training/training.module';
 import { TasksModule } from './tasks/tasks.module';
+import { RateLimitInterceptor } from './security/rate-limit/rate-limit.interceptor';
+import { InMemoryRateLimitStore } from './security/rate-limit/rate-limit.store';
 
 @Module({
   imports: [
@@ -28,6 +31,13 @@ import { TasksModule } from './tasks/tasks.module';
     TasksModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    InMemoryRateLimitStore,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: RateLimitInterceptor,
+    },
+  ],
 })
 export class AppModule {}
