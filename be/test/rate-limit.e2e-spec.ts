@@ -69,4 +69,32 @@ describe('Rate limiting (e2e)', () => {
       .send({})
       .expect(429);
   });
+
+  it('POST /api/training/echo returns 429 after exceeding ip limit', async () => {
+    for (let i = 0; i < 60; i += 1) {
+      await request(app.getHttpServer())
+        .post('/api/training/echo')
+        .send({ message: 'hello', count: i })
+        .expect(200);
+    }
+
+    await request(app.getHttpServer())
+      .post('/api/training/echo')
+      .send({ message: 'hello', count: 999 })
+      .expect(429);
+  });
+
+  it('POST /api/tasks/:id/submit returns 429 after exceeding ip limit', async () => {
+    for (let i = 0; i < 120; i += 1) {
+      await request(app.getHttpServer())
+        .post('/api/tasks/string-hello-world/submit')
+        .send({ solution: 'hello world' })
+        .expect(200);
+    }
+
+    await request(app.getHttpServer())
+      .post('/api/tasks/string-hello-world/submit')
+      .send({ solution: 'hello world' })
+      .expect(429);
+  });
 });

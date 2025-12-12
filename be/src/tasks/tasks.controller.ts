@@ -11,6 +11,7 @@ import { TasksService } from './tasks.service';
 import { TaskDto } from './dto/task.dto';
 import { SubmitTaskDto } from './dto/submit-task.dto';
 import { TaskResultDto } from './dto/task-result.dto';
+import { RateLimit } from '../security/rate-limit/rate-limit.decorator';
 
 @Controller('tasks')
 export class TasksController {
@@ -37,6 +38,7 @@ export class TasksController {
   }
 
   @Post(':id/submit')
+  @RateLimit({ limit: 120, windowSeconds: 60, key: 'ip' })
   @HttpCode(200)
   submitTask(
     @Param('id') id: string,
