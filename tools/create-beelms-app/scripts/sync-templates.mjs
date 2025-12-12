@@ -15,6 +15,32 @@ const COPY_IGNORE_NAMES = new Set([
   ".cache",
 ]);
 
+function sleepMs(ms) {
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+}
+
+function rmDirWithRetries(dir) {
+  // Windows can intermittently throw ENOTEMPTY due to file locks (AV/indexing)
+  // even with recursive+force. Use retries + backoff.
+  const attempts = 8;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      fs.rmSync(dir, {
+        recursive: true,
+        force: true,
+        maxRetries: 20,
+        retryDelay: 100,
+      });
+      return;
+    } catch (err) {
+      if (i === attempts - 1) {
+        throw err;
+      }
+      sleepMs(150 * (i + 1));
+    }
+  }
+}
+
 function copyDir(srcDir, destDir) {
   if (!fs.existsSync(srcDir) || !fs.statSync(srcDir).isDirectory()) {
     return;
@@ -62,7 +88,7 @@ function main() {
     throw new Error(`Expected frontend template folder not found: ${feSrcDir}`);
   }
 
-  fs.rmSync(templatesRoot, { recursive: true, force: true });
+  rmDirWithRetries(templatesRoot);
   fs.mkdirSync(templatesRoot, { recursive: true });
 
   copyDir(beSrcDir, apiDestDir);
