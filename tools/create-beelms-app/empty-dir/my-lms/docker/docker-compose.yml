@@ -1,0 +1,39 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: my-lms-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: my_lms
+      POSTGRES_USER: my_lms
+      POSTGRES_PASSWORD: my_lms
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+  api:
+    build:
+      context: ../api
+      dockerfile: Dockerfile
+    container_name: my-lms-api
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: my_lms
+      DB_USER: my_lms
+      DB_PASSWORD: my_lms
+      MEDIA_ROOT: /usr/src/app/media
+    ports:
+      - "3000:3000"
+    volumes:
+      - wiki-media:/usr/src/app/media
+
+volumes:
+  db-data:
+  wiki-media:
