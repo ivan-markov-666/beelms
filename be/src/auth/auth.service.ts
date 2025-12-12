@@ -22,6 +22,8 @@ import { VerifyEmailDto } from './dto/verify-email.dto';
 
 const RESET_PASSWORD_TOKEN_TTL_MS = 24 * 60 * 60 * 1000;
 const EMAIL_VERIFICATION_TOKEN_TTL_MS = 24 * 60 * 60 * 1000;
+const SHOULD_LOG_AUTH_LINKS =
+  process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test';
 
 @Injectable()
 export class AuthService {
@@ -65,7 +67,7 @@ export class AuthService {
 
       await this.usersRepo.save(saved);
 
-      if (process.env.NODE_ENV !== 'production') {
+      if (SHOULD_LOG_AUTH_LINKS) {
         console.log(
           `[auth] Email verification requested for ${saved.email}. Verification link: /auth/verify-email?token=${verificationToken}`,
         );
@@ -134,7 +136,7 @@ export class AuthService {
 
     await this.usersRepo.save(user);
 
-    if (process.env.NODE_ENV !== 'production') {
+    if (SHOULD_LOG_AUTH_LINKS) {
       console.log(
         `[auth] Password reset requested for ${user.email}. Reset link: /auth/reset-password?token=${token}`,
       );

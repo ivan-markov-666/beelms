@@ -16,6 +16,8 @@ import { UpdateProfileDto } from './dto/update-profile.dto';
 import { UserExportDto } from './dto/user-export.dto';
 
 const EMAIL_VERIFICATION_TOKEN_TTL_MS = 24 * 60 * 60 * 1000;
+const SHOULD_LOG_AUTH_LINKS =
+  process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test';
 
 @Injectable()
 export class AccountService {
@@ -114,7 +116,7 @@ export class AccountService {
 
     const saved = await this.usersRepo.save(user);
 
-    if (process.env.NODE_ENV !== 'production') {
+    if (SHOULD_LOG_AUTH_LINKS) {
       console.log(
         `[account] Email change requested for ${saved.email}. Verification link for new email (${dto.email}): /auth/verify-email?token=${verificationToken}`,
       );
