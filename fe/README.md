@@ -92,6 +92,22 @@ npm install
 npm test
 ```
 
+#### 1.2.1. Markdown-related Jest mocks
+
+The Wiki FE tests run in a Jest/Node environment, while some markdown-related dependencies
+(`react-markdown`, `remark-gfm`, `rehype-raw`) are ESM-only packages.
+
+To keep the tests simple and stable, we mock these modules in Jest:
+
+- Jest config: `fe/jest.config.cjs`
+  - `moduleNameMapper` maps `react-markdown`, `remark-gfm` and `rehype-raw` to local mocks.
+- Mocks live in `fe/test/__mocks__/`:
+  - `react-markdown.tsx` – renders children inside a simple wrapper component;
+  - `remark-gfm.ts`, `rehype-raw.ts` – no-op plugin mocks.
+
+This way the tests focus on the Wiki UI behaviour (props, links, text, actions), without
+depending on the full markdown/mermaid rendering pipeline.
+
 ### Language switcher and global i18n roadmap
 
 - The global header `LanguageSwitcher` (BG/EN) controls the `lang` query parameter for all public pages.

@@ -1,7 +1,7 @@
 services:
   db:
     image: postgres:16-alpine
-    container_name: qa4free-db
+    container_name: beelms-core-db
     restart: unless-stopped
     environment:
       POSTGRES_DB: qa4free
@@ -16,7 +16,7 @@ services:
     build:
       context: ./be
       dockerfile: Dockerfile
-    container_name: qa4free-api
+    container_name: beelms-core-api
     restart: unless-stopped
     depends_on:
       - db
@@ -39,7 +39,7 @@ services:
     build:
       context: ./training-api
       dockerfile: Dockerfile
-    container_name: qa4free-training-api
+    container_name: beelms-core-training-api
     restart: unless-stopped
     environment:
       NODE_ENV: development

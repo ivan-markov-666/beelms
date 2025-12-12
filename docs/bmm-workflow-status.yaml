@@ -1,0 +1,35 @@
+# BMM Workflow Status - auto-initialized for qa-4-free
+# Track: Enterprise Method, brownfield
+# This file tracks Analysis / Planning / Solutioning / Implementation workflows.
+# Implementation execution itself се следи отделно (например чрез sprint-status.yaml).
+
+generated: "2025-12-10T07:57:00Z"
+project: "qa-4-free"
+project_type: "enterprise-bmad-method"
+selected_track: "enterprise"
+field_type: "brownfield"
+workflow_path: ".bmad/bmm/workflows/workflow-status/paths/enterprise-brownfield.yaml"
+
+workflow_status:
+  # Prerequisite phase (conditional – used само ако проектът е недокументиран)
+  document-project: "docs/index.md"
+
+  # Phase 0 – Discovery (Required phase, но отделните workflows могат да са optional/recommended)
+  brainstorm-project: "docs/backlog/brainstorm-beelms-core.md"
+  research: "docs/analysis/research/technical-self-hosted-lms-architecture-research-2025-12-10.md"
+  # Product brief е вече обновен за новата цел (framework)
+  product-brief: "docs/product/product-brief.md"
+
+  # Phase 1 – Planning
+  prd: "docs/product/prd.md"
+  create-ux-design: "docs/ux-design-specification.md"
+
+  # Phase 2 – Solutioning
+  create-architecture: "docs/architecture/beelms-core-architecture.md"
+  create-epics-and-stories: "docs/backlog/beelms-core-epics-and-stories.md"
+  test-design: "docs/testing/beelms-core-test-design.md"
+  validate-architecture: "docs/architecture/beelms-core-architecture.md"
+  implementation-readiness: "docs/delivery/beelms-core-implementation-readiness.md"
+
+  # Phase 3 – Implementation
+  sprint-planning: "docs/sprint-artifacts/beelms-core-sprint-planning.md"

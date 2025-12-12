@@ -126,7 +126,7 @@ docker compose up -d api
 
 Това ще:
 
-- презбилдне image-а за `qa4free-api` от актуалния `be/` код;
+- презбилдне image-а за `api` услугата от актуалния `be/` код (виж `docker-compose.yml`);
 - рестартира само `api` услугата.
 
 Алтернативно, с **една** команда можеш да направиш rebuild + start само на `api`:
@@ -252,7 +252,7 @@ docker compose exec api sh -c "npm run migration:run && npm run seed:wiki"
 
 1. Провери, че BE, който върви на `3000`, е
    - или стартиран с `npm run start:dev` в `be/`,
-   - или е контейнерът `qa4free-api`, билднат от актуалния код (`docker compose build api`).
+   - или е `api` услугата от Docker Compose, билдната от актуалния код (`docker compose build api`).
 2. Увери се, че `GET http://localhost:3000/api/health` връща отговор.
 3. Пробвай директно с `curl` към Admin Wiki create endpoint-а (виж `docs/architecture/admin-wiki-api-examples.md`).
 4. Ако променяш BE кода и ползваш Docker, не забравяй **rebuild** стъпката от т. 3.2.
@@ -261,3 +261,43 @@ docker compose exec api sh -c "npm run migration:run && npm run seed:wiki"
 
 За по-детайлна документация за API/DB виж:
 - `docs/architecture/api-db-docs-index.md` – входна точка към OpenAPI, DB модел и всички `*-api-examples.md`.
+
+---
+
+## 6. WS-CORE-4 CLI scaffold и локален "бедняшки CI"
+
+В това репо има експериментален CLI прототип за scaffold на нов beelms core проект:
+
+- пакет: `tools/create-beelms-app/`
+- команда (локално):
+  - `node tools/create-beelms-app/dist/index.js my-lms`
+  - `node tools/create-beelms-app/dist/index.js my-lms --api-only`
+
+CLI-то създава структура от вида:
+
+```text
+my-lms/
+  api/    # NestJS backend (копие на be/)
+  web/    # Next.js frontend (копие на fe/, по избор)
+  docker/ # docker-compose.yml + DX helper скриптове
+  env/    # място за .env.example файлове
+  README.md
+```
+
+### 6.1. Локален "бедняшки CI" (BE + FE + CLI)
+
+Препоръчителен ритуал преди по-големи промени/merge към `main`:
+
+- Backend:
+  - `cd be`
+  - `npm run test:regression:local`
+- Frontend:
+  - `cd fe`
+  - `npm run test`
+- CLI + Docker smoke (по желание, напр. преди release):
+  - `cd tools/create-beelms-app`
+  - `npm run smoke`
+
+Подробности и примерни git `pre-push` hook-ове (Windows / Linux/macOS) има в:
+
+- `docs/LOCAL_CI.md`
