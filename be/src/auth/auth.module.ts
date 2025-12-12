@@ -16,6 +16,8 @@ import { AdminMetricsService } from './admin-metrics.service';
 import { AdminMetricsController } from './admin-metrics.controller';
 import { AdminActivityService } from './admin-activity.service';
 import { AdminActivityController } from './admin-activity.controller';
+import { InMemoryLoginAttemptStore } from '../security/account-protection/login-attempts.store';
+import { LoginProtectionInterceptor } from '../security/account-protection/login-protection.interceptor';
 
 @Module({
   imports: [
@@ -35,6 +37,8 @@ import { AdminActivityController } from './admin-activity.controller';
     AdminUsersService,
     AdminMetricsService,
     AdminActivityService,
+    InMemoryLoginAttemptStore,
+    LoginProtectionInterceptor,
   ],
   controllers: [
     AuthController,
