@@ -25,7 +25,7 @@ sprints:
 
   - id: "S3"
     name: "Sprint 3 – WS-CORE-3 (Admin Dashboard) + WS-CORE-4 prep"
-    status: "in_progress"
+    status: "done"
     walking_skeletons:
       - "WS-CORE-3"
     goals:
@@ -50,8 +50,8 @@ walking_skeletons:
 
   - id: "WS-CORE-4"
     name: "DX & CLI – npx create-beelms-app"
-    status: "planned"
-    notes: "Все още няма CLI имплементация; бъдещ vertical."
+    status: "done"
+    notes: "WS-CORE-4 е реализиран като локален TypeScript CLI прототип в monorepo-то (tools/create-beelms-app), който scaffold-ва нов проект (api/, по избор web/, env/, docker/), генерира docker-compose.yml с project-specific имена/портове, добавя DX helper скриптове за regression тестове и README. Има smoke тест (npm run smoke), който валидира walking skeleton-а CLI → Docker → npm run test:regression:local за нов проект, и е добавен локален \"бедняшки CI\" ритуал + примерни pre-push hook-ове и коренен CHANGELOG.md с v0.1.0 DX/CLI baseline. Оставаща бъдеща работа: публикуване като реална npx create-beelms-app команда извън това репо, по-богати DX флагове/интерактивен UX и CI шаблони."
 
 notes:
   - "Статусите тук са за изпълнението по beelms core. Legacy QA4Free може вече да има част от тези потоци, но не са систематично мапнати тук."

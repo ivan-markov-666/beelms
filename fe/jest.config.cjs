@@ -8,8 +8,14 @@ const customJestConfig = {
   testEnvironment: "jest-environment-jsdom",
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/src/$1",
+    "^react-markdown$": "<rootDir>/test/__mocks__/react-markdown.tsx",
+    "^remark-gfm$": "<rootDir>/test/__mocks__/remark-gfm.ts",
+    "^rehype-raw$": "<rootDir>/test/__mocks__/rehype-raw.ts",
   },
   setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
+  transformIgnorePatterns: [
+    "/node_modules/(?!(react-markdown|vfile|unist-.*|unified|bail|is-plain-obj|trough|remark-.*|mdast-util-.*|micromark.*|decode-named-character-reference|character-entities|property-information|hast-util-whitespace|space-separated-tokens|comma-separated-tokens|ccount|escape-string-regexp|markdown-table|trim-lines)/)",
+  ],
 };
 
 module.exports = createJestConfig(customJestConfig);

@@ -1,0 +1,19 @@
+{
+  "name": "create-beelms-app",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Experimental beelms core app scaffolding CLI (prototype for npx create-beelms-app)",
+  "main": "dist/index.js",
+  "bin": {
+    "create-beelms-app": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p .",
+    "cli": "node ./dist/index.js --help",
+    "smoke": "npm run build && node ./dist/smoke.js"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}

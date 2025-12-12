@@ -1,0 +1,86 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  backend-tests:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: qa4free
+          POSTGRES_USER: qa4free
+          POSTGRES_PASSWORD: qa4free
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U qa4free -d qa4free"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install (be)
+        run: npm ci
+        working-directory: be
+
+      - name: Test regression (be)
+        run: npm run test:regression:local
+        working-directory: be
+        env:
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_NAME: qa4free
+          DB_USER: qa4free
+          DB_PASSWORD: qa4free
+          JWT_SECRET: dev_jwt_secret_change_me
+          JWT_EXPIRES_IN: 900s
+          NODE_ENV: test
+
+  frontend-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install (fe)
+        run: npm ci
+        working-directory: fe
+
+      - name: Test (fe)
+        run: npm test
+        working-directory: fe
+
+  cli-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install (create-beelms-app)
+        run: npm ci
+        working-directory: tools/create-beelms-app
+
+      - name: Smoke (create-beelms-app)
+        run: npm run smoke
+        working-directory: tools/create-beelms-app

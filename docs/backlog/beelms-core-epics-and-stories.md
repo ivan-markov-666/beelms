@@ -101,6 +101,10 @@ beelms трябва да имат собствени EPIC/STORY документ
 - **STORY-CORE-DOCKER-COMPOSE-STACK** – Docker Compose стек за Lean Tier 0 (backend, frontend, postgres, redis по избор).
 - **STORY-CORE-MIGRATIONS-SEED** – Стандартизиран процес за миграции и seed (incl. примерни данни).
 - **STORY-CORE-MULTI-INSTANCE-TOOLING** – Скриптове/tooling за създаване на нова инстанция (нова база, конфигурация).
+ - **STORY-CORE-CLI-ENV-TEMPLATES** – Автоматично генериране на `.env.example` файлове за `api`/`web` при scaffold на нов проект.
+ - **STORY-CORE-CLI-NPM-PUBLISH** – Публикуване на CLI-то като npm пакет и осигуряване на реално `npx create-beelms-app` извън това репо.
+ - **STORY-CORE-CLI-DOCKER-EXTENDED** – Разширен Docker Compose scaffold с опционални `web` и `redis` услуги според Lean Tier 0.
+ - **STORY-CORE-CLI-CI-TEMPLATES** – Генериране на примерни CI templates (напр. GitHub Actions) за BE/FE тестове и CLI smoke.
 
 ### 4.8. EPIC-CORE-CROSS-I18N – Internationalization (I18N)
 
