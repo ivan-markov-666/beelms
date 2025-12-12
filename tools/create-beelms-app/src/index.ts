@@ -102,12 +102,25 @@ function main(): void {
 
   fs.mkdirSync(targetDir, { recursive: true });
 
-  // Determine the beelms core repo root relative to the compiled dist/index.js file
+  const templatesRoot = path.resolve(__dirname, "../templates");
+  const apiTemplateDir = path.join(templatesRoot, "api");
+  const webTemplateDir = path.join(templatesRoot, "web");
+
+  // Dev fallback: determine the beelms core repo root relative to the compiled dist/index.js file
   // dist/index.js -> ../.. -> create-beelms-app -> .. -> tools -> .. -> repo root
   const repoRoot = path.resolve(__dirname, "../../..");
-
   const beSrcDir = path.join(repoRoot, "be");
   const feSrcDir = path.join(repoRoot, "fe");
+
+  const apiSrcDir =
+    fs.existsSync(apiTemplateDir) && fs.statSync(apiTemplateDir).isDirectory()
+      ? apiTemplateDir
+      : beSrcDir;
+
+  const webSrcDir =
+    fs.existsSync(webTemplateDir) && fs.statSync(webTemplateDir).isDirectory()
+      ? webTemplateDir
+      : feSrcDir;
 
   const apiTargetDir = path.join(targetDir, "api");
   const webTargetDir = path.join(targetDir, "web");
@@ -116,13 +129,13 @@ function main(): void {
 
   const scaffolded: string[] = [];
 
-  if (fs.existsSync(beSrcDir) && fs.statSync(beSrcDir).isDirectory()) {
-    copyDir(beSrcDir, apiTargetDir);
+  if (fs.existsSync(apiSrcDir) && fs.statSync(apiSrcDir).isDirectory()) {
+    copyDir(apiSrcDir, apiTargetDir);
     scaffolded.push("api/");
   }
 
-  if (!apiOnly && fs.existsSync(feSrcDir) && fs.statSync(feSrcDir).isDirectory()) {
-    copyDir(feSrcDir, webTargetDir);
+  if (!apiOnly && fs.existsSync(webSrcDir) && fs.statSync(webSrcDir).isDirectory()) {
+    copyDir(webSrcDir, webTargetDir);
     scaffolded.push("web/");
   }
 
@@ -137,6 +150,8 @@ function main(): void {
       POSTGRES_DB: ${dbName}
       POSTGRES_USER: ${dbName}
       POSTGRES_PASSWORD: ${dbName}
+    networks:
+      - app-net
     ports:
       - "5432:5432"
     volumes:
@@ -159,6 +174,8 @@ function main(): void {
       DB_USER: ${dbName}
       DB_PASSWORD: ${dbName}
       MEDIA_ROOT: /usr/src/app/media
+    networks:
+      - app-net
     ports:
       - "3000:3000"
     volumes:
@@ -166,7 +183,13 @@ function main(): void {
 
 volumes:
   db-data:
+    name: ${projectName}-db-data
   wiki-media:
+    name: ${projectName}-wiki-media
+
+networks:
+  app-net:
+    name: ${projectName}-net
 `;
 
   fs.writeFileSync(
