@@ -4,9 +4,10 @@ import { NestFactory } from '@nestjs/core';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import type { NextFunction, Request, Response } from 'express';
+import helmet from 'helmet';
 import { AppModule } from './app.module';
 
-async function bootstrap() {
+export async function createApp(): Promise<NestExpressApplication> {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const logger = new Logger('HTTP');
   const defaultMediaRoot = path.join(process.cwd(), 'media');
@@ -17,6 +18,30 @@ async function bootstrap() {
       : defaultMediaRoot;
 
   app.setGlobalPrefix('api');
+
+  app.useBodyParser('json', {
+    limit: process.env.REQUEST_BODY_LIMIT ?? '1mb',
+  });
+
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        useDefaults: true,
+        directives: {
+          'default-src': ["'self'"],
+          'base-uri': ["'none'"],
+          'frame-ancestors': ["'none'"],
+          'object-src': ["'none'"],
+          'img-src': ["'self'", 'data:'],
+          'script-src': ["'self'"],
+          'style-src': ["'self'", "'unsafe-inline'"],
+        },
+      },
+      crossOriginEmbedderPolicy: false,
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+    }),
+  );
+
   app.use((req: Request, res: Response, next: NextFunction) => {
     const start = process.hrtime.bigint();
 
@@ -53,6 +78,15 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
+
+  return app;
+}
+
+export async function bootstrap(): Promise<void> {
+  const app = await createApp();
   await app.listen(process.env.PORT ?? 3000);
 }
-void bootstrap();
+
+if (require.main === module) {
+  void bootstrap();
+}
