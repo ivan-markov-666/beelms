@@ -67,6 +67,47 @@ If `npm run smoke` succeeds, it proves that:
 - the Docker stack for that project works;
 - the backend regression flow (`test:regression:local`) passes inside the container.
 
+### 3.1. Using the CLI locally without npm publish (tarball workflow)
+
+The `create-beelms-app` package is **not published** to the npm registry yet, so `npx create-beelms-app ...` will not work.
+
+Use `npm pack` to produce a local `.tgz` tarball and run it via `npx`.
+
+1) Build a tarball:
+
+```bash
+cd tools/create-beelms-app
+npm ci
+npm pack
+```
+
+2) Scaffold a project from the tarball (recommended to use an **absolute path**):
+
+```bash
+# Example (Windows)
+npx --yes --package "D:\\Projects\\qa-4-free\\tools\\create-beelms-app\\create-beelms-app-0.1.0.tgz" create-beelms-app my-lms
+```
+
+> Note: On Windows, relative `file:` / `..\\...tgz` paths can be resolved against the nearest parent `package.json`. Using an absolute path avoids this.
+
+3) Run the Docker stack for the scaffolded project:
+
+```bash
+cd my-lms/docker
+
+# Default stack (api + db)
+docker compose up --build -d
+
+# Full stack (api + db + web + redis)
+docker compose --profile web --profile redis up --build -d
+```
+
+4) Cleanup:
+
+```bash
+docker compose down -v
+```
+
 ---
 
 ## 4. Suggested local CI ritual

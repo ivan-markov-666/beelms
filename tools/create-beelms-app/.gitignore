@@ -1,3 +1,5 @@
 templates/
 empty-dir/
 *.tgz
+my-lms-*/
+my-next-lms/
