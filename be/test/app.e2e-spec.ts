@@ -24,6 +24,6 @@ describe('AppController (e2e)', () => {
     await request(app.getHttpServer())
       .get('/api/health')
       .expect(200)
-      .expect('OK');
+      .expect({ status: 'ok' });
   });
 });
