@@ -1,12 +1,14 @@
 import 'reflect-metadata';
 import * as path from 'path';
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import type { NextFunction, Request, Response } from 'express';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const logger = new Logger('HTTP');
   const defaultMediaRoot = path.join(process.cwd(), 'media');
   const mediaRootEnv = process.env.MEDIA_ROOT;
   const mediaRoot =
@@ -15,6 +17,29 @@ async function bootstrap() {
       : defaultMediaRoot;
 
   app.setGlobalPrefix('api');
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    const start = process.hrtime.bigint();
+
+    res.on('finish', () => {
+      const end = process.hrtime.bigint();
+      const durationMs = Number(end - start) / 1_000_000;
+      const statusCode = res.statusCode;
+      const method = req.method;
+      const url = req.originalUrl ?? req.url;
+
+      const message = `${method} ${url} ${statusCode} ${durationMs.toFixed(1)}ms`;
+
+      if (statusCode >= 500) {
+        logger.error(message);
+      } else if (statusCode >= 400) {
+        logger.warn(message);
+      } else {
+        logger.log(message);
+      }
+    });
+
+    next();
+  });
   app.enableCors({
     origin: process.env.FRONTEND_ORIGIN ?? 'http://localhost:3001',
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
