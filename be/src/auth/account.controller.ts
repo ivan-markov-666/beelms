@@ -18,6 +18,7 @@ import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { AccountExportRequestDto } from './dto/account-export-request.dto';
 import { UserExportDto } from './dto/user-export.dto';
+import { RateLimit } from '../security/rate-limit/rate-limit.decorator';
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -56,6 +57,7 @@ export class AccountController {
 
   @UseGuards(JwtAuthGuard)
   @Post('me/change-password')
+  @RateLimit({ limit: 10, windowSeconds: 3600, key: 'userId' })
   @HttpCode(200)
   async changePassword(
     @Req() req: AuthenticatedRequest,
@@ -74,6 +76,7 @@ export class AccountController {
 
   @UseGuards(JwtAuthGuard)
   @Delete('me')
+  @RateLimit({ limit: 3, windowSeconds: 86400, key: 'userId' })
   @HttpCode(204)
   async deleteMe(@Req() req: AuthenticatedRequest): Promise<void> {
     if (!req.user) {
@@ -85,6 +88,7 @@ export class AccountController {
 
   @UseGuards(JwtAuthGuard)
   @Post('me/export')
+  @RateLimit({ limit: 3, windowSeconds: 86400, key: 'userId' })
   @HttpCode(200)
   exportMe(
     @Req() req: AuthenticatedRequest,
