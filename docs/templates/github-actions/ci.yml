@@ -1,7 +1,8 @@
-name: CI (disabled)
+name: CI
 
 on:
-  workflow_dispatch:
+  push:
+  pull_request:
 
 jobs:
   backend-tests:
