@@ -220,8 +220,6 @@ export default nextConfig;
       POSTGRES_PASSWORD: ${dbName}
     networks:
       - app-net
-    ports:
-      - "5432:5432"
     volumes:
       - db-data:/var/lib/postgresql/data
 
@@ -278,6 +276,18 @@ networks:
   fs.writeFileSync(
     path.join(dockerTargetDir, "docker-compose.yml"),
     dockerComposeContent,
+    { encoding: "utf8" },
+  );
+
+  const dockerComposeDbHostContent = `services:
+  db:
+    ports:
+      - "\${DB_PORT_PUBLISHED:-5432}:5432"
+`;
+
+  fs.writeFileSync(
+    path.join(dockerTargetDir, "docker-compose.db-host.yml"),
+    dockerComposeDbHostContent,
     { encoding: "utf8" },
   );
 
@@ -379,6 +389,10 @@ endlocal
     `- Start full stack (web + redis):\n` +
     `   cd docker\n` +
     `   docker compose --profile web --profile redis up --build -d\n\n` +
+    `By default, Postgres is not published to the host (avoids port collisions). If you need host access (psql, running api locally), use:\n` +
+    `   cd docker\n` +
+    `   docker compose -f docker-compose.yml -f docker-compose.db-host.yml up -d db\n` +
+    `You can optionally set DB_PORT_PUBLISHED to publish a different host port (default 5432).\n\n` +
     `## Backend (api/) quick start\n\n` +
     `1. Install dependencies:\n` +
     `   cd api\n` +
