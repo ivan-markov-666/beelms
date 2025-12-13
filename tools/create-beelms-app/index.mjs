@@ -119,6 +119,18 @@ function main() {
     scaffolded.push("docker/");
   }
 
+  const dockerComposeDbHostSrc = path.join(repoRoot, "docker-compose.db-host.yml");
+  const dockerComposeDbHostDest = path.join(
+    dockerTargetDir,
+    "docker-compose.db-host.yml",
+  );
+  if (
+    fs.existsSync(dockerComposeDbHostSrc) &&
+    fs.statSync(dockerComposeDbHostSrc).isFile()
+  ) {
+    fs.copyFileSync(dockerComposeDbHostSrc, dockerComposeDbHostDest);
+  }
+
   fs.mkdirSync(envTargetDir, { recursive: true });
   scaffolded.push("env/");
 
@@ -130,6 +142,10 @@ function main() {
     `- web/ (optional Next.js frontend template, copied from the fe/ folder)\n` +
     `- docker/ (Docker Compose file copied from docker-compose.yml)\n` +
     `- env/ (placeholder folder for environment templates)\n\n` +
+    `By default, Postgres is not published to the host (avoids port collisions). If you need host access, use:\n` +
+    `   cd docker\n` +
+    `   docker compose -f docker-compose.yml -f docker-compose.db-host.yml up -d db\n` +
+    `You can optionally set DB_PORT_PUBLISHED to publish a different host port (default 5432).\n\n` +
     `For the full manual template process and how this maps to WS-CORE-1..3, see:\n` +
     `docs/sprint-artifacts/beelms-core-ws-core-4-manual-template.md in the beelms core repo.\n`;
 
