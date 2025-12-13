@@ -10,9 +10,13 @@ export class InMemoryLoginAttemptStore {
   private readonly states = new Map<string, AttemptState>();
 
   isBlocked(key: string, nowMs: number): boolean {
+    return this.getBlockedUntilMs(key, nowMs) !== undefined;
+  }
+
+  getBlockedUntilMs(key: string, nowMs: number): number | undefined {
     const state = this.states.get(key);
     if (!state?.blockedUntilMs) {
-      return false;
+      return undefined;
     }
 
     if (state.blockedUntilMs <= nowMs) {
@@ -21,10 +25,10 @@ export class InMemoryLoginAttemptStore {
       if (state.failures.length === 0) {
         this.states.delete(key);
       }
-      return false;
+      return undefined;
     }
 
-    return true;
+    return state.blockedUntilMs;
   }
 
   recordFailure(

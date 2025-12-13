@@ -46,10 +46,14 @@ describe('Account protection (e2e)', () => {
         .expect(401);
     }
 
-    await request(app.getHttpServer())
+    const res = await request(app.getHttpServer())
       .post('/api/auth/login')
       .send({ email, password: 'WrongPassword1234' })
       .expect(429);
+
+    const retryAfter = Number(res.headers['retry-after']);
+    expect(Number.isFinite(retryAfter)).toBe(true);
+    expect(retryAfter).toBeGreaterThan(0);
   });
 
   it('successful login clears lockout for the same ip+email', async () => {
