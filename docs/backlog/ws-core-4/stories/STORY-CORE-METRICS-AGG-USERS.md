@@ -21,7 +21,7 @@
 
 ## Test Plan (local)
 - 1) DB + migrations + seed:
-  - `docker compose up -d db`
+  - `docker compose -f docker-compose.yml -f docker-compose.db-host.yml up -d db`
   - `cd be`
   - `npm run test:setup-db`
 - 2) e2e:

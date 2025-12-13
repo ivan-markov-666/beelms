@@ -36,10 +36,10 @@
 
 ```bash
 # В root на репото
-docker compose up -d db
+docker compose -f docker-compose.yml -f docker-compose.db-host.yml up -d db
 ```
 
-- DB ще е достъпен на `localhost:5432` c:
+- DB ще е достъпен на `localhost:5432` (или друг порт, ако зададеш `DB_PORT_PUBLISHED`) c:
   - DB: `qa4free`
   - User: `qa4free`
   - Password: `qa4free`
@@ -109,9 +109,11 @@ docker compose up -d
 
 Това стартира три услуги:
 
-- **db** – Postgres 16 на `localhost:5432`
+- **db** – Postgres 16 (по подразбиране не е exposed към host)
 - **api** – NestJS API на `http://localhost:3000`
 - **training-api** – Training API на `http://localhost:4000`
+
+> Ако ти трябва DB достъп от host (psql, локален BE без Docker), ползвай override файла: `docker-compose.db-host.yml`.
 
 > Обърни внимание: `api` услугата се билдва от директорията `be/` чрез `be/Dockerfile`. Ако промениш BE кода, трябва да rebuild-неш контейнера.
 
@@ -153,7 +155,7 @@ docker compose down
 1. Увери се, че Postgres (`db` service) върви:
 
    ```bash
-   docker compose up -d db
+   docker compose -f docker-compose.yml -f docker-compose.db-host.yml up -d db
    ```
 
 2. От папка `be/` генерирай миграция според променения код (entities):
@@ -206,7 +208,7 @@ docker compose exec api sh -c "npm run migration:run && npm run seed:wiki"
 1. Стартирай само Postgres:
 
    ```bash
-   docker compose up -d db
+   docker compose -f docker-compose.yml -f docker-compose.db-host.yml up -d db
    ```
 2. Стартирай BE dev:
 

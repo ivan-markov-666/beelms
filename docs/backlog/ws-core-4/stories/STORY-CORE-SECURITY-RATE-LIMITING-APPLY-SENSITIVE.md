@@ -32,7 +32,7 @@ Apply per-endpoint limits (as defined in master spec):
 - [ ] Добавяне/обновяване на e2e тестове.
 
 ## Test Plan (local)
-- `docker compose up -d db`
+- `docker compose -f docker-compose.yml -f docker-compose.db-host.yml up -d db`
 - `cd be`
 - `npm run test:setup-db`
 - `npm run test:e2e`

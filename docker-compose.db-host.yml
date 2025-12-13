@@ -1,0 +1,4 @@
+services:
+  db:
+    ports:
+      - "${DB_PORT_PUBLISHED:-5432}:5432"
