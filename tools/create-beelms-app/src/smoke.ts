@@ -7,7 +7,6 @@ function runOrFail(command: string, args: string[], cwd: string): void {
   const result = spawnSync(command, args, {
     cwd,
     stdio: "inherit",
-    shell: process.platform === "win32",
   });
 
   if (result.status !== 0) {
@@ -121,7 +120,6 @@ function main(): void {
     spawnSync("docker", [...composeArgs, "down", "-v"], {
       cwd: dockerDir,
       stdio: "inherit",
-      shell: process.platform === "win32",
     });
   }
 }
