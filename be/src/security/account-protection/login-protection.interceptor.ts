@@ -7,7 +7,7 @@ import {
   type ExecutionContext,
   type CallHandler,
 } from '@nestjs/common';
-import type { Request } from 'express';
+import type { Request, Response } from 'express';
 import { catchError, Observable, tap, throwError } from 'rxjs';
 import { InMemoryLoginAttemptStore } from './login-attempts.store';
 
@@ -35,6 +35,7 @@ export class LoginProtectionInterceptor implements NestInterceptor {
 
     const http = context.switchToHttp();
     const req = http.getRequest<Request>();
+    const res = http.getResponse<Response>();
 
     const ip = this.getClientIp(req);
     const email = this.getEmail(req);
@@ -42,7 +43,13 @@ export class LoginProtectionInterceptor implements NestInterceptor {
 
     const nowMs = Date.now();
 
-    if (this.store.isBlocked(key, nowMs)) {
+    const blockedUntilMs = this.store.getBlockedUntilMs(key, nowMs);
+    if (blockedUntilMs !== undefined) {
+      const retryAfterSeconds = Math.max(
+        0,
+        Math.ceil((blockedUntilMs - nowMs) / 1000),
+      );
+      res.setHeader('Retry-After', String(retryAfterSeconds));
       throw new HttpException(
         { message: 'Too many failed login attempts' },
         HttpStatus.TOO_MANY_REQUESTS,
