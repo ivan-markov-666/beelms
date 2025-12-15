@@ -653,6 +653,9 @@ export function WikiMarkdown({ content }: { content: string }) {
     ...defaultSchema,
     tagNames: [
       ...((defaultSchema.tagNames as string[] | undefined) ?? []),
+      "u",
+      "sup",
+      "sub",
       "table",
       "thead",
       "tbody",
