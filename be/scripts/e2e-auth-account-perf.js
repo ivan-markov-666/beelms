@@ -8,7 +8,8 @@
  *
  * Environment variables:
  *   API_BASE_URL      - defaults to http://localhost:3000/api
- *   PERF_ITERATIONS   - number of iterations (default: 10)
+ *   PERF_ITERATIONS   - number of iterations (default: 3)
+ *   PERF_ITERATION_PAUSE_MS - pause between iterations (default: 750)
  */
 
 /* eslint-disable no-console */
@@ -18,7 +19,12 @@ const RED = "\x1b[31m";
 const RESET = "\x1b[0m";
 
 const API_BASE_URL = process.env.API_BASE_URL ?? "http://localhost:3000/api";
-const ITERATIONS = Number(process.env.PERF_ITERATIONS ?? 10);
+const ITERATIONS = Number(process.env.PERF_ITERATIONS ?? 3);
+const ITERATION_PAUSE_MS = Number(process.env.PERF_ITERATION_PAUSE_MS ?? 750);
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 async function jsonFetch(url, options) {
   const res = await fetch(url, {
@@ -39,6 +45,35 @@ async function jsonFetch(url, options) {
   return { res, body };
 }
 
+async function jsonFetchWithRetry(url, options) {
+  const maxRetries = Number(process.env.PERF_RETRIES ?? 10);
+  const baseDelayMs = Number(process.env.PERF_RETRY_DELAY_MS ?? 250);
+  const maxDelayMs = Number(process.env.PERF_RETRY_MAX_DELAY_MS ?? 2_000);
+
+  for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
+    const result = await jsonFetch(url, options);
+
+    if (result.res.status !== 429 || attempt === maxRetries) {
+      return result;
+    }
+
+    const retryAfterRaw = result.res.headers.get("retry-after");
+    const retryAfterSeconds = retryAfterRaw ? Number(retryAfterRaw) : NaN;
+
+    const retryAfterMs = Number.isFinite(retryAfterSeconds)
+      ? Math.max(0, retryAfterSeconds) * 1000
+      : baseDelayMs * 2 ** attempt;
+
+    const waitMs = Math.min(retryAfterMs, maxDelayMs);
+    console.warn(
+      `HTTP 429 received. Retrying in ${Math.ceil(waitMs / 1000)}s (attempt ${attempt + 1}/${maxRetries})`,
+    );
+    await sleep(waitMs);
+  }
+
+  return jsonFetch(url, options);
+}
+
 function uniqueEmail(iteration) {
   const ts = Date.now();
   return `perf+${ts}+${iteration}@example.com`;
@@ -51,7 +86,7 @@ async function runSingleFlow(iteration) {
   const password = "Password123!";
 
   const t0 = Date.now();
-  const { res: regRes } = await jsonFetch(`${API_BASE_URL}/auth/register`, {
+  const { res: regRes } = await jsonFetchWithRetry(`${API_BASE_URL}/auth/register`, {
     method: "POST",
     body: JSON.stringify({
       email,
@@ -237,6 +272,10 @@ async function main() {
     } catch (err) {
       console.error(`Iteration ${i + 1} failed:`, err instanceof Error ? err.message : err);
       failureCount += 1;
+    }
+
+    if (i < ITERATIONS - 1 && ITERATION_PAUSE_MS > 0) {
+      await sleep(ITERATION_PAUSE_MS);
     }
   }
   const totalDuration = Date.now() - startAll;

@@ -7,6 +7,8 @@ type DomainMessages = {
     practiceApi: string;
     login: string;
     register: string;
+    profile: string;
+    logout: string;
     admin: string;
   };
   auth: Record<string, string>;
@@ -26,6 +28,8 @@ export const messages: Messages = {
       practiceApi: "API Demo",
       login: "Вход",
       register: "Регистрация",
+      profile: "Профил",
+      logout: "Изход",
       admin: "Admin",
     },
     auth: {
@@ -329,6 +333,8 @@ export const messages: Messages = {
       practiceApi: "API Demo",
       login: "Sign in",
       register: "Register",
+      profile: "Profile",
+      logout: "Sign out",
       admin: "Admin",
     },
     auth: {
@@ -630,6 +636,8 @@ export const messages: Messages = {
       practiceApi: "API Demo",
       login: "Anmelden",
       register: "Registrieren",
+      profile: "Profil",
+      logout: "Abmelden",
       admin: "Admin",
     },
     auth: {

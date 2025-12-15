@@ -1,0 +1,445 @@
+"use client";
+
+import { useEffect, useMemo, useRef, useState } from "react";
+import { EditorContent, useEditor } from "@tiptap/react";
+import type { Editor } from "@tiptap/core";
+import StarterKit from "@tiptap/starter-kit";
+import { Table } from "@tiptap/extension-table";
+import { TableRow } from "@tiptap/extension-table-row";
+import { TableHeader } from "@tiptap/extension-table-header";
+import { TableCell } from "@tiptap/extension-table-cell";
+import { CodeBlock } from "@tiptap/extension-code-block";
+import TurndownService from "turndown";
+import * as turndownGfm from "turndown-plugin-gfm";
+import DOMPurify from "dompurify";
+import { marked } from "marked";
+
+function normalizeMarkdownForEditor(markdown: string): string {
+  if (!markdown) {
+    return "";
+  }
+
+  try {
+    const html = marked.parse(markdown) as string;
+    return DOMPurify.sanitize(html, { USE_PROFILES: { html: true } });
+  } catch {
+    return "";
+  }
+}
+
+function createTurndown(): TurndownService {
+  const service = new TurndownService({
+    codeBlockStyle: "fenced",
+    emDelimiter: "_",
+  });
+
+  // Best effort: enable GFM tables/strikethrough.
+  const gfm = (turndownGfm as unknown as { gfm?: unknown }).gfm;
+  const tables = (turndownGfm as unknown as { tables?: unknown }).tables;
+  const strikethrough = (turndownGfm as unknown as { strikethrough?: unknown })
+    .strikethrough;
+
+  const plugins = [gfm, tables, strikethrough].filter(Boolean);
+  if (plugins.length) {
+    service.use(plugins as unknown as Parameters<TurndownService["use"]>[0]);
+  }
+
+  service.addRule("fencedCodeBlockWithLanguage", {
+    filter(node) {
+      if (!node || node.nodeName !== "PRE") {
+        return false;
+      }
+      const first = (node as HTMLElement).firstElementChild;
+      return !!first && first.nodeName === "CODE";
+    },
+    replacement(_content, node) {
+      const pre = node as HTMLElement;
+      const codeEl = pre.firstElementChild as HTMLElement | null;
+      const rawCode = codeEl?.textContent ?? "";
+
+      const codeClassName = codeEl?.getAttribute("class") ?? "";
+      const preClassName = pre.getAttribute("class") ?? "";
+      const className = `${codeClassName} ${preClassName}`.trim();
+      const match = /language-([a-zA-Z0-9_-]+)/.exec(className);
+      const language = match?.[1] ?? "";
+
+      const fence = "```";
+      const info = language ? language : "";
+
+      const trimmedCode = rawCode.replace(/\n+$/, "");
+
+      return `\n\n${fence}${info}\n${trimmedCode}\n${fence}\n\n`;
+    },
+  });
+
+  return service;
+}
+
+const CodeBlockWithLanguage = CodeBlock.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      language: {
+        default: null,
+        parseHTML: (element: HTMLElement) => {
+          const code = element.querySelector("code");
+          const className = code?.getAttribute("class") ?? "";
+          const match = /language-([a-zA-Z0-9_-]+)/.exec(className);
+          return match?.[1] ?? null;
+        },
+        renderHTML: (attributes: Record<string, unknown>) => {
+          const language = attributes.language as string | null;
+          if (!language) {
+            return {};
+          }
+          return { class: `language-${language}` };
+        },
+      },
+    };
+  },
+});
+
+export type WikiRichEditorProps = {
+  markdown: string;
+  onChangeMarkdown: (markdown: string) => void;
+  disabled?: boolean;
+};
+
+export function WikiRichEditor({
+  markdown,
+  onChangeMarkdown,
+  disabled,
+}: WikiRichEditorProps) {
+  const turndown = useMemo(() => createTurndown(), []);
+
+  const [tableMessage, setTableMessage] = useState<string | null>(null);
+  const tableMessageTimeoutRef = useRef<number | null>(null);
+
+  const lastEmittedMarkdownRef = useRef<string>(markdown);
+  const pendingEmitTimeoutRef = useRef<number | null>(null);
+
+  const editor = useEditor({
+    immediatelyRender: false,
+    editable: !disabled,
+    extensions: [
+      StarterKit.configure({
+        codeBlock: false,
+        heading: {
+          levels: [1, 2, 3, 4],
+        },
+      }),
+      CodeBlockWithLanguage,
+      Table.configure({
+        resizable: true,
+      }),
+      TableRow,
+      TableHeader,
+      TableCell,
+    ],
+    content: normalizeMarkdownForEditor(markdown),
+    editorProps: {
+      attributes: {
+        id: "content",
+        class:
+          "tiptap-content min-h-[60vh] rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500",
+      },
+      transformPastedHTML(html: string) {
+        return DOMPurify.sanitize(html, { USE_PROFILES: { html: true } });
+      },
+    },
+    onUpdate: ({ editor }: { editor: Editor }) => {
+      if (pendingEmitTimeoutRef.current) {
+        window.clearTimeout(pendingEmitTimeoutRef.current);
+      }
+
+      pendingEmitTimeoutRef.current = window.setTimeout(() => {
+        const html = editor.getHTML();
+        const sanitizedHtml = DOMPurify.sanitize(html, {
+          USE_PROFILES: { html: true },
+        });
+
+        const nextMarkdown = turndown.turndown(sanitizedHtml).trim();
+
+        if (nextMarkdown !== lastEmittedMarkdownRef.current) {
+          lastEmittedMarkdownRef.current = nextMarkdown;
+          onChangeMarkdown(nextMarkdown);
+        }
+      }, 400);
+    },
+  });
+
+  useEffect(() => {
+    if (!editor) {
+      return;
+    }
+
+    if (markdown === lastEmittedMarkdownRef.current) {
+      return;
+    }
+
+    lastEmittedMarkdownRef.current = markdown;
+    const html = normalizeMarkdownForEditor(markdown);
+
+    try {
+      editor.commands.setContent(html, { emitUpdate: false });
+    } catch {
+      // ignore
+    }
+  }, [editor, markdown]);
+
+  if (!editor) {
+    return (
+      <div className="rounded-md border border-zinc-200 bg-zinc-50 p-3 text-sm text-zinc-600">
+        Зареждане на rich editor...
+      </div>
+    );
+  }
+
+  const btnBase =
+    "rounded border px-2 py-1 text-xs font-semibold hover:bg-white/70 disabled:cursor-not-allowed disabled:opacity-50";
+
+  const btnActive = "bg-white border-zinc-400 text-zinc-900";
+  const btnIdle = "bg-white/40 border-zinc-300 text-zinc-800";
+
+  return (
+    <div className="space-y-2">
+      <div className="flex flex-wrap gap-2 rounded-md border border-zinc-200 bg-zinc-50 p-2">
+        <div className="flex flex-wrap items-center gap-2 rounded-md border border-sky-300 bg-sky-100 p-2">
+          <span className="px-1 text-[10px] font-bold uppercase tracking-wide text-sky-700">
+            Text
+          </span>
+
+          <button
+            type="button"
+            className={`${btnBase} ${btnIdle}`}
+            onClick={() => editor.chain().focus().undo().run()}
+            disabled={!editor.can().undo()}
+          >
+            Undo
+          </button>
+          <button
+            type="button"
+            className={`${btnBase} ${btnIdle}`}
+            onClick={() => editor.chain().focus().redo().run()}
+            disabled={!editor.can().redo()}
+          >
+            Redo
+          </button>
+
+          <div className="mx-1 h-5 w-px bg-sky-200" />
+
+          <button
+            type="button"
+            className={`${btnBase} ${
+              editor.isActive("paragraph") ? btnActive : btnIdle
+            }`}
+            onClick={() => editor.chain().focus().setParagraph().run()}
+          >
+            P
+          </button>
+          <button
+            type="button"
+            className={`${btnBase} ${
+              editor.isActive("heading", { level: 1 }) ? btnActive : btnIdle
+            }`}
+            onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+          >
+            H1
+          </button>
+          <button
+            type="button"
+            className={`${btnBase} ${
+              editor.isActive("heading", { level: 2 }) ? btnActive : btnIdle
+            }`}
+            onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+          >
+            H2
+          </button>
+          <button
+            type="button"
+            className={`${btnBase} ${
+              editor.isActive("heading", { level: 3 }) ? btnActive : btnIdle
+            }`}
+            onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+          >
+            H3
+          </button>
+          <button
+            type="button"
+            className={`${btnBase} ${
+              editor.isActive("heading", { level: 4 }) ? btnActive : btnIdle
+            }`}
+            onClick={() => editor.chain().focus().toggleHeading({ level: 4 }).run()}
+          >
+            H4
+          </button>
+
+          <div className="mx-1 h-5 w-px bg-sky-200" />
+
+          <button
+            type="button"
+            className={`${btnBase} ${editor.isActive("bold") ? btnActive : btnIdle}`}
+            onClick={() => editor.chain().focus().toggleBold().run()}
+          >
+            Bold
+          </button>
+          <button
+            type="button"
+            className={`${btnBase} ${
+              editor.isActive("italic") ? btnActive : btnIdle
+            }`}
+            onClick={() => editor.chain().focus().toggleItalic().run()}
+          >
+            Italic
+          </button>
+          <button
+            type="button"
+            className={`${btnBase} ${
+              editor.isActive("bulletList") ? btnActive : btnIdle
+            }`}
+            onClick={() => editor.chain().focus().toggleBulletList().run()}
+          >
+            Bullets
+          </button>
+          <button
+            type="button"
+            className={`${btnBase} ${
+              editor.isActive("orderedList") ? btnActive : btnIdle
+            }`}
+            onClick={() => editor.chain().focus().toggleOrderedList().run()}
+          >
+            Numbered
+          </button>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2 rounded-md border border-violet-300 bg-violet-100 p-2">
+          <span className="px-1 text-[10px] font-bold uppercase tracking-wide text-violet-700">
+            Table
+          </span>
+
+          <button
+            type="button"
+            className={`${btnBase} ${btnIdle}`}
+            onClick={() =>
+              editor
+                .chain()
+                .focus()
+                .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
+                .run()
+            }
+          >
+            Insert
+          </button>
+          <button
+            type="button"
+            className={`${btnBase} ${btnIdle}`}
+            onClick={() => editor.chain().focus().addRowAfter().run()}
+          >
+            +Row
+          </button>
+          <button
+            type="button"
+            className={`${btnBase} ${btnIdle}`}
+            onClick={() => editor.chain().focus().addColumnAfter().run()}
+          >
+            +Col
+          </button>
+          <button
+            type="button"
+            className={`${btnBase} ${btnIdle}`}
+            onClick={() => editor.chain().focus().deleteRow().run()}
+          >
+            -Row
+          </button>
+          <button
+            type="button"
+            className={`${btnBase} ${btnIdle}`}
+            onClick={() => editor.chain().focus().deleteColumn().run()}
+          >
+            -Col
+          </button>
+          <button
+            type="button"
+            className={`${btnBase} ${btnIdle}`}
+            onClick={() => {
+              if (tableMessageTimeoutRef.current) {
+                window.clearTimeout(tableMessageTimeoutRef.current);
+              }
+
+              if (!editor.can().mergeCells()) {
+                setTableMessage(
+                  "Не може да се слеят клетки: маркирай правоъгълна група от повече от една клетка.",
+                );
+                tableMessageTimeoutRef.current = window.setTimeout(() => {
+                  setTableMessage(null);
+                }, 10000);
+                return;
+              }
+
+              setTableMessage(null);
+              editor.chain().focus().mergeCells().run();
+            }}
+          >
+            Merge
+          </button>
+          <button
+            type="button"
+            className={`${btnBase} ${btnIdle}`}
+            onClick={() => editor.chain().focus().splitCell().run()}
+          >
+            Split
+          </button>
+          <button
+            type="button"
+            className={`${btnBase} ${btnIdle}`}
+            onClick={() => editor.chain().focus().toggleHeaderRow().run()}
+          >
+            Header row
+          </button>
+          <button
+            type="button"
+            className={`${btnBase} ${btnIdle}`}
+            onClick={() => editor.chain().focus().toggleHeaderColumn().run()}
+          >
+            Header col
+          </button>
+          <button
+            type="button"
+            className={`${btnBase} ${btnIdle}`}
+            onClick={() => editor.chain().focus().deleteTable().run()}
+          >
+            Delete
+          </button>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2 rounded-md border border-emerald-300 bg-emerald-100 p-2">
+          <span className="px-1 text-[10px] font-bold uppercase tracking-wide text-emerald-700">
+            Mermaid
+          </span>
+
+          <button
+            type="button"
+            className={`${btnBase} ${btnIdle}`}
+            onClick={() => {
+              editor.chain().focus().insertContent({
+                type: "codeBlock",
+                attrs: { language: "mermaid" },
+                content: [{ type: "text", text: "graph TD\n  A[Start] --> B[Next]" }],
+              }).run();
+            }}
+          >
+            Insert
+          </button>
+        </div>
+      </div>
+
+      {tableMessage && (
+        <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+          {tableMessage}
+        </div>
+      )}
+
+      <EditorContent editor={editor} />
+    </div>
+  );
+}

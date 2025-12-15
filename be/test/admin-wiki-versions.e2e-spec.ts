@@ -288,4 +288,62 @@ describe('Admin Wiki versions endpoints (e2e)', () => {
       .set('Authorization', `Bearer ${accessToken}`)
       .expect(404);
   });
+
+  it('DELETE /api/admin/wiki/articles/:id/versions/:versionId returns 400 when trying to delete the current version for a language', async () => {
+    const { email, accessToken } = await registerAndLogin(
+      app,
+      'admin-wiki-versions-delete-current-400',
+    );
+
+    const user = await userRepo.findOne({ where: { email } });
+    expect(user).toBeDefined();
+
+    if (!user) {
+      throw new Error('User not found after registerAndLogin');
+    }
+
+    user.role = 'admin';
+    await userRepo.save(user);
+
+    const article = await articleRepo.findOne({
+      where: { slug: 'getting-started' },
+    });
+    expect(article).toBeDefined();
+
+    if (!article) {
+      throw new Error('Article "getting-started" not found in seed data');
+    }
+
+    const updatedTitle = `Admin updated title ${Date.now()}`;
+    const updatedContent = `Admin updated content ${Date.now()}`;
+
+    await request(app.getHttpServer())
+      .put(`/api/admin/wiki/articles/${article.id}`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({
+        language: 'bg',
+        title: updatedTitle,
+        content: updatedContent,
+        status: 'active',
+      })
+      .expect(200);
+
+    const versionsRes = await request(app.getHttpServer())
+      .get(`/api/admin/wiki/articles/${article.id}/versions`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .expect(200);
+
+    const versions = versionsRes.body as AdminWikiArticleVersionResponse[];
+    const bgVersions = versions.filter((v) => v.language === 'bg');
+    expect(bgVersions.length).toBeGreaterThanOrEqual(2);
+
+    const latestBg = bgVersions.reduce((latest, current) =>
+      current.version > latest.version ? current : latest,
+    );
+
+    await request(app.getHttpServer())
+      .delete(`/api/admin/wiki/articles/${article.id}/versions/${latestBg.id}`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .expect(400);
+  });
 });

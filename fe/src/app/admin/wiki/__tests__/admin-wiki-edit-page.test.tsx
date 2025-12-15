@@ -72,6 +72,11 @@ describe("AdminWikiEditPage", () => {
         ok: true,
         status: 200,
         json: async () => [],
+      } as unknown as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => [],
       } as unknown as Response);
 
     global.fetch = fetchMock as unknown as typeof fetch;

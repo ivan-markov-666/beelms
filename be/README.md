@@ -31,6 +31,23 @@
 npm install
 ```
 
+## npm audit workaround (overrides)
+
+In local development you may see `npm audit` warnings related to transitive dependencies pulled by developer tooling (e.g. `@nestjs/cli`).
+
+This repository uses `package.json` `overrides` to pin patched versions for known vulnerable transitive packages:
+
+```json
+{
+  "overrides": {
+    "glob": "10.5.0",
+    "tmp": "0.2.5"
+  }
+}
+```
+
+If a future `npm install` or `npm audit` reintroduces these issues, re-run `npm install` and verify that the lockfile keeps the override versions.
+
 ## Compile and run the project (local, without Docker)
 
 ```bash
