@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { diffWords, type Change } from "diff";
+import type { Editor as TipTapEditor } from "@tiptap/core";
 import Link from "next/link";
 import Image from "next/image";
 import dynamic from "next/dynamic";
@@ -150,6 +151,8 @@ export default function AdminWikiEditPage() {
   const params = useParams<{ slug: string }>();
   const rawSlug = params?.slug;
   const slug = Array.isArray(rawSlug) ? rawSlug[0] : rawSlug;
+
+  const richEditorRef = useRef<TipTapEditor | null>(null);
 
   const [contentEditorMode, setContentEditorMode] = useState<
     "markdown" | "rich"
@@ -640,6 +643,32 @@ export default function AdminWikiEditPage() {
       setError("Възникна грешка при запис на промените.");
       setSaving(false);
     }
+  };
+
+  const handleInsertImage = (item: MediaItem) => {
+    const markdownSnippet = `![image](${item.url})`;
+
+    if (contentEditorMode === "rich" && richEditorRef.current) {
+      richEditorRef.current
+        .chain()
+        .focus()
+        .insertContent({
+          type: "image",
+          attrs: { src: item.url, alt: "image" },
+        })
+        .run();
+      return;
+    }
+
+    setForm((current) => {
+      if (!current) return current;
+
+      const separator = current.content.trim().length > 0 ? "\n\n" : "";
+      return {
+        ...current,
+        content: `${current.content}${separator}${markdownSnippet}`,
+      };
+    });
   };
 
   const handleUploadClick = () => {
@@ -1225,6 +1254,9 @@ export default function AdminWikiEditPage() {
                 <WikiRichEditor
                   markdown={form.content}
                   disabled={saving}
+                  onEditorReady={(editor) => {
+                    richEditorRef.current = editor;
+                  }}
                   onChangeMarkdown={(markdown) =>
                     setForm((current) =>
                       current ? { ...current, content: markdown } : current,
@@ -1397,6 +1429,13 @@ export default function AdminWikiEditPage() {
                         <span className="break-all">{item.url}</span>
                       </div>
                       <div className="flex flex-shrink-0 items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleInsertImage(item)}
+                          className="text-[11px] font-semibold text-zinc-700 hover:text-zinc-900"
+                        >
+                          Insert
+                        </button>
                         <button
                           type="button"
                           onClick={() => handleCopyMarkdown(item)}

@@ -652,12 +652,18 @@ export function WikiMarkdown({ content }: { content: string }) {
   const baseAttributes =
     (defaultSchema.attributes as Record<string, unknown> | undefined) ?? {};
   const anchorAttributes = (baseAttributes.a as string[] | undefined) ?? [];
+  const imgAttributes = (baseAttributes.img as string[] | undefined) ?? [];
+  const baseProtocols =
+    (defaultSchema.protocols as Record<string, unknown> | undefined) ?? {};
+  const hrefProtocols = (baseProtocols.href as string[] | undefined) ?? [];
+  const srcProtocols = (baseProtocols.src as string[] | undefined) ?? [];
 
   const sanitizeSchema = {
     ...defaultSchema,
     tagNames: [
       ...((defaultSchema.tagNames as string[] | undefined) ?? []),
       "a",
+      "img",
       "u",
       "sup",
       "sub",
@@ -683,6 +689,18 @@ export function WikiMarkdown({ content }: { content: string }) {
           "className",
         ]),
       ),
+      img: Array.from(
+        new Set([
+          ...imgAttributes,
+          "src",
+          "alt",
+          "title",
+          "width",
+          "height",
+          "className",
+          "loading",
+        ]),
+      ),
       table: ["className"],
       thead: ["className"],
       tbody: ["className"],
@@ -693,9 +711,32 @@ export function WikiMarkdown({ content }: { content: string }) {
       colgroup: ["className"],
       col: ["className", "span"],
     },
+    protocols: {
+      ...baseProtocols,
+      href: Array.from(
+        new Set(["http", "https", "mailto", "tel", ...hrefProtocols]),
+      ),
+      src: Array.from(new Set(["http", "https", ...srcProtocols])),
+    },
   };
 
   const components: Components = {
+    a({ children, rel, target, ...props }) {
+      const nextRel =
+        target === "_blank"
+          ? Array.from(
+              new Set(
+                `${rel ?? ""} noopener noreferrer`.trim().split(/\s+/),
+              ),
+            ).join(" ")
+          : rel;
+
+      return (
+        <a {...props} target={target} rel={nextRel}>
+          {children}
+        </a>
+      );
+    },
     code({ className, children, ...props }) {
       const match = /language-(\w+)/.exec(className || "");
       const language = match?.[1];
