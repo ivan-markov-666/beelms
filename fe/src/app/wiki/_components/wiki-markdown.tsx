@@ -5,6 +5,7 @@ import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
+import Image from "next/image";
 
 type MermaidRenderResult = string | { svg: string };
 
@@ -735,6 +736,43 @@ export function WikiMarkdown({ content }: { content: string }) {
         <a {...props} target={target} rel={nextRel}>
           {children}
         </a>
+      );
+    },
+    img({ src, alt, title, ...props }) {
+      if (!src || typeof src !== "string") {
+        return null;
+      }
+
+      const widthRaw = (props as { width?: unknown }).width;
+      const heightRaw = (props as { height?: unknown }).height;
+
+      const width =
+        typeof widthRaw === "number"
+          ? widthRaw
+          : Number.parseInt(String(widthRaw ?? ""), 10);
+      const height =
+        typeof heightRaw === "number"
+          ? heightRaw
+          : Number.parseInt(String(heightRaw ?? ""), 10);
+
+      const safeWidth = Number.isFinite(width) && width > 0 ? width : 800;
+      const safeHeight = Number.isFinite(height) && height > 0 ? height : 450;
+
+      return (
+        <span className="my-4 block">
+          <Image
+            src={src}
+            alt={alt ?? ""}
+            title={title}
+            width={safeWidth}
+            height={safeHeight}
+            sizes="100vw"
+            className={(props as { className?: string }).className}
+            style={{ maxWidth: "100%", height: "auto" }}
+            loader={({ src: url }) => url}
+            unoptimized
+          />
+        </span>
       );
     },
     code({ className, children, ...props }) {

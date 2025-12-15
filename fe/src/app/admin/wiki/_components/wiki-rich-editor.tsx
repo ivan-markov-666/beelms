@@ -137,13 +137,16 @@ function createTurndown(): TurndownService {
     replacement(_content, node) {
       const img = node as HTMLElement;
       const src = img.getAttribute("src") ?? "";
-      const alt = img.getAttribute("alt") ?? "image";
+      const alt = img.getAttribute("alt") ?? "";
+      const title = img.getAttribute("title") ?? "";
 
       if (!src) {
         return "";
       }
 
-      return `![${alt}](${src})`;
+      const escapedTitle = title.replace(/"/g, "\\\"");
+      const titleSuffix = escapedTitle ? ` \"${escapedTitle}\"` : "";
+      return `![${alt}](${src}${titleSuffix})`;
     },
   });
 
@@ -570,13 +573,14 @@ export function WikiRichEditor({
               }
 
               const alt = window.prompt("Alt text (optional)", "") ?? "";
+              const title = window.prompt("Title (optional)", "") ?? "";
 
               editor
                 .chain()
                 .focus()
                 .insertContent({
                   type: "image",
-                  attrs: { src, alt },
+                  attrs: { src, alt, title },
                 })
                 .run();
             }}
