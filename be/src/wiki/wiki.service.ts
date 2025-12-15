@@ -933,6 +933,28 @@ export class WikiService {
       throw new NotFoundException('Version not found');
     }
 
+    const versionsForLanguage = versions.filter(
+      (v) => v.language === versionToDelete.language,
+    );
+
+    const latestForLanguage = versionsForLanguage.reduce((latest, current) => {
+      const latestVersion = latest.versionNumber ?? 0;
+      const currentVersion = current.versionNumber ?? 0;
+      if (currentVersion !== latestVersion) {
+        return currentVersion > latestVersion ? current : latest;
+      }
+
+      const latestTime = latest.createdAt ? latest.createdAt.getTime() : 0;
+      const currentTime = current.createdAt ? current.createdAt.getTime() : 0;
+      return currentTime > latestTime ? current : latest;
+    }, versionsForLanguage[0]);
+
+    if (latestForLanguage && latestForLanguage.id === versionToDelete.id) {
+      throw new BadRequestException(
+        'Cannot delete the current active version of this article',
+      );
+    }
+
     if (versions.length <= 1) {
       throw new BadRequestException(
         'Cannot delete the last remaining version of this article',

@@ -16,6 +16,17 @@ export function HeaderNav() {
   const [hasToken, setHasToken] = useState<boolean | null>(null);
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
 
+  const handleLogout = () => {
+    if (typeof window !== "undefined") {
+      try {
+        window.localStorage.removeItem("qa4free_access_token");
+      } catch {
+        // ignore
+      }
+      window.location.assign("/");
+    }
+  };
+
   useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -134,6 +145,20 @@ export function HeaderNav() {
               >
                 {t(lang, "nav", "register")}
               </Link>
+            </>
+          )}
+          {hasToken === true && (
+            <>
+              <Link href="/profile" className="hover:text-green-600">
+                {t(lang, "nav", "profile")}
+              </Link>
+              <button
+                type="button"
+                className="hover:text-green-600"
+                onClick={handleLogout}
+              >
+                {t(lang, "nav", "logout")}
+              </button>
             </>
           )}
           <LanguageSwitcher />

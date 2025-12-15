@@ -810,20 +810,30 @@ describe('WikiService', () => {
       const article = {
         id: 'article-1',
         versions: [
-          { id: 'v1' } as WikiArticleVersion,
-          { id: 'v2' } as WikiArticleVersion,
+          {
+            id: 'v1',
+            language: 'bg',
+            versionNumber: 1,
+            createdAt: new Date('2023-01-01T00:00:00Z'),
+          } as WikiArticleVersion,
+          {
+            id: 'v2',
+            language: 'bg',
+            versionNumber: 2,
+            createdAt: new Date('2023-01-02T00:00:00Z'),
+          } as WikiArticleVersion,
         ],
       } as unknown as WikiArticle;
 
       (articleRepo.findOne as jest.Mock).mockResolvedValue(article);
 
-      await service.adminDeleteArticleVersion('article-1', 'v2');
+      await service.adminDeleteArticleVersion('article-1', 'v1');
 
       expect(articleRepo.findOne).toHaveBeenCalledTimes(1);
       expect(versionRepo.remove).toHaveBeenCalledTimes(1);
       const removedArg = (versionRepo.remove as jest.Mock).mock
         .calls[0][0] as WikiArticleVersion;
-      expect(removedArg.id).toBe('v2');
+      expect(removedArg.id).toBe('v1');
     });
 
     it('throws NotFoundException when article does not exist', async () => {
@@ -858,6 +868,67 @@ describe('WikiService', () => {
       await expect(
         service.adminDeleteArticleVersion('article-1', 'v1'),
       ).rejects.toBeInstanceOf(BadRequestException);
+    });
+
+    it('throws BadRequestException when trying to delete the current version for a language', async () => {
+      const article = {
+        id: 'article-1',
+        versions: [
+          {
+            id: 'bg-v1',
+            language: 'bg',
+            versionNumber: 1,
+            createdAt: new Date('2023-01-01T00:00:00Z'),
+          } as WikiArticleVersion,
+          {
+            id: 'bg-v2',
+            language: 'bg',
+            versionNumber: 2,
+            createdAt: new Date('2023-01-02T00:00:00Z'),
+          } as WikiArticleVersion,
+          {
+            id: 'en-v1',
+            language: 'en',
+            versionNumber: 1,
+            createdAt: new Date('2023-01-01T00:00:00Z'),
+          } as WikiArticleVersion,
+        ],
+      } as unknown as WikiArticle;
+
+      (articleRepo.findOne as jest.Mock).mockResolvedValue(article);
+
+      await expect(
+        service.adminDeleteArticleVersion('article-1', 'bg-v2'),
+      ).rejects.toBeInstanceOf(BadRequestException);
+    });
+
+    it('allows deleting a non-current version for a language', async () => {
+      const article = {
+        id: 'article-1',
+        versions: [
+          {
+            id: 'bg-v1',
+            language: 'bg',
+            versionNumber: 1,
+            createdAt: new Date('2023-01-01T00:00:00Z'),
+          } as WikiArticleVersion,
+          {
+            id: 'bg-v2',
+            language: 'bg',
+            versionNumber: 2,
+            createdAt: new Date('2023-01-02T00:00:00Z'),
+          } as WikiArticleVersion,
+        ],
+      } as unknown as WikiArticle;
+
+      (articleRepo.findOne as jest.Mock).mockResolvedValue(article);
+
+      await service.adminDeleteArticleVersion('article-1', 'bg-v1');
+
+      expect(versionRepo.remove).toHaveBeenCalledTimes(1);
+      const removedArg = (versionRepo.remove as jest.Mock).mock
+        .calls[0][0] as WikiArticleVersion;
+      expect(removedArg.id).toBe('bg-v1');
     });
   });
 

@@ -128,12 +128,23 @@ body {
 
 .wiki-markdown .mermaid {
   margin: 1rem auto;
-  display: flex;
-  justify-content: center;
+  max-width: 640px;
+  overflow-x: auto;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 0.75rem;
 }
 
 .wiki-markdown .mermaid svg {
+  display: block;
   max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+
+.wiki-markdown .mermaid svg .background {
+  fill: #ffffff !important;
 }
 
 .wiki-markdown a {
@@ -143,4 +154,102 @@ body {
 
 .wiki-markdown a:hover {
   text-decoration: underline;
+}
+
+.tiptap-content ul,
+.tiptap-content ol {
+  margin-top: 0.4rem;
+  margin-bottom: 0.6rem;
+  padding-left: 1.5rem;
+}
+
+.tiptap-content ul {
+  list-style-type: disc;
+}
+
+.tiptap-content ol {
+  list-style-type: decimal;
+}
+
+.tiptap-content h1,
+.tiptap-content h2,
+.tiptap-content h3,
+.tiptap-content h4 {
+  font-weight: 700;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.tiptap-content h1 {
+  font-size: 1.75rem;
+}
+
+.tiptap-content h2 {
+  font-size: 1.4rem;
+}
+
+.tiptap-content h3 {
+  font-size: 1.2rem;
+}
+
+.tiptap-content h4 {
+  font-size: 1.05rem;
+}
+
+.tiptap-content code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+  font-size: 0.9em;
+  padding: 0.1rem 0.3rem;
+  border-radius: 0.25rem;
+  background-color: #f3f4f6;
+}
+
+.tiptap-content pre {
+  margin: 0.75rem 0;
+  padding: 0.75rem 1rem;
+  overflow-x: auto;
+  border-radius: 0.5rem;
+  background-color: #0f172a;
+  color: #e5e7eb;
+}
+
+.tiptap-content pre code {
+  background-color: transparent;
+  padding: 0;
+}
+
+.tiptap-content li + li {
+  margin-top: 0.25rem;
+}
+
+.tiptap-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1rem 0;
+  font-size: 0.9rem;
+}
+
+.tiptap-content th,
+.tiptap-content td {
+  border: 1px solid #d1d5db;
+  padding: 0.4rem 0.6rem;
+}
+
+.tiptap-content thead {
+  background-color: #f3f4f6;
+}
+
+.tiptap-content th,
+.tiptap-content td {
+  position: relative;
+}
+
+.tiptap-content td.selectedCell::after,
+.tiptap-content th.selectedCell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(59, 130, 246, 0.2);
+  pointer-events: none;
 }

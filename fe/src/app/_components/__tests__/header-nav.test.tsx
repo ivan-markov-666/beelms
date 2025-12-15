@@ -86,6 +86,9 @@ describe("HeaderNav i18n", () => {
       ).not.toBeInTheDocument();
     });
 
+    expect(await screen.findByRole("link", { name: "Профил" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Изход" })).toBeInTheDocument();
+
     window.localStorage.removeItem("qa4free_access_token");
   });
 

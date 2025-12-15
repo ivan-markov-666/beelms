@@ -3,8 +3,24 @@
 import { useEffect, useRef, useState } from "react";
 import { diffWords, type Change } from "diff";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useParams } from "next/navigation";
 import { WikiMarkdown } from "../../../../wiki/_components/wiki-markdown";
+
+const WikiRichEditor = dynamic(
+  () =>
+    import("../../_components/wiki-rich-editor").then(
+      (m) => m.WikiRichEditor,
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="rounded-md border border-zinc-200 bg-zinc-50 p-3 text-sm text-zinc-600">
+        Зареждане на rich editor...
+      </div>
+    ),
+  },
+);
 
 const ADMIN_API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
@@ -132,6 +148,10 @@ export default function AdminWikiEditPage() {
   const params = useParams<{ slug: string }>();
   const rawSlug = params?.slug;
   const slug = Array.isArray(rawSlug) ? rawSlug[0] : rawSlug;
+
+  const [contentEditorMode, setContentEditorMode] = useState<
+    "markdown" | "rich"
+  >("markdown");
 
   const [articleId, setArticleId] = useState<string | null>(null);
   const [form, setForm] = useState<FormState | null>(null);
@@ -1162,12 +1182,54 @@ export default function AdminWikiEditPage() {
               >
                 Съдържание
               </label>
-              <textarea
-                id="content"
-                className="block min-h-[60vh] w-full resize-y rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
-                value={form.content}
-                onChange={handleChange("content")}
-              />
+              <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                <p className="text-xs text-zinc-500">
+                  Режим на редакция:
+                </p>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setContentEditorMode("markdown")}
+                    className={`rounded-md border px-3 py-1.5 text-xs font-semibold ${
+                      contentEditorMode === "markdown"
+                        ? "border-green-600 bg-green-600 text-white"
+                        : "border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50"
+                    }`}
+                  >
+                    Markdown
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setContentEditorMode("rich")}
+                    className={`rounded-md border px-3 py-1.5 text-xs font-semibold ${
+                      contentEditorMode === "rich"
+                        ? "border-green-600 bg-green-600 text-white"
+                        : "border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50"
+                    }`}
+                  >
+                    Rich text
+                  </button>
+                </div>
+              </div>
+
+              {contentEditorMode === "markdown" ? (
+                <textarea
+                  id="content"
+                  className="block min-h-[60vh] w-full resize-y rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                  value={form.content}
+                  onChange={handleChange("content")}
+                />
+              ) : (
+                <WikiRichEditor
+                  markdown={form.content}
+                  disabled={saving}
+                  onChangeMarkdown={(markdown) =>
+                    setForm((current) =>
+                      current ? { ...current, content: markdown } : current,
+                    )
+                  }
+                />
+              )}
               <p className="text-xs text-zinc-500">
                 За диаграми използвайте fenced code block с език{" "}
                 <code>mermaid</code>, напр.:{" "}
@@ -1891,9 +1953,26 @@ export default function AdminWikiEditPage() {
 
                       if (!res.ok) {
                         if (res.status === 400) {
-                          setDeleteVersionError(
-                            "Тази версия не може да бъде изтрита, защото е последната версия на статията.",
-                          );
+                          let errorMessage: unknown = undefined;
+                          try {
+                            const body = (await res.json()) as unknown;
+                            errorMessage = (body as { message?: unknown })?.message;
+                          } catch {
+                            // ignore
+                          }
+
+                          const messageText =
+                            typeof errorMessage === "string" ? errorMessage : "";
+
+                          if (messageText.includes("current active version")) {
+                            setDeleteVersionError(
+                              "Текущата активна версия не може да бъде изтрита.",
+                            );
+                          } else {
+                            setDeleteVersionError(
+                              "Тази версия не може да бъде изтрита, защото е последната версия на статията.",
+                            );
+                          }
                         } else if (res.status === 404) {
                           setDeleteVersionError(
                             "Версията или статията не бяха намерени.",
