@@ -460,6 +460,23 @@ export function WikiRichEditor({
 
           <button
             type="button"
+            className={`${btnBase} ${btnIdle}`}
+            onClick={() => editor.chain().focus().undo().run()}
+            disabled={!editor.can().undo()}
+          >
+            Undo
+          </button>
+          <button
+            type="button"
+            className={`${btnBase} ${btnIdle}`}
+            onClick={() => editor.chain().focus().redo().run()}
+            disabled={!editor.can().redo()}
+          >
+            Redo
+          </button>
+
+          <button
+            type="button"
             className={`${btnBase} ${editor.isActive("bold") ? btnActive : btnIdle}`}
             onClick={() => editor.chain().focus().toggleBold().run()}
           >
