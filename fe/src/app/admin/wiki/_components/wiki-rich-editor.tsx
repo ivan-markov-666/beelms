@@ -27,6 +27,20 @@ function normalizeMarkdownForEditor(markdown: string): string {
   }
 }
 
+function normalizeLinkHref(raw: string): string | null {
+  const href = raw.trim();
+
+  if (!href) {
+    return null;
+  }
+
+  if (/^(https?:\/\/|mailto:|tel:|\/|#)/i.test(href)) {
+    return href;
+  }
+
+  return null;
+}
+
 function createTurndown(): TurndownService {
   const service = new TurndownService({
     codeBlockStyle: "fenced",
@@ -134,6 +148,24 @@ const SubscriptMark = Mark.create({
   },
 });
 
+const LinkMark = Mark.create({
+  name: "link",
+  inclusive: false,
+  addAttributes() {
+    return {
+      href: {
+        default: null,
+      },
+    };
+  },
+  parseHTML() {
+    return [{ tag: "a[href]" }];
+  },
+  renderHTML({ HTMLAttributes }) {
+    return ["a", mergeAttributes(HTMLAttributes), 0];
+  },
+});
+
 const CodeBlockWithLanguage = CodeBlock.extend({
   addAttributes() {
     return {
@@ -190,6 +222,7 @@ export function WikiRichEditor({
       UnderlineMark,
       SuperscriptMark,
       SubscriptMark,
+      LinkMark,
       CodeBlockWithLanguage,
       Table.configure({
         resizable: true,
@@ -391,6 +424,48 @@ export function WikiRichEditor({
             onClick={() => editor.chain().focus().toggleMark("subscript").run()}
           >
             Sub
+          </button>
+          <button
+            type="button"
+            className={`${btnBase} ${editor.isActive("link") ? btnActive : btnIdle}`}
+            onClick={() => {
+              const currentHref = editor.getAttributes("link").href as
+                | string
+                | undefined;
+              const input = window.prompt(
+                "URL (http(s)://, mailto:, tel:, /...)",
+                currentHref ?? "",
+              );
+
+              if (input === null) {
+                return;
+              }
+
+              const href = normalizeLinkHref(input);
+              if (!href) {
+                window.alert("Невалиден URL.");
+                return;
+              }
+
+              editor
+                .chain()
+                .focus()
+                .extendMarkRange("link")
+                .setMark("link", { href })
+                .run();
+            }}
+          >
+            Link
+          </button>
+          <button
+            type="button"
+            className={`${btnBase} ${btnIdle}`}
+            onClick={() =>
+              editor.chain().focus().extendMarkRange("link").unsetMark("link").run()
+            }
+            disabled={!editor.isActive("link")}
+          >
+            Unlink
           </button>
           <button
             type="button"
