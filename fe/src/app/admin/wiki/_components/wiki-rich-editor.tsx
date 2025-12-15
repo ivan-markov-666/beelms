@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { EditorContent, useEditor } from "@tiptap/react";
-import { Mark, mergeAttributes, type Editor } from "@tiptap/core";
+import { Mark, Node, mergeAttributes, type Editor } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
 import { Table } from "@tiptap/extension-table";
 import { TableRow } from "@tiptap/extension-table-row";
@@ -21,7 +21,10 @@ function normalizeMarkdownForEditor(markdown: string): string {
 
   try {
     const html = marked.parse(markdown) as string;
-    return DOMPurify.sanitize(html, { USE_PROFILES: { html: true } });
+    return DOMPurify.sanitize(html, {
+      USE_PROFILES: { html: true },
+      ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto|tel):|\/|#)/i,
+    });
   } catch {
     return "";
   }
@@ -36,6 +39,20 @@ function normalizeLinkHref(raw: string): string | null {
 
   if (/^(https?:\/\/|mailto:|tel:|\/|#)/i.test(href)) {
     return href;
+  }
+
+  return null;
+}
+
+function normalizeImageSrc(raw: string): string | null {
+  const src = raw.trim();
+
+  if (!src) {
+    return null;
+  }
+
+  if (/^(https?:\/\/|\/)/i.test(src)) {
+    return src;
   }
 
   return null;
@@ -113,6 +130,23 @@ function createTurndown(): TurndownService {
     },
   });
 
+  service.addRule("image", {
+    filter(node) {
+      return node.nodeName === "IMG";
+    },
+    replacement(_content, node) {
+      const img = node as HTMLElement;
+      const src = img.getAttribute("src") ?? "";
+      const alt = img.getAttribute("alt") ?? "image";
+
+      if (!src) {
+        return "";
+      }
+
+      return `![${alt}](${src})`;
+    },
+  });
+
   return service;
 }
 
@@ -123,6 +157,36 @@ const UnderlineMark = Mark.create({
   },
   renderHTML({ HTMLAttributes }) {
     return ["u", mergeAttributes(HTMLAttributes), 0];
+  },
+});
+
+const ImageNode = Node.create({
+  name: "image",
+  inline: true,
+  group: "inline",
+  draggable: true,
+  selectable: true,
+  atom: true,
+  addAttributes() {
+    return {
+      src: {
+        default: null,
+        parseHTML: (element: HTMLElement) =>
+          normalizeImageSrc(element.getAttribute("src") ?? ""),
+      },
+      alt: {
+        default: null,
+      },
+      title: {
+        default: null,
+      },
+    };
+  },
+  parseHTML() {
+    return [{ tag: "img[src]" }];
+  },
+  renderHTML({ HTMLAttributes }) {
+    return ["img", mergeAttributes(HTMLAttributes)];
   },
 });
 
@@ -155,6 +219,8 @@ const LinkMark = Mark.create({
     return {
       href: {
         default: null,
+        parseHTML: (element: HTMLElement) =>
+          normalizeLinkHref(element.getAttribute("href") ?? ""),
       },
     };
   },
@@ -194,14 +260,24 @@ export type WikiRichEditorProps = {
   markdown: string;
   onChangeMarkdown: (markdown: string) => void;
   disabled?: boolean;
+  onEditorReady?: (editor: Editor | null) => void;
 };
 
 export function WikiRichEditor({
   markdown,
   onChangeMarkdown,
   disabled,
+  onEditorReady,
 }: WikiRichEditorProps) {
   const turndown = useMemo(() => createTurndown(), []);
+
+  const onEditorReadyRef = useRef<WikiRichEditorProps["onEditorReady"]>(
+    onEditorReady,
+  );
+
+  useEffect(() => {
+    onEditorReadyRef.current = onEditorReady;
+  }, [onEditorReady]);
 
   const [tableMessage, setTableMessage] = useState<string | null>(null);
   const tableMessageTimeoutRef = useRef<number | null>(null);
@@ -223,6 +299,7 @@ export function WikiRichEditor({
       SuperscriptMark,
       SubscriptMark,
       LinkMark,
+      ImageNode,
       CodeBlockWithLanguage,
       Table.configure({
         resizable: true,
@@ -262,6 +339,13 @@ export function WikiRichEditor({
       }, 400);
     },
   });
+
+  useEffect(() => {
+    onEditorReadyRef.current?.(editor);
+    return () => {
+      onEditorReadyRef.current?.(null);
+    };
+  }, [editor]);
 
   useEffect(() => {
     if (!editor) {
@@ -466,6 +550,38 @@ export function WikiRichEditor({
             disabled={!editor.isActive("link")}
           >
             Unlink
+          </button>
+          <button
+            type="button"
+            className={`${btnBase} ${btnIdle}`}
+            onClick={() => {
+              const input = window.prompt(
+                "Image URL (http(s):// or /...)",
+                "",
+              );
+              if (input === null) {
+                return;
+              }
+
+              const src = normalizeImageSrc(input);
+              if (!src) {
+                window.alert("Невалиден URL за изображение.");
+                return;
+              }
+
+              const alt = window.prompt("Alt text (optional)", "") ?? "";
+
+              editor
+                .chain()
+                .focus()
+                .insertContent({
+                  type: "image",
+                  attrs: { src, alt },
+                })
+                .run();
+            }}
+          >
+            Image
           </button>
           <button
             type="button"
