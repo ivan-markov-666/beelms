@@ -657,6 +657,112 @@ export function WikiRichEditor({
           </button>
           <button
             type="button"
+            className={`${btnBase} ${btnIdle}`}
+            disabled={!editor.isActive("image")}
+            onClick={() => {
+              if (!editor.isActive("image")) {
+                return;
+              }
+
+              const { state } = editor;
+              const { from } = state.selection;
+              const $from = state.doc.resolve(from);
+
+              let blockDepth: number | null = null;
+              for (let d = $from.depth; d > 0; d--) {
+                if ($from.node(d).isBlock) {
+                  blockDepth = d;
+                  break;
+                }
+              }
+
+              if (blockDepth === null) {
+                return;
+              }
+
+              const insertPos = $from.after(blockDepth);
+              const maybeCaptionNode = state.doc.nodeAt(insertPos);
+
+              const isCaptionParagraph = (node: typeof maybeCaptionNode) => {
+                if (!node || node.type.name !== "paragraph") {
+                  return false;
+                }
+
+                if (!node.textContent.trim()) {
+                  return false;
+                }
+
+                let allItalic = true;
+                node.descendants((n) => {
+                  if (!allItalic) {
+                    return false;
+                  }
+                  if (n.isText) {
+                    const hasItalic = n.marks.some(
+                      (mark) => mark.type.name === "italic",
+                    );
+                    if (!hasItalic) {
+                      allItalic = false;
+                      return false;
+                    }
+                  }
+                  return true;
+                });
+
+                return allItalic;
+              };
+
+              const hasCaption = isCaptionParagraph(maybeCaptionNode);
+              const currentCaption = hasCaption
+                ? maybeCaptionNode?.textContent ?? ""
+                : "";
+
+              const nextCaption = window.prompt(
+                "Caption (optional). Keep it short. Empty removes caption.",
+                currentCaption,
+              );
+
+              if (nextCaption === null) {
+                return;
+              }
+
+              const trimmed = nextCaption.trim();
+              if (!trimmed) {
+                if (hasCaption && maybeCaptionNode) {
+                  editor.commands.deleteRange({
+                    from: insertPos,
+                    to: insertPos + maybeCaptionNode.nodeSize,
+                  });
+                }
+                return;
+              }
+
+              const captionParagraph = {
+                type: "paragraph",
+                content: [
+                  {
+                    type: "text",
+                    marks: [{ type: "italic" }],
+                    text: trimmed,
+                  },
+                ],
+              };
+
+              if (hasCaption && maybeCaptionNode) {
+                editor.commands.insertContentAt(
+                  { from: insertPos, to: insertPos + maybeCaptionNode.nodeSize },
+                  captionParagraph,
+                );
+                return;
+              }
+
+              editor.commands.insertContentAt(insertPos, captionParagraph);
+            }}
+          >
+            Caption
+          </button>
+          <button
+            type="button"
             className={`${btnBase} ${
               editor.isActive("bulletList") ? btnActive : btnIdle
             }`}
