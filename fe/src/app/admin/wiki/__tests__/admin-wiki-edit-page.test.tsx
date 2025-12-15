@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import AdminWikiEditPage from "../[slug]/edit/page";
 import { ACCESS_TOKEN_KEY } from "../../../auth-token";
 
@@ -319,7 +320,7 @@ describe("AdminWikiEditPage", () => {
     render(<AdminWikiEditPage />);
 
     const rollbackButton = await screen.findByRole("button", { name: "Върни" });
-    rollbackButton.click();
+    await userEvent.click(rollbackButton);
 
     expect(
       await screen.findByText(
@@ -388,7 +389,7 @@ describe("AdminWikiEditPage", () => {
     render(<AdminWikiEditPage />);
 
     const rollbackButton = await screen.findByRole("button", { name: "Върни" });
-    rollbackButton.click();
+    await userEvent.click(rollbackButton);
 
     expect(
       await screen.findByText(
@@ -467,7 +468,7 @@ describe("AdminWikiEditPage", () => {
     render(<AdminWikiEditPage />);
 
     const rollbackButton = await screen.findByRole("button", { name: "Върни" });
-    rollbackButton.click();
+    await userEvent.click(rollbackButton);
 
     expect(
       await screen.findByText(
@@ -519,7 +520,7 @@ describe("AdminWikiEditPage", () => {
     render(<AdminWikiEditPage />);
 
     const rollbackButton = await screen.findByRole("button", { name: "Върни" });
-    rollbackButton.click();
+    await userEvent.click(rollbackButton);
 
     expect(
       await screen.findByText(
