@@ -1279,6 +1279,11 @@ export default function AdminWikiEditPage() {
                 <code>{"```mermaid ... ```"}</code>. Диаграмите ще се виждат в
                 прегледа и в публичната Wiki.
               </p>
+              <p className="text-xs text-zinc-500">
+                За caption под изображение: поставете изображението, а на
+                следващия ред напишете текста (по желание в italic), напр.:{" "}
+                <code>{"![Alt](url)\n*Caption*"}</code>.
+              </p>
             </div>
 
             <section
