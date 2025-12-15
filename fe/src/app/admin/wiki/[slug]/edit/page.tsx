@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { diffWords, type Change } from "diff";
 import Link from "next/link";
+import Image from "next/image";
 import dynamic from "next/dynamic";
 import { useParams } from "next/navigation";
 import { WikiMarkdown } from "../../../../wiki/_components/wiki-markdown";
@@ -1384,11 +1385,14 @@ export default function AdminWikiEditPage() {
                       className="flex items-center justify-between gap-2"
                     >
                       <div className="flex items-center gap-2">
-                        <img
+                        <Image
                           src={item.url}
                           alt={item.filename}
+                          width={40}
+                          height={40}
                           className="h-10 w-10 rounded border border-zinc-200 bg-white object-cover"
-                          loading="lazy"
+                          loader={({ src }) => src}
+                          unoptimized
                         />
                         <span className="break-all">{item.url}</span>
                       </div>
