@@ -649,10 +649,15 @@ export function MermaidDiagram({ code }: { code: string }) {
 }
 
 export function WikiMarkdown({ content }: { content: string }) {
+  const baseAttributes =
+    (defaultSchema.attributes as Record<string, unknown> | undefined) ?? {};
+  const anchorAttributes = (baseAttributes.a as string[] | undefined) ?? [];
+
   const sanitizeSchema = {
     ...defaultSchema,
     tagNames: [
       ...((defaultSchema.tagNames as string[] | undefined) ?? []),
+      "a",
       "u",
       "sup",
       "sub",
@@ -667,7 +672,17 @@ export function WikiMarkdown({ content }: { content: string }) {
       "col",
     ],
     attributes: {
-      ...((defaultSchema.attributes as Record<string, unknown>) ?? {}),
+      ...baseAttributes,
+      a: Array.from(
+        new Set([
+          ...anchorAttributes,
+          "href",
+          "title",
+          "target",
+          "rel",
+          "className",
+        ]),
+      ),
       table: ["className"],
       thead: ["className"],
       tbody: ["className"],
