@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import AdminWikiEditPage from "../[slug]/edit/page";
+import { ACCESS_TOKEN_KEY } from "../../../auth-token";
 
 jest.mock("next/navigation", () => {
   const actual = jest.requireActual("next/navigation");
@@ -23,7 +24,7 @@ function makeArticle(overrides?: Partial<{
     id: "1",
     slug: "getting-started",
     language: "bg",
-    title: "Начало с QA4Free",
+    title: "Начало с BeeLMS",
     content: "Съдържание на статията",
     status: "active",
     updatedAt: "2025-11-25T00:00:00.000Z",
@@ -57,7 +58,7 @@ describe("AdminWikiEditPage", () => {
   });
 
   it("renders edit form with loaded article data", async () => {
-    window.localStorage.setItem("qa4free_access_token", "test-token");
+    window.localStorage.setItem(ACCESS_TOKEN_KEY, "test-token");
 
     const article = makeArticle();
 
@@ -93,17 +94,17 @@ describe("AdminWikiEditPage", () => {
       "Статус",
     ) as HTMLSelectElement;
 
-    expect(titleInput.value).toBe("Начало с QA4Free");
+    expect(titleInput.value).toBe("Начало с BeeLMS");
     expect(contentTextarea.value).toBe("Съдържание на статията");
     expect(statusSelect.value).toBe("active");
   });
 
   it("submits updated article and shows success message", async () => {
-    window.localStorage.setItem("qa4free_access_token", "test-token");
+    window.localStorage.setItem(ACCESS_TOKEN_KEY, "test-token");
 
     const initialArticle = makeArticle({ status: "draft" });
     const updatedArticle = makeArticle({
-      title: "Начало с QA4Free (обновено)",
+      title: "Начало с BeeLMS (обновено)",
       status: "active",
     });
 
@@ -149,7 +150,7 @@ describe("AdminWikiEditPage", () => {
     )) as HTMLInputElement;
 
     fireEvent.change(titleInput, {
-      target: { value: "Начало с QA4Free (обновено)" },
+      target: { value: "Начало с BeeLMS (обновено)" },
     });
 
     const saveButton = screen.getByRole("button", { name: "Запази" });
@@ -173,7 +174,7 @@ describe("AdminWikiEditPage", () => {
   });
 
   it("shows error message when save fails with server error", async () => {
-    window.localStorage.setItem("qa4free_access_token", "test-token");
+    window.localStorage.setItem(ACCESS_TOKEN_KEY, "test-token");
 
     const initialArticle = makeArticle();
 
@@ -216,7 +217,7 @@ describe("AdminWikiEditPage", () => {
   });
 
   it("renders versions list with rollback actions", async () => {
-    window.localStorage.setItem("qa4free_access_token", "test-token");
+    window.localStorage.setItem(ACCESS_TOKEN_KEY, "test-token");
 
     const article = makeArticle();
     const versions = [
@@ -258,7 +259,7 @@ describe("AdminWikiEditPage", () => {
   });
 
   it("restores a selected version and updates the form", async () => {
-    window.localStorage.setItem("qa4free_access_token", "test-token");
+    window.localStorage.setItem(ACCESS_TOKEN_KEY, "test-token");
 
     const initialArticle = makeArticle({
       title: "Начално заглавие",
@@ -347,7 +348,7 @@ describe("AdminWikiEditPage", () => {
   });
 
   it("shows error message when restore fails with server error", async () => {
-    window.localStorage.setItem("qa4free_access_token", "test-token");
+    window.localStorage.setItem(ACCESS_TOKEN_KEY, "test-token");
 
     const initialArticle = makeArticle();
     const versions = [
@@ -399,7 +400,7 @@ describe("AdminWikiEditPage", () => {
   });
 
   it("shows error message when versions list fails to load", async () => {
-    window.localStorage.setItem("qa4free_access_token", "test-token");
+    window.localStorage.setItem(ACCESS_TOKEN_KEY, "test-token");
 
     const initialArticle = makeArticle();
 
@@ -426,7 +427,7 @@ describe("AdminWikiEditPage", () => {
   });
 
   it("shows not-found error message when restore returns 404", async () => {
-    window.localStorage.setItem("qa4free_access_token", "test-token");
+    window.localStorage.setItem(ACCESS_TOKEN_KEY, "test-token");
 
     const initialArticle = makeArticle();
     const versions = [
@@ -478,7 +479,7 @@ describe("AdminWikiEditPage", () => {
   });
 
   it("shows validation error message when restore returns 400", async () => {
-    window.localStorage.setItem("qa4free_access_token", "test-token");
+    window.localStorage.setItem(ACCESS_TOKEN_KEY, "test-token");
 
     const initialArticle = makeArticle();
     const versions = [

@@ -153,7 +153,7 @@ export const messages: Messages = {
       accountDeletedDescription:
         "Вашият акаунт е закрит и личните ви данни са маркирани за изтриване в съответствие с нашите правила за защита на данните и GDPR.",
       accountDeletedHint:
-        "Няма да имате достъп до профила си. Ако в бъдеще решите отново да ползвате QA4Free, ще е необходима нова регистрация.",
+        "Няма да имате достъп до профила си. Ако в бъдеще решите отново да ползвате BeeLMS, ще е необходима нова регистрация.",
       accountDeletedPrimaryCta: "Към началната страница",
       accountDeletedSecondaryCta: "Към Wiki статиите",
     },
@@ -305,15 +305,15 @@ export const messages: Messages = {
       adminMetricsNetUsersChangeNegativeSuffix:
         "нетни загубени потребители за избрания период.",
       legalFooterDisclaimer:
-        "QA4Free е учебна платформа. Вижте страниците за Условия за ползване и Политика за поверителност за повече детайли.",
+        "BeeLMS е учебна платформа. Вижте страниците за Условия за ползване и Политика за поверителност за повече детайли.",
       legalFooterPrivacyLink: "Политика за поверителност (Privacy/GDPR)",
       legalFooterTermsLink: "Условия за ползване",
       legalPrivacyTitle: "Политика за поверителност и GDPR",
       legalPrivacyIntro:
-        "Тази страница обобщава какви лични данни обработва QA4Free и за какви цели, в съответствие с GDPR.",
+        "Тази страница обобщава какви лични данни обработва BeeLMS и за какви цели, в съответствие с GDPR.",
       legalTermsTitle: "Условия за ползване",
       legalTermsIntro:
-        "Тази страница описва основните правила за коректно и етично използване на QA4Free като учебна платформа.",
+        "Тази страница описва основните правила за коректно и етично използване на BeeLMS като учебна платформа.",
       footerAboutLink: "About",
       footerContactLink: "Contact",
     },
@@ -359,7 +359,7 @@ export const messages: Messages = {
       loginLoading: "Loading...",
       registerTitle: "Create account",
       registerSubtitle:
-        "Create your free QA4Free account to start practicing.",
+        "Create your free BeeLMS account to start practicing.",
       registerEmailLabel: "Email",
       registerPasswordLabel: "Password",
       registerPasswordHint: "Minimum 8 characters",
@@ -459,7 +459,7 @@ export const messages: Messages = {
       accountDeletedDescription:
         "Your account has been closed and your personal data has been marked for deletion in accordance with our data protection rules and GDPR.",
       accountDeletedHint:
-        "You will no longer have access to your profile. If you decide to use QA4Free again in the future, you will need to create a new account.",
+        "You will no longer have access to your profile. If you decide to use BeeLMS again in the future, you will need to create a new account.",
       accountDeletedPrimaryCta: "Go to home page",
       accountDeletedSecondaryCta: "Go to Wiki articles",
     },
@@ -609,15 +609,15 @@ export const messages: Messages = {
       adminMetricsNetUsersChangeNegativeSuffix:
         "net lost users for the selected period.",
       legalFooterDisclaimer:
-        "QA4Free is a learning platform. See the Terms of Use and Privacy Policy pages for more details.",
+        "BeeLMS is a learning platform. See the Terms of Use and Privacy Policy pages for more details.",
       legalFooterPrivacyLink: "Privacy Policy (GDPR)",
       legalFooterTermsLink: "Terms of Use",
       legalPrivacyTitle: "Privacy Policy and GDPR",
       legalPrivacyIntro:
-        "This page summarizes what personal data QA4Free processes and for what purposes, in line with GDPR.",
+        "This page summarizes what personal data BeeLMS processes and for what purposes, in line with GDPR.",
       legalTermsTitle: "Terms of Use",
       legalTermsIntro:
-        "This page outlines the key rules for fair and ethical use of QA4Free as a learning platform.",
+        "This page outlines the key rules for fair and ethical use of BeeLMS as a learning platform.",
       footerAboutLink: "About",
       footerContactLink: "Contact",
     },
@@ -660,7 +660,7 @@ export const messages: Messages = {
       loginErrorNetwork: "Beim Kontakt mit dem Server ist ein Netzwerkfehler aufgetreten.",
       loginLoading: "Laden...",
       registerTitle: "Konto erstellen",
-      registerSubtitle: "Erstelle dein kostenloses QA4Free-Konto, um mit dem Üben zu beginnen.",
+      registerSubtitle: "Erstelle dein kostenloses BeeLMS-Konto, um mit dem Üben zu beginnen.",
       registerEmailLabel: "E-Mail",
       registerPasswordLabel: "Passwort",
       registerPasswordHint: "Mindestens 8 Zeichen",
@@ -737,7 +737,7 @@ export const messages: Messages = {
       accountDeletedDescription:
         "Dein Konto wurde geschlossen und deine personenbezogenen Daten wurden entsprechend unseren Datenschutzregeln und der DSGVO zur Löschung markiert.",
       accountDeletedHint:
-        "Du wirst keinen Zugriff mehr auf dein Profil haben. Wenn du QA4Free in Zukunft erneut nutzen möchtest, musst du ein neues Konto registrieren.",
+        "Du wirst keinen Zugriff mehr auf dein Profil haben. Wenn du BeeLMS in Zukunft erneut nutzen möchtest, musst du ein neues Konto registrieren.",
       accountDeletedPrimaryCta: "Zur Startseite",
       accountDeletedSecondaryCta: "Zu den Wiki-Artikeln",
     },

@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import * as nextNavigation from "next/navigation";
 import AdminWikiPage from "../page";
+import { ACCESS_TOKEN_KEY } from "../../../auth-token";
 
 jest.mock("next/navigation", () => ({
   useSearchParams: jest.fn(),
@@ -28,13 +29,13 @@ describe("AdminWikiPage", () => {
   });
 
   it("renders table with admin wiki articles from API", async () => {
-    window.localStorage.setItem("qa4free_access_token", "test-token");
+    window.localStorage.setItem(ACCESS_TOKEN_KEY, "test-token");
 
     mockFetchOnce([
       {
         id: "1",
         slug: "getting-started",
-        title: "Начало с QA4Free",
+        title: "Начало с BeeLMS",
         status: "active",
         updatedAt: "2025-11-25T00:00:00.000Z",
       },
@@ -47,7 +48,7 @@ describe("AdminWikiPage", () => {
     ).toBeInTheDocument();
 
     expect(await screen.findByText("getting-started")).toBeInTheDocument();
-    expect(await screen.findByText("Начало с QA4Free")).toBeInTheDocument();
+    expect(await screen.findByText("Начало с BeeLMS")).toBeInTheDocument();
 
     const editLink = screen.getByRole("link", { name: "Edit" });
     expect(editLink).toHaveAttribute(
@@ -63,7 +64,7 @@ describe("AdminWikiPage", () => {
   });
 
   it("shows empty state when there are no articles", async () => {
-    window.localStorage.setItem("qa4free_access_token", "test-token");
+    window.localStorage.setItem(ACCESS_TOKEN_KEY, "test-token");
 
     mockFetchOnce([]);
 
@@ -75,7 +76,7 @@ describe("AdminWikiPage", () => {
   });
 
   it("shows error message when API call fails", async () => {
-    window.localStorage.setItem("qa4free_access_token", "test-token");
+    window.localStorage.setItem(ACCESS_TOKEN_KEY, "test-token");
 
     mockFetchOnce([], false, 500);
 

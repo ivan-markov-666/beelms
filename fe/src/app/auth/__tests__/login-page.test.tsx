@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import LoginPage from "../login/page";
+import { ACCESS_TOKEN_KEY } from "../../auth-token";
 
 const mockPush = jest.fn();
 const mockReplace = jest.fn();
@@ -76,7 +77,7 @@ describe("LoginPage", () => {
       expect(mockPush).toHaveBeenCalledWith("/wiki");
     });
 
-    expect(window.localStorage.getItem("qa4free_access_token")).toBe(
+    expect(window.localStorage.getItem(ACCESS_TOKEN_KEY)).toBe(
       "test-token",
     );
   });

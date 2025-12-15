@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCurrentLang } from "../../../i18n/useCurrentLang";
 import { t } from "../../../i18n/t";
+import { clearAccessToken, getAccessToken, setAccessToken } from "../../auth-token";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
@@ -36,7 +37,7 @@ export default function LoginPage() {
 
     const checkSession = async () => {
       try {
-        const token = window.localStorage.getItem("qa4free_access_token");
+        const token = getAccessToken();
         if (!token) {
           return;
         }
@@ -54,7 +55,7 @@ export default function LoginPage() {
 
         if (!res.ok && (res.status === 401 || res.status === 404)) {
           try {
-            window.localStorage.removeItem("qa4free_access_token");
+            clearAccessToken();
           } catch {
             // ignore localStorage errors
           }
@@ -128,10 +129,7 @@ export default function LoginPage() {
 
         if (data?.accessToken) {
           try {
-            window.localStorage.setItem(
-              "qa4free_access_token",
-              data.accessToken,
-            );
+            setAccessToken(data.accessToken);
           } catch {
             // ignore localStorage errors
           }

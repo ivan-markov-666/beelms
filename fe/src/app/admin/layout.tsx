@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { clearAccessToken, getAccessToken } from "../auth-token";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
@@ -23,7 +24,7 @@ export default function AdminLayout({
 
     const init = async () => {
       try {
-        const token = window.localStorage.getItem("qa4free_access_token");
+        const token = getAccessToken();
         if (!token) {
           router.replace("/auth/login");
           return;
@@ -38,7 +39,7 @@ export default function AdminLayout({
         if (!res.ok) {
           if (res.status === 401 || res.status === 404) {
             try {
-              window.localStorage.removeItem("qa4free_access_token");
+              clearAccessToken();
             } catch {
             }
             router.replace("/auth/login");

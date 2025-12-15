@@ -35,7 +35,7 @@ export default async function PrivacyPage({
         {isBg ? (
           <>
             <p>
-              QA4Free събира и обработва минимален набор от лични данни, описани в
+              BeeLMS събира и обработва минимален набор от лични данни, описани в
               PRD/MVP документацията – основно имейл адрес и техническа информация
               за сесиите, необходима за вход, защита от злоупотреби и подобряване
               на услугата.
@@ -71,7 +71,7 @@ export default async function PrivacyPage({
         ) : (
           <>
             <p>
-              QA4Free collects and processes a minimal set of personal data as
+              BeeLMS collects and processes a minimal set of personal data as
               described in the PRD/MVP documentation – mainly your email address
               and some technical session information, needed for authentication,
               abuse prevention and improving the service.

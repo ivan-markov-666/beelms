@@ -1,5 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import AdminLayout from "../layout";
+import { ACCESS_TOKEN_KEY } from "../../auth-token";
 
 const mockPush = jest.fn();
 const mockReplace = jest.fn();
@@ -23,7 +24,7 @@ describe("AdminLayout", () => {
   });
 
   it("renders admin content for admin user", async () => {
-    window.localStorage.setItem("qa4free_access_token", "test-token");
+    window.localStorage.setItem(ACCESS_TOKEN_KEY, "test-token");
     global.fetch = jest.fn().mockResolvedValue({
       ok: true,
       status: 200,
@@ -65,7 +66,7 @@ describe("AdminLayout", () => {
   });
 
   it("shows Access denied page for non-admin user", async () => {
-    window.localStorage.setItem("qa4free_access_token", "test-token");
+    window.localStorage.setItem(ACCESS_TOKEN_KEY, "test-token");
     global.fetch = jest.fn().mockResolvedValue({
       ok: true,
       status: 200,

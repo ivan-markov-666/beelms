@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useCurrentLang } from "../../../i18n/useCurrentLang";
 import { t } from "../../../i18n/t";
+import { getAccessToken } from "../../auth-token";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
@@ -89,7 +90,7 @@ export default function AdminMetricsPage() {
       setError(null);
 
       try {
-        const token = window.localStorage.getItem("qa4free_access_token");
+        const token = getAccessToken();
         if (!token) {
           if (!cancelled) {
             setError(t(lang, "common", "adminDashboardMetricsError"));
@@ -173,7 +174,7 @@ export default function AdminMetricsPage() {
 
     const loadActivitySummary = async () => {
       try {
-        const token = window.localStorage.getItem("qa4free_access_token");
+        const token = getAccessToken();
         if (!token) {
           if (!cancelled) {
             setActivityStats(null);

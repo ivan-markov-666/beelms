@@ -32,7 +32,7 @@ describe("WikiArticlePage", () => {
         id: "1",
         slug: "getting-started",
         language: "bg",
-        title: "Начало с QA4Free",
+        title: "Начало с BeeLMS",
         content: "Съдържание на статията",
         status: "active",
         updatedAt: "2025-11-25T00:00:00.000Z",
@@ -46,7 +46,7 @@ describe("WikiArticlePage", () => {
     });
     render(ui);
 
-    expect(screen.getByText("Начало с QA4Free")).toBeInTheDocument();
+    expect(screen.getByText("Начало с BeeLMS")).toBeInTheDocument();
     expect(screen.getByText("Съдържание на статията")).toBeInTheDocument();
     expect(screen.getByText("← Назад към Wiki")).toBeInTheDocument();
     expect(
@@ -63,7 +63,7 @@ describe("WikiArticlePage", () => {
         id: "1",
         slug: "getting-started",
         language: "en",
-        title: "Getting started with QA4Free (EN)",
+        title: "Getting started with BeeLMS (EN)",
         content: "Article content EN",
         status: "active",
         updatedAt: "2025-11-25T00:00:00.000Z",

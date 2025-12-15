@@ -10,6 +10,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCurrentLang } from "../../../i18n/useCurrentLang";
 import { t } from "../../../i18n/t";
+import { getAccessToken } from "../../auth-token";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
@@ -119,7 +120,7 @@ export default function AdminUsersPage() {
       const role = options?.role;
 
       try {
-        const token = window.localStorage.getItem("qa4free_access_token");
+        const token = getAccessToken();
         if (!token) {
           setError(t(lang, "common", "adminUsersNoToken"));
           setLoading(false);
@@ -171,7 +172,7 @@ export default function AdminUsersPage() {
     setStatsError(null);
 
     try {
-      const token = window.localStorage.getItem("qa4free_access_token");
+      const token = getAccessToken();
       if (!token) {
         setStatsError(t(lang, "common", "adminUsersNoToken"));
         setStatsLoading(false);
@@ -233,7 +234,7 @@ export default function AdminUsersPage() {
     setUsers(optimisticUsers);
 
     try {
-      const token = window.localStorage.getItem("qa4free_access_token");
+      const token = getAccessToken();
       if (!token) {
         throw new Error("missing-token");
       }

@@ -34,8 +34,7 @@ export class AdminActivityService {
         versions
           .map((v) => v.createdByUserId)
           .filter(
-            (id): id is string =>
-              typeof id === 'string' && id.length > 0,
+            (id): id is string => typeof id === 'string' && id.length > 0,
           ),
       ),
     );

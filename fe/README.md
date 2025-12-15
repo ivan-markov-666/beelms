@@ -1,4 +1,4 @@
-This is the frontend of the **beelms** framework (QA4Free example instance), built as a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+This is the frontend of the **beelms** framework (BeeLMS example instance), built as a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
 
@@ -126,7 +126,7 @@ For the WS-2 Auth/Profile walking skeleton, the frontend depends on the Auth and
 - `GET /api/users/me`, `PATCH /api/users/me`, `POST /api/users/me/change-password`,
   `DELETE /api/users/me` and `POST /api/users/me/export` for the `/profile` page.
 
-The `/auth/login`, `/auth/register` and `/profile` routes in this app expect a running backend on `http://localhost:3000/api`. On successful login, the JWT access token is stored in `localStorage` under the key `qa4free_access_token`, which is then used by `/profile` to guard access and call the protected account endpoints.
+The `/auth/login`, `/auth/register` and `/profile` routes in this app expect a running backend on `http://localhost:3000/api`. On successful login, the JWT access token is stored in `localStorage` under the key `beelms_access_token`, which is then used by `/profile` to guard access and call the protected account endpoints.
 
 Basic manual flow (assuming the backend and database are running as described in `be/README.md`):
 
@@ -229,7 +229,7 @@ In **WS-7**, the same `/practice/ui-demo` page is extended with a small Tasks AP
 For the WS-4 Admin skeleton, the frontend provides a minimal Admin area that depends on the backend Auth/Profile API (including the `role` field from `GET /api/users/me`).
 
 - The `/admin` route uses a dedicated Admin layout and is **guarded on the client side**:
-  - when there is **no** `qa4free_access_token` in `localStorage`, the user is redirected to `/auth/login`;
+  - when there is **no** `beelms_access_token` in `localStorage`, the user is redirected to `/auth/login`;
   - when a token is present but `GET /api/users/me` returns a non-admin role, the page renders a simple "Access denied" (403-style) message without further redirects;
   - only when `role === "admin"` does the Admin shell render its children.
 - Inside the Admin shell, the header navigation includes:
@@ -241,7 +241,7 @@ For the WS-4 Admin skeleton, the frontend provides a minimal Admin area that dep
 
 The `/admin/wiki` page:
 
-- calls the protected backend endpoint `GET /api/admin/wiki/articles` using the stored `qa4free_access_token`;
+- calls the protected backend endpoint `GET /api/admin/wiki/articles` using the stored `beelms_access_token`;
 - renders a table with `Slug`, `Title`, `Status` and `Updated` columns;
 - visually distinguishes article statuses (e.g. Active, Draft, Archived) via colored badges;
 - links each article slug to the public `/wiki/[slug]` page (opened in a new tab);
@@ -252,7 +252,7 @@ The `/admin/wiki` page:
 For WS-6, the Admin Wiki area adds a minimal but real edit UI for Wiki articles:
 
 - the `/admin/wiki` list includes a **"Редактирай"** link for each article, which points to `/admin/wiki/[slug]/edit`;
-- the edit page is available only to authenticated admin users (guarded by the same Admin layout and `qa4free_access_token` logic as the rest of `/admin`);
+- the edit page is available only to authenticated admin users (guarded by the same Admin layout and `beelms_access_token` logic as the rest of `/admin`);
 - on the edit page, admins can change:
   - `language` (dropdown: `bg` / `en`);
   - `title` (text input);
@@ -268,7 +268,7 @@ For WS-6, the Admin Wiki area adds a minimal but real edit UI for Wiki articles:
 
 On the same `/admin/wiki/[slug]/edit` page, WS-6 also provides a minimal versions UI:
 
-- below the edit form there is a **"Версии на статията"** table backed by `GET /api/admin/wiki/articles/{id}/versions` (using the stored `qa4free_access_token`);
+- below the edit form there is a **"Версии на статията"** table backed by `GET /api/admin/wiki/articles/{id}/versions` (using the stored `beelms_access_token`);
 - each row shows:
   - `version` (e.g. `v1`, `v2`);
   - `language`;

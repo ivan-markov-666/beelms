@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import * as nextNavigation from "next/navigation";
 import { HeaderNav } from "../header-nav";
+import { ACCESS_TOKEN_KEY } from "../../auth-token";
 
 jest.mock("next/navigation", () => {
   const actual = jest.requireActual("next/navigation");
@@ -64,7 +65,7 @@ describe("HeaderNav i18n", () => {
     useSearchParamsMock.mockReturnValue(makeSearchParams("lang=bg"));
     usePathnameMock.mockReturnValue("/wiki");
 
-    window.localStorage.setItem("qa4free_access_token", "test-token");
+    window.localStorage.setItem(ACCESS_TOKEN_KEY, "test-token");
 
     // stub fetch for profile check
     global.fetch = jest.fn().mockResolvedValue({
@@ -89,14 +90,14 @@ describe("HeaderNav i18n", () => {
     expect(await screen.findByRole("link", { name: "Профил" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Изход" })).toBeInTheDocument();
 
-    window.localStorage.removeItem("qa4free_access_token");
+    window.localStorage.removeItem(ACCESS_TOKEN_KEY);
   });
 
   it("shows Admin link only for admin user", async () => {
     useSearchParamsMock.mockReturnValue(makeSearchParams("lang=en"));
     usePathnameMock.mockReturnValue("/wiki");
 
-    window.localStorage.setItem("qa4free_access_token", "test-token");
+    window.localStorage.setItem(ACCESS_TOKEN_KEY, "test-token");
 
     global.fetch = jest.fn().mockResolvedValue({
       ok: true,
@@ -113,14 +114,14 @@ describe("HeaderNav i18n", () => {
 
     expect(await screen.findByRole("link", { name: "Admin" })).toBeInTheDocument();
 
-    window.localStorage.removeItem("qa4free_access_token");
+    window.localStorage.removeItem(ACCESS_TOKEN_KEY);
   });
 
   it("does not show Admin link for non-admin user", async () => {
     useSearchParamsMock.mockReturnValue(makeSearchParams("lang=en"));
     usePathnameMock.mockReturnValue("/wiki");
 
-    window.localStorage.setItem("qa4free_access_token", "test-token");
+    window.localStorage.setItem(ACCESS_TOKEN_KEY, "test-token");
 
     global.fetch = jest.fn().mockResolvedValue({
       ok: true,
@@ -139,7 +140,7 @@ describe("HeaderNav i18n", () => {
       expect(screen.queryByRole("link", { name: "Admin" })).not.toBeInTheDocument();
     });
 
-    window.localStorage.removeItem("qa4free_access_token");
+    window.localStorage.removeItem(ACCESS_TOKEN_KEY);
   });
 
   it("does not show Admin link when token is missing", async () => {

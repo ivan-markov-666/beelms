@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import * as nextNavigation from "next/navigation";
 import AdminUsersPage from "../page";
+import { ACCESS_TOKEN_KEY } from "../../../auth-token";
 
 jest.mock("next/navigation", () => ({
   useSearchParams: jest.fn(),
@@ -32,7 +33,7 @@ describe("AdminUsersPage", () => {
   });
 
   it("renders table with admin users from API", async () => {
-    window.localStorage.setItem("qa4free_access_token", "test-token");
+    window.localStorage.setItem(ACCESS_TOKEN_KEY, "test-token");
 
     mockFetchSequence([
       {
@@ -74,7 +75,7 @@ describe("AdminUsersPage", () => {
   });
 
   it("shows empty state when there are no users", async () => {
-    window.localStorage.setItem("qa4free_access_token", "test-token");
+    window.localStorage.setItem(ACCESS_TOKEN_KEY, "test-token");
 
     mockFetchSequence([
       {
@@ -102,7 +103,7 @@ describe("AdminUsersPage", () => {
   });
 
   it("shows error message when API call fails", async () => {
-    window.localStorage.setItem("qa4free_access_token", "test-token");
+    window.localStorage.setItem(ACCESS_TOKEN_KEY, "test-token");
 
     mockFetchSequence([
       {
@@ -132,7 +133,7 @@ describe("AdminUsersPage", () => {
   });
 
   it("filters users by email when search is submitted", async () => {
-    window.localStorage.setItem("qa4free_access_token", "test-token");
+    window.localStorage.setItem(ACCESS_TOKEN_KEY, "test-token");
 
     const fetchMock = jest
       .fn()
@@ -179,7 +180,7 @@ describe("AdminUsersPage", () => {
   });
 
   it("toggles user active flag when button is clicked", async () => {
-    window.localStorage.setItem("qa4free_access_token", "test-token");
+    window.localStorage.setItem(ACCESS_TOKEN_KEY, "test-token");
 
     const fetchMock = jest
       .fn()
@@ -242,7 +243,7 @@ describe("AdminUsersPage", () => {
   });
 
   it("shows error and rolls back when toggle request fails", async () => {
-    window.localStorage.setItem("qa4free_access_token", "test-token");
+    window.localStorage.setItem(ACCESS_TOKEN_KEY, "test-token");
 
     const fetchMock = jest
       .fn()
@@ -303,7 +304,7 @@ describe("AdminUsersPage", () => {
   });
 
   it("calls API with status filter when status dropdown changes", async () => {
-    window.localStorage.setItem("qa4free_access_token", "test-token");
+    window.localStorage.setItem(ACCESS_TOKEN_KEY, "test-token");
 
     const fetchMock = jest
       .fn()
@@ -349,7 +350,7 @@ describe("AdminUsersPage", () => {
   });
 
   it("calls API with role filter when role dropdown changes", async () => {
-    window.localStorage.setItem("qa4free_access_token", "test-token");
+    window.localStorage.setItem(ACCESS_TOKEN_KEY, "test-token");
 
     const fetchMock = jest
       .fn()
@@ -395,7 +396,7 @@ describe("AdminUsersPage", () => {
   });
 
   it("renders avatar initials, ID and View action in the table", async () => {
-    window.localStorage.setItem("qa4free_access_token", "test-token");
+    window.localStorage.setItem(ACCESS_TOKEN_KEY, "test-token");
 
     mockFetchSequence([
       {

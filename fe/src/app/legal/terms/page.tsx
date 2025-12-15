@@ -35,14 +35,14 @@ export default async function TermsPage({
         {isBg ? (
           <>
             <p>
-              Като използвате QA4Free, приемате, че платформата се предоставя
+              Като използвате BeeLMS, приемате, че платформата се предоставя
               с учебна цел и „както е“ (as is), без гаранции за пълнота или
               липса на грешки в съдържанието.
             </p>
             <p>Основни принципи при ползване на платформата:</p>
             <ul className="list-disc space-y-1 pl-5">
               <li>
-                не използвайте QA4Free за злонамерени атаки срещу други системи
+                не използвайте BeeLMS за злонамерени атаки срещу други системи
                 или потребители;
               </li>
               <li>
@@ -63,13 +63,13 @@ export default async function TermsPage({
             <p className="text-xs text-zinc-500 dark:text-zinc-400">
               Това резюме е с информативен характер и не замества пълни
               юридически условия. Целта му е да постави рамка за коректно и
-              етично използване на QA4Free като учебна среда.
+              етично използване на BeeLMS като учебна среда.
             </p>
           </>
         ) : (
           <>
             <p>
-              By using QA4Free you acknowledge that the platform is provided for
+              By using BeeLMS you acknowledge that the platform is provided for
               learning purposes and on an &quot;as is&quot; basis, without
               guarantees about completeness or the absence of errors in the
               content.
@@ -77,7 +77,7 @@ export default async function TermsPage({
             <p>Core principles when using the platform:</p>
             <ul className="list-disc space-y-1 pl-5">
               <li>
-                do not use QA4Free to perform malicious attacks against other
+                do not use BeeLMS to perform malicious attacks against other
                 systems or users;
               </li>
               <li>
@@ -97,7 +97,7 @@ export default async function TermsPage({
             <p className="text-xs text-zinc-500 dark:text-zinc-400">
               This summary is for information purposes only and does not replace
               a full set of legal terms. Its goal is to set expectations for
-              fair and ethical use of QA4Free as a learning environment.
+              fair and ethical use of BeeLMS as a learning environment.
             </p>
           </>
         )}
