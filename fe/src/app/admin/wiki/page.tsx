@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCurrentLang } from "../../../i18n/useCurrentLang";
 import { t } from "../../../i18n/t";
+import { getAccessToken } from "../../auth-token";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
@@ -118,7 +119,7 @@ export default function AdminWikiPage() {
       setError(null);
 
       try {
-        const token = window.localStorage.getItem("qa4free_access_token");
+        const token = getAccessToken();
         if (!token) {
           if (!cancelled) {
             setError(
@@ -193,7 +194,7 @@ export default function AdminWikiPage() {
 
     const loadLanguages = async () => {
       try {
-        const token = window.localStorage.getItem("qa4free_access_token");
+        const token = getAccessToken();
         if (!token) {
           return;
         }
@@ -314,7 +315,7 @@ export default function AdminWikiPage() {
     setArticles(optimistic);
 
     try {
-      const token = window.localStorage.getItem("qa4free_access_token");
+      const token = getAccessToken();
       if (!token) {
         throw new Error("missing-token");
       }
@@ -873,9 +874,7 @@ export default function AdminWikiPage() {
                   setDeleteArticleSubmitting(true);
 
                   try {
-                    const token = window.localStorage.getItem(
-                      "qa4free_access_token",
-                    );
+                    const token = getAccessToken();
                     if (!token) {
                       setDeleteArticleError(
                         "Липсва достъп до Admin API. Моля, влезте отново като администратор.",

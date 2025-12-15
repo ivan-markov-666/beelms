@@ -137,13 +137,13 @@ describe('WikiService', () => {
         versions: [
           {
             language: 'bg',
-            title: 'Начало с QA4Free',
+            title: 'Начало с платформата',
             isPublished: true,
             createdAt: new Date('2023-01-01T00:00:00Z'),
           },
           {
             language: 'en',
-            title: 'Getting started with QA4Free',
+            title: 'Getting started with the platform',
             isPublished: true,
             createdAt: new Date('2023-01-02T00:00:00Z'),
           },
@@ -161,7 +161,7 @@ describe('WikiService', () => {
     const first = result[0];
     expect(first.slug).toBe('getting-started');
     expect(first.language).toBe('en');
-    expect(first.title).toBe('Getting started with QA4Free');
+    expect(first.title).toBe('Getting started with the platform');
   });
 
   it('filters list by language when lang filter is provided', async () => {
@@ -177,13 +177,13 @@ describe('WikiService', () => {
         versions: [
           {
             language: 'bg',
-            title: 'Начало с QA4Free',
+            title: 'Начало с платформата',
             isPublished: true,
             createdAt: new Date('2023-01-01T00:00:00Z'),
           },
           {
             language: 'en',
-            title: 'Getting started with QA4Free',
+            title: 'Getting started with the platform',
             isPublished: true,
             createdAt: new Date('2023-01-02T00:00:00Z'),
           },
@@ -206,7 +206,7 @@ describe('WikiService', () => {
     const first = result[0];
     expect(first.slug).toBe('getting-started');
     expect(first.language).toBe('bg');
-    expect(first.title).toBe('Начало с QA4Free');
+    expect(first.title).toBe('Начало с платформата');
   });
 
   it('filters list by search query when q filter is provided', async () => {
@@ -222,7 +222,7 @@ describe('WikiService', () => {
         versions: [
           {
             language: 'bg',
-            title: 'Начало с QA4Free',
+            title: 'Начало с платформата',
             isPublished: true,
             createdAt: new Date('2023-01-01T00:00:00Z'),
           },
@@ -258,7 +258,7 @@ describe('WikiService', () => {
     expect(result).toHaveLength(1);
     const first = result[0];
     expect(first.slug).toBe('getting-started');
-    expect(first.title).toBe('Начало с QA4Free');
+    expect(first.title).toBe('Начало с платформата');
   });
 
   it('returns empty array when there are no active articles', async () => {
@@ -299,7 +299,7 @@ describe('WikiService', () => {
         versions: [
           {
             language: 'bg',
-            title: 'Начало с QA4Free (draft)',
+            title: 'Начало с платформата (draft)',
             isPublished: false,
             createdAt: now,
           },

@@ -2,6 +2,7 @@
 
 import { useEffect, useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { clearAccessToken, getAccessToken } from "../auth-token";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
@@ -98,7 +99,7 @@ export default function ProfilePage() {
     let cancelled = false;
 
     const init = async () => {
-      const stored = window.localStorage.getItem("qa4free_access_token");
+      const stored = getAccessToken();
       if (!stored) {
         router.replace("/auth/login");
         return;
@@ -114,7 +115,7 @@ export default function ProfilePage() {
         if (!res.ok) {
           if (res.status === 401 || res.status === 404) {
             try {
-              window.localStorage.removeItem("qa4free_access_token");
+              clearAccessToken();
             } catch {
               // ignore
             }
@@ -166,7 +167,7 @@ export default function ProfilePage() {
   const handleLogout = () => {
     if (typeof window !== "undefined") {
       try {
-        window.localStorage.removeItem("qa4free_access_token");
+        clearAccessToken();
       } catch {
         // ignore
       }
@@ -363,7 +364,7 @@ export default function ProfilePage() {
 
       if (typeof window !== "undefined") {
         try {
-          window.localStorage.removeItem("qa4free_access_token");
+          clearAccessToken();
         } catch {
           // ignore
         }

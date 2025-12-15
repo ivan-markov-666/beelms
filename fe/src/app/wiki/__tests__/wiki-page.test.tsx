@@ -19,7 +19,7 @@ describe("WikiPage", () => {
         id: "1",
         slug: "getting-started",
         language: "bg",
-        title: "Начало с QA4Free",
+        title: "Начало с BeeLMS",
         status: "active",
         updatedAt: "2025-11-25T00:00:00.000Z",
       },
@@ -29,7 +29,7 @@ describe("WikiPage", () => {
     render(ui);
 
     expect(screen.getByText("Wiki")).toBeInTheDocument();
-    expect(screen.getByText("Начало с QA4Free")).toBeInTheDocument();
+    expect(screen.getByText("Начало с BeeLMS")).toBeInTheDocument();
   });
 
   it("renders empty state when there are no articles", async () => {
@@ -105,7 +105,7 @@ describe("WikiPage", () => {
         id: "1",
         slug: "getting-started",
         language: "bg",
-        title: "Начало с QA4Free",
+        title: "Начало с BeeLMS",
         status: "active",
         updatedAt: "2025-11-25T00:00:00.000Z",
       },

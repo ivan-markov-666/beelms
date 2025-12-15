@@ -4,9 +4,9 @@ services:
     container_name: beelms-core-db
     restart: unless-stopped
     environment:
-      POSTGRES_DB: qa4free
-      POSTGRES_USER: qa4free
-      POSTGRES_PASSWORD: qa4free
+      POSTGRES_DB: beelms
+      POSTGRES_USER: beelms
+      POSTGRES_PASSWORD: beelms
     volumes:
       - db-data:/var/lib/postgresql/data
 
@@ -23,9 +23,9 @@ services:
       PORT: 3000
       DB_HOST: db
       DB_PORT: 5432
-      DB_NAME: qa4free
-      DB_USER: qa4free
-      DB_PASSWORD: qa4free
+      DB_NAME: beelms
+      DB_USER: beelms
+      DB_PASSWORD: beelms
       MEDIA_ROOT: /usr/src/app/media
     ports:
       - "3000:3000"

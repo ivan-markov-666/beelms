@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { getAccessToken } from "../../../auth-token";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
@@ -32,7 +33,7 @@ export default function AdminWikiCreatePage() {
 
     if (typeof window === "undefined") return;
 
-    const token = window.localStorage.getItem("qa4free_access_token");
+    const token = getAccessToken();
     if (!token) {
       setError(
         "Липсва достъп до Admin API. Моля, влезте отново като администратор.",
@@ -226,7 +227,7 @@ export default function AdminWikiCreatePage() {
           <div className="mt-4 flex items-center justify-between gap-4 border-t border-gray-200 pt-6">
             <div className="flex flex-col text-sm text-gray-500">
               <p>
-                Articles created here are stored in the QA4Free database
+                Articles created here are stored in the BeeLMS database
                 (development environment). Use this form for admin Wiki
                 management and automation exercises.
               </p>

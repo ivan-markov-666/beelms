@@ -16,6 +16,8 @@ import { UpdateProfileDto } from './dto/update-profile.dto';
 import { UserExportDto } from './dto/user-export.dto';
 
 const EMAIL_VERIFICATION_TOKEN_TTL_MS = 24 * 60 * 60 * 1000;
+const DELETED_EMAIL_DOMAIN =
+  process.env.DELETED_EMAIL_DOMAIN ?? 'deleted.example.invalid';
 const SHOULD_LOG_AUTH_LINKS =
   process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test';
 
@@ -166,7 +168,7 @@ export class AccountService {
     const now = new Date();
 
     user.active = false;
-    user.email = `deleted+${user.id}@deleted.qa4free.invalid`;
+    user.email = `deleted+${user.id}@${DELETED_EMAIL_DOMAIN}`;
     user.passwordHash = '';
 
     if (!user.gdprErasureRequestedAt) {

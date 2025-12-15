@@ -7,10 +7,10 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-4 py-16 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
           <div>
             <h1 className="text-4xl lg:text-5xl font-extrabold text-gray-900 mb-4">
-              Практикувай QA тестване безплатно
+              Практикувай QA тестване в учебна среда
             </h1>
             <p className="text-lg text-gray-700 mb-8">
-              QA4Free е тренировъчна среда за бъдещи и настоящи QA специалисти – с
+              BeeLMS е тренировъчна среда за бъдещи и настоящи QA специалисти – с
               Wiki статии, практическа UI среда и Training API, върху които можеш да
               упражняваш тестване и автоматизация.
             </p>

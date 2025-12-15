@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { getAccessToken } from "../../auth-token";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
@@ -39,7 +40,7 @@ export default function VerifyEmailPage() {
     const updateHasToken = () => {
       if (cancelled) return;
       try {
-        const stored = window.localStorage.getItem("qa4free_access_token");
+        const stored = getAccessToken();
         setHasAccessToken(Boolean(stored));
       } catch {
         setHasAccessToken(false);
@@ -90,7 +91,7 @@ export default function VerifyEmailPage() {
           if (typeof window !== "undefined") {
             try {
               window.localStorage.removeItem(
-                "qa4free_email_change_limit_reached_at",
+                "beelms_email_change_limit_reached_at",
               );
             } catch {
               // ignore
@@ -105,7 +106,7 @@ export default function VerifyEmailPage() {
           if (typeof window !== "undefined") {
             try {
               window.localStorage.setItem(
-                "qa4free_email_change_limit_reached_at",
+                "beelms_email_change_limit_reached_at",
                 new Date().toISOString(),
               );
             } catch {

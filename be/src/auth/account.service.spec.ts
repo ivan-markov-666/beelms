@@ -16,6 +16,8 @@ describe('AccountService', () => {
   let usersRepo: jest.Mocked<Repository<User>>;
 
   beforeEach(async () => {
+    process.env.DELETED_EMAIL_DOMAIN = 'deleted.example.invalid';
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AccountService,
@@ -34,6 +36,7 @@ describe('AccountService', () => {
   });
 
   afterEach(() => {
+    delete process.env.DELETED_EMAIL_DOMAIN;
     jest.resetAllMocks();
   });
 
@@ -283,7 +286,7 @@ describe('AccountService', () => {
     });
     expect(usersRepo.save).toHaveBeenCalled();
     expect(user.active).toBe(false);
-    expect(user.email).toBe(`deleted+${user.id}@deleted.qa4free.invalid`);
+    expect(user.email).toBe(`deleted+${user.id}@deleted.example.invalid`);
     expect(user.passwordHash).toBe('');
 
     expect(user.emailVerified).toBe(false);

@@ -6,6 +6,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useParams } from "next/navigation";
 import { WikiMarkdown } from "../../../../wiki/_components/wiki-markdown";
+import { getAccessToken } from "../../../../auth-token";
 
 const WikiRichEditor = dynamic(
   () =>
@@ -222,7 +223,7 @@ export default function AdminWikiEditPage() {
           return;
         }
 
-        const token = window.localStorage.getItem("qa4free_access_token");
+        const token = getAccessToken();
         if (!token) {
           if (!cancelled) {
             setError(
@@ -319,7 +320,7 @@ export default function AdminWikiEditPage() {
       return;
     }
 
-    const token = window.localStorage.getItem("qa4free_access_token");
+    const token = getAccessToken();
     if (!token) {
       return;
     }
@@ -387,7 +388,7 @@ export default function AdminWikiEditPage() {
       setVersionsError(null);
 
       try {
-        const token = window.localStorage.getItem("qa4free_access_token");
+        const token = getAccessToken();
         if (!token) {
           if (!cancelled) {
             setVersionsError(
@@ -512,7 +513,7 @@ export default function AdminWikiEditPage() {
       return;
     }
 
-    const token = window.localStorage.getItem("qa4free_access_token");
+    const token = getAccessToken();
     if (!token) {
       return;
     }
@@ -569,7 +570,7 @@ export default function AdminWikiEditPage() {
     setSuccess(null);
 
     try {
-      const token = window.localStorage.getItem("qa4free_access_token");
+      const token = getAccessToken();
       if (!token) {
         setError(
           "Липсва достъп до Admin API. Моля, влезте отново като администратор.",
@@ -669,7 +670,7 @@ export default function AdminWikiEditPage() {
       return;
     }
 
-    const token = window.localStorage.getItem("qa4free_access_token");
+    const token = getAccessToken();
     if (!token) {
       setError(
         "Липсва достъп до Admin API. Моля, влезте отново като администратор.",
@@ -774,7 +775,7 @@ export default function AdminWikiEditPage() {
       return;
     }
 
-    const token = window.localStorage.getItem("qa4free_access_token");
+    const token = getAccessToken();
     if (!token) {
       setError(
         "Липсва достъп до Admin API. Моля, влезте отново като администратор.",
@@ -864,7 +865,7 @@ export default function AdminWikiEditPage() {
     setSuccess(null);
 
     try {
-      const token = window.localStorage.getItem("qa4free_access_token");
+      const token = getAccessToken();
       if (!token) {
         setError(
           "Липсва достъп до Admin API. Моля, влезте отново като администратор.",
@@ -1927,8 +1928,7 @@ export default function AdminWikiEditPage() {
                       setDeleteVersionSubmitting(true);
 
                       try {
-                        const token =
-                          window.localStorage.getItem("qa4free_access_token");
+                        const token = getAccessToken();
                         if (!token) {
                           setDeleteVersionError(
                             "Липсва достъп до Admin API. Моля, влезте отново като администратор.",
@@ -2102,8 +2102,7 @@ export default function AdminWikiEditPage() {
                     setBulkDeleteSubmitting(true);
 
                     try {
-                      const token =
-                        window.localStorage.getItem("qa4free_access_token");
+                      const token = getAccessToken();
                       if (!token) {
                         setBulkDeleteError(
                           "Липсва достъп до Admin API. Моля, влезте отново като администратор.",

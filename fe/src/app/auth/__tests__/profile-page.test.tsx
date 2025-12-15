@@ -2,6 +2,7 @@ import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import ProfilePage from "../../profile/page";
+import { ACCESS_TOKEN_KEY } from "../../auth-token";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
 
@@ -33,7 +34,7 @@ describe("ProfilePage email change behaviour", () => {
       .spyOn(window.localStorage.__proto__, "getItem")
       .mockImplementation((...args: unknown[]) => {
         const [key] = args as [string];
-        if (key === "qa4free_access_token") {
+        if (key === ACCESS_TOKEN_KEY) {
           return "test-access-token";
         }
         return null;

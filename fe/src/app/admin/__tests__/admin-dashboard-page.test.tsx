@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import * as nextNavigation from "next/navigation";
 import AdminHomePage from "../page";
+import { ACCESS_TOKEN_KEY } from "../../auth-token";
 
 jest.mock("next/navigation", () => ({
   useSearchParams: jest.fn(),
@@ -20,7 +21,7 @@ describe("AdminHomePage (Dashboard)", () => {
   });
 
   it("renders metrics card with total users from API", async () => {
-    window.localStorage.setItem("qa4free_access_token", "test-token");
+    window.localStorage.setItem(ACCESS_TOKEN_KEY, "test-token");
 
     global.fetch = jest.fn().mockImplementation((input: RequestInfo) => {
       const url = typeof input === "string" ? input : String(input);
@@ -63,7 +64,7 @@ describe("AdminHomePage (Dashboard)", () => {
   });
 
   it("shows error message when metrics API call fails", async () => {
-    window.localStorage.setItem("qa4free_access_token", "test-token");
+    window.localStorage.setItem(ACCESS_TOKEN_KEY, "test-token");
 
     global.fetch = jest.fn().mockImplementation((input: RequestInfo) => {
       const url = typeof input === "string" ? input : String(input);
@@ -99,7 +100,7 @@ describe("AdminHomePage (Dashboard)", () => {
   });
 
   it("renders quick links to admin wiki and users", async () => {
-    window.localStorage.setItem("qa4free_access_token", "test-token");
+    window.localStorage.setItem(ACCESS_TOKEN_KEY, "test-token");
 
     global.fetch = jest.fn().mockImplementation((input: RequestInfo) => {
       const url = typeof input === "string" ? input : String(input);

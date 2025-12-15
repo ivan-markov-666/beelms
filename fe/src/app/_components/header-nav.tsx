@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useCurrentLang } from "../../i18n/useCurrentLang";
 import { t } from "../../i18n/t";
 import { LanguageSwitcher } from "../wiki/_components/language-switcher";
+import { clearAccessToken, getAccessToken } from "../auth-token";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
@@ -19,7 +20,7 @@ export function HeaderNav() {
   const handleLogout = () => {
     if (typeof window !== "undefined") {
       try {
-        window.localStorage.removeItem("qa4free_access_token");
+        clearAccessToken();
       } catch {
         // ignore
       }
@@ -36,7 +37,7 @@ export function HeaderNav() {
       if (cancelled) return;
 
       try {
-        const stored = window.localStorage.getItem("qa4free_access_token");
+        const stored = getAccessToken();
 
         if (!stored) {
           setHasToken(false);
@@ -56,7 +57,7 @@ export function HeaderNav() {
           if (!res.ok) {
             if (res.status === 401 || res.status === 404) {
               try {
-                window.localStorage.removeItem("qa4free_access_token");
+                clearAccessToken();
               } catch {
                 // ignore
               }
@@ -97,7 +98,7 @@ export function HeaderNav() {
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4">
         <div className="flex items-center">
           <Link href="/" className="text-2xl font-bold text-green-600">
-            QA4Free
+            BeeLMS
           </Link>
         </div>
 

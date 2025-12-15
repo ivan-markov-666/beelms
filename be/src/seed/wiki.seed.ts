@@ -7,9 +7,9 @@ const SeedDataSource = new DataSource({
   type: 'postgres',
   host: process.env.DB_HOST ?? 'localhost',
   port: Number(process.env.DB_PORT ?? 5432),
-  username: process.env.DB_USER ?? 'qa4free',
-  password: process.env.DB_PASSWORD ?? 'qa4free',
-  database: process.env.DB_NAME ?? 'qa4free',
+  username: process.env.DB_USER ?? 'beelms',
+  password: process.env.DB_PASSWORD ?? 'beelms',
+  database: process.env.DB_NAME ?? 'beelms',
   entities: [WikiArticle, WikiArticleVersion],
   synchronize: false,
 });
@@ -83,7 +83,8 @@ async function seedWiki() {
       content:
         'This is a sample getting started Wiki article for a demo platform. It shows how content might look and how to get started.',
       versionNumber: 1,
-      changeSummary: 'Initial sample EN version of the getting started article.',
+      changeSummary:
+        'Initial sample EN version of the getting started article.',
     },
   ]);
 
@@ -98,12 +99,12 @@ async function seedWiki() {
     },
   ]);
 
-  await ensureArticleWithVersions('qa4free-overview', 'active', [
+  await ensureArticleWithVersions('platform-overview', 'active', [
     {
       language: 'bg',
       title: 'Общ преглед на платформата',
       content:
-        'Тази статия дава примерен общ преглед на демо платформа – каква е целта й, за кого е предназначена и какви раздели включва Wiki-то и практическите задачи.',
+        'Тази статия дава примерен общ преглед на демо платформа – каква е целта й, за кого е предназначена и какви раздели включва съдържанието.',
       versionNumber: 1,
       changeSummary: 'Първоначална примерна версия на обзорна статия (BG).',
     },
