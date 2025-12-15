@@ -66,6 +66,13 @@ type MediaItem = {
   url: string;
 };
 
+function deriveAltFromFilename(filename: string): string {
+  const withoutQuery = filename.split("?")[0] ?? filename;
+  const lastSegment = withoutQuery.split("/").pop() ?? withoutQuery;
+  const withoutExt = lastSegment.replace(/\.[a-zA-Z0-9]+$/, "");
+  return withoutExt || "image";
+}
+
 const VERSIONS_PAGE_SIZE = 10;
 
 function normalizeMarkdownContent(raw: string): string {
@@ -646,7 +653,8 @@ export default function AdminWikiEditPage() {
   };
 
   const handleInsertImage = (item: MediaItem) => {
-    const markdownSnippet = `![image](${item.url})`;
+    const alt = deriveAltFromFilename(item.filename);
+    const markdownSnippet = `![${alt}](${item.url})`;
 
     if (contentEditorMode === "rich" && richEditorRef.current) {
       richEditorRef.current
@@ -654,7 +662,7 @@ export default function AdminWikiEditPage() {
         .focus()
         .insertContent({
           type: "image",
-          attrs: { src: item.url, alt: "image" },
+          attrs: { src: item.url, alt },
         })
         .run();
       return;
@@ -859,7 +867,8 @@ export default function AdminWikiEditPage() {
   };
 
   const handleCopyMarkdown = async (item: MediaItem) => {
-    const markdownSnippet = `![image](${item.url})`;
+    const alt = deriveAltFromFilename(item.filename);
+    const markdownSnippet = `![${alt}](${item.url})`;
 
     try {
       if (
