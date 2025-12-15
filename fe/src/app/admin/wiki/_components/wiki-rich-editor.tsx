@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { EditorContent, useEditor } from "@tiptap/react";
-import type { Editor } from "@tiptap/core";
+import { Mark, mergeAttributes, type Editor } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
 import { Table } from "@tiptap/extension-table";
 import { TableRow } from "@tiptap/extension-table-row";
@@ -72,8 +72,67 @@ function createTurndown(): TurndownService {
     },
   });
 
+  service.addRule("underline", {
+    filter(node) {
+      return node.nodeName === "U";
+    },
+    replacement(content) {
+      return `<u>${content}</u>`;
+    },
+  });
+
+  service.addRule("superscript", {
+    filter(node) {
+      return node.nodeName === "SUP";
+    },
+    replacement(content) {
+      return `<sup>${content}</sup>`;
+    },
+  });
+
+  service.addRule("subscript", {
+    filter(node) {
+      return node.nodeName === "SUB";
+    },
+    replacement(content) {
+      return `<sub>${content}</sub>`;
+    },
+  });
+
   return service;
 }
+
+const UnderlineMark = Mark.create({
+  name: "underline",
+  parseHTML() {
+    return [{ tag: "u" }];
+  },
+  renderHTML({ HTMLAttributes }) {
+    return ["u", mergeAttributes(HTMLAttributes), 0];
+  },
+});
+
+const SuperscriptMark = Mark.create({
+  name: "superscript",
+  excludes: "subscript",
+  parseHTML() {
+    return [{ tag: "sup" }];
+  },
+  renderHTML({ HTMLAttributes }) {
+    return ["sup", mergeAttributes(HTMLAttributes), 0];
+  },
+});
+
+const SubscriptMark = Mark.create({
+  name: "subscript",
+  excludes: "superscript",
+  parseHTML() {
+    return [{ tag: "sub" }];
+  },
+  renderHTML({ HTMLAttributes }) {
+    return ["sub", mergeAttributes(HTMLAttributes), 0];
+  },
+});
 
 const CodeBlockWithLanguage = CodeBlock.extend({
   addAttributes() {
@@ -128,6 +187,9 @@ export function WikiRichEditor({
           levels: [1, 2, 3, 4],
         },
       }),
+      UnderlineMark,
+      SuperscriptMark,
+      SubscriptMark,
       CodeBlockWithLanguage,
       Table.configure({
         resizable: true,
@@ -291,6 +353,44 @@ export function WikiRichEditor({
             onClick={() => editor.chain().focus().toggleItalic().run()}
           >
             Italic
+          </button>
+          <button
+            type="button"
+            className={`${btnBase} ${
+              editor.isActive("underline") ? btnActive : btnIdle
+            }`}
+            onClick={() => editor.chain().focus().toggleMark("underline").run()}
+          >
+            Underline
+          </button>
+          <button
+            type="button"
+            className={`${btnBase} ${
+              editor.isActive("strike") ? btnActive : btnIdle
+            }`}
+            onClick={() => editor.chain().focus().toggleStrike().run()}
+          >
+            Strike
+          </button>
+          <button
+            type="button"
+            className={`${btnBase} ${
+              editor.isActive("superscript") ? btnActive : btnIdle
+            }`}
+            onClick={() =>
+              editor.chain().focus().toggleMark("superscript").run()
+            }
+          >
+            Sup
+          </button>
+          <button
+            type="button"
+            className={`${btnBase} ${
+              editor.isActive("subscript") ? btnActive : btnIdle
+            }`}
+            onClick={() => editor.chain().focus().toggleMark("subscript").run()}
+          >
+            Sub
           </button>
           <button
             type="button"
