@@ -589,6 +589,57 @@ export function WikiRichEditor({
           </button>
           <button
             type="button"
+            className={`${btnBase} ${btnIdle}`}
+            disabled={!editor.isActive("image")}
+            onClick={() => {
+              if (!editor.isActive("image")) {
+                return;
+              }
+
+              const attrs = editor.getAttributes("image") as {
+                src?: string;
+                alt?: string;
+                title?: string;
+              };
+
+              const alt = window.prompt("Alt text (optional)", attrs.alt ?? "");
+              if (alt === null) {
+                return;
+              }
+
+              const title = window.prompt(
+                "Title (optional)",
+                attrs.title ?? "",
+              );
+              if (title === null) {
+                return;
+              }
+
+              editor
+                .chain()
+                .focus()
+                .updateAttributes("image", { alt, title })
+                .run();
+            }}
+          >
+            Edit image
+          </button>
+          <button
+            type="button"
+            className={`${btnBase} ${btnIdle}`}
+            disabled={!editor.isActive("image")}
+            onClick={() => {
+              if (!editor.isActive("image")) {
+                return;
+              }
+
+              editor.chain().focus().deleteSelection().run();
+            }}
+          >
+            Remove image
+          </button>
+          <button
+            type="button"
             className={`${btnBase} ${
               editor.isActive("bulletList") ? btnActive : btnIdle
             }`}
