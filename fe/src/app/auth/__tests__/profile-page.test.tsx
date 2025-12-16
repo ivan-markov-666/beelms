@@ -349,3 +349,196 @@ describe("ProfilePage email change behaviour", () => {
     expect(tooltip).toBeInTheDocument();
   });
 });
+
+describe("ProfilePage critical actions", () => {
+  const originalFetch = global.fetch;
+  const originalLocation = window.location;
+
+  beforeEach(() => {
+    mockReplace.mockClear();
+
+    // @ts-expect-error JSDOM
+    delete window.location;
+    // @ts-expect-error JSDOM
+    window.location = { ...originalLocation, assign: jest.fn() };
+
+    jest
+      .spyOn(window.localStorage.__proto__, "getItem")
+      .mockImplementation((...args: unknown[]) => {
+        const [key] = args as [string];
+        if (key === ACCESS_TOKEN_KEY) {
+          return "test-access-token";
+        }
+        return null;
+      });
+
+    jest
+      .spyOn(window.localStorage.__proto__, "removeItem")
+      .mockImplementation(jest.fn());
+
+    global.fetch = jest.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = typeof input === "string" ? input : input.toString();
+
+      if (
+        url === `${API_BASE_URL}/users/me` &&
+        (!init || !init.method || init.method === "GET")
+      ) {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            id: "user-1",
+            email: "user@example.com",
+            createdAt: new Date().toISOString(),
+            emailChangeLimitReached: false,
+            emailChangeLimitResetAt: null,
+          }),
+        } as Response;
+      }
+
+      if (url === `${API_BASE_URL}/users/me/change-password` && init?.method === "POST") {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({}),
+        } as Response;
+      }
+
+      if (url === `${API_BASE_URL}/users/me/export` && init?.method === "POST") {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            id: "user-1",
+            email: "user@example.com",
+            createdAt: new Date().toISOString(),
+            active: true,
+          }),
+        } as Response;
+      }
+
+      if (url === `${API_BASE_URL}/users/me` && init?.method === "DELETE") {
+        return {
+          ok: true,
+          status: 204,
+          json: async () => ({}),
+        } as Response;
+      }
+
+      throw new Error(`Unexpected fetch to ${url}`);
+    }) as unknown as typeof fetch;
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+    global.fetch = originalFetch;
+    // @ts-expect-error JSDOM
+    window.location = originalLocation;
+  });
+
+  it("redirects to /auth/login when no token is present", async () => {
+    jest
+      .spyOn(window.localStorage.__proto__, "getItem")
+      .mockImplementation(() => null);
+
+    render(<ProfilePage />);
+
+    await waitFor(() => {
+      expect(mockReplace).toHaveBeenCalledWith("/auth/login");
+    });
+  });
+
+  it("logs out and redirects to home", async () => {
+    render(<ProfilePage />);
+    await screen.findByText("Моят профил");
+
+    fireEvent.click(screen.getByRole("button", { name: "Изход" }));
+
+    expect(window.localStorage.removeItem).toHaveBeenCalledWith(ACCESS_TOKEN_KEY);
+    expect(mockReplace).toHaveBeenCalledWith("/");
+  });
+
+  it("changes password successfully", async () => {
+    render(<ProfilePage />);
+    await screen.findByText("Моят профил");
+
+    const changeButtons = screen.getAllByRole("button", { name: "Промяна" });
+    fireEvent.click(changeButtons[1]);
+
+    fireEvent.change(await screen.findByLabelText("Текуща парола"), {
+      target: { value: "old-pass" },
+    });
+    fireEvent.change(screen.getByLabelText("Нова парола"), {
+      target: { value: "new-password" },
+    });
+    fireEvent.change(screen.getByLabelText("Потвърждение"), {
+      target: { value: "new-password" },
+    });
+
+    fireEvent.click(screen.getAllByRole("button", { name: "Запази" })[0]);
+
+    await waitFor(() => {
+      expect(screen.getByText("Паролата беше успешно сменена.")).toBeInTheDocument();
+    });
+  });
+
+  it("exports user data", async () => {
+    render(<ProfilePage />);
+    await screen.findByText("Моят профил");
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Експортирай моите данни",
+      }),
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("Заявката за експорт на данни беше приета."),
+      ).toBeInTheDocument();
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText(/Детайли от експортираните данни/i)).toBeInTheDocument();
+    });
+
+    expect((global.fetch as jest.Mock).mock.calls).toEqual(
+      expect.arrayContaining([
+        [
+          `${API_BASE_URL}/users/me/export`,
+          expect.objectContaining({
+            method: "POST",
+            body: JSON.stringify({ captchaToken: "dummy-captcha-token" }),
+          }),
+        ],
+      ]),
+    );
+  });
+
+  it("deletes account with two-step confirmation and redirects", async () => {
+    render(<ProfilePage />);
+    await screen.findByText("Моят профил");
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Изтрий акаунта завинаги",
+      }),
+    );
+
+    await screen.findByText("Закриване на акаунта");
+
+    fireEvent.click(screen.getByRole("button", { name: "OK" }));
+
+    await screen.findByText("Потвърдете изтриването на акаунта");
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Да, изтрий акаунта завинаги" }),
+    );
+
+    await waitFor(() => {
+      expect(mockReplace).toHaveBeenCalledWith("/auth/account-deleted");
+    });
+
+    expect(window.localStorage.removeItem).toHaveBeenCalledWith(ACCESS_TOKEN_KEY);
+  });
+});
