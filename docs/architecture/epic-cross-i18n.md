@@ -35,7 +35,7 @@
 - **Wiki article `/wiki/[slug]`:**
   - чете `lang` от `searchParams` и го подава към `GET /api/wiki/articles/{slug}?lang=...`;
   - ако няма версия на този език, backend връща `404` → FE показва 404 страница (избран е вариантът „Not available for this language“).
-- **Други екрани (Login, Practice UI, и т.н.):**
+- **Други екрани (Login/Register/Profile, Admin и т.н.):**
   - виждат същия глобален header с LanguageSwitcher-а;
   - навигацията в header-а вече използва FE i18n речниците за линковете „Wiki“ и „Вход“/`"Sign in"` според избрания език, но останалите UI текстове по екрани все още са основно на BG и предстои да се мигрират към i18n слоя.
 
@@ -88,7 +88,7 @@
   - state се запазва при навигиране по link-ове, които съхраняват `lang` (или чрез глобалния switcher).
 - **Следваща стъпка за EPIC-CROSS-I18N:**
   - при смяна на езика global switcher-ът записва стойността и в cookie, напр. `ui_lang=bg|en`;
-  - при директен достъп без `?lang=` (напр. bookmark към `/practice/ui`) FE/BE използват cookie-то, за да изберат начален език;
+  - при директен достъп без `?lang=` FE/BE използват cookie-то, за да изберат начален език;
   - при конфликт между URL и cookie – **URL има приоритет** (по-прозрачен за потребителя и за поддръжка).
 
 ---
@@ -108,8 +108,8 @@
 
 - `src/i18n/messages.ts` – централен речник с UI текстове:
   - структура тип:
-    - `messages = { bg: { nav: { wiki: "Wiki", practice: "Практика" }, auth: {...}, ... }, en: { ... } }`;
-  - разделяне по домейни (nav, auth, wiki, practice, common) за четимост.
+    - `messages = { bg: { nav: { wiki: "Wiki" }, auth: {...}, ... }, en: { ... } }`;
+  - разделяне по домейни (nav, auth, wiki, common) за четимост.
 - Използване чрез helper функция, напр.:
   - `export function t(lang: SupportedLang, path: string): string` или по-типизиран вариант с TS generics.
 
@@ -153,14 +153,13 @@
   - имплементация на `useCurrentLang()` hook за client компоненти;
   - smoke тестове за i18n helper-ите;
   - адаптиране на основния публичен layout shell и навигацията да използват i18n речниците вместо твърди BG стрингове;
-  - осигуряване, че при различни стойности на `?lang=` (BG/EN) навигацията показва коректните преводи за основните менюта (Wiki, Practical UI, Training API, Login/Register, Account и др.).
+  - осигуряване, че при различни стойности на `?lang=` (BG/EN) навигацията показва коректните преводи за основните менюта (Wiki, Login/Register, Account и др.).
+
 
 ### Фаза 3 – Превод на ключови екрани (примерен ред)
 
 - Story за Auth екрани (`/login`, `/register`):
   - форм labels, бутони, error messages → през i18n речника.
-- Story за Practice / Sandbox UI:
-  - основни заглавия, подсказки и бутонни текстове.
 - При нужда – отделно story за public landing / home.
 
 В рамките на WS-2 Auth walking skeleton, FE екраните `/auth/login`, `/auth/register`, `/auth/forgot-password` и `/auth/reset-password` вече са вързани към общия i18n слой и използват `auth` домейна в `src/i18n/messages.ts`, като показват преводими етикети, бутони и съобщения според глобалния `lang` параметър.
@@ -185,7 +184,7 @@
   - unit тестове за i18n helper-ите (`normalizeLang`, `useCurrentLang`, `t`);
   - компоненти, които ползват преводи, да имат поне smoke тест (проверка, че показват правилния текст за BG/EN).
 - **Manual QA сценарии:**
-  - смяна на езика през header-а на различни екрани (Wiki, Login, Practice) и проверка на текстовете;
+  - смяна на езика през header-а на различни екрани (Wiki, Login) и проверка на текстовете;
   - поведение при директен линк с `?lang=en` vs. без `lang` с налично `ui_lang` cookie;
   - проверка на 404 при `/wiki/[slug]?lang=en` без EN версия.
 - **Документация:**

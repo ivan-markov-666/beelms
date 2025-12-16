@@ -85,7 +85,7 @@ npm pack
 
 ```bash
 # Example (Windows)
-npx --yes --package "D:\\Projects\\qa-4-free\\tools\\create-beelms-app\\create-beelms-app-0.1.0.tgz" create-beelms-app my-lms
+npx --yes --package "C:\\path\\to\\repo\\tools\\create-beelms-app\\create-beelms-app-0.1.0.tgz" create-beelms-app my-lms
 ```
 
 > Note: On Windows, relative `file:` / `..\\...tgz` paths can be resolved against the nearest parent `package.json`. Using an absolute path avoids this.

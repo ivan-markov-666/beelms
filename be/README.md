@@ -63,9 +63,9 @@ npm run start:prod
 
 ## Dockerized development environment
 
-The beelms backend in this QA4Free example is primarily intended to run in Docker together with a PostgreSQL database.
+The beelms backend is primarily intended to run in Docker together with a PostgreSQL database.
 
-From the project root (`d:\Projects\qa-4-free`):
+From the project root:
 
 ```bash
 docker compose up --build
@@ -74,9 +74,9 @@ docker compose up --build
 This starts:
 
 - a Postgres 16 instance (service `db`) with:
-  - `DB_NAME = qa4free`
-  - `DB_USER = qa4free`
-  - `DB_PASSWORD = qa4free`
+  - `DB_NAME = beelms`
+  - `DB_USER = beelms`
+  - `DB_PASSWORD = beelms`
 - the NestJS API (service `api`) on port `3000`.
 
 Health check:
@@ -97,7 +97,7 @@ From the project root:
 docker compose exec api npm run migration:run
 ```
 
-This applies all pending migrations against the `qa4free` database.
+This applies all pending migrations against the `beelms` database.
 
 You can also run migrations directly from the host (if you have a local Postgres instance that matches the Docker configuration):
 
@@ -120,7 +120,7 @@ This will insert:
 
 - an `active` article with slug `getting-started` with BG and EN versions;
 - an `active` article with slug `faq` with a BG version;
-- an `active` article with slug `qa4free-overview` with BG and EN versions (high-level overview of the QA4Free platform).
+- an `active` article with slug `platform-overview` with BG and EN versions (high-level overview of the platform).
 
 The seed script is idempotent and can be safely executed multiple times.
 
@@ -184,7 +184,7 @@ curl -X PUT "http://localhost:3000/api/admin/wiki/articles/<ARTICLE_ID>" \
   -H "Content-Type: application/json" \
   -d '{
     "language": "bg",
-    "title": "Начало с QA4Free (admin редакция)",
+    "title": "Начало с платформата (admin редакция)",
     "content": "Обновено съдържание от администратор",
     "status": "active"
   }'

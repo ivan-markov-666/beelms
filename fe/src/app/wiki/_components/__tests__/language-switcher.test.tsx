@@ -63,7 +63,7 @@ describe("LanguageSwitcher", () => {
   });
 
   it("updates lang and preserves other params on non-wiki pages", () => {
-    usePathnameMock.mockReturnValue("/practice/ui");
+    usePathnameMock.mockReturnValue("/profile");
     useSearchParamsMock.mockReturnValue(
       makeSearchParams("lang=bg&foo=bar"),
     );
@@ -76,7 +76,7 @@ describe("LanguageSwitcher", () => {
     expect(pushMock).toHaveBeenCalledTimes(1);
     const [url] = pushMock.mock.calls[0] as [string];
 
-    expect(url.startsWith("/practice/ui")).toBe(true);
+    expect(url.startsWith("/profile")).toBe(true);
     expect(url).toContain("lang=en");
     expect(url).toContain("foo=bar");
   });

@@ -8,8 +8,6 @@ import { WikiArticleVersion } from './wiki/wiki-article-version.entity';
 import { WikiModule } from './wiki/wiki.module';
 import { AuthModule } from './auth/auth.module';
 import { User } from './auth/user.entity';
-import { TrainingModule } from './training/training.module';
-import { TasksModule } from './tasks/tasks.module';
 import { RateLimitInterceptor } from './security/rate-limit/rate-limit.interceptor';
 import { InMemoryRateLimitStore } from './security/rate-limit/rate-limit.store';
 
@@ -27,8 +25,6 @@ import { InMemoryRateLimitStore } from './security/rate-limit/rate-limit.store';
     }),
     WikiModule,
     AuthModule,
-    TrainingModule,
-    TasksModule,
   ],
   controllers: [AppController],
   providers: [

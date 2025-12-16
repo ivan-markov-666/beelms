@@ -3,8 +3,6 @@ import type { SupportedLang } from "./config";
 type DomainMessages = {
   nav: {
     wiki: string;
-    practice: string;
-    practiceApi: string;
     login: string;
     register: string;
     profile: string;
@@ -24,8 +22,6 @@ export const messages: Messages = {
   bg: {
     nav: {
       wiki: "Wiki",
-      practice: "Практика",
-      practiceApi: "API Demo",
       login: "Вход",
       register: "Регистрация",
       profile: "Профил",
@@ -329,8 +325,6 @@ export const messages: Messages = {
   en: {
     nav: {
       wiki: "Wiki",
-      practice: "Practice",
-      practiceApi: "API Demo",
       login: "Sign in",
       register: "Register",
       profile: "Profile",
@@ -359,7 +353,7 @@ export const messages: Messages = {
       loginLoading: "Loading...",
       registerTitle: "Create account",
       registerSubtitle:
-        "Create your free BeeLMS account to start practicing.",
+        "Create your free BeeLMS account to get started.",
       registerEmailLabel: "Email",
       registerPasswordLabel: "Password",
       registerPasswordHint: "Minimum 8 characters",
@@ -632,8 +626,6 @@ export const messages: Messages = {
   de: {
     nav: {
       wiki: "Wiki",
-      practice: "Praxis",
-      practiceApi: "API Demo",
       login: "Anmelden",
       register: "Registrieren",
       profile: "Profil",
@@ -660,7 +652,7 @@ export const messages: Messages = {
       loginErrorNetwork: "Beim Kontakt mit dem Server ist ein Netzwerkfehler aufgetreten.",
       loginLoading: "Laden...",
       registerTitle: "Konto erstellen",
-      registerSubtitle: "Erstelle dein kostenloses BeeLMS-Konto, um mit dem Üben zu beginnen.",
+      registerSubtitle: "Erstelle dein kostenloses BeeLMS-Konto, um loszulegen.",
       registerEmailLabel: "E-Mail",
       registerPasswordLabel: "Passwort",
       registerPasswordHint: "Mindestens 8 Zeichen",

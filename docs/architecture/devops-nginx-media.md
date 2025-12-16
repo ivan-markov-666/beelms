@@ -1,4 +1,4 @@
-# QA4Free – Nginx конфигурация за Wiki media (MVP)
+# beelms – Nginx конфигурация за Wiki media (MVP)
 
 _Роля: DevOps / Architect. Този документ описва примерна Nginx конфигурация за обслужване на Wiki изображенията, използвани в markdown съдържанието._
 
@@ -14,11 +14,11 @@ _Роля: DevOps / Architect. Този документ описва приме
 Концептуална структура на директориите за Wiki media:
 
 ```text
-/var/qa4free/media/wiki/<article_slug>/<filename.ext>
-пример: /var/qa4free/media/wiki/manual-testing-intro/diagram-1.png
+/var/beelms/media/wiki/<article_slug>/<filename.ext>
+пример: /var/beelms/media/wiki/manual-testing-intro/diagram-1.png
 ```
 
-Тази директория (`/var/qa4free/media`) следва да бъде:
+Тази директория (`/var/beelms/media`) следва да бъде:
 - споделена Docker volume между:
   - Nginx контейнера (reverse proxy);
   - `wiki_service` контейнера, който качва/трие файлове.
@@ -32,22 +32,22 @@ volumes:
 services:
   nginx:
     volumes:
-      - wiki_media:/var/qa4free/media
+      - wiki_media:/var/beelms/media
 
   wiki_service:
     volumes:
-      - wiki_media:/var/qa4free/media
+      - wiki_media:/var/beelms/media
 ```
 
 ## 3. Примерен Nginx `location` блок
 
-Следният блок показва как `/wiki/media/` се мапва към файловата система под `/var/qa4free/media/wiki/`:
+Следният блок показва как `/wiki/media/` се мапва към файловата система под `/var/beelms/media/wiki/`:
 
 ```nginx
 # Статични файлове за Wiki изображения (MVP)
 location /wiki/media/ {
     # "alias" позволява директно мапване към поддиректорията "wiki" под media_root
-    alias /var/qa4free/media/wiki/;
+    alias /var/beelms/media/wiki/;
 
     # По избор: ограничаване до четене на файлове (без листинг на директории)
     autoindex off;
@@ -64,10 +64,10 @@ location /wiki/media/ {
 ```
 
 Важно:
-- `alias /var/qa4free/media/wiki/;` означава, че заявка за:
+- `alias /var/beelms/media/wiki/;` означава, че заявка за:
   - `/wiki/media/manual-testing-intro/diagram-1.png`
   ще се търси на диска като:
-  - `/var/qa4free/media/wiki/manual-testing-intro/diagram-1.png`
+  - `/var/beelms/media/wiki/manual-testing-intro/diagram-1.png`
 
 ## 4. Забележки за сигурност и бъдещи стъпки
 

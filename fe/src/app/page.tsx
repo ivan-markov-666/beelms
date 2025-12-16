@@ -7,12 +7,11 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-4 py-16 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
           <div>
             <h1 className="text-4xl lg:text-5xl font-extrabold text-gray-900 mb-4">
-              Практикувай QA тестване в учебна среда
+              BeeLMS – учебна платформа с Wiki и акаунти
             </h1>
             <p className="text-lg text-gray-700 mb-8">
-              BeeLMS е тренировъчна среда за бъдещи и настоящи QA специалисти – с
-              Wiki статии, практическа UI среда и Training API, върху които можеш да
-              упражняваш тестване и автоматизация.
+              BeeLMS предоставя публично Wiki съдържание и базови потребителски
+              акаунти (регистрация, вход и профил), плюс админ панел за управление.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link
@@ -22,19 +21,19 @@ export default function Home() {
                 Отвори Wiki
               </Link>
               <Link
-                href="/practice/ui-demo"
+                href="/auth/register"
                 className="inline-flex items-center justify-center px-6 py-3 bg-white text-green-700 border border-green-600 rounded-lg font-semibold hover:bg-green-50 transition"
               >
-                Стартирай Practical UI
+                Регистрация
               </Link>
             </div>
             <p className="mt-4 text-sm text-gray-600">
-              Или директно тествай Training API →{" "}
+              Вече имаш акаунт? →{" "}
               <Link
-                href="/practice/api-demo"
+                href="/auth/login"
                 className="text-green-700 font-medium hover:text-green-800"
               >
-                Swagger демо
+                Вход
               </Link>
             </p>
           </div>
@@ -57,23 +56,13 @@ export default function Home() {
                   2
                 </dt>
                 <dd>
-                  <span className="font-semibold">Practical UI (Sandbox)</span> –
-                  страници с реални HTML компоненти за manual и UI automation
-                  упражнения.
+                  <span className="font-semibold">Акаунти</span> – регистрация,
+                  вход/изход, профил и GDPR действия.
                 </dd>
               </div>
               <div className="flex items-start">
                 <dt className="w-8 h-8 flex items-center justify-center rounded-full bg-green-100 text-green-700 font-bold mr-3">
                   3
-                </dt>
-                <dd>
-                  <span className="font-semibold">Training API</span> – публичен
-                  demo API с Swagger UI за API/integration тестване.
-                </dd>
-              </div>
-              <div className="flex items-start">
-                <dt className="w-8 h-8 flex items-center justify-center rounded-full bg-green-100 text-green-700 font-bold mr-3">
-                  4
                 </dt>
                 <dd>
                   <span className="font-semibold">Admin панел</span> – само за
@@ -102,42 +91,40 @@ export default function Home() {
               <span className="mt-3 text-xs text-gray-500">SCR-WIKI-LST</span>
             </Link>
             <Link
-              href="/practice/ui-demo"
+              href="/auth/register"
               className="bg-white border border-gray-200 rounded-lg p-5 hover:shadow-md transition flex flex-col justify-between"
             >
               <div>
-                <h3 className="font-semibold text-gray-900 mb-2">
-                  Sandbox UI – Text Box
-                </h3>
+                <h3 className="font-semibold text-gray-900 mb-2">Регистрация</h3>
                 <p className="text-sm text-gray-600">
-                  Започни с основните text input елементи.
+                  Създай нов акаунт, за да използваш профила и админ функциите.
                 </p>
               </div>
-              <span className="mt-3 text-xs text-gray-500">SCR-SBX-UI</span>
+              <span className="mt-3 text-xs text-gray-500">SCR-AUTH-REGISTER</span>
             </Link>
             <Link
-              href="/practice/ui-demo"
+              href="/auth/login"
               className="bg-white border border-gray-200 rounded-lg p-5 hover:shadow-md transition flex flex-col justify-between"
             >
               <div>
-                <h3 className="font-semibold text-gray-900 mb-2">Table CRUD</h3>
+                <h3 className="font-semibold text-gray-900 mb-2">Вход</h3>
                 <p className="text-sm text-gray-600">
-                  Упражнявай тестване на таблици, CRUD операции и пагинация.
+                  Влез в акаунта си и достъпи профила.
                 </p>
               </div>
-              <span className="mt-3 text-xs text-gray-500">SCR-SBX-UI</span>
+              <span className="mt-3 text-xs text-gray-500">SCR-AUTH-LOGIN</span>
             </Link>
             <Link
-              href="/practice/api-demo"
+              href="/profile"
               className="bg-white border border-gray-200 rounded-lg p-5 hover:shadow-md transition flex flex-col justify-between"
             >
               <div>
-                <h3 className="font-semibold text-gray-900 mb-2">Training API</h3>
+                <h3 className="font-semibold text-gray-900 mb-2">Профил</h3>
                 <p className="text-sm text-gray-600">
-                  Swagger UI с demo ендпойнти за API тестване.
+                  Управлявай имейл, парола, експорт и закриване на акаунта.
                 </p>
               </div>
-              <span className="mt-3 text-xs text-gray-500">SCR-SBX-API</span>
+              <span className="mt-3 text-xs text-gray-500">SCR-AUTH-PROFILE</span>
             </Link>
           </div>
         </div>
