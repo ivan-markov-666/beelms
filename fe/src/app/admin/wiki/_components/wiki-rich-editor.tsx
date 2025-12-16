@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { EditorContent, useEditor } from "@tiptap/react";
 import { Mark, Node, mergeAttributes, type Editor } from "@tiptap/core";
+import { NodeSelection } from "@tiptap/pm/state";
+import type { Node as PMNode } from "@tiptap/pm/model";
 import StarterKit from "@tiptap/starter-kit";
 import { Table } from "@tiptap/extension-table";
 import { TableRow } from "@tiptap/extension-table-row";
@@ -274,6 +276,8 @@ export function WikiRichEditor({
 }: WikiRichEditorProps) {
   const turndown = useMemo(() => createTurndown(), []);
 
+  const [, bumpSelectionVersion] = useState(0);
+
   const onEditorReadyRef = useRef<WikiRichEditorProps["onEditorReady"]>(
     onEditorReady,
   );
@@ -321,6 +325,9 @@ export function WikiRichEditor({
       transformPastedHTML(html: string) {
         return DOMPurify.sanitize(html, { USE_PROFILES: { html: true } });
       },
+    },
+    onSelectionUpdate: () => {
+      bumpSelectionVersion((v) => v + 1);
     },
     onUpdate: ({ editor }: { editor: Editor }) => {
       if (pendingEmitTimeoutRef.current) {
@@ -382,6 +389,90 @@ export function WikiRichEditor({
 
   const btnActive = "bg-white border-zinc-400 text-zinc-900";
   const btnIdle = "bg-white/40 border-zinc-300 text-zinc-800";
+
+  const isCaptionParagraph = (node: PMNode | null | undefined) => {
+    if (!node || node.type.name !== "paragraph") {
+      return false;
+    }
+
+    if (!node.textContent.trim()) {
+      return false;
+    }
+
+    let allItalic = true;
+    node.descendants((n) => {
+      if (!allItalic) {
+        return false;
+      }
+      if (n.isText) {
+        const hasItalic = n.marks.some((mark) => mark.type.name === "italic");
+        if (!hasItalic) {
+          allItalic = false;
+          return false;
+        }
+      }
+      return true;
+    });
+
+    return allItalic;
+  };
+
+  const findClosestImageInSelectionBlock = (): { pos: number; node: PMNode } | null => {
+    const { state } = editor;
+    const { selection } = state;
+
+    if (selection instanceof NodeSelection && selection.node.type.name === "image") {
+      return { pos: selection.from, node: selection.node };
+    }
+
+    const $from = state.doc.resolve(selection.from);
+
+    let blockDepth: number | null = null;
+    for (let d = $from.depth; d > 0; d--) {
+      if ($from.node(d).isBlock) {
+        blockDepth = d;
+        break;
+      }
+    }
+
+    if (blockDepth === null) {
+      return null;
+    }
+
+    const blockStart = $from.start(blockDepth);
+    const blockNode = $from.node(blockDepth);
+
+    const imagesInBlock: Array<{ pos: number; node: PMNode }> = [];
+    blockNode.descendants((n, pos) => {
+      if (n.type.name === "image") {
+        imagesInBlock.push({ pos: blockStart + pos, node: n });
+      }
+      return true;
+    });
+
+    if (!imagesInBlock.length) {
+      return null;
+    }
+
+    const best = imagesInBlock.reduce<{ pos: number; node: PMNode; dist: number }>(
+      (acc, cur) => {
+        const dist = Math.abs(cur.pos - selection.from);
+        if (dist < acc.dist) {
+          return { pos: cur.pos, node: cur.node, dist };
+        }
+        return acc;
+      },
+      {
+        pos: imagesInBlock[0].pos,
+        node: imagesInBlock[0].node,
+        dist: Math.abs(imagesInBlock[0].pos - selection.from),
+      },
+    );
+
+    return { pos: best.pos, node: best.node };
+  };
+
+  const canActOnImage = !!findClosestImageInSelectionBlock();
 
   return (
     <div className="space-y-2">
@@ -457,23 +548,6 @@ export function WikiRichEditor({
           </button>
 
           <div className="mx-1 h-5 w-px bg-sky-200" />
-
-          <button
-            type="button"
-            className={`${btnBase} ${btnIdle}`}
-            onClick={() => editor.chain().focus().undo().run()}
-            disabled={!editor.can().undo()}
-          >
-            Undo
-          </button>
-          <button
-            type="button"
-            className={`${btnBase} ${btnIdle}`}
-            onClick={() => editor.chain().focus().redo().run()}
-            disabled={!editor.can().redo()}
-          >
-            Redo
-          </button>
 
           <button
             type="button"
@@ -607,16 +681,17 @@ export function WikiRichEditor({
           <button
             type="button"
             className={`${btnBase} ${btnIdle}`}
-            disabled={!editor.isActive("image")}
+            disabled={!canActOnImage}
             onClick={() => {
-              if (!editor.isActive("image")) {
+              const match = findClosestImageInSelectionBlock();
+              if (!match) {
                 return;
               }
 
-              const attrs = editor.getAttributes("image") as {
-                src?: string;
-                alt?: string;
-                title?: string;
+              const attrs = match.node.attrs as {
+                src?: string | null;
+                alt?: string | null;
+                title?: string | null;
               };
 
               const alt = window.prompt("Alt text (optional)", attrs.alt ?? "");
@@ -632,11 +707,15 @@ export function WikiRichEditor({
                 return;
               }
 
-              editor
-                .chain()
-                .focus()
-                .updateAttributes("image", { alt, title })
-                .run();
+              editor.commands.focus();
+              const { state, view } = editor;
+              const nextAttrs = {
+                ...(match.node.attrs as Record<string, unknown>),
+                alt,
+                title,
+              };
+              const tr = state.tr.setNodeMarkup(match.pos, undefined, nextAttrs);
+              view.dispatch(tr);
             }}
           >
             Edit image
@@ -644,13 +723,42 @@ export function WikiRichEditor({
           <button
             type="button"
             className={`${btnBase} ${btnIdle}`}
-            disabled={!editor.isActive("image")}
+            disabled={!canActOnImage}
             onClick={() => {
-              if (!editor.isActive("image")) {
+              const match = findClosestImageInSelectionBlock();
+              if (!match) {
                 return;
               }
 
-              editor.chain().focus().deleteSelection().run();
+              const { state } = editor;
+              const $img = state.doc.resolve(match.pos);
+              let blockDepth: number | null = null;
+              for (let d = $img.depth; d > 0; d--) {
+                if ($img.node(d).isBlock) {
+                  blockDepth = d;
+                  break;
+                }
+              }
+
+              if (blockDepth !== null) {
+                const insertPos = $img.after(blockDepth);
+                const maybeCaptionNode = state.doc.nodeAt(insertPos);
+                if (isCaptionParagraph(maybeCaptionNode)) {
+                  editor.commands.deleteRange({
+                    from: insertPos,
+                    to: insertPos + (maybeCaptionNode?.nodeSize ?? 0),
+                  });
+                }
+              }
+
+              editor
+                .chain()
+                .focus()
+                .deleteRange({
+                  from: match.pos,
+                  to: match.pos + match.node.nodeSize,
+                })
+                .run();
             }}
           >
             Remove image
@@ -658,19 +766,19 @@ export function WikiRichEditor({
           <button
             type="button"
             className={`${btnBase} ${btnIdle}`}
-            disabled={!editor.isActive("image")}
+            disabled={!canActOnImage}
             onClick={() => {
-              if (!editor.isActive("image")) {
+              const match = findClosestImageInSelectionBlock();
+              if (!match) {
                 return;
               }
 
               const { state } = editor;
-              const { from } = state.selection;
-              const $from = state.doc.resolve(from);
+              const $img = state.doc.resolve(match.pos);
 
               let blockDepth: number | null = null;
-              for (let d = $from.depth; d > 0; d--) {
-                if ($from.node(d).isBlock) {
+              for (let d = $img.depth; d > 0; d--) {
+                if ($img.node(d).isBlock) {
                   blockDepth = d;
                   break;
                 }
@@ -680,37 +788,8 @@ export function WikiRichEditor({
                 return;
               }
 
-              const insertPos = $from.after(blockDepth);
+              const insertPos = $img.after(blockDepth);
               const maybeCaptionNode = state.doc.nodeAt(insertPos);
-
-              const isCaptionParagraph = (node: typeof maybeCaptionNode) => {
-                if (!node || node.type.name !== "paragraph") {
-                  return false;
-                }
-
-                if (!node.textContent.trim()) {
-                  return false;
-                }
-
-                let allItalic = true;
-                node.descendants((n) => {
-                  if (!allItalic) {
-                    return false;
-                  }
-                  if (n.isText) {
-                    const hasItalic = n.marks.some(
-                      (mark) => mark.type.name === "italic",
-                    );
-                    if (!hasItalic) {
-                      allItalic = false;
-                      return false;
-                    }
-                  }
-                  return true;
-                });
-
-                return allItalic;
-              };
 
               const hasCaption = isCaptionParagraph(maybeCaptionNode);
               const currentCaption = hasCaption

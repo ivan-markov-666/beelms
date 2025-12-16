@@ -33,3 +33,6 @@ Thumbs.db
 
 # Next.js (if used)
 .next/
+
+# Generated wiki test media
+be/media/wiki/test/
