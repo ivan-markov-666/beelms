@@ -1,4 +1,4 @@
-# Post-MVP Backlog за QA4Free
+# Post-MVP Backlog за beelms
 
 _Роля: PM / Product Owner. Фаза: post-MVP планиране. Този документ събира идеи и функционалности, които **няма** да се реализират в първото MVP, но са желани за бъдещи версии._
 

@@ -6,7 +6,7 @@
 Предполага се, че си в папка `fe`:
 
 ```bash
-cd d:\Projects\qa-4-free\fe
+cd C:\path\to\repo\fe
 ```
 
 Ползвам `npm`. Ако искаш `pnpm`, просто замени `npm` с `pnpm`.
@@ -149,32 +149,6 @@ cd d:\Projects\qa-4-free\fe
   Команда:  
   ```bash
   npm test -- src/app/legal/__tests__/legal-pages.test.tsx --runInBand
-  ```
-
----
-
-### Practice – API demo
-
-- **practice api-demo – api-demo-page.test.tsx**   - pass
-  Команда:  
-  ```bash
-  npm test -- src/app/practice/api-demo/__tests__/api-demo-page.test.tsx --runInBand
-  ```
-
----
-
-### Practice – UI demo
-
-- **practice ui-demo – ui-demo-page.test.tsx** - pass
-  Команда:  
-  ```bash
-  npm test -- src/app/practice/ui-demo/__tests__/ui-demo-page.test.tsx --runInBand
-  ```
-
-- **practice ui-demo – ui-demo-interactions.test.tsx**  - pass
-  Команда:  
-  ```bash
-  npm test -- src/app/practice/ui-demo/__tests__/ui-demo-interactions.test.tsx --runInBand
   ```
 
 ---

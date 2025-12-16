@@ -4,9 +4,9 @@
 # Date: 2025-12-10T07:32:43.263Z
 
 tea_use_playwright_utils: true
-project_name: qa-4-free
+project_name: beelms
 user_skill_level: beginner
-sprint_artifacts: '{project-root}/docs/sprint-artifacts'
+sprint_artifacts: '{project-root}/docs'
 tea_use_mcp_enhancements: true
 
 # Core Configuration Values

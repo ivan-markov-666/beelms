@@ -1,6 +1,6 @@
 # beelms core – System Architecture
 
-> Документ тип: BMAD Solutioning / Architecture. Описва **референтната архитектура** на рамката **beelms core** – не на конкретна инстанция (QA4Free и др.), а на самия продукт/рамка.
+> Документ тип: BMAD Solutioning / Architecture. Описва **референтната архитектура** на рамката **beelms core** – не на конкретна инстанция, а на самия продукт/рамка.
 >
 > Входни документи: Product Brief, PRD, Brainstorm, Technical Research, UX Design Specification.
 
@@ -39,33 +39,29 @@
      - Organizations / Instance Config
      - Wiki / Content
      - Courses & Learning Paths
-     - Assessments & Tasks
+     - Assessments
      - Admin & Settings
      - Metrics & Monitoring API
      - Integrations (email, storage, payments, infra услуги)
 
 2. **Reference Frontend (Next.js)**
    - Публичен сайт:
-     - Home, Wiki, Course Catalog, Course Detail, Practical Lab, Auth екрани.
+     - Home, Wiki, Course Catalog, Course Detail, Auth екрани.
    - Admin панел:
      - Wiki Management, Course Management, Users, Settings, Metrics.
    - Използва REST API на core backend.
 
-3. **Training API (опционален отделен сервис)**
-   - Минимален NestJS service (както в текущия `training-api` пакет), достъпен през API Gateway/Reverse proxy.
-   - Използва се за практическа среда (API demo и задачи за QA/automation тренинг).
-
-4. **Database Layer (PostgreSQL)**
+3. **Database Layer (PostgreSQL)**
    - Една база на инстанция (single-tenant per deployment).
-   - Схема с таблици за потребители, роли, статии, курсове, тестове, задачи, конфигурации и др.
+   - Схема с таблици за потребители, роли, статии, курсове, тестове/квизове, конфигурации и др.
 
-5. **Optional Infrastructure Services**
+4. **Optional Infrastructure Services**
    - **Redis** – cache / session store.
    - **RabbitMQ** – message broker за асинхронни процеси (нотификации, дълги задачи).
    - **Prometheus + Grafana** – monitoring и метрики.
    - **Sentry** – error tracking.
 
-6. **npx create-beelms-app (CLI)**
+5. **npx create-beelms-app (CLI)**
    - Генерира структура на проект за нова инстанция:
      - backend (NestJS core);
      - по избор frontend (Next.js);
@@ -75,7 +71,6 @@
 ### 2.2. Поток на заявките
 
 - Клиент (браузър) → **Next.js frontend** → HTTP/HTTPS → **beelms Core Backend (NestJS)** → PostgreSQL/Redis/RabbitMQ.
-- За Training API сценарии: frontend или Postman → API Gateway/Reverse proxy → Training API service.
 
 ---
 
@@ -99,7 +94,7 @@
   - Статии, версии, категории, многоезичност.
 
 - `CoursesModule`
-  - Курсове, модули (lessons/tests/tasks), enrollment, базов прогрес.
+  - Курсове, модули (lessons/quizzes), enrollment, базов прогрес.
 
 - `AssessmentsModule`
   - Въпроси, тестове, evaluation логика.
@@ -158,7 +153,6 @@
   - `postgres` – основна база данни.
   - `redis` – по избор.
   - `rabbitmq` – по избор.
-  - `training-api` – отделен контейнер при нужда.
   - reverse proxy (Caddy/Traefik/Nginx).
 
 - Основни принципи:
@@ -169,11 +163,11 @@
 ### 5.2. Път към по-сложни среди
 
 - При нужда от скалиране:
-  - backend и training-api могат да бъдат репликирани;
+  - backend може да бъде репликиран;
   - базата може да се премести към управляван Postgres;
   - Redis/RabbitMQ могат да бъдат заместени с managed услуги.
 - При достатъчно мащаб и екип:
-  - миграция към Kubernetes става възможна, като отделните компоненти (backend, training-api, frontend) вече имат ясни образи и конфигурации.
+  - миграция към Kubernetes става възможна, като отделните компоненти (backend, frontend) вече имат ясни образи и конфигурации.
 
 ---
 
@@ -183,7 +177,7 @@
 
 - **User** – акаунт, профил, роли, GDPR статут.
 - **Article** – wiki статия с версии и езикови варианти.
-- **Course** – набор от модули (уроци, тестове, задачи).
+- **Course** – набор от модули (уроци, тестове/квизове).
 - **Assessment** – тест/квиз с въпроси и резултати.
 - **InstanceConfig** – настройки за инстанцията (branding, активни модули, интеграции).
 

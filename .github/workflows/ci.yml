@@ -10,13 +10,13 @@ jobs:
       postgres:
         image: postgres:16-alpine
         env:
-          POSTGRES_DB: qa4free
-          POSTGRES_USER: qa4free
-          POSTGRES_PASSWORD: qa4free
+          POSTGRES_DB: beelms
+          POSTGRES_USER: beelms
+          POSTGRES_PASSWORD: beelms
         ports:
           - 5432:5432
         options: >-
-          --health-cmd="pg_isready -U qa4free -d qa4free"
+          --health-cmd="pg_isready -U beelms -d beelms"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
@@ -39,9 +39,9 @@ jobs:
         env:
           DB_HOST: localhost
           DB_PORT: 5432
-          DB_NAME: qa4free
-          DB_USER: qa4free
-          DB_PASSWORD: qa4free
+          DB_NAME: beelms
+          DB_USER: beelms
+          DB_PASSWORD: beelms
           JWT_SECRET: dev_jwt_secret_change_me
           JWT_EXPIRES_IN: 900s
           NODE_ENV: test

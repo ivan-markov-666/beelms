@@ -5,7 +5,7 @@ _Роля: QA / Tech Lead. Workflow: BMAD Solutioning / test-design._
 ## 1. Контекст и цел
 
 Този документ описва **високониво тестов дизайн / стратегия** за рамката **beelms core** – не за
-конкретна инстанция (QA4Free и др.), а за самия core продукт.
+конкретна инстанция, а за самия core продукт.
 
 Входни документи:
 
@@ -28,7 +28,7 @@ _Роля: QA / Tech Lead. Workflow: BMAD Solutioning / test-design._
 - **Quality built-in** – тестовете се проектират заедно с архитектурата и EPIC/STORY картата, не като
   „крайна проверка“.
 - **Risk-based** – фокус върху критични потоци (Auth, GDPR, Security, Courses/Progress, Admin,
-  Practical Lab, DX tooling).
+  DX tooling).
 - **Simple first** – за MVP избягваме прекалено сложни test frameworks; стъпваме на Jest + Playwright
   + Dockerized среди.
 - **Traceability** – за всеки основен EPIC има ясно дефинирани тестови цели и нива на тестване.
@@ -47,7 +47,6 @@ _Роля: QA / Tech Lead. Workflow: BMAD Solutioning / test-design._
   - Courses & Learning Paths
   - Basic Assessments / Quizzes
   - Admin Portal & Settings
-  - Practical Lab (UI demo + Training API, ако е активен)
   - DX / CLI & Instance tooling (create-beelms-app, миграции, seed)
   - Cross-cutting: I18N, GDPR/Legal, Metrics, Security
 - Основни нефункционални проверки (на ниво MVP):
@@ -188,19 +187,7 @@ _Роля: QA / Tech Lead. Workflow: BMAD Solutioning / test-design._
 - API/Integration: admin endpoints; защита на достъпа (Admin-only).
 - E2E: основни admin екрани (Dashboard, Users, Wiki Management).
 
-### 5.6. EPIC-CORE-PRACTICAL-LAB – Practical Lab (UI + API demo)
-
-Основни потоци:
-
-- UI demo страница с богати HTML елементи и Reset.
-- Training API (ping/echo) + Swagger UI.
-
-Нива на тестване:
-
-- Unit / Integration: basic проверка на API endpoints.
-- E2E: навигация до Practical Lab, основни UI взаимодействия, проверка на Reset.
-
-### 5.7. EPIC-CORE-DX-CLI-INFRA – DX, CLI & Instance Tooling
+### 5.6. EPIC-CORE-DX-CLI-INFRA – DX, CLI & Instance Tooling
 
 Основни потоци:
 

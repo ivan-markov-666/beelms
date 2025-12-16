@@ -8,7 +8,7 @@ This version marks the first stable DX baseline for the beelms core repo, focuse
 ### Backend (be/)
 
 - Canonicalised the wiki seed (`src/seed/wiki.seed.ts`) to use generic, hello-world style
-  content instead of QA4Free-specific wording.
+  content instead of instance-specific wording.
 - Synced e2e tests with the canonical seed, making them robust to content changes and
   focused on invariants (slugs, languages, statuses).
 - Added DX-friendly npm scripts in `be/package.json`:

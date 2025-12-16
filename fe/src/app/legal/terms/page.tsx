@@ -51,8 +51,7 @@ export default async function TermsPage({
               </li>
               <li>
                 спазвайте добри практики при тестване и не изпращайте
-                прекомерно количество заявки към Training API или други
-                публични ресурси.
+                прекомерно количество заявки към публичните ресурси.
               </li>
             </ul>
             <p>
@@ -86,7 +85,7 @@ export default async function TermsPage({
               </li>
               <li>
                 follow good testing practices and avoid sending excessive
-                traffic to the Training API or other public resources.
+                traffic to public resources.
               </li>
             </ul>
             <p>

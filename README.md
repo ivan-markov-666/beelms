@@ -1,9 +1,8 @@
-# beelms (QA4Free example) – Dev & Local Docker Setup
+# beelms – Dev & Local Docker Setup
 
-Това репо съдържа примерна инсталация на core рамката **beelms**, конфигурирана като тренировъчна платформа **QA4Free**:
+Това репо съдържа примерна инсталация на core рамката **beelms**:
 - Next.js frontend (FE)
 - NestJS API (BE)
-- Training API (отделен NestJS service за упражнения)
 - PostgreSQL база данни
 
 Този README описва **как да стартирате проекта за dev** и **как да го стартирате през Docker локално**. Няма инструкции за stage/production – те са извън текущия обхват.
@@ -14,9 +13,8 @@
 
 - `fe/` – Next.js frontend
 - `be/` – NestJS backend API (`/api/...`)
-- `training-api/` – отделен NestJS service за Training API (`/api/training/...`)
 - `docs/` – архитектура, OpenAPI, API примери, DB модел
-- `docker-compose.yml` – локална Docker конфигурация за **db + api + training-api**
+- `docker-compose.yml` – локална Docker конфигурация за **db + api**
 
 ---
 
@@ -40,9 +38,9 @@ docker compose -f docker-compose.yml -f docker-compose.db-host.yml up -d db
 ```
 
 - DB ще е достъпен на `localhost:5432` (или друг порт, ако зададеш `DB_PORT_PUBLISHED`) c:
-  - DB: `qa4free`
-  - User: `qa4free`
-  - Password: `qa4free`
+  - DB: `beelms`
+  - User: `beelms`
+  - Password: `beelms`
 
 ### 2.3. Стартиране на BE (NestJS API) в dev режим
 
@@ -61,20 +59,7 @@ npm run start:dev  # NestJS с --watch и hot reload
 
 > Ако променяте BE кода и стартирате през `npm run start:dev`, **няма нужда** от ръчен `npm run build` – NestJS сам компилира при промени.
 
-### 2.4. Стартиране на Training API в dev режим
-
-```bash
-cd training-api
-npm install        # само първия път
-npm run start:dev
-```
-
-- Training API се стартира на `http://localhost:4000`.
-- Примери:
-  - `GET http://localhost:4000/api/training/ping`
-  - `POST http://localhost:4000/api/training/echo`
-
-### 2.5. Стартиране на FE (Next.js) в dev режим
+### 2.4. Стартиране на FE (Next.js) в dev режим
 
 ```bash
 cd fe
@@ -94,7 +79,7 @@ NEXT_PUBLIC_API_BASE_URL=http://localhost:3000/api
 
 ---
 
-## 3. Local Docker setup – db + api + training-api
+## 3. Local Docker setup – db + api
 
 Този вариант е удобен, когато искаш **бързо да вдигнеш backend-а и базата** без да мислиш за локална инсталация на Postgres и Node версии. FE (Next.js) обикновено се стартира отделно в dev режим.
 
@@ -103,7 +88,7 @@ NEXT_PUBLIC_API_BASE_URL=http://localhost:3000/api
 В root на проекта:
 
 ```bash
-# Build + start db, api (NestJS) и training-api
+# Build + start db и api (NestJS)
 docker compose up -d
 ```
 
@@ -111,7 +96,6 @@ docker compose up -d
 
 - **db** – Postgres 16 (по подразбиране не е exposed към host)
 - **api** – NestJS API на `http://localhost:3000`
-- **training-api** – Training API на `http://localhost:4000`
 
 > Ако ти трябва DB достъп от host (psql, локален BE без Docker), ползвай override файла: `docker-compose.db-host.yml`.
 
@@ -143,7 +127,7 @@ docker compose up -d --build api
 docker compose down
 ```
 
-Това спира `db`, `api` и `training-api` и премахва контейнерите. Volume-ът за Postgres (`db-data`) остава, освен ако не го изтриеш изрично.
+Това спира `db` и `api` и премахва контейнерите. Volume-ът за Postgres (`db-data`) остава, освен ако не го изтриеш изрично.
 
 ### 3.4. Миграции на базата (TypeORM + Docker)
 
@@ -185,7 +169,7 @@ docker compose down
    docker compose exec api npm run migration:run
    ```
 
-Това изпълнява `npm run migration:run` вътре в `api` контейнера срещу `qa4free` базата (Postgres контейнер `db`).
+Това изпълнява `npm run migration:run` вътре в `api` контейнера срещу `beelms` базата (Postgres контейнер `db`).
 
 #### Комбинирана команда: миграции + Wiki seed (по избор)
 
@@ -216,20 +200,14 @@ docker compose exec api sh -c "npm run migration:run && npm run seed:wiki"
    cd be
    npm run start:dev
    ```
-3. Стартирай Training API dev (по избор):
-
-   ```bash
-   cd training-api
-   npm run start:dev
-   ```
-4. Стартирай FE dev:
+3. Стартирай FE dev:
 
    ```bash
    cd fe
    npm run dev
    ```
 
-### 4.2. Всичко през Docker за BE + DB + Training API, FE локално
+### 4.2. Всичко през Docker за BE + DB, FE локално
 
 1. В root:
 

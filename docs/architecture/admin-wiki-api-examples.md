@@ -25,7 +25,7 @@ curl -X GET \
   {
     "id": "c1b7d4b4-...",
     "slug": "getting-started",
-    "title": "Getting started with QA4Free",
+    "title": "Getting started with the platform",
     "status": "active",
     "updatedAt": "2025-01-10T10:15:00.000Z"
   },

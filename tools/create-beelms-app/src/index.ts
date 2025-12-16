@@ -363,8 +363,7 @@ endlocal
     const webEnvExamplePath = path.join(envTargetDir, ".env.example.web");
     const webEnvExampleContent = `# Frontend (.env for Next.js app)\n` +
       `NEXT_PUBLIC_API_BASE_URL=http://localhost:3000/api\n` +
-      `API_INTERNAL_BASE_URL=http://localhost:3000\n` +
-      `NEXT_PUBLIC_TRAINING_API_SWAGGER_URL=http://localhost:4000/api/training/docs\n`;
+      `API_INTERNAL_BASE_URL=http://localhost:3000\n`;
 
     fs.writeFileSync(webEnvExamplePath, webEnvExampleContent, {
       encoding: "utf8",

@@ -18,11 +18,9 @@ _Роля: Tech Lead / Architect / QA Lead. Workflow: BMAD Solutioning → Imple
 
 - Product Brief – `docs/product/product-brief.md`
 - PRD – `docs/product/prd.md`
-- Brainstorm – `docs/backlog/brainstorm-beelms-core.md`
 - Technical Research – `docs/analysis/research/technical-self-hosted-lms-architecture-research-2025-12-10.md`
 - UX Design – `docs/ux-design-specification.md`
 - System Architecture – `docs/architecture/beelms-core-architecture.md`
-- EPIC & Story Map – `docs/backlog/beelms-core-epics-and-stories.md`
 - Test Design – `docs/testing/beelms-core-test-design.md`
 
 ## 3. Обхват на първата имплементационна фаза (MVP core)
@@ -36,7 +34,6 @@ _Роля: Tech Lead / Architect / QA Lead. Workflow: BMAD Solutioning → Imple
 - **Courses & Learning Paths** – базови курсове и прогрес (completed/in progress).
 - **Basic Assessments** – прости quizzes към уроци.
 - **Admin Portal** – базов панел за съдържание, потребители и метрики.
-- **Practical Lab (опционален модул)** – UI demo + Training API, ако бъде активиран за конкретна инстанция.
 - **DX / CLI & Infra tooling** – `npx create-beelms-app`, docker-compose стек, миграции/seed.
 - **Cross-cutting:** I18N, GDPR/Legal, Metrics (минимално), Security.
 
@@ -78,7 +75,7 @@ _Роля: Tech Lead / Architect / QA Lead. Workflow: BMAD Solutioning → Imple
 
 `docs/backlog/beelms-core-epics-and-stories.md` дефинира:
 
-- MVP EPIC-и по основните домейни (Auth, Wiki, Courses, Assessments, Admin, Practical Lab, DX,
+- MVP EPIC-и по основните домейни (Auth, Wiki, Courses, Assessments, Admin, DX,
   Cross-cutting);
 - базов Story breakdown за всеки EPIC (без да влиза в прекомерни детайли).
 
@@ -123,7 +120,7 @@ _Роля: Tech Lead / Architect / QA Lead. Workflow: BMAD Solutioning → Imple
 ### 7.2. Ключови допускания
 
 - Екипът приема modular monolith + Lean Tier 0 като основна стартова посока за поне първите 6–12 месеца.
-- beelms core ще служи като база и за QA4Free-подобни инстанции, но тези инстанции ще имат собствени
+- beelms core ще служи като база и за бъдещи конкретни инстанции, но тези инстанции ще имат собствени
   backlog-и и Delivery планове.
 
 ## 8. Заключение: Implementation Readiness статус

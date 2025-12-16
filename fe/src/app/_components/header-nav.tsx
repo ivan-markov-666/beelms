@@ -109,18 +109,6 @@ export function HeaderNav() {
           >
             {t(lang, "nav", "wiki")}
           </Link>
-          <Link
-            href="/practice/ui-demo"
-            className="hover:text-green-600"
-          >
-            {t(lang, "nav", "practice")}
-          </Link>
-          <Link
-            href="/practice/api-demo"
-            className="hover:text-green-600"
-          >
-            {t(lang, "nav", "practiceApi")}
-          </Link>
           {isAdmin === true && (
             <Link
               href="/admin"

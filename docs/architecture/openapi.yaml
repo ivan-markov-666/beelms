@@ -1,12 +1,12 @@
 openapi: 3.1.0
 info:
-  title: QA4Free API
+  title: beelms API
   version: 0.1.0
   description: |
-    OpenAPI спецификация за основните MVP услуги на QA4Free.
+    OpenAPI спецификация за основните MVP услуги на beelms.
 
 servers:
-  - url: https://api.qa4free.com/api
+  - url: https://api.example.com/api
     description: Production (примерен домейн, с /api префикс)
   - url: http://localhost:3000/api
     description: Local development (с /api префикс)
@@ -219,35 +219,6 @@ components:
           nullable: true
           description: Идентификатор на потребителя, направил промяната
 
-    Task:
-      type: object
-      properties:
-        id:
-          type: string
-        type:
-          type: string
-          description: Вид на задачата (ui, api, db и др.)
-        title:
-          type: string
-        description:
-          type: string
-        metadata:
-          type: object
-          additionalProperties: true
-
-    TaskResult:
-      type: object
-      properties:
-        taskId:
-          type: string
-        passed:
-          type: boolean
-        score:
-          type: number
-          format: float
-        feedback:
-          type: string
-
     MetricsOverview:
       type: object
       properties:
@@ -279,49 +250,6 @@ components:
         url:
           type: string
           description: Пълен URL за достъп до изображението (използва се в markdown съдържанието)
-
-    TrainingHelloResponse:
-      type: object
-      properties:
-        message:
-          type: string
-          example: "pong"
-        timestamp:
-          type: string
-          format: date-time
-          description: ISO timestamp, когато сървърът е обработил ping заявката
-
-    TrainingEchoRequest:
-      type: object
-      properties:
-        value:
-          description: Произволна JSON стойност за упражнения по API/integration тестване
-          oneOf:
-            - type: string
-            - type: number
-            - type: boolean
-            - type: object
-            - type: array
-      required: [value]
-
-    TrainingEchoResponse:
-      type: object
-      properties:
-        value:
-          description: Стойността, върната от Training API, 1:1 с изпратената
-          oneOf:
-            - type: string
-            - type: number
-            - type: boolean
-            - type: object
-            - type: array
-        receivedAt:
-          type: string
-          format: date-time
-          description: ISO timestamp, когато сървърът е получил заявката
-        requestId:
-          type: string
-          description: Идентификатор на заявката за нуждите на упражнението
 
 security:
   - bearerAuth: []
@@ -923,104 +851,6 @@ paths:
           description: Неоторизиран достъп
         "404":
           description: Статията или файлът не са намерени
-
-  ############################
-  # Practical Environment – Tasks
-  ############################
-
-  /tasks/{id}:
-    get:
-      tags: [Practical]
-      summary: Връща описание на практическа задача
-      security: []
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-      responses:
-        "200":
-          description: Описание на задачата
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Task'
-        "404":
-          description: Задачата не е намерена
-
-  /tasks/{id}/submit:
-    post:
-      tags: [Practical]
-      summary: Изпращане на решение за практическа задача
-      security: []
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              description: Данни за решението. Структурата зависи от типа задача.
-              properties:
-                solution:
-                  type: string
-                  description: Свободен текст / код / стъпки.
-                metadata:
-                  type: object
-                  additionalProperties: true
-      responses:
-        "200":
-          description: Резултат от оценяването
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TaskResult'
-        "400":
-          description: Невалидни данни
-
-  ############################
-  # Training API (Demo)
-  ############################
-
-  /training/ping:
-    get:
-      tags: [Training]
-      summary: Проверка на Training API (ping/pong)
-      security: []
-      responses:
-        "200":
-          description: Успешен ping отговор от Training API с текущ timestamp
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TrainingHelloResponse'
-
-  /training/echo:
-    post:
-      tags: [Training]
-      summary: Ехо заявка за упражнение по API/integration тестване
-      security: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/TrainingEchoRequest'
-      responses:
-        "200":
-          description: Ехо на изпратената стойност + receivedAt + requestId
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TrainingEchoResponse'
-        "400":
-          description: Невалидни данни (липсващо или невалидно поле value)
 
   ############################
   # Admin / Metrics (MVP ниво)

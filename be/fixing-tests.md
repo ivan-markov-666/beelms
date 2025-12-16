@@ -1,11 +1,11 @@
-Ще превключим към backend тестовете в `be/` и ще ти извадя чеклист както за FE: списък с всички тестови файлове + точните команди как да ги пускаш един по един. За целта ще погледна [be/package.json](cci:1://file:///d:/Projects/qa-4-free/fe/src/app/_components/__tests__/header-nav.test.tsx:124:6-129:8), за да видя как се стартират тестовете, и ще изровя всички `*.spec.ts`/`*.test.ts` файлове в `be/test`. После ще ти върна структуриран списък.
+Ще превключим към backend тестовете в `be/` и ще ти извадя чеклист както за FE: списък с всички тестови файлове + точните команди как да ги пускаш един по един. За целта ще погледна [be/package.json](package.json), за да видя как се стартират тестовете, и ще изровя всички `*.spec.ts`/`*.test.ts` файлове в `be/test`. После ще ти върна структуриран списък.
 
 
 
 
 Да, да минем към `be` тестовете и да ги правим по същия „checklist“ модел.
 
-Ще приемам, че **си в папка** `d:\Projects\qa-4-free\be`.
+Ще приемам, че **си в папка** `C:\path\to\repo\be`.
 
 ---
 
@@ -16,11 +16,6 @@
 - **App controller – app.controller.spec.ts**  - pass
   ```bash
   npm test -- src/app.controller.spec.ts
-  ```
-
-- **Tasks – tasks.service.spec.ts**  - pass
-  ```bash
-  npm test -- src/tasks/tasks.service.spec.ts
   ```
 
 - **Auth – auth.service.spec.ts**  - pass
@@ -53,11 +48,6 @@
   npm test -- src/wiki/wiki.service.spec.ts
   ```
 
-- **Training – training.service.spec.ts**  - pass
-  ```bash
-  npm test -- src/training/training.service.spec.ts
-  ```
-
 Може да добавиш `--runInBand` ако искаш всичко да върви строго последователно:
 
 ```bash
@@ -68,7 +58,7 @@ npm test -- src/auth/auth.service.spec.ts --runInBand
 
 ## 2. E2E тестове (Jest, `test/*.e2e-spec.ts`)
 
-Тези минават през `npm run test:e2e` (Jest с [test/jest-e2e.json](cci:7://file:///d:/Projects/qa-4-free/be/test/jest-e2e.json:0:0-0:0)):
+Тези минават през `npm run test:e2e` (Jest с [test/jest-e2e.json](test/jest-e2e.json)):
 
 - **Core – app.e2e-spec.ts**  - pass
   ```bash
@@ -83,11 +73,6 @@ npm test -- src/auth/auth.service.spec.ts --runInBand
 - **Account – account.e2e-spec.ts**  - pass 
   ```bash
   npm run test:e2e -- test/account.e2e-spec.ts
-  ```
-
-- **Tasks – tasks.e2e-spec.ts**  - pass 
-  ```bash
-  npm run test:e2e -- test/tasks.e2e-spec.ts
   ```
 
 - **Admin metrics – admin-metrics.e2e-spec.ts**  - pass 
@@ -128,11 +113,6 @@ npm test -- src/auth/auth.service.spec.ts --runInBand
 - **Wiki – db smoke – wiki-db.e2e-spec.ts**   - pass
   ```bash
   npm run test:e2e -- test/wiki-db.e2e-spec.ts
-  ```
-
-- **Training API – training-api.e2e-spec.ts**  - pass
-  ```bash
-  npm run test:e2e -- test/training-api.e2e-spec.ts
   ```
 
 ---
