@@ -1,7 +1,7 @@
 {
   "name": "training-api",
   "version": "0.0.1",
-  "description": "Minimal Training API service for QA4Free practical environment",
+  "description": "Minimal Training API service for practical environment",
   "author": "",
   "private": true,
   "license": "UNLICENSED",
