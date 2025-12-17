@@ -1,0 +1,59 @@
+generated: "2025-12-17T20:18:00Z"
+project: "beelms"
+project_key: "beelms"
+tracking_system: "file-system"
+story_location: "docs/backlog"
+
+development_status:
+  epic-core-wiki-content: done
+  story-wiki-1-public-list-search-filter: done
+  story-wiki-2-article-by-slug-language: done
+  story-wiki-3-admin-statuses-draft-active-inactive: in-progress
+  epic-core-wiki-content-retrospective: optional
+
+  epic-core-auth-accounts: done
+  story-auth-1-register-login: done
+  story-auth-2-forgot-reset-password: done
+  story-auth-3-profile-change-email-password: done
+  story-auth-4-gdpr-delete-export: done
+  epic-core-auth-accounts-retrospective: optional
+
+  epic-core-courses-progress: in-progress
+  story-courses-1-catalog-course-detail-public: done
+  story-courses-2-enrollment-my-courses: backlog
+  story-courses-3-basic-progress: backlog
+  epic-core-courses-progress-retrospective: optional
+
+  epic-core-tasks: backlog
+  story-tasks-1-task-item-in-course: backlog
+  story-tasks-2-mark-task-completed: backlog
+  epic-core-tasks-retrospective: optional
+
+  epic-core-assessments: backlog
+  story-assessments-1-quiz-definition: backlog
+  story-assessments-2-quiz-delivery-submit-scoring: backlog
+  story-assessments-3-persist-attempts-results: backlog
+  epic-core-assessments-retrospective: optional
+
+  epic-core-admin: in-progress
+  story-admin-1-users-list-activate-deactivate: done
+  story-admin-2-wiki-management-crud-status: done
+  story-admin-3-wiki-versions-list-rollback-delete: done
+  story-admin-4-metrics-overview-total-users: done
+  story-admin-5-courses-management-crud-status-curriculum: backlog
+  story-admin-6-quizzes-management-crud-linking: backlog
+  epic-core-admin-retrospective: optional
+
+  epic-core-cross-gdpr-legal: in-progress
+  story-legal-1-terms-privacy-about-contact-pages-footer: done
+  story-legal-2-terms-privacy-acceptance-register: in-progress
+  epic-core-cross-gdpr-legal-retrospective: optional
+
+  epic-cross-i18n: in-progress
+  epic-cross-i18n-retrospective: optional
+
+  epic-core-dx-cli-infra: in-progress
+  story-dx-1-docker-compose-dev-workflow: backlog
+  story-dx-2-migrations-seed-workflow: in-progress
+  story-dx-3-create-beelms-app: in-progress
+  epic-core-dx-cli-infra-retrospective: optional

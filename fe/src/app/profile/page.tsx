@@ -583,6 +583,17 @@ export default function ProfilePage() {
                 </button>
               </div>
 
+              {passwordError && (
+                <p className="mt-2 text-xs text-red-600" role="alert">
+                  {passwordError}
+                </p>
+              )}
+              {passwordSuccess && (
+                <p className="mt-2 text-xs text-green-600" role="status">
+                  {passwordSuccess}
+                </p>
+              )}
+
               {passwordEditOpen && (
                 <form
                   onSubmit={handlePasswordSubmit}
@@ -638,16 +649,6 @@ export default function ProfilePage() {
                       />
                     </div>
                   </div>
-                  {passwordError && (
-                    <p className="text-xs text-red-600" role="alert">
-                      {passwordError}
-                    </p>
-                  )}
-                  {passwordSuccess && (
-                    <p className="text-xs text-green-600" role="status">
-                      {passwordSuccess}
-                    </p>
-                  )}
                   <div className="flex items-center gap-2 pt-1">
                     <button
                       type="submit"

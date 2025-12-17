@@ -10,6 +10,8 @@ import { AuthModule } from './auth/auth.module';
 import { User } from './auth/user.entity';
 import { RateLimitInterceptor } from './security/rate-limit/rate-limit.interceptor';
 import { InMemoryRateLimitStore } from './security/rate-limit/rate-limit.store';
+import { CoursesModule } from './courses/courses.module';
+import { Course } from './courses/course.entity';
 
 @Module({
   imports: [
@@ -20,11 +22,12 @@ import { InMemoryRateLimitStore } from './security/rate-limit/rate-limit.store';
       username: process.env.DB_USER ?? 'beelms',
       password: process.env.DB_PASSWORD ?? 'beelms',
       database: process.env.DB_NAME ?? 'beelms',
-      entities: [WikiArticle, WikiArticleVersion, User],
+      entities: [WikiArticle, WikiArticleVersion, User, Course],
       synchronize: false,
     }),
     WikiModule,
     AuthModule,
+    CoursesModule,
   ],
   controllers: [AppController],
   providers: [
