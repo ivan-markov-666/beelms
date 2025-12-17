@@ -3,6 +3,7 @@ import type { SupportedLang } from "./config";
 type DomainMessages = {
   nav: {
     wiki: string;
+    courses: string;
     login: string;
     register: string;
     profile: string;
@@ -22,6 +23,7 @@ export const messages: Messages = {
   bg: {
     nav: {
       wiki: "Wiki",
+      courses: "Courses",
       login: "Вход",
       register: "Регистрация",
       profile: "Профил",
@@ -325,6 +327,7 @@ export const messages: Messages = {
   en: {
     nav: {
       wiki: "Wiki",
+      courses: "Courses",
       login: "Sign in",
       register: "Register",
       profile: "Profile",
@@ -626,6 +629,7 @@ export const messages: Messages = {
   de: {
     nav: {
       wiki: "Wiki",
+      courses: "Kurse",
       login: "Anmelden",
       register: "Registrieren",
       profile: "Profil",

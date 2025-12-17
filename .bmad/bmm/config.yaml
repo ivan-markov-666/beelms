@@ -6,7 +6,7 @@
 tea_use_playwright_utils: true
 project_name: beelms
 user_skill_level: beginner
-sprint_artifacts: '{project-root}/docs'
+sprint_artifacts: '{project-root}/docs/sprint-artifacts'
 tea_use_mcp_enhancements: true
 
 # Core Configuration Values
