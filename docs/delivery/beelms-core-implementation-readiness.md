@@ -46,7 +46,6 @@ _Роля: Tech Lead / Architect / QA Lead. Workflow: BMAD Solutioning → Imple
 - Shared Multi-tenant режим;
 - Billing/Monetization;
 - Advanced analytics & recommendations;
-- Advanced Practical Environment.
 
 Това намалява риска от „scope creep“ в първата имплементационна фаза.
 
@@ -55,9 +54,9 @@ _Роля: Tech Lead / Architect / QA Lead. Workflow: BMAD Solutioning → Imple
 ### 4.1. Backend и frontend архитектура
 
 - **Backend:** NestJS modular monolith с ясно описани домейн модули (Auth, Users, Wiki,
-  Courses, Assessments, Admin, Metrics, Integrations) – `beelms-core-architecture.md` §3.
+  Courses, Assessments, Admin, Metrics, Integrations) – `docs/architecture/beelms-core-architecture.md` §3.
 - **Frontend:** референтен Next.js UI (public + admin), описан на ниво UX потоци и шаблони –
-  `ux-design-specification.md`.
+  `docs/ux-design-specification.md`.
 
 Заключение: за ниво „walking skeleton + последващо доразвиване“ архитектурната яснота е достатъчна.
 
@@ -90,7 +89,7 @@ _Роля: Tech Lead / Architect / QA Lead. Workflow: BMAD Solutioning → Imple
 
 - ясни нива на тестване (unit, API/integration, E2E, non-functional);
 - критични потоци по EPIC-и и какви нива тестове са задължителни;
-- идеи за E2E сценарии, стъпвайки и на `web-automation-scenarios.md` (за Auth/Wiki).
+- идеи за E2E сценарии, стъпвайки и на `docs/testing/playwright-scenarios/web-automation-scenarios.md` (за Auth/Wiki).
 
 Заключение: имаме достатъчно ясна тестова стратегия за старт на имплементацията и последваща
 автоматизация.

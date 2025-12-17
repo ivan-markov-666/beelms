@@ -266,7 +266,7 @@ The main endpoints are:
 - `POST /api/users/me/change-password`
   - Changes the current user's password.
   - Request body: `{ currentPassword: string, newPassword: string }` where `newPassword` must be at least 8 characters (same rules as registration).
-  - Success: `200 OK` with an empty body; the stored bcrypt hash is updated.
+  - Success: `204 No Content`.
   - Errors:
     - `400` when the current password is wrong or the new password does not meet the policy.
     - `401` when the JWT is missing/invalid.

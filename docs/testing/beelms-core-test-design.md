@@ -7,17 +7,6 @@ _Роля: QA / Tech Lead. Workflow: BMAD Solutioning / test-design._
 Този документ описва **високониво тестов дизайн / стратегия** за рамката **beelms core** – не за
 конкретна инстанция, а за самия core продукт.
 
-Входни документи:
-
-- Product Brief – `docs/product/product-brief.md`
-- PRD – `docs/product/prd.md`
-- Brainstorm – `docs/backlog/brainstorm-beelms-core.md`
-- Technical Research – `docs/analysis/research/technical-self-hosted-lms-architecture-research-2025-12-10.md`
-- UX Design – `docs/ux-design-specification.md`
-- System Architecture – `docs/architecture/beelms-core-architecture.md`
-- EPIC & Story Map – `docs/backlog/beelms-core-epics-and-stories.md`
-- Web automation scenarios (исторически) – `docs/testing/web-automation-scenarios.md`
-
 **Цел:** Да опише _какво_ и _на кое ниво_ тестваме в beelms core (unit / API / E2E / non-functional),
 как подреждаме приоритетите по EPIC-и и как това ще се използва по-късно в Test Plan и автоматизация.
 
@@ -83,14 +72,14 @@ _Роля: QA / Tech Lead. Workflow: BMAD Solutioning / test-design._
 - **Обект:** HTTP слоят и взаимодействие с база/infra (PostgreSQL, Redis по избор).
 - **Инструмент:** Jest + Supertest (или еквивалент), отделна test база/миграции.
 - **Цели:**
-  - да валидират основни REST endpoints по FR от PRD (FR-AUTH, FR-WIKI, FR-ADMIN, FR-API-DEMO и др.);
+  - да валидират основни REST endpoints по FR от PRD (FR-AUTH, FR-WIKI, FR-ADMIN и др.);
   - да проверяват позитивни и негативни сценарии (HTTP кодове, error формати, валидации);
   - да осигурят стабилен базов regression suite без нужда от UI.
 
 ### 4.3. End-to-end (E2E) / UI tests
 
 - **Обект:** основни UX потоци през референтния Next.js frontend.
-- **Инструмент:** Playwright (както е описано в `web-automation-scenarios.md`).
+- **Инструмент:** Playwright (както е описано в `playwright-scenarios/web-automation-scenarios.md`).
 - **Цели:**
   - да покриват ключови user journeys (Guest→Register→My Courses, Auth flows,
     Wiki browse, Admin basic);
@@ -128,7 +117,7 @@ _Роля: QA / Tech Lead. Workflow: BMAD Solutioning / test-design._
 - API/Integration: всички основни REST endpoints (PRD §4.2, FR-AUTH-1..8).
 - E2E: основни user journeys (register + login + profile + delete/export), както и негативни
   сценарии (invalid creds, expired token). Част от това вече е скицирано в
-  `web-automation-scenarios.md`.
+  `playwright-scenarios/web-automation-scenarios.md`.
 
 ### 5.2. EPIC-CORE-WIKI-CONTENT – Wiki & Content
 
@@ -141,7 +130,7 @@ _Роля: QA / Tech Lead. Workflow: BMAD Solutioning / test-design._
 Нива на тестване:
 
 - Unit: content services (избор на статии по статус, език, категории).
-- API/Integration: `GET /api/wiki/articles`, `GET /api/wiki/articles/{slug}`, admin endpoints.
+- API/Integration: REST endpoints за Wiki и admin (виж `docs/architecture/openapi.yaml`).
 - E2E: browse wiki, search/filter, отваряне на статия (WA-WIKI-* сценарии + Admin сценарии по-късно).
 
 ### 5.3. EPIC-CORE-COURSES-PROGRESS – Courses & Learning Paths
@@ -172,7 +161,7 @@ _Роля: QA / Tech Lead. Workflow: BMAD Solutioning / test-design._
 - API/Integration: endpoints за quiz-ове (load, submit).
 - E2E: решаване на quiz от крайния потребител като част от курс.
 
-### 5.5. EPIC-CORE-ADMIN-PORTAL – Admin Portal & Settings
+### 5.5. EPIC-CORE-ADMIN – Admin Portal & Settings
 
 Основни потоци:
 
@@ -201,23 +190,23 @@ _Роля: QA / Tech Lead. Workflow: BMAD Solutioning / test-design._
 - Script-level tests / smoke scripts (shell, Node scripts).
 - Интеграционни сценарии: „scaffold → docker-compose up → basic health/smoke tests“.
 
-### 5.8. EPIC-CORE-CROSS-I18N – Internationalization (I18N)
+### 5.7. EPIC-CROSS-I18N – Internationalization (I18N)
 
 - Unit: utilities за локализация/езици.
 - API/Integration: коректно съхранение/четене на езикови варианти.
 - E2E: езиков switcher, визуализация на преводи.
 
-### 5.9. EPIC-CORE-CROSS-GDPR-LEGAL – GDPR & Legal Pages
+### 5.8. EPIC-CORE-CROSS-GDPR-LEGAL – GDPR & Legal Pages
 
 - API/Integration: GDPR endpoints (access/delete/export) със силни негативни сценарии.
 - E2E: достъп до Privacy/GDPR и Terms страници, интеграция с регистрацията.
 
-### 5.10. EPIC-CORE-CROSS-METRICS – Core Metrics & Monitoring
+### 5.9. FR-CROSS – Core Metrics & Monitoring
 
 - Integration: API за метрики, коректно броене на регистрирани потребители.
 - Smoke: наличност на basic metrics endpoint-и след деплой.
 
-### 5.11. EPIC-CORE-CROSS-SECURITY – Security & Protection
+### 5.10. FR-CROSS – Security & Protection
 
 - Unit: части от security логика (напр. password policy, токен валидация).
 - API/Integration: защита срещу типични злоупотреби (brute force login, твърде много reset-и и др.).
@@ -257,7 +246,7 @@ _Роля: QA / Tech Lead. Workflow: BMAD Solutioning / test-design._
 
 - **Smoke suite (deployment validation):**
   - минимални сценарии по основните EPIC-и (Auth happy path, Wiki list/article,
-    My Courses, 1 quiz flow, Admin Dashboard, Practical Lab ping, metrics endpoint);
+    My Courses, 1 quiz flow, Admin Dashboard, metrics endpoint);
   - цел: бърза проверка, че инстанцията е здравa след деплой.
 
 - **Regression suite:**
@@ -269,14 +258,14 @@ _Роля: QA / Tech Lead. Workflow: BMAD Solutioning / test-design._
 ## 9. Връзка към други BMAD артефакти и бъдещи документи
 
 - Този Test Design стъпва директно върху:
-  - PRD функционалните области (FR-WIKI, FR-AUTH, FR-UI-DEMO, FR-API-DEMO, FR-TASKS, FR-ADMIN, FR-CROSS);
-  - архитектурните модули в `beelms-core-architecture.md`;
-  - EPIC/STORY картата в `beelms-core-epics-and-stories.md`.
+  - PRD функционалните области (FR-WIKI, FR-AUTH, FR-COURSES, FR-TASKS, FR-ASSESSMENTS, FR-ADMIN, FR-CROSS);
+  - архитектурните модули в `docs/architecture/beelms-core-architecture.md`;
+  - EPIC/STORY картата в `docs/backlog/beelms-core-epics-and-stories.md`.
 - Той служи като **вход** за:
   - бъдещ Delivery **Test Plan** – `docs/delivery/test-plan.md`, който ще описва конкретни цикли,
     критерии за приемане и release gates;
   - имплементацията на автоматизирани тестове (unit/API/E2E), включително сценарии
-    от `docs/testing/web-automation-scenarios.md`.
+    от `docs/testing/playwright-scenarios/web-automation-scenarios.md`.
 
 Този документ е жив – очаква се да бъде актуализиран, когато EPIC обхватът се разширява или когато се
 взимат нови решения за tooling, среди и нива на автоматизация.

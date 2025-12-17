@@ -6,6 +6,7 @@
 
 - `docs/architecture/openapi.yaml` – основният източник на истина за:
   - Auth, Account (`/auth/...`, `/users/me`);
+  - Courses & Assessments (`/courses...`, `/users/me/courses`, quizzes endpoints);
   - Wiki (public и Admin Wiki);
   - Admin Metrics (`/admin/metrics/overview`).
 
@@ -57,5 +58,5 @@
 
 1. Обновете `openapi.yaml` (schemas + paths).
 2. Обновете съответните BE/FE имплементации.
-3. Ако endpoint-ът е важен за упражнения или за Admin UI, добавете или актуализирайте примерните документи в `docs/architecture/*-api-examples.md`.
+3. Ако endpoint-ът е важен за упражнения или за Admin UI, добавете или актуализирайте примерните документи в `admin-wiki-api-examples.md`, `admin-metrics-api-examples.md` и `auth-api-examples.md`.
 4. При промяна по модела на данните – синхронизирайте `db-model.md` (ER диаграмата и описанията).
