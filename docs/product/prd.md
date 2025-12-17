@@ -1,10 +1,26 @@
 # beelms – Product Requirements Document (PRD)
 
-> Бележка: Този PRD описва **beelms core** като рамка. Конкретни инстанции, стъпили върху нея, имат собствени Product Brief и PRD в отделни репозитории.
+> Бележка: Този PRD описва **beelms core** като рамка. Конкретни инстанции, стъпили върху нея, имат собствени Product Brief и PRD извън този репозитори.
 
 _Роля: PM (Product Manager). Фаза: BMAD Planning / Solutioning. Описва какви изисквания трябва да покрие продуктът за първата MVP версия._
 
 ## 1. Цел и обхват
+
+Този PRD формализира **MVP изискванията** за **beelms core** като рамка (v1).
+Целта е да даде единен списък от функционални области (FR) и ключови правила, които:
+
+- се реализират като backend модули (NestJS) и референтен Next.js UI;
+- имат ясно API покритие в `docs/architecture/openapi.yaml`;
+- се проследяват към EPIC/STORY breakdown в `docs/backlog/beelms-core-epics-and-stories.md`.
+
+**In scope (MVP v1):** FR-WIKI, FR-AUTH, FR-COURSES, FR-TASKS, FR-ASSESSMENTS, FR-ADMIN, FR-CROSS.
+
+**Out of scope (за v1):** всички идеи, описани като post-MVP в `docs/product/post-mvp-backlog.md` и в Product Brief секциите „Out of Scope / Future Vision“.
+
+Детайлите за поведение по екрани и UX сценарии **не се дублират** тук и са описани в:
+
+- `docs/architecture/mvp-feature-list.md`
+- `docs/ux-design-specification.md`
 
 ## 2. Потребители и таргет аудитория
 
@@ -15,7 +31,7 @@ _Роля: PM (Product Manager). Фаза: BMAD Planning / Solutioning. Опис
 
 Крайните обучаеми (студенти, специалисти и др.) не са директна таргет аудитория на рамката – те са потребители на конкретни инстанции, изградени върху beelms.
 
-Роли в типична инстанция (детайли в `system-architecture.md` → „Потребителски роли и права" и Product Brief §5.1):
+Роли в типична инстанция (детайли в `docs/architecture/beelms-core-architecture.md` → „Потребителски роли и права" и Product Brief §5.1):
 - Администратор
 - Потребител (регистриран)
 - Гост (нерегистриран потребител)
@@ -33,7 +49,7 @@ _Роля: PM (Product Manager). Фаза: BMAD Planning / Solutioning. Опис
 
 ## 4. Функционални изисквания (FR)
 
-Тук са описани основните функционални области на beelms core. Детайлизираното поведение по екрани и UX сценарии за конкретни инстанции се държи в техните собствени MVP feature list / архитектурни документи.
+Тук са описани основните функционални области на beelms core. Детайлизираното поведение по екрани и UX сценарии за MVP се описва в `docs/architecture/mvp-feature-list.md`.
 
 ### 4.1. Публична Wiki (FR-WIKI)
 
@@ -68,17 +84,68 @@ API покритие:
  - FR-AUTH-7: Anti-bot защита (напр. Google reCAPTCHA) при критични операции: регистрация, заявка за забравена парола, заявки за експорт на лични данни и (по избор) при вход след няколко последователни неуспешни опита.
  - FR-AUTH-8: Системата прилага базов rate limiting за чувствителни email операции – напр. ограничение на броя успешни потвърждения на смяна на email за даден акаунт (примерно 3 потвърждения в рамките на 24 часа), като при достигане на лимита се връща справедливо съобщение за грешка и потребителят вижда кога ще може отново да заяви промяна.
 
- API покритие (детайли в `openapi.yaml`):
+ API покритие (детайли в `docs/architecture/openapi.yaml`):
 - `POST /api/auth/register`
 - `POST /api/auth/login`
-- `POST /api/auth/forgot-password`
-- `POST /api/auth/reset-password`
-- `GET /api/users/me`, `DELETE /api/users/me`, `POST /api/users/me/export`
+ - `POST /api/auth/forgot-password`
+ - `POST /api/auth/reset-password`
+ - `POST /api/auth/verify-email`
+ - `GET /api/users/me`, `PATCH /api/users/me`, `DELETE /api/users/me`
+ - `POST /api/users/me/export`, `POST /api/users/me/change-password`
 
-### 4.3. Администраторски панел (FR-ADMIN)
+### 4.3. Курсове и учебни пътеки (FR-COURSES)
 
-Обхват (MVP Feature List §5):
+ Обхват (MVP Feature List §6, Product Brief §5.2):
+- Course Catalog и Course Detail.
+- Enrollment в free курс и екран „My Courses“.
+- Базов прогрес по курс (Not Started / In Progress / Completed).
+
+Ключови изисквания:
+- FR-COURSES-1: Гост може да преглежда списък с курсове (catalog) и детайл на курс.
+- FR-COURSES-2: Регистриран потребител може да се запише (enroll) в free курс.
+- FR-COURSES-3: Записаният потребител вижда „My Courses“ с текущ статус на курса и базов прогрес.
+- FR-COURSES-4: Course Detail показва подредена програма от модули (уроци/статии, задачи, quizzes).
+
+API покритие (планирано, детайли в `docs/architecture/openapi.yaml`):
+- `GET /api/courses`
+- `GET /api/courses/{courseId}`
+- `POST /api/courses/{courseId}/enroll`
+- `GET /api/users/me/courses`
+
+### 4.4. Практически задачи (FR-TASKS)
+
+Обхват (MVP Feature List §7):
+- Course curriculum може да включва „task“ елементи с описание.
+  - Потребителят може да маркира задача като изпълнена (completed) за целите на прогреса.
+ 
+ Ключови изисквания:
+- FR-TASKS-1: Курс може да съдържа задачи (task items) с title + описание.
+ - FR-TASKS-2: Записаният потребител може да маркира задача като изпълнена.
+ - FR-TASKS-3: За MVP задачите не изискват автоматично оценяване и не генерират advanced learning analytics (вж. FR-CROSS-3).
+   
+API покритие (планирано):
+- `POST /api/courses/{courseId}/tasks/{taskId}/complete`
+
+### 4.5. Базово оценяване / quizzes (FR-ASSESSMENTS)
+
+Обхват (MVP Feature List §7, Product Brief §5.2):
+- Прости quizzes (MCQ/single choice) като част от курс.
+- Delivery на quiz и submit на отговори с резултат (score, pass/fail).
+
+Ключови изисквания:
+- FR-ASSESSMENTS-1: Курс може да включва quizzes към уроци/модули.
+- FR-ASSESSMENTS-2: Записаният потребител може да зареди quiz, да подаде отговори и да получи резултат (score + pass/fail).
+- FR-ASSESSMENTS-3: Системата записва резултата от опита (attempt) за нуждите на базов прогрес и история на потребителя.
+
+API покритие (планирано):
+- `GET /api/courses/{courseId}/quizzes/{quizId}`
+- `POST /api/courses/{courseId}/quizzes/{quizId}/submit`
+
+### 4.6. Администраторски панел (FR-ADMIN)
+
+Обхват (MVP Feature List §4):
 - Управление на Wiki съдържание и версии.
+- Управление на курсове и quizzes (MVP ниво).
 - Управление на потребители (активиране/деактивиране).
 - Базово табло с метрики.
 
@@ -87,16 +154,20 @@ API покритие:
 - FR-ADMIN-2: Админ може да преглежда история на версиите на статия, да връща към предишна версия и да трие избрани стари версии.
 - FR-ADMIN-3: Админ може да преглежда списък с потребители и да активира/деактивира акаунти.
  - FR-ADMIN-4: Админ табло показва базови метрики (поне брой регистрирани потребители).
+ - FR-ADMIN-5: Админ може да управлява курсове (списък, създаване, редакция и статуси) и структурата им (модули: статии, задачи, quizzes).
+ - FR-ADMIN-6: Админ може да управлява базови quizzes (MCQ) и въпроси и да ги свързва към курсове.
 
 API покритие (частично):
 - `/api/admin/wiki/articles...`
 - `/api/admin/wiki/articles/{id}/versions...`
+- `/api/admin/courses...`
+- `/api/admin/quizzes...`
 - `/api/admin/users`, `/api/admin/users/{id}`
 - `GET /api/admin/metrics/overview`
 
-### 4.4. Cross-cutting функционалности (FR-CROSS)
+### 4.7. Cross-cutting функционалности (FR-CROSS)
 
-Обхват (MVP Feature List §6, System Architecture – GDPR, Метрики, Безопасност):
+Обхват (MVP Feature List §5, System Architecture – GDPR, Метрики, Безопасност):
 - Мултиезичност в интерфейса и съдържанието.
 - GDPR и управление на данни.
 - Метрики и анализи.
@@ -106,14 +177,14 @@ API покритие (частично):
 - FR-CROSS-1: Поддръжка на поне два езика в интерфейса (напр. BG и EN).
 - FR-CROSS-2: Права по GDPR – достъп, изтриване, преносимост, корекция, плюс публична страница „Privacy/GDPR“ с обобщена информация за обработката на данни.
 - FR-CROSS-3: Събиране на базови метрики за потребителско поведение и производителност на системата. Метрики за индивидуален учебен напредък (завършени задачи/exams) не са част от текущото MVP и ще се добавят в бъдещия „exams“ модул.
-  - За текущото MVP минималното изискване за метрики е наличието на агрегирана стойност "брой регистрирани потребители", показвана в Admin Dashboard / Admin Metrics (виж FR-ADMIN-4 и mvp-feature-list §5.4). По-сложните агрегирани метрики (брой сесии, средна продължителност, разпределение по източник на трафик, периоди, export на данни и др.) са планирани като **post-MVP** функционалност и са описани в `docs/product/post-mvp-backlog.md` (MTX-POST-1).
+  - За текущото MVP минималното изискване за метрики е наличието на агрегирана стойност "брой регистрирани потребители", показвана в Admin Dashboard / Admin Metrics (виж FR-ADMIN-4 и mvp-feature-list §4.4). По-сложните агрегирани метрики (брой сесии, средна продължителност, разпределение по източник на трафик, периоди, export на данни и др.) са планирани като **post-MVP** функционалност и са описани в `docs/product/post-mvp-backlog.md` (MTX-POST-1).
 - FR-CROSS-4: Основни защити – CSRF, XSS, SQL injection, защита срещу brute force атаки.
-- FR-CROSS-5: Публични статични страници „About“ и „Contact“, достъпни от footer-а на основните екрани.
-- FR-LEGAL-1: Публична статична страница „Условия за ползване (Terms of Use)“, достъпна от footer-а на основните екрани и от регистрационната форма (checkbox „Съгласен съм с условията за ползване и политиката за поверителност“).
+- FR-CROSS-5: Публични статични страници „About“ и „Contact", достъпни от footer-а на основните екрани.
+- FR-LEGAL-1: Публична статична страница „Условия за ползване (Terms of Use)", достъпна от footer-а на основните екрани и от регистрационната форма (checkbox „Съгласен съм с условията за ползване и политиката за поверителност“).
 
 ## 5. Нефункционални изисквания (NFR)
 
-Подробностите са описани основно в `docs/architecture/system-architecture.md`. Тук са събрани ключовите теми:
+Подробностите са описани основно в `docs/architecture/beelms-core-architecture.md`. Тук са събрани ключовите теми:
 
 ### 5.1. Производителност и мащабируемост
 

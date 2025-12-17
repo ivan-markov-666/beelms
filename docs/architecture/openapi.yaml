@@ -50,6 +50,31 @@ components:
         createdAt:
           type: string
           format: date-time
+        role:
+          type: string
+          description: Роля на потребителя (напр. "user", "admin", "teacher", "author", "monitoring")
+        emailChangeLimitReached:
+          type: boolean
+          description: Дали е достигнат лимитът за потвърждения на смяна на email в текущия прозорец
+        emailChangeLimitResetAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: ISO дата/час, когато лимитът за смяна на email се нулира (ако е приложимо)
+
+    UserExport:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+          format: email
+        createdAt:
+          type: string
+          format: date-time
+        active:
+          type: boolean
 
     AdminUserSummary:
       type: object
@@ -251,6 +276,135 @@ components:
           type: string
           description: Пълен URL за достъп до изображението (използва се в markdown съдържанието)
 
+    CourseSummary:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        language:
+          type: string
+          example: bg
+        status:
+          type: string
+          description: Статус на курса (draft, active, inactive)
+          enum: [draft, active, inactive]
+
+    CourseModuleItem:
+      type: object
+      properties:
+        id:
+          type: string
+        itemType:
+          type: string
+          description: Тип на елемента в програмата на курса
+          enum: [wiki, task, quiz]
+        title:
+          type: string
+        order:
+          type: integer
+        wikiSlug:
+          type: string
+          nullable: true
+        taskId:
+          type: string
+          nullable: true
+        quizId:
+          type: string
+          nullable: true
+
+    CourseDetail:
+      allOf:
+        - $ref: '#/components/schemas/CourseSummary'
+        - type: object
+          properties:
+            curriculum:
+              type: array
+              items:
+                $ref: '#/components/schemas/CourseModuleItem'
+
+    MyCourseListItem:
+      allOf:
+        - $ref: '#/components/schemas/CourseSummary'
+        - type: object
+          properties:
+            enrollmentStatus:
+              type: string
+              enum: [not_started, in_progress, completed]
+            progressPercent:
+              type: number
+              format: float
+              nullable: true
+            enrolledAt:
+              type: string
+              format: date-time
+              nullable: true
+
+    Task:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+
+    Quiz:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        passingScore:
+          type: integer
+          nullable: true
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuizQuestion'
+
+    QuizQuestion:
+      type: object
+      properties:
+        id:
+          type: string
+        text:
+          type: string
+        options:
+          type: array
+          items:
+            type: string
+
+    QuizSubmitInput:
+      type: object
+      properties:
+        answers:
+          type: array
+          items:
+            type: object
+            properties:
+              questionId:
+                type: string
+              optionIndex:
+                type: integer
+            required: [questionId, optionIndex]
+      required: [answers]
+
+    QuizSubmitResult:
+      type: object
+      properties:
+        score:
+          type: integer
+        maxScore:
+          type: integer
+        passed:
+          type: boolean
+
 security:
   - bearerAuth: []
 
@@ -405,6 +559,36 @@ paths:
         "401":
           description: Неоторизиран достъп
 
+    patch:
+      tags: [Account]
+      summary: Обновяване на профилна информация на текущия потребител
+      description: |
+        MVP: позволява промяна на имейл адреса.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+              required: [email]
+      responses:
+        "200":
+          description: Профилът е обновен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        "400":
+          description: Невалидни данни
+        "401":
+          description: Неоторизиран достъп
+
     delete:
       tags: [Account]
       summary: Деактивиране/изтриване на акаунт на текущия потребител
@@ -421,14 +605,225 @@ paths:
       tags: [Account]
       summary: Заявка за експорт на лични данни (GDPR)
       description: |
-        Стартира процес за генериране на архив с личните данни на текущия потребител.
+        Връща JSON payload с основните лични данни (MVP).
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                captchaToken:
+                  type: string
+              required: []
+      responses:
+        "200":
+          description: Експортът е генериран
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserExport'
+        "400":
+          description: Невалидни данни (например липсващ captchaToken, когато е задължителен)
+        "401":
+          description: Неоторизиран достъп
+
+  /users/me/change-password:
+    post:
+      tags: [Account]
+      summary: Смяна на парола на текущия потребител
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                currentPassword:
+                  type: string
+                newPassword:
+                  type: string
+              required: [currentPassword, newPassword]
+      responses:
+        "204":
+          description: Паролата е сменена успешно
+        "400":
+          description: Невалидни данни
+        "401":
+          description: Неоторизиран достъп
+
+  /users/me/courses:
+    get:
+      tags: [Courses]
+      summary: Списък с курсове за текущия потребител (My Courses)
       security:
         - bearerAuth: []
       responses:
-        "202":
-          description: Заявката за експорт е приета
+        "200":
+          description: Списък с курсове + базов прогрес
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MyCourseListItem'
         "401":
           description: Неоторизиран достъп
+
+  ############################
+  # Courses & Assessments
+  ############################
+
+  /courses:
+    get:
+      tags: [Courses]
+      summary: Списък с курсове (catalog)
+      security: []
+      responses:
+        "200":
+          description: Списък с курсове
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CourseSummary'
+
+  /courses/{courseId}:
+    get:
+      tags: [Courses]
+      summary: Детайл на курс
+      security: []
+      parameters:
+        - in: path
+          name: courseId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Детайл на курс
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseDetail'
+        "404":
+          description: Курсът не е намерен
+
+  /courses/{courseId}/enroll:
+    post:
+      tags: [Courses]
+      summary: Записване (enroll) в курс
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: courseId
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Потребителят е записан успешно
+        "401":
+          description: Неоторизиран достъп
+        "404":
+          description: Курсът не е намерен
+
+  /courses/{courseId}/tasks/{taskId}/complete:
+    post:
+      tags: [Courses]
+      summary: Маркиране на задача като изпълнена (completed)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: courseId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: taskId
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Задачата е маркирана като изпълнена
+        "401":
+          description: Неоторизиран достъп
+        "404":
+          description: Курсът или задачата не са намерени
+
+  /courses/{courseId}/quizzes/{quizId}:
+    get:
+      tags: [Assessments]
+      summary: Зареждане на quiz
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: courseId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: quizId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Quiz за попълване
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Quiz'
+        "401":
+          description: Неоторизиран достъп
+        "404":
+          description: Курсът или quiz-ът не са намерени
+
+  /courses/{courseId}/quizzes/{quizId}/submit:
+    post:
+      tags: [Assessments]
+      summary: Submit на quiz отговори и връщане на резултат
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: courseId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: quizId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuizSubmitInput'
+      responses:
+        "200":
+          description: Резултат от quiz attempt
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuizSubmitResult'
+        "400":
+          description: Невалидни данни
+        "401":
+          description: Неоторизиран достъп
+        "404":
+          description: Курсът или quiz-ът не са намерени
 
   /admin/users:
     get:

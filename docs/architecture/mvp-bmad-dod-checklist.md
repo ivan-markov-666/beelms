@@ -3,14 +3,14 @@
 Този документ описва минимален Definition of Done (DoD) за MVP версията на продукта, базиран на BMAD (Business, Metrics, Architecture, Docs). Използва се като финален gate преди да кажем, че „MVP е реално готов“.
 
 ## 1. Business & Product (B)
-
-- **Ясен MVP обхват**
-  - [ ] MVP функционалностите в `mvp-feature-list.md` са или имплементирани, или съзнателно маркирани като "out of scope" с причина.
-  - [ ] Всички MVP епики в `MCP-EPIC-map.md` имат поне един walking skeleton (WS‑1..WS‑8), който реално работи.
-
-- **Критични потребителски пътеки (end‑to‑end)**
-  - [ ] Анонимен потребител може да отвори публичния Wiki / home страницата и Legal страниците (Terms/Privacy).
-  - [ ] Потребител може да се регистрира / логне и да достъпи практическата среда (UI Demo / API Demo) според MVP.
+ 
+ - **Ясен MVP обхват**
+   - [ ] MVP функционалностите в `docs/architecture/mvp-feature-list.md` са или имплементирани, или съзнателно маркирани като "out of scope" с причина.
+   - [ ] Всички MVP епики в `docs/backlog/beelms-core-epics-and-stories.md` имат поне един walking skeleton (WS‑1..WS‑4), който реално работи.
+ 
+ - **Критични потребителски пътеки (end‑to‑end)**
+   - [ ] Анонимен потребител може да отвори публичния Wiki / home страницата и Legal страниците (Terms/Privacy).
+   - [ ] Потребител може да се регистрира / логне и да достъпи Courses/My Courses и базов quiz flow според MVP.
   - [ ] Admin може да влезе в `/admin`, да види списъка с потребители `/admin/users` и да активира/деактивира потребители.
   - [ ] Admin може да види базови метрики в `/admin` (например total users).
   - [ ] Горните пътеки са минати ръчно поне веднъж на "чиста" среда (fresh DB или през миграции).
@@ -35,7 +35,7 @@
 ## 3. Architecture, Implementation & Quality (A)
 
 - **API контракт & security**
-  - [ ] Основните API endpoints (особено за WS‑1..WS‑8) са описани в `openapi.yaml`, реално съществуват в NestJS и са защитени правилно (JWT, admin guard където е нужно).
+  - [ ] Основните API endpoints (особено за WS‑1..WS‑4) са описани в `docs/architecture/openapi.yaml`, реално съществуват в NestJS и са защитени правилно (JWT, admin guard където е нужно).
   - [ ] Frontend използва само описани в OpenAPI endpoints (няма "скрити" магически URL‑и).
 
 - **Качество на имплементацията**
@@ -52,15 +52,15 @@
 - **Тестове**
   - [ ] Има unit tests за ключови backend услуги (вкл. `AdminUsersService`, auth и основните domain services).
   - [ ] Има e2e tests за критичните API пътеки (логин, основни WS endpoints, admin endpoints).
-  - [ ] Има frontend tests за основните страници/компоненти (напр. `/admin`, `/admin/users`, legal pages, ключови UI demo/flows).
+  - [ ] Има frontend tests за основните страници/компоненти (напр. `/admin`, `/admin/users`, legal pages, ключови Courses/Assessments flows).
   - [ ] CI pipeline минава зелено (lint + tests) преди merge към основния клон.
 
 ## 4. Docs, Backlog & Change Management (D)
 
 - **Backlog & BMAD артефакти**
-  - [ ] `MCP-EPIC-map.md` и `mvp-feature-list.md` отразяват реално състоянието на имплементацията (MVP частта не противоречи на кода).
-  - [ ] WS‑epic‑ите (вкл. `EPIC-WS8-ADMIN-USERS-METRICS.md`) имат актуален статус (Planned → Implemented/Done).
-  - [ ] WS‑stories (WS‑1..WS‑8) имат маркиран статус (Planned / Implemented / Tested / Done) и бележки за известни отклонения от първоначалния план (ако има такива).
+  - [ ] `docs/backlog/beelms-core-epics-and-stories.md` и `docs/architecture/mvp-feature-list.md` отразяват реално състоянието на имплементацията (MVP частта не противоречи на кода).
+  - [ ] WS‑epic‑ите имат актуален статус (Planned → Implemented/Done).
+  - [ ] WS‑stories (WS‑1..WS‑4) имат маркиран статус (Planned / Implemented / Tested / Done) и бележки за известни отклонения от първоначалния план (ако има такива).
 
 - **README & developer docs**
   - [ ] Root `README` описва какво е MVP на продукта и как да се стартират BE/FE (dev + basic prod/staging).

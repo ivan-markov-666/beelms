@@ -6,7 +6,7 @@ _Роля: Architect. Фаза: BMAD Solutioning. Концептуален мо�
 - Product Brief – `docs/product/product-brief.md`
 - PRD – `docs/product/prd.md`
 - MVP feature list – `docs/architecture/mvp-feature-list.md`
-- System architecture – `docs/architecture/system-architecture.md`
+- System architecture – `docs/architecture/beelms-core-architecture.md`
 - OpenAPI спецификация – `docs/architecture/openapi.yaml`
 
 Целта е да даде ясен модел за реализацията на базата данни (PostgreSQL) преди детайлни migration-и и ORM модели.
@@ -17,6 +17,13 @@ _Роля: Architect. Фаза: BMAD Solutioning. Концептуален мо�
 - **WikiArticle** – логическа статия в Wiki (по един slug, независимо от езиците и версиите).
 - **WikiArticleVersion** – конкретна езикова версия на статия в определен момент.
 - **GdprRequest** – заявка свързана с права по GDPR (изтриване, експорт и т.н.).
+- **Course** – курс (title/description/language/status).
+- **CourseModuleItem** – елемент в програмата на курс (wiki/task/quiz) с ред.
+- **CourseEnrollment** – записване на потребител в курс + базов статус/прогрес.
+- **CourseTask** – задача, която е част от курс.
+- **CourseTaskCompletion** – маркиране на задача като изпълнена от даден потребител.
+- **Quiz** – quiz (MCQ) към курс.
+- **QuizAttempt** – опит (attempt) за quiz + резултат.
 
 Този базов модел може да бъде разширяван по-късно (напр. с по-детайлни логове за метрики, нотификации и др.), без да нарушава текущия MVP.
 
@@ -25,19 +32,27 @@ _Роля: Architect. Фаза: BMAD Solutioning. Концептуален мо�
 ```mermaid
 erDiagram
     USER ||--o{ GDPR_REQUEST : "има заявки"
+    USER ||--o{ COURSE_ENROLLMENT : "има enrollments"
+    COURSE ||--o{ COURSE_ENROLLMENT : "има записани потребители"
+    COURSE ||--o{ COURSE_MODULE_ITEM : "има програма"
+    WIKI_ARTICLE ||--o{ COURSE_MODULE_ITEM : "използва се в курс"
+    COURSE ||--o{ COURSE_TASK : "има задачи"
+    COURSE_TASK ||--o{ COURSE_TASK_COMPLETION : "има completions"
+    USER ||--o{ COURSE_TASK_COMPLETION : "completes"
+    COURSE ||--o{ QUIZ : "има quizzes"
+    QUIZ ||--o{ QUIZ_ATTEMPT : "има attempts"
+    USER ||--o{ QUIZ_ATTEMPT : "attempts"
 
     USER {
         uuid id PK
         string email
         string password_hash
-        string role        "user | admin"
+        string role        "user | admin | teacher | author | monitoring"
         string status      "active | inactive | deleted"
         timestamp created_at
         timestamp updated_at
         timestamp last_login_at
     }
-
-    WIKI_ARTICLE ||--o{ WIKI_ARTICLE_VERSION : "има версии"
 
     WIKI_ARTICLE {
         uuid id PK
@@ -68,6 +83,73 @@ erDiagram
         timestamp requested_at
         timestamp processed_at
     }
+
+    COURSE {
+        uuid id PK
+        string title
+        string description
+        string language      "напр. bg, en"
+        string status        "draft | active | inactive"
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    COURSE_ENROLLMENT {
+        uuid id PK
+        uuid course_id FK
+        uuid user_id FK
+        string status        "not_started | in_progress | completed"
+        timestamp enrolled_at
+        timestamp updated_at
+    }
+
+    COURSE_MODULE_ITEM {
+        uuid id PK
+        uuid course_id FK
+        string item_type     "wiki | task | quiz"
+        int order
+        uuid wiki_article_id FK
+        uuid task_id FK
+        uuid quiz_id FK
+    }
+
+    COURSE_TASK {
+        uuid id PK
+        uuid course_id FK
+        string title
+        text description
+        int order
+    }
+
+    COURSE_TASK_COMPLETION {
+        uuid id PK
+        uuid course_id FK
+        uuid task_id FK
+        uuid user_id FK
+        timestamp completed_at
+    }
+
+    QUIZ {
+        uuid id PK
+        uuid course_id FK
+        string title
+        int passing_score
+        json questions_json
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    QUIZ_ATTEMPT {
+        uuid id PK
+        uuid quiz_id FK
+        uuid course_id FK
+        uuid user_id FK
+        json answers_json
+        int score
+        int max_score
+        boolean passed
+        timestamp submitted_at
+    }
 ```
 
 ## 3. Описания на ентитетите
@@ -78,6 +160,7 @@ erDiagram
 
 - Един user може да има много `GdprRequest` записи.
 - Потребителите с `role = 'admin'` имат достъп до admin панела и управлението на Wiki/потребители.
+- Допълнителните роли (`teacher`, `author`, `monitoring`) се използват за ограничаване/разделяне на достъпа до създаване на съдържание и до агрегирани метрики (детайли в Product Brief/PRD).
 
 ### 3.2. WikiArticle и WikiArticleVersion
 
@@ -111,6 +194,29 @@ erDiagram
 - Всеки запис представлява заявка от потребител за право по GDPR.
 - Полетата `type` и `status` се използват за обработка и одит.
 - При успешна обработка на заявка за изтриване данните на потребителя могат да бъдат анонимизирани/изтрити според архитектурните решения.
+
+### 3.4. Course и CourseModuleItem
+
+- `Course` моделира course catalog + Course Detail.
+- `CourseModuleItem` описва програмата на курса (модули) и позволява курсът да комбинира:
+  - `wiki` елементи (връзка към Wiki съдържание);
+  - `task` елементи (практически задачи);
+  - `quiz` елементи (оценяване).
+
+### 3.5. CourseEnrollment (My Courses)
+
+- `CourseEnrollment` пази записването на потребител в курс и базов статус на прогрес.
+- За MVP стойности като `progressPercent` могат да бъдат изчислявани динамично на база completions/attempts.
+
+### 3.6. CourseTask и CourseTaskCompletion
+
+- `CourseTask` пази описанието на задачата.
+- `CourseTaskCompletion` пази маркирането на задача като изпълнена от конкретен потребител.
+
+### 3.7. Quiz и QuizAttempt
+
+- `Quiz` пази quiz дефиниция (MVP: въпроси/опции могат да се съхраняват като JSON).
+- `QuizAttempt` пази submit-натите отговори и резултата (score/pass) за конкретен потребител.
 
 ## 4. Забележки за имплементация
 

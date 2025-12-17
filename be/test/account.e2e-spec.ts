@@ -139,7 +139,7 @@ describe('Account endpoints (e2e)', () => {
       .post('/api/users/me/change-password')
       .set('Authorization', `Bearer ${accessToken}`)
       .send({ currentPassword: oldPassword, newPassword })
-      .expect(200);
+      .expect(204);
 
     await request(app.getHttpServer())
       .post('/api/auth/login')
@@ -214,7 +214,7 @@ describe('Account endpoints (e2e)', () => {
     await request(app.getHttpServer()).delete('/api/users/me').expect(401);
   });
 
-  it('revokes old tokens after password change', async () => {
+  it('POST /api/users/me revokes tokens after change-password', async () => {
     const {
       email,
       password: oldPassword,
@@ -234,7 +234,7 @@ describe('Account endpoints (e2e)', () => {
       .post('/api/users/me/change-password')
       .set('Authorization', `Bearer ${accessToken}`)
       .send({ currentPassword: oldPassword, newPassword })
-      .expect(200);
+      .expect(204);
 
     // The same old token is now rejected by protected endpoints
     await request(app.getHttpServer())
@@ -423,7 +423,7 @@ describe('Account endpoints (e2e)', () => {
       .post('/api/users/me/change-password')
       .set('Authorization', `Bearer ${accessToken}`)
       .send({ currentPassword: password, newPassword })
-      .expect(200);
+      .expect(204);
 
     // Old password no longer works
     await request(app.getHttpServer())
@@ -534,7 +534,7 @@ describe('Account endpoints (e2e)', () => {
       .post('/api/users/me/change-password')
       .set('Authorization', `Bearer ${accessToken}`)
       .send({ currentPassword: oldPassword, newPassword })
-      .expect(200);
+      .expect(204);
 
     // 2) Old password should no longer work
     await request(app.getHttpServer())

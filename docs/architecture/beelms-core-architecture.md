@@ -1,8 +1,6 @@
 # beelms core – System Architecture
 
 > Документ тип: BMAD Solutioning / Architecture. Описва **референтната архитектура** на рамката **beelms core** – не на конкретна инстанция, а на самия продукт/рамка.
->
-> Входни документи: Product Brief, PRD, Brainstorm, Technical Research, UX Design Specification.
 
 ---
 

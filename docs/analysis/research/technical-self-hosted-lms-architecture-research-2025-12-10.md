@@ -54,7 +54,7 @@
 **Заключение за beelms core:**
 
 - Изборът **„NestJS modular monolith + ясни домейн модули (auth, wiki, courses, assessments, admin, integrations)“** е напълно в синхрон с добрите практики за малък екип и MVP рамка.
-- Microservices могат да се появят по-късно (напр. отделен training API или analytics сервис), но **не трябва да са основна цел на v1/v2**.
+- Microservices могат да се появят по-късно (напр. analytics сервис), но **не трябва да са основна цел на v1/v2**.
 
 ---
 

@@ -58,7 +58,7 @@ export class AccountController {
   @UseGuards(JwtAuthGuard)
   @Post('me/change-password')
   @RateLimit({ limit: 10, windowSeconds: 3600, key: 'userId' })
-  @HttpCode(200)
+  @HttpCode(204)
   async changePassword(
     @Req() req: AuthenticatedRequest,
     @Body() dto: ChangePasswordDto,
