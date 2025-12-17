@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { EnrollCourseButton } from "../_components/enroll-course-button";
 
 export const dynamic = "force-dynamic";
 
@@ -67,6 +68,8 @@ export default async function CourseDetailPage(props: {
           <span className="rounded bg-gray-100 px-2 py-1">{course.language}</span>
           <span className="rounded bg-gray-100 px-2 py-1">{course.status}</span>
         </div>
+
+        <EnrollCourseButton courseId={course.id} />
       </header>
 
       <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">

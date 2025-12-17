@@ -12,6 +12,7 @@ import { RateLimitInterceptor } from './security/rate-limit/rate-limit.intercept
 import { InMemoryRateLimitStore } from './security/rate-limit/rate-limit.store';
 import { CoursesModule } from './courses/courses.module';
 import { Course } from './courses/course.entity';
+import { CourseEnrollment } from './courses/course-enrollment.entity';
 
 @Module({
   imports: [
@@ -22,7 +23,13 @@ import { Course } from './courses/course.entity';
       username: process.env.DB_USER ?? 'beelms',
       password: process.env.DB_PASSWORD ?? 'beelms',
       database: process.env.DB_NAME ?? 'beelms',
-      entities: [WikiArticle, WikiArticleVersion, User, Course],
+      entities: [
+        WikiArticle,
+        WikiArticleVersion,
+        User,
+        Course,
+        CourseEnrollment,
+      ],
       synchronize: false,
     }),
     WikiModule,
