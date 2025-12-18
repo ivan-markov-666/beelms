@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Course } from './course.entity';
@@ -23,6 +27,7 @@ export class CoursesService {
       description: course.description,
       language: course.language,
       status: course.status,
+      isPaid: !!course.isPaid,
     };
   }
 
@@ -53,6 +58,10 @@ export class CoursesService {
 
     if (!course || course.status !== 'active') {
       throw new NotFoundException('Course not found');
+    }
+
+    if (course.isPaid) {
+      throw new ForbiddenException('Payment required');
     }
 
     const existing = await this.enrollmentRepo.findOne({

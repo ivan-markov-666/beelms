@@ -4,4 +4,5 @@ export class CourseSummaryDto {
   description: string;
   language: string;
   status: string;
+  isPaid: boolean;
 }

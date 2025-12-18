@@ -292,6 +292,9 @@ components:
           type: string
           description: Статус на курса (draft, active, inactive)
           enum: [draft, active, inactive]
+        isPaid:
+          type: boolean
+          description: Дали курсът е платен (изисква плащане преди enrollment)
 
     CourseModuleItem:
       type: object
@@ -731,6 +734,12 @@ paths:
           description: Потребителят е записан успешно
         "401":
           description: Неоторизиран достъп
+        "403":
+          description: Payment required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         "404":
           description: Курсът не е намерен
 

@@ -1,7 +1,10 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
+import { Course } from '../src/courses/course.entity';
 import { registerAndLogin } from './utils/auth-helpers';
 
 type CourseSummary = {
@@ -20,6 +23,7 @@ type MyCourseListItem = CourseSummary & {
 
 describe('Course enrollment + my-courses endpoints (e2e)', () => {
   let app: INestApplication;
+  let courseRepo: Repository<Course>;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -35,6 +39,8 @@ describe('Course enrollment + my-courses endpoints (e2e)', () => {
       }),
     );
     await app.init();
+
+    courseRepo = app.get<Repository<Course>>(getRepositoryToken(Course));
   });
 
   afterAll(async () => {
@@ -83,5 +89,34 @@ describe('Course enrollment + my-courses endpoints (e2e)', () => {
     const item = myCourses.find((c) => c.id === courseId);
     expect(item).toBeDefined();
     expect(item!.enrollmentStatus).toBe('not_started');
+  });
+
+  it('POST /api/courses/:courseId/enroll returns 403 for paid courses (Payment required)', async () => {
+    const { accessToken } = await registerAndLogin(app, 'course-enroll-paid');
+
+    const listRes = await request(app.getHttpServer())
+      .get('/api/courses')
+      .expect(200);
+    const courses = listRes.body as CourseSummary[];
+    expect(courses.length).toBeGreaterThanOrEqual(1);
+
+    const courseId = courses[0].id;
+
+    const course = await courseRepo.findOne({ where: { id: courseId } });
+    expect(course).toBeDefined();
+    if (!course) {
+      throw new Error('Seed course not found');
+    }
+
+    course.isPaid = true;
+    await courseRepo.save(course);
+
+    const res = await request(app.getHttpServer())
+      .post(`/api/courses/${courseId}/enroll`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .expect(403);
+
+    const body = res.body as { message?: string };
+    expect(body.message).toBe('Payment required');
   });
 });
