@@ -1,6 +1,8 @@
 import {
   ArrayMinSize,
+  ArrayUnique,
   IsIn,
+  IsArray,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -30,6 +32,17 @@ export class AdminCreateWikiArticleDto {
   @IsString()
   @IsNotEmpty()
   slug: string;
+
+  @IsString()
+  @IsOptional()
+  @IsIn(['public', 'course_only'])
+  visibility?: string;
+
+  @IsArray()
+  @IsOptional()
+  @ArrayUnique()
+  @IsString({ each: true })
+  tags?: string[];
 
   @IsString()
   @IsIn(['draft', 'active', 'inactive'])
