@@ -1,4 +1,11 @@
-import { IsIn, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import {
+  ArrayUnique,
+  IsArray,
+  IsIn,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class AdminUpdateWikiArticleDto {
   @IsString()
@@ -20,4 +27,15 @@ export class AdminUpdateWikiArticleDto {
   @IsString()
   @IsIn(['draft', 'active', 'inactive'])
   status: string;
+
+  @IsString()
+  @IsOptional()
+  @IsIn(['public', 'course_only'])
+  visibility?: string;
+
+  @IsArray()
+  @IsOptional()
+  @ArrayUnique()
+  @IsString({ each: true })
+  tags?: string[];
 }

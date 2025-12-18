@@ -19,6 +19,12 @@ export class WikiArticle {
   @Column({ type: 'varchar', length: 20 })
   status: string;
 
+  @Column({ type: 'varchar', length: 20, default: 'public' })
+  visibility: string;
+
+  @Column({ type: 'text', array: true, default: () => "'{}'" })
+  tags: string[];
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

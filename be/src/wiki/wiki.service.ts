@@ -80,7 +80,7 @@ export class WikiService {
     const take = safePageSize;
 
     const articles = await this.articleRepo.find({
-      where: { status: 'active' },
+      where: { status: 'active', visibility: 'public' },
       relations: ['versions'],
       order: { updatedAt: 'DESC' },
       skip,
@@ -211,7 +211,7 @@ export class WikiService {
     lang?: string,
   ): Promise<WikiArticleDetailDto> {
     const article = await this.articleRepo.findOne({
-      where: { slug, status: 'active' },
+      where: { slug, status: 'active', visibility: 'public' },
       relations: ['versions'],
     });
 
@@ -268,6 +268,8 @@ export class WikiService {
     return {
       id: article.id,
       slug: article.slug,
+      visibility: article.visibility,
+      tags: article.tags,
       language: latest.language,
       title: latest.title,
       subtitle: latest.subtitle ?? undefined,
@@ -341,6 +343,8 @@ export class WikiService {
     return {
       id: article.id,
       slug: article.slug,
+      visibility: article.visibility,
+      tags: article.tags,
       language: latest.language,
       title: latest.title,
       subtitle: latest.subtitle ?? undefined,
@@ -509,6 +513,8 @@ export class WikiService {
     const article = this.articleRepo.create({
       slug: dto.slug,
       status: dto.status,
+      visibility: dto.visibility ?? 'public',
+      tags: dto.tags ?? [],
     });
 
     const savedArticle = await this.articleRepo.save(article);
@@ -550,6 +556,8 @@ export class WikiService {
     return {
       id: savedArticle.id,
       slug: savedArticle.slug,
+      visibility: savedArticle.visibility,
+      tags: savedArticle.tags,
       language: primaryVersion.language,
       title: primaryVersion.title,
       subtitle: primaryVersion.subtitle ?? undefined,
@@ -587,6 +595,12 @@ export class WikiService {
     }
 
     article.status = dto.status;
+    if (dto.visibility) {
+      article.visibility = dto.visibility;
+    }
+    if (dto.tags) {
+      article.tags = dto.tags;
+    }
     await this.articleRepo.save(article);
 
     const existingVersions = await this.versionRepo.find({
@@ -675,6 +689,8 @@ export class WikiService {
     return {
       id: article.id,
       slug: article.slug,
+      visibility: article.visibility,
+      tags: article.tags,
       language: primaryVersion.language,
       title: primaryVersion.title,
       subtitle: primaryVersion.subtitle ?? undefined,
