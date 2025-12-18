@@ -18,10 +18,14 @@ async function seedCourses() {
 
   const courseRepo = SeedDataSource.getRepository(Course);
 
-  const existing = await courseRepo.count();
-  if (existing === 0) {
+  const demoTitle = 'QA Fundamentals (Demo Course)';
+  const existingDemo = await courseRepo.findOne({
+    where: { title: demoTitle },
+  });
+
+  if (!existingDemo) {
     const course = courseRepo.create({
-      title: 'QA Fundamentals (Demo Course)',
+      title: demoTitle,
       description:
         'Демо курс за WS-3. Използва се за валидиране на Course Catalog + Course Detail през FE/API/DB.',
       language: 'bg',
@@ -30,6 +34,22 @@ async function seedCourses() {
     });
 
     await courseRepo.save(course);
+  } else {
+    let shouldUpdate = false;
+
+    if (existingDemo.status !== 'active') {
+      existingDemo.status = 'active';
+      shouldUpdate = true;
+    }
+
+    if (existingDemo.isPaid) {
+      existingDemo.isPaid = false;
+      shouldUpdate = true;
+    }
+
+    if (shouldUpdate) {
+      await courseRepo.save(existingDemo);
+    }
   }
 
   await SeedDataSource.destroy();

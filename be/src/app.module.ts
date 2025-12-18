@@ -13,6 +13,7 @@ import { InMemoryRateLimitStore } from './security/rate-limit/rate-limit.store';
 import { CoursesModule } from './courses/courses.module';
 import { Course } from './courses/course.entity';
 import { CourseEnrollment } from './courses/course-enrollment.entity';
+import { CourseCurriculumItem } from './courses/course-curriculum-item.entity';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { CourseEnrollment } from './courses/course-enrollment.entity';
         User,
         Course,
         CourseEnrollment,
+        CourseCurriculumItem,
       ],
       synchronize: false,
     }),

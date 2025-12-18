@@ -90,6 +90,13 @@ export function EnrollCourseButton({ courseId }: { courseId: string }) {
         return;
       }
 
+      if (res.status === 403) {
+        setError(
+          "Този курс е платен. Записването изисква плащане (Payment required).",
+        );
+        return;
+      }
+
       if (!res.ok && res.status !== 204) {
         setError("Записването в курса не беше успешно. Опитайте отново.");
         return;

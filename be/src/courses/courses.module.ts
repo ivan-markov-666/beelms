@@ -6,10 +6,29 @@ import { CoursesService } from './courses.service';
 import { CourseEnrollment } from './course-enrollment.entity';
 import { MyCoursesController } from './my-courses.controller';
 import { AuthModule } from '../auth/auth.module';
+import { AdminCoursesController } from './admin-courses.controller';
+import { CourseCurriculumItem } from './course-curriculum-item.entity';
+import { AdminCourseCurriculumController } from './admin-course-curriculum.controller';
+import { WikiArticle } from '../wiki/wiki-article.entity';
+import { WikiArticleVersion } from '../wiki/wiki-article-version.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Course, CourseEnrollment]), AuthModule],
-  controllers: [CoursesController, MyCoursesController],
+  imports: [
+    TypeOrmModule.forFeature([
+      Course,
+      CourseEnrollment,
+      CourseCurriculumItem,
+      WikiArticle,
+      WikiArticleVersion,
+    ]),
+    AuthModule,
+  ],
+  controllers: [
+    CoursesController,
+    MyCoursesController,
+    AdminCoursesController,
+    AdminCourseCurriculumController,
+  ],
   providers: [CoursesService],
 })
 export class CoursesModule {}
