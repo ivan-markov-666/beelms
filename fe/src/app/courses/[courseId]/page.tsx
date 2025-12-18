@@ -85,7 +85,21 @@ export default async function CourseDetailPage(props: {
               .sort((a, b) => a.order - b.order)
               .map((item) => (
                 <li key={item.id} className="py-1">
-                  {item.title} <span className="text-gray-500">({item.itemType})</span>
+                  {item.itemType === "wiki" && item.wikiSlug ? (
+                    <Link
+                      href={`/courses/${encodeURIComponent(
+                        course.id,
+                      )}/wiki/${encodeURIComponent(
+                        item.wikiSlug,
+                      )}?lang=${encodeURIComponent(course.language)}`}
+                      className="font-medium text-green-700 hover:text-green-800 hover:underline"
+                    >
+                      {item.title}
+                    </Link>
+                  ) : (
+                    <span className="font-medium text-gray-900">{item.title}</span>
+                  )}{" "}
+                  <span className="text-gray-500">({item.itemType})</span>
                 </li>
               ))}
           </ol>

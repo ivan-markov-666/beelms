@@ -905,6 +905,284 @@ paths:
           description: Потребителят не е намерен
 
   ############################
+  # Admin Courses (CRUD)
+  ############################
+
+  /admin/courses:
+    get:
+      tags: [Admin, Courses]
+      summary: Списък с курсове за администрация
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Списък с курсове
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CourseSummary'
+        "401":
+          description: Неоторизиран достъп
+
+    post:
+      tags: [Admin, Courses]
+      summary: Създаване на нов курс
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                language:
+                  type: string
+                status:
+                  type: string
+                  enum: [draft, active, inactive]
+                isPaid:
+                  type: boolean
+              required: [title, description, language, status]
+      responses:
+        "201":
+          description: Курсът е създаден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseDetail'
+        "400":
+          description: Невалидни данни
+        "401":
+          description: Неоторизиран достъп
+
+  /admin/courses/{courseId}:
+    get:
+      tags: [Admin, Courses]
+      summary: Детайл на курс за администрация
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: courseId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Детайл на курс
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseDetail'
+        "401":
+          description: Неоторизиран достъп
+        "404":
+          description: Курсът не е намерен
+
+    patch:
+      tags: [Admin, Courses]
+      summary: Редакция на курс
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: courseId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                language:
+                  type: string
+                status:
+                  type: string
+                  enum: [draft, active, inactive]
+                isPaid:
+                  type: boolean
+      responses:
+        "200":
+          description: Обновен курс
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseDetail'
+        "400":
+          description: Невалидни данни
+        "401":
+          description: Неоторизиран достъп
+        "404":
+          description: Курсът не е намерен
+
+  /admin/courses/{courseId}/curriculum:
+    get:
+      tags: [Admin, Courses]
+      summary: Curriculum за курс (admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: courseId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Списък с curriculum items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CourseModuleItem'
+        "401":
+          description: Неоторизиран достъп
+        "404":
+          description: Курсът не е намерен
+
+    post:
+      tags: [Admin, Courses]
+      summary: Добавяне на curriculum item към курс (admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: courseId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                itemType:
+                  type: string
+                  enum: [wiki, task, quiz]
+                title:
+                  type: string
+                order:
+                  type: integer
+                  minimum: 1
+                  nullable: true
+                wikiSlug:
+                  type: string
+                  nullable: true
+                taskId:
+                  type: string
+                  nullable: true
+                quizId:
+                  type: string
+                  nullable: true
+              required: [itemType, title]
+      responses:
+        "201":
+          description: Създаден curriculum item
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseModuleItem'
+        "400":
+          description: Невалидни данни
+        "401":
+          description: Неоторизиран достъп
+        "404":
+          description: Курсът не е намерен
+
+  /admin/courses/{courseId}/curriculum/{itemId}:
+    patch:
+      tags: [Admin, Courses]
+      summary: Обновяване/преместване на curriculum item (admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: courseId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: itemId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                order:
+                  type: integer
+                  minimum: 1
+                wikiSlug:
+                  type: string
+                  nullable: true
+                taskId:
+                  type: string
+                  nullable: true
+                quizId:
+                  type: string
+                  nullable: true
+      responses:
+        "200":
+          description: Обновен curriculum item
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseModuleItem'
+        "400":
+          description: Невалидни данни
+        "401":
+          description: Неоторизиран достъп
+        "404":
+          description: Курсът или item-ът не са намерени
+
+    delete:
+      tags: [Admin, Courses]
+      summary: Изтриване на curriculum item (admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: courseId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: itemId
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Изтрито успешно
+        "401":
+          description: Неоторизиран достъп
+        "404":
+          description: Курсът или item-ът не са намерени
+
+  ############################
   # Wiki Service
   ############################
 

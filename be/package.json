@@ -18,7 +18,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r ts-node/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "test:e2e:local": "npm run test:setup-db && npm run test:e2e",
+    "test:e2e:local": "npm run test:setup-db && npm run test:e2e --",
     "test:regression": "npm run test && npm run test:e2e && npm run test:perf",
     "test:regression:log": "npm run test:regression > be-test-regression.log 2>&1",
     "test:setup-db": "npm run build && npm run migration:run && npm run seed:wiki && npm run seed:courses",

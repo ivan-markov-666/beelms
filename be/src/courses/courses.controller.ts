@@ -4,6 +4,7 @@ import {
   HttpCode,
   Param,
   Post,
+  Query,
   Req,
   UnauthorizedException,
   UseGuards,
@@ -13,6 +14,7 @@ import { CoursesService } from './courses.service';
 import { CourseSummaryDto } from './dto/course-summary.dto';
 import { CourseDetailDto } from './dto/course-detail.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { WikiArticleDetailDto } from '../wiki/dto/wiki-article-detail.dto';
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -51,5 +53,27 @@ export class CoursesController {
     }
 
     await this.coursesService.enrollInCourse(userId, courseId);
+  }
+
+  @Get(':courseId/wiki/:slug')
+  @UseGuards(JwtAuthGuard)
+  async getCourseWikiArticle(
+    @Param('courseId') courseId: string,
+    @Param('slug') slug: string,
+    @Query('lang') lang: string | undefined,
+    @Req() req: AuthenticatedRequest,
+  ): Promise<WikiArticleDetailDto> {
+    const userId = req.user?.userId;
+
+    if (!userId) {
+      throw new UnauthorizedException('Authenticated user not found');
+    }
+
+    return this.coursesService.getCourseWikiArticle(
+      userId,
+      courseId,
+      slug,
+      lang,
+    );
   }
 }
