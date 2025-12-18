@@ -58,6 +58,8 @@ erDiagram
         uuid id PK
         string slug           "уникален идентификатор в URL"
         string status         "draft | active | inactive"
+        string visibility     "public | course_only"
+        string tags           "array of English tags"
         timestamp created_at
         timestamp updated_at
     }
@@ -90,6 +92,7 @@ erDiagram
         string description
         string language      "напр. bg, en"
         string status        "draft | active | inactive"
+        boolean is_paid      "free vs paid"
         timestamp created_at
         timestamp updated_at
     }

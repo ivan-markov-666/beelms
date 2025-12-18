@@ -26,6 +26,7 @@ async function seedCourses() {
         'Демо курс за WS-3. Използва се за валидиране на Course Catalog + Course Detail през FE/API/DB.',
       language: 'bg',
       status: 'active',
+      isPaid: false,
     });
 
     await courseRepo.save(course);

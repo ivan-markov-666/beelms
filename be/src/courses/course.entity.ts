@@ -23,6 +23,9 @@ export class Course {
   @Column({ type: 'varchar', length: 20 })
   status: string;
 
+  @Column({ name: 'is_paid', type: 'boolean', default: false })
+  isPaid: boolean;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
