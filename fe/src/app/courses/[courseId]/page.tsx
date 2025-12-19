@@ -31,6 +31,7 @@ type CourseDetail = {
   description: string;
   language: string;
   status: string;
+  isPaid: boolean;
   curriculum: CourseModuleItem[];
 };
 
@@ -75,7 +76,7 @@ export default async function CourseDetailPage(props: {
           <span className="rounded bg-gray-100 px-2 py-1">{course.status}</span>
         </div>
 
-        <EnrollCourseButton courseId={course.id} />
+        <EnrollCourseButton courseId={course.id} isPaid={course.isPaid} />
       </header>
 
       <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">

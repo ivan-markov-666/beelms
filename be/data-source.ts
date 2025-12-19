@@ -6,6 +6,8 @@ import { User } from './src/auth/user.entity';
 import { Course } from './src/courses/course.entity';
 import { CourseEnrollment } from './src/courses/course-enrollment.entity';
 import { CourseCurriculumItem } from './src/courses/course-curriculum-item.entity';
+import { UserCurriculumProgress } from './src/courses/user-curriculum-progress.entity';
+import { CoursePurchase } from './src/courses/course-purchase.entity';
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -20,7 +22,9 @@ export const AppDataSource = new DataSource({
     User,
     Course,
     CourseEnrollment,
+    CoursePurchase,
     CourseCurriculumItem,
+    UserCurriculumProgress,
   ],
   migrations: ['src/migrations/*.ts'],
   synchronize: false,

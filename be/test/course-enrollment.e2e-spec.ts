@@ -128,6 +128,28 @@ describe('Course enrollment + my-courses endpoints (e2e)', () => {
     expect(body.message).toBe('Payment required');
   });
 
+  it('User can purchase a paid course and then enroll', async () => {
+    const { accessToken } = await registerAndLogin(app, 'course-purchase-paid');
+
+    const course = await createCourse({ isPaid: true });
+    const courseId = course.id;
+
+    await request(app.getHttpServer())
+      .post(`/api/courses/${courseId}/enroll`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .expect(403);
+
+    await request(app.getHttpServer())
+      .post(`/api/courses/${courseId}/purchase`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .expect(204);
+
+    await request(app.getHttpServer())
+      .post(`/api/courses/${courseId}/enroll`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .expect(204);
+  });
+
   it('GET /api/users/me/courses does not include inactive courses', async () => {
     const { accessToken } = await registerAndLogin(app, 'my-courses-inactive');
 
