@@ -10,6 +10,7 @@ import { Course } from './course.entity';
 import { CourseEnrollment } from './course-enrollment.entity';
 import { CourseCurriculumItem } from './course-curriculum-item.entity';
 import { UserCurriculumProgress } from './user-curriculum-progress.entity';
+import { CoursePurchase } from './course-purchase.entity';
 import { WikiArticle } from '../wiki/wiki-article.entity';
 import { WikiArticleVersion } from '../wiki/wiki-article-version.entity';
 import { WikiArticleDetailDto } from '../wiki/dto/wiki-article-detail.dto';
@@ -29,6 +30,8 @@ export class CoursesService {
     private readonly courseRepo: Repository<Course>,
     @InjectRepository(CourseEnrollment)
     private readonly enrollmentRepo: Repository<CourseEnrollment>,
+    @InjectRepository(CoursePurchase)
+    private readonly purchaseRepo: Repository<CoursePurchase>,
     @InjectRepository(CourseCurriculumItem)
     private readonly curriculumRepo: Repository<CourseCurriculumItem>,
     @InjectRepository(UserCurriculumProgress)
@@ -556,7 +559,13 @@ export class CoursesService {
     }
 
     if (course.isPaid) {
-      throw new ForbiddenException('Payment required');
+      const purchased = await this.purchaseRepo.findOne({
+        where: { userId, courseId },
+      });
+
+      if (!purchased) {
+        throw new ForbiddenException('Payment required');
+      }
     }
 
     const existing = await this.enrollmentRepo.findOne({
@@ -574,6 +583,33 @@ export class CoursesService {
     });
 
     await this.enrollmentRepo.save(enrollment);
+  }
+
+  async purchaseCourse(userId: string, courseId: string): Promise<void> {
+    const course = await this.courseRepo.findOne({ where: { id: courseId } });
+
+    if (!course || course.status !== 'active') {
+      throw new NotFoundException('Course not found');
+    }
+
+    if (!course.isPaid) {
+      throw new BadRequestException('Course is not paid');
+    }
+
+    const existing = await this.purchaseRepo.findOne({
+      where: { userId, courseId },
+    });
+
+    if (existing) {
+      return;
+    }
+
+    const purchase = this.purchaseRepo.create({
+      userId,
+      courseId,
+    });
+
+    await this.purchaseRepo.save(purchase);
   }
 
   async getMyCourses(userId: string): Promise<MyCourseListItemDto[]> {

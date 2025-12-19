@@ -13,12 +13,14 @@ import { WikiArticle } from '../wiki/wiki-article.entity';
 import { WikiArticleVersion } from '../wiki/wiki-article-version.entity';
 import { UserCurriculumProgress } from './user-curriculum-progress.entity';
 import { CurriculumProgressController } from './curriculum-progress.controller';
+import { CoursePurchase } from './course-purchase.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
       Course,
       CourseEnrollment,
+      CoursePurchase,
       CourseCurriculumItem,
       UserCurriculumProgress,
       WikiArticle,

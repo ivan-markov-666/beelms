@@ -15,7 +15,13 @@ function apiUrl(path: string): string {
   return `${normalizedBase}${normalizedPath}`;
 }
 
-export function EnrollCourseButton({ courseId }: { courseId: string }) {
+export function EnrollCourseButton({
+  courseId,
+  isPaid,
+}: {
+  courseId: string;
+  isPaid: boolean;
+}) {
   const [hasToken, setHasToken] = useState<boolean | null>(null);
   const [enrolled, setEnrolled] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -63,6 +69,32 @@ export function EnrollCourseButton({ courseId }: { courseId: string }) {
     };
   }, [courseId]);
 
+  const purchaseIfNeeded = async (accessToken: string) => {
+    if (!isPaid) {
+      return true;
+    }
+
+    const res = await fetch(apiUrl(`/courses/${courseId}/purchase`), {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    if (res.status === 401) {
+      setHasToken(false);
+      setError("Няма активна сесия. Моля, влезте отново.");
+      return false;
+    }
+
+    if (!res.ok && res.status !== 204) {
+      setError("Неуспешно отключване на курса. Опитайте отново.");
+      return false;
+    }
+
+    return true;
+  };
+
   const enroll = async () => {
     setError(null);
     setSuccess(null);
@@ -77,6 +109,13 @@ export function EnrollCourseButton({ courseId }: { courseId: string }) {
     setSubmitting(true);
 
     try {
+      if (isPaid) {
+        const purchased = await purchaseIfNeeded(accessToken);
+        if (!purchased) {
+          return;
+        }
+      }
+
       const res = await fetch(apiUrl(`/courses/${courseId}/enroll`), {
         method: "POST",
         headers: {
@@ -130,7 +169,15 @@ export function EnrollCourseButton({ courseId }: { courseId: string }) {
         disabled={submitting || enrolled}
         className="inline-flex items-center justify-center rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-700 disabled:opacity-70"
       >
-        {submitting ? "Записване..." : enrolled ? "Enrolled" : "Enroll"}
+        {submitting
+          ? isPaid
+            ? "Отключване..."
+            : "Записване..."
+          : enrolled
+            ? "Enrolled"
+            : isPaid
+              ? "Unlock & Enroll"
+              : "Enroll"}
       </button>
 
       {success && <p className="text-sm text-green-700">{success}</p>}
