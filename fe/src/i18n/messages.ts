@@ -4,6 +4,7 @@ type DomainMessages = {
   nav: {
     wiki: string;
     courses: string;
+    myCourses: string;
     login: string;
     register: string;
     profile: string;
@@ -24,6 +25,7 @@ export const messages: Messages = {
     nav: {
       wiki: "Wiki",
       courses: "Courses",
+      myCourses: "My Courses",
       login: "Вход",
       register: "Регистрация",
       profile: "Профил",
@@ -329,6 +331,7 @@ export const messages: Messages = {
     nav: {
       wiki: "Wiki",
       courses: "Courses",
+      myCourses: "My Courses",
       login: "Sign in",
       register: "Register",
       profile: "Profile",
@@ -632,6 +635,7 @@ export const messages: Messages = {
     nav: {
       wiki: "Wiki",
       courses: "Kurse",
+      myCourses: "Meine Kurse",
       login: "Anmelden",
       register: "Registrieren",
       profile: "Profil",

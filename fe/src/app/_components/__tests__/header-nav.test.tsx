@@ -34,6 +34,9 @@ describe("HeaderNav i18n", () => {
     expect(screen.getByRole("link", { name: "Wiki" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Courses" })).toBeInTheDocument();
     expect(
+      screen.queryByRole("link", { name: "My Courses" }),
+    ).not.toBeInTheDocument();
+    expect(
       await screen.findByRole("link", { name: "Вход" }),
     ).toBeInTheDocument();
   });
@@ -46,6 +49,9 @@ describe("HeaderNav i18n", () => {
 
     expect(screen.getByRole("link", { name: "Wiki" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Courses" })).toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "My Courses" }),
+    ).not.toBeInTheDocument();
     expect(
       await screen.findByRole("link", { name: "Sign in" }),
     ).toBeInTheDocument();
@@ -77,6 +83,9 @@ describe("HeaderNav i18n", () => {
       ).not.toBeInTheDocument();
     });
 
+    expect(
+      await screen.findByRole("link", { name: "My Courses" }),
+    ).toBeInTheDocument();
     expect(await screen.findByRole("link", { name: "Профил" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Изход" })).toBeInTheDocument();
 

@@ -115,6 +115,11 @@ export function HeaderNav() {
           >
             {t(lang, "nav", "courses")}
           </Link>
+          {hasToken === true && (
+            <Link href="/my-courses" className="hover:text-green-600">
+              {t(lang, "nav", "myCourses")}
+            </Link>
+          )}
           {isAdmin === true && (
             <Link
               href="/admin"

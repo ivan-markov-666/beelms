@@ -31,15 +31,18 @@ export class AdminCoursesController {
   }
 
   @Post()
-  create(@Body() dto: AdminCreateCourseDto): Promise<CourseDetailDto> {
-    return this.coursesService.adminCreateCourse(dto);
+  create(@Body() dto: unknown): Promise<CourseDetailDto> {
+    return this.coursesService.adminCreateCourse(dto as AdminCreateCourseDto);
   }
 
   @Patch(':courseId')
   update(
     @Param('courseId') courseId: string,
-    @Body() dto: AdminUpdateCourseDto,
+    @Body() dto: unknown,
   ): Promise<CourseDetailDto> {
-    return this.coursesService.adminUpdateCourse(courseId, dto);
+    return this.coursesService.adminUpdateCourse(
+      courseId,
+      dto as AdminUpdateCourseDto,
+    );
   }
 }
