@@ -113,14 +113,16 @@ export default function MyCoursesPage() {
       {!loading && !error && items.length > 0 && (
         <section className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {items.map((course) => (
-            <Link
+            <div
               key={course.id}
-              href={`/courses/${course.id}`}
               className="flex h-full flex-col rounded-lg border border-gray-200 bg-white p-5 text-left shadow-sm transition hover:shadow-md"
             >
-              <h2 className="mb-2 text-lg font-semibold text-gray-900">
+              <Link
+                href={`/courses/${course.id}`}
+                className="mb-2 text-lg font-semibold text-gray-900 hover:text-green-800"
+              >
                 {course.title}
-              </h2>
+              </Link>
               <p className="text-sm text-gray-600 line-clamp-4">
                 {course.description}
               </p>
@@ -132,7 +134,25 @@ export default function MyCoursesPage() {
                   {course.enrollmentStatus}
                 </span>
               </div>
-            </Link>
+
+              <div className="mt-4 flex items-center gap-3">
+                <Link
+                  href={`/courses/${course.id}`}
+                  className="text-sm text-green-700 hover:text-green-800"
+                >
+                  Open course →
+                </Link>
+
+                {course.enrollmentStatus === "completed" && (
+                  <Link
+                    href={`/my-courses/${course.id}/certificate`}
+                    className="text-sm text-green-700 hover:text-green-800"
+                  >
+                    Certificate →
+                  </Link>
+                )}
+              </div>
+            </div>
           ))}
         </section>
       )}
