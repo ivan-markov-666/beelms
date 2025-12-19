@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { EnrollCourseButton } from "../_components/enroll-course-button";
+import { CourseProgressPanel } from "../_components/course-progress-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -87,6 +88,8 @@ export default async function CourseDetailPage(props: {
 
         <EnrollCourseButton courseId={course.id} isPaid={course.isPaid} />
       </header>
+
+      <CourseProgressPanel courseId={course.id} courseLanguage={course.language} />
 
       <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
         <h2 className="text-lg font-semibold text-gray-900">
