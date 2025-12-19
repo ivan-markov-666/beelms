@@ -24,7 +24,9 @@ export function EnrollCourseButton({
 }) {
   const [hasToken, setHasToken] = useState<boolean | null>(null);
   const [enrolled, setEnrolled] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
+  const [phase, setPhase] = useState<"idle" | "unlocking" | "enrolling">(
+    "idle",
+  );
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -74,6 +76,8 @@ export function EnrollCourseButton({
       return true;
     }
 
+    setPhase("unlocking");
+
     const res = await fetch(apiUrl(`/courses/${courseId}/purchase`), {
       method: "POST",
       headers: {
@@ -84,11 +88,13 @@ export function EnrollCourseButton({
     if (res.status === 401) {
       setHasToken(false);
       setError("Няма активна сесия. Моля, влезте отново.");
+      setPhase("idle");
       return false;
     }
 
     if (!res.ok && res.status !== 204) {
       setError("Неуспешно отключване на курса. Опитайте отново.");
+      setPhase("idle");
       return false;
     }
 
@@ -106,7 +112,7 @@ export function EnrollCourseButton({
       return;
     }
 
-    setSubmitting(true);
+    setPhase("enrolling");
 
     try {
       if (isPaid) {
@@ -114,6 +120,8 @@ export function EnrollCourseButton({
         if (!purchased) {
           return;
         }
+
+        setPhase("enrolling");
       }
 
       const res = await fetch(apiUrl(`/courses/${courseId}/enroll`), {
@@ -126,27 +134,32 @@ export function EnrollCourseButton({
       if (res.status === 401) {
         setHasToken(false);
         setError("Няма активна сесия. Моля, влезте отново.");
+        setPhase("idle");
         return;
       }
 
       if (res.status === 403) {
-        setError(
-          "Този курс е платен. Записването изисква плащане (Payment required).",
-        );
+        setError("Курсът е платен и не е отключен (Payment required).");
+        setPhase("idle");
         return;
       }
 
       if (!res.ok && res.status !== 204) {
         setError("Записването в курса не беше успешно. Опитайте отново.");
+        setPhase("idle");
         return;
       }
 
-      setSuccess("Записването е успешно.");
+      setSuccess(
+        isPaid
+          ? "Курсът е отключен и записването е успешно."
+          : "Записването е успешно.",
+      );
       setEnrolled(true);
     } catch {
       setError("Възникна грешка при връзката със сървъра.");
     } finally {
-      setSubmitting(false);
+      setPhase("idle");
     }
   };
 
@@ -166,18 +179,18 @@ export function EnrollCourseButton({
       <button
         type="button"
         onClick={enroll}
-        disabled={submitting || enrolled}
+        disabled={phase !== "idle" || enrolled}
         className="inline-flex items-center justify-center rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-700 disabled:opacity-70"
       >
-        {submitting
-          ? isPaid
-            ? "Отключване..."
-            : "Записване..."
-          : enrolled
-            ? "Enrolled"
-            : isPaid
-              ? "Unlock & Enroll"
-              : "Enroll"}
+        {phase === "unlocking"
+          ? "Отключване..."
+          : phase === "enrolling"
+            ? "Записване..."
+            : enrolled
+              ? "Enrolled"
+              : isPaid
+                ? "Unlock & Enroll"
+                : "Enroll"}
       </button>
 
       {success && <p className="text-sm text-green-700">{success}</p>}

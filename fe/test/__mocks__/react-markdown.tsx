@@ -11,7 +11,18 @@ export type ReactMarkdownProps = {
   [key: string]: any;
 };
 
-export default function ReactMarkdownMock({ children, className, ...rest }: ReactMarkdownProps) {
+export default function ReactMarkdownMock({
+  children,
+  className,
+  remarkPlugins,
+  rehypePlugins,
+  components,
+  ...rest
+}: ReactMarkdownProps) {
+  void remarkPlugins;
+  void rehypePlugins;
+  void components;
+
   return (
     <span data-testid="react-markdown-mock" className={className} {...rest}>
       {children}
