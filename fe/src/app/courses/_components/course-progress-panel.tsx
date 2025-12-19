@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { getAccessToken } from "../../auth-token";
 
@@ -43,77 +43,77 @@ export function CourseProgressPanel({
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<CurriculumProgress | null>(null);
 
-  useEffect(() => {
+  const refresh = useCallback(async () => {
     const token = getAccessToken();
     setHasToken(!!token);
 
     if (!token) {
       setLoading(false);
+      setError(null);
+      setData(null);
       return;
     }
 
-    let cancelled = false;
+    setLoading(true);
 
-    const run = async () => {
-      try {
-        const res = await fetch(
-          apiUrl(`/courses/${encodeURIComponent(courseId)}/curriculum/progress`),
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+    try {
+      const res = await fetch(
+        apiUrl(`/courses/${encodeURIComponent(courseId)}/curriculum/progress`),
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
           },
-        );
+        },
+      );
 
-        if (res.status === 401) {
-          if (!cancelled) {
-            setHasToken(false);
-            setError(null);
-            setData(null);
-          }
-          return;
-        }
-
-        if (res.status === 403) {
-          if (!cancelled) {
-            setError("Запиши се в курса, за да виждаш прогреса.");
-            setData(null);
-          }
-          return;
-        }
-
-        if (!res.ok) {
-          if (!cancelled) {
-            setError("Неуспешно зареждане на прогреса.");
-            setData(null);
-          }
-          return;
-        }
-
-        const json = (await res.json()) as CurriculumProgress;
-
-        if (!cancelled) {
-          setError(null);
-          setData(json);
-        }
-      } catch {
-        if (!cancelled) {
-          setError("Възникна грешка при връзката със сървъра.");
-          setData(null);
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
+      if (res.status === 401) {
+        setHasToken(false);
+        setError(null);
+        setData(null);
+        return;
       }
+
+      if (res.status === 403) {
+        setError("Запиши се в курса, за да виждаш прогреса.");
+        setData(null);
+        return;
+      }
+
+      if (!res.ok) {
+        setError("Неуспешно зареждане на прогреса.");
+        setData(null);
+        return;
+      }
+
+      const json = (await res.json()) as CurriculumProgress;
+      setError(null);
+      setData(json);
+    } catch {
+      setError("Възникна грешка при връзката със сървъра.");
+      setData(null);
+    } finally {
+      setLoading(false);
+    }
+  }, [courseId]);
+
+  useEffect(() => {
+    void refresh();
+  }, [refresh]);
+
+  useEffect(() => {
+    const handler = (event: Event) => {
+      const custom = event as CustomEvent<{ courseId?: string }>;
+      if (custom.detail?.courseId && custom.detail.courseId !== courseId) {
+        return;
+      }
+      void refresh();
     };
 
-    void run();
-
+    window.addEventListener("course-progress-updated", handler);
     return () => {
-      cancelled = true;
+      window.removeEventListener("course-progress-updated", handler);
     };
-  }, [courseId, courseLanguage]);
+  }, [courseId, refresh]);
 
   if (loading) {
     return null;

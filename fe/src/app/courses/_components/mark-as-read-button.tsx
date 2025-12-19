@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import { getAccessToken } from "../../auth-token";
 
 const API_BASE_URL =
@@ -35,6 +36,7 @@ export function MarkAsReadButton({
   const [marking, setMarking] = useState(false);
   const [completed, setCompleted] = useState(false);
   const [itemId, setItemId] = useState<string | null>(null);
+  const [progressPercent, setProgressPercent] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const fetchProgress = useCallback(async () => {
@@ -60,6 +62,8 @@ export function MarkAsReadButton({
       }
 
       const data = (await res.json()) as CurriculumProgress;
+
+      setProgressPercent(data.progressPercent);
 
       const item = data.items.find(
         (i) => i.itemType === "wiki" && i.wikiSlug === wikiSlug,
@@ -105,6 +109,14 @@ export function MarkAsReadButton({
 
       if (res.status === 204 || res.ok) {
         setCompleted(true);
+
+        await fetchProgress();
+
+        window.dispatchEvent(
+          new CustomEvent("course-progress-updated", {
+            detail: { courseId },
+          }),
+        );
       } else if (res.status === 401) {
         setError("Трябва да си логнат.");
       } else if (res.status === 403) {
@@ -129,22 +141,33 @@ export function MarkAsReadButton({
 
   if (completed) {
     return (
-      <div className="flex items-center gap-2 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
-        <svg
-          className="h-5 w-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          aria-hidden="true"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M5 13l4 4L19 7"
-          />
-        </svg>
-        <span>Прочетено</span>
+      <div className="space-y-3">
+        <div className="flex items-center gap-2 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+          <svg
+            className="h-5 w-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M5 13l4 4L19 7"
+            />
+          </svg>
+          <span>Прочетено</span>
+        </div>
+
+        {typeof progressPercent === "number" && progressPercent >= 100 && (
+          <Link
+            href={`/my-courses/${encodeURIComponent(courseId)}/certificate`}
+            className="inline-flex items-center justify-center rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-700"
+          >
+            Certificate
+          </Link>
+        )}
       </div>
     );
   }
