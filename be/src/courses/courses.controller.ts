@@ -15,6 +15,7 @@ import { CourseSummaryDto } from './dto/course-summary.dto';
 import { CourseDetailDto } from './dto/course-detail.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { WikiArticleDetailDto } from '../wiki/dto/wiki-article-detail.dto';
+import { CourseCertificateDto } from './dto/course-certificate.dto';
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -69,6 +70,26 @@ export class CoursesController {
     }
 
     await this.coursesService.purchaseCourse(userId, courseId);
+  }
+
+  @Get(':courseId/certificate')
+  @UseGuards(JwtAuthGuard)
+  async getCertificate(
+    @Param('courseId') courseId: string,
+    @Req() req: AuthenticatedRequest,
+  ): Promise<CourseCertificateDto> {
+    const userId = req.user?.userId;
+    const userEmail = req.user?.email;
+
+    if (!userId || !userEmail) {
+      throw new UnauthorizedException('Authenticated user not found');
+    }
+
+    return this.coursesService.getCourseCertificate(
+      userId,
+      userEmail,
+      courseId,
+    );
   }
 
   @Get(':courseId/wiki/:slug')

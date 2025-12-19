@@ -22,6 +22,7 @@ import { AdminCreateCourseDto } from './dto/admin-create-course.dto';
 import { AdminUpdateCourseDto } from './dto/admin-update-course.dto';
 import { AdminCreateCourseCurriculumItemDto } from './dto/admin-create-course-curriculum-item.dto';
 import { AdminUpdateCourseCurriculumItemDto } from './dto/admin-update-course-curriculum-item.dto';
+import { CourseCertificateDto } from './dto/course-certificate.dto';
 
 @Injectable()
 export class CoursesService {
@@ -610,6 +611,44 @@ export class CoursesService {
     });
 
     await this.purchaseRepo.save(purchase);
+  }
+
+  async getCourseCertificate(
+    userId: string,
+    userEmail: string,
+    courseId: string,
+  ): Promise<CourseCertificateDto> {
+    const course = await this.courseRepo.findOne({ where: { id: courseId } });
+
+    if (!course || course.status !== 'active') {
+      throw new NotFoundException('Course not found');
+    }
+
+    const enrollment = await this.enrollmentRepo.findOne({
+      where: { userId, courseId },
+    });
+
+    if (!enrollment) {
+      throw new ForbiddenException('Enrollment required');
+    }
+
+    if ((enrollment.status ?? '').toLowerCase() !== 'completed') {
+      throw new ForbiddenException('Course not completed');
+    }
+
+    const completedAt = (
+      enrollment.updatedAt ?? enrollment.enrolledAt
+    ).toISOString();
+    const issuedAt = new Date().toISOString();
+
+    return {
+      courseId: course.id,
+      courseTitle: course.title,
+      userId,
+      userEmail,
+      completedAt,
+      issuedAt,
+    };
   }
 
   async getMyCourses(userId: string): Promise<MyCourseListItemDto[]> {
