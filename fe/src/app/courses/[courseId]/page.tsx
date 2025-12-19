@@ -70,6 +70,15 @@ export default async function CourseDetailPage(props: {
         <h1 className="text-3xl font-semibold text-zinc-900">{course.title}</h1>
         <p className="text-sm text-zinc-600">{course.description}</p>
         <div className="flex items-center gap-2 text-xs text-gray-500">
+          <span
+            className={`rounded-full px-2 py-1 text-[11px] font-semibold ${
+              course.isPaid
+                ? "bg-amber-100 text-amber-800"
+                : "bg-emerald-100 text-emerald-800"
+            }`}
+          >
+            {course.isPaid ? "Paid" : "Free"}
+          </span>
           <span className="rounded bg-gray-100 px-2 py-1">
             {course.language}
           </span>
