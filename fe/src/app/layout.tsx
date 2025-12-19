@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Suspense } from "react";
 import "./globals.css";
 import { HeaderNav } from "./_components/header-nav";
 import { SiteFooter } from "./_components/site-footer";
@@ -30,9 +31,13 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <div className="flex min-h-screen flex-col bg-gray-50">
-          <HeaderNav />
+          <Suspense fallback={null}>
+            <HeaderNav />
+          </Suspense>
           <div className="flex-1">{children}</div>
-          <SiteFooter />
+          <Suspense fallback={null}>
+            <SiteFooter />
+          </Suspense>
         </div>
       </body>
     </html>
