@@ -64,9 +64,7 @@ describe("LanguageSwitcher", () => {
 
   it("updates lang and preserves other params on non-wiki pages", () => {
     usePathnameMock.mockReturnValue("/profile");
-    useSearchParamsMock.mockReturnValue(
-      makeSearchParams("lang=bg&foo=bar"),
-    );
+    useSearchParamsMock.mockReturnValue(makeSearchParams("lang=bg&foo=bar"));
 
     render(<LanguageSwitcher />);
 

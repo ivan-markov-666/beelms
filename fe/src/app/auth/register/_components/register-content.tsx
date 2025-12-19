@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -190,7 +190,7 @@ export function RegisterContent() {
                 htmlFor="email"
                 className="block text-sm font-medium text-gray-800"
               >
-                {t(lang, "auth", "registerEmailLabel")} 
+                {t(lang, "auth", "registerEmailLabel")}
                 <span className="text-red-500">*</span>
               </label>
               <input
@@ -213,7 +213,7 @@ export function RegisterContent() {
                 htmlFor="password"
                 className="block text-sm font-medium text-gray-800"
               >
-                {t(lang, "auth", "registerPasswordLabel")} 
+                {t(lang, "auth", "registerPasswordLabel")}
                 <span className="text-red-500">*</span>
               </label>
               <input
@@ -239,7 +239,7 @@ export function RegisterContent() {
                 htmlFor="confirmPassword"
                 className="block text-sm font-medium text-gray-800"
               >
-                {t(lang, "auth", "registerConfirmPasswordLabel")} 
+                {t(lang, "auth", "registerConfirmPasswordLabel")}
                 <span className="text-red-500">*</span>
               </label>
               <input
@@ -323,7 +323,7 @@ export function RegisterContent() {
 
         <div className="mt-6 text-center text-xs text-gray-600">
           <p>
-            {t(lang, "auth", "registerHasAccount")} {" "}
+            {t(lang, "auth", "registerHasAccount")}{" "}
             <button
               type="button"
               className="cursor-pointer font-semibold text-green-700 hover:text-green-800"

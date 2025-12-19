@@ -40,8 +40,7 @@ export default function AdminLayout({
           if (res.status === 401 || res.status === 404) {
             try {
               clearAccessToken();
-            } catch {
-            }
+            } catch {}
             router.replace("/auth/login");
             return;
           }

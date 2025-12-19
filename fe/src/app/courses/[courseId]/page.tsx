@@ -5,7 +5,8 @@ import { EnrollCourseButton } from "../_components/enroll-course-button";
 export const dynamic = "force-dynamic";
 
 function apiUrl(path: string): string {
-  const base = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
+  const base =
+    process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
   const normalizedBase = base.endsWith("/api")
     ? base
     : `${base.replace(/\/$/, "")}/api`;
@@ -59,13 +60,18 @@ export default async function CourseDetailPage(props: {
   return (
     <main className="mx-auto flex min-h-screen max-w-4xl flex-col gap-8 px-4 py-10">
       <header className="space-y-3">
-        <Link href="/courses" className="text-sm text-green-700 hover:text-green-800">
+        <Link
+          href="/courses"
+          className="text-sm text-green-700 hover:text-green-800"
+        >
           ← Back to courses
         </Link>
         <h1 className="text-3xl font-semibold text-zinc-900">{course.title}</h1>
         <p className="text-sm text-zinc-600">{course.description}</p>
         <div className="flex items-center gap-2 text-xs text-gray-500">
-          <span className="rounded bg-gray-100 px-2 py-1">{course.language}</span>
+          <span className="rounded bg-gray-100 px-2 py-1">
+            {course.language}
+          </span>
           <span className="rounded bg-gray-100 px-2 py-1">{course.status}</span>
         </div>
 
@@ -73,7 +79,9 @@ export default async function CourseDetailPage(props: {
       </header>
 
       <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
-        <h2 className="text-lg font-semibold text-gray-900">Curriculum (MVP)</h2>
+        <h2 className="text-lg font-semibold text-gray-900">
+          Curriculum (MVP)
+        </h2>
         {course.curriculum.length === 0 ? (
           <p className="mt-2 text-sm text-gray-600">
             Curriculum ще бъде добавен на следващ етап (WS-3 tasks/quizzes).
@@ -97,7 +105,9 @@ export default async function CourseDetailPage(props: {
                       {item.title}
                     </Link>
                   ) : (
-                    <span className="font-medium text-gray-900">{item.title}</span>
+                    <span className="font-medium text-gray-900">
+                      {item.title}
+                    </span>
                   )}{" "}
                   <span className="text-gray-500">({item.itemType})</span>
                 </li>

@@ -146,7 +146,7 @@ function createTurndown(): TurndownService {
         return "";
       }
 
-      const escapedTitle = title.replace(/"/g, "\\\"");
+      const escapedTitle = title.replace(/"/g, '\\"');
       const titleSuffix = escapedTitle ? ` \"${escapedTitle}\"` : "";
       return `![${alt}](${src}${titleSuffix})`;
     },
@@ -278,9 +278,8 @@ export function WikiRichEditor({
 
   const [, bumpSelectionVersion] = useState(0);
 
-  const onEditorReadyRef = useRef<WikiRichEditorProps["onEditorReady"]>(
-    onEditorReady,
-  );
+  const onEditorReadyRef =
+    useRef<WikiRichEditorProps["onEditorReady"]>(onEditorReady);
 
   useEffect(() => {
     onEditorReadyRef.current = onEditorReady;
@@ -417,11 +416,17 @@ export function WikiRichEditor({
     return allItalic;
   };
 
-  const findClosestImageInSelectionBlock = (): { pos: number; node: PMNode } | null => {
+  const findClosestImageInSelectionBlock = (): {
+    pos: number;
+    node: PMNode;
+  } | null => {
     const { state } = editor;
     const { selection } = state;
 
-    if (selection instanceof NodeSelection && selection.node.type.name === "image") {
+    if (
+      selection instanceof NodeSelection &&
+      selection.node.type.name === "image"
+    ) {
       return { pos: selection.from, node: selection.node };
     }
 
@@ -454,7 +459,11 @@ export function WikiRichEditor({
       return null;
     }
 
-    const best = imagesInBlock.reduce<{ pos: number; node: PMNode; dist: number }>(
+    const best = imagesInBlock.reduce<{
+      pos: number;
+      node: PMNode;
+      dist: number;
+    }>(
       (acc, cur) => {
         const dist = Math.abs(cur.pos - selection.from);
         if (dist < acc.dist) {
@@ -515,7 +524,9 @@ export function WikiRichEditor({
             className={`${btnBase} ${
               editor.isActive("heading", { level: 1 }) ? btnActive : btnIdle
             }`}
-            onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+            onClick={() =>
+              editor.chain().focus().toggleHeading({ level: 1 }).run()
+            }
           >
             H1
           </button>
@@ -524,7 +535,9 @@ export function WikiRichEditor({
             className={`${btnBase} ${
               editor.isActive("heading", { level: 2 }) ? btnActive : btnIdle
             }`}
-            onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+            onClick={() =>
+              editor.chain().focus().toggleHeading({ level: 2 }).run()
+            }
           >
             H2
           </button>
@@ -533,7 +546,9 @@ export function WikiRichEditor({
             className={`${btnBase} ${
               editor.isActive("heading", { level: 3 }) ? btnActive : btnIdle
             }`}
-            onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+            onClick={() =>
+              editor.chain().focus().toggleHeading({ level: 3 }).run()
+            }
           >
             H3
           </button>
@@ -542,7 +557,9 @@ export function WikiRichEditor({
             className={`${btnBase} ${
               editor.isActive("heading", { level: 4 }) ? btnActive : btnIdle
             }`}
-            onClick={() => editor.chain().focus().toggleHeading({ level: 4 }).run()}
+            onClick={() =>
+              editor.chain().focus().toggleHeading({ level: 4 }).run()
+            }
           >
             H4
           </button>
@@ -639,7 +656,12 @@ export function WikiRichEditor({
             type="button"
             className={`${btnBase} ${btnIdle}`}
             onClick={() =>
-              editor.chain().focus().extendMarkRange("link").unsetMark("link").run()
+              editor
+                .chain()
+                .focus()
+                .extendMarkRange("link")
+                .unsetMark("link")
+                .run()
             }
             disabled={!editor.isActive("link")}
           >
@@ -649,10 +671,7 @@ export function WikiRichEditor({
             type="button"
             className={`${btnBase} ${btnIdle}`}
             onClick={() => {
-              const input = window.prompt(
-                "Image URL (http(s):// or /...)",
-                "",
-              );
+              const input = window.prompt("Image URL (http(s):// or /...)", "");
               if (input === null) {
                 return;
               }
@@ -714,7 +733,11 @@ export function WikiRichEditor({
                 alt,
                 title,
               };
-              const tr = state.tr.setNodeMarkup(match.pos, undefined, nextAttrs);
+              const tr = state.tr.setNodeMarkup(
+                match.pos,
+                undefined,
+                nextAttrs,
+              );
               view.dispatch(tr);
             }}
           >
@@ -793,7 +816,7 @@ export function WikiRichEditor({
 
               const hasCaption = isCaptionParagraph(maybeCaptionNode);
               const currentCaption = hasCaption
-                ? maybeCaptionNode?.textContent ?? ""
+                ? (maybeCaptionNode?.textContent ?? "")
                 : "";
 
               const nextCaption = window.prompt(
@@ -829,7 +852,10 @@ export function WikiRichEditor({
 
               if (hasCaption && maybeCaptionNode) {
                 editor.commands.insertContentAt(
-                  { from: insertPos, to: insertPos + maybeCaptionNode.nodeSize },
+                  {
+                    from: insertPos,
+                    to: insertPos + maybeCaptionNode.nodeSize,
+                  },
                   captionParagraph,
                 );
                 return;
@@ -969,11 +995,17 @@ export function WikiRichEditor({
             type="button"
             className={`${btnBase} ${btnIdle}`}
             onClick={() => {
-              editor.chain().focus().insertContent({
-                type: "codeBlock",
-                attrs: { language: "mermaid" },
-                content: [{ type: "text", text: "graph TD\n  A[Start] --> B[Next]" }],
-              }).run();
+              editor
+                .chain()
+                .focus()
+                .insertContent({
+                  type: "codeBlock",
+                  attrs: { language: "mermaid" },
+                  content: [
+                    { type: "text", text: "graph TD\n  A[Start] --> B[Next]" },
+                  ],
+                })
+                .run();
             }}
           >
             Insert

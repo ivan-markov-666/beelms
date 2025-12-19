@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useEffect, useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
@@ -124,7 +124,9 @@ export default function ProfilePage() {
           }
 
           if (!cancelled) {
-            setGlobalError("Неуспешно зареждане на профила. Моля, опитайте отново.");
+            setGlobalError(
+              "Неуспешно зареждане на профила. Моля, опитайте отново.",
+            );
           }
           return;
         }
@@ -416,7 +418,9 @@ export default function ProfilePage() {
       <main className="w-full max-w-4xl space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="mb-2 text-4xl font-bold text-zinc-900">Моят профил</h1>
+            <h1 className="mb-2 text-4xl font-bold text-zinc-900">
+              Моят профил
+            </h1>
             <p className="text-sm text-zinc-600">
               Управлявайте вашия акаунт и данни
             </p>
@@ -428,7 +432,8 @@ export default function ProfilePage() {
           >
             Изход
           </button>
-        </div>        <section className="rounded-lg border border-gray-200 bg-white p-8 shadow-sm">
+        </div>{" "}
+        <section className="rounded-lg border border-gray-200 bg-white p-8 shadow-sm">
           <h2 className="mb-6 flex items-center text-xl font-bold text-gray-900">
             <span
               aria-hidden="true"
@@ -717,8 +722,8 @@ export default function ProfilePage() {
             </p>
           </div>
           <div className="mb-4 rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-xs text-gray-600">
-            CAPTCHA / reCAPTCHA (placeholder за защита от ботове при заявка
-            за експорт на лични данни)
+            CAPTCHA / reCAPTCHA (placeholder за защита от ботове при заявка за
+            експорт на лични данни)
           </div>
           <button
             type="button"
@@ -764,17 +769,16 @@ export default function ProfilePage() {
                 <span className="font-semibold">Email:</span> {exportData.email}
               </p>
               <p className="text-xs text-zinc-700">
-                <span className="font-semibold">Дата на регистрация:</span> {" "}
+                <span className="font-semibold">Дата на регистрация:</span>{" "}
                 {formatDate(exportData.createdAt)}
               </p>
               <p className="text-xs text-zinc-700">
-                <span className="font-semibold">Активен акаунт:</span> {" "}
+                <span className="font-semibold">Активен акаунт:</span>{" "}
                 {exportData.active ? "Да" : "Не"}
               </p>
             </div>
           )}
         </section>
-
         <section className="rounded-lg border border-red-200 bg-white p-8 shadow-sm">
           <h2 className="mb-4 flex items-center text-xl font-bold text-gray-900">
             <span
@@ -838,7 +842,6 @@ export default function ProfilePage() {
             </p>
           )}
         </section>
-
         {deleteStep1Open && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
             <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
@@ -846,9 +849,9 @@ export default function ProfilePage() {
                 Закриване на акаунта
               </h3>
               <p className="mb-4 text-sm text-zinc-700">
-                Акаунтът ви ще бъде завинаги закрит и изтрит. Това действие е необратимо
-                и ще доведе до премахване на вашите лични данни съгласно нашите правила
-                за защита на данните и GDPR.
+                Акаунтът ви ще бъде завинаги закрит и изтрит. Това действие е
+                необратимо и ще доведе до премахване на вашите лични данни
+                съгласно нашите правила за защита на данните и GDPR.
               </p>
               <div className="flex justify-end gap-2">
                 <button
@@ -872,7 +875,6 @@ export default function ProfilePage() {
             </div>
           </div>
         )}
-
         {deleteStep2Open && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
             <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
@@ -880,8 +882,8 @@ export default function ProfilePage() {
                 Потвърдете изтриването на акаунта
               </h3>
               <p className="mb-4 text-sm text-zinc-700">
-                Наистина ли искате акаунтът ви да бъде изтрит напълно? Това действие е
-                окончателно и не може да бъде отменено.
+                Наистина ли искате акаунтът ви да бъде изтрит напълно? Това
+                действие е окончателно и не може да бъде отменено.
               </p>
               <div className="flex justify-end gap-2">
                 <button

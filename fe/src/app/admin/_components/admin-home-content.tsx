@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -156,9 +156,7 @@ export function AdminHomeContent() {
 
         if (!res.ok) {
           if (!cancelled) {
-            setActivityError(
-              t(lang, "common", "adminDashboardMetricsError"),
-            );
+            setActivityError(t(lang, "common", "adminDashboardMetricsError"));
             setActivityLoading(false);
           }
           return;
@@ -189,8 +187,7 @@ export function AdminHomeContent() {
   const totalArticles = metrics?.totalArticles ?? 0;
   const hasMetrics = !loading && !error && metrics !== null;
 
-  const usersChangePercent =
-    metrics?.usersChangePercentSinceLastMonth ?? null;
+  const usersChangePercent = metrics?.usersChangePercentSinceLastMonth ?? null;
 
   const usersTrendText = (() => {
     if (usersChangePercent === null || !hasMetrics) {
@@ -299,16 +296,16 @@ export function AdminHomeContent() {
       )}
 
       {!loading && error && (
-        <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">
+        <div
+          className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+          role="alert"
+        >
           {error}
         </div>
       )}
 
       {/* KPI cards */}
-      <section
-        id="metrics"
-        className="grid grid-cols-1 gap-6 md:grid-cols-2"
-      >
+      <section id="metrics" className="grid grid-cols-1 gap-6 md:grid-cols-2">
         {/* Registered Users card */}
         <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
           <div className="mb-4 flex items-center justify-between">
@@ -335,11 +332,9 @@ export function AdminHomeContent() {
           <div className="flex items-end justify-between">
             <div>
               <p className="text-3xl font-bold text-gray-900">
-                {hasMetrics ? totalUsers.toLocaleString("bg-BG") : "—" }
+                {hasMetrics ? totalUsers.toLocaleString("bg-BG") : "—"}
               </p>
-              <p className="mt-1 text-sm text-green-600">
-                {usersTrendText}
-              </p>
+              <p className="mt-1 text-sm text-green-600">{usersTrendText}</p>
               <p className="mt-0.5 text-xs text-gray-500">
                 {t(lang, "common", "adminDashboardCardUsersTrendHelp")}
               </p>
@@ -373,14 +368,10 @@ export function AdminHomeContent() {
           <div className="flex items-end justify-between">
             <div>
               <p className="text-3xl font-bold text-gray-900">
-                {hasMetrics ? totalArticles.toLocaleString("bg-BG") : "—" }
+                {hasMetrics ? totalArticles.toLocaleString("bg-BG") : "—"}
               </p>
               <p className="mt-1 text-sm text-blue-600">
-                {t(
-                  lang,
-                  "common",
-                  "adminDashboardCardArticlesSubtitle",
-                )}
+                {t(lang, "common", "adminDashboardCardArticlesSubtitle")}
               </p>
             </div>
           </div>
@@ -559,9 +550,7 @@ export function AdminHomeContent() {
                       : ""
                   }`}
                 >
-                  <div
-                    className={`mt-2 h-2 w-2 rounded-full ${dotClass}`}
-                  />
+                  <div className={`mt-2 h-2 w-2 rounded-full ${dotClass}`} />
                   <div className="flex-grow">
                     <p className="text-sm text-gray-900">
                       <span className="font-semibold">

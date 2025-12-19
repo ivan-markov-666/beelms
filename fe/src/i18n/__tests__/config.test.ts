@@ -1,4 +1,8 @@
-import { DEFAULT_LANG, SUPPORTED_LANGS, normalizeLang } from "../../i18n/config";
+import {
+  DEFAULT_LANG,
+  SUPPORTED_LANGS,
+  normalizeLang,
+} from "../../i18n/config";
 
 describe("i18n config", () => {
   it("defines supported languages", () => {

@@ -5,7 +5,8 @@ import Link from "next/link";
 import { getAccessToken } from "../../auth-token";
 
 function apiUrl(path: string): string {
-  const base = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
+  const base =
+    process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
   const normalizedBase = base.endsWith("/api")
     ? base
     : `${base.replace(/\/$/, "")}/api`;
@@ -52,8 +53,7 @@ export function EnrollCourseButton({ courseId }: { courseId: string }) {
         if (!cancelled) {
           setEnrolled(data.some((c) => c.id === courseId));
         }
-      } catch {
-      }
+      } catch {}
     };
 
     void checkEnrolled();
@@ -137,7 +137,10 @@ export function EnrollCourseButton({ courseId }: { courseId: string }) {
       {error && <p className="text-sm text-red-700">{error}</p>}
 
       {success && (
-        <Link href="/my-courses" className="text-sm text-green-700 hover:text-green-800">
+        <Link
+          href="/my-courses"
+          className="text-sm text-green-700 hover:text-green-800"
+        >
           Виж My Courses →
         </Link>
       )}

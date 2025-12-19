@@ -11,16 +11,25 @@ jest.mock("next/navigation", () => {
   };
 });
 
-function makeArticle(overrides?: Partial<{
-  id: string;
-  slug: string;
-  language: string;
-  title: string;
-  content: string;
-  status: string;
-  updatedAt: string;
-  versions: { id: string; version: number; language: string; title: string; createdAt: string; createdBy: string | null }[];
-}>) {
+function makeArticle(
+  overrides?: Partial<{
+    id: string;
+    slug: string;
+    language: string;
+    title: string;
+    content: string;
+    status: string;
+    updatedAt: string;
+    versions: {
+      id: string;
+      version: number;
+      language: string;
+      title: string;
+      createdAt: string;
+      createdBy: string | null;
+    }[];
+  }>,
+) {
   return {
     id: "1",
     slug: "getting-started",
@@ -33,14 +42,16 @@ function makeArticle(overrides?: Partial<{
   };
 }
 
-function makeVersion(overrides?: Partial<{
-  id: string;
-  version: number;
-  language: string;
-  title: string;
-  createdAt: string;
-  createdBy: string | null;
-}>) {
+function makeVersion(
+  overrides?: Partial<{
+    id: string;
+    version: number;
+    language: string;
+    title: string;
+    createdAt: string;
+    createdBy: string | null;
+  }>,
+) {
   return {
     id: "version-1",
     version: 1,
@@ -91,9 +102,7 @@ describe("AdminWikiEditPage", () => {
     const contentTextarea = screen.getByLabelText(
       "Съдържание",
     ) as HTMLTextAreaElement;
-    const statusSelect = screen.getByLabelText(
-      "Статус",
-    ) as HTMLSelectElement;
+    const statusSelect = screen.getByLabelText("Статус") as HTMLSelectElement;
 
     expect(titleInput.value).toBe("Начало с BeeLMS");
     expect(contentTextarea.value).toBe("Съдържание на статията");
@@ -170,7 +179,10 @@ describe("AdminWikiEditPage", () => {
 
     expect(restoreCall).toBeDefined();
     const [, putOptions] = restoreCall as [string, RequestInit];
-    const headers = (putOptions as RequestInit).headers as Record<string, string>;
+    const headers = (putOptions as RequestInit).headers as Record<
+      string,
+      string
+    >;
     expect(headers.Authorization).toBe("Bearer test-token");
   });
 
@@ -248,9 +260,7 @@ describe("AdminWikiEditPage", () => {
 
     render(<AdminWikiEditPage />);
 
-    expect(
-      await screen.findByText("Версии на статията"),
-    ).toBeInTheDocument();
+    expect(await screen.findByText("Версии на статията")).toBeInTheDocument();
 
     expect(await screen.findByText("v1")).toBeInTheDocument();
     expect(screen.getByText("Първа версия")).toBeInTheDocument();
@@ -323,14 +333,10 @@ describe("AdminWikiEditPage", () => {
     await userEvent.click(rollbackButton);
 
     expect(
-      await screen.findByText(
-        "Статията беше върната към избраната версия.",
-      ),
+      await screen.findByText("Статията беше върната към избраната версия."),
     ).toBeInTheDocument();
 
-    const titleInput = screen.getByLabelText(
-      "Заглавие",
-    ) as HTMLInputElement;
+    const titleInput = screen.getByLabelText("Заглавие") as HTMLInputElement;
     expect(titleInput.value).toBe("Стара версия");
 
     const restoreCall = (fetchMock as jest.Mock).mock.calls.find(
@@ -471,9 +477,7 @@ describe("AdminWikiEditPage", () => {
     await userEvent.click(rollbackButton);
 
     expect(
-      await screen.findByText(
-        "Избраната версия или статия не беше намерена.",
-      ),
+      await screen.findByText("Избраната версия или статия не беше намерена."),
     ).toBeInTheDocument();
 
     confirmSpy.mockRestore();

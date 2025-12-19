@@ -1,7 +1,5 @@
 "use client";
 
-export const dynamic = 'force-dynamic';
-
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useCurrentLang } from "../../../i18n/useCurrentLang";
@@ -75,7 +73,9 @@ export default function AdminActivityPage() {
       const typeLabel = t(
         lang,
         "common",
-        item.type === "wiki" ? "adminActivityTypeWiki" : "adminActivityTypeUser",
+        item.type === "wiki"
+          ? "adminActivityTypeWiki"
+          : "adminActivityTypeUser",
       );
 
       const actionLabel = t(
@@ -84,10 +84,10 @@ export default function AdminActivityPage() {
         item.action === "article_created"
           ? "adminActivityActionArticleCreated"
           : item.action === "article_updated"
-          ? "adminActivityActionArticleUpdated"
-          : item.action === "user_registered"
-          ? "adminActivityActionUserRegistered"
-          : "adminActivityActionUserDeactivated",
+            ? "adminActivityActionArticleUpdated"
+            : item.action === "user_registered"
+              ? "adminActivityActionUserRegistered"
+              : "adminActivityActionUserDeactivated",
       );
 
       const subject = `${item.entityLabel} (ID: ${item.entityId})`;
@@ -248,10 +248,10 @@ export default function AdminActivityPage() {
             item.action === "article_created"
               ? "adminActivityActionArticleCreated"
               : item.action === "article_updated"
-              ? "adminActivityActionArticleUpdated"
-              : item.action === "user_registered"
-              ? "adminActivityActionUserRegistered"
-              : "adminActivityActionUserDeactivated",
+                ? "adminActivityActionArticleUpdated"
+                : item.action === "user_registered"
+                  ? "adminActivityActionUserRegistered"
+                  : "adminActivityActionUserDeactivated",
           ),
         ]
           .join(" ")
@@ -400,32 +400,16 @@ export default function AdminActivityPage() {
                 {t(lang, "common", "adminActivityFilterActionAll")}
               </option>
               <option value="article_created">
-                {t(
-                  lang,
-                  "common",
-                  "adminActivityFilterActionArticleCreated",
-                )}
+                {t(lang, "common", "adminActivityFilterActionArticleCreated")}
               </option>
               <option value="article_updated">
-                {t(
-                  lang,
-                  "common",
-                  "adminActivityFilterActionArticleUpdated",
-                )}
+                {t(lang, "common", "adminActivityFilterActionArticleUpdated")}
               </option>
               <option value="user_registered">
-                {t(
-                  lang,
-                  "common",
-                  "adminActivityFilterActionUserRegistered",
-                )}
+                {t(lang, "common", "adminActivityFilterActionUserRegistered")}
               </option>
               <option value="user_deactivated">
-                {t(
-                  lang,
-                  "common",
-                  "adminActivityFilterActionUserDeactivated",
-                )}
+                {t(lang, "common", "adminActivityFilterActionUserDeactivated")}
               </option>
             </select>
             <div className="mt-2 flex justify-end">
@@ -534,18 +518,24 @@ export default function AdminActivityPage() {
                         item.action === "article_created"
                           ? "adminActivityActionArticleCreated"
                           : item.action === "article_updated"
-                          ? "adminActivityActionArticleUpdated"
-                          : item.action === "user_registered"
-                          ? "adminActivityActionUserRegistered"
-                          : "adminActivityActionUserDeactivated",
+                            ? "adminActivityActionArticleUpdated"
+                            : item.action === "user_registered"
+                              ? "adminActivityActionUserRegistered"
+                              : "adminActivityActionUserDeactivated",
                       )}
                     </td>
                     <td className="px-6 py-3 align-middle text-gray-900">
                       <div className="font-medium">{item.entityLabel}</div>
-                      <div className="text-xs text-gray-500">ID: {item.entityId}</div>
+                      <div className="text-xs text-gray-500">
+                        ID: {item.entityId}
+                      </div>
                     </td>
                     <td className="px-6 py-3 align-middle text-gray-700">
-                      {item.actorLabel ? item.actorLabel : <span className="text-xs text-gray-400">—</span>}
+                      {item.actorLabel ? (
+                        item.actorLabel
+                      ) : (
+                        <span className="text-xs text-gray-400">—</span>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -553,10 +543,10 @@ export default function AdminActivityPage() {
             </table>
           </div>
           <div className="border-t border-gray-100 bg-gray-50 px-6 py-2 text-xs text-gray-600">
-            {t(lang, "common", "adminActivityFooterCountPrefix")} {" "}
-            {limitedItems.length} {" "}
-            {t(lang, "common", "adminActivityFooterCountOf")} {" "}
-            {filteredItems.length} {" "}
+            {t(lang, "common", "adminActivityFooterCountPrefix")}{" "}
+            {limitedItems.length}{" "}
+            {t(lang, "common", "adminActivityFooterCountOf")}{" "}
+            {filteredItems.length}{" "}
             {t(lang, "common", "adminActivityFooterCountSuffix")}
           </div>
         </section>

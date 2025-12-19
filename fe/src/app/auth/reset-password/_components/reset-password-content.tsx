@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { FormEvent, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -32,11 +32,7 @@ export function ResetPasswordContent() {
     const errors: FieldErrors = {};
 
     if (!newPassword) {
-      errors.newPassword = t(
-        lang,
-        "auth",
-        "resetErrorNewPasswordRequired",
-      );
+      errors.newPassword = t(lang, "auth", "resetErrorNewPasswordRequired");
     } else if (newPassword.length < 8) {
       errors.newPassword = t(lang, "auth", "resetErrorNewPasswordTooShort");
     }
@@ -125,7 +121,7 @@ export function ResetPasswordContent() {
                 htmlFor="newPassword"
                 className="block text-sm font-medium text-gray-800"
               >
-                {t(lang, "auth", "resetNewPasswordLabel")} {" "}
+                {t(lang, "auth", "resetNewPasswordLabel")}{" "}
                 <span className="text-red-500">*</span>
               </label>
               <input
@@ -139,14 +135,12 @@ export function ResetPasswordContent() {
                 disabled={submitting || completed}
               />
               {fieldErrors.newPassword && (
-                <p className="text-xs text-red-600">{fieldErrors.newPassword}</p>
+                <p className="text-xs text-red-600">
+                  {fieldErrors.newPassword}
+                </p>
               )}
               <p className="mt-1 text-xs text-gray-500">
-                {t(
-                  lang,
-                  "auth",
-                  "resetPasswordRequirementsItemMinLength",
-                )}
+                {t(lang, "auth", "resetPasswordRequirementsItemMinLength")}
               </p>
             </div>
 
@@ -155,7 +149,7 @@ export function ResetPasswordContent() {
                 htmlFor="confirmNewPassword"
                 className="block text-sm font-medium text-gray-800"
               >
-                {t(lang, "auth", "resetConfirmNewPasswordLabel")} {" "}
+                {t(lang, "auth", "resetConfirmNewPasswordLabel")}{" "}
                 <span className="text-red-500">*</span>
               </label>
               <input
@@ -184,11 +178,7 @@ export function ResetPasswordContent() {
                   <span aria-hidden="true" className="text-green-500">
                     ●
                   </span>
-                  {t(
-                    lang,
-                    "auth",
-                    "resetPasswordRequirementsItemMinLength",
-                  )}
+                  {t(lang, "auth", "resetPasswordRequirementsItemMinLength")}
                 </li>
                 <li className="flex items-center gap-2">
                   <span aria-hidden="true" className="text-emerald-500">

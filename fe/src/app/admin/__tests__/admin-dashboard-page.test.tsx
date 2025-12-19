@@ -55,7 +55,9 @@ describe("AdminHomePage (Dashboard)", () => {
 
     render(<AdminHomePage />);
 
-    expect(await screen.findByRole("heading", { name: /Админ табло/ })).toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", { name: /Админ табло/ }),
+    ).toBeInTheDocument();
 
     await waitFor(() => {
       expect(screen.getByText("Регистрирани потребители")).toBeInTheDocument();

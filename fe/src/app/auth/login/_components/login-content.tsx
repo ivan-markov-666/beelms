@@ -1,10 +1,14 @@
-'use client';
+"use client";
 
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCurrentLang } from "../../../../i18n/useCurrentLang";
 import { t } from "../../../../i18n/t";
-import { clearAccessToken, getAccessToken, setAccessToken } from "../../../auth-token";
+import {
+  clearAccessToken,
+  getAccessToken,
+  setAccessToken,
+} from "../../../auth-token";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
@@ -192,7 +196,7 @@ export function LoginContent() {
                 htmlFor="password"
                 className="block text-sm font-medium text-gray-800"
               >
-                {t(lang, "auth", "loginPasswordLabel")} {" "}
+                {t(lang, "auth", "loginPasswordLabel")}{" "}
                 <span className="text-red-500">*</span>
               </label>
               <div className="relative">
@@ -234,10 +238,7 @@ export function LoginContent() {
                 onChange={(event) => setRememberMe(event.target.checked)}
                 disabled={submitting}
               />
-              <label
-                htmlFor="remember"
-                className="ml-2 text-xs text-gray-700"
-              >
+              <label htmlFor="remember" className="ml-2 text-xs text-gray-700">
                 {t(lang, "auth", "loginRememberMeLabel")}
               </label>
             </div>
@@ -268,7 +269,7 @@ export function LoginContent() {
             {t(lang, "auth", "loginForgotLink")}
           </button>
           <p>
-            {t(lang, "auth", "loginRegisterLink")} {" "}
+            {t(lang, "auth", "loginRegisterLink")}{" "}
             <button
               type="button"
               className="cursor-pointer font-semibold text-green-700 hover:text-green-800"

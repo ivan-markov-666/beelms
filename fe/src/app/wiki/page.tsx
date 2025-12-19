@@ -138,8 +138,8 @@ export default async function WikiPage({
 }: {
   searchParams?: WikiPageSearchParams | Promise<WikiPageSearchParams>;
 } = {}) {
-  const resolvedSearchParams =
-    ((await searchParams) ?? {}) as WikiPageSearchParams;
+  const resolvedSearchParams = ((await searchParams) ??
+    {}) as WikiPageSearchParams;
 
   const rawQ = resolvedSearchParams.q ?? "";
   const rawLang = resolvedSearchParams.lang ?? "";
@@ -164,7 +164,8 @@ export default async function WikiPage({
             Wiki
           </h1>
           <p className="mt-2 text-zinc-600 dark:text-zinc-400">
-            Възникна проблем при зареждане на статиите. Опитайте отново по-късно.
+            Възникна проблем при зареждане на статиите. Опитайте отново
+            по-късно.
           </p>
         </header>
       </WikiMain>

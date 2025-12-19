@@ -61,7 +61,11 @@ describe("LoginPage", () => {
   });
 
   it("logs in successfully, stores token and redirects to /wiki", async () => {
-    mockFetchOnce({ accessToken: "test-token", tokenType: "Bearer" }, true, 200);
+    mockFetchOnce(
+      { accessToken: "test-token", tokenType: "Bearer" },
+      true,
+      200,
+    );
 
     render(<LoginPage />);
 
@@ -77,9 +81,7 @@ describe("LoginPage", () => {
       expect(mockPush).toHaveBeenCalledWith("/wiki");
     });
 
-    expect(window.localStorage.getItem(ACCESS_TOKEN_KEY)).toBe(
-      "test-token",
-    );
+    expect(window.localStorage.getItem(ACCESS_TOKEN_KEY)).toBe("test-token");
   });
 
   it("shows error message when credentials are invalid", async () => {

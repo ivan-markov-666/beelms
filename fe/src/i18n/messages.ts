@@ -48,10 +48,8 @@ export const messages: Messages = {
       loginErrorEmailInvalid: "Моля, въведете валиден имейл адрес.",
       loginErrorPasswordRequired: "Моля, въведете парола.",
       loginErrorInvalidCredentials: "Невалидни данни за вход.",
-      loginErrorGeneric:
-        "Входът не успя. Моля, опитайте отново по-късно.",
-      loginErrorNetwork:
-        "Възникна грешка при връзката със сървъра.",
+      loginErrorGeneric: "Входът не успя. Моля, опитайте отново по-късно.",
+      loginErrorNetwork: "Възникна грешка при връзката със сървъра.",
       loginLoading: "Зареждане...",
       registerTitle: "Регистрация",
       registerSubtitle: "Създайте нов акаунт.",
@@ -64,8 +62,7 @@ export const messages: Messages = {
       registerTermsSuffix: "",
       registerTermsLabel:
         "Съгласен съм с Условията за ползване и Политиката за поверителност.",
-      registerCaptchaLabel:
-        "Не съм робот (placeholder за CAPTCHA интеграция).",
+      registerCaptchaLabel: "Не съм робот (placeholder за CAPTCHA интеграция).",
       registerCaptchaPlaceholder:
         "CAPTCHA / reCAPTCHA (placeholder за защита от ботове при регистрация)",
       registerSubmit: "Регистрация",
@@ -75,21 +72,17 @@ export const messages: Messages = {
       registerErrorEmailRequired: "Моля, въведете имейл.",
       registerErrorEmailInvalid: "Моля, въведете валиден имейл адрес.",
       registerErrorPasswordRequired: "Моля, въведете парола.",
-      registerErrorPasswordTooShort:
-        "Паролата трябва да е поне 8 символа.",
-      registerErrorConfirmPasswordRequired:
-        "Моля, потвърдете паролата.",
+      registerErrorPasswordTooShort: "Паролата трябва да е поне 8 символа.",
+      registerErrorConfirmPasswordRequired: "Моля, потвърдете паролата.",
       registerErrorPasswordsMismatch: "Паролите не съвпадат.",
       registerErrorTermsRequired: "Необходимо е да приемете условията.",
-      registerErrorCaptchaRequired:
-        "Моля, потвърдете, че не сте робот.",
+      registerErrorCaptchaRequired: "Моля, потвърдете, че не сте робот.",
       registerErrorDuplicateEmail: "Този имейл вече е регистриран.",
       registerErrorInvalidData:
         "Данните не са валидни. Моля, проверете формата и опитайте отново.",
       registerErrorGeneric:
         "Регистрацията не успя. Моля, опитайте отново по-късно.",
-      registerErrorNetwork:
-        "Възникна грешка при връзката със сървъра.",
+      registerErrorNetwork: "Възникна грешка при връзката със сървъра.",
       registerSuccess:
         "Регистрацията беше успешна. Моля, проверете имейла си и потвърдете адреса чрез получен линк. След това можете да влезете в акаунта си от страницата за вход.",
       registerLoading: "Зареждане...",
@@ -97,26 +90,22 @@ export const messages: Messages = {
       forgotSubtitle:
         "Въведете вашия email адрес и ще ви изпратим линк за смяна на паролата.",
       forgotEmailLabel: "Email адрес",
-      forgotCaptchaLabel:
-        "Не съм робот (placeholder за CAPTCHA интеграция).",
+      forgotCaptchaLabel: "Не съм робот (placeholder за CAPTCHA интеграция).",
       forgotSubmit: "Изпрати линк за смяна",
       forgotSubmitLoading: "Изпращане...",
       forgotHasPassword: "Спомнихте си паролата?",
       forgotLoginLink: "Върни се към вход",
       forgotErrorEmailRequired: "Моля, въведете имейл.",
       forgotErrorEmailInvalid: "Моля, въведете валиден имейл адрес.",
-      forgotErrorCaptchaRequired:
-        "Моля, потвърдете, че не сте робот.",
+      forgotErrorCaptchaRequired: "Моля, потвърдете, че не сте робот.",
       forgotErrorInvalidData:
         "Данните не са валидни. Моля, проверете формата и опитайте отново.",
       forgotErrorGeneric:
         "Заявката за забравена парола не успя. Моля, опитайте отново по-късно.",
-      forgotErrorNetwork:
-        "Възникна грешка при връзката със сървъра.",
+      forgotErrorNetwork: "Възникна грешка при връзката със сървъра.",
       forgotSuccess:
         "Ако има акаунт с този имейл, ще изпратим инструкции за смяна на паролата.",
-      forgotResetLinkInfo:
-        "Линкът за смяна на паролата е валиден 24 часа",
+      forgotResetLinkInfo: "Линкът за смяна на паролата е валиден 24 часа",
       forgotCaptchaPlaceholder:
         "CAPTCHA / reCAPTCHA (placeholder за защита от ботове при заявка за смяна на парола)",
       resetTitle: "Смяна на парола",
@@ -131,17 +120,14 @@ export const messages: Messages = {
       resetBackToLogin: "Върни се към вход",
       resetSuccessLoginCta: "Към страницата за вход",
       resetErrorNewPasswordRequired: "Моля, въведете нова парола.",
-      resetErrorNewPasswordTooShort:
-        "Паролата трябва да е поне 8 символа.",
-      resetErrorConfirmPasswordRequired:
-        "Моля, потвърдете новата парола.",
+      resetErrorNewPasswordTooShort: "Паролата трябва да е поне 8 символа.",
+      resetErrorConfirmPasswordRequired: "Моля, потвърдете новата парола.",
       resetErrorPasswordsMismatch: "Паролите не съвпадат.",
       resetErrorInvalidOrExpiredLink:
         "Линкът за смяна на паролата е невалиден или е изтекъл. Моля, заявете нов линк от екрана 'Забравена парола'.",
       resetErrorGeneric:
         "Смяната на паролата не успя. Моля, опитайте отново по-късно.",
-      resetErrorNetwork:
-        "Възникна грешка при връзката със сървъра.",
+      resetErrorNetwork: "Възникна грешка при връзката със сървъра.",
       resetSuccess:
         "Паролата беше сменена успешно. Ще ви пренасочим към страницата за вход...",
       resetPasswordRequirementsTitle: "Изисквания за парола:",
@@ -198,8 +184,7 @@ export const messages: Messages = {
       adminWikiStatsInactiveHelper:
         "Неактивни – скрити от публичното Wiki, могат да бъдат активирани отново.",
       adminDashboardTitle: "Админ табло",
-      adminDashboardSubtitle:
-        "Системен преглед и инструменти за управление.",
+      adminDashboardSubtitle: "Системен преглед и инструменти за управление.",
       adminDashboardMetricsTitle: "Общ брой потребители",
       adminDashboardMetricsLoading: "Зареждане на метриките...",
       adminDashboardMetricsError: "Неуспешно зареждане на метрики.",
@@ -248,8 +233,7 @@ export const messages: Messages = {
       adminActivityTitle: "Активност",
       adminActivitySubtitle:
         "Последни промени във Wiki статиите и потребителските акаунти.",
-      adminActivitySearchPlaceholder:
-        "Търсене по обект, извършител или тип...",
+      adminActivitySearchPlaceholder: "Търсене по обект, извършител или тип...",
       adminActivityFilterTypeLabel: "Тип",
       adminActivityFilterActionLabel: "Действие",
       adminActivityFilterTypeAll: "Всички типове",
@@ -285,18 +269,14 @@ export const messages: Messages = {
       adminActivityFilterRangeTo: "До дата",
       adminActivityFooterCountPrefix: "Показани",
       adminActivityFooterCountOf: "от",
-      adminActivityFooterCountSuffix:
-        "записа в избрания период и филтри",
+      adminActivityFooterCountSuffix: "записа в избрания период и филтри",
       adminActivityExportButton: "Експорт на всички (CSV)",
       adminMetricsUsersTrendTitle:
         "Нови потребители по месеци (последни периоди)",
       adminMetricsUserActivityTitle: "Активност за избрания период",
-      adminMetricsUserActivityRegisteredLink:
-        "Виж потребителите (Users)",
-      adminMetricsUserActivityDeactivatedLink:
-        "Виж деактивираните (Users)",
-      adminMetricsUserActivityArticleCreatedLink:
-        "Виж новите статии (Wiki)",
+      adminMetricsUserActivityRegisteredLink: "Виж потребителите (Users)",
+      adminMetricsUserActivityDeactivatedLink: "Виж деактивираните (Users)",
+      adminMetricsUserActivityArticleCreatedLink: "Виж новите статии (Wiki)",
       adminMetricsUserActivityArticleUpdatedLink:
         "Виж обновените статии (Wiki)",
       adminMetricsNetUsersChangeZero:
@@ -323,8 +303,7 @@ export const messages: Messages = {
       articlePrintButton: "Принтирай",
       articleShareSuccess: "Споделено успешно.",
       articleShareClipboard: "Линкът е копиран в клипборда.",
-      articleShareError:
-        "Не успяхме да споделим линка. Опитайте ръчно.",
+      articleShareError: "Не успяхме да споделим линка. Опитайте ръчно.",
     },
   },
   en: {
@@ -359,8 +338,7 @@ export const messages: Messages = {
         "A network error occurred while contacting the server.",
       loginLoading: "Loading...",
       registerTitle: "Create account",
-      registerSubtitle:
-        "Create your free BeeLMS account to get started.",
+      registerSubtitle: "Create your free BeeLMS account to get started.",
       registerEmailLabel: "Email",
       registerPasswordLabel: "Password",
       registerPasswordHint: "Minimum 8 characters",
@@ -368,8 +346,7 @@ export const messages: Messages = {
       registerTermsPrefix: "I agree to the ",
       registerTermsAnd: " and the ",
       registerTermsSuffix: ".",
-      registerTermsLabel:
-        "I agree to the Terms of Use and the Privacy Policy.",
+      registerTermsLabel: "I agree to the Terms of Use and the Privacy Policy.",
       registerCaptchaLabel:
         "I'm not a robot (placeholder for CAPTCHA integration).",
       registerCaptchaPlaceholder:
@@ -383,25 +360,21 @@ export const messages: Messages = {
       registerErrorPasswordRequired: "Please enter a password.",
       registerErrorPasswordTooShort:
         "Password must be at least 8 characters long.",
-      registerErrorConfirmPasswordRequired:
-        "Please confirm your password.",
+      registerErrorConfirmPasswordRequired: "Please confirm your password.",
       registerErrorPasswordsMismatch: "Passwords do not match.",
       registerErrorTermsRequired: "You must accept the terms.",
-      registerErrorCaptchaRequired:
-        "Please confirm that you are not a robot.",
+      registerErrorCaptchaRequired: "Please confirm that you are not a robot.",
       registerErrorDuplicateEmail: "This email is already registered.",
       registerErrorInvalidData:
         "The data is not valid. Please review the form and try again.",
-      registerErrorGeneric:
-        "Registration failed. Please try again later.",
+      registerErrorGeneric: "Registration failed. Please try again later.",
       registerErrorNetwork:
         "A network error occurred while contacting the server.",
       registerSuccess:
         "Registration was successful. Please check your email and confirm your address using the link we sent you. After that you can sign in from the login page.",
       registerLoading: "Loading...",
       forgotTitle: "Forgot password",
-      forgotSubtitle:
-        "Enter your email address to request a password reset.",
+      forgotSubtitle: "Enter your email address to request a password reset.",
       forgotEmailLabel: "Email",
       forgotCaptchaLabel:
         "I'm not a robot (placeholder for CAPTCHA integration).",
@@ -411,8 +384,7 @@ export const messages: Messages = {
       forgotLoginLink: "Back to sign in",
       forgotErrorEmailRequired: "Please enter your email.",
       forgotErrorEmailInvalid: "Please enter a valid email address.",
-      forgotErrorCaptchaRequired:
-        "Please confirm that you are not a robot.",
+      forgotErrorCaptchaRequired: "Please confirm that you are not a robot.",
       forgotErrorInvalidData:
         "The data is not valid. Please review the form and try again.",
       forgotErrorGeneric:
@@ -421,8 +393,7 @@ export const messages: Messages = {
         "A network error occurred while contacting the server.",
       forgotSuccess:
         "If there is an account with this email, we will send instructions to reset your password.",
-      forgotResetLinkInfo:
-        "The password reset link is valid for 24 hours.",
+      forgotResetLinkInfo: "The password reset link is valid for 24 hours.",
       forgotCaptchaPlaceholder:
         "CAPTCHA / reCAPTCHA (placeholder for bot protection when requesting a password reset)",
       resetTitle: "Change password",
@@ -439,13 +410,11 @@ export const messages: Messages = {
       resetErrorNewPasswordRequired: "Please enter a new password.",
       resetErrorNewPasswordTooShort:
         "Password must be at least 8 characters long.",
-      resetErrorConfirmPasswordRequired:
-        "Please confirm your new password.",
+      resetErrorConfirmPasswordRequired: "Please confirm your new password.",
       resetErrorPasswordsMismatch: "Passwords do not match.",
       resetErrorInvalidOrExpiredLink:
         'The password reset link is invalid or has expired. Please request a new link from the "Forgot password" screen.',
-      resetErrorGeneric:
-        "Password change failed. Please try again later.",
+      resetErrorGeneric: "Password change failed. Please try again later.",
       resetErrorNetwork:
         "A network error occurred while contacting the server.",
       resetSuccess:
@@ -454,8 +423,7 @@ export const messages: Messages = {
       resetPasswordRequirementsItemMinLength: "Minimum 8 characters",
       resetPasswordRequirementsItemRecommendation:
         "We recommend using letters, numbers and symbols.",
-      resetGoToForgotCta:
-        'Go to the "Forgot password" screen',
+      resetGoToForgotCta: 'Go to the "Forgot password" screen',
       accountDeletedTitle: "Your account has been closed and deleted",
       accountDeletedDescription:
         "Your account has been closed and your personal data has been marked for deletion in accordance with our data protection rules and GDPR.",
@@ -466,16 +434,13 @@ export const messages: Messages = {
     },
     common: {
       adminUsersTitle: "Admin Users",
-      adminUsersSubtitle:
-        "List of users and account status (active/inactive).",
+      adminUsersSubtitle: "List of users and account status (active/inactive).",
       adminUsersSearchPlaceholder: "Search by email...",
       adminUsersSearchButton: "Search",
       adminUsersLoading: "Loading users...",
-      adminUsersError:
-        "An error occurred while loading the users list.",
+      adminUsersError: "An error occurred while loading the users list.",
       adminUsersNoData: "No users to display.",
-      adminUsersToggleError:
-        "Failed to update user status. Please try again.",
+      adminUsersToggleError: "Failed to update user status. Please try again.",
       adminUsersNoToken:
         "No access to the Admin API. Please sign in again as an administrator.",
       adminUsersColEmail: "Email",
@@ -490,8 +455,7 @@ export const messages: Messages = {
       adminUsersStatsDeactivated: "Deleted / inactive",
       adminUsersStatsAdmins: "Admins",
       adminUsersStatsLoading: "Loading user statistics...",
-      adminUsersStatsError:
-        "An error occurred while loading user statistics.",
+      adminUsersStatsError: "An error occurred while loading user statistics.",
       adminWikiStatsTotal: "Total articles",
       adminWikiStatsActive: "Active",
       adminWikiStatsDraft: "Draft",
@@ -554,8 +518,7 @@ export const messages: Messages = {
       adminActivityTitle: "Activity log",
       adminActivitySubtitle:
         "Recent changes in wiki articles and user accounts.",
-      adminActivitySearchPlaceholder:
-        "Search by subject, actor or type...",
+      adminActivitySearchPlaceholder: "Search by subject, actor or type...",
       adminActivityFilterTypeLabel: "Type",
       adminActivityFilterActionLabel: "Action",
       adminActivityFilterTypeAll: "All types",
@@ -590,18 +553,13 @@ export const messages: Messages = {
       adminActivityFilterRangeTo: "To date",
       adminActivityFooterCountPrefix: "Showing",
       adminActivityFooterCountOf: "of",
-      adminActivityFooterCountSuffix:
-        "entries for selected period and filters",
+      adminActivityFooterCountSuffix: "entries for selected period and filters",
       adminActivityExportButton: "Export all (CSV)",
-      adminMetricsUsersTrendTitle:
-        "New users per month (recent periods)",
+      adminMetricsUsersTrendTitle: "New users per month (recent periods)",
       adminMetricsUserActivityTitle: "Activity for selected period",
-      adminMetricsUserActivityRegisteredLink:
-        "View users (Users)",
-      adminMetricsUserActivityDeactivatedLink:
-        "View deactivated (Users)",
-      adminMetricsUserActivityArticleCreatedLink:
-        "View new articles (Wiki)",
+      adminMetricsUserActivityRegisteredLink: "View users (Users)",
+      adminMetricsUserActivityDeactivatedLink: "View deactivated (Users)",
+      adminMetricsUserActivityArticleCreatedLink: "View new articles (Wiki)",
       adminMetricsUserActivityArticleUpdatedLink:
         "View updated articles (Wiki)",
       adminMetricsNetUsersChangeZero:
@@ -628,7 +586,8 @@ export const messages: Messages = {
       articlePrintButton: "Print",
       articleShareSuccess: "Shared successfully.",
       articleShareClipboard: "Link copied to clipboard.",
-      articleShareError: "We couldn't share the link. Please share it manually.",
+      articleShareError:
+        "We couldn't share the link. Please share it manually.",
     },
   },
   de: {
@@ -658,11 +617,14 @@ export const messages: Messages = {
       loginErrorEmailInvalid: "Bitte gib eine gültige E-Mail-Adresse ein.",
       loginErrorPasswordRequired: "Bitte gib dein Passwort ein.",
       loginErrorInvalidCredentials: "Ungültige Anmeldedaten.",
-      loginErrorGeneric: "Anmeldung fehlgeschlagen. Bitte versuche es später erneut.",
-      loginErrorNetwork: "Beim Kontakt mit dem Server ist ein Netzwerkfehler aufgetreten.",
+      loginErrorGeneric:
+        "Anmeldung fehlgeschlagen. Bitte versuche es später erneut.",
+      loginErrorNetwork:
+        "Beim Kontakt mit dem Server ist ein Netzwerkfehler aufgetreten.",
       loginLoading: "Laden...",
       registerTitle: "Konto erstellen",
-      registerSubtitle: "Erstelle dein kostenloses BeeLMS-Konto, um loszulegen.",
+      registerSubtitle:
+        "Erstelle dein kostenloses BeeLMS-Konto, um loszulegen.",
       registerEmailLabel: "E-Mail",
       registerPasswordLabel: "Passwort",
       registerPasswordHint: "Mindestens 8 Zeichen",
@@ -670,8 +632,10 @@ export const messages: Messages = {
       registerTermsPrefix: "Ich stimme den ",
       registerTermsAnd: " und der ",
       registerTermsSuffix: " zu.",
-      registerTermsLabel: "Ich stimme den Nutzungsbedingungen und der Datenschutzrichtlinie zu.",
-      registerCaptchaLabel: "Ich bin kein Roboter (Platzhalter für CAPTCHA-Integration).",
+      registerTermsLabel:
+        "Ich stimme den Nutzungsbedingungen und der Datenschutzrichtlinie zu.",
+      registerCaptchaLabel:
+        "Ich bin kein Roboter (Platzhalter für CAPTCHA-Integration).",
       registerCaptchaPlaceholder:
         "CAPTCHA / reCAPTCHA (Platzhalter zum Schutz vor Bots bei der Registrierung)",
       registerSubmit: "Registrieren",
@@ -681,21 +645,30 @@ export const messages: Messages = {
       registerErrorEmailRequired: "Bitte gib deine E-Mail-Adresse ein.",
       registerErrorEmailInvalid: "Bitte gib eine gültige E-Mail-Adresse ein.",
       registerErrorPasswordRequired: "Bitte gib ein Passwort ein.",
-      registerErrorPasswordTooShort: "Das Passwort muss mindestens 8 Zeichen lang sein.",
+      registerErrorPasswordTooShort:
+        "Das Passwort muss mindestens 8 Zeichen lang sein.",
       registerErrorConfirmPasswordRequired: "Bitte bestätige dein Passwort.",
       registerErrorPasswordsMismatch: "Die Passwörter stimmen nicht überein.",
       registerErrorTermsRequired: "Du musst die Bedingungen akzeptieren.",
-      registerErrorCaptchaRequired: "Bitte bestätige, dass du kein Roboter bist.",
-      registerErrorDuplicateEmail: "Diese E-Mail-Adresse ist bereits registriert.",
-      registerErrorInvalidData: "Die Daten sind nicht gültig. Bitte überprüfe das Formular und versuche es erneut.",
-      registerErrorGeneric: "Registrierung fehlgeschlagen. Bitte versuche es später erneut.",
-      registerErrorNetwork: "Beim Kontakt mit dem Server ist ein Netzwerkfehler aufgetreten.",
-      registerSuccess: "Die Registrierung war erfolgreich. Bitte überprüfe deine E-Mail und bestätige deine Adresse über den Link, den wir dir geschickt haben. Danach kannst du dich über die Login-Seite anmelden.",
+      registerErrorCaptchaRequired:
+        "Bitte bestätige, dass du kein Roboter bist.",
+      registerErrorDuplicateEmail:
+        "Diese E-Mail-Adresse ist bereits registriert.",
+      registerErrorInvalidData:
+        "Die Daten sind nicht gültig. Bitte überprüfe das Formular und versuche es erneut.",
+      registerErrorGeneric:
+        "Registrierung fehlgeschlagen. Bitte versuche es später erneut.",
+      registerErrorNetwork:
+        "Beim Kontakt mit dem Server ist ein Netzwerkfehler aufgetreten.",
+      registerSuccess:
+        "Die Registrierung war erfolgreich. Bitte überprüfe deine E-Mail und bestätige deine Adresse über den Link, den wir dir geschickt haben. Danach kannst du dich über die Login-Seite anmelden.",
       registerLoading: "Laden...",
       forgotTitle: "Passwort vergessen",
-      forgotSubtitle: "Gib deine E-Mail-Adresse ein, um eine Zurücksetzung des Passworts anzufordern.",
+      forgotSubtitle:
+        "Gib deine E-Mail-Adresse ein, um eine Zurücksetzung des Passworts anzufordern.",
       forgotEmailLabel: "E-Mail",
-      forgotCaptchaLabel: "Ich bin kein Roboter (Platzhalter für CAPTCHA-Integration).",
+      forgotCaptchaLabel:
+        "Ich bin kein Roboter (Platzhalter für CAPTCHA-Integration).",
       forgotSubmit: "Link zum Zurücksetzen senden",
       forgotSubmitLoading: "Senden...",
       forgotHasPassword: "Du erinnerst dich wieder an dein Passwort?",
@@ -703,10 +676,14 @@ export const messages: Messages = {
       forgotErrorEmailRequired: "Bitte gib deine E-Mail-Adresse ein.",
       forgotErrorEmailInvalid: "Bitte gib eine gültige E-Mail-Adresse ein.",
       forgotErrorCaptchaRequired: "Bitte bestätige, dass du kein Roboter bist.",
-      forgotErrorInvalidData: "Die Daten sind nicht gültig. Bitte überprüfe das Formular und versuche es erneut.",
-      forgotErrorGeneric: "Die Anfrage zum Zurücksetzen des Passworts ist fehlgeschlagen. Bitte versuche es später erneut.",
-      forgotErrorNetwork: "Beim Kontakt mit dem Server ist ein Netzwerkfehler aufgetreten.",
-      forgotSuccess: "Falls ein Konto mit dieser E-Mail-Adresse existiert, senden wir dir Anweisungen zum Zurücksetzen des Passworts.",
+      forgotErrorInvalidData:
+        "Die Daten sind nicht gültig. Bitte überprüfe das Formular und versuche es erneut.",
+      forgotErrorGeneric:
+        "Die Anfrage zum Zurücksetzen des Passworts ist fehlgeschlagen. Bitte versuche es später erneut.",
+      forgotErrorNetwork:
+        "Beim Kontakt mit dem Server ist ein Netzwerkfehler aufgetreten.",
+      forgotSuccess:
+        "Falls ein Konto mit dieser E-Mail-Adresse existiert, senden wir dir Anweisungen zum Zurücksetzen des Passworts.",
       forgotResetLinkInfo:
         "Der Link zum Zurücksetzen des Passworts ist 24 Stunden lang gültig.",
       forgotCaptchaPlaceholder:
@@ -723,18 +700,23 @@ export const messages: Messages = {
       resetBackToLogin: "Zur Anmeldung zurückkehren",
       resetSuccessLoginCta: "Zur Login-Seite",
       resetErrorNewPasswordRequired: "Bitte gib ein neues Passwort ein.",
-      resetErrorNewPasswordTooShort: "Das Passwort muss mindestens 8 Zeichen lang sein.",
+      resetErrorNewPasswordTooShort:
+        "Das Passwort muss mindestens 8 Zeichen lang sein.",
       resetErrorConfirmPasswordRequired: "Bitte bestätige dein neues Passwort.",
       resetErrorPasswordsMismatch: "Die Passwörter stimmen nicht überein.",
-      resetErrorInvalidOrExpiredLink: "Der Link zum Ändern des Passworts ist ungültig oder abgelaufen. Bitte fordere über den Bildschirm \"Passwort vergessen\" einen neuen Link an.",
-      resetErrorGeneric: "Die Änderung des Passworts ist fehlgeschlagen. Bitte versuche es später erneut.",
-      resetErrorNetwork: "Beim Kontakt mit dem Server ist ein Netzwerkfehler aufgetreten.",
-      resetSuccess: "Dein Passwort wurde erfolgreich geändert. Wir leiten dich gleich zur Login-Seite weiter...",
+      resetErrorInvalidOrExpiredLink:
+        'Der Link zum Ändern des Passworts ist ungültig oder abgelaufen. Bitte fordere über den Bildschirm "Passwort vergessen" einen neuen Link an.',
+      resetErrorGeneric:
+        "Die Änderung des Passworts ist fehlgeschlagen. Bitte versuche es später erneut.",
+      resetErrorNetwork:
+        "Beim Kontakt mit dem Server ist ein Netzwerkfehler aufgetreten.",
+      resetSuccess:
+        "Dein Passwort wurde erfolgreich geändert. Wir leiten dich gleich zur Login-Seite weiter...",
       resetPasswordRequirementsTitle: "Passwortanforderungen:",
       resetPasswordRequirementsItemMinLength: "Mindestens 8 Zeichen",
       resetPasswordRequirementsItemRecommendation:
         "Es wird empfohlen, Buchstaben, Zahlen und Sonderzeichen zu verwenden.",
-      resetGoToForgotCta: "Zum Bildschirm \"Passwort vergessen\"",
+      resetGoToForgotCta: 'Zum Bildschirm "Passwort vergessen"',
       accountDeletedTitle: "Dein Konto wurde geschlossen und gelöscht",
       accountDeletedDescription:
         "Dein Konto wurde geschlossen und deine personenbezogenen Daten wurden entsprechend unseren Datenschutzregeln und der DSGVO zur Löschung markiert.",
@@ -757,12 +739,10 @@ export const messages: Messages = {
       adminWikiStatsInactiveHelper:
         "Inaktiv – im öffentlichen Wiki ausgeblendet, kann wieder aktiviert werden.",
       adminDashboardTitle: "Admin-Dashboard",
-      adminDashboardSubtitle:
-        "Systemübersicht und Administrationswerkzeuge.",
+      adminDashboardSubtitle: "Systemübersicht und Administrationswerkzeuge.",
       adminDashboardMetricsTitle: "Gesamtzahl der Benutzer",
       adminDashboardMetricsLoading: "Lade Metriken...",
-      adminDashboardMetricsError:
-        "Metriken konnten nicht geladen werden.",
+      adminDashboardMetricsError: "Metriken konnten nicht geladen werden.",
       adminDashboardLinksTitle: "Admin-Bereiche",
       adminDashboardGoToWiki: "Zum Admin-Wiki",
       adminDashboardGoToUsers: "Zu Admin-Users",
@@ -799,8 +779,7 @@ export const messages: Messages = {
       adminDashboardRecentItem2Detail: "[email protected]",
       adminDashboardRecentItem2Time: "Vor 5 Stunden",
       adminDashboardRecentItem3Prefix: "Artikel aktualisiert:",
-      adminDashboardRecentItem3Detail:
-        "Selenium WebDriver Best Practices",
+      adminDashboardRecentItem3Detail: "Selenium WebDriver Best Practices",
       adminDashboardRecentItem3Time: "Vor 1 Tag",
       adminDashboardRecentItem4Prefix: "Benutzer deaktiviert:",
       adminDashboardRecentItem4Detail: "[email protected]",
@@ -809,8 +788,7 @@ export const messages: Messages = {
       adminActivityTitle: "Aktivitätsprotokoll",
       adminActivitySubtitle:
         "Neueste Änderungen an Wiki-Artikeln und Benutzerkonten.",
-      adminActivitySearchPlaceholder:
-        "Suche nach Objekt, Akteur oder Typ...",
+      adminActivitySearchPlaceholder: "Suche nach Objekt, Akteur oder Typ...",
       adminActivityFilterTypeLabel: "Typ",
       adminActivityFilterActionLabel: "Aktion",
       adminActivityFilterTypeAll: "Alle Typen",
@@ -849,13 +827,10 @@ export const messages: Messages = {
       adminActivityFooterCountSuffix:
         "Einträgen für den ausgewählten Zeitraum und die Filter angezeigt",
       adminActivityExportButton: "Alle exportieren (CSV)",
-      adminMetricsUsersTrendTitle:
-        "Neue Benutzer pro Monat (letzte Zeiträume)",
+      adminMetricsUsersTrendTitle: "Neue Benutzer pro Monat (letzte Zeiträume)",
       adminMetricsUserActivityTitle: "Aktivität für den ausgewählten Zeitraum",
-      adminMetricsUserActivityRegisteredLink:
-        "Benutzer anzeigen (Users)",
-      adminMetricsUserActivityDeactivatedLink:
-        "Deaktivierte anzeigen (Users)",
+      adminMetricsUserActivityRegisteredLink: "Benutzer anzeigen (Users)",
+      adminMetricsUserActivityDeactivatedLink: "Deaktivierte anzeigen (Users)",
       adminMetricsUserActivityArticleCreatedLink:
         "Neue Artikel anzeigen (Wiki)",
       adminMetricsUserActivityArticleUpdatedLink:
@@ -874,7 +849,8 @@ export const messages: Messages = {
       articlePrintButton: "Drucken",
       articleShareSuccess: "Erfolgreich geteilt.",
       articleShareClipboard: "Link wurde in die Zwischenablage kopiert.",
-      articleShareError: "Der Link konnte nicht geteilt werden. Bitte teilen Sie ihn manuell.",
+      articleShareError:
+        "Der Link konnte nicht geteilt werden. Bitte teilen Sie ihn manuell.",
     },
   },
-}
+};

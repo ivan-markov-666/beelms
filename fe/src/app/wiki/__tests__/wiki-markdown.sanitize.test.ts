@@ -20,8 +20,8 @@ describe("sanitizeMermaidSvg", () => {
     expect(sanitized.toLowerCase()).not.toContain("onload=");
     expect(sanitized.toLowerCase()).not.toContain("onclick=");
 
-    expect(sanitized).toContain("dx=\"10\"");
-    expect(sanitized).toContain("dy=\"5\"");
+    expect(sanitized).toContain('dx="10"');
+    expect(sanitized).toContain('dy="5"');
   });
 
   it("sanitizes style tags by removing @import and external url()", () => {

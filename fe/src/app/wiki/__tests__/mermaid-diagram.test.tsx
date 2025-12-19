@@ -36,11 +36,15 @@ describe("MermaidDiagram", () => {
       };
     });
 
-    (window as unknown as { open: jest.Mock }).open = openMock as unknown as jest.Mock;
+    (window as unknown as { open: jest.Mock }).open =
+      openMock as unknown as jest.Mock;
   });
 
   it("renders controls and opens fullscreen", async () => {
-    const mermaidApi = mermaid as unknown as { initialize: jest.Mock; render: jest.Mock };
+    const mermaidApi = mermaid as unknown as {
+      initialize: jest.Mock;
+      render: jest.Mock;
+    };
 
     mermaidApi.render.mockResolvedValue({
       svg: `
@@ -57,16 +61,22 @@ describe("MermaidDiagram", () => {
 
     await waitFor(() => expect(mermaidApi.render).toHaveBeenCalled());
 
-    expect(screen.getByRole("button", { name: "Fullscreen" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Fullscreen" }),
+    ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Print" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Zoom in" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Zoom out" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Zoom out" }),
+    ).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole("button", { name: "Fullscreen" }));
     expect(screen.getByRole("button", { name: "Close" })).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole("button", { name: "Close" }));
-    expect(screen.queryByRole("button", { name: "Close" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Close" }),
+    ).not.toBeInTheDocument();
   });
 
   it("prints diagram using window.open", async () => {

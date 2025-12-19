@@ -10,8 +10,8 @@ export default async function PrivacyPage({
 }: {
   searchParams?: LegalPageSearchParams | Promise<LegalPageSearchParams>;
 } = {}) {
-  const resolvedSearchParams =
-    ((await searchParams) ?? {}) as LegalPageSearchParams;
+  const resolvedSearchParams = ((await searchParams) ??
+    {}) as LegalPageSearchParams;
 
   const rawLang = resolvedSearchParams.lang ?? null;
   const lang: SupportedLang = normalizeLang(rawLang);
@@ -35,10 +35,10 @@ export default async function PrivacyPage({
         {isBg ? (
           <>
             <p>
-              BeeLMS събира и обработва минимален набор от лични данни, описани в
-              PRD/MVP документацията – основно имейл адрес и техническа информация
-              за сесиите, необходима за вход, защита от злоупотреби и подобряване
-              на услугата.
+              BeeLMS събира и обработва минимален набор от лични данни, описани
+              в PRD/MVP документацията – основно имейл адрес и техническа
+              информация за сесиите, необходима за вход, защита от злоупотреби и
+              подобряване на услугата.
             </p>
             <p>Типични категории данни включват:</p>
             <ul className="list-disc space-y-1 pl-5">
