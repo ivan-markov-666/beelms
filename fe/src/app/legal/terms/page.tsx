@@ -10,8 +10,8 @@ export default async function TermsPage({
 }: {
   searchParams?: LegalPageSearchParams | Promise<LegalPageSearchParams>;
 } = {}) {
-  const resolvedSearchParams =
-    ((await searchParams) ?? {}) as LegalPageSearchParams;
+  const resolvedSearchParams = ((await searchParams) ??
+    {}) as LegalPageSearchParams;
 
   const rawLang = resolvedSearchParams.lang ?? null;
   const lang: SupportedLang = normalizeLang(rawLang);
@@ -35,9 +35,9 @@ export default async function TermsPage({
         {isBg ? (
           <>
             <p>
-              Като използвате BeeLMS, приемате, че платформата се предоставя
-              с учебна цел и „както е“ (as is), без гаранции за пълнота или
-              липса на грешки в съдържанието.
+              Като използвате BeeLMS, приемате, че платформата се предоставя с
+              учебна цел и „както е“ (as is), без гаранции за пълнота или липса
+              на грешки в съдържанието.
             </p>
             <p>Основни принципи при ползване на платформата:</p>
             <ul className="list-disc space-y-1 pl-5">
@@ -50,8 +50,8 @@ export default async function TermsPage({
                 лични данни на трети лица;
               </li>
               <li>
-                спазвайте добри практики при тестване и не изпращайте
-                прекомерно количество заявки към публичните ресурси.
+                спазвайте добри практики при тестване и не изпращайте прекомерно
+                количество заявки към публичните ресурси.
               </li>
             </ul>
             <p>

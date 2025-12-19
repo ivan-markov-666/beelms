@@ -40,9 +40,7 @@ export function LanguageSwitcher() {
       <select
         id="global-lang"
         value={currentLang}
-        onChange={(event) =>
-          handleChange(event.target.value as SupportedLang)
-        }
+        onChange={(event) => handleChange(event.target.value as SupportedLang)}
         className="rounded-md border border-gray-300 bg-white px-2 py-1 text-xs font-medium text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
       >
         {SUPPORTED_LANGS.map((lang) => (

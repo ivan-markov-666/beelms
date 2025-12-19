@@ -1,7 +1,5 @@
 "use client";
 
-export const dynamic = 'force-dynamic';
-
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useCurrentLang } from "../../../i18n/useCurrentLang";
@@ -58,9 +56,8 @@ export default function AdminMetricsPage() {
   const [userStats, setUserStats] = useState<AdminUsersStats | null>(null);
   const [wikiStats, setWikiStats] = useState<WikiStats | null>(null);
   const [userTrend, setUserTrend] = useState<UsersTrendPoint[]>([]);
-  const [activityStats, setActivityStats] = useState<ActivityPeriodStats | null>(
-    null,
-  );
+  const [activityStats, setActivityStats] =
+    useState<ActivityPeriodStats | null>(null);
   const [periodPreset, setPeriodPreset] = useState("");
   const [periodFrom, setPeriodFrom] = useState("");
   const [periodTo, setPeriodTo] = useState("");
@@ -289,10 +286,10 @@ export default function AdminMetricsPage() {
   };
 
   const netUserChange =
-    effectiveActivityStats.userRegistered - effectiveActivityStats.userDeactivated;
+    effectiveActivityStats.userRegistered -
+    effectiveActivityStats.userDeactivated;
 
-  const usersChangePercent =
-    metrics?.usersChangePercentSinceLastMonth ?? null;
+  const usersChangePercent = metrics?.usersChangePercentSinceLastMonth ?? null;
 
   const usersTrendText = (() => {
     if (usersChangePercent === null || !hasMetrics) {
@@ -389,19 +386,13 @@ export default function AdminMetricsPage() {
               {!loading && !error && (
                 <>
                   <p className="text-3xl font-bold text-gray-900">
-                    {hasMetrics
-                      ? totalUsers.toLocaleString("bg-BG")
-                      : "—"}
+                    {hasMetrics ? totalUsers.toLocaleString("bg-BG") : "—"}
                   </p>
                   <p className="mt-1 text-sm text-green-600">
                     {usersTrendText}
                   </p>
                   <p className="mt-0.5 text-xs text-gray-500">
-                    {t(
-                      lang,
-                      "common",
-                      "adminDashboardCardUsersTrendHelp",
-                    )}
+                    {t(lang, "common", "adminDashboardCardUsersTrendHelp")}
                   </p>
                 </>
               )}
@@ -619,7 +610,11 @@ export default function AdminMetricsPage() {
                       href="/admin/users?status=active"
                       className="text-green-700 hover:text-green-800 hover:underline"
                     >
-                      {t(lang, "common", "adminMetricsUserActivityRegisteredLink")}
+                      {t(
+                        lang,
+                        "common",
+                        "adminMetricsUserActivityRegisteredLink",
+                      )}
                     </Link>
                   </p>
                 </div>
@@ -773,18 +768,18 @@ export default function AdminMetricsPage() {
           </h2>
           <p className="text-xs text-gray-600">
             {netUserChange === 0 && (
-              <>
-                {t(lang, "common", "adminMetricsNetUsersChangeZero")}
-              </>
+              <>{t(lang, "common", "adminMetricsNetUsersChangeZero")}</>
             )}
             {netUserChange > 0 && (
               <span className="text-green-700">
-                +{netUserChange} {t(lang, "common", "adminMetricsNetUsersChangePositiveSuffix")}
+                +{netUserChange}{" "}
+                {t(lang, "common", "adminMetricsNetUsersChangePositiveSuffix")}
               </span>
             )}
             {netUserChange < 0 && (
               <span className="text-red-700">
-                {netUserChange} {t(lang, "common", "adminMetricsNetUsersChangeNegativeSuffix")}
+                {netUserChange}{" "}
+                {t(lang, "common", "adminMetricsNetUsersChangeNegativeSuffix")}
               </span>
             )}
           </p>
@@ -802,16 +797,10 @@ export default function AdminMetricsPage() {
 
               return userTrend.map((point) => {
                 const widthRegistered = point.registered
-                  ? Math.max(
-                      6,
-                      Math.round((point.registered / safeMax) * 100),
-                    )
+                  ? Math.max(6, Math.round((point.registered / safeMax) * 100))
                   : 0;
                 const widthDeactivated = point.deactivated
-                  ? Math.max(
-                      6,
-                      Math.round((point.deactivated / safeMax) * 100),
-                    )
+                  ? Math.max(6, Math.round((point.deactivated / safeMax) * 100))
                   : 0;
 
                 return (
@@ -821,11 +810,7 @@ export default function AdminMetricsPage() {
                     </div>
                     <div className="flex items-center space-x-3">
                       <div className="w-24 text-[11px] text-green-700">
-                        {t(
-                          lang,
-                          "common",
-                          "adminActivityActionUserRegistered",
-                        )}
+                        {t(lang, "common", "adminActivityActionUserRegistered")}
                       </div>
                       <div className="flex-1 h-2 rounded-full bg-gray-100">
                         {widthRegistered > 0 && (

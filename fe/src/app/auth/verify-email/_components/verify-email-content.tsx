@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -174,8 +174,8 @@ export function VerifyEmailContent() {
               status === "success"
                 ? "text-green-600"
                 : status === "invalid_or_expired" || status === "missing_token"
-                ? "text-amber-700"
-                : "text-red-600"
+                  ? "text-amber-700"
+                  : "text-red-600"
             }`}
             role={status === "success" ? "status" : "alert"}
           >

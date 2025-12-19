@@ -1,7 +1,5 @@
 "use client";
 
-export const dynamic = 'force-dynamic';
-
 import { type FormEvent, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useCurrentLang } from "../../../i18n/useCurrentLang";
@@ -192,13 +190,17 @@ export default function AdminCoursesPage() {
               <input
                 className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400"
                 value={form.title}
-                onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))}
+                onChange={(e) =>
+                  setForm((p) => ({ ...p, title: e.target.value }))
+                }
                 required
               />
             </label>
 
             <label className="space-y-1">
-              <span className="text-xs font-medium text-gray-600">Language</span>
+              <span className="text-xs font-medium text-gray-600">
+                Language
+              </span>
               <select
                 className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900"
                 value={form.language}
@@ -216,7 +218,9 @@ export default function AdminCoursesPage() {
               <select
                 className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900"
                 value={form.status}
-                onChange={(e) => setForm((p) => ({ ...p, status: e.target.value }))}
+                onChange={(e) =>
+                  setForm((p) => ({ ...p, status: e.target.value }))
+                }
               >
                 <option value="draft">draft</option>
                 <option value="active">active</option>
@@ -237,7 +241,9 @@ export default function AdminCoursesPage() {
           </div>
 
           <label className="space-y-1">
-            <span className="text-xs font-medium text-gray-600">Description</span>
+            <span className="text-xs font-medium text-gray-600">
+              Description
+            </span>
             <textarea
               className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400"
               rows={3}
@@ -341,7 +347,9 @@ export default function AdminCoursesPage() {
                         {course.description}
                       </p>
                     </td>
-                    <td className="px-2 py-2 text-gray-700">{course.language}</td>
+                    <td className="px-2 py-2 text-gray-700">
+                      {course.language}
+                    </td>
                     <td className="px-2 py-2 text-gray-700">{course.status}</td>
                     <td className="px-2 py-2 text-gray-700">
                       {course.isPaid ? "yes" : "no"}

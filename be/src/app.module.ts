@@ -14,6 +14,7 @@ import { CoursesModule } from './courses/courses.module';
 import { Course } from './courses/course.entity';
 import { CourseEnrollment } from './courses/course-enrollment.entity';
 import { CourseCurriculumItem } from './courses/course-curriculum-item.entity';
+import { UserCurriculumProgress } from './courses/user-curriculum-progress.entity';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { CourseCurriculumItem } from './courses/course-curriculum-item.entity';
         Course,
         CourseEnrollment,
         CourseCurriculumItem,
+        UserCurriculumProgress,
       ],
       synchronize: false,
     }),

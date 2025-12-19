@@ -142,8 +142,8 @@ export default function AdminWikiCreatePage() {
             Create New Article
           </h1>
           <p className="text-gray-600">
-            Въведете само slug за нова Wiki статия. Език, статус и съдържание
-            се настройват по-късно в страницата за редакция.
+            Въведете само slug за нова Wiki статия. Език, статус и съдържание се
+            настройват по-късно в страницата за редакция.
           </p>
         </div>
         <Link

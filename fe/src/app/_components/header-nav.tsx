@@ -103,16 +103,10 @@ export function HeaderNav() {
         </div>
 
         <nav className="hidden items-center space-x-6 text-sm text-gray-700 md:flex">
-          <Link
-            href="/wiki"
-            className="hover:text-green-600"
-          >
+          <Link href="/wiki" className="hover:text-green-600">
             {t(lang, "nav", "wiki")}
           </Link>
-          <Link
-            href="/courses"
-            className="hover:text-green-600"
-          >
+          <Link href="/courses" className="hover:text-green-600">
             {t(lang, "nav", "courses")}
           </Link>
           {hasToken === true && (
@@ -121,10 +115,7 @@ export function HeaderNav() {
             </Link>
           )}
           {isAdmin === true && (
-            <Link
-              href="/admin"
-              className="hover:text-green-600"
-            >
+            <Link href="/admin" className="hover:text-green-600">
               {t(lang, "nav", "admin")}
             </Link>
           )}
@@ -133,16 +124,10 @@ export function HeaderNav() {
         <div className="flex items-center gap-4 text-sm text-gray-700">
           {hasToken === false && (
             <>
-              <Link
-                href="/auth/login"
-                className="hover:text-green-600"
-              >
+              <Link href="/auth/login" className="hover:text-green-600">
                 {t(lang, "nav", "login")}
               </Link>
-              <Link
-                href="/auth/register"
-                className="hover:text-green-600"
-              >
+              <Link href="/auth/register" className="hover:text-green-600">
                 {t(lang, "nav", "register")}
               </Link>
             </>

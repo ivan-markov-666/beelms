@@ -78,18 +78,16 @@ async function fetchWikiArticle(
   return res.json();
 }
 
-export default async function WikiArticlePage(
-  props: {
-    params: { slug: string } | Promise<{ slug: string }>;
-    searchParams?:
-      | WikiArticlePageSearchParams
-      | Promise<WikiArticlePageSearchParams>;
-  },
-) {
+export default async function WikiArticlePage(props: {
+  params: { slug: string } | Promise<{ slug: string }>;
+  searchParams?:
+    | WikiArticlePageSearchParams
+    | Promise<WikiArticlePageSearchParams>;
+}) {
   // Next 15 can provide params/searchParams as Promises, so we need to unwrap them.
   const resolvedParams = await props.params;
-  const resolvedSearchParams =
-    ((await props.searchParams) ?? {}) as WikiArticlePageSearchParams;
+  const resolvedSearchParams = ((await props.searchParams) ??
+    {}) as WikiArticlePageSearchParams;
 
   const rawLang = resolvedSearchParams.lang ?? null;
   const uiLang: SupportedLang = normalizeLang(rawLang);
@@ -103,9 +101,7 @@ export default async function WikiArticlePage(
     <WikiMain>
       <header className="space-y-2">
         <WikiBackLink />
-        <h1 className="text-4xl font-bold text-zinc-900">
-          {article.title}
-        </h1>
+        <h1 className="text-4xl font-bold text-zinc-900">{article.title}</h1>
         {article.subtitle && (
           <p className="text-lg text-zinc-600">{article.subtitle}</p>
         )}

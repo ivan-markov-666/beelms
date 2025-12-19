@@ -3,7 +3,8 @@ import Link from "next/link";
 export const dynamic = "force-dynamic";
 
 function apiUrl(path: string): string {
-  const base = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
+  const base =
+    process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
   const normalizedBase = base.endsWith("/api")
     ? base
     : `${base.replace(/\/$/, "")}/api`;
@@ -44,7 +45,8 @@ export default async function CoursesPage() {
         <header className="space-y-2">
           <h1 className="text-3xl font-semibold text-zinc-900">Courses</h1>
           <p className="text-sm text-zinc-600">
-            Възникна проблем при зареждане на курсовете. Опитайте отново по-късно.
+            Възникна проблем при зареждане на курсовете. Опитайте отново
+            по-късно.
           </p>
         </header>
       </main>
@@ -56,7 +58,9 @@ export default async function CoursesPage() {
       <main className="mx-auto flex min-h-screen max-w-6xl flex-col gap-8 px-4 py-10">
         <header className="space-y-2">
           <h1 className="text-3xl font-semibold text-zinc-900">Courses</h1>
-          <p className="text-sm text-zinc-600">Все още няма публикувани курсове.</p>
+          <p className="text-sm text-zinc-600">
+            Все още няма публикувани курсове.
+          </p>
         </header>
       </main>
     );
@@ -81,10 +85,16 @@ export default async function CoursesPage() {
             <h2 className="mb-2 text-lg font-semibold text-gray-900">
               {course.title}
             </h2>
-            <p className="text-sm text-gray-600 line-clamp-4">{course.description}</p>
+            <p className="text-sm text-gray-600 line-clamp-4">
+              {course.description}
+            </p>
             <div className="mt-4 flex items-center gap-2 text-xs text-gray-500">
-              <span className="rounded bg-gray-100 px-2 py-1">{course.language}</span>
-              <span className="rounded bg-gray-100 px-2 py-1">{course.status}</span>
+              <span className="rounded bg-gray-100 px-2 py-1">
+                {course.language}
+              </span>
+              <span className="rounded bg-gray-100 px-2 py-1">
+                {course.status}
+              </span>
             </div>
           </Link>
         ))}

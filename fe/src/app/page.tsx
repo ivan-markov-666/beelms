@@ -11,7 +11,8 @@ export default function Home() {
             </h1>
             <p className="text-lg text-gray-700 mb-8">
               BeeLMS предоставя публично Wiki съдържание и базови потребителски
-              акаунти (регистрация, вход и профил), плюс админ панел за управление.
+              акаунти (регистрация, вход и профил), плюс админ панел за
+              управление.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link
@@ -76,14 +77,18 @@ export default function Home() {
 
       <section className="py-12">
         <div className="max-w-6xl mx-auto px-4">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Бързи линкове</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">
+            Бързи линкове
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <Link
               href="/wiki"
               className="bg-white border border-gray-200 rounded-lg p-5 hover:shadow-md transition flex flex-col justify-between"
             >
               <div>
-                <h3 className="font-semibold text-gray-900 mb-2">Преглед на Wiki</h3>
+                <h3 className="font-semibold text-gray-900 mb-2">
+                  Преглед на Wiki
+                </h3>
                 <p className="text-sm text-gray-600">
                   Разгледай статии за manual, UI и API тестване.
                 </p>
@@ -95,12 +100,16 @@ export default function Home() {
               className="bg-white border border-gray-200 rounded-lg p-5 hover:shadow-md transition flex flex-col justify-between"
             >
               <div>
-                <h3 className="font-semibold text-gray-900 mb-2">Регистрация</h3>
+                <h3 className="font-semibold text-gray-900 mb-2">
+                  Регистрация
+                </h3>
                 <p className="text-sm text-gray-600">
                   Създай нов акаунт, за да използваш профила и админ функциите.
                 </p>
               </div>
-              <span className="mt-3 text-xs text-gray-500">SCR-AUTH-REGISTER</span>
+              <span className="mt-3 text-xs text-gray-500">
+                SCR-AUTH-REGISTER
+              </span>
             </Link>
             <Link
               href="/auth/login"
@@ -124,7 +133,9 @@ export default function Home() {
                   Управлявай имейл, парола, експорт и закриване на акаунта.
                 </p>
               </div>
-              <span className="mt-3 text-xs text-gray-500">SCR-AUTH-PROFILE</span>
+              <span className="mt-3 text-xs text-gray-500">
+                SCR-AUTH-PROFILE
+              </span>
             </Link>
           </div>
         </div>

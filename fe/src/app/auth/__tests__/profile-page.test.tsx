@@ -4,7 +4,8 @@ import "@testing-library/jest-dom";
 import ProfilePage from "../../profile/page";
 import { ACCESS_TOKEN_KEY } from "../../auth-token";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
 
 const mockReplace = jest.fn();
 
@@ -44,38 +45,47 @@ describe("ProfilePage email change behaviour", () => {
       .spyOn(window.localStorage.__proto__, "removeItem")
       .mockImplementation(jest.fn());
 
-    global.fetch = jest.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
-      const url = typeof input === "string" ? input : input.toString();
+    global.fetch = jest.fn(
+      async (input: RequestInfo | URL, init?: RequestInit) => {
+        const url = typeof input === "string" ? input : input.toString();
 
-      if (url === `${API_BASE_URL}/users/me` && (!init || !init.method || init.method === "GET")) {
-        return {
-          ok: true,
-          status: 200,
-          json: async () => ({
-            id: "user-1",
-            email: "user@example.com",
-            createdAt: new Date().toISOString(),
-            emailChangeLimitReached: false,
-            emailChangeLimitResetAt: null,
-          }),
-        } as Response;
-      }
+        if (
+          url === `${API_BASE_URL}/users/me` &&
+          (!init || !init.method || init.method === "GET")
+        ) {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              id: "user-1",
+              email: "user@example.com",
+              createdAt: new Date().toISOString(),
+              emailChangeLimitReached: false,
+              emailChangeLimitResetAt: null,
+            }),
+          } as Response;
+        }
 
-      if (url === `${API_BASE_URL}/users/me` && init && init.method === "PATCH") {
-        const body = init.body ? JSON.parse(init.body as string) : {};
-        return {
-          ok: true,
-          status: 200,
-          json: async () => ({
-            id: "user-1",
-            email: body.email ?? "user@example.com",
-            createdAt: new Date().toISOString(),
-          }),
-        } as Response;
-      }
+        if (
+          url === `${API_BASE_URL}/users/me` &&
+          init &&
+          init.method === "PATCH"
+        ) {
+          const body = init.body ? JSON.parse(init.body as string) : {};
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              id: "user-1",
+              email: body.email ?? "user@example.com",
+              createdAt: new Date().toISOString(),
+            }),
+          } as Response;
+        }
 
-      throw new Error(`Unexpected fetch to ${url}`);
-    }) as unknown as typeof fetch;
+        throw new Error(`Unexpected fetch to ${url}`);
+      },
+    ) as unknown as typeof fetch;
   });
 
   afterEach(() => {
@@ -124,7 +134,7 @@ describe("ProfilePage email change behaviour", () => {
     });
 
     // ensure no new PATCH call was sent
-    expect((global.fetch as jest.Mock)).not.toHaveBeenCalledWith(
+    expect(global.fetch as jest.Mock).not.toHaveBeenCalledWith(
       `${API_BASE_URL}/users/me`,
       expect.objectContaining({ method: "PATCH" }),
     );
@@ -171,11 +181,13 @@ describe("ProfilePage email change behaviour", () => {
       ).toBeInTheDocument();
     });
 
-    let patchCalls = (global.fetch as jest.Mock).mock.calls.filter(([, init]) => {
-      if (!init) return false;
-      const cast = init as RequestInit;
-      return cast.method === "PATCH";
-    });
+    let patchCalls = (global.fetch as jest.Mock).mock.calls.filter(
+      ([, init]) => {
+        if (!init) return false;
+        const cast = init as RequestInit;
+        return cast.method === "PATCH";
+      },
+    );
 
     expect(patchCalls.length).toBe(0);
 
@@ -269,7 +281,11 @@ describe("ProfilePage email change behaviour", () => {
           } as Response;
         }
 
-        if (url === `${API_BASE_URL}/users/me` && init && init.method === "PATCH") {
+        if (
+          url === `${API_BASE_URL}/users/me` &&
+          init &&
+          init.method === "PATCH"
+        ) {
           return {
             ok: false,
             status: 429,
@@ -328,11 +344,13 @@ describe("ProfilePage email change behaviour", () => {
       ).toBeInTheDocument();
     });
 
-    const patchCalls = (global.fetch as jest.Mock).mock.calls.filter(([, init]) => {
-      if (!init) return false;
-      const cast = init as RequestInit;
-      return cast.method === "PATCH";
-    });
+    const patchCalls = (global.fetch as jest.Mock).mock.calls.filter(
+      ([, init]) => {
+        if (!init) return false;
+        const cast = init as RequestInit;
+        return cast.method === "PATCH";
+      },
+    );
 
     expect(patchCalls.length).toBe(0);
   });
@@ -376,57 +394,65 @@ describe("ProfilePage critical actions", () => {
       .spyOn(window.localStorage.__proto__, "removeItem")
       .mockImplementation(jest.fn());
 
-    global.fetch = jest.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
-      const url = typeof input === "string" ? input : input.toString();
+    global.fetch = jest.fn(
+      async (input: RequestInfo | URL, init?: RequestInit) => {
+        const url = typeof input === "string" ? input : input.toString();
 
-      if (
-        url === `${API_BASE_URL}/users/me` &&
-        (!init || !init.method || init.method === "GET")
-      ) {
-        return {
-          ok: true,
-          status: 200,
-          json: async () => ({
-            id: "user-1",
-            email: "user@example.com",
-            createdAt: new Date().toISOString(),
-            emailChangeLimitReached: false,
-            emailChangeLimitResetAt: null,
-          }),
-        } as Response;
-      }
+        if (
+          url === `${API_BASE_URL}/users/me` &&
+          (!init || !init.method || init.method === "GET")
+        ) {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              id: "user-1",
+              email: "user@example.com",
+              createdAt: new Date().toISOString(),
+              emailChangeLimitReached: false,
+              emailChangeLimitResetAt: null,
+            }),
+          } as Response;
+        }
 
-      if (url === `${API_BASE_URL}/users/me/change-password` && init?.method === "POST") {
-        return {
-          ok: true,
-          status: 200,
-          json: async () => ({}),
-        } as Response;
-      }
+        if (
+          url === `${API_BASE_URL}/users/me/change-password` &&
+          init?.method === "POST"
+        ) {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({}),
+          } as Response;
+        }
 
-      if (url === `${API_BASE_URL}/users/me/export` && init?.method === "POST") {
-        return {
-          ok: true,
-          status: 200,
-          json: async () => ({
-            id: "user-1",
-            email: "user@example.com",
-            createdAt: new Date().toISOString(),
-            active: true,
-          }),
-        } as Response;
-      }
+        if (
+          url === `${API_BASE_URL}/users/me/export` &&
+          init?.method === "POST"
+        ) {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              id: "user-1",
+              email: "user@example.com",
+              createdAt: new Date().toISOString(),
+              active: true,
+            }),
+          } as Response;
+        }
 
-      if (url === `${API_BASE_URL}/users/me` && init?.method === "DELETE") {
-        return {
-          ok: true,
-          status: 204,
-          json: async () => ({}),
-        } as Response;
-      }
+        if (url === `${API_BASE_URL}/users/me` && init?.method === "DELETE") {
+          return {
+            ok: true,
+            status: 204,
+            json: async () => ({}),
+          } as Response;
+        }
 
-      throw new Error(`Unexpected fetch to ${url}`);
-    }) as unknown as typeof fetch;
+        throw new Error(`Unexpected fetch to ${url}`);
+      },
+    ) as unknown as typeof fetch;
   });
 
   afterEach(() => {
@@ -454,7 +480,9 @@ describe("ProfilePage critical actions", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Изход" }));
 
-    expect(window.localStorage.removeItem).toHaveBeenCalledWith(ACCESS_TOKEN_KEY);
+    expect(window.localStorage.removeItem).toHaveBeenCalledWith(
+      ACCESS_TOKEN_KEY,
+    );
     expect(mockReplace).toHaveBeenCalledWith("/");
   });
 
@@ -478,7 +506,9 @@ describe("ProfilePage critical actions", () => {
     fireEvent.click(screen.getAllByRole("button", { name: "Запази" })[0]);
 
     await waitFor(() => {
-      expect(screen.getByText("Паролата беше успешно сменена.")).toBeInTheDocument();
+      expect(
+        screen.getByText("Паролата беше успешно сменена."),
+      ).toBeInTheDocument();
     });
   });
 
@@ -499,7 +529,9 @@ describe("ProfilePage critical actions", () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText(/Детайли от експортираните данни/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Детайли от експортираните данни/i),
+      ).toBeInTheDocument();
     });
 
     expect((global.fetch as jest.Mock).mock.calls).toEqual(
@@ -539,6 +571,8 @@ describe("ProfilePage critical actions", () => {
       expect(mockReplace).toHaveBeenCalledWith("/auth/account-deleted");
     });
 
-    expect(window.localStorage.removeItem).toHaveBeenCalledWith(ACCESS_TOKEN_KEY);
+    expect(window.localStorage.removeItem).toHaveBeenCalledWith(
+      ACCESS_TOKEN_KEY,
+    );
   });
 });

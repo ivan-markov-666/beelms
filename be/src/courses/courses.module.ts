@@ -11,6 +11,8 @@ import { CourseCurriculumItem } from './course-curriculum-item.entity';
 import { AdminCourseCurriculumController } from './admin-course-curriculum.controller';
 import { WikiArticle } from '../wiki/wiki-article.entity';
 import { WikiArticleVersion } from '../wiki/wiki-article-version.entity';
+import { UserCurriculumProgress } from './user-curriculum-progress.entity';
+import { CurriculumProgressController } from './curriculum-progress.controller';
 
 @Module({
   imports: [
@@ -18,6 +20,7 @@ import { WikiArticleVersion } from '../wiki/wiki-article-version.entity';
       Course,
       CourseEnrollment,
       CourseCurriculumItem,
+      UserCurriculumProgress,
       WikiArticle,
       WikiArticleVersion,
     ]),
@@ -28,6 +31,7 @@ import { WikiArticleVersion } from '../wiki/wiki-article-version.entity';
     MyCoursesController,
     AdminCoursesController,
     AdminCourseCurriculumController,
+    CurriculumProgressController,
   ],
   providers: [CoursesService],
 })

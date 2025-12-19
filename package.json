@@ -1,0 +1,12 @@
+{
+  "name": "qa-4-free",
+  "private": true,
+  "devDependencies": {
+    "husky": "^8.0.3"
+  },
+  "scripts": {
+    "prepare": "husky install",
+    "lint": "npm --prefix be run lint && npm --prefix fe run lint",
+    "format": "npm --prefix be run format && npm --prefix fe run format"
+  }
+}

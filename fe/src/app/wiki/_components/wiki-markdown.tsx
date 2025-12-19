@@ -289,8 +289,7 @@ export function MermaidDiagram({ code }: { code: string }) {
 
         const id = `mermaid-${Math.random().toString(36).slice(2, 9)}`;
         const result = await mod.render(id, code);
-        const svg: string =
-          typeof result === "string" ? result : result.svg;
+        const svg: string = typeof result === "string" ? result : result.svg;
 
         const sanitized = sanitizeMermaidSvg(svg);
         if (!sanitized) {
@@ -394,7 +393,9 @@ export function MermaidDiagram({ code }: { code: string }) {
 
     const printWindow = window.open("", "_blank");
     if (!printWindow) {
-      window.alert("Pop-up blocked. Please allow pop-ups to print the diagram.");
+      window.alert(
+        "Pop-up blocked. Please allow pop-ups to print the diagram.",
+      );
       return;
     }
 
@@ -545,11 +546,7 @@ export function MermaidDiagram({ code }: { code: string }) {
         </button>
       </div>
 
-      <div
-        ref={viewportRef}
-        className="overflow-auto"
-        onWheel={onWheel}
-      >
+      <div ref={viewportRef} className="overflow-auto" onWheel={onWheel}>
         <div
           className={isPanning ? "cursor-grabbing select-none" : "cursor-grab"}
           onPointerDown={onPointerDown}
@@ -557,7 +554,12 @@ export function MermaidDiagram({ code }: { code: string }) {
           onPointerUp={endPan}
           onPointerCancel={endPan}
         >
-          <div style={{ transform: `scale(${scale})`, transformOrigin: "top left" }}>
+          <div
+            style={{
+              transform: `scale(${scale})`,
+              transformOrigin: "top left",
+            }}
+          >
             {svg ? (
               <div
                 dangerouslySetInnerHTML={{ __html: svg }}
@@ -625,13 +627,20 @@ export function MermaidDiagram({ code }: { code: string }) {
             onWheel={onWheel}
           >
             <div
-              className={isPanning ? "cursor-grabbing select-none" : "cursor-grab"}
+              className={
+                isPanning ? "cursor-grabbing select-none" : "cursor-grab"
+              }
               onPointerDown={onPointerDown}
               onPointerMove={onPointerMove}
               onPointerUp={endPan}
               onPointerCancel={endPan}
             >
-              <div style={{ transform: `scale(${scale})`, transformOrigin: "top left" }}>
+              <div
+                style={{
+                  transform: `scale(${scale})`,
+                  transformOrigin: "top left",
+                }}
+              >
                 {svg ? (
                   <div
                     dangerouslySetInnerHTML={{ __html: svg }}
@@ -726,9 +735,7 @@ export function WikiMarkdown({ content }: { content: string }) {
       const nextRel =
         target === "_blank"
           ? Array.from(
-              new Set(
-                `${rel ?? ""} noopener noreferrer`.trim().split(/\s+/),
-              ),
+              new Set(`${rel ?? ""} noopener noreferrer`.trim().split(/\s+/)),
             ).join(" ")
           : rel;
 

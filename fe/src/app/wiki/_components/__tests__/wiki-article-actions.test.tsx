@@ -29,7 +29,9 @@ describe("WikiArticleActions", () => {
     render(<WikiArticleActions title="Test article" lang="bg" />);
 
     expect(screen.getByRole("button", { name: "Сподели" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Принтирай" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Принтирай" }),
+    ).toBeInTheDocument();
   });
 
   it("uses Web Share API when available", async () => {

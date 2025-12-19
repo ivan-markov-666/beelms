@@ -9,6 +9,7 @@ import { Repository } from 'typeorm';
 import { Course } from './course.entity';
 import { CourseEnrollment } from './course-enrollment.entity';
 import { CourseCurriculumItem } from './course-curriculum-item.entity';
+import { UserCurriculumProgress } from './user-curriculum-progress.entity';
 import { WikiArticle } from '../wiki/wiki-article.entity';
 import { WikiArticleVersion } from '../wiki/wiki-article-version.entity';
 import { WikiArticleDetailDto } from '../wiki/dto/wiki-article-detail.dto';
@@ -30,6 +31,8 @@ export class CoursesService {
     private readonly enrollmentRepo: Repository<CourseEnrollment>,
     @InjectRepository(CourseCurriculumItem)
     private readonly curriculumRepo: Repository<CourseCurriculumItem>,
+    @InjectRepository(UserCurriculumProgress)
+    private readonly progressRepo: Repository<UserCurriculumProgress>,
     @InjectRepository(WikiArticle)
     private readonly wikiArticleRepo: Repository<WikiArticle>,
     @InjectRepository(WikiArticleVersion)
@@ -580,16 +583,200 @@ export class CoursesService {
       order: { enrolledAt: 'DESC' },
     });
 
-    return enrollments
-      .filter((e) => e.course && e.course.status === 'active')
-      .map((e) => ({
+    const results: MyCourseListItemDto[] = [];
+
+    for (const e of enrollments) {
+      if (!e.course || e.course.status !== 'active') {
+        continue;
+      }
+
+      const progressPercent = await this.calculateProgressPercent(
+        userId,
+        e.courseId,
+      );
+
+      results.push({
         ...this.toSummary(e.course),
         enrollmentStatus: (e.status ?? 'not_started') as
           | 'not_started'
           | 'in_progress'
           | 'completed',
-        progressPercent: null,
+        progressPercent,
         enrolledAt: e.enrolledAt ? e.enrolledAt.toISOString() : null,
-      }));
+      });
+    }
+
+    return results;
+  }
+
+  private async calculateProgressPercent(
+    userId: string,
+    courseId: string,
+  ): Promise<number> {
+    const totalItems = await this.curriculumRepo.count({
+      where: { courseId },
+    });
+
+    if (totalItems === 0) {
+      return 0;
+    }
+
+    const completedItems = await this.progressRepo.count({
+      where: { userId, courseId },
+    });
+
+    return Math.round((completedItems / totalItems) * 100);
+  }
+
+  private async updateEnrollmentStatus(
+    userId: string,
+    courseId: string,
+  ): Promise<void> {
+    const enrollment = await this.enrollmentRepo.findOne({
+      where: { userId, courseId },
+    });
+
+    if (!enrollment) {
+      return;
+    }
+
+    const totalItems = await this.curriculumRepo.count({
+      where: { courseId },
+    });
+
+    const completedItems = await this.progressRepo.count({
+      where: { userId, courseId },
+    });
+
+    let newStatus: string;
+
+    if (completedItems === 0) {
+      newStatus = 'not_started';
+    } else if (completedItems >= totalItems && totalItems > 0) {
+      newStatus = 'completed';
+    } else {
+      newStatus = 'in_progress';
+    }
+
+    if (enrollment.status !== newStatus) {
+      enrollment.status = newStatus;
+      await this.enrollmentRepo.save(enrollment);
+    }
+  }
+
+  async markCurriculumItemCompleted(
+    userId: string,
+    courseId: string,
+    itemId: string,
+  ): Promise<void> {
+    const course = await this.courseRepo.findOne({ where: { id: courseId } });
+
+    if (!course || course.status !== 'active') {
+      throw new NotFoundException('Course not found');
+    }
+
+    const enrollment = await this.enrollmentRepo.findOne({
+      where: { userId, courseId },
+    });
+
+    if (!enrollment) {
+      throw new ForbiddenException('Enrollment required');
+    }
+
+    const curriculumItem = await this.curriculumRepo.findOne({
+      where: { id: itemId, courseId },
+    });
+
+    if (!curriculumItem) {
+      throw new NotFoundException('Curriculum item not found');
+    }
+
+    const existing = await this.progressRepo.findOne({
+      where: { userId, curriculumItemId: itemId },
+    });
+
+    if (existing) {
+      return;
+    }
+
+    const progress = this.progressRepo.create({
+      userId,
+      courseId,
+      curriculumItemId: itemId,
+      completedAt: new Date(),
+    });
+
+    await this.progressRepo.save(progress);
+
+    await this.updateEnrollmentStatus(userId, courseId);
+  }
+
+  async getCurriculumProgress(
+    userId: string,
+    courseId: string,
+  ): Promise<{
+    totalItems: number;
+    completedItems: number;
+    progressPercent: number;
+    items: Array<{
+      id: string;
+      title: string;
+      itemType: string;
+      wikiSlug: string | null;
+      completed: boolean;
+      completedAt: string | null;
+    }>;
+  }> {
+    const course = await this.courseRepo.findOne({ where: { id: courseId } });
+
+    if (!course || course.status !== 'active') {
+      throw new NotFoundException('Course not found');
+    }
+
+    const enrollment = await this.enrollmentRepo.findOne({
+      where: { userId, courseId },
+    });
+
+    if (!enrollment) {
+      throw new ForbiddenException('Enrollment required');
+    }
+
+    const curriculumItems = await this.curriculumRepo.find({
+      where: { courseId },
+      order: { order: 'ASC' },
+    });
+
+    const progressRecords = await this.progressRepo.find({
+      where: { userId, courseId },
+    });
+
+    const progressMap = new Map<string, Date | null>();
+    for (const p of progressRecords) {
+      progressMap.set(p.curriculumItemId, p.completedAt);
+    }
+
+    const totalItems = curriculumItems.length;
+    const completedItems = progressRecords.length;
+    const progressPercent =
+      totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
+
+    const items = curriculumItems.map((item) => {
+      const completedAt = progressMap.get(item.id) ?? null;
+      return {
+        id: item.id,
+        title: item.title,
+        itemType: item.itemType,
+        wikiSlug: item.wikiSlug ?? null,
+        completed: completedAt !== null,
+        completedAt: completedAt ? completedAt.toISOString() : null,
+      };
+    });
+
+    return {
+      totalItems,
+      completedItems,
+      progressPercent,
+      items,
+    };
   }
 }

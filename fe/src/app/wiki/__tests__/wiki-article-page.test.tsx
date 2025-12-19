@@ -49,9 +49,7 @@ describe("WikiArticlePage", () => {
     expect(screen.getByText("Начало с BeeLMS")).toBeInTheDocument();
     expect(screen.getByText("Съдържание на статията")).toBeInTheDocument();
     expect(screen.getByText("← Назад към Wiki")).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Сподели" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Сподели" })).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Принтирай" }),
     ).toBeInTheDocument();

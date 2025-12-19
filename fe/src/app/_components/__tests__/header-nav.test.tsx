@@ -86,7 +86,9 @@ describe("HeaderNav i18n", () => {
     expect(
       await screen.findByRole("link", { name: "My Courses" }),
     ).toBeInTheDocument();
-    expect(await screen.findByRole("link", { name: "Профил" })).toBeInTheDocument();
+    expect(
+      await screen.findByRole("link", { name: "Профил" }),
+    ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Изход" })).toBeInTheDocument();
 
     window.localStorage.removeItem(ACCESS_TOKEN_KEY);
@@ -111,7 +113,9 @@ describe("HeaderNav i18n", () => {
 
     render(<HeaderNav />);
 
-    expect(await screen.findByRole("link", { name: "Admin" })).toBeInTheDocument();
+    expect(
+      await screen.findByRole("link", { name: "Admin" }),
+    ).toBeInTheDocument();
 
     window.localStorage.removeItem(ACCESS_TOKEN_KEY);
   });
@@ -136,7 +140,9 @@ describe("HeaderNav i18n", () => {
     render(<HeaderNav />);
 
     await waitFor(() => {
-      expect(screen.queryByRole("link", { name: "Admin" })).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("link", { name: "Admin" }),
+      ).not.toBeInTheDocument();
     });
 
     window.localStorage.removeItem(ACCESS_TOKEN_KEY);
@@ -151,7 +157,9 @@ describe("HeaderNav i18n", () => {
     render(<HeaderNav />);
 
     await waitFor(() => {
-      expect(screen.queryByRole("link", { name: "Admin" })).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("link", { name: "Admin" }),
+      ).not.toBeInTheDocument();
     });
   });
 });

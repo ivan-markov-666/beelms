@@ -18,8 +18,7 @@ export function setAccessToken(token: string): void {
 
   try {
     window.localStorage.setItem(ACCESS_TOKEN_KEY, token);
-  } catch {
-  }
+  } catch {}
 }
 
 export function clearAccessToken(): void {
@@ -27,6 +26,5 @@ export function clearAccessToken(): void {
 
   try {
     window.localStorage.removeItem(ACCESS_TOKEN_KEY);
-  } catch {
-  }
+  } catch {}
 }

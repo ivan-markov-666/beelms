@@ -6,7 +6,8 @@ import { useRouter } from "next/navigation";
 import { getAccessToken } from "../auth-token";
 
 function apiUrl(path: string): string {
-  const base = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
+  const base =
+    process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
   const normalizedBase = base.endsWith("/api")
     ? base
     : `${base.replace(/\/$/, "")}/api`;
@@ -86,7 +87,9 @@ export default function MyCoursesPage() {
     <main className="mx-auto flex min-h-screen max-w-6xl flex-col gap-8 px-4 py-10">
       <header className="space-y-2">
         <h1 className="text-3xl font-semibold text-zinc-900">My Courses</h1>
-        <p className="text-sm text-zinc-600">Записаните курсове за текущия потребител.</p>
+        <p className="text-sm text-zinc-600">
+          Записаните курсове за текущия потребител.
+        </p>
       </header>
 
       {loading && <p className="text-sm text-zinc-600">Зареждане...</p>}
@@ -95,8 +98,13 @@ export default function MyCoursesPage() {
 
       {!loading && !error && items.length === 0 && (
         <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
-          <p className="text-sm text-gray-700">Все още нямате записани курсове.</p>
-          <Link href="/courses" className="mt-3 inline-block text-sm text-green-700 hover:text-green-800">
+          <p className="text-sm text-gray-700">
+            Все още нямате записани курсове.
+          </p>
+          <Link
+            href="/courses"
+            className="mt-3 inline-block text-sm text-green-700 hover:text-green-800"
+          >
             Отиди към Courses →
           </Link>
         </div>
@@ -110,11 +118,19 @@ export default function MyCoursesPage() {
               href={`/courses/${course.id}`}
               className="flex h-full flex-col rounded-lg border border-gray-200 bg-white p-5 text-left shadow-sm transition hover:shadow-md"
             >
-              <h2 className="mb-2 text-lg font-semibold text-gray-900">{course.title}</h2>
-              <p className="text-sm text-gray-600 line-clamp-4">{course.description}</p>
+              <h2 className="mb-2 text-lg font-semibold text-gray-900">
+                {course.title}
+              </h2>
+              <p className="text-sm text-gray-600 line-clamp-4">
+                {course.description}
+              </p>
               <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-gray-500">
-                <span className="rounded bg-gray-100 px-2 py-1">{course.language}</span>
-                <span className="rounded bg-gray-100 px-2 py-1">{course.enrollmentStatus}</span>
+                <span className="rounded bg-gray-100 px-2 py-1">
+                  {course.language}
+                </span>
+                <span className="rounded bg-gray-100 px-2 py-1">
+                  {course.enrollmentStatus}
+                </span>
               </div>
             </Link>
           ))}

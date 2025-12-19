@@ -13,11 +13,13 @@ function makeSearchParams(query: string) {
   return new URLSearchParams(query) as unknown as URLSearchParams;
 }
 
-function mockFetchSequence(responses: Array<{
-  ok: boolean;
-  status: number;
-  json: () => Promise<unknown>;
-}>) {
+function mockFetchSequence(
+  responses: Array<{
+    ok: boolean;
+    status: number;
+    json: () => Promise<unknown>;
+  }>,
+) {
   global.fetch = jest
     .fn()
     .mockImplementation(() =>
@@ -430,9 +432,7 @@ describe("AdminUsersPage", () => {
 
     render(<AdminUsersPage />);
 
-    expect(
-      await screen.findByText("john.doe@example.com"),
-    ).toBeInTheDocument();
+    expect(await screen.findByText("john.doe@example.com")).toBeInTheDocument();
 
     // Avatar initials derived from local part of email
     expect(screen.getByText("JD")).toBeInTheDocument();

@@ -1,10 +1,12 @@
 export default function AboutPage() {
   return (
     <main className="mx-auto max-w-3xl px-4 py-10 text-sm text-gray-700">
-      <h1 className="mb-4 text-2xl font-semibold text-gray-900">About BeeLMS</h1>
+      <h1 className="mb-4 text-2xl font-semibold text-gray-900">
+        About BeeLMS
+      </h1>
       <p className="mb-3">
-        BeeLMS е тренировъчна платформа за бъдещи и настоящи QA специалисти.
-        Тук можеш да практикуваш тестване върху Wiki статии, практическа UI среда
+        BeeLMS е тренировъчна платформа за бъдещи и настоящи QA специалисти. Тук
+        можеш да практикуваш тестване върху Wiki статии, практическа UI среда
         без риск да повредиш реална продукционна система.
       </p>
       <p>

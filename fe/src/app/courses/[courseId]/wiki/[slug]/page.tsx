@@ -1,12 +1,11 @@
 "use client";
 
-export const dynamic = 'force-dynamic';
-
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { WikiArticleActions } from "../../../../wiki/_components/wiki-article-actions";
 import { WikiMarkdown } from "../../../../wiki/_components/wiki-markdown";
+import { MarkAsReadButton } from "../../../_components/mark-as-read-button";
 import { getAccessToken } from "../../../../auth-token";
 import { normalizeLang, type SupportedLang } from "../../../../../i18n/config";
 
@@ -51,7 +50,13 @@ function normalizeMarkdownContent(raw: string): string {
   return inner;
 }
 
-function ArticleMeta({ language, updatedAt }: { language: string; updatedAt: string }) {
+function ArticleMeta({
+  language,
+  updatedAt,
+}: {
+  language: string;
+  updatedAt: string;
+}) {
   const formatted = useMemo(() => {
     const d = new Date(updatedAt);
     if (Number.isNaN(d.getTime())) return updatedAt;
@@ -140,7 +145,9 @@ export default function CourseWikiArticlePage() {
         }
 
         if (res.status === 403) {
-          setError("Трябва да се запишеш в курса, за да отвориш този материал.");
+          setError(
+            "Трябва да се запишеш в курса, за да отвориш този материал.",
+          );
           setLoading(false);
           return;
         }
@@ -182,7 +189,9 @@ export default function CourseWikiArticlePage() {
       <header className="space-y-2">
         <p className="text-sm text-zinc-500">
           <Link
-            href={courseId ? `/courses/${encodeURIComponent(courseId)}` : "/courses"}
+            href={
+              courseId ? `/courses/${encodeURIComponent(courseId)}` : "/courses"
+            }
             className="hover:underline"
           >
             ← Назад към курса
@@ -202,23 +211,36 @@ export default function CourseWikiArticlePage() {
 
         {!loading && !error && article && (
           <>
-            <h1 className="text-4xl font-bold text-zinc-900">{article.title}</h1>
+            <h1 className="text-4xl font-bold text-zinc-900">
+              {article.title}
+            </h1>
             {article.subtitle && (
               <p className="text-lg text-zinc-600">{article.subtitle}</p>
             )}
-            <ArticleMeta language={article.language} updatedAt={article.updatedAt} />
+            <ArticleMeta
+              language={article.language}
+              updatedAt={article.updatedAt}
+            />
             <WikiArticleActions title={article.title} lang={uiLang} />
           </>
         )}
       </header>
 
       {!loading && !error && article && (
-        <article
-          className="wiki-markdown mt-2 w-full max-w-4xl text-base leading-relaxed"
-          style={{ color: "#111827" }}
-        >
-          <WikiMarkdown content={markdownContent} />
-        </article>
+        <>
+          <article
+            className="wiki-markdown mt-2 w-full max-w-4xl text-base leading-relaxed"
+            style={{ color: "#111827" }}
+          >
+            <WikiMarkdown content={markdownContent} />
+          </article>
+
+          <div className="mt-8 border-t border-gray-200 pt-6">
+            {courseId && slug && (
+              <MarkAsReadButton courseId={courseId} wikiSlug={slug} />
+            )}
+          </div>
+        </>
       )}
     </main>
   );

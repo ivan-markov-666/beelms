@@ -38,7 +38,8 @@ describe("RegisterPage", () => {
 
     const emailInput = await screen.findByLabelText(/Имейл/);
     const passwordInput = await screen.findByLabelText(/Парола/);
-    const confirmPasswordInput = await screen.findByLabelText(/Потвърди паролата/);
+    const confirmPasswordInput =
+      await screen.findByLabelText(/Потвърди паролата/);
     const submitButton = await screen.findByRole("button", {
       name: "Регистрация",
     });
@@ -79,7 +80,8 @@ describe("RegisterPage", () => {
 
     const emailInput = await screen.findByLabelText(/Имейл/);
     const passwordInput = await screen.findByLabelText(/Парола/);
-    const confirmPasswordInput = await screen.findByLabelText(/Потвърди паролата/);
+    const confirmPasswordInput =
+      await screen.findByLabelText(/Потвърди паролата/);
     const termsCheckbox = await screen.findByRole("checkbox", {
       name: /Съгласен съм с/i,
     });
@@ -113,7 +115,9 @@ describe("RegisterPage", () => {
     const emailInput = screen.getByLabelText(/Имейл/);
     const passwordInput = screen.getByLabelText(/Парола/);
     const confirmPasswordInput = screen.getByLabelText(/Потвърди паролата/);
-    const termsCheckbox = screen.getByRole("checkbox", { name: /Съгласен съм с/i });
+    const termsCheckbox = screen.getByRole("checkbox", {
+      name: /Съгласен съм с/i,
+    });
     const submitButton = screen.getByRole("button", { name: "Регистрация" });
 
     fireEvent.change(emailInput, { target: { value: "user@example.com" } });

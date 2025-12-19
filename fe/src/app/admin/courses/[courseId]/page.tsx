@@ -60,7 +60,9 @@ export default function AdminCourseDetailPage() {
   const [courseForm, setCourseForm] = useState<CourseEditForm | null>(null);
   const [courseSaving, setCourseSaving] = useState(false);
   const [courseSaveError, setCourseSaveError] = useState<string | null>(null);
-  const [courseSaveSuccess, setCourseSaveSuccess] = useState<string | null>(null);
+  const [courseSaveSuccess, setCourseSaveSuccess] = useState<string | null>(
+    null,
+  );
 
   const [form, setForm] = useState<CreateCurriculumItemForm>(DEFAULT_FORM);
   const [saving, setSaving] = useState(false);
@@ -89,17 +91,19 @@ export default function AdminCourseDetailPage() {
     );
   }, [course, courseForm]);
 
-  const readErrorMessage = useCallback(async (res: Response): Promise<string> => {
-    try {
-      const body = (await res.json()) as { message?: unknown };
-      if (typeof body?.message === "string" && body.message.trim()) {
-        return body.message;
-      }
-    } catch {
-    }
+  const readErrorMessage = useCallback(
+    async (res: Response): Promise<string> => {
+      try {
+        const body = (await res.json()) as { message?: unknown };
+        if (typeof body?.message === "string" && body.message.trim()) {
+          return body.message;
+        }
+      } catch {}
 
-    return "Request failed";
-  }, []);
+      return "Request failed";
+    },
+    [],
+  );
 
   const sortedCurriculum = useMemo(() => {
     return curriculum.slice().sort((a, b) => a.order - b.order);
@@ -114,7 +118,9 @@ export default function AdminCourseDetailPage() {
     try {
       const token = getAccessToken();
       if (!token) {
-        setError("Липсва достъп до Admin API. Моля, влезте отново като администратор.");
+        setError(
+          "Липсва достъп до Admin API. Моля, влезте отново като администратор.",
+        );
         setLoading(false);
         return;
       }
@@ -304,7 +310,9 @@ export default function AdminCourseDetailPage() {
 
       const updated = (await res.json()) as CourseDetail;
       setCourse(updated);
-      setCurriculum(Array.isArray(updated.curriculum) ? updated.curriculum : []);
+      setCurriculum(
+        Array.isArray(updated.curriculum) ? updated.curriculum : [],
+      );
       setCourseForm({
         title: updated.title,
         description: updated.description,
@@ -369,7 +377,11 @@ export default function AdminCourseDetailPage() {
         }
       }
 
-      if (Number.isFinite(nextOrder) && nextOrder > 0 && nextOrder !== item.order) {
+      if (
+        Number.isFinite(nextOrder) &&
+        nextOrder > 0 &&
+        nextOrder !== item.order
+      ) {
         payload.order = nextOrder;
       }
 
@@ -552,8 +564,12 @@ export default function AdminCourseDetailPage() {
           </h1>
           <p className="mt-1 text-sm text-gray-600">{course.description}</p>
           <div className="mt-2 flex items-center gap-2 text-xs text-gray-500">
-            <span className="rounded bg-gray-100 px-2 py-1">{course.language}</span>
-            <span className="rounded bg-gray-100 px-2 py-1">{course.status}</span>
+            <span className="rounded bg-gray-100 px-2 py-1">
+              {course.language}
+            </span>
+            <span className="rounded bg-gray-100 px-2 py-1">
+              {course.status}
+            </span>
             <span className="rounded bg-gray-100 px-2 py-1">
               {course.isPaid ? "paid" : "free"}
             </span>
@@ -563,7 +579,9 @@ export default function AdminCourseDetailPage() {
 
       <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">Course settings</h2>
+          <h2 className="text-lg font-semibold text-gray-900">
+            Course settings
+          </h2>
           <button
             type="button"
             className="text-sm font-medium text-green-700 hover:text-green-900 disabled:opacity-60"
@@ -599,9 +617,7 @@ export default function AdminCourseDetailPage() {
               className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400"
               value={courseForm?.title ?? ""}
               onChange={(e) =>
-                setCourseForm((p) =>
-                  p ? { ...p, title: e.target.value } : p,
-                )
+                setCourseForm((p) => (p ? { ...p, title: e.target.value } : p))
               }
             />
           </label>
@@ -628,9 +644,7 @@ export default function AdminCourseDetailPage() {
               className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900"
               value={courseForm?.status ?? "draft"}
               onChange={(e) =>
-                setCourseForm((p) =>
-                  p ? { ...p, status: e.target.value } : p,
-                )
+                setCourseForm((p) => (p ? { ...p, status: e.target.value } : p))
               }
             >
               <option value="draft">draft</option>
@@ -686,7 +700,9 @@ export default function AdminCourseDetailPage() {
             <input
               className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400"
               value={form.title}
-              onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))}
+              onChange={(e) =>
+                setForm((p) => ({ ...p, title: e.target.value }))
+              }
             />
           </label>
           <label className="space-y-1">
@@ -700,11 +716,15 @@ export default function AdminCourseDetailPage() {
             />
           </label>
           <label className="space-y-1">
-            <span className="text-xs font-medium text-gray-600">Order (optional)</span>
+            <span className="text-xs font-medium text-gray-600">
+              Order (optional)
+            </span>
             <input
               className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400"
               value={form.order}
-              onChange={(e) => setForm((p) => ({ ...p, order: e.target.value }))}
+              onChange={(e) =>
+                setForm((p) => ({ ...p, order: e.target.value }))
+              }
               placeholder="e.g. 1"
             />
           </label>
@@ -732,7 +752,10 @@ export default function AdminCourseDetailPage() {
           type="button"
           className="mt-3 inline-flex items-center rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-green-700 disabled:opacity-60"
           disabled={
-            saving || !form.title.trim() || !form.wikiSlug.trim() || form.title.length < 1
+            saving ||
+            !form.title.trim() ||
+            !form.wikiSlug.trim() ||
+            form.title.length < 1
           }
           onClick={() => void handleAddWikiItem()}
         >

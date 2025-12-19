@@ -1,0 +1,17 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+set -e
+
+echo "[husky] Running be lint + format"
+npm --prefix be run lint
+npm --prefix be run format
+
+echo "[husky] Running fe lint + format"
+npm --prefix fe run lint
+npm --prefix fe run format
+
+if ! git diff --quiet; then
+  echo "[husky] ❌ Code was changed by lint/format. Please commit the changes and push again."
+  git status --porcelain
+  exit 1
+fi

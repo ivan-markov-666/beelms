@@ -1,7 +1,5 @@
 "use client";
 
-export const dynamic = 'force-dynamic';
-
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -42,8 +40,7 @@ function getStatusBadge(status: string): { label: string; className: string } {
   if (normalized === "active") {
     return {
       label: "Active",
-      className:
-        "border-green-200 bg-green-50 text-green-700",
+      className: "border-green-200 bg-green-50 text-green-700",
     };
   }
 
@@ -83,21 +80,23 @@ export default function AdminWikiPage() {
   const [statusUpdateError, setStatusUpdateError] = useState<string | null>(
     null,
   );
-  const [deleteArticleStep1Id, setDeleteArticleStep1Id] =
-    useState<string | null>(null);
-  const [deleteArticleStep2Id, setDeleteArticleStep2Id] =
-    useState<string | null>(null);
+  const [deleteArticleStep1Id, setDeleteArticleStep1Id] = useState<
+    string | null
+  >(null);
+  const [deleteArticleStep2Id, setDeleteArticleStep2Id] = useState<
+    string | null
+  >(null);
   const [deleteArticleError, setDeleteArticleError] = useState<string | null>(
     null,
   );
-  const [deleteArticleSubmitting, setDeleteArticleSubmitting] =
-    useState(false);
+  const [deleteArticleSubmitting, setDeleteArticleSubmitting] = useState(false);
   const [didInitFromQuery, setDidInitFromQuery] = useState(false);
 
   const deleteArticleTarget =
     deleteArticleStep2Id == null
       ? null
-      : articles.find((article) => article.id === deleteArticleStep2Id) ?? null;
+      : (articles.find((article) => article.id === deleteArticleStep2Id) ??
+        null);
 
   useEffect(() => {
     if (!didInitFromQuery) {
@@ -131,7 +130,11 @@ export default function AdminWikiPage() {
           }
           return;
         }
-        const effectiveLang = (languageFilter || headerLang || "").toLowerCase();
+        const effectiveLang = (
+          languageFilter ||
+          headerLang ||
+          ""
+        ).toLowerCase();
 
         let url = `${API_BASE_URL}/admin/wiki/articles`;
         if (effectiveLang) {
@@ -146,9 +149,7 @@ export default function AdminWikiPage() {
 
         if (!res.ok) {
           if (!cancelled) {
-            setError(
-              "Възникна грешка при зареждане на Admin Wiki списъка.",
-            );
+            setError("Възникна грешка при зареждане на Admin Wiki списъка.");
             setLoading(false);
           }
           return;
@@ -260,7 +261,9 @@ export default function AdminWikiPage() {
 
   const filteredArticles = articles.filter((article) => {
     if (trimmedSearch) {
-      const inTitle = (article.title ?? "").toLowerCase().includes(trimmedSearch);
+      const inTitle = (article.title ?? "")
+        .toLowerCase()
+        .includes(trimmedSearch);
       const inSlug = (article.slug ?? "").toLowerCase().includes(trimmedSearch);
       if (!inTitle && !inSlug) {
         return false;
@@ -289,7 +292,8 @@ export default function AdminWikiPage() {
   const [currentPage, setCurrentPage] = useState(1);
 
   const totalArticles = filteredArticles.length;
-  const totalPages = totalArticles > 0 ? Math.ceil(totalArticles / PAGE_SIZE) : 1;
+  const totalPages =
+    totalArticles > 0 ? Math.ceil(totalArticles / PAGE_SIZE) : 1;
   const safeCurrentPage = Math.min(Math.max(currentPage, 1), totalPages);
   const startIndex = (safeCurrentPage - 1) * PAGE_SIZE;
   const endIndex = startIndex + PAGE_SIZE;
@@ -659,7 +663,8 @@ export default function AdminWikiPage() {
                   const normalizedStatus = article.status.toLowerCase();
                   const isInactive = normalizedStatus === "inactive";
                   const canToggleStatus =
-                    normalizedStatus === "active" || normalizedStatus === "inactive";
+                    normalizedStatus === "active" ||
+                    normalizedStatus === "inactive";
                   const isActive = normalizedStatus === "active";
 
                   return (
@@ -728,8 +733,8 @@ export default function AdminWikiPage() {
                             {isUpdating
                               ? "Updating..."
                               : isInactive
-                              ? "Activate"
-                              : "Deactivate"}
+                                ? "Activate"
+                                : "Deactivate"}
                           </button>
                         )}
                         <button
@@ -754,8 +759,7 @@ export default function AdminWikiPage() {
 
           <div className="flex items-center justify-between border-t border-gray-200 px-6 py-4">
             <p className="text-sm text-gray-600">
-              Showing <span className="font-semibold">{showingFrom}</span>
-              -
+              Showing <span className="font-semibold">{showingFrom}</span>-
               <span className="font-semibold">{showingTo}</span> of{" "}
               <span className="font-semibold">{totalArticles}</span> articles
             </p>
@@ -845,11 +849,14 @@ export default function AdminWikiPage() {
               окончателно и не може да бъде отменено.
             </p>
             <p className="mb-3 text-xs text-gray-600">
-              Заглавие: <span className="font-semibold">{deleteArticleTarget.title}</span>
+              Заглавие:{" "}
+              <span className="font-semibold">{deleteArticleTarget.title}</span>
               <br />
-              Slug: <span className="font-mono">{deleteArticleTarget.slug}</span>
+              Slug:{" "}
+              <span className="font-mono">{deleteArticleTarget.slug}</span>
               <br />
-              Последно обновена на {formatDateTime(deleteArticleTarget.updatedAt)}.
+              Последно обновена на{" "}
+              {formatDateTime(deleteArticleTarget.updatedAt)}.
             </p>
             {deleteArticleError && (
               <p className="mb-3 text-xs text-red-600" role="alert">
@@ -903,9 +910,7 @@ export default function AdminWikiPage() {
                           "Статията не може да бъде изтрита, защото е активна. Първо я деактивирайте.",
                         );
                       } else if (res.status === 404) {
-                        setDeleteArticleError(
-                          "Статията не беше намерена.",
-                        );
+                        setDeleteArticleError("Статията не беше намерена.");
                       } else {
                         setDeleteArticleError(
                           "Възникна грешка при изтриване на статията.",
