@@ -25,6 +25,22 @@ describe('Course enrollment + my-courses endpoints (e2e)', () => {
   let app: INestApplication;
   let courseRepo: Repository<Course>;
 
+  async function createCourse(
+    overrides?: Partial<
+      Pick<Course, 'title' | 'description' | 'language' | 'status' | 'isPaid'>
+    >,
+  ): Promise<Course> {
+    const course = courseRepo.create({
+      title: overrides?.title ?? `E2E Course ${Date.now()}`,
+      description: overrides?.description ?? 'E2E course description',
+      language: overrides?.language ?? 'en',
+      status: overrides?.status ?? 'active',
+      isPaid: overrides?.isPaid ?? false,
+    });
+
+    return courseRepo.save(course);
+  }
+
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
@@ -57,18 +73,24 @@ describe('Course enrollment + my-courses endpoints (e2e)', () => {
     await request(app.getHttpServer()).get('/api/users/me/courses').expect(401);
   });
 
+  it('GET /api/users/me/courses returns empty list for a new user with no enrollments', async () => {
+    const { accessToken } = await registerAndLogin(app, 'my-courses-empty');
+
+    const res = await request(app.getHttpServer())
+      .get('/api/users/me/courses')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .expect(200);
+
+    const body = res.body as unknown;
+    expect(Array.isArray(body)).toBe(true);
+    expect((body as unknown[]).length).toBe(0);
+  });
+
   it('User can enroll and see course in /api/users/me/courses', async () => {
     const { accessToken } = await registerAndLogin(app, 'course-enroll');
 
-    const listRes = await request(app.getHttpServer())
-      .get('/api/courses')
-      .expect(200);
-
-    const courses = listRes.body as CourseSummary[];
-    expect(Array.isArray(courses)).toBe(true);
-    expect(courses.length).toBeGreaterThanOrEqual(1);
-
-    const courseId = courses[0].id;
+    const course = await createCourse();
+    const courseId = course.id;
 
     await request(app.getHttpServer())
       .post(`/api/courses/${courseId}/enroll`)
@@ -94,22 +116,8 @@ describe('Course enrollment + my-courses endpoints (e2e)', () => {
   it('POST /api/courses/:courseId/enroll returns 403 for paid courses (Payment required)', async () => {
     const { accessToken } = await registerAndLogin(app, 'course-enroll-paid');
 
-    const listRes = await request(app.getHttpServer())
-      .get('/api/courses')
-      .expect(200);
-    const courses = listRes.body as CourseSummary[];
-    expect(courses.length).toBeGreaterThanOrEqual(1);
-
-    const courseId = courses[0].id;
-
-    const course = await courseRepo.findOne({ where: { id: courseId } });
-    expect(course).toBeDefined();
-    if (!course) {
-      throw new Error('Seed course not found');
-    }
-
-    course.isPaid = true;
-    await courseRepo.save(course);
+    const course = await createCourse({ isPaid: true });
+    const courseId = course.id;
 
     const res = await request(app.getHttpServer())
       .post(`/api/courses/${courseId}/enroll`)
@@ -118,5 +126,29 @@ describe('Course enrollment + my-courses endpoints (e2e)', () => {
 
     const body = res.body as { message?: string };
     expect(body.message).toBe('Payment required');
+  });
+
+  it('GET /api/users/me/courses does not include inactive courses', async () => {
+    const { accessToken } = await registerAndLogin(app, 'my-courses-inactive');
+
+    const course = await createCourse();
+    const courseId = course.id;
+
+    await request(app.getHttpServer())
+      .post(`/api/courses/${courseId}/enroll`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .expect(204);
+
+    course.status = 'inactive';
+    await courseRepo.save(course);
+
+    const myRes = await request(app.getHttpServer())
+      .get('/api/users/me/courses')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .expect(200);
+
+    const myCourses = myRes.body as MyCourseListItem[];
+    const ids = myCourses.map((c) => c.id);
+    expect(ids).not.toContain(courseId);
   });
 });

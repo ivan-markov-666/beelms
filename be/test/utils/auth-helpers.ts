@@ -2,8 +2,15 @@ import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 
 export const uniqueEmail = (suffix: string): string => {
-  const ts = Date.now();
-  return `auth-test-${suffix}-${ts}@example.com`;
+  const ts = Date.now().toString(36);
+  const safeSuffix = (suffix || 'test')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+    .slice(0, 20);
+
+  // Keep the local-part short to satisfy validator.js / RFC constraints (<= 64 chars)
+  return `t-${safeSuffix}-${ts}@example.com`;
 };
 
 export async function registerAndLogin(
