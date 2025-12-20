@@ -20,7 +20,23 @@ type CourseSummary = {
   language: string;
   status: string;
   isPaid: boolean;
+  currency: string | null;
+  priceCents: number | null;
 };
+
+function formatPrice(currency: string, priceCents: number): string {
+  const normalizedCurrency = currency.trim().toUpperCase();
+  const amount = priceCents / 100;
+
+  try {
+    return new Intl.NumberFormat(undefined, {
+      style: "currency",
+      currency: normalizedCurrency,
+    }).format(amount);
+  } catch {
+    return `${amount.toFixed(2)} ${normalizedCurrency}`;
+  }
+}
 
 async function fetchCourses(): Promise<CourseSummary[]> {
   const res = await fetch(apiUrl("/courses"), {
@@ -87,15 +103,25 @@ export default async function CoursesPage() {
               <h2 className="text-lg font-semibold text-gray-900">
                 {course.title}
               </h2>
-              <span
-                className={`shrink-0 rounded-full px-2 py-1 text-[11px] font-semibold ${
-                  course.isPaid
-                    ? "bg-amber-100 text-amber-800"
-                    : "bg-emerald-100 text-emerald-800"
-                }`}
-              >
-                {course.isPaid ? "Paid" : "Free"}
-              </span>
+              <div className="flex shrink-0 flex-col items-end gap-1">
+                <span
+                  className={`rounded-full px-2 py-1 text-[11px] font-semibold ${
+                    course.isPaid
+                      ? "bg-amber-100 text-amber-800"
+                      : "bg-emerald-100 text-emerald-800"
+                  }`}
+                >
+                  {course.isPaid ? "Paid" : "Free"}
+                </span>
+
+                {course.isPaid &&
+                  typeof course.priceCents === "number" &&
+                  !!course.currency && (
+                    <span className="text-[11px] font-semibold text-zinc-700">
+                      {formatPrice(course.currency, course.priceCents)}
+                    </span>
+                  )}
+              </div>
             </div>
             <p className="text-sm text-gray-600 line-clamp-4">
               {course.description}

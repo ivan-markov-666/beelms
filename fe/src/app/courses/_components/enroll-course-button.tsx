@@ -18,12 +18,30 @@ function apiUrl(path: string): string {
 const STRIPE_PAYMENTS_ENABLED =
   process.env.NEXT_PUBLIC_STRIPE_PAYMENTS === "true";
 
+function formatPrice(currency: string, priceCents: number): string {
+  const normalizedCurrency = currency.trim().toUpperCase();
+  const amount = priceCents / 100;
+
+  try {
+    return new Intl.NumberFormat(undefined, {
+      style: "currency",
+      currency: normalizedCurrency,
+    }).format(amount);
+  } catch {
+    return `${amount.toFixed(2)} ${normalizedCurrency}`;
+  }
+}
+
 export function EnrollCourseButton({
   courseId,
   isPaid,
+  currency,
+  priceCents,
 }: {
   courseId: string;
   isPaid: boolean;
+  currency?: string | null;
+  priceCents?: number | null;
 }) {
   const [hasToken, setHasToken] = useState<boolean | null>(null);
   const [enrolled, setEnrolled] = useState(false);
@@ -227,7 +245,9 @@ export function EnrollCourseButton({
               ? "Enrolled"
               : isPaid
                 ? STRIPE_PAYMENTS_ENABLED
-                  ? "Pay & Enroll"
+                  ? typeof priceCents === "number" && !!currency
+                    ? `Pay ${formatPrice(currency, priceCents)} & Enroll`
+                    : "Pay & Enroll"
                   : "Unlock & Enroll"
                 : "Enroll"}
       </button>

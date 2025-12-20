@@ -25,6 +25,7 @@ export default function CheckoutSuccessPage(props: {
     "loading",
   );
   const [error, setError] = useState<string | null>(null);
+  const [courseId, setCourseId] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -37,6 +38,9 @@ export default function CheckoutSuccessPage(props: {
       }
 
       const resolvedParams = await props.params;
+      if (!cancelled) {
+        setCourseId(resolvedParams.courseId);
+      }
       const resolvedSearch = await props.searchParams;
       const sessionId = resolvedSearch?.session_id;
 
@@ -90,8 +94,6 @@ export default function CheckoutSuccessPage(props: {
         if (!cancelled) {
           setStatus("success");
         }
-
-        router.replace(`/courses/${resolvedParams.courseId}`);
       } catch {
         if (!cancelled) {
           setStatus("error");
@@ -115,18 +117,66 @@ export default function CheckoutSuccessPage(props: {
         <p className="text-sm text-zinc-600">Finalizing payment...</p>
       )}
 
-      {status === "error" && (
-        <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          {error ?? "Something went wrong."}
+      {status === "success" && (
+        <div className="space-y-4">
+          <div className="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+            Плащането е успешно. Курсът е отключен и записването е завършено.
+          </div>
+
+          <div className="flex flex-col gap-2 sm:flex-row">
+            {courseId && (
+              <Link
+                href={`/courses/${courseId}`}
+                className="inline-flex items-center justify-center rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-700"
+              >
+                Go to course
+              </Link>
+            )}
+
+            <Link
+              href="/my-courses"
+              className="inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50"
+            >
+              Go to My Courses
+            </Link>
+          </div>
         </div>
       )}
 
-      <Link
-        href="/my-courses"
-        className="text-sm text-green-700 hover:text-green-800"
-      >
-        Go to My Courses →
-      </Link>
+      {status === "error" && (
+        <div className="space-y-4">
+          <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {error ?? "Something went wrong."}
+          </div>
+
+          <div className="flex flex-col gap-2 sm:flex-row">
+            {courseId && (
+              <Link
+                href={`/courses/${courseId}`}
+                className="inline-flex items-center justify-center rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-700"
+              >
+                Back to course (retry)
+              </Link>
+            )}
+
+            <Link
+              href="/courses"
+              className="inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50"
+            >
+              Back to courses
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {status === "loading" && (
+        <Link
+          href="/my-courses"
+          className="text-sm text-green-700 hover:text-green-800"
+        >
+          Go to My Courses →
+        </Link>
+      )}
     </main>
   );
 }
