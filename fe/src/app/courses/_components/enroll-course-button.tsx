@@ -15,6 +15,9 @@ function apiUrl(path: string): string {
   return `${normalizedBase}${normalizedPath}`;
 }
 
+const STRIPE_PAYMENTS_ENABLED =
+  process.env.NEXT_PUBLIC_STRIPE_PAYMENTS === "true";
+
 export function EnrollCourseButton({
   courseId,
   isPaid,
@@ -74,6 +77,40 @@ export function EnrollCourseButton({
   const purchaseIfNeeded = async (accessToken: string) => {
     if (!isPaid) {
       return true;
+    }
+
+    if (STRIPE_PAYMENTS_ENABLED) {
+      setPhase("unlocking");
+
+      const res = await fetch(apiUrl(`/courses/${courseId}/checkout`), {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (res.status === 401) {
+        setHasToken(false);
+        setError("Няма активна сесия. Моля, влезте отново.");
+        setPhase("idle");
+        return false;
+      }
+
+      if (!res.ok) {
+        setError("Плащането не е налично (Stripe не е конфигуриран).");
+        setPhase("idle");
+        return false;
+      }
+
+      const body = (await res.json()) as { url?: string };
+      if (!body.url) {
+        setError("Неуспешно стартиране на плащането.");
+        setPhase("idle");
+        return false;
+      }
+
+      window.location.href = body.url;
+      return false;
     }
 
     setPhase("unlocking");
@@ -189,7 +226,9 @@ export function EnrollCourseButton({
             : enrolled
               ? "Enrolled"
               : isPaid
-                ? "Unlock & Enroll"
+                ? STRIPE_PAYMENTS_ENABLED
+                  ? "Pay & Enroll"
+                  : "Unlock & Enroll"
                 : "Enroll"}
       </button>
 

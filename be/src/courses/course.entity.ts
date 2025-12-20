@@ -26,6 +26,12 @@ export class Course {
   @Column({ name: 'is_paid', type: 'boolean', default: false })
   isPaid: boolean;
 
+  @Column({ type: 'varchar', length: 3, nullable: true })
+  currency: string | null;
+
+  @Column({ name: 'price_cents', type: 'int', nullable: true })
+  priceCents: number | null;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

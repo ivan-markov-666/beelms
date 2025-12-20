@@ -16,6 +16,8 @@ type CourseSummary = {
   language: string;
   status: string;
   isPaid: boolean;
+  currency: string | null;
+  priceCents: number | null;
 };
 
 type CourseDetail = CourseSummary & {
@@ -28,6 +30,8 @@ type CreateCourseForm = {
   language: string;
   status: string;
   isPaid: boolean;
+  currency: string;
+  priceCents: string;
 };
 
 const DEFAULT_FORM: CreateCourseForm = {
@@ -36,6 +40,8 @@ const DEFAULT_FORM: CreateCourseForm = {
   language: "bg",
   status: "draft",
   isPaid: false,
+  currency: "eur",
+  priceCents: "999",
 };
 
 export default function AdminCoursesPage() {
@@ -112,12 +118,37 @@ export default function AdminCoursesPage() {
         return;
       }
 
+      const currency = form.currency.trim().toLowerCase();
+      const priceRaw = form.priceCents.trim();
+      const priceCents = /^\d+$/.test(priceRaw)
+        ? Number.parseInt(priceRaw, 10)
+        : NaN;
+
+      if (form.isPaid) {
+        if (!/^[a-z]{3}$/.test(currency)) {
+          setCreateError("Paid course изисква валидна валута (напр. EUR).");
+          setCreating(false);
+          return;
+        }
+        if (!Number.isFinite(priceCents) || priceCents <= 0) {
+          setCreateError("Paid course изисква валидна цена в cents (напр. 999).");
+          setCreating(false);
+          return;
+        }
+      }
+
       const payload = {
         title: form.title.trim(),
         description: form.description.trim(),
         language: form.language,
         status: form.status,
         isPaid: form.isPaid,
+        ...(form.isPaid
+          ? {
+              currency,
+              priceCents,
+            }
+          : {}),
       };
 
       const res = await fetch(`${API_BASE_URL}/admin/courses`, {
@@ -238,6 +269,37 @@ export default function AdminCoursesPage() {
               />
               <span className="text-sm text-gray-700">Paid course</span>
             </label>
+
+            <label className="space-y-1">
+              <span className="text-xs font-medium text-gray-600">
+                Currency
+              </span>
+              <input
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 disabled:bg-gray-50"
+                value={form.currency}
+                onChange={(e) =>
+                  setForm((p) => ({ ...p, currency: e.target.value }))
+                }
+                disabled={!form.isPaid}
+                required={form.isPaid}
+              />
+            </label>
+
+            <label className="space-y-1">
+              <span className="text-xs font-medium text-gray-600">
+                Price (cents)
+              </span>
+              <input
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 disabled:bg-gray-50"
+                value={form.priceCents}
+                onChange={(e) =>
+                  setForm((p) => ({ ...p, priceCents: e.target.value }))
+                }
+                disabled={!form.isPaid}
+                inputMode="numeric"
+                required={form.isPaid}
+              />
+            </label>
           </div>
 
           <label className="space-y-1">
@@ -331,6 +393,7 @@ export default function AdminCoursesPage() {
                   <th className="px-2 py-2">Language</th>
                   <th className="px-2 py-2">Status</th>
                   <th className="px-2 py-2">Paid</th>
+                  <th className="px-2 py-2">Price</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -353,6 +416,13 @@ export default function AdminCoursesPage() {
                     <td className="px-2 py-2 text-gray-700">{course.status}</td>
                     <td className="px-2 py-2 text-gray-700">
                       {course.isPaid ? "yes" : "no"}
+                    </td>
+                    <td className="px-2 py-2 text-gray-700">
+                      {course.isPaid && course.priceCents
+                        ? `${(course.priceCents / 100).toFixed(2)} ${
+                            (course.currency ?? "eur").toUpperCase()
+                          }`
+                        : "-"}
                     </td>
                   </tr>
                 ))}

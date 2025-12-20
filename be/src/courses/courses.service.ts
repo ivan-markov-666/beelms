@@ -51,6 +51,9 @@ export class CoursesService {
       language: course.language,
       status: course.status,
       isPaid: !!course.isPaid,
+      currency: course.currency ?? null,
+      priceCents:
+        typeof course.priceCents === 'number' ? course.priceCents : null,
     };
   }
 
@@ -293,12 +296,32 @@ export class CoursesService {
   }
 
   async adminCreateCourse(dto: AdminCreateCourseDto): Promise<CourseDetailDto> {
+    const isPaid = dto.isPaid ?? false;
+    const currency = typeof dto.currency === 'string'
+      ? dto.currency.trim().toLowerCase()
+      : null;
+    const priceCents =
+      typeof dto.priceCents === 'number' && Number.isInteger(dto.priceCents)
+        ? dto.priceCents
+        : null;
+
+    if (isPaid) {
+      if (!currency || !/^[a-z]{3}$/.test(currency)) {
+        throw new BadRequestException('Paid courses require valid currency');
+      }
+      if (!priceCents || priceCents <= 0) {
+        throw new BadRequestException('Paid courses require valid priceCents');
+      }
+    }
+
     const course = this.courseRepo.create({
       title: dto.title,
       description: dto.description,
       language: dto.language,
       status: dto.status,
-      isPaid: dto.isPaid ?? false,
+      isPaid,
+      currency: isPaid && currency ? currency : null,
+      priceCents: isPaid && priceCents && priceCents > 0 ? priceCents : null,
     });
 
     const saved = await this.courseRepo.save(course);
@@ -339,6 +362,43 @@ export class CoursesService {
 
     if (typeof dto.isPaid === 'boolean') {
       course.isPaid = dto.isPaid;
+    }
+
+    if (dto.currency !== undefined) {
+      if (dto.currency === null) {
+        course.currency = null;
+      } else {
+        const next = (dto.currency ?? '').trim().toLowerCase();
+        course.currency = next ? next : null;
+      }
+    }
+
+    if (dto.priceCents !== undefined) {
+      if (dto.priceCents === null) {
+        course.priceCents = null;
+      } else {
+        const next = Number(dto.priceCents);
+        if (!Number.isInteger(next)) {
+          throw new BadRequestException('priceCents must be an integer');
+        }
+        course.priceCents = next;
+      }
+    }
+
+    if (!course.isPaid) {
+      course.currency = null;
+      course.priceCents = null;
+    }
+
+    if (course.isPaid) {
+      const nextCurrency = (course.currency ?? '').trim().toLowerCase();
+      if (!nextCurrency || !/^[a-z]{3}$/.test(nextCurrency)) {
+        throw new BadRequestException('Paid courses require valid currency');
+      }
+      if (typeof course.priceCents !== 'number' || course.priceCents <= 0) {
+        throw new BadRequestException('Paid courses require valid priceCents');
+      }
+      course.currency = nextCurrency;
     }
 
     const saved = await this.courseRepo.save(course);

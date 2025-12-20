@@ -198,6 +198,7 @@ export const messages: Messages = {
       adminDashboardTabUsers: "Потребители",
       adminDashboardTabMetrics: "Метрики",
       adminDashboardTabActivity: "Активност",
+      adminDashboardTabPayments: "Плащания",
       adminDashboardCardUsersTitle: "Регистрирани потребители",
       adminDashboardCardUsersTrend: "+12% спрямо миналия месец",
       adminDashboardCardUsersTrendSuffix: "спрямо миналия месец",
