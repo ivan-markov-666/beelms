@@ -33,8 +33,24 @@ type CourseDetail = {
   language: string;
   status: string;
   isPaid: boolean;
+  currency: string | null;
+  priceCents: number | null;
   curriculum: CourseModuleItem[];
 };
+
+function formatPrice(currency: string, priceCents: number): string {
+  const normalizedCurrency = currency.trim().toUpperCase();
+  const amount = priceCents / 100;
+
+  try {
+    return new Intl.NumberFormat(undefined, {
+      style: "currency",
+      currency: normalizedCurrency,
+    }).format(amount);
+  } catch {
+    return `${amount.toFixed(2)} ${normalizedCurrency}`;
+  }
+}
 
 async function fetchCourseDetail(courseId: string): Promise<CourseDetail> {
   const res = await fetch(apiUrl(`/courses/${courseId}`), {
@@ -80,13 +96,26 @@ export default async function CourseDetailPage(props: {
           >
             {course.isPaid ? "Paid" : "Free"}
           </span>
+
+          {course.isPaid &&
+            typeof course.priceCents === "number" &&
+            !!course.currency && (
+              <span className="rounded bg-gray-100 px-2 py-1 font-semibold text-zinc-700">
+                {formatPrice(course.currency, course.priceCents)}
+              </span>
+            )}
           <span className="rounded bg-gray-100 px-2 py-1">
             {course.language}
           </span>
           <span className="rounded bg-gray-100 px-2 py-1">{course.status}</span>
         </div>
 
-        <EnrollCourseButton courseId={course.id} isPaid={course.isPaid} />
+        <EnrollCourseButton
+          courseId={course.id}
+          isPaid={course.isPaid}
+          currency={course.currency}
+          priceCents={course.priceCents}
+        />
       </header>
 
       <CourseProgressPanel courseId={course.id} courseLanguage={course.language} />
