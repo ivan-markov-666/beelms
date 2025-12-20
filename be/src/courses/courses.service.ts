@@ -646,33 +646,6 @@ export class CoursesService {
     await this.enrollmentRepo.save(enrollment);
   }
 
-  async purchaseCourse(userId: string, courseId: string): Promise<void> {
-    const course = await this.courseRepo.findOne({ where: { id: courseId } });
-
-    if (!course || course.status !== 'active') {
-      throw new NotFoundException('Course not found');
-    }
-
-    if (!course.isPaid) {
-      throw new BadRequestException('Course is not paid');
-    }
-
-    const existing = await this.purchaseRepo.findOne({
-      where: { userId, courseId },
-    });
-
-    if (existing) {
-      return;
-    }
-
-    const purchase = this.purchaseRepo.create({
-      userId,
-      courseId,
-    });
-
-    await this.purchaseRepo.save(purchase);
-  }
-
   async getCourseCertificate(
     userId: string,
     userEmail: string,

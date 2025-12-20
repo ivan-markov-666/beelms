@@ -5,11 +5,13 @@ import { Repository } from 'typeorm';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { User } from '../src/auth/user.entity';
+import { CoursePurchase } from '../src/courses/course-purchase.entity';
 import { registerAndLogin } from './utils/auth-helpers';
 
 describe('Paid course entitlements (e2e)', () => {
   let app: INestApplication;
   let userRepo: Repository<User>;
+  let purchaseRepo: Repository<CoursePurchase>;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -27,6 +29,9 @@ describe('Paid course entitlements (e2e)', () => {
     await app.init();
 
     userRepo = app.get<Repository<User>>(getRepositoryToken(User));
+    purchaseRepo = app.get<Repository<CoursePurchase>>(
+      getRepositoryToken(CoursePurchase),
+    );
   });
 
   afterAll(async () => {
@@ -98,10 +103,17 @@ describe('Paid course entitlements (e2e)', () => {
       })
       .expect(201);
 
-    const { accessToken: userToken } = await registerAndLogin(
+    const { email: userEmail, accessToken: userToken } = await registerAndLogin(
       app,
       'paid-entitlements-user',
     );
+
+    const buyer = await userRepo.findOne({ where: { email: userEmail } });
+    expect(buyer).toBeDefined();
+
+    if (!buyer) {
+      throw new Error('User not found after registerAndLogin');
+    }
 
     // 1) Wiki access requires enrollment (403)
     await request(app.getHttpServer())
@@ -116,11 +128,13 @@ describe('Paid course entitlements (e2e)', () => {
       .set('Authorization', `Bearer ${userToken}`)
       .expect(403);
 
-    // 3) Record purchase (MVP endpoint)
-    await request(app.getHttpServer())
-      .post(`/api/courses/${courseId}/purchase`)
-      .set('Authorization', `Bearer ${userToken}`)
-      .expect(204);
+    // 3) Seed purchase (purchases are recorded via Stripe verify in production)
+    await purchaseRepo.save(
+      purchaseRepo.create({
+        userId: buyer.id,
+        courseId,
+      }),
+    );
 
     // 4) Enroll now succeeds
     await request(app.getHttpServer())
