@@ -3,6 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import request from 'supertest';
+import Stripe from 'stripe';
 import { AppModule } from '../src/app.module';
 import { User } from '../src/auth/user.entity';
 import { CoursePurchase } from '../src/courses/course-purchase.entity';
@@ -37,6 +38,29 @@ type CreatedCourse = {
   isPaid: boolean;
   currency: string | null;
   priceCents: number | null;
+};
+
+type MockStripe = {
+  checkout: {
+    sessions: {
+      create: jest.Mock;
+      retrieve: jest.Mock;
+    };
+  };
+  webhooks: {
+    constructEvent: jest.Mock;
+  };
+};
+
+const getMockStripe = (): MockStripe => {
+  const mockStripe = (Stripe as unknown as { __mockStripe?: MockStripe })
+    .__mockStripe;
+
+  if (!mockStripe) {
+    throw new Error('Stripe mock not found');
+  }
+
+  return mockStripe;
 };
 
 describe('Payments Stripe mock (e2e)', () => {
@@ -122,9 +146,7 @@ describe('Payments Stripe mock (e2e)', () => {
       'stripe-mock-checkout-buyer',
     );
 
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const Stripe = require('stripe') as unknown as { __mockStripe: any };
-    const stripe = Stripe.__mockStripe;
+    const stripe = getMockStripe();
 
     stripe.checkout.sessions.create.mockResolvedValue({
       url: 'https://stripe.test/checkout/session/mock',
@@ -135,7 +157,9 @@ describe('Payments Stripe mock (e2e)', () => {
       .set('Authorization', `Bearer ${buyerToken}`)
       .expect(201);
 
-    expect(res.body).toEqual({ url: 'https://stripe.test/checkout/session/mock' });
+    expect(res.body).toEqual({
+      url: 'https://stripe.test/checkout/session/mock',
+    });
     expect(stripe.checkout.sessions.create).toHaveBeenCalledTimes(1);
   });
 
@@ -150,14 +174,14 @@ describe('Payments Stripe mock (e2e)', () => {
 
     const buyerLogin = await registerAndLogin(app, 'stripe-mock-verify-buyer');
 
-    const buyerUser = await userRepo.findOne({ where: { email: buyerLogin.email } });
+    const buyerUser = await userRepo.findOne({
+      where: { email: buyerLogin.email },
+    });
     if (!buyerUser) {
       throw new Error('Buyer user not found');
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const Stripe = require('stripe') as unknown as { __mockStripe: any };
-    const stripe = Stripe.__mockStripe;
+    const stripe = getMockStripe();
 
     stripe.checkout.sessions.retrieve.mockResolvedValue({
       payment_status: 'paid',
@@ -189,15 +213,18 @@ describe('Payments Stripe mock (e2e)', () => {
 
     const course = await createPaidCourseAsAdmin(adminToken);
 
-    const buyerLogin = await registerAndLogin(app, 'stripe-mock-mismatch-buyer');
-    const buyerUser = await userRepo.findOne({ where: { email: buyerLogin.email } });
+    const buyerLogin = await registerAndLogin(
+      app,
+      'stripe-mock-mismatch-buyer',
+    );
+    const buyerUser = await userRepo.findOne({
+      where: { email: buyerLogin.email },
+    });
     if (!buyerUser) {
       throw new Error('Buyer user not found');
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const Stripe = require('stripe') as unknown as { __mockStripe: any };
-    const stripe = Stripe.__mockStripe;
+    const stripe = getMockStripe();
 
     stripe.checkout.sessions.retrieve.mockResolvedValue({
       payment_status: 'paid',
@@ -230,14 +257,14 @@ describe('Payments Stripe mock (e2e)', () => {
     const course = await createPaidCourseAsAdmin(adminToken);
 
     const buyerLogin = await registerAndLogin(app, 'stripe-mock-unpaid-buyer');
-    const buyerUser = await userRepo.findOne({ where: { email: buyerLogin.email } });
+    const buyerUser = await userRepo.findOne({
+      where: { email: buyerLogin.email },
+    });
     if (!buyerUser) {
       throw new Error('Buyer user not found');
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const Stripe = require('stripe') as unknown as { __mockStripe: any };
-    const stripe = Stripe.__mockStripe;
+    const stripe = getMockStripe();
 
     stripe.checkout.sessions.retrieve.mockResolvedValue({
       payment_status: 'unpaid',
@@ -263,15 +290,18 @@ describe('Payments Stripe mock (e2e)', () => {
 
     const course = await createPaidCourseAsAdmin(adminToken);
 
-    const buyerLogin = await registerAndLogin(app, 'stripe-mock-idempotent-buyer');
-    const buyerUser = await userRepo.findOne({ where: { email: buyerLogin.email } });
+    const buyerLogin = await registerAndLogin(
+      app,
+      'stripe-mock-idempotent-buyer',
+    );
+    const buyerUser = await userRepo.findOne({
+      where: { email: buyerLogin.email },
+    });
     if (!buyerUser) {
       throw new Error('Buyer user not found');
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const Stripe = require('stripe') as unknown as { __mockStripe: any };
-    const stripe = Stripe.__mockStripe;
+    const stripe = getMockStripe();
 
     stripe.checkout.sessions.retrieve.mockResolvedValue({
       payment_status: 'paid',
@@ -314,9 +344,7 @@ describe('Payments Stripe mock (e2e)', () => {
       'stripe-mock-checkout-url-missing-buyer',
     );
 
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const Stripe = require('stripe') as unknown as { __mockStripe: any };
-    const stripe = Stripe.__mockStripe;
+    const stripe = getMockStripe();
 
     stripe.checkout.sessions.create.mockResolvedValue({ url: null });
 

@@ -202,9 +202,7 @@ export default function AdminPaymentsPage() {
                 <option key={c} value={c.toUpperCase()} />
               ))}
             </datalist>
-            <p className="mt-2 text-xs text-gray-500">
-              Пример: EUR, USD, BGN.
-            </p>
+            <p className="mt-2 text-xs text-gray-500">Пример: EUR, USD, BGN.</p>
           </div>
 
           <div className="mt-6 max-w-sm">

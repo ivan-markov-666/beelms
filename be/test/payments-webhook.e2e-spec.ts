@@ -62,12 +62,14 @@ describe('Payments webhook (e2e)', () => {
     app = moduleFixture.createNestApplication();
     app.setGlobalPrefix('api');
 
-    app.use(json({
-      limit: process.env.REQUEST_BODY_LIMIT ?? '1mb',
-      verify: (req: { rawBody?: Buffer }, _res: unknown, buf: Buffer) => {
-        req.rawBody = buf;
-      },
-    }));
+    app.use(
+      json({
+        limit: process.env.REQUEST_BODY_LIMIT ?? '1mb',
+        verify: (req: { rawBody?: Buffer }, _res: unknown, buf: Buffer) => {
+          req.rawBody = buf;
+        },
+      }),
+    );
 
     app.useGlobalPipes(
       new ValidationPipe({
@@ -142,21 +144,25 @@ describe('Payments webhook (e2e)', () => {
       throw new Error('Buyer not found');
     }
 
-    const mockStripe = (Stripe as unknown as {
-      __mockStripe?: {
-        webhooks?: { constructEvent?: jest.Mock };
-      };
-    }).__mockStripe;
+    const mockStripe = (
+      Stripe as unknown as {
+        __mockStripe?: {
+          webhooks?: { constructEvent?: jest.Mock };
+        };
+      }
+    ).__mockStripe;
     if (!mockStripe?.webhooks?.constructEvent) {
       throw new Error('Stripe webhook mock not found');
     }
+
+    const uniqueSessionId = `cs_test_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
 
     mockStripe.webhooks.constructEvent.mockReturnValue({
       id: 'evt_1',
       type: 'checkout.session.completed',
       data: {
         object: {
-          id: 'cs_test_1',
+          id: uniqueSessionId,
           metadata: {
             courseId: course.id,
             userId: buyer.id,
@@ -192,7 +198,7 @@ describe('Payments webhook (e2e)', () => {
     });
 
     expect(purchases.length).toBe(1);
-    expect(purchases[0].stripeSessionId).toBe('cs_test_1');
+    expect(purchases[0].stripeSessionId).toBe(uniqueSessionId);
     expect(purchases[0].stripePaymentIntentId).toBe('pi_test_1');
     expect(purchases[0].amountCents).toBe(999);
     expect(purchases[0].currency).toBe('eur');

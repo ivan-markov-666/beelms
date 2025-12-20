@@ -9,7 +9,9 @@ export default function CheckoutCancelPage() {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-2xl flex-col gap-6 px-4 py-10">
-      <h1 className="text-2xl font-semibold text-zinc-900">Payment cancelled</h1>
+      <h1 className="text-2xl font-semibold text-zinc-900">
+        Payment cancelled
+      </h1>
       <div className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
         Плащането беше прекъснато или отказано. Няма направена покупка.
       </div>

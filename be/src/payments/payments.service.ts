@@ -44,12 +44,18 @@ export class PaymentsService {
     const stripe = this.getStripe();
     const webhookSecret = (process.env.STRIPE_WEBHOOK_SECRET ?? '').trim();
     if (!webhookSecret) {
-      throw new NotImplementedException('Stripe webhook secret is not configured');
+      throw new NotImplementedException(
+        'Stripe webhook secret is not configured',
+      );
     }
 
     let event: Stripe.Event;
     try {
-      event = stripe.webhooks.constructEvent(rawBody, stripeSignature, webhookSecret);
+      event = stripe.webhooks.constructEvent(
+        rawBody,
+        stripeSignature,
+        webhookSecret,
+      );
     } catch {
       throw new BadRequestException('Invalid Stripe webhook signature');
     }
@@ -58,12 +64,26 @@ export class PaymentsService {
       return;
     }
 
-    const session = event.data.object as Stripe.Checkout.Session;
+    const session = event.data.object;
     const courseId = session.metadata?.courseId;
     const userId = session.metadata?.userId;
 
     if (!courseId || !userId) {
       throw new BadRequestException('Stripe session metadata missing');
+    }
+
+    const existingBySession = await this.purchaseRepo.findOne({
+      where: { stripeSessionId: session.id },
+    });
+    if (existingBySession) {
+      if (
+        existingBySession.courseId === courseId &&
+        existingBySession.userId === userId
+      ) {
+        return;
+      }
+
+      throw new BadRequestException('Stripe session already processed');
     }
 
     const course = await this.courseRepo.findOne({ where: { id: courseId } });
@@ -75,22 +95,30 @@ export class PaymentsService {
       throw new BadRequestException('Course is not paid');
     }
 
-    const existing = await this.purchaseRepo.findOne({ where: { userId, courseId } });
+    const existing = await this.purchaseRepo.findOne({
+      where: { userId, courseId },
+    });
     if (existing) {
       return;
     }
 
     const paymentIntentId =
-      typeof session.payment_intent === 'string' ? session.payment_intent : null;
+      typeof session.payment_intent === 'string'
+        ? session.payment_intent
+        : null;
 
     const amountCents =
       typeof session.amount_total === 'number' ? session.amount_total : null;
-    const currency = typeof session.currency === 'string' ? session.currency : null;
+    const currency =
+      typeof session.currency === 'string' ? session.currency : null;
 
     await this.purchaseRepo.save(
       this.purchaseRepo.create({
         userId,
         courseId,
+        source: 'stripe',
+        grantedByUserId: null,
+        grantReason: null,
         stripeSessionId: session.id,
         stripePaymentIntentId: paymentIntentId,
         amountCents,
@@ -100,7 +128,9 @@ export class PaymentsService {
   }
 
   async hasPurchased(userId: string, courseId: string): Promise<boolean> {
-    const existing = await this.purchaseRepo.findOne({ where: { userId, courseId } });
+    const existing = await this.purchaseRepo.findOne({
+      where: { userId, courseId },
+    });
     return !!existing;
   }
 
@@ -206,7 +236,11 @@ export class PaymentsService {
 
     const settings = await this.getPaymentSettings();
 
-    const currency = (course.currency || settings.currency || 'eur').toLowerCase();
+    const currency = (
+      course.currency ||
+      settings.currency ||
+      'eur'
+    ).toLowerCase();
     const priceCentsRaw =
       typeof course.priceCents === 'number' && course.priceCents > 0
         ? course.priceCents
@@ -300,10 +334,16 @@ export class PaymentsService {
     const purchase = this.purchaseRepo.create({
       userId,
       courseId,
+      source: 'stripe',
+      grantedByUserId: null,
+      grantReason: null,
       stripeSessionId: session.id,
       stripePaymentIntentId:
-        typeof session.payment_intent === 'string' ? session.payment_intent : null,
-      amountCents: typeof session.amount_total === 'number' ? session.amount_total : null,
+        typeof session.payment_intent === 'string'
+          ? session.payment_intent
+          : null,
+      amountCents:
+        typeof session.amount_total === 'number' ? session.amount_total : null,
       currency: typeof session.currency === 'string' ? session.currency : null,
     });
 

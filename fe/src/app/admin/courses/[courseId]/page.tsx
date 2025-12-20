@@ -575,7 +575,8 @@ export default function AdminCourseDetailPage() {
             </span>
             {course.isPaid && course.priceCents && (
               <span className="rounded bg-gray-100 px-2 py-1">
-                {(course.priceCents / 100).toFixed(2)} {(course.currency ?? "eur").toUpperCase()}
+                {(course.priceCents / 100).toFixed(2)}{" "}
+                {(course.currency ?? "eur").toUpperCase()}
               </span>
             )}
           </div>

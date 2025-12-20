@@ -20,7 +20,26 @@ export class CoursePurchase {
   @Column({ name: 'user_id', type: 'uuid' })
   userId: string;
 
-  @Column({ name: 'stripe_session_id', type: 'varchar', length: 255, nullable: true })
+  @Column({ name: 'source', type: 'varchar', length: 20, default: 'stripe' })
+  source: string;
+
+  @Column({ name: 'granted_by_user_id', type: 'uuid', nullable: true })
+  grantedByUserId: string | null;
+
+  @Column({
+    name: 'grant_reason',
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+  })
+  grantReason: string | null;
+
+  @Column({
+    name: 'stripe_session_id',
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+  })
   stripeSessionId: string | null;
 
   @Column({

@@ -3,54 +3,58 @@ import userEvent from "@testing-library/user-event";
 import { EnrollCourseButton } from "../enroll-course-button";
 import { ACCESS_TOKEN_KEY } from "../../../auth-token";
 
-function mockFetchPaidFlow(courseId: string) {
-  global.fetch = jest.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
-    const url = String(input);
-    const method = (init?.method ?? "GET").toUpperCase();
+function mockFetchPaidFlow() {
+  global.fetch = jest.fn(
+    async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+      const method = (init?.method ?? "GET").toUpperCase();
 
-    if (url.endsWith("/users/me/courses") && method === "GET") {
+      if (url.endsWith("/users/me/courses") && method === "GET") {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => [],
+        } as unknown as Response;
+      }
+
       return {
-        ok: true,
-        status: 200,
-        json: async () => [],
+        ok: false,
+        status: 500,
+        json: async () => ({}),
       } as unknown as Response;
-    }
-
-    return {
-      ok: false,
-      status: 500,
-      json: async () => ({}),
-    } as unknown as Response;
-  });
+    },
+  );
 }
 
 function mockFetchFreeFlow(courseId: string) {
-  global.fetch = jest.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
-    const url = String(input);
-    const method = (init?.method ?? "GET").toUpperCase();
+  global.fetch = jest.fn(
+    async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+      const method = (init?.method ?? "GET").toUpperCase();
 
-    if (url.endsWith("/users/me/courses") && method === "GET") {
-      return {
-        ok: true,
-        status: 200,
-        json: async () => [],
-      } as unknown as Response;
-    }
+      if (url.endsWith("/users/me/courses") && method === "GET") {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => [],
+        } as unknown as Response;
+      }
 
-    if (url.endsWith(`/courses/${courseId}/enroll`) && method === "POST") {
+      if (url.endsWith(`/courses/${courseId}/enroll`) && method === "POST") {
+        return {
+          ok: true,
+          status: 204,
+          json: async () => ({}),
+        } as unknown as Response;
+      }
+
       return {
-        ok: true,
-        status: 204,
+        ok: false,
+        status: 500,
         json: async () => ({}),
       } as unknown as Response;
-    }
-
-    return {
-      ok: false,
-      status: 500,
-      json: async () => ({}),
-    } as unknown as Response;
-  });
+    },
+  );
 }
 
 describe("EnrollCourseButton", () => {
@@ -64,18 +68,22 @@ describe("EnrollCourseButton", () => {
     const courseId = "course-1";
 
     window.localStorage.setItem(ACCESS_TOKEN_KEY, "test-token");
-    mockFetchPaidFlow(courseId);
+    mockFetchPaidFlow();
 
     render(<EnrollCourseButton courseId={courseId} isPaid={true} />);
 
-    const button = await screen.findByRole("button", { name: "Unlock & Enroll" });
+    const button = await screen.findByRole("button", {
+      name: "Unlock & Enroll",
+    });
     await user.click(button);
 
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalled();
     });
 
-    expect(await screen.findByText("Плащането не е налично.")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Плащането не е налично."),
+    ).toBeInTheDocument();
   });
 
   it("enrolls directly for free course", async () => {
@@ -90,7 +98,9 @@ describe("EnrollCourseButton", () => {
     const button = await screen.findByRole("button", { name: "Enroll" });
     await user.click(button);
 
-    expect(await screen.findByText("Записването е успешно.")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Записването е успешно."),
+    ).toBeInTheDocument();
 
     expect(
       await screen.findByRole("button", { name: "Enrolled" }),

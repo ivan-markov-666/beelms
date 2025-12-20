@@ -61,9 +61,7 @@ export default function CheckoutSuccessPage(props: {
               return true;
             }
           }
-        } catch {
-          // ignore transient network errors while polling
-        }
+        } catch {}
 
         await sleep(Math.min(800 * attempt, 3000));
       }
