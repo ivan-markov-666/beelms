@@ -1,6 +1,6 @@
 # STORY-COURSES-4: Paid Course Unlock (MVP)
 
-_BMAD Story Spec | EPIC: EPIC-CORE-COURSES-PROGRESS | Status: 🟡 In Progress_
+_BMAD Story Spec | EPIC: EPIC-CORE-COURSES-PROGRESS | Status: ✅ Implemented_
 
 ---
 
@@ -92,3 +92,4 @@ _BMAD Story Spec | EPIC: EPIC-CORE-COURSES-PROGRESS | Status: 🟡 In Progress_
 | Date | Author | Change |
 |------|--------|--------|
 | 2025-12-19 | Cascade | Initial story spec + implementation work |
+| 2025-12-20 | Cascade | Marked as implemented (all AC ✅) |
