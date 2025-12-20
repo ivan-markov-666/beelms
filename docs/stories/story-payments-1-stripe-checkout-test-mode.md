@@ -1,6 +1,6 @@
 # STORY-PAYMENTS-1: Stripe Checkout (Test Mode) for Paid Courses
 
-_BMAD Story Spec | EPIC: EPIC-COURSES-PAID | Status: 🟡 In Progress_
+_BMAD Story Spec | EPIC: EPIC-COURSES-PAID | Status: 🟢 Done_
 
 ---
 
@@ -29,36 +29,36 @@ _BMAD Story Spec | EPIC: EPIC-COURSES-PAID | Status: 🟡 In Progress_
 
 | # | Criterion | Status |
 |---|-----------|--------|
-| AC-1 | Добавен Stripe SDK dependency в BE | ⬜ |
-| AC-2 | `POST /api/courses/:courseId/checkout` (JWT) връща Stripe Checkout URL за paid course | ⬜ |
-| AC-3 | `POST /api/courses/:courseId/purchase/verify` (JWT) валидира `session_id` и записва `CoursePurchase` | ⬜ |
-| AC-4 | Ако Stripe env липсва → 501/400 с ясна грешка | ⬜ |
-| AC-4.1 | Има `payment_settings` таблица (singleton) за currency | ⬜ |
-| AC-4.2 | Admin може да сменя currency през `GET/PATCH /api/admin/payments/settings` | ⬜ |
-| AC-4.3 | Admin може да изтегли списък валути през `GET /api/admin/payments/currencies` | ⬜ |
-| AC-4.4 | Admin може да сменя цена (cents) през `PATCH /api/admin/payments/settings` | ⬜ |
-| AC-4.5 | Paid course може да има `currency` + `priceCents` (per-course pricing) | ⬜ |
-| AC-4.6 | Stripe checkout използва per-course pricing; ако липсва → fallback към `payment_settings` | ⬜ |
+| AC-1 | Добавен Stripe SDK dependency в BE | ✅ |
+| AC-2 | `POST /api/courses/:courseId/checkout` (JWT) връща Stripe Checkout URL за paid course | ✅ |
+| AC-3 | `POST /api/courses/:courseId/purchase/verify` (JWT) валидира `session_id` и записва `CoursePurchase` | ✅ |
+| AC-4 | Ако Stripe env липсва → 501/400 с ясна грешка | ✅ |
+| AC-4.1 | Има `payment_settings` таблица (singleton) за currency | ✅ |
+| AC-4.2 | Admin може да сменя currency през `GET/PATCH /api/admin/payments/settings` | ✅ |
+| AC-4.3 | Admin може да изтегли списък валути през `GET /api/admin/payments/currencies` | ✅ |
+| AC-4.4 | Admin може да сменя цена (cents) през `PATCH /api/admin/payments/settings` | ✅ |
+| AC-4.5 | Paid course може да има `currency` + `priceCents` (per-course pricing) | ✅ |
+| AC-4.6 | Stripe checkout използва per-course pricing; ако липсва → fallback към `payment_settings` | ✅ |
 
 ### 3.2 Frontend
 
 | # | Criterion | Status |
 |---|-----------|--------|
-| AC-5 | Paid flow редиректва към Stripe Checkout | ⬜ |
-| AC-6 | След success redirect: verify purchase → enroll → показва success state | ⬜ |
-| AC-7 | Cancel/failed payment дава ясна грешка и позволява retry | ⬜ |
+| AC-5 | Paid flow редиректва към Stripe Checkout | ✅ |
+| AC-6 | След success redirect: verify purchase → enroll → показва success state | ✅ |
+| AC-7 | Cancel/failed payment дава ясна грешка и позволява retry | ✅ |
 
 ### 3.3 Env / Config
 
 | # | Criterion | Status |
 |---|-----------|--------|
-| AC-8 | Документирани env vars: `STRIPE_SECRET_KEY`, `FRONTEND_ORIGIN`, `STRIPE_COURSE_PRICE_CENTS` | ⬜ |
+| AC-8 | Документирани env vars: `STRIPE_SECRET_KEY`, `FRONTEND_ORIGIN`, `STRIPE_COURSE_PRICE_CENTS`, `NEXT_PUBLIC_STRIPE_PAYMENTS` | ✅ |
 
 ### 3.4 Tests
 
 | # | Criterion | Status |
 |---|-----------|--------|
-| AC-9 | BE unit/e2e test за verify endpoint (happy path + invalid session) | ⬜ |
+| AC-9 | BE unit/e2e test за verify endpoint (happy path + invalid session) | ✅ |
 
 ---
 
@@ -74,3 +74,4 @@ _BMAD Story Spec | EPIC: EPIC-COURSES-PAID | Status: 🟡 In Progress_
 | Date | Author | Change |
 |------|--------|--------|
 | 2025-12-19 | Cascade | Initial story spec |
+| 2025-12-20 | Cascade | Marked AC-1..AC-9 as done; documented env vars |

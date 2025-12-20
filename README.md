@@ -75,6 +75,30 @@ npm run dev -- -p 3001
 NEXT_PUBLIC_API_BASE_URL=http://localhost:3000/api
 ```
 
+#### 2.4.1. Stripe payments (Paid courses) – env vars
+
+За да работи Stripe checkout flow за paid courses (STORY-PAYMENTS-1):
+
+- FE (`fe/.env.local`):
+
+```bash
+NEXT_PUBLIC_STRIPE_PAYMENTS=true
+```
+
+- BE (`be/.env` / env на процеса):
+
+```bash
+STRIPE_SECRET_KEY=sk_test_...
+FRONTEND_ORIGIN=http://localhost:3001
+STRIPE_COURSE_PRICE_CENTS=999
+```
+
+Notes:
+
+- `STRIPE_SECRET_KEY` трябва да е test mode secret key от Stripe.
+- `FRONTEND_ORIGIN` се ползва за success/cancel redirect URL-и.
+- `STRIPE_COURSE_PRICE_CENTS` е fallback цена (ако няма per-course pricing и няма `payment_settings`).
+
 Така Admin UI (напр. `/admin/wiki`) ще вика реалните NestJS endpoint-и.
 
 ---
