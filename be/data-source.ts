@@ -8,6 +8,7 @@ import { CourseEnrollment } from './src/courses/course-enrollment.entity';
 import { CourseCurriculumItem } from './src/courses/course-curriculum-item.entity';
 import { UserCurriculumProgress } from './src/courses/user-curriculum-progress.entity';
 import { CoursePurchase } from './src/courses/course-purchase.entity';
+import { PaymentSettings } from './src/payments/payment-settings.entity';
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -23,6 +24,7 @@ export const AppDataSource = new DataSource({
     Course,
     CourseEnrollment,
     CoursePurchase,
+    PaymentSettings,
     CourseCurriculumItem,
     UserCurriculumProgress,
   ],

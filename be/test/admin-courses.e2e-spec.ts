@@ -15,6 +15,8 @@ type CourseSummary = {
   language: string;
   status: string;
   isPaid: boolean;
+  currency: string | null;
+  priceCents: number | null;
 };
 
 type CourseDetail = CourseSummary & {
@@ -90,6 +92,8 @@ describe('Admin Courses endpoints (e2e)', () => {
         language: 'bg',
         status: 'draft',
         isPaid: true,
+        currency: 'eur',
+        priceCents: 999,
       })
       .expect(201);
 
@@ -97,11 +101,15 @@ describe('Admin Courses endpoints (e2e)', () => {
     expect(created.id).toBeDefined();
     expect(created.title).toBe('Admin Created Course');
     expect(created.isPaid).toBe(true);
+    expect(created.currency).toBe('eur');
+    expect(created.priceCents).toBe(999);
     expect(Array.isArray(created.curriculum)).toBe(true);
 
     const dbCreated = await courseRepo.findOne({ where: { id: created.id } });
     expect(dbCreated).toBeDefined();
     expect(dbCreated!.isPaid).toBe(true);
+    expect(dbCreated!.currency).toBe('eur');
+    expect(dbCreated!.priceCents).toBe(999);
 
     const listRes = await request(app.getHttpServer())
       .get('/api/admin/courses')

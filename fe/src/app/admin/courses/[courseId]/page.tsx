@@ -573,6 +573,11 @@ export default function AdminCourseDetailPage() {
             <span className="rounded bg-gray-100 px-2 py-1">
               {course.isPaid ? "paid" : "free"}
             </span>
+            {course.isPaid && course.priceCents && (
+              <span className="rounded bg-gray-100 px-2 py-1">
+                {(course.priceCents / 100).toFixed(2)} {(course.currency ?? "eur").toUpperCase()}
+              </span>
+            )}
           </div>
         </div>
       </section>
@@ -664,6 +669,39 @@ export default function AdminCourseDetailPage() {
               }
             />
             <span className="text-sm text-gray-700">Paid course</span>
+          </label>
+
+          <label className="space-y-1">
+            <span className="text-xs font-medium text-gray-600">Currency</span>
+            <input
+              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 disabled:bg-gray-50"
+              value={courseForm?.currency ?? ""}
+              onChange={(e) =>
+                setCourseForm((p) =>
+                  p ? { ...p, currency: e.target.value } : p,
+                )
+              }
+              disabled={!(courseForm?.isPaid ?? false)}
+              placeholder="eur"
+            />
+          </label>
+
+          <label className="space-y-1">
+            <span className="text-xs font-medium text-gray-600">
+              Price (cents)
+            </span>
+            <input
+              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 disabled:bg-gray-50"
+              value={courseForm?.priceCents ?? ""}
+              onChange={(e) =>
+                setCourseForm((p) =>
+                  p ? { ...p, priceCents: e.target.value } : p,
+                )
+              }
+              disabled={!(courseForm?.isPaid ?? false)}
+              inputMode="numeric"
+              placeholder="999"
+            />
           </label>
         </div>
 

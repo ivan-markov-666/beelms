@@ -285,6 +285,14 @@ export function AdminHomeContent() {
               {t(lang, "common", "adminDashboardTabActivity")}
             </Link>
           </li>
+          <li>
+            <Link
+              href="/admin/payments"
+              className="inline-block border-b-2 border-transparent pb-3 text-gray-600 transition hover:border-green-400 hover:text-green-700"
+            >
+              {t(lang, "common", "adminDashboardTabPayments")}
+            </Link>
+          </li>
         </ul>
       </nav>
 

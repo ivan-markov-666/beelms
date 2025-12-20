@@ -1,4 +1,12 @@
-import { IsBoolean, IsIn, IsOptional, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsIn,
+  IsInt,
+  IsOptional,
+  IsString,
+  Length,
+  Min,
+} from 'class-validator';
 
 export class AdminUpdateCourseDto {
   @IsString()
@@ -21,4 +29,14 @@ export class AdminUpdateCourseDto {
   @IsBoolean()
   @IsOptional()
   isPaid?: boolean;
+
+  @IsOptional()
+  @IsString()
+  @Length(3, 3)
+  currency?: string | null;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  priceCents?: number | null;
 }

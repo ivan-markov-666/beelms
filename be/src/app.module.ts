@@ -11,11 +11,13 @@ import { User } from './auth/user.entity';
 import { RateLimitInterceptor } from './security/rate-limit/rate-limit.interceptor';
 import { InMemoryRateLimitStore } from './security/rate-limit/rate-limit.store';
 import { CoursesModule } from './courses/courses.module';
+import { PaymentsModule } from './payments/payments.module';
 import { Course } from './courses/course.entity';
 import { CourseEnrollment } from './courses/course-enrollment.entity';
 import { CourseCurriculumItem } from './courses/course-curriculum-item.entity';
 import { UserCurriculumProgress } from './courses/user-curriculum-progress.entity';
 import { CoursePurchase } from './courses/course-purchase.entity';
+import { PaymentSettings } from './payments/payment-settings.entity';
 
 @Module({
   imports: [
@@ -33,6 +35,7 @@ import { CoursePurchase } from './courses/course-purchase.entity';
         Course,
         CourseEnrollment,
         CoursePurchase,
+        PaymentSettings,
         CourseCurriculumItem,
         UserCurriculumProgress,
       ],
@@ -41,6 +44,7 @@ import { CoursePurchase } from './courses/course-purchase.entity';
     WikiModule,
     AuthModule,
     CoursesModule,
+    PaymentsModule,
   ],
   controllers: [AppController],
   providers: [
