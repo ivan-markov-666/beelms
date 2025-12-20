@@ -80,6 +80,37 @@ export class CoursesService {
     return items.map((i) => this.toCurriculumItemDto(i));
   }
 
+  private async requireEnrollment(userId: string, courseId: string): Promise<{
+    course: Course;
+    enrollment: CourseEnrollment;
+  }> {
+    const course = await this.courseRepo.findOne({ where: { id: courseId } });
+
+    if (!course || course.status !== 'active') {
+      throw new NotFoundException('Course not found');
+    }
+
+    const enrollment = await this.enrollmentRepo.findOne({
+      where: { courseId, userId },
+    });
+
+    if (!enrollment) {
+      throw new ForbiddenException('Enrollment required');
+    }
+
+    if (course.isPaid) {
+      const purchased = await this.purchaseRepo.findOne({
+        where: { userId, courseId },
+      });
+
+      if (!purchased) {
+        throw new ForbiddenException('Payment required');
+      }
+    }
+
+    return { course, enrollment };
+  }
+
   private validateCurriculumRefs(
     itemType: 'wiki' | 'task' | 'quiz',
     fields: {
@@ -196,19 +227,7 @@ export class CoursesService {
     slug: string,
     lang?: string,
   ): Promise<WikiArticleDetailDto> {
-    const course = await this.courseRepo.findOne({ where: { id: courseId } });
-
-    if (!course || course.status !== 'active') {
-      throw new NotFoundException('Course not found');
-    }
-
-    const enrollment = await this.enrollmentRepo.findOne({
-      where: { courseId, userId },
-    });
-
-    if (!enrollment) {
-      throw new ForbiddenException('Enrollment required');
-    }
+    const { course } = await this.requireEnrollment(userId, courseId);
 
     const trimmedSlug = slug.trim();
     if (!trimmedSlug) {
@@ -651,19 +670,7 @@ export class CoursesService {
     userEmail: string,
     courseId: string,
   ): Promise<CourseCertificateDto> {
-    const course = await this.courseRepo.findOne({ where: { id: courseId } });
-
-    if (!course || course.status !== 'active') {
-      throw new NotFoundException('Course not found');
-    }
-
-    const enrollment = await this.enrollmentRepo.findOne({
-      where: { userId, courseId },
-    });
-
-    if (!enrollment) {
-      throw new ForbiddenException('Enrollment required');
-    }
+    const { course, enrollment } = await this.requireEnrollment(userId, courseId);
 
     if ((enrollment.status ?? '').toLowerCase() !== 'completed') {
       throw new ForbiddenException('Course not completed');
@@ -777,19 +784,7 @@ export class CoursesService {
     courseId: string,
     itemId: string,
   ): Promise<void> {
-    const course = await this.courseRepo.findOne({ where: { id: courseId } });
-
-    if (!course || course.status !== 'active') {
-      throw new NotFoundException('Course not found');
-    }
-
-    const enrollment = await this.enrollmentRepo.findOne({
-      where: { userId, courseId },
-    });
-
-    if (!enrollment) {
-      throw new ForbiddenException('Enrollment required');
-    }
+    await this.requireEnrollment(userId, courseId);
 
     const curriculumItem = await this.curriculumRepo.findOne({
       where: { id: itemId, courseId },
@@ -835,19 +830,7 @@ export class CoursesService {
       completedAt: string | null;
     }>;
   }> {
-    const course = await this.courseRepo.findOne({ where: { id: courseId } });
-
-    if (!course || course.status !== 'active') {
-      throw new NotFoundException('Course not found');
-    }
-
-    const enrollment = await this.enrollmentRepo.findOne({
-      where: { userId, courseId },
-    });
-
-    if (!enrollment) {
-      throw new ForbiddenException('Enrollment required');
-    }
+    await this.requireEnrollment(userId, courseId);
 
     const curriculumItems = await this.curriculumRepo.find({
       where: { courseId },
