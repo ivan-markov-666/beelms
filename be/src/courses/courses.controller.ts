@@ -56,22 +56,6 @@ export class CoursesController {
     await this.coursesService.enrollInCourse(userId, courseId);
   }
 
-  @Post(':courseId/purchase')
-  @UseGuards(JwtAuthGuard)
-  @HttpCode(204)
-  async purchase(
-    @Param('courseId') courseId: string,
-    @Req() req: AuthenticatedRequest,
-  ): Promise<void> {
-    const userId = req.user?.userId;
-
-    if (!userId) {
-      throw new UnauthorizedException('Authenticated user not found');
-    }
-
-    await this.coursesService.purchaseCourse(userId, courseId);
-  }
-
   @Get(':courseId/certificate')
   @UseGuards(JwtAuthGuard)
   async getCertificate(

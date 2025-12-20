@@ -97,43 +97,15 @@ export function EnrollCourseButton({
       return true;
     }
 
-    if (STRIPE_PAYMENTS_ENABLED) {
-      setPhase("unlocking");
-
-      const res = await fetch(apiUrl(`/courses/${courseId}/checkout`), {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-
-      if (res.status === 401) {
-        setHasToken(false);
-        setError("Няма активна сесия. Моля, влезте отново.");
-        setPhase("idle");
-        return false;
-      }
-
-      if (!res.ok) {
-        setError("Плащането не е налично (Stripe не е конфигуриран).");
-        setPhase("idle");
-        return false;
-      }
-
-      const body = (await res.json()) as { url?: string };
-      if (!body.url) {
-        setError("Неуспешно стартиране на плащането.");
-        setPhase("idle");
-        return false;
-      }
-
-      window.location.href = body.url;
+    if (!STRIPE_PAYMENTS_ENABLED) {
+      setError("Плащането не е налично.");
+      setPhase("idle");
       return false;
     }
 
     setPhase("unlocking");
 
-    const res = await fetch(apiUrl(`/courses/${courseId}/purchase`), {
+    const res = await fetch(apiUrl(`/courses/${courseId}/checkout`), {
       method: "POST",
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -147,13 +119,21 @@ export function EnrollCourseButton({
       return false;
     }
 
-    if (!res.ok && res.status !== 204) {
-      setError("Неуспешно отключване на курса. Опитайте отново.");
+    if (!res.ok) {
+      setError("Плащането не е налично (Stripe не е конфигуриран). ");
       setPhase("idle");
       return false;
     }
 
-    return true;
+    const body = (await res.json()) as { url?: string };
+    if (!body.url) {
+      setError("Неуспешно стартиране на плащането.");
+      setPhase("idle");
+      return false;
+    }
+
+    window.location.href = body.url;
+    return false;
   };
 
   const enroll = async () => {

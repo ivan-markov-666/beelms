@@ -16,22 +16,6 @@ function mockFetchPaidFlow(courseId: string) {
       } as unknown as Response;
     }
 
-    if (url.endsWith(`/courses/${courseId}/purchase`) && method === "POST") {
-      return {
-        ok: true,
-        status: 204,
-        json: async () => ({}),
-      } as unknown as Response;
-    }
-
-    if (url.endsWith(`/courses/${courseId}/enroll`) && method === "POST") {
-      return {
-        ok: true,
-        status: 204,
-        json: async () => ({}),
-      } as unknown as Response;
-    }
-
     return {
       ok: false,
       status: 500,
@@ -75,7 +59,7 @@ describe("EnrollCourseButton", () => {
     window.localStorage.clear();
   });
 
-  it("runs purchase then enroll for paid course", async () => {
+  it("shows error for paid course when Stripe payments are disabled", async () => {
     const user = userEvent.setup();
     const courseId = "course-1";
 
@@ -91,26 +75,7 @@ describe("EnrollCourseButton", () => {
       expect(global.fetch).toHaveBeenCalled();
     });
 
-    expect(
-      await screen.findByText("Курсът е отключен и записването е успешно."),
-    ).toBeInTheDocument();
-
-    expect(
-      await screen.findByRole("button", { name: "Enrolled" }),
-    ).toBeDisabled();
-
-    const calls = (global.fetch as jest.Mock).mock.calls;
-    const calledPurchase = calls.some(([url, init]) =>
-      String(url).endsWith(`/courses/${courseId}/purchase`) &&
-      ((init?.method ?? "GET") as string).toUpperCase() === "POST",
-    );
-    const calledEnroll = calls.some(([url, init]) =>
-      String(url).endsWith(`/courses/${courseId}/enroll`) &&
-      ((init?.method ?? "GET") as string).toUpperCase() === "POST",
-    );
-
-    expect(calledPurchase).toBe(true);
-    expect(calledEnroll).toBe(true);
+    expect(await screen.findByText("Плащането не е налично.")).toBeInTheDocument();
   });
 
   it("enrolls directly for free course", async () => {

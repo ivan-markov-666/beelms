@@ -5,6 +5,8 @@ import { Repository } from 'typeorm';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { Course } from '../src/courses/course.entity';
+import { CoursePurchase } from '../src/courses/course-purchase.entity';
+import { User } from '../src/auth/user.entity';
 import { registerAndLogin } from './utils/auth-helpers';
 
 type CourseSummary = {
@@ -24,6 +26,8 @@ type MyCourseListItem = CourseSummary & {
 describe('Course enrollment + my-courses endpoints (e2e)', () => {
   let app: INestApplication;
   let courseRepo: Repository<Course>;
+  let purchaseRepo: Repository<CoursePurchase>;
+  let userRepo: Repository<User>;
 
   async function createCourse(
     overrides?: Partial<
@@ -57,6 +61,10 @@ describe('Course enrollment + my-courses endpoints (e2e)', () => {
     await app.init();
 
     courseRepo = app.get<Repository<Course>>(getRepositoryToken(Course));
+    purchaseRepo = app.get<Repository<CoursePurchase>>(
+      getRepositoryToken(CoursePurchase),
+    );
+    userRepo = app.get<Repository<User>>(getRepositoryToken(User));
   });
 
   afterAll(async () => {
@@ -129,7 +137,10 @@ describe('Course enrollment + my-courses endpoints (e2e)', () => {
   });
 
   it('User can purchase a paid course and then enroll', async () => {
-    const { accessToken } = await registerAndLogin(app, 'course-purchase-paid');
+    const { email, accessToken } = await registerAndLogin(
+      app,
+      'course-purchase-paid',
+    );
 
     const course = await createCourse({ isPaid: true });
     const courseId = course.id;
@@ -139,10 +150,19 @@ describe('Course enrollment + my-courses endpoints (e2e)', () => {
       .set('Authorization', `Bearer ${accessToken}`)
       .expect(403);
 
-    await request(app.getHttpServer())
-      .post(`/api/courses/${courseId}/purchase`)
-      .set('Authorization', `Bearer ${accessToken}`)
-      .expect(204);
+    const buyer = await userRepo.findOne({ where: { email } });
+
+    expect(buyer).toBeDefined();
+    if (!buyer) {
+      throw new Error('User not found after registerAndLogin');
+    }
+
+    await purchaseRepo.save(
+      purchaseRepo.create({
+        userId: buyer.id,
+        courseId,
+      }),
+    );
 
     await request(app.getHttpServer())
       .post(`/api/courses/${courseId}/enroll`)
