@@ -1,6 +1,6 @@
 # STORY-OPS-1: Automated DB Migrations on Deploy
 
-_BMAD Story Spec | Status: 🟡 In Progress_
+_BMAD Story Spec | Status: 🟢 Done_
 
 ---
 
@@ -21,10 +21,10 @@ _BMAD Story Spec | Status: 🟡 In Progress_
 
 | # | Criterion | Status |
 |---|-----------|--------|
-| AC-1 | Има документ/инструкция как се пускат миграции при deploy за текущия hosting | ⬜ |
-| AC-2 | CI/CD или deploy скрипт включва стъпка `npm --prefix be run migration:run` | ⬜ |
-| AC-3 | Има безопасна проверка/лог, че няма pending migrations след deploy | ⬜ |
-| AC-4 | Deploy pipeline failure ако миграцията fail-не (fail-fast) | ⬜ |
+| AC-1 | Има документ/инструкция как се пускат миграции при deploy за текущия hosting | ✅ |
+| AC-2 | CI/CD или deploy скрипт включва стъпка `npm --prefix be run migration:run` | ✅ |
+| AC-3 | Има безопасна проверка/лог, че няма pending migrations след deploy | ✅ |
+| AC-4 | Deploy pipeline failure ако миграцията fail-не (fail-fast) | ✅ |
 
 ---
 
@@ -34,6 +34,35 @@ _BMAD Story Spec | Status: 🟡 In Progress_
   - Docker Compose: run migrations в отделен one-off container/step
   - PM2/systemd: run migrations като pre-start step
   - Managed CI/CD (GitHub Actions): добавяне на job/step
+
+### 4.1 Commands (from repo root)
+
+Run migrations:
+
+```bash
+npm --prefix be run migration:run
+```
+
+Fail-fast check for pending migrations (should be executed after `migration:run`):
+
+```bash
+npm --prefix be run migration:check
+```
+
+### 4.2 Docker Compose deploy
+
+Docker compose includes a one-off `migrate` service that depends on DB healthcheck and runs:
+
+- `npm run migration:run`
+- `npm run migration:check`
+
+Use it as a deploy step:
+
+```bash
+docker compose run --rm migrate
+```
+
+The `api` service is configured to start only after migrations complete successfully.
 
 ---
 
@@ -50,3 +79,4 @@ _BMAD Story Spec | Status: 🟡 In Progress_
 | Date | Author | Change |
 |------|--------|--------|
 | 2025-12-19 | Cascade | Initial story spec |
+| 2025-12-20 | Cascade | Added automated migration run + pending check + docker compose migrate step |
