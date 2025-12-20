@@ -30,6 +30,47 @@ export default function CheckoutSuccessPage(props: {
   useEffect(() => {
     let cancelled = false;
 
+    const sleep = (ms: number) =>
+      new Promise<void>((resolve) => {
+        setTimeout(resolve, ms);
+      });
+
+    const waitForPurchase = async (args: {
+      token: string;
+      courseId: string;
+      maxAttempts: number;
+    }): Promise<boolean> => {
+      for (let attempt = 1; attempt <= args.maxAttempts; attempt++) {
+        if (cancelled) {
+          return false;
+        }
+
+        try {
+          const res = await fetch(
+            apiUrl(`/payments/courses/${args.courseId}/purchase/status`),
+            {
+              headers: {
+                Authorization: `Bearer ${args.token}`,
+              },
+            },
+          );
+
+          if (res.ok) {
+            const data = (await res.json()) as { purchased?: boolean };
+            if (data.purchased) {
+              return true;
+            }
+          }
+        } catch {
+          // ignore transient network errors while polling
+        }
+
+        await sleep(Math.min(800 * attempt, 3000));
+      }
+
+      return false;
+    };
+
     const run = async () => {
       const token = getAccessToken();
       if (!token) {
@@ -53,6 +94,11 @@ export default function CheckoutSuccessPage(props: {
       }
 
       try {
+        if (!cancelled) {
+          setStatus("loading");
+          setError(null);
+        }
+
         const verifyRes = await fetch(
           apiUrl(`/courses/${resolvedParams.courseId}/purchase/verify`),
           {
@@ -69,6 +115,22 @@ export default function CheckoutSuccessPage(props: {
           if (!cancelled) {
             setStatus("error");
             setError("Payment verification failed.");
+          }
+          return;
+        }
+
+        const purchased = await waitForPurchase({
+          token,
+          courseId: resolvedParams.courseId,
+          maxAttempts: 10,
+        });
+
+        if (!purchased) {
+          if (!cancelled) {
+            setStatus("error");
+            setError(
+              "Payment is still processing. Please refresh this page in a moment.",
+            );
           }
           return;
         }
