@@ -146,7 +146,7 @@ export default function CourseWikiArticlePage() {
 
         if (res.status === 403) {
           setError(
-            "Трябва да се запишеш в курса, за да отвориш този материал.",
+            "Нямаш достъп до този материал. Отключи/запиши се в курса от страницата на курса.",
           );
           setLoading(false);
           return;
@@ -201,11 +201,33 @@ export default function CourseWikiArticlePage() {
         {loading && <p className="text-sm text-gray-600">Loading...</p>}
 
         {!loading && error && (
-          <div
-            className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
-            role="alert"
-          >
-            {error}
+          <div className="space-y-3">
+            <div
+              className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+              role="alert"
+            >
+              {error}
+            </div>
+
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Link
+                href={
+                  courseId
+                    ? `/courses/${encodeURIComponent(courseId)}`
+                    : "/courses"
+                }
+                className="inline-flex items-center justify-center rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-700"
+              >
+                Назад към курса
+              </Link>
+
+              <Link
+                href="/courses"
+                className="inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50"
+              >
+                Каталог курсове
+              </Link>
+            </div>
           </div>
         )}
 
