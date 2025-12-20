@@ -14,10 +14,14 @@ jest.mock('stripe', () => {
     create: jest.fn(),
     retrieve: jest.fn(),
   };
+  const webhooks = {
+    constructEvent: jest.fn(),
+  };
   const mockStripe = {
     checkout: {
       sessions,
     },
+    webhooks,
   };
 
   const Stripe = jest.fn().mockImplementation(() => mockStripe);

@@ -6,6 +6,7 @@ import { CoursePurchase } from '../courses/course-purchase.entity';
 import { PaymentSettings } from './payment-settings.entity';
 import { PaymentsController } from './payments.controller';
 import { AdminPaymentsController } from './admin-payments.controller';
+import { PaymentsWebhookController } from './payments-webhook.controller';
 import { PaymentsService } from './payments.service';
 
 @Module({
@@ -13,7 +14,7 @@ import { PaymentsService } from './payments.service';
     TypeOrmModule.forFeature([Course, CoursePurchase, PaymentSettings]),
     AuthModule,
   ],
-  controllers: [PaymentsController, AdminPaymentsController],
+  controllers: [PaymentsController, AdminPaymentsController, PaymentsWebhookController],
   providers: [PaymentsService],
 })
 export class PaymentsModule {}

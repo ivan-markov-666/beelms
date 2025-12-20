@@ -21,6 +21,9 @@ export async function createApp(): Promise<NestExpressApplication> {
 
   app.useBodyParser('json', {
     limit: process.env.REQUEST_BODY_LIMIT ?? '1mb',
+    verify: (req: Request & { rawBody?: Buffer }, _res: Response, buf: Buffer) => {
+      req.rawBody = buf;
+    },
   });
 
   app.use(

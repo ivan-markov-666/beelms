@@ -20,6 +20,23 @@ export class CoursePurchase {
   @Column({ name: 'user_id', type: 'uuid' })
   userId: string;
 
+  @Column({ name: 'stripe_session_id', type: 'varchar', length: 255, nullable: true })
+  stripeSessionId: string | null;
+
+  @Column({
+    name: 'stripe_payment_intent_id',
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+  })
+  stripePaymentIntentId: string | null;
+
+  @Column({ name: 'amount_cents', type: 'integer', nullable: true })
+  amountCents: number | null;
+
+  @Column({ name: 'currency', type: 'varchar', length: 3, nullable: true })
+  currency: string | null;
+
   @ManyToOne(() => Course, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'course_id' })
   course: Course;
