@@ -7,8 +7,30 @@ services:
       POSTGRES_DB: beelms
       POSTGRES_USER: beelms
       POSTGRES_PASSWORD: beelms
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U beelms -d beelms"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
     volumes:
       - db-data:/var/lib/postgresql/data
+
+  migrate:
+    build:
+      context: ./be
+      dockerfile: Dockerfile
+    container_name: beelms-core-migrate
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: development
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: beelms
+      DB_USER: beelms
+      DB_PASSWORD: beelms
+    command: ["sh", "-c", "npm run migration:run && npm run migration:check"]
 
   api:
     build:
@@ -17,7 +39,10 @@ services:
     container_name: beelms-core-api
     restart: unless-stopped
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     environment:
       NODE_ENV: development
       PORT: 3000

@@ -91,19 +91,36 @@ Expected response: `OK`.
 
 Migrations are managed with TypeORM and are executed **inside the API container**.
 
-From the project root:
+When you start the stack with `docker compose up`, the `api` service will wait for the `migrate` service to complete successfully.
+
+If you need to run migrations manually from the project root (one-off step):
+
+```bash
+docker compose run --rm migrate
+```
+
+This applies all pending migrations against the `beelms` database and fails if there are still pending migrations afterwards.
+
+If you need to run them manually inside the running API container:
 
 ```bash
 docker compose exec api npm run migration:run
+docker compose exec api npm run migration:check
 ```
-
-This applies all pending migrations against the `beelms` database.
 
 You can also run migrations directly from the host (if you have a local Postgres instance that matches the Docker configuration):
 
 ```bash
 cd be
 npm run migration:run
+npm run migration:check
+```
+
+Or from the project root:
+
+```bash
+npm --prefix be run migration:run
+npm --prefix be run migration:check
 ```
 
 ## Wiki seed data
