@@ -14,7 +14,11 @@ import { PaymentsService } from './payments.service';
     TypeOrmModule.forFeature([Course, CoursePurchase, PaymentSettings]),
     AuthModule,
   ],
-  controllers: [PaymentsController, AdminPaymentsController, PaymentsWebhookController],
+  controllers: [
+    PaymentsController,
+    AdminPaymentsController,
+    PaymentsWebhookController,
+  ],
   providers: [PaymentsService],
 })
 export class PaymentsModule {}

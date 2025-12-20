@@ -22,6 +22,20 @@
 
 Този вариант е удобен, когато правите промени по кода (BE/FE) и искате **автоматичен reload**.
 
+### 2.x. Команди от root директорията (npm --prefix)
+
+Можеш да стартираш скриптовете за BE/FE директно от root на репото, без да влизаш в папките:
+
+```bash
+# BE
+npm --prefix be run build
+npm --prefix be run start:dev
+
+# FE
+npm --prefix fe run build
+npm --prefix fe run dev -- -p 3001
+```
+
 ### 2.1. Предварителни изисквания
 
 - Node.js LTS (напр. 22.x)

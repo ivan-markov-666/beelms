@@ -118,7 +118,10 @@ export default async function CourseDetailPage(props: {
         />
       </header>
 
-      <CourseProgressPanel courseId={course.id} courseLanguage={course.language} />
+      <CourseProgressPanel
+        courseId={course.id}
+        courseLanguage={course.language}
+      />
 
       <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
         <h2 className="text-lg font-semibold text-gray-900">

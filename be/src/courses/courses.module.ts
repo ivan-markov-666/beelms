@@ -6,6 +6,7 @@ import { CoursesService } from './courses.service';
 import { CourseEnrollment } from './course-enrollment.entity';
 import { MyCoursesController } from './my-courses.controller';
 import { AuthModule } from '../auth/auth.module';
+import { User } from '../auth/user.entity';
 import { AdminCoursesController } from './admin-courses.controller';
 import { CourseCurriculumItem } from './course-curriculum-item.entity';
 import { AdminCourseCurriculumController } from './admin-course-curriculum.controller';
@@ -18,6 +19,7 @@ import { CoursePurchase } from './course-purchase.entity';
 @Module({
   imports: [
     TypeOrmModule.forFeature([
+      User,
       Course,
       CourseEnrollment,
       CoursePurchase,

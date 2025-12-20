@@ -47,7 +47,9 @@ export default function CourseCertificatePage(props: {
   const router = useRouter();
 
   const [loading, setLoading] = useState(true);
-  const [certificate, setCertificate] = useState<CourseCertificate | null>(null);
+  const [certificate, setCertificate] = useState<CourseCertificate | null>(
+    null,
+  );
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -138,7 +140,8 @@ export default function CourseCertificatePage(props: {
               {certificate.courseTitle}
             </h2>
             <p className="text-sm text-gray-700">
-              Awarded to <span className="font-semibold">{certificate.userEmail}</span>
+              Awarded to{" "}
+              <span className="font-semibold">{certificate.userEmail}</span>
             </p>
             <p className="text-sm text-gray-700">
               Completed at: {formatDateTime(certificate.completedAt)}

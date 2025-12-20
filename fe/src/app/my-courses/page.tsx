@@ -41,9 +41,7 @@ function enrollmentStatusLabel(
   }
 }
 
-function courseCtaLabel(
-  status: MyCourseListItem["enrollmentStatus"],
-): string {
+function courseCtaLabel(status: MyCourseListItem["enrollmentStatus"]): string {
   switch (status) {
     case "not_started":
       return "Започни →";
@@ -174,7 +172,9 @@ export default function MyCoursesPage() {
                   <div className="mt-2 h-2 w-full rounded-full bg-gray-100">
                     <div
                       className="h-2 rounded-full bg-green-600"
-                      style={{ width: `${Math.min(Math.max(course.progressPercent, 0), 100)}%` }}
+                      style={{
+                        width: `${Math.min(Math.max(course.progressPercent, 0), 100)}%`,
+                      }}
                     />
                   </div>
                 </div>

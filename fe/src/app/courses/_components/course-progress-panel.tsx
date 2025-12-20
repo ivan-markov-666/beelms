@@ -155,7 +155,9 @@ export function CourseProgressPanel({
     <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
       <div className="flex items-start justify-between gap-4">
         <h2 className="text-lg font-semibold text-gray-900">Прогрес</h2>
-        <span className="text-sm font-semibold text-gray-700">{safePercent}%</span>
+        <span className="text-sm font-semibold text-gray-700">
+          {safePercent}%
+        </span>
       </div>
 
       <div className="mt-3 h-2 w-full rounded-full bg-gray-100">
@@ -205,7 +207,9 @@ export function CourseProgressPanel({
                     {item.title}
                   </Link>
                 ) : (
-                  <span className="font-medium text-gray-900">{item.title}</span>
+                  <span className="font-medium text-gray-900">
+                    {item.title}
+                  </span>
                 )}
                 <span className="ml-2 text-xs text-gray-500">
                   ({item.itemType})

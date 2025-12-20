@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { User } from '../auth/user.entity';
 import { Course } from './course.entity';
 import { CourseEnrollment } from './course-enrollment.entity';
 import { CourseCurriculumItem } from './course-curriculum-item.entity';
@@ -23,10 +24,13 @@ import { AdminUpdateCourseDto } from './dto/admin-update-course.dto';
 import { AdminCreateCourseCurriculumItemDto } from './dto/admin-create-course-curriculum-item.dto';
 import { AdminUpdateCourseCurriculumItemDto } from './dto/admin-update-course-curriculum-item.dto';
 import { CourseCertificateDto } from './dto/course-certificate.dto';
+import { AdminGrantCourseAccessDto } from './dto/admin-grant-course-access.dto';
 
 @Injectable()
 export class CoursesService {
   constructor(
+    @InjectRepository(User)
+    private readonly usersRepo: Repository<User>,
     @InjectRepository(Course)
     private readonly courseRepo: Repository<Course>,
     @InjectRepository(CourseEnrollment)
@@ -80,7 +84,10 @@ export class CoursesService {
     return items.map((i) => this.toCurriculumItemDto(i));
   }
 
-  private async requireEnrollment(userId: string, courseId: string): Promise<{
+  private async requireEnrollment(
+    userId: string,
+    courseId: string,
+  ): Promise<{
     course: Course;
     enrollment: CourseEnrollment;
   }> {
@@ -316,9 +323,10 @@ export class CoursesService {
 
   async adminCreateCourse(dto: AdminCreateCourseDto): Promise<CourseDetailDto> {
     const isPaid = dto.isPaid ?? false;
-    const currency = typeof dto.currency === 'string'
-      ? dto.currency.trim().toLowerCase()
-      : null;
+    const currency =
+      typeof dto.currency === 'string'
+        ? dto.currency.trim().toLowerCase()
+        : null;
     const priceCents =
       typeof dto.priceCents === 'number' && Number.isInteger(dto.priceCents)
         ? dto.priceCents
@@ -665,12 +673,63 @@ export class CoursesService {
     await this.enrollmentRepo.save(enrollment);
   }
 
+  async adminGrantCourseAccess(
+    courseId: string,
+    dto: AdminGrantCourseAccessDto,
+    adminUserId: string,
+  ): Promise<void> {
+    const userId = dto.userId;
+
+    const user = await this.usersRepo.findOne({
+      where: { id: userId, active: true },
+    });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const course = await this.courseRepo.findOne({ where: { id: courseId } });
+
+    if (!course || course.status !== 'active') {
+      throw new NotFoundException('Course not found');
+    }
+
+    if (course.isPaid) {
+      const existingPurchase = await this.purchaseRepo.findOne({
+        where: { userId, courseId },
+      });
+
+      if (!existingPurchase) {
+        const purchase = this.purchaseRepo.create({
+          userId,
+          courseId,
+          source: 'admin',
+          grantedByUserId: adminUserId,
+          grantReason: dto.grantReason ?? null,
+          stripeSessionId: null,
+          stripePaymentIntentId: null,
+          amountCents:
+            typeof course.priceCents === 'number' ? course.priceCents : null,
+          currency: course.currency ?? null,
+        });
+
+        await this.purchaseRepo.save(purchase);
+      }
+    }
+
+    if (dto.enroll !== false) {
+      await this.enrollInCourse(userId, courseId);
+    }
+  }
+
   async getCourseCertificate(
     userId: string,
     userEmail: string,
     courseId: string,
   ): Promise<CourseCertificateDto> {
-    const { course, enrollment } = await this.requireEnrollment(userId, courseId);
+    const { course, enrollment } = await this.requireEnrollment(
+      userId,
+      courseId,
+    );
 
     if ((enrollment.status ?? '').toLowerCase() !== 'completed') {
       throw new ForbiddenException('Course not completed');

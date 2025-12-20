@@ -131,7 +131,9 @@ export default function AdminCoursesPage() {
           return;
         }
         if (!Number.isFinite(priceCents) || priceCents <= 0) {
-          setCreateError("Paid course изисква валидна цена в cents (напр. 999).");
+          setCreateError(
+            "Paid course изисква валидна цена в cents (напр. 999).",
+          );
           setCreating(false);
           return;
         }
@@ -419,9 +421,9 @@ export default function AdminCoursesPage() {
                     </td>
                     <td className="px-2 py-2 text-gray-700">
                       {course.isPaid && course.priceCents
-                        ? `${(course.priceCents / 100).toFixed(2)} ${
-                            (course.currency ?? "eur").toUpperCase()
-                          }`
+                        ? `${(course.priceCents / 100).toFixed(2)} ${(
+                            course.currency ?? "eur"
+                          ).toUpperCase()}`
                         : "-"}
                     </td>
                   </tr>
