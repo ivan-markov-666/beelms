@@ -4,8 +4,10 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
+import { User } from '../src/auth/user.entity';
 import { Course } from '../src/courses/course.entity';
 import { CourseCurriculumItem } from '../src/courses/course-curriculum-item.entity';
+import { CourseEnrollment } from '../src/courses/course-enrollment.entity';
 import { WikiArticle } from '../src/wiki/wiki-article.entity';
 import { WikiArticleVersion } from '../src/wiki/wiki-article-version.entity';
 import { registerAndLogin } from './utils/auth-helpers';
@@ -26,7 +28,9 @@ type CurriculumProgressResponse = {
 
 describe('Curriculum Progress endpoints (e2e)', () => {
   let app: INestApplication;
+  let userRepo: Repository<User>;
   let courseRepo: Repository<Course>;
+  let enrollmentRepo: Repository<CourseEnrollment>;
   let curriculumRepo: Repository<CourseCurriculumItem>;
   let wikiArticleRepo: Repository<WikiArticle>;
   let wikiVersionRepo: Repository<WikiArticleVersion>;
@@ -121,7 +125,11 @@ describe('Curriculum Progress endpoints (e2e)', () => {
     );
     await app.init();
 
+    userRepo = app.get<Repository<User>>(getRepositoryToken(User));
     courseRepo = app.get<Repository<Course>>(getRepositoryToken(Course));
+    enrollmentRepo = app.get<Repository<CourseEnrollment>>(
+      getRepositoryToken(CourseEnrollment),
+    );
     curriculumRepo = app.get<Repository<CourseCurriculumItem>>(
       getRepositoryToken(CourseCurriculumItem),
     );
@@ -261,34 +269,39 @@ describe('Curriculum Progress endpoints (e2e)', () => {
     expect(enrolledCourse?.progressPercent).toBe(100);
   });
 
-  it('Completing one item sets enrollment status to in_progress', async () => {
-    const { accessToken } = await registerAndLogin(app, 'progress-in-prog');
-    const { course, items } = await createCourseWithCurriculum();
+  it('Paid courses: progress is forbidden when enrolled but not purchased (hardening)', async () => {
+    const { email, accessToken } = await registerAndLogin(
+      app,
+      'progress-paid-not-purchased',
+    );
 
-    await request(app.getHttpServer())
-      .post(`/api/courses/${course.id}/enroll`)
+    const user = await userRepo.findOne({ where: { email } });
+    expect(user).toBeDefined();
+    if (!user) {
+      throw new Error('User not found after registerAndLogin');
+    }
+
+    const { course } = await createCourseWithCurriculum();
+    course.isPaid = true;
+    course.currency = 'eur';
+    course.priceCents = 999;
+    await courseRepo.save(course);
+
+    await enrollmentRepo.save(
+      enrollmentRepo.create({
+        userId: user.id,
+        courseId: course.id,
+        status: 'not_started',
+      }),
+    );
+
+    const res = await request(app.getHttpServer())
+      .get(`/api/courses/${course.id}/curriculum/progress`)
       .set('Authorization', `Bearer ${accessToken}`)
-      .expect(204);
+      .expect(403);
 
-    await request(app.getHttpServer())
-      .post(`/api/courses/${course.id}/curriculum/${items[0].id}/complete`)
-      .set('Authorization', `Bearer ${accessToken}`)
-      .expect(204);
-
-    const myCoursesRes = await request(app.getHttpServer())
-      .get('/api/users/me/courses')
-      .set('Authorization', `Bearer ${accessToken}`)
-      .expect(200);
-
-    const myCourses = myCoursesRes.body as Array<{
-      id: string;
-      enrollmentStatus: string;
-      progressPercent: number;
-    }>;
-
-    const enrolledCourse = myCourses.find((c) => c.id === course.id);
-    expect(enrolledCourse?.enrollmentStatus).toBe('in_progress');
-    expect(enrolledCourse?.progressPercent).toBe(50);
+    const body = res.body as { message?: string };
+    expect(body.message).toBe('Payment required');
   });
 
   it('Marking same item complete twice is idempotent', async () => {
