@@ -77,7 +77,29 @@ export class PaymentsService {
       return;
     }
 
-    if (event.type !== 'checkout.session.completed') {
+    if (event.type === 'checkout.session.async_payment_failed') {
+      const session = this.getCheckoutSessionFromEvent(event);
+      const courseId = session?.metadata?.courseId;
+      const userId = session?.metadata?.userId;
+
+      if (!courseId || !userId) {
+        this.logger.warn(
+          `Stripe webhook missing metadata: ${JSON.stringify({ eventId: event.id, eventType: event.type, sessionId: session?.id ?? 'unknown' })}`,
+        );
+      }
+
+      await this.markWebhookEventFailed(
+        existingEvent.id,
+        new Error('Stripe async payment failed'),
+      );
+      return;
+    }
+
+    const isSuccessCheckoutEvent =
+      event.type === 'checkout.session.completed' ||
+      event.type === 'checkout.session.async_payment_succeeded';
+
+    if (!isSuccessCheckoutEvent) {
       this.logger.debug(
         `Stripe webhook event ignored (unsupported type): ${JSON.stringify({ eventId: event.id, eventType: event.type })}`,
       );
@@ -86,7 +108,11 @@ export class PaymentsService {
     }
 
     try {
-      const session = event.data.object;
+      const session = this.getCheckoutSessionFromEvent(event);
+      if (!session) {
+        throw new BadRequestException('Stripe session payload missing');
+      }
+
       const courseId = session.metadata?.courseId;
       const userId = session.metadata?.userId;
 
@@ -169,34 +195,57 @@ export class PaymentsService {
     }
   }
 
-  private sanitizeWebhookEvent(event: Stripe.Event): unknown {
-    const data = event.data as unknown as { object?: unknown } | undefined;
-    const object = data?.object;
+  private isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' && value !== null;
+  }
 
-    const objectAs = object as
-      | {
-          id?: unknown;
-          metadata?: unknown;
-          payment_intent?: unknown;
-          amount_total?: unknown;
-          currency?: unknown;
-        }
-      | undefined;
+  private getCheckoutSessionFromEvent(
+    event: Stripe.Event,
+  ): Stripe.Checkout.Session | null {
+    const data = event.data as unknown as { object?: unknown } | undefined;
+    const obj = data?.object;
+
+    if (!this.isRecord(obj)) {
+      return null;
+    }
+
+    const id = obj['id'];
+    if (typeof id !== 'string' || id.trim().length === 0) {
+      return null;
+    }
+
+    return obj as unknown as Stripe.Checkout.Session;
+  }
+
+  private sanitizeWebhookEvent(event: Stripe.Event): Record<string, unknown> {
+    const data = event.data as unknown as { object?: unknown } | undefined;
+    const rawObj = data?.object;
+    const obj = this.isRecord(rawObj) ? rawObj : {};
+
+    const safeObject: Record<string, unknown> = {};
+    const allowedKeys = [
+      'id',
+      'metadata',
+      'payment_intent',
+      'amount_total',
+      'currency',
+      'payment_status',
+    ];
+
+    for (const key of allowedKeys) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        safeObject[key] = obj[key];
+      }
+    }
 
     return {
       id: event.id,
       type: event.type,
       created: event.created,
       livemode: event.livemode,
-      api_version: event.api_version,
+      api_version: event.api_version ?? null,
       data: {
-        object: {
-          id: objectAs?.id,
-          metadata: objectAs?.metadata,
-          payment_intent: objectAs?.payment_intent,
-          amount_total: objectAs?.amount_total,
-          currency: objectAs?.currency,
-        },
+        object: safeObject,
       },
     };
   }
