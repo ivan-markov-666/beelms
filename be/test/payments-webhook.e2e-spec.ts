@@ -263,6 +263,141 @@ describe('Payments webhook (e2e)', () => {
     expect(webhookEvents[0].eventPayload).toBeTruthy();
   });
 
+  it('POST /api/payments/webhook records purchase for checkout.session.async_payment_succeeded', async () => {
+    const { email: adminEmail, accessToken: adminToken } =
+      await registerAndLogin(app, 'webhook-async-succeeded-admin');
+    await makeAdmin(adminEmail);
+
+    const course = await createPaidCourseAsAdmin(adminToken);
+
+    const { email: buyerEmail } = await registerAndLogin(
+      app,
+      'webhook-async-succeeded-buyer',
+    );
+
+    const buyer = await userRepo.findOne({ where: { email: buyerEmail } });
+    if (!buyer) {
+      throw new Error('Buyer not found');
+    }
+
+    const mockStripe = (
+      Stripe as unknown as {
+        __mockStripe?: {
+          webhooks?: { constructEvent?: jest.Mock };
+        };
+      }
+    ).__mockStripe;
+    if (!mockStripe?.webhooks?.constructEvent) {
+      throw new Error('Stripe webhook mock not found');
+    }
+
+    const uniqueSessionId = `cs_test_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+    const eventId = `evt_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+
+    mockStripe.webhooks.constructEvent.mockReturnValue({
+      id: eventId,
+      type: 'checkout.session.async_payment_succeeded',
+      data: {
+        object: {
+          id: uniqueSessionId,
+          metadata: {
+            courseId: course.id,
+            userId: buyer.id,
+          },
+          payment_intent: 'pi_test_async_1',
+          amount_total: 999,
+          currency: 'eur',
+        },
+      },
+    });
+
+    await request(app.getHttpServer())
+      .post('/api/payments/webhook')
+      .set('stripe-signature', 'sig_mocked')
+      .send({ any: 'payload' })
+      .expect(200);
+
+    const purchases = await purchaseRepo.find({
+      where: { userId: buyer.id, courseId: course.id },
+    });
+
+    expect(purchases.length).toBe(1);
+    expect(purchases[0].stripeSessionId).toBe(uniqueSessionId);
+    expect(purchases[0].stripePaymentIntentId).toBe('pi_test_async_1');
+
+    const webhookEvents = await webhookEventRepo.find({ where: { eventId } });
+    expect(webhookEvents.length).toBe(1);
+    expect(webhookEvents[0].status).toBe('processed');
+  });
+
+  it('POST /api/payments/webhook marks event failed for checkout.session.async_payment_failed and does not create purchase', async () => {
+    const { email: adminEmail, accessToken: adminToken } =
+      await registerAndLogin(app, 'webhook-async-failed-admin');
+    await makeAdmin(adminEmail);
+
+    const course = await createPaidCourseAsAdmin(adminToken);
+
+    const { email: buyerEmail } = await registerAndLogin(
+      app,
+      'webhook-async-failed-buyer',
+    );
+
+    const buyer = await userRepo.findOne({ where: { email: buyerEmail } });
+    if (!buyer) {
+      throw new Error('Buyer not found');
+    }
+
+    const mockStripe = (
+      Stripe as unknown as {
+        __mockStripe?: {
+          webhooks?: { constructEvent?: jest.Mock };
+        };
+      }
+    ).__mockStripe;
+    if (!mockStripe?.webhooks?.constructEvent) {
+      throw new Error('Stripe webhook mock not found');
+    }
+
+    const uniqueSessionId = `cs_test_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+    const eventId = `evt_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+
+    mockStripe.webhooks.constructEvent.mockReturnValue({
+      id: eventId,
+      type: 'checkout.session.async_payment_failed',
+      data: {
+        object: {
+          id: uniqueSessionId,
+          metadata: {
+            courseId: course.id,
+            userId: buyer.id,
+          },
+          payment_intent: 'pi_test_async_fail_1',
+          amount_total: 999,
+          currency: 'eur',
+        },
+      },
+    });
+
+    await request(app.getHttpServer())
+      .post('/api/payments/webhook')
+      .set('stripe-signature', 'sig_mocked')
+      .send({ any: 'payload' })
+      .expect(200);
+
+    const purchases = await purchaseRepo.find({
+      where: { userId: buyer.id, courseId: course.id },
+    });
+    expect(purchases.length).toBe(0);
+
+    const webhookEvents = await webhookEventRepo.find({ where: { eventId } });
+    expect(webhookEvents.length).toBe(1);
+    expect(webhookEvents[0].status).toBe('failed');
+    expect(webhookEvents[0].errorMessage).toContain(
+      'Stripe async payment failed',
+    );
+    expect(webhookEvents[0].eventPayload).toBeTruthy();
+  });
+
   it('POST /api/payments/webhook dedupes by event id even if payload differs', async () => {
     const { email: adminEmail, accessToken: adminToken } =
       await registerAndLogin(app, 'webhook-dedupe-admin');
