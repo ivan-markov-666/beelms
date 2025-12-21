@@ -16,6 +16,9 @@ jest.mock('stripe', () => {
     create: jest.fn(),
     retrieve: jest.fn(),
   };
+  const events = {
+    retrieve: jest.fn(),
+  };
   const webhooks = {
     constructEvent: jest.fn(),
   };
@@ -24,6 +27,7 @@ jest.mock('stripe', () => {
     checkout: {
       sessions,
     },
+    events,
     webhooks,
   };
 

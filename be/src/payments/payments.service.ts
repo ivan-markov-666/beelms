@@ -13,7 +13,10 @@ import { Course } from '../courses/course.entity';
 import { CoursePurchase } from '../courses/course-purchase.entity';
 import { PaymentSettings } from './payment-settings.entity';
 import { AdminUpdatePaymentSettingsDto } from './dto/admin-update-payment-settings.dto';
-import { StripeWebhookEvent } from './stripe-webhook-event.entity';
+import {
+  StripeWebhookEvent,
+  StripeWebhookEventStatus,
+} from './stripe-webhook-event.entity';
 
 @Injectable()
 export class PaymentsService {
@@ -69,12 +72,19 @@ export class PaymentsService {
       throw new BadRequestException('Invalid Stripe webhook signature');
     }
 
+    await this.processStripeEvent(event, { throwOnError: true });
+  }
+
+  private async processStripeEvent(
+    event: Stripe.Event,
+    options: { throwOnError: boolean },
+  ): Promise<'processed' | 'failed'> {
     const existingEvent = await this.ensureWebhookEventRecord(event);
     if (existingEvent.status === 'processed') {
       this.logger.debug(
-        `Stripe webhook event ignored (already processed): ${JSON.stringify({ eventId: event.id, eventType: event.type })}`,
+        `Stripe event ignored (already processed): ${JSON.stringify({ eventId: event.id, eventType: event.type })}`,
       );
-      return;
+      return 'processed';
     }
 
     if (
@@ -82,7 +92,10 @@ export class PaymentsService {
       event.type === 'charge.dispute.created'
     ) {
       await this.handleChargeRelatedRevocation(event, existingEvent.id);
-      return;
+      const updated = await this.webhookEventRepo.findOne({
+        where: { id: existingEvent.id },
+      });
+      return updated?.status === 'failed' ? 'failed' : 'processed';
     }
 
     if (event.type === 'checkout.session.async_payment_failed') {
@@ -100,7 +113,7 @@ export class PaymentsService {
         existingEvent.id,
         new Error('Stripe async payment failed'),
       );
-      return;
+      return 'failed';
     }
 
     const isSuccessCheckoutEvent =
@@ -109,10 +122,10 @@ export class PaymentsService {
 
     if (!isSuccessCheckoutEvent) {
       this.logger.debug(
-        `Stripe webhook event ignored (unsupported type): ${JSON.stringify({ eventId: event.id, eventType: event.type })}`,
+        `Stripe event ignored (unsupported type): ${JSON.stringify({ eventId: event.id, eventType: event.type })}`,
       );
       await this.markWebhookEventProcessed(existingEvent.id);
-      return;
+      return 'processed';
     }
 
     try {
@@ -140,10 +153,10 @@ export class PaymentsService {
           existingBySession.userId === userId
         ) {
           this.logger.debug(
-            `Stripe webhook ignored (session already processed): ${JSON.stringify({ eventId: event.id, eventType: event.type, sessionId: session.id })}`,
+            `Stripe event ignored (session already processed): ${JSON.stringify({ eventId: event.id, eventType: event.type, sessionId: session.id })}`,
           );
           await this.markWebhookEventProcessed(existingEvent.id);
-          return;
+          return 'processed';
         }
 
         throw new BadRequestException('Stripe session already processed');
@@ -163,10 +176,10 @@ export class PaymentsService {
       });
       if (existing) {
         this.logger.debug(
-          `Stripe webhook ignored (purchase already exists): ${JSON.stringify({ eventId: event.id, eventType: event.type, sessionId: session.id, courseId, userId })}`,
+          `Stripe event ignored (purchase already exists): ${JSON.stringify({ eventId: event.id, eventType: event.type, sessionId: session.id, courseId, userId })}`,
         );
         await this.markWebhookEventProcessed(existingEvent.id);
-        return;
+        return 'processed';
       }
 
       const revokedExisting = await this.purchaseRepo.findOne({
@@ -215,9 +228,13 @@ export class PaymentsService {
         `Stripe webhook purchase recorded: ${JSON.stringify({ eventId: event.id, eventType: event.type, sessionId: session.id, courseId, userId })}`,
       );
       await this.markWebhookEventProcessed(existingEvent.id);
+      return 'processed';
     } catch (err: unknown) {
       await this.markWebhookEventFailed(existingEvent.id, err);
-      throw err;
+      if (options.throwOnError) {
+        throw err;
+      }
+      return 'failed';
     }
   }
 
@@ -355,6 +372,62 @@ export class PaymentsService {
       where: { userId, courseId, revokedAt: IsNull() },
     });
     return !!existing;
+  }
+
+  async listWebhookEvents(params: {
+    status?: StripeWebhookEventStatus;
+    limit?: number;
+  }): Promise<StripeWebhookEvent[]> {
+    const where: { status?: StripeWebhookEventStatus } = {};
+    if (params.status) {
+      where.status = params.status;
+    }
+
+    const take =
+      typeof params.limit === 'number' && params.limit > 0
+        ? Math.min(params.limit, 200)
+        : 50;
+
+    return this.webhookEventRepo.find({
+      where,
+      take,
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  async retryWebhookEvent(eventId: string): Promise<{
+    status: 'processed' | 'failed';
+    errorMessage: string | null;
+  }> {
+    const existing = await this.webhookEventRepo.findOne({
+      where: { eventId },
+    });
+
+    if (!existing) {
+      throw new NotFoundException('Webhook event not found');
+    }
+
+    if (existing.status === 'processed') {
+      return { status: 'processed', errorMessage: null };
+    }
+
+    try {
+      const stripe = this.getStripe();
+      const retrieved = await stripe.events.retrieve(eventId);
+      await this.processStripeEvent(retrieved, { throwOnError: false });
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : 'Unknown error';
+      await this.markWebhookEventFailed(existing.id, new Error(message));
+    }
+
+    const updated = await this.webhookEventRepo.findOne({
+      where: { eventId },
+    });
+
+    return {
+      status: updated?.status === 'failed' ? 'failed' : 'processed',
+      errorMessage: updated?.errorMessage ?? null,
+    };
   }
 
   private getPaymentIntentIdFromEventObject(
