@@ -8,7 +8,7 @@ development_status:
   epic-core-wiki-content: done
   story-wiki-1-public-list-search-filter: done
   story-wiki-2-article-by-slug-language: done
-  story-wiki-3-admin-statuses-draft-active-inactive: in-progress
+  story-wiki-3-admin-statuses-draft-active-inactive: done
   epic-core-wiki-content-retrospective: optional
 
   epic-core-auth-accounts: done
@@ -40,7 +40,7 @@ development_status:
   story-admin-2-wiki-management-crud-status: done
   story-admin-3-wiki-versions-list-rollback-delete: done
   story-admin-4-metrics-overview-total-users: done
-  story-admin-5-courses-management-crud-status-curriculum: backlog
+  story-admin-5-courses-management-crud-status-curriculum: done
   story-admin-6-quizzes-management-crud-linking: backlog
   epic-core-admin-retrospective: optional
 
