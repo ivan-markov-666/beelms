@@ -1,6 +1,6 @@
 # EPIC-PAYMENTS-OPS: Payments Ops (Hardening & Reconciliation)
 
-_BMAD Epic Spec | Status: 🟡 In Progress_
+_BMAD Epic Spec | Status: 🟢 Done_
 
 ---
 
