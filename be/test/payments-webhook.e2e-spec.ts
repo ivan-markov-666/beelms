@@ -8,6 +8,7 @@ import Stripe from 'stripe';
 import { AppModule } from '../src/app.module';
 import { User } from '../src/auth/user.entity';
 import { CoursePurchase } from '../src/courses/course-purchase.entity';
+import { StripeWebhookEvent } from '../src/payments/stripe-webhook-event.entity';
 import { registerAndLogin } from './utils/auth-helpers';
 
 jest.mock('stripe', () => {
@@ -44,6 +45,7 @@ describe('Payments webhook (e2e)', () => {
   let app: INestApplication;
   let userRepo: Repository<User>;
   let purchaseRepo: Repository<CoursePurchase>;
+  let webhookEventRepo: Repository<StripeWebhookEvent>;
 
   let originalStripeSecretKey: string | undefined;
   let originalStripeWebhookSecret: string | undefined;
@@ -65,8 +67,14 @@ describe('Payments webhook (e2e)', () => {
     app.use(
       json({
         limit: process.env.REQUEST_BODY_LIMIT ?? '1mb',
-        verify: (req: { rawBody?: Buffer }, _res: unknown, buf: Buffer) => {
-          req.rawBody = buf;
+        verify: (
+          req: unknown,
+          _res: unknown,
+          buf: Buffer,
+          _encoding: string,
+        ) => {
+          void _encoding;
+          (req as { rawBody?: Buffer }).rawBody = buf;
         },
       }),
     );
@@ -83,6 +91,9 @@ describe('Payments webhook (e2e)', () => {
     userRepo = app.get<Repository<User>>(getRepositoryToken(User));
     purchaseRepo = app.get<Repository<CoursePurchase>>(
       getRepositoryToken(CoursePurchase),
+    );
+    webhookEventRepo = app.get<Repository<StripeWebhookEvent>>(
+      getRepositoryToken(StripeWebhookEvent),
     );
   });
 
@@ -156,9 +167,10 @@ describe('Payments webhook (e2e)', () => {
     }
 
     const uniqueSessionId = `cs_test_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+    const eventId = `evt_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
 
     mockStripe.webhooks.constructEvent.mockReturnValue({
-      id: 'evt_1',
+      id: eventId,
       type: 'checkout.session.completed',
       data: {
         object: {
@@ -202,5 +214,127 @@ describe('Payments webhook (e2e)', () => {
     expect(purchases[0].stripePaymentIntentId).toBe('pi_test_1');
     expect(purchases[0].amountCents).toBe(999);
     expect(purchases[0].currency).toBe('eur');
+
+    const webhookEvents = await webhookEventRepo.find({ where: { eventId } });
+    expect(webhookEvents.length).toBe(1);
+    expect(webhookEvents[0].status).toBe('processed');
+  });
+
+  it('POST /api/payments/webhook dedupes by event id even if payload differs', async () => {
+    const { email: adminEmail, accessToken: adminToken } =
+      await registerAndLogin(app, 'webhook-dedupe-admin');
+    await makeAdmin(adminEmail);
+
+    const course = await createPaidCourseAsAdmin(adminToken);
+
+    const { email: buyerEmail } = await registerAndLogin(
+      app,
+      'webhook-dedupe-buyer',
+    );
+
+    const buyer = await userRepo.findOne({ where: { email: buyerEmail } });
+    if (!buyer) {
+      throw new Error('Buyer not found');
+    }
+
+    const mockStripe = (
+      Stripe as unknown as {
+        __mockStripe?: {
+          webhooks?: { constructEvent?: jest.Mock };
+        };
+      }
+    ).__mockStripe;
+    if (!mockStripe?.webhooks?.constructEvent) {
+      throw new Error('Stripe webhook mock not found');
+    }
+
+    const eventId = `evt_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+    const sessionId1 = `cs_test_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+    const sessionId2 = `cs_test_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+
+    mockStripe.webhooks.constructEvent
+      .mockReturnValueOnce({
+        id: eventId,
+        type: 'checkout.session.completed',
+        data: {
+          object: {
+            id: sessionId1,
+            metadata: {
+              courseId: course.id,
+              userId: buyer.id,
+            },
+            payment_intent: 'pi_test_dedupe_1',
+            amount_total: 999,
+            currency: 'eur',
+          },
+        },
+      })
+      .mockReturnValueOnce({
+        id: eventId,
+        type: 'checkout.session.completed',
+        data: {
+          object: {
+            id: sessionId2,
+            metadata: {
+              courseId: course.id,
+              userId: buyer.id,
+            },
+            payment_intent: 'pi_test_dedupe_2',
+            amount_total: 999,
+            currency: 'eur',
+          },
+        },
+      });
+
+    await request(app.getHttpServer())
+      .post('/api/payments/webhook')
+      .set('stripe-signature', 'sig_mocked')
+      .send({ any: 'payload' })
+      .expect(200);
+
+    await request(app.getHttpServer())
+      .post('/api/payments/webhook')
+      .set('stripe-signature', 'sig_mocked')
+      .send({ any: 'payload' })
+      .expect(200);
+
+    const purchases = await purchaseRepo.find({
+      where: { userId: buyer.id, courseId: course.id },
+    });
+
+    expect(purchases.length).toBe(1);
+    expect(purchases[0].stripeSessionId).toBe(sessionId1);
+
+    const purchaseBySecondSession = await purchaseRepo.findOne({
+      where: { stripeSessionId: sessionId2 },
+    });
+    expect(purchaseBySecondSession).toBeNull();
+
+    const webhookEvents = await webhookEventRepo.find({ where: { eventId } });
+    expect(webhookEvents.length).toBe(1);
+    expect(webhookEvents[0].status).toBe('processed');
+  });
+
+  it('POST /api/payments/webhook returns 400 for invalid signature', async () => {
+    const mockStripe = (
+      Stripe as unknown as {
+        __mockStripe?: {
+          webhooks?: { constructEvent?: jest.Mock };
+        };
+      }
+    ).__mockStripe;
+    if (!mockStripe?.webhooks?.constructEvent) {
+      throw new Error('Stripe webhook mock not found');
+    }
+
+    mockStripe.webhooks.constructEvent.mockImplementation(() => {
+      throw new Error('Invalid signature');
+    });
+
+    await request(app.getHttpServer())
+      .post('/api/payments/webhook')
+      .set('stripe-signature', 'sig_bad')
+      .send({ any: 'payload' })
+      .expect(400);
   });
 });

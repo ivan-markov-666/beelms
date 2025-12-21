@@ -18,6 +18,7 @@ import { CourseCurriculumItem } from './courses/course-curriculum-item.entity';
 import { UserCurriculumProgress } from './courses/user-curriculum-progress.entity';
 import { CoursePurchase } from './courses/course-purchase.entity';
 import { PaymentSettings } from './payments/payment-settings.entity';
+import { StripeWebhookEvent } from './payments/stripe-webhook-event.entity';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { PaymentSettings } from './payments/payment-settings.entity';
         CourseEnrollment,
         CoursePurchase,
         PaymentSettings,
+        StripeWebhookEvent,
         CourseCurriculumItem,
         UserCurriculumProgress,
       ],
