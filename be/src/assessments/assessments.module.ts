@@ -5,12 +5,13 @@ import { AuthModule } from '../auth/auth.module';
 import { Quiz } from './quiz.entity';
 import { QuizQuestion } from './quiz-question.entity';
 import { QuizOption } from './quiz-option.entity';
+import { QuizAttempt } from './quiz-attempt.entity';
 import { AssessmentsService } from './assessments.service';
 import { AssessmentsController } from './assessments.controller';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Quiz, QuizQuestion, QuizOption]),
+    TypeOrmModule.forFeature([Quiz, QuizQuestion, QuizOption, QuizAttempt]),
     CoursesModule,
     AuthModule,
   ],

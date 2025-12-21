@@ -46,9 +46,9 @@ _Роля: PM / Tech Lead. Фаза: BMAD Solutioning → Create-epics-and-stori
 
 - **Goal:** Базови quizzes (MCQ) – load/submit + резултат.
 - **Stories (high level):**
-  - STORY-ASSESSMENTS-1 Quiz definition (questions/options)
-  - STORY-ASSESSMENTS-2 Quiz delivery + submit + scoring
-  - STORY-ASSESSMENTS-3 Persist attempts/results
+  - STORY-ASSESSMENTS-1 Quiz definition (questions/options) ✅ Implemented
+  - STORY-ASSESSMENTS-2 Quiz delivery + submit + scoring ✅ Implemented
+  - STORY-ASSESSMENTS-3 Persist attempts/results ✅ Implemented (stores attempts with score/passed and submitted answers)
 
 ### EPIC-CORE-ADMIN (FR-ADMIN)
 

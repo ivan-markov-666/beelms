@@ -9,6 +9,7 @@ import { CoursesService } from '../courses/courses.service';
 import { Quiz } from './quiz.entity';
 import { QuizQuestion } from './quiz-question.entity';
 import { QuizOption } from './quiz-option.entity';
+import { QuizAttempt } from './quiz-attempt.entity';
 import { QuizDto } from './dto/quiz.dto';
 import { QuizSubmitInputDto, QuizSubmitResultDto } from './dto/quiz-submit.dto';
 
@@ -22,6 +23,8 @@ export class AssessmentsService {
     private readonly questionRepo: Repository<QuizQuestion>,
     @InjectRepository(QuizOption)
     private readonly optionRepo: Repository<QuizOption>,
+    @InjectRepository(QuizAttempt)
+    private readonly attemptRepo: Repository<QuizAttempt>,
   ) {}
 
   async getQuizForCourseUser(
@@ -149,6 +152,21 @@ export class AssessmentsService {
     const maxScore = questions.length;
     const required = quiz.passingScore ?? maxScore;
     const passed = score >= required;
+
+    await this.attemptRepo.save(
+      this.attemptRepo.create({
+        quizId,
+        courseId,
+        userId,
+        score,
+        maxScore,
+        passed,
+        answers: dto.answers.map((a) => ({
+          questionId: a.questionId,
+          optionIndex: a.optionIndex,
+        })),
+      }),
+    );
 
     return { score, maxScore, passed };
   }

@@ -29,10 +29,10 @@ development_status:
   story-tasks-2-mark-task-completed: backlog
   epic-core-tasks-retrospective: optional
 
-  epic-core-assessments: in-progress
+  epic-core-assessments: done
   story-assessments-1-quiz-definition: done
   story-assessments-2-quiz-delivery-submit-scoring: done
-  story-assessments-3-persist-attempts-results: backlog
+  story-assessments-3-persist-attempts-results: done
   epic-core-assessments-retrospective: optional
 
   epic-core-admin: in-progress
