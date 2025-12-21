@@ -1,6 +1,6 @@
 # STORY-ADMIN-6: Admin Quizzes Management (CRUD + Questions + Linking)
 
-_BMAD Story Spec | EPIC: EPIC-CORE-ADMIN | Status: 🚧 Backlog (Not Implemented)_
+_BMAD Story Spec | EPIC: EPIC-CORE-ADMIN | Status: 🟡 In Progress (BE CRUD + curriculum validation implemented)_
 
 ---
 
@@ -27,24 +27,24 @@ _BMAD Story Spec | EPIC: EPIC-CORE-ADMIN | Status: 🚧 Backlog (Not Implemented
 
 | # | Criterion | Status |
 |---|-----------|--------|
-| AC-1 | Admin може да създава quiz (title, description, language, status) | ❌ |
-| AC-2 | Admin може да вижда списък с quizzes | ❌ |
-| AC-3 | Admin може да редактира quiz metadata | ❌ |
-| AC-4 | Admin може да активира/деактивира quiz (status workflow) | ❌ |
+| AC-1 | Admin може да създава quiz (title, description, language, status) | ✅ |
+| AC-2 | Admin може да вижда списък с quizzes | ✅ |
+| AC-3 | Admin може да редактира quiz metadata | ✅ |
+| AC-4 | Admin може да активира/деактивира quiz (status workflow) | ✅ |
 
 ### 3.2 Question CRUD (MCQ)
 
 | # | Criterion | Status |
 |---|-----------|--------|
-| AC-5 | Quiz има въпроси тип single-choice (question text + options + correct option) | ❌ |
-| AC-6 | Admin може да добавя/редактира/трие въпроси и options | ❌ |
-| AC-7 | Има deterministic order на въпросите | ❌ |
+| AC-5 | Quiz има въпроси тип single-choice (question text + options + correct option) | ✅ |
+| AC-6 | Admin може да добавя/редактира/трие въпроси и options | ✅ |
+| AC-7 | Има deterministic order на въпросите | ✅ |
 
 ### 3.3 Linking към Courses
 
 | # | Criterion | Status |
 |---|-----------|--------|
-| AC-8 | Admin може да свързва quiz към курс чрез curriculum item тип `quiz` | ⚠️ Partial |
+| AC-8 | Admin може да свързва quiz към курс чрез curriculum item тип `quiz` | ✅ |
 | AC-9 | В curriculum се пази `quizId` (FK или uuid reference) | ✅ |
 | AC-10 | Admin UI позволява избор на quiz при добавяне на curriculum item | ❌ |
 
@@ -52,7 +52,7 @@ _BMAD Story Spec | EPIC: EPIC-CORE-ADMIN | Status: 🚧 Backlog (Not Implemented
 
 | # | Criterion | Status |
 |---|-----------|--------|
-| AC-11 | Всички admin quiz endpoints изискват JWT + admin role | ❌ |
+| AC-11 | Всички admin quiz endpoints изискват JWT + admin role | ✅ |
 
 ---
 
@@ -65,14 +65,16 @@ _BMAD Story Spec | EPIC: EPIC-CORE-ADMIN | Status: 🚧 Backlog (Not Implemented
   - `be/src/courses/dto/admin-create-course-curriculum-item.dto.ts` (`itemType` includes `quiz`, `quizId?: uuid`)
   - `be/src/courses/dto/course-module-item.dto.ts` (`quizId` in response)
 
-### 4.2 Missing implementation
+### 4.2 Implemented in codebase
 
-Към момента **няма** открити:
+- BE entities/migrations за `Quiz`, `QuizQuestion`, `QuizOption`, `QuizAttempt`
+- Admin controllers/service за `/api/admin/quizzes` + nested `/questions`
+- Curriculum validation изисква активен `quizId` при create/update
+- E2E тестове: admin quiz CRUD + curriculum validation
 
-- BE module/entity/migrations за `Quiz`, `QuizQuestion`, `QuizAttempt`
-- BE controllers за `/api/admin/quizzes...`
+### 4.3 Missing
+
 - FE admin UI под `/admin/quizzes`
-- BE e2e тестове за quizzes и admin quiz CRUD
 
 ---
 
@@ -137,3 +139,4 @@ PRD указва:
 | Date | Author | Change |
 |------|--------|--------|
 | 2025-12-21 | Cascade | Created backlog story spec for ADMIN-6 based on PRD/OpenAPI; implementation not present in codebase |
+| 2025-12-21 | Cascade | Updated status to In Progress; marked backend CRUD + curriculum validation + e2e as implemented; FE UI still pending |

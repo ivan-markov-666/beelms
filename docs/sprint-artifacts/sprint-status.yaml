@@ -41,7 +41,7 @@ development_status:
   story-admin-3-wiki-versions-list-rollback-delete: done
   story-admin-4-metrics-overview-total-users: done
   story-admin-5-courses-management-crud-status-curriculum: done
-  story-admin-6-quizzes-management-crud-linking: backlog
+  story-admin-6-quizzes-management-crud-linking: in-progress
   epic-core-admin-retrospective: optional
 
   epic-core-cross-gdpr-legal: done
