@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
   NotImplementedException,
 } from '@nestjs/common';
@@ -18,6 +19,7 @@ import { StripeWebhookEvent } from './stripe-webhook-event.entity';
 export class PaymentsService {
   private stripe: Stripe | null;
   private readonly frontendOrigin: string;
+  private readonly logger = new Logger(PaymentsService.name);
 
   constructor(
     @InjectRepository(Course)
@@ -59,16 +61,26 @@ export class PaymentsService {
         stripeSignature,
         webhookSecret,
       );
-    } catch {
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Unknown error';
+      this.logger.warn(
+        `Stripe webhook signature verification failed: ${JSON.stringify({ message })}`,
+      );
       throw new BadRequestException('Invalid Stripe webhook signature');
     }
 
     const existingEvent = await this.ensureWebhookEventRecord(event);
     if (existingEvent.status === 'processed') {
+      this.logger.debug(
+        `Stripe webhook event ignored (already processed): ${JSON.stringify({ eventId: event.id, eventType: event.type })}`,
+      );
       return;
     }
 
     if (event.type !== 'checkout.session.completed') {
+      this.logger.debug(
+        `Stripe webhook event ignored (unsupported type): ${JSON.stringify({ eventId: event.id, eventType: event.type })}`,
+      );
       await this.markWebhookEventProcessed(existingEvent.id);
       return;
     }
@@ -79,6 +91,9 @@ export class PaymentsService {
       const userId = session.metadata?.userId;
 
       if (!courseId || !userId) {
+        this.logger.warn(
+          `Stripe webhook missing metadata: ${JSON.stringify({ eventId: event.id, eventType: event.type, sessionId: session.id })}`,
+        );
         throw new BadRequestException('Stripe session metadata missing');
       }
 
@@ -90,6 +105,9 @@ export class PaymentsService {
           existingBySession.courseId === courseId &&
           existingBySession.userId === userId
         ) {
+          this.logger.debug(
+            `Stripe webhook ignored (session already processed): ${JSON.stringify({ eventId: event.id, eventType: event.type, sessionId: session.id })}`,
+          );
           await this.markWebhookEventProcessed(existingEvent.id);
           return;
         }
@@ -110,6 +128,9 @@ export class PaymentsService {
         where: { userId, courseId },
       });
       if (existing) {
+        this.logger.debug(
+          `Stripe webhook ignored (purchase already exists): ${JSON.stringify({ eventId: event.id, eventType: event.type, sessionId: session.id, courseId, userId })}`,
+        );
         await this.markWebhookEventProcessed(existingEvent.id);
         return;
       }
@@ -138,11 +159,46 @@ export class PaymentsService {
         }),
       );
 
+      this.logger.log(
+        `Stripe webhook purchase recorded: ${JSON.stringify({ eventId: event.id, eventType: event.type, sessionId: session.id, courseId, userId })}`,
+      );
       await this.markWebhookEventProcessed(existingEvent.id);
     } catch (err: unknown) {
       await this.markWebhookEventFailed(existingEvent.id, err);
       throw err;
     }
+  }
+
+  private sanitizeWebhookEvent(event: Stripe.Event): unknown {
+    const data = event.data as unknown as { object?: unknown } | undefined;
+    const object = data?.object;
+
+    const objectAs = object as
+      | {
+          id?: unknown;
+          metadata?: unknown;
+          payment_intent?: unknown;
+          amount_total?: unknown;
+          currency?: unknown;
+        }
+      | undefined;
+
+    return {
+      id: event.id,
+      type: event.type,
+      created: event.created,
+      livemode: event.livemode,
+      api_version: event.api_version,
+      data: {
+        object: {
+          id: objectAs?.id,
+          metadata: objectAs?.metadata,
+          payment_intent: objectAs?.payment_intent,
+          amount_total: objectAs?.amount_total,
+          currency: objectAs?.currency,
+        },
+      },
+    };
   }
 
   private async ensureWebhookEventRecord(
@@ -162,6 +218,8 @@ export class PaymentsService {
           eventType: event.type,
           status: 'received',
           errorMessage: null,
+          errorStack: null,
+          eventPayload: this.sanitizeWebhookEvent(event),
           processedAt: null,
         }),
       );
@@ -189,6 +247,7 @@ export class PaymentsService {
         status: 'processed',
         processedAt: new Date(),
         errorMessage: null,
+        errorStack: null,
       },
     );
   }
@@ -198,6 +257,12 @@ export class PaymentsService {
     err: unknown,
   ): Promise<void> {
     const message = err instanceof Error ? err.message : 'Unknown error';
+    const stack = err instanceof Error ? (err.stack ?? null) : null;
+
+    this.logger.error(
+      `Stripe webhook processing failed: ${JSON.stringify({ webhookEventId: id, message })}`,
+      stack ?? undefined,
+    );
 
     await this.webhookEventRepo.update(
       { id },
@@ -205,6 +270,7 @@ export class PaymentsService {
         status: 'failed',
         processedAt: new Date(),
         errorMessage: message,
+        errorStack: stack,
       },
     );
   }

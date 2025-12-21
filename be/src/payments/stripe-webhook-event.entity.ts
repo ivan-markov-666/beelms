@@ -25,6 +25,12 @@ export class StripeWebhookEvent {
   @Column({ name: 'error_message', type: 'text', nullable: true })
   errorMessage: string | null;
 
+  @Column({ name: 'error_stack', type: 'text', nullable: true })
+  errorStack: string | null;
+
+  @Column({ name: 'event_payload', type: 'jsonb', nullable: true })
+  eventPayload: Record<string, unknown> | null;
+
   @Column({ name: 'processed_at', type: 'timestamptz', nullable: true })
   processedAt: Date | null;
 
