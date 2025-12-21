@@ -38,5 +38,6 @@ import { CoursePurchase } from './course-purchase.entity';
     CurriculumProgressController,
   ],
   providers: [CoursesService],
+  exports: [CoursesService],
 })
 export class CoursesModule {}

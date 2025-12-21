@@ -10,6 +10,9 @@ import { UserCurriculumProgress } from './src/courses/user-curriculum-progress.e
 import { CoursePurchase } from './src/courses/course-purchase.entity';
 import { PaymentSettings } from './src/payments/payment-settings.entity';
 import { StripeWebhookEvent } from './src/payments/stripe-webhook-event.entity';
+import { Quiz } from './src/assessments/quiz.entity';
+import { QuizQuestion } from './src/assessments/quiz-question.entity';
+import { QuizOption } from './src/assessments/quiz-option.entity';
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -29,6 +32,9 @@ export const AppDataSource = new DataSource({
     StripeWebhookEvent,
     CourseCurriculumItem,
     UserCurriculumProgress,
+    Quiz,
+    QuizQuestion,
+    QuizOption,
   ],
   migrations: ['src/migrations/*.ts'],
   synchronize: false,
