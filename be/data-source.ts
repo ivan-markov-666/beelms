@@ -9,6 +9,7 @@ import { CourseCurriculumItem } from './src/courses/course-curriculum-item.entit
 import { UserCurriculumProgress } from './src/courses/user-curriculum-progress.entity';
 import { CoursePurchase } from './src/courses/course-purchase.entity';
 import { PaymentSettings } from './src/payments/payment-settings.entity';
+import { StripeWebhookEvent } from './src/payments/stripe-webhook-event.entity';
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -25,6 +26,7 @@ export const AppDataSource = new DataSource({
     CourseEnrollment,
     CoursePurchase,
     PaymentSettings,
+    StripeWebhookEvent,
     CourseCurriculumItem,
     UserCurriculumProgress,
   ],

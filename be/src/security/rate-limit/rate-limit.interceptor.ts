@@ -44,8 +44,9 @@ export class RateLimitInterceptor implements NestInterceptor {
       return next.handle();
     }
 
+    const isJest = process.env.JEST_WORKER_ID !== undefined;
     if (
-      process.env.NODE_ENV === 'test' &&
+      (process.env.NODE_ENV === 'test' || isJest) &&
       process.env.RATE_LIMIT_TEST_MODE !== 'true'
     ) {
       return next.handle();

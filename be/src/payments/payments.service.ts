@@ -6,12 +6,13 @@ import {
   NotImplementedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { QueryFailedError, Repository } from 'typeorm';
 import Stripe from 'stripe';
 import { Course } from '../courses/course.entity';
 import { CoursePurchase } from '../courses/course-purchase.entity';
 import { PaymentSettings } from './payment-settings.entity';
 import { AdminUpdatePaymentSettingsDto } from './dto/admin-update-payment-settings.dto';
+import { StripeWebhookEvent } from './stripe-webhook-event.entity';
 
 @Injectable()
 export class PaymentsService {
@@ -25,6 +26,8 @@ export class PaymentsService {
     private readonly purchaseRepo: Repository<CoursePurchase>,
     @InjectRepository(PaymentSettings)
     private readonly settingsRepo: Repository<PaymentSettings>,
+    @InjectRepository(StripeWebhookEvent)
+    private readonly webhookEventRepo: Repository<StripeWebhookEvent>,
   ) {
     const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
     this.stripe = stripeSecretKey?.trim()
@@ -60,70 +63,149 @@ export class PaymentsService {
       throw new BadRequestException('Invalid Stripe webhook signature');
     }
 
-    if (event.type !== 'checkout.session.completed') {
+    const existingEvent = await this.ensureWebhookEventRecord(event);
+    if (existingEvent.status === 'processed') {
       return;
     }
 
-    const session = event.data.object;
-    const courseId = session.metadata?.courseId;
-    const userId = session.metadata?.userId;
-
-    if (!courseId || !userId) {
-      throw new BadRequestException('Stripe session metadata missing');
+    if (event.type !== 'checkout.session.completed') {
+      await this.markWebhookEventProcessed(existingEvent.id);
+      return;
     }
 
-    const existingBySession = await this.purchaseRepo.findOne({
-      where: { stripeSessionId: session.id },
-    });
-    if (existingBySession) {
-      if (
-        existingBySession.courseId === courseId &&
-        existingBySession.userId === userId
-      ) {
+    try {
+      const session = event.data.object;
+      const courseId = session.metadata?.courseId;
+      const userId = session.metadata?.userId;
+
+      if (!courseId || !userId) {
+        throw new BadRequestException('Stripe session metadata missing');
+      }
+
+      const existingBySession = await this.purchaseRepo.findOne({
+        where: { stripeSessionId: session.id },
+      });
+      if (existingBySession) {
+        if (
+          existingBySession.courseId === courseId &&
+          existingBySession.userId === userId
+        ) {
+          await this.markWebhookEventProcessed(existingEvent.id);
+          return;
+        }
+
+        throw new BadRequestException('Stripe session already processed');
+      }
+
+      const course = await this.courseRepo.findOne({ where: { id: courseId } });
+      if (!course || course.status !== 'active') {
+        throw new NotFoundException('Course not found');
+      }
+
+      if (!course.isPaid) {
+        throw new BadRequestException('Course is not paid');
+      }
+
+      const existing = await this.purchaseRepo.findOne({
+        where: { userId, courseId },
+      });
+      if (existing) {
+        await this.markWebhookEventProcessed(existingEvent.id);
         return;
       }
 
-      throw new BadRequestException('Stripe session already processed');
-    }
+      const paymentIntentId =
+        typeof session.payment_intent === 'string'
+          ? session.payment_intent
+          : null;
 
-    const course = await this.courseRepo.findOne({ where: { id: courseId } });
-    if (!course || course.status !== 'active') {
-      throw new NotFoundException('Course not found');
-    }
+      const amountCents =
+        typeof session.amount_total === 'number' ? session.amount_total : null;
+      const currency =
+        typeof session.currency === 'string' ? session.currency : null;
 
-    if (!course.isPaid) {
-      throw new BadRequestException('Course is not paid');
-    }
+      await this.purchaseRepo.save(
+        this.purchaseRepo.create({
+          userId,
+          courseId,
+          source: 'stripe',
+          grantedByUserId: null,
+          grantReason: null,
+          stripeSessionId: session.id,
+          stripePaymentIntentId: paymentIntentId,
+          amountCents,
+          currency,
+        }),
+      );
 
-    const existing = await this.purchaseRepo.findOne({
-      where: { userId, courseId },
+      await this.markWebhookEventProcessed(existingEvent.id);
+    } catch (err: unknown) {
+      await this.markWebhookEventFailed(existingEvent.id, err);
+      throw err;
+    }
+  }
+
+  private async ensureWebhookEventRecord(
+    event: Stripe.Event,
+  ): Promise<StripeWebhookEvent> {
+    const existing = await this.webhookEventRepo.findOne({
+      where: { eventId: event.id },
     });
     if (existing) {
-      return;
+      return existing;
     }
 
-    const paymentIntentId =
-      typeof session.payment_intent === 'string'
-        ? session.payment_intent
-        : null;
+    try {
+      return await this.webhookEventRepo.save(
+        this.webhookEventRepo.create({
+          eventId: event.id,
+          eventType: event.type,
+          status: 'received',
+          errorMessage: null,
+          processedAt: null,
+        }),
+      );
+    } catch (e: unknown) {
+      if (e instanceof QueryFailedError) {
+        const maybeCode = (e as unknown as { code?: string }).code;
+        if (maybeCode === '23505') {
+          const createdByOther = await this.webhookEventRepo.findOne({
+            where: { eventId: event.id },
+          });
+          if (createdByOther) {
+            return createdByOther;
+          }
+        }
+      }
 
-    const amountCents =
-      typeof session.amount_total === 'number' ? session.amount_total : null;
-    const currency =
-      typeof session.currency === 'string' ? session.currency : null;
+      throw e;
+    }
+  }
 
-    await this.purchaseRepo.save(
-      this.purchaseRepo.create({
-        userId,
-        courseId,
-        source: 'stripe',
-        grantedByUserId: null,
-        grantReason: null,
-        stripeSessionId: session.id,
-        stripePaymentIntentId: paymentIntentId,
-        amountCents,
-        currency,
-      }),
+  private async markWebhookEventProcessed(id: string): Promise<void> {
+    await this.webhookEventRepo.update(
+      { id },
+      {
+        status: 'processed',
+        processedAt: new Date(),
+        errorMessage: null,
+      },
+    );
+  }
+
+  private async markWebhookEventFailed(
+    id: string,
+    err: unknown,
+  ): Promise<void> {
+    const message = err instanceof Error ? err.message : 'Unknown error';
+
+    await this.webhookEventRepo.update(
+      { id },
+      {
+        status: 'failed',
+        processedAt: new Date(),
+        errorMessage: message,
+      },
     );
   }
 
