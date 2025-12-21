@@ -36,7 +36,12 @@ describe('Rate limiting (e2e)', () => {
 
     await request(app.getHttpServer())
       .post('/api/auth/register')
-      .send({ email, password, captchaToken: 'test-captcha-token' })
+      .send({
+        email,
+        password,
+        captchaToken: 'test-captcha-token',
+        acceptTerms: true,
+      })
       .expect(201);
 
     for (let i = 0; i < 10; i += 1) {

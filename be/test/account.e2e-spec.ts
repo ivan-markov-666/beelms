@@ -248,7 +248,7 @@ describe('Account endpoints (e2e)', () => {
       .send({ email, password: newPassword })
       .expect(200);
 
-    const loginBody = loginRes.body as { accessToken: string };
+    const loginBody = loginRes.body as unknown as { accessToken: string };
     const newAccessToken = loginBody.accessToken;
 
     await request(app.getHttpServer())
@@ -437,7 +437,7 @@ describe('Account endpoints (e2e)', () => {
       .send({ email: updatedEmail, password: newPassword })
       .expect(200);
 
-    const loginResBody = loginRes.body as { accessToken: string };
+    const loginResBody = loginRes.body as unknown as { accessToken: string };
     const newAccessToken = loginResBody.accessToken;
 
     // 4) Export data
@@ -474,7 +474,12 @@ describe('Account endpoints (e2e)', () => {
     // 1) Initial registration
     await request(app.getHttpServer())
       .post('/api/auth/register')
-      .send({ email, password, captchaToken: 'test-captcha-token' })
+      .send({
+        email,
+        password,
+        captchaToken: 'test-captcha-token',
+        acceptTerms: true,
+      })
       .expect(201);
 
     // 2) Login with the initial credentials
@@ -483,7 +488,7 @@ describe('Account endpoints (e2e)', () => {
       .send({ email, password })
       .expect(200);
 
-    const login1Body = login1.body as { accessToken: string };
+    const login1Body = login1.body as unknown as { accessToken: string };
     const accessToken1 = login1Body.accessToken;
 
     // 3) Delete the account
@@ -501,7 +506,12 @@ describe('Account endpoints (e2e)', () => {
     // 5) Re-register with the same email and password
     await request(app.getHttpServer())
       .post('/api/auth/register')
-      .send({ email, password, captchaToken: 'test-captcha-token' })
+      .send({
+        email,
+        password,
+        captchaToken: 'test-captcha-token',
+        acceptTerms: true,
+      })
       .expect(201);
 
     // 6) Login with the same email/password now works again
@@ -510,7 +520,7 @@ describe('Account endpoints (e2e)', () => {
       .send({ email, password })
       .expect(200);
 
-    const login2Body = login2.body as { accessToken: string };
+    const login2Body = login2.body as unknown as { accessToken: string };
     const accessToken2 = login2Body.accessToken;
 
     // 7) Delete the account again to keep the DB clean
@@ -548,7 +558,7 @@ describe('Account endpoints (e2e)', () => {
       .send({ email, password: newPassword })
       .expect(200);
 
-    const loginBody = loginRes.body as { accessToken: string };
+    const loginBody = loginRes.body as unknown as { accessToken: string };
     const newAccessToken = loginBody.accessToken;
 
     // 4) Delete the user to keep the DB clean

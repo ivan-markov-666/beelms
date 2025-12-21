@@ -39,6 +39,10 @@ export class AuthService {
       throw new BadRequestException('captcha verification required');
     }
 
+    if (dto.acceptTerms !== true) {
+      throw new BadRequestException('terms acceptance required');
+    }
+
     const existing = await this.usersRepo.findOne({
       where: { email: dto.email },
     });
@@ -55,6 +59,8 @@ export class AuthService {
       active: true,
       emailVerified: false,
       passwordLastChangedAt: now,
+      termsAcceptedAt: now,
+      privacyAcceptedAt: now,
     });
     try {
       const saved = await this.usersRepo.save(user);

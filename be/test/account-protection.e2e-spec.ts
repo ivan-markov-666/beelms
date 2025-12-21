@@ -36,7 +36,12 @@ describe('Account protection (e2e)', () => {
 
     await request(app.getHttpServer())
       .post('/api/auth/register')
-      .send({ email, password, captchaToken: 'test-captcha-token' })
+      .send({
+        email,
+        password,
+        captchaToken: 'test-captcha-token',
+        acceptTerms: true,
+      })
       .expect(201);
 
     for (let i = 0; i < 5; i += 1) {
@@ -62,7 +67,12 @@ describe('Account protection (e2e)', () => {
 
     await request(app.getHttpServer())
       .post('/api/auth/register')
-      .send({ email, password, captchaToken: 'test-captcha-token' })
+      .send({
+        email,
+        password,
+        captchaToken: 'test-captcha-token',
+        acceptTerms: true,
+      })
       .expect(201);
 
     for (let i = 0; i < 4; i += 1) {

@@ -41,6 +41,7 @@ describe('Auth endpoints (e2e)', () => {
       .send({
         email,
         password: 'Password1234',
+        acceptTerms: true,
       })
       .expect(201);
 
@@ -64,12 +65,12 @@ describe('Auth endpoints (e2e)', () => {
 
     await request(app.getHttpServer())
       .post('/api/auth/register')
-      .send({ email, password: 'Password1234' })
+      .send({ email, password: 'Password1234', acceptTerms: true })
       .expect(201);
 
     const res = await request(app.getHttpServer())
       .post('/api/auth/register')
-      .send({ email, password: 'Password1234' })
+      .send({ email, password: 'Password1234', acceptTerms: true })
       .expect(409);
 
     expect(res.body).toHaveProperty('message');
@@ -80,7 +81,7 @@ describe('Auth endpoints (e2e)', () => {
   it('POST /api/auth/register returns 400 for invalid data', async () => {
     const res = await request(app.getHttpServer())
       .post('/api/auth/register')
-      .send({ email: 'not-an-email', password: 'short' })
+      .send({ email: 'not-an-email', password: 'short', acceptTerms: true })
       .expect(400);
 
     expect(res.body).not.toHaveProperty('password');
@@ -95,8 +96,18 @@ describe('Auth endpoints (e2e)', () => {
       .send({
         email,
         password: 'Password1234',
+        acceptTerms: true,
         extraField: 'should-be-rejected',
       })
+      .expect(400);
+  });
+
+  it('POST /api/auth/register returns 400 when acceptTerms is false', async () => {
+    const email = uniqueEmail('register-terms-false');
+
+    await request(app.getHttpServer())
+      .post('/api/auth/register')
+      .send({ email, password: 'Password1234', acceptTerms: false })
       .expect(400);
   });
 
@@ -107,7 +118,7 @@ describe('Auth endpoints (e2e)', () => {
 
     await request(app.getHttpServer())
       .post('/api/auth/register')
-      .send({ email, password: 'Password1234' })
+      .send({ email, password: 'Password1234', acceptTerms: true })
       .expect(400);
 
     const res = await request(app.getHttpServer())
@@ -116,6 +127,7 @@ describe('Auth endpoints (e2e)', () => {
         email,
         password: 'Password1234',
         captchaToken: 'test-captcha-token',
+        acceptTerms: true,
       })
       .expect(201);
 
@@ -140,7 +152,7 @@ describe('Auth endpoints (e2e)', () => {
 
     await request(app.getHttpServer())
       .post('/api/auth/register')
-      .send({ email, password: 'Password1234' })
+      .send({ email, password: 'Password1234', acceptTerms: true })
       .expect(201);
 
     const res = await request(app.getHttpServer())
@@ -166,7 +178,7 @@ describe('Auth endpoints (e2e)', () => {
 
     await request(app.getHttpServer())
       .post('/api/auth/register')
-      .send({ email, password: 'Password1234' })
+      .send({ email, password: 'Password1234', acceptTerms: true })
       .expect(201);
 
     const userBefore = await userRepo.findOne({ where: { email } });
@@ -199,7 +211,7 @@ describe('Auth endpoints (e2e)', () => {
 
     await request(app.getHttpServer())
       .post('/api/auth/register')
-      .send({ email, password: originalPassword })
+      .send({ email, password: originalPassword, acceptTerms: true })
       .expect(201);
 
     await request(app.getHttpServer())

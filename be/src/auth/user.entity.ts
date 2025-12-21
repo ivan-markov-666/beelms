@@ -131,6 +131,20 @@ export class User {
   })
   lastExportDeliveredAt: Date | null;
 
+  @Column({
+    name: 'terms_accepted_at',
+    type: 'timestamp with time zone',
+    nullable: true,
+  })
+  termsAcceptedAt: Date | null;
+
+  @Column({
+    name: 'privacy_accepted_at',
+    type: 'timestamp with time zone',
+    nullable: true,
+  })
+  privacyAcceptedAt: Date | null;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

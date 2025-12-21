@@ -27,7 +27,12 @@ export async function registerAndLogin(
 
   const registerRes = await request(app.getHttpServer())
     .post('/api/auth/register')
-    .send({ email, password, captchaToken: 'test-captcha-token' });
+    .send({
+      email,
+      password,
+      captchaToken: 'test-captcha-token',
+      acceptTerms: true,
+    });
 
   if (registerRes.status !== 201) {
     console.error(
