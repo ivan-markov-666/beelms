@@ -25,6 +25,7 @@ import { AdminCreateCourseCurriculumItemDto } from './dto/admin-create-course-cu
 import { AdminUpdateCourseCurriculumItemDto } from './dto/admin-update-course-curriculum-item.dto';
 import { CourseCertificateDto } from './dto/course-certificate.dto';
 import { AdminGrantCourseAccessDto } from './dto/admin-grant-course-access.dto';
+import { Quiz } from '../assessments/quiz.entity';
 
 @Injectable()
 export class CoursesService {
@@ -45,6 +46,8 @@ export class CoursesService {
     private readonly wikiArticleRepo: Repository<WikiArticle>,
     @InjectRepository(WikiArticleVersion)
     private readonly wikiVersionRepo: Repository<WikiArticleVersion>,
+    @InjectRepository(Quiz)
+    private readonly quizRepo: Repository<Quiz>,
   ) {}
 
   private toSummary(course: Course): CourseSummaryDto {
@@ -131,49 +134,39 @@ export class CoursesService {
     }
   }
 
-  private validateCurriculumRefs(
+  private async validateCurriculumRefs(
     itemType: 'wiki' | 'task' | 'quiz',
     fields: {
       wikiSlug?: string;
       taskId?: string;
       quizId?: string;
     },
-  ): void {
+  ): Promise<void> {
     const wikiSlug = fields.wikiSlug?.trim();
     const taskId = fields.taskId;
     const quizId = fields.quizId;
 
-    if (itemType === 'wiki') {
-      if (!wikiSlug) {
-        throw new BadRequestException('wikiSlug is required for wiki items');
-      }
-      if (taskId || quizId) {
-        throw new BadRequestException(
-          'taskId/quizId are not allowed for wiki items',
-        );
-      }
-      return;
+    if (itemType === 'wiki' && !wikiSlug) {
+      throw new BadRequestException('wikiSlug is required for wiki items');
     }
 
-    if (itemType === 'task') {
-      if (!taskId) {
-        throw new BadRequestException('taskId is required for task items');
-      }
-      if (wikiSlug || quizId) {
-        throw new BadRequestException(
-          'wikiSlug/quizId are not allowed for task items',
-        );
-      }
-      return;
+    if (itemType === 'task' && !taskId) {
+      throw new BadRequestException('taskId is required for task items');
     }
 
-    if (!quizId) {
-      throw new BadRequestException('quizId is required for quiz items');
-    }
-    if (wikiSlug || taskId) {
-      throw new BadRequestException(
-        'wikiSlug/taskId are not allowed for quiz items',
-      );
+    if (itemType === 'quiz') {
+      if (!quizId) {
+        throw new BadRequestException('quizId is required for quiz items');
+      }
+      if (wikiSlug || taskId) {
+        throw new BadRequestException(
+          'wikiSlug/taskId are not allowed for quiz items',
+        );
+      }
+      const quiz = await this.quizRepo.findOne({ where: { id: quizId } });
+      if (!quiz || quiz.status !== 'active') {
+        throw new BadRequestException('quizId must reference an active quiz');
+      }
     }
   }
 
@@ -471,7 +464,7 @@ export class CoursesService {
       throw new NotFoundException('Course not found');
     }
 
-    this.validateCurriculumRefs(dto.itemType, {
+    await this.validateCurriculumRefs(dto.itemType, {
       wikiSlug: dto.wikiSlug,
       taskId: dto.taskId,
       quizId: dto.quizId,
@@ -556,7 +549,7 @@ export class CoursesService {
           nextQuizId !== undefined;
 
         if (refsChanged) {
-          this.validateCurriculumRefs(
+          await this.validateCurriculumRefs(
             item.itemType as 'wiki' | 'task' | 'quiz',
             {
               wikiSlug: nextWikiSlug ?? item.wikiSlug ?? undefined,

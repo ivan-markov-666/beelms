@@ -15,6 +15,7 @@ import { WikiArticleVersion } from '../wiki/wiki-article-version.entity';
 import { UserCurriculumProgress } from './user-curriculum-progress.entity';
 import { CurriculumProgressController } from './curriculum-progress.controller';
 import { CoursePurchase } from './course-purchase.entity';
+import { Quiz } from '../assessments/quiz.entity';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { CoursePurchase } from './course-purchase.entity';
       UserCurriculumProgress,
       WikiArticle,
       WikiArticleVersion,
+      Quiz,
     ]),
     AuthModule,
   ],
