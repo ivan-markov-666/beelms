@@ -19,6 +19,10 @@ import { UserCurriculumProgress } from './courses/user-curriculum-progress.entit
 import { CoursePurchase } from './courses/course-purchase.entity';
 import { PaymentSettings } from './payments/payment-settings.entity';
 import { StripeWebhookEvent } from './payments/stripe-webhook-event.entity';
+import { AssessmentsModule } from './assessments/assessments.module';
+import { Quiz } from './assessments/quiz.entity';
+import { QuizQuestion } from './assessments/quiz-question.entity';
+import { QuizOption } from './assessments/quiz-option.entity';
 
 @Module({
   imports: [
@@ -40,6 +44,9 @@ import { StripeWebhookEvent } from './payments/stripe-webhook-event.entity';
         StripeWebhookEvent,
         CourseCurriculumItem,
         UserCurriculumProgress,
+        Quiz,
+        QuizQuestion,
+        QuizOption,
       ],
       synchronize: false,
     }),
@@ -47,6 +54,7 @@ import { StripeWebhookEvent } from './payments/stripe-webhook-event.entity';
     AuthModule,
     CoursesModule,
     PaymentsModule,
+    AssessmentsModule,
   ],
   controllers: [AppController],
   providers: [

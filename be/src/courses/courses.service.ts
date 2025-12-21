@@ -84,7 +84,7 @@ export class CoursesService {
     return items.map((i) => this.toCurriculumItemDto(i));
   }
 
-  private async requireEnrollment(
+  async requireEnrollment(
     userId: string,
     courseId: string,
   ): Promise<{
@@ -116,6 +116,19 @@ export class CoursesService {
     }
 
     return { course, enrollment };
+  }
+
+  async requireQuizInCurriculum(
+    courseId: string,
+    quizId: string,
+  ): Promise<void> {
+    const curriculumItem = await this.curriculumRepo.findOne({
+      where: { courseId, itemType: 'quiz', quizId },
+    });
+
+    if (!curriculumItem) {
+      throw new NotFoundException('Quiz not found');
+    }
   }
 
   private validateCurriculumRefs(
