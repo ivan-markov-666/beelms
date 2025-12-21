@@ -220,6 +220,49 @@ describe('Payments webhook (e2e)', () => {
     expect(webhookEvents[0].status).toBe('processed');
   });
 
+  it('POST /api/payments/webhook marks event failed and stores error when processing fails', async () => {
+    const mockStripe = (
+      Stripe as unknown as {
+        __mockStripe?: {
+          webhooks?: { constructEvent?: jest.Mock };
+        };
+      }
+    ).__mockStripe;
+    if (!mockStripe?.webhooks?.constructEvent) {
+      throw new Error('Stripe webhook mock not found');
+    }
+
+    const eventId = `evt_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+    const sessionId = `cs_test_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+
+    mockStripe.webhooks.constructEvent.mockReturnValue({
+      id: eventId,
+      type: 'checkout.session.completed',
+      data: {
+        object: {
+          id: sessionId,
+          metadata: {},
+          payment_intent: 'pi_test_fail_1',
+          amount_total: 999,
+          currency: 'eur',
+        },
+      },
+    });
+
+    await request(app.getHttpServer())
+      .post('/api/payments/webhook')
+      .set('stripe-signature', 'sig_mocked')
+      .send({ any: 'payload' })
+      .expect(400);
+
+    const webhookEvents = await webhookEventRepo.find({ where: { eventId } });
+    expect(webhookEvents.length).toBe(1);
+    expect(webhookEvents[0].status).toBe('failed');
+    expect(webhookEvents[0].errorMessage).toContain('Stripe session metadata');
+    expect(webhookEvents[0].errorStack).toBeTruthy();
+    expect(webhookEvents[0].eventPayload).toBeTruthy();
+  });
+
   it('POST /api/payments/webhook dedupes by event id even if payload differs', async () => {
     const { email: adminEmail, accessToken: adminToken } =
       await registerAndLogin(app, 'webhook-dedupe-admin');
