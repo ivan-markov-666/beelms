@@ -7,7 +7,7 @@ import {
   NotImplementedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { QueryFailedError, Repository } from 'typeorm';
+import { IsNull, QueryFailedError, Repository } from 'typeorm';
 import Stripe from 'stripe';
 import { Course } from '../courses/course.entity';
 import { CoursePurchase } from '../courses/course-purchase.entity';
@@ -74,6 +74,14 @@ export class PaymentsService {
       this.logger.debug(
         `Stripe webhook event ignored (already processed): ${JSON.stringify({ eventId: event.id, eventType: event.type })}`,
       );
+      return;
+    }
+
+    if (
+      event.type === 'charge.refunded' ||
+      event.type === 'charge.dispute.created'
+    ) {
+      await this.handleChargeRelatedRevocation(event, existingEvent.id);
       return;
     }
 
@@ -151,7 +159,7 @@ export class PaymentsService {
       }
 
       const existing = await this.purchaseRepo.findOne({
-        where: { userId, courseId },
+        where: { userId, courseId, revokedAt: IsNull() },
       });
       if (existing) {
         this.logger.debug(
@@ -160,6 +168,10 @@ export class PaymentsService {
         await this.markWebhookEventProcessed(existingEvent.id);
         return;
       }
+
+      const revokedExisting = await this.purchaseRepo.findOne({
+        where: { userId, courseId },
+      });
 
       const paymentIntentId =
         typeof session.payment_intent === 'string'
@@ -171,19 +183,33 @@ export class PaymentsService {
       const currency =
         typeof session.currency === 'string' ? session.currency : null;
 
-      await this.purchaseRepo.save(
-        this.purchaseRepo.create({
-          userId,
-          courseId,
-          source: 'stripe',
-          grantedByUserId: null,
-          grantReason: null,
-          stripeSessionId: session.id,
-          stripePaymentIntentId: paymentIntentId,
-          amountCents,
-          currency,
-        }),
-      );
+      if (revokedExisting && revokedExisting.revokedAt) {
+        revokedExisting.source = 'stripe';
+        revokedExisting.grantedByUserId = null;
+        revokedExisting.grantReason = null;
+        revokedExisting.revokedAt = null;
+        revokedExisting.revokedReason = null;
+        revokedExisting.revokedEventId = null;
+        revokedExisting.stripeSessionId = session.id;
+        revokedExisting.stripePaymentIntentId = paymentIntentId;
+        revokedExisting.amountCents = amountCents;
+        revokedExisting.currency = currency;
+        await this.purchaseRepo.save(revokedExisting);
+      } else {
+        await this.purchaseRepo.save(
+          this.purchaseRepo.create({
+            userId,
+            courseId,
+            source: 'stripe',
+            grantedByUserId: null,
+            grantReason: null,
+            stripeSessionId: session.id,
+            stripePaymentIntentId: paymentIntentId,
+            amountCents,
+            currency,
+          }),
+        );
+      }
 
       this.logger.log(
         `Stripe webhook purchase recorded: ${JSON.stringify({ eventId: event.id, eventType: event.type, sessionId: session.id, courseId, userId })}`,
@@ -326,9 +352,57 @@ export class PaymentsService {
 
   async hasPurchased(userId: string, courseId: string): Promise<boolean> {
     const existing = await this.purchaseRepo.findOne({
-      where: { userId, courseId },
+      where: { userId, courseId, revokedAt: IsNull() },
     });
     return !!existing;
+  }
+
+  private getPaymentIntentIdFromEventObject(
+    event: Stripe.Event,
+  ): string | null {
+    const data = event.data as unknown as { object?: unknown } | undefined;
+    const obj = data?.object;
+    if (!this.isRecord(obj)) {
+      return null;
+    }
+
+    const raw = obj['payment_intent'];
+    return typeof raw === 'string' && raw.trim().length > 0 ? raw : null;
+  }
+
+  private async handleChargeRelatedRevocation(
+    event: Stripe.Event,
+    webhookEventId: string,
+  ): Promise<void> {
+    const paymentIntentId = this.getPaymentIntentIdFromEventObject(event);
+    if (!paymentIntentId) {
+      await this.markWebhookEventFailed(
+        webhookEventId,
+        new Error('Stripe charge event missing payment_intent'),
+      );
+      return;
+    }
+
+    const purchase = await this.purchaseRepo.findOne({
+      where: { stripePaymentIntentId: paymentIntentId },
+    });
+
+    if (!purchase) {
+      await this.markWebhookEventFailed(
+        webhookEventId,
+        new Error('Purchase not found for payment_intent'),
+      );
+      return;
+    }
+
+    if (!purchase.revokedAt) {
+      purchase.revokedAt = new Date();
+      purchase.revokedReason = event.type;
+      purchase.revokedEventId = event.id;
+      await this.purchaseRepo.save(purchase);
+    }
+
+    await this.markWebhookEventProcessed(webhookEventId);
   }
 
   getSupportedCurrencies(): string[] {

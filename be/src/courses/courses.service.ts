@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { IsNull, Repository } from 'typeorm';
 import { User } from '../auth/user.entity';
 import { Course } from './course.entity';
 import { CourseEnrollment } from './course-enrollment.entity';
@@ -107,7 +107,7 @@ export class CoursesService {
 
     if (course.isPaid) {
       const purchased = await this.purchaseRepo.findOne({
-        where: { userId, courseId },
+        where: { userId, courseId, revokedAt: IsNull() },
       });
 
       if (!purchased) {
@@ -648,7 +648,7 @@ export class CoursesService {
 
     if (course.isPaid) {
       const purchased = await this.purchaseRepo.findOne({
-        where: { userId, courseId },
+        where: { userId, courseId, revokedAt: IsNull() },
       });
 
       if (!purchased) {
@@ -713,6 +713,11 @@ export class CoursesService {
         });
 
         await this.purchaseRepo.save(purchase);
+      } else if (existingPurchase.revokedAt) {
+        existingPurchase.revokedAt = null;
+        existingPurchase.revokedReason = null;
+        existingPurchase.revokedEventId = null;
+        await this.purchaseRepo.save(existingPurchase);
       }
     }
 

@@ -56,6 +56,25 @@ export class CoursePurchase {
   @Column({ name: 'currency', type: 'varchar', length: 3, nullable: true })
   currency: string | null;
 
+  @Column({ name: 'revoked_at', type: 'timestamptz', nullable: true })
+  revokedAt: Date | null;
+
+  @Column({
+    name: 'revoked_reason',
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+  })
+  revokedReason: string | null;
+
+  @Column({
+    name: 'revoked_event_id',
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+  })
+  revokedEventId: string | null;
+
   @ManyToOne(() => Course, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'course_id' })
   course: Course;

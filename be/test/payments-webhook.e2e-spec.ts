@@ -398,6 +398,190 @@ describe('Payments webhook (e2e)', () => {
     expect(webhookEvents[0].eventPayload).toBeTruthy();
   });
 
+  it('POST /api/payments/webhook revokes access on charge.refunded', async () => {
+    const { email: adminEmail, accessToken: adminToken } =
+      await registerAndLogin(app, 'webhook-refund-admin');
+    await makeAdmin(adminEmail);
+
+    const course = await createPaidCourseAsAdmin(adminToken);
+
+    const { email: buyerEmail, accessToken: buyerToken } =
+      await registerAndLogin(app, 'webhook-refund-buyer');
+
+    const buyer = await userRepo.findOne({ where: { email: buyerEmail } });
+    if (!buyer) {
+      throw new Error('Buyer not found');
+    }
+
+    const mockStripe = (
+      Stripe as unknown as {
+        __mockStripe?: {
+          webhooks?: { constructEvent?: jest.Mock };
+        };
+      }
+    ).__mockStripe;
+    if (!mockStripe?.webhooks?.constructEvent) {
+      throw new Error('Stripe webhook mock not found');
+    }
+
+    const sessionId = `cs_test_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+    const paymentIntentId = `pi_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+    const successEventId = `evt_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+
+    mockStripe.webhooks.constructEvent.mockReturnValueOnce({
+      id: successEventId,
+      type: 'checkout.session.completed',
+      data: {
+        object: {
+          id: sessionId,
+          metadata: {
+            courseId: course.id,
+            userId: buyer.id,
+          },
+          payment_intent: paymentIntentId,
+          amount_total: 999,
+          currency: 'eur',
+        },
+      },
+    });
+
+    await request(app.getHttpServer())
+      .post('/api/payments/webhook')
+      .set('stripe-signature', 'sig_mocked')
+      .send({ any: 'payload' })
+      .expect(200);
+
+    await request(app.getHttpServer())
+      .post(`/api/courses/${course.id}/enroll`)
+      .set('Authorization', `Bearer ${buyerToken}`)
+      .send({})
+      .expect(204);
+
+    const refundEventId = `evt_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+    mockStripe.webhooks.constructEvent.mockReturnValueOnce({
+      id: refundEventId,
+      type: 'charge.refunded',
+      data: {
+        object: {
+          id: 'ch_test_1',
+          payment_intent: paymentIntentId,
+        },
+      },
+    });
+
+    await request(app.getHttpServer())
+      .post('/api/payments/webhook')
+      .set('stripe-signature', 'sig_mocked')
+      .send({ any: 'payload' })
+      .expect(200);
+
+    const purchase = await purchaseRepo.findOne({
+      where: { userId: buyer.id, courseId: course.id },
+    });
+    expect(purchase).toBeTruthy();
+    expect(purchase?.revokedAt).toBeTruthy();
+    expect(purchase?.revokedReason).toBe('charge.refunded');
+    expect(purchase?.revokedEventId).toBe(refundEventId);
+
+    await request(app.getHttpServer())
+      .post(`/api/courses/${course.id}/enroll`)
+      .set('Authorization', `Bearer ${buyerToken}`)
+      .send({})
+      .expect(403);
+  });
+
+  it('POST /api/payments/webhook revokes access on charge.dispute.created', async () => {
+    const { email: adminEmail, accessToken: adminToken } =
+      await registerAndLogin(app, 'webhook-dispute-admin');
+    await makeAdmin(adminEmail);
+
+    const course = await createPaidCourseAsAdmin(adminToken);
+
+    const { email: buyerEmail, accessToken: buyerToken } =
+      await registerAndLogin(app, 'webhook-dispute-buyer');
+
+    const buyer = await userRepo.findOne({ where: { email: buyerEmail } });
+    if (!buyer) {
+      throw new Error('Buyer not found');
+    }
+
+    const mockStripe = (
+      Stripe as unknown as {
+        __mockStripe?: {
+          webhooks?: { constructEvent?: jest.Mock };
+        };
+      }
+    ).__mockStripe;
+    if (!mockStripe?.webhooks?.constructEvent) {
+      throw new Error('Stripe webhook mock not found');
+    }
+
+    const sessionId = `cs_test_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+    const paymentIntentId = `pi_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+    const successEventId = `evt_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+
+    mockStripe.webhooks.constructEvent.mockReturnValueOnce({
+      id: successEventId,
+      type: 'checkout.session.completed',
+      data: {
+        object: {
+          id: sessionId,
+          metadata: {
+            courseId: course.id,
+            userId: buyer.id,
+          },
+          payment_intent: paymentIntentId,
+          amount_total: 999,
+          currency: 'eur',
+        },
+      },
+    });
+
+    await request(app.getHttpServer())
+      .post('/api/payments/webhook')
+      .set('stripe-signature', 'sig_mocked')
+      .send({ any: 'payload' })
+      .expect(200);
+
+    await request(app.getHttpServer())
+      .post(`/api/courses/${course.id}/enroll`)
+      .set('Authorization', `Bearer ${buyerToken}`)
+      .send({})
+      .expect(204);
+
+    const disputeEventId = `evt_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+    mockStripe.webhooks.constructEvent.mockReturnValueOnce({
+      id: disputeEventId,
+      type: 'charge.dispute.created',
+      data: {
+        object: {
+          id: 'dp_test_1',
+          payment_intent: paymentIntentId,
+        },
+      },
+    });
+
+    await request(app.getHttpServer())
+      .post('/api/payments/webhook')
+      .set('stripe-signature', 'sig_mocked')
+      .send({ any: 'payload' })
+      .expect(200);
+
+    const purchase = await purchaseRepo.findOne({
+      where: { userId: buyer.id, courseId: course.id },
+    });
+    expect(purchase).toBeTruthy();
+    expect(purchase?.revokedAt).toBeTruthy();
+    expect(purchase?.revokedReason).toBe('charge.dispute.created');
+    expect(purchase?.revokedEventId).toBe(disputeEventId);
+
+    await request(app.getHttpServer())
+      .post(`/api/courses/${course.id}/enroll`)
+      .set('Authorization', `Bearer ${buyerToken}`)
+      .send({})
+      .expect(403);
+  });
+
   it('POST /api/payments/webhook dedupes by event id even if payload differs', async () => {
     const { email: adminEmail, accessToken: adminToken } =
       await registerAndLogin(app, 'webhook-dedupe-admin');
