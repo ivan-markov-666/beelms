@@ -23,6 +23,7 @@ import { AssessmentsModule } from './assessments/assessments.module';
 import { Quiz } from './assessments/quiz.entity';
 import { QuizQuestion } from './assessments/quiz-question.entity';
 import { QuizOption } from './assessments/quiz-option.entity';
+import { QuizAttempt } from './assessments/quiz-attempt.entity';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { QuizOption } from './assessments/quiz-option.entity';
         Quiz,
         QuizQuestion,
         QuizOption,
+        QuizAttempt,
       ],
       synchronize: false,
     }),
