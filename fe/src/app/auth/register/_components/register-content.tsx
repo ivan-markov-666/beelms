@@ -137,6 +137,7 @@ export function RegisterContent() {
         body: JSON.stringify({
           email,
           password,
+          acceptTerms,
         }),
       });
 

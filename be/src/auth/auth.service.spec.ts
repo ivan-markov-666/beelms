@@ -55,6 +55,7 @@ describe('AuthService', () => {
     const dto: RegisterDto = {
       email: 'test@example.com',
       password: 'Password1234',
+      acceptTerms: true,
     };
 
     (usersRepo.findOne as jest.Mock).mockResolvedValue(undefined);
@@ -88,6 +89,7 @@ describe('AuthService', () => {
     const dto: RegisterDto = {
       email: 'test@example.com',
       password: 'Password1234',
+      acceptTerms: true,
     };
 
     await expect(service.register(dto)).rejects.toBeInstanceOf(
@@ -100,6 +102,7 @@ describe('AuthService', () => {
     const dto: RegisterDto = {
       email: 'test@example.com',
       password: 'Password1234',
+      acceptTerms: true,
     };
 
     (usersRepo.findOne as jest.Mock).mockResolvedValue({
@@ -111,10 +114,24 @@ describe('AuthService', () => {
     );
   });
 
+  it('rejects registration when acceptTerms is false', async () => {
+    const dto: RegisterDto = {
+      email: 'test@example.com',
+      password: 'Password1234',
+      acceptTerms: false,
+    };
+
+    await expect(service.register(dto)).rejects.toBeInstanceOf(
+      BadRequestException,
+    );
+    expect(usersRepo.findOne).not.toHaveBeenCalled();
+  });
+
   it('maps unique constraint errors during register to ConflictException', async () => {
     const dto: RegisterDto = {
       email: 'race@example.com',
       password: 'Password1234',
+      acceptTerms: true,
     };
 
     (usersRepo.findOne as jest.Mock).mockResolvedValue(undefined);
