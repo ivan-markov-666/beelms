@@ -8,6 +8,8 @@ import { QuizOption } from './quiz-option.entity';
 import { QuizAttempt } from './quiz-attempt.entity';
 import { AssessmentsService } from './assessments.service';
 import { AssessmentsController } from './assessments.controller';
+import { AdminQuizzesService } from './admin-quizzes.service';
+import { AdminQuizzesController } from './admin-quizzes.controller';
 
 @Module({
   imports: [
@@ -15,7 +17,7 @@ import { AssessmentsController } from './assessments.controller';
     CoursesModule,
     AuthModule,
   ],
-  providers: [AssessmentsService],
-  controllers: [AssessmentsController],
+  providers: [AssessmentsService, AdminQuizzesService],
+  controllers: [AssessmentsController, AdminQuizzesController],
 })
 export class AssessmentsModule {}

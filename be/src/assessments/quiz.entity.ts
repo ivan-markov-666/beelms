@@ -14,6 +14,15 @@ export class Quiz {
   @Column({ type: 'varchar', length: 255 })
   title: string;
 
+  @Column({ type: 'text', nullable: true })
+  description: string | null;
+
+  @Column({ type: 'varchar', length: 10, default: 'bg' })
+  language: string;
+
+  @Column({ type: 'varchar', length: 20, default: 'active' })
+  status: 'draft' | 'active' | 'inactive';
+
   @Column({ name: 'passing_score', type: 'integer', nullable: true })
   passingScore: number | null;
 
