@@ -29,9 +29,9 @@ development_status:
   story-tasks-2-mark-task-completed: backlog
   epic-core-tasks-retrospective: optional
 
-  epic-core-assessments: backlog
-  story-assessments-1-quiz-definition: backlog
-  story-assessments-2-quiz-delivery-submit-scoring: backlog
+  epic-core-assessments: in-progress
+  story-assessments-1-quiz-definition: done
+  story-assessments-2-quiz-delivery-submit-scoring: done
   story-assessments-3-persist-attempts-results: backlog
   epic-core-assessments-retrospective: optional
 
@@ -44,9 +44,9 @@ development_status:
   story-admin-6-quizzes-management-crud-linking: backlog
   epic-core-admin-retrospective: optional
 
-  epic-core-cross-gdpr-legal: in-progress
+  epic-core-cross-gdpr-legal: done
   story-legal-1-terms-privacy-about-contact-pages-footer: done
-  story-legal-2-terms-privacy-acceptance-register: in-progress
+  story-legal-2-terms-privacy-acceptance-register: done
   epic-core-cross-gdpr-legal-retrospective: optional
 
   epic-cross-i18n: in-progress
