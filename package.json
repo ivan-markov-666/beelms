@@ -18,6 +18,15 @@
     "be:seed:courses": "npm --prefix be run seed:courses",
     "be:seed:wiki:dev": "npm --prefix be run seed:wiki:dev",
     "be:seed:courses:dev": "npm --prefix be run seed:courses:dev",
-    "be:seed:dev": "npm --prefix be run seed:wiki:dev && npm --prefix be run seed:courses:dev"
+    "be:seed:dev": "npm --prefix be run seed:wiki:dev && npm --prefix be run seed:courses:dev",
+
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:down:volumes": "docker compose down -v",
+    "docker:rebuild:api": "docker compose up -d --build api",
+    "docker:migrate": "docker compose run --rm migrate",
+    "docker:seed:wiki": "docker compose exec api npm run seed:wiki",
+    "docker:seed:courses": "docker compose exec api npm run seed:courses",
+    "docker:db:host": "docker compose -f docker-compose.yml -f docker-compose.db-host.yml up -d db"
   }
 }
