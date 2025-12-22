@@ -20,6 +20,8 @@ type CurriculumProgressItem = {
   title: string;
   itemType: string;
   wikiSlug: string | null;
+  taskId: string | null;
+  quizId: string | null;
   completed: boolean;
   completedAt: string | null;
 };
@@ -202,6 +204,24 @@ export function CourseProgressPanel({
                     )}/wiki/${encodeURIComponent(
                       item.wikiSlug,
                     )}?lang=${encodeURIComponent(courseLanguage)}`}
+                    className="font-medium text-green-700 hover:text-green-800 hover:underline"
+                  >
+                    {item.title}
+                  </Link>
+                ) : item.itemType === "task" && item.taskId ? (
+                  <Link
+                    href={`/courses/${encodeURIComponent(
+                      courseId,
+                    )}/tasks/${encodeURIComponent(item.taskId)}`}
+                    className="font-medium text-green-700 hover:text-green-800 hover:underline"
+                  >
+                    {item.title}
+                  </Link>
+                ) : item.itemType === "quiz" && item.quizId ? (
+                  <Link
+                    href={`/courses/${encodeURIComponent(
+                      courseId,
+                    )}/quizzes/${encodeURIComponent(item.quizId)}`}
                     className="font-medium text-green-700 hover:text-green-800 hover:underline"
                   >
                     {item.title}

@@ -24,9 +24,9 @@ development_status:
   story-courses-3-basic-progress: done
   epic-core-courses-progress-retrospective: optional
 
-  epic-core-tasks: backlog
-  story-tasks-1-task-item-in-course: backlog
-  story-tasks-2-mark-task-completed: backlog
+  epic-core-tasks: done
+  story-tasks-1-task-item-in-course: done
+  story-tasks-2-mark-task-completed: done
   epic-core-tasks-retrospective: optional
 
   epic-core-assessments: done
@@ -35,13 +35,13 @@ development_status:
   story-assessments-3-persist-attempts-results: done
   epic-core-assessments-retrospective: optional
 
-  epic-core-admin: in-progress
+  epic-core-admin: done
   story-admin-1-users-list-activate-deactivate: done
   story-admin-2-wiki-management-crud-status: done
   story-admin-3-wiki-versions-list-rollback-delete: done
   story-admin-4-metrics-overview-total-users: done
   story-admin-5-courses-management-crud-status-curriculum: done
-  story-admin-6-quizzes-management-crud-linking: in-progress
+  story-admin-6-quizzes-management-crud-linking: done
   epic-core-admin-retrospective: optional
 
   epic-core-cross-gdpr-legal: done
