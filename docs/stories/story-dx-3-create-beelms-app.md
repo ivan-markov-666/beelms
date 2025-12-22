@@ -1,6 +1,6 @@
 # STORY-DX-3: create-beelms-app (CLI scaffold)
 
-_BMAD Story Spec | EPIC: EPIC-CORE-DX-CLI-INFRA | Status: 🟡 In Progress_
+_BMAD Story Spec | EPIC: EPIC-CORE-DX-CLI-INFRA | Status: ✅ Implemented_
 
 ---
 
@@ -50,17 +50,20 @@ _BMAD Story Spec | EPIC: EPIC-CORE-DX-CLI-INFRA | Status: 🟡 In Progress_
 
 ## 4. Current State in Codebase
 
-- CLI е в `tools/create-beelms-app`.
+- CLI: `tools/create-beelms-app`.
 - Templates се синхронизират при `prepack` чрез `scripts/sync-templates.mjs`.
-- `smoke.ts` scaffold-ва API-only проект и пуска regression suite през Docker.
-- Генерираният `docker/docker-compose.yml` включва `db` healthcheck и `migrate` service, като `api` изчаква `migrate`.
+- `smoke.ts` scaffold-ва API-only проект (с `--api-only`) и пуска regression suite през Docker.
+- Генерираният `docker/docker-compose.yml` включва `db` healthcheck, `migrate` service и `api` → чака `migrate`.
+- Generated `README.md` описва docker up + migrate + seed + test flow.
+- `npm pack` пакетира CLI + templates (без да дърпа core repo).
 
 ---
 
 ## 5. Implementation Notes
 
-- Prefer: да се align-не генерираният compose с root `docker-compose.yml` (db healthcheck + migrate service + api depends_on condition).
-- `copyDir` трябва да избягва copying на локални артефакти (node_modules, dist, coverage и др.) и потенциални local env файлове.
+- Поддържай parity между core `docker-compose.yml` и генерирания шаблон (healthcheck/migrate chain).
+- `copyDir` пропуска `node_modules`, `dist`, `coverage`, `.env.local`, `.DS_Store` и др.
+- Smoke тестът е Windows-friendly; ако добавяме нови template assets, обнови `smoke.ts` assertions.
 
 ---
 
@@ -69,3 +72,4 @@ _BMAD Story Spec | EPIC: EPIC-CORE-DX-CLI-INFRA | Status: 🟡 In Progress_
 | Date | Author | Change |
 |------|--------|--------|
 | 2025-12-22 | Cascade | Created story spec for DX-3 |
+| 2025-12-22 | Cascade | CLI stabilized (help/validation, compose, smoke), marked as implemented |
