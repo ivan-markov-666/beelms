@@ -1,6 +1,6 @@
 # STORY-LEGAL-2: Terms/Privacy Acceptance in Register Flow
 
-_BMAD Story Spec | EPIC: EPIC-CORE-CROSS-GDPR-LEGAL | Status: 🚧 In Progress_
+_BMAD Story Spec | EPIC: EPIC-CORE-CROSS-GDPR-LEGAL | Status: ✅ Implemented_
 
 ---
 
@@ -45,9 +45,9 @@ _BMAD Story Spec | EPIC: EPIC-CORE-CROSS-GDPR-LEGAL | Status: 🚧 In Progress_
 
 | # | Criterion | Status |
 |---|-----------|--------|
-| AC-6 | `POST /api/auth/register` изисква consent флаг (напр. `acceptTerms: true`) | ❌ |
-| AC-7 | При липсващ/false consent API връща `400` | ❌ |
-| AC-8 | При успешна регистрация consent се записва в DB (напр. `termsAcceptedAt`, `privacyAcceptedAt` или общо поле) | ❌ |
+| AC-6 | `POST /api/auth/register` изисква consent флаг (напр. `acceptTerms: true`) | ✅ |
+| AC-7 | При липсващ/false consent API връща `400` | ✅ |
+| AC-8 | При успешна регистрация consent се записва в DB (напр. `termsAcceptedAt`, `privacyAcceptedAt` или общо поле) | ✅ |
 
 ---
 
@@ -60,12 +60,13 @@ _BMAD Story Spec | EPIC: EPIC-CORE-CROSS-GDPR-LEGAL | Status: 🚧 In Progress_
 - Има unit тест, който проверява, че без маркиране на checkbox не се прави submit.
 - `/legal/terms` и `/legal/privacy` страници са имплементирани като публични pages.
 
-### 4.2 What is missing (Why story is In Progress)
+- BE register изисква `acceptTerms: true` и при `false` връща `400`.
+- BE записва `termsAcceptedAt` / `privacyAcceptedAt` при регистрация.
+- Има BE e2e тестове за register + consent.
 
-- Consent НЕ се изпраща към backend (в request body се пращат само `email` и `password`).
-- `RegisterDto` няма поле за consent.
-- `User` entity няма колони за consent.
-- Няма e2e тестове за „consent required“ на BE.
+### 4.2 What was missing originally
+
+- Persistence и enforcement в backend (вече реализирани).
 
 ---
 
@@ -87,24 +88,18 @@ _BMAD Story Spec | EPIC: EPIC-CORE-CROSS-GDPR-LEGAL | Status: 🚧 In Progress_
 ### 5.2 Backend (Current)
 
 - Register DTO:
-  - `be/src/auth/dto/register.dto.ts` (няма consent поле)
+  - `be/src/auth/dto/register.dto.ts` (`acceptTerms`)
 - Register implementation:
-  - `be/src/auth/auth.service.ts` → `register()` (не валидира/записва consent)
-  - `be/src/auth/user.entity.ts` (няма consent колони)
+  - `be/src/auth/auth.service.ts` → `register()` (reject ако `acceptTerms !== true`, записва timestamp-и)
+  - `be/src/auth/user.entity.ts` (`termsAcceptedAt`, `privacyAcceptedAt`)
+  - Migration: `be/src/migrations/1765943000000-AddLegalAcceptanceToUser.ts`
+  - Tests: `be/test/auth.e2e-spec.ts`
 
 ---
 
-## 6. Recommended Next Steps (To complete LEGAL-2)
+## 6. Notes
 
-- Add to DTO:
-  - `acceptTerms: boolean` (или `legalAccepted: boolean`)
-- Persist in DB:
-  - new columns в `users` (например `terms_accepted_at`, `privacy_accepted_at`) + migration
-- Update register flow:
-  - FE: включва consent полето в body към `/api/auth/register`
-  - BE: reject ако consent е false/missing
-- Tests:
-  - BE e2e: register без consent → 400; register с consent → 201
+- Story е затворено: consent се валидира и персистира в BE, и има e2e покритие.
 
 ---
 
@@ -113,3 +108,4 @@ _BMAD Story Spec | EPIC: EPIC-CORE-CROSS-GDPR-LEGAL | Status: 🚧 In Progress_
 | Date | Author | Change |
 |------|--------|--------|
 | 2025-12-21 | Cascade | Documented current FE-only consent gate and identified missing BE persistence |
+| 2025-12-22 | Cascade | Updated spec to reflect implemented BE consent enforcement + persistence |
