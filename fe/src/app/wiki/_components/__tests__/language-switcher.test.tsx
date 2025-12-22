@@ -22,6 +22,8 @@ describe("LanguageSwitcher", () => {
   beforeEach(() => {
     useRouterMock.mockReturnValue({ push: pushMock });
     pushMock.mockReset();
+    // reset cookie between tests
+    document.cookie = "ui_lang=; Path=/; Max-Age=0; SameSite=Lax";
   });
 
   afterEach(() => {
@@ -52,6 +54,8 @@ describe("LanguageSwitcher", () => {
 
     const select = screen.getByLabelText("Език на съдържанието");
     fireEvent.change(select, { target: { value: "en" } });
+
+    expect(document.cookie).toContain("ui_lang=en");
 
     expect(pushMock).toHaveBeenCalledTimes(1);
     const [url] = pushMock.mock.calls[0] as [string];

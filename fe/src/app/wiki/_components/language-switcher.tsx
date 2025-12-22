@@ -18,6 +18,12 @@ export function LanguageSwitcher() {
     if (!pathname) return;
     if (target === currentLang) return;
 
+    try {
+      document.cookie = `ui_lang=${target}; Path=/; Max-Age=31536000; SameSite=Lax`;
+    } catch {
+      // ignore
+    }
+
     const params = new URLSearchParams(searchParams.toString());
     params.set("lang", target);
 
