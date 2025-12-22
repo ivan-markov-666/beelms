@@ -5,6 +5,8 @@ import { Suspense } from "react";
 import "./globals.css";
 import { HeaderNav } from "./_components/header-nav";
 import { SiteFooter } from "./_components/site-footer";
+import { AnalyticsConsentBanner } from "./_components/analytics-consent-banner";
+import { AnalyticsTracker } from "./_components/analytics-tracker";
 import { normalizeLang } from "../i18n/config";
 
 const geistSans = Geist({
@@ -39,9 +41,15 @@ export default async function RootLayout({
           <Suspense fallback={null}>
             <HeaderNav />
           </Suspense>
+          <Suspense fallback={null}>
+            <AnalyticsTracker />
+          </Suspense>
           <div className="flex-1">{children}</div>
           <Suspense fallback={null}>
             <SiteFooter />
+          </Suspense>
+          <Suspense fallback={null}>
+            <AnalyticsConsentBanner />
           </Suspense>
         </div>
       </body>
