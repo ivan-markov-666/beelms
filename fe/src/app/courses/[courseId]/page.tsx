@@ -149,6 +149,24 @@ export default async function CourseDetailPage(props: {
                     >
                       {item.title}
                     </Link>
+                  ) : item.itemType === "task" && item.taskId ? (
+                    <Link
+                      href={`/courses/${encodeURIComponent(
+                        course.id,
+                      )}/tasks/${encodeURIComponent(item.taskId)}`}
+                      className="font-medium text-green-700 hover:text-green-800 hover:underline"
+                    >
+                      {item.title}
+                    </Link>
+                  ) : item.itemType === "quiz" && item.quizId ? (
+                    <Link
+                      href={`/courses/${encodeURIComponent(
+                        course.id,
+                      )}/quizzes/${encodeURIComponent(item.quizId)}`}
+                      className="font-medium text-green-700 hover:text-green-800 hover:underline"
+                    >
+                      {item.title}
+                    </Link>
                   ) : (
                     <span className="font-medium text-gray-900">
                       {item.title}

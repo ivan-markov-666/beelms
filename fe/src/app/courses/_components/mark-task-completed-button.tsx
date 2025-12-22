@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { getAccessToken } from "../../auth-token";
 
@@ -25,15 +25,13 @@ type CurriculumProgress = {
   items: CurriculumProgressItem[];
 };
 
-interface MarkAsReadButtonProps {
-  courseId: string;
-  wikiSlug: string;
-}
-
-export function MarkAsReadButton({
+export function MarkTaskCompletedButton({
   courseId,
-  wikiSlug,
-}: MarkAsReadButtonProps) {
+  taskId,
+}: {
+  courseId: string;
+  taskId: string;
+}) {
   const [loading, setLoading] = useState(true);
   const [marking, setMarking] = useState(false);
   const [completed, setCompleted] = useState(false);
@@ -68,7 +66,7 @@ export function MarkAsReadButton({
       setProgressPercent(data.progressPercent);
 
       const item = data.items.find(
-        (i) => i.itemType === "wiki" && i.wikiSlug === wikiSlug,
+        (i) => i.itemType === "task" && i.taskId === taskId,
       );
 
       if (item) {
@@ -80,13 +78,13 @@ export function MarkAsReadButton({
     } catch {
       setLoading(false);
     }
-  }, [courseId, wikiSlug]);
+  }, [courseId, taskId]);
 
   useEffect(() => {
     void fetchProgress();
   }, [fetchProgress]);
 
-  const handleMarkAsRead = async () => {
+  const handleMarkCompleted = async () => {
     if (!itemId || marking || completed) return;
 
     const token = getAccessToken();
@@ -159,7 +157,7 @@ export function MarkAsReadButton({
               d="M5 13l4 4L19 7"
             />
           </svg>
-          <span>Прочетено</span>
+          <span>Завършено</span>
         </div>
 
         {typeof progressPercent === "number" && progressPercent >= 100 && (
@@ -178,7 +176,7 @@ export function MarkAsReadButton({
     <div className="space-y-2">
       <button
         type="button"
-        onClick={handleMarkAsRead}
+        onClick={handleMarkCompleted}
         disabled={marking}
         className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70"
       >
@@ -222,7 +220,7 @@ export function MarkAsReadButton({
                 d="M5 13l4 4L19 7"
               />
             </svg>
-            <span>Маркирай като прочетено</span>
+            <span>Маркирай като завършено</span>
           </>
         )}
       </button>

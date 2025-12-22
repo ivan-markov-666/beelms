@@ -97,4 +97,27 @@ export class CoursesController {
       lang,
     );
   }
+
+  @Get(':courseId/tasks/:taskId')
+  @UseGuards(JwtAuthGuard)
+  async getCourseTask(
+    @Param('courseId') courseId: string,
+    @Param('taskId') taskId: string,
+    @Req() req: AuthenticatedRequest,
+  ): Promise<{
+    id: string;
+    title: string;
+    description: string;
+    language: string;
+    status: string;
+    updatedAt: string;
+  }> {
+    const userId = req.user?.userId;
+
+    if (!userId) {
+      throw new UnauthorizedException('Authenticated user not found');
+    }
+
+    return this.coursesService.getCourseTask(userId, courseId, taskId);
+  }
 }

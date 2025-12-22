@@ -25,6 +25,8 @@ type CourseDetail = {
   language: string;
   status: string;
   isPaid: boolean;
+  currency: string | null;
+  priceCents: number | null;
   curriculum: CourseModuleItem[];
 };
 
@@ -34,18 +36,40 @@ type CourseEditForm = {
   language: string;
   status: string;
   isPaid: boolean;
+  currency: string;
+  priceCents: string;
 };
 
 type CreateCurriculumItemForm = {
+  itemType: "wiki" | "quiz" | "task";
   title: string;
   wikiSlug: string;
+  taskId: string;
+  quizId: string;
   order: string;
 };
 
 const DEFAULT_FORM: CreateCurriculumItemForm = {
+  itemType: "wiki",
   title: "",
   wikiSlug: "",
+  taskId: "",
+  quizId: "",
   order: "",
+};
+
+type AdminQuizListItem = {
+  id: string;
+  title: string;
+  language: string;
+  status: string;
+};
+
+type AdminTaskListItem = {
+  id: string;
+  title: string;
+  language: string;
+  status: string;
 };
 
 export default function AdminCourseDetailPage() {
@@ -69,6 +93,14 @@ export default function AdminCourseDetailPage() {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
 
+  const [quizzes, setQuizzes] = useState<AdminQuizListItem[]>([]);
+  const [quizzesLoading, setQuizzesLoading] = useState(false);
+  const [quizzesError, setQuizzesError] = useState<string | null>(null);
+
+  const [tasks, setTasks] = useState<AdminTaskListItem[]>([]);
+  const [tasksLoading, setTasksLoading] = useState(false);
+  const [tasksError, setTasksError] = useState<string | null>(null);
+
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
   const [actionBusyId, setActionBusyId] = useState<string | null>(null);
@@ -77,6 +109,8 @@ export default function AdminCourseDetailPage() {
   const [editDraft, setEditDraft] = useState<{
     title: string;
     wikiSlug: string;
+    taskId: string;
+    quizId: string;
     order: string;
   } | null>(null);
 
@@ -87,7 +121,10 @@ export default function AdminCourseDetailPage() {
       courseForm.description.trim() !== course.description ||
       courseForm.language !== course.language ||
       courseForm.status !== course.status ||
-      courseForm.isPaid !== course.isPaid
+      courseForm.isPaid !== course.isPaid ||
+      (courseForm.currency.trim() || "") !== (course.currency ?? "") ||
+      (courseForm.priceCents.trim() || "") !==
+        (typeof course.priceCents === "number" ? String(course.priceCents) : "")
     );
   }, [course, courseForm]);
 
@@ -104,6 +141,14 @@ export default function AdminCourseDetailPage() {
     },
     [],
   );
+
+  const quizById = useMemo(() => {
+    return new Map(quizzes.map((q) => [q.id, q] as const));
+  }, [quizzes]);
+
+  const taskById = useMemo(() => {
+    return new Map(tasks.map((t) => [t.id, t] as const));
+  }, [tasks]);
 
   const sortedCurriculum = useMemo(() => {
     return curriculum.slice().sort((a, b) => a.order - b.order);
@@ -157,6 +202,11 @@ export default function AdminCourseDetailPage() {
         language: detail.language,
         status: detail.status,
         isPaid: !!detail.isPaid,
+        currency: detail.currency ?? "",
+        priceCents:
+          typeof detail.priceCents === "number"
+            ? String(detail.priceCents)
+            : "",
       });
 
       if (!curriculumRes.ok) {
@@ -184,7 +234,97 @@ export default function AdminCourseDetailPage() {
     };
   }, [load]);
 
-  const handleAddWikiItem = async () => {
+  const loadQuizzes = useCallback(async () => {
+    if (typeof window === "undefined") return;
+
+    setQuizzesLoading(true);
+    setQuizzesError(null);
+
+    try {
+      const token = getAccessToken();
+      if (!token) {
+        setQuizzesError("Липсва достъп до Admin API.");
+        setQuizzesLoading(false);
+        return;
+      }
+
+      const res = await fetch(`${API_BASE_URL}/admin/quizzes`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) {
+        setQuizzesError("Възникна грешка при зареждане на quizzes.");
+        setQuizzesLoading(false);
+        return;
+      }
+
+      const data = (await res.json()) as AdminQuizListItem[];
+      setQuizzes(Array.isArray(data) ? data : []);
+      setQuizzesLoading(false);
+    } catch {
+      setQuizzesError("Възникна грешка при зареждане на quizzes.");
+      setQuizzesLoading(false);
+    }
+  }, []);
+
+  const loadTasks = useCallback(async () => {
+    if (typeof window === "undefined") return;
+
+    setTasksLoading(true);
+    setTasksError(null);
+
+    try {
+      const token = getAccessToken();
+      if (!token) {
+        setTasksError("Липсва достъп до Admin API.");
+        setTasksLoading(false);
+        return;
+      }
+
+      const res = await fetch(`${API_BASE_URL}/admin/tasks`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) {
+        setTasksError("Възникна грешка при зареждане на tasks.");
+        setTasksLoading(false);
+        return;
+      }
+
+      const data = (await res.json()) as AdminTaskListItem[];
+      setTasks(Array.isArray(data) ? data : []);
+      setTasksLoading(false);
+    } catch {
+      setTasksError("Възникна грешка при зареждане на tasks.");
+      setTasksLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      void loadQuizzes();
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [loadQuizzes]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      void loadTasks();
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [loadTasks]);
+
+  const handleAddCurriculumItem = async () => {
     if (typeof window === "undefined") return;
     if (!courseId) return;
 
@@ -200,16 +340,47 @@ export default function AdminCourseDetailPage() {
         return;
       }
 
-      const payload: {
-        itemType: "wiki";
-        title: string;
-        wikiSlug: string;
-        order?: number;
-      } = {
-        itemType: "wiki",
-        title: form.title.trim(),
-        wikiSlug: form.wikiSlug.trim(),
+      const title = form.title.trim();
+      if (!title) {
+        setSaveError("Title is required");
+        setSaving(false);
+        return;
+      }
+
+      const payload: Record<string, unknown> = {
+        itemType: form.itemType,
+        title,
       };
+
+      if (form.itemType === "wiki") {
+        const wikiSlug = form.wikiSlug.trim();
+        if (!wikiSlug) {
+          setSaveError("wikiSlug is required for wiki items");
+          setSaving(false);
+          return;
+        }
+        payload.wikiSlug = wikiSlug;
+      }
+
+      if (form.itemType === "task") {
+        const taskId = form.taskId.trim();
+        if (!taskId) {
+          setSaveError("taskId is required for task items");
+          setSaving(false);
+          return;
+        }
+        payload.taskId = taskId;
+      }
+
+      if (form.itemType === "quiz") {
+        const quizId = form.quizId.trim();
+        if (!quizId) {
+          setSaveError("quizId is required for quiz items");
+          setSaving(false);
+          return;
+        }
+        payload.quizId = quizId;
+      }
 
       const maybeOrder = Number(form.order);
       if (form.order.trim() && Number.isFinite(maybeOrder) && maybeOrder > 0) {
@@ -283,6 +454,47 @@ export default function AdminCourseDetailPage() {
         payload.isPaid = courseForm.isPaid;
       }
 
+      const nextCurrency = courseForm.currency.trim().toLowerCase();
+      const nextPriceRaw = courseForm.priceCents.trim();
+      const nextPriceCents = Number(nextPriceRaw);
+
+      if (courseForm.isPaid) {
+        if (!/^[a-z]{3}$/.test(nextCurrency)) {
+          setCourseSaveError(
+            "Paid course изисква валидна валута (напр. EUR). ",
+          );
+          setCourseSaving(false);
+          return;
+        }
+
+        if (
+          !nextPriceRaw ||
+          !Number.isFinite(nextPriceCents) ||
+          nextPriceCents <= 0
+        ) {
+          setCourseSaveError(
+            "Paid course изисква валидна цена в cents (напр. 999).",
+          );
+          setCourseSaving(false);
+          return;
+        }
+
+        if (nextCurrency !== (course.currency ?? "")) {
+          payload.currency = nextCurrency;
+        }
+
+        if (nextPriceCents !== (course.priceCents ?? null)) {
+          payload.priceCents = nextPriceCents;
+        }
+      } else {
+        if (course.currency !== null) {
+          payload.currency = null;
+        }
+        if (course.priceCents !== null) {
+          payload.priceCents = null;
+        }
+      }
+
       if (Object.keys(payload).length === 0) {
         setCourseSaveSuccess("Няма промени за запис.");
         setCourseSaving(false);
@@ -319,6 +531,11 @@ export default function AdminCourseDetailPage() {
         language: updated.language,
         status: updated.status,
         isPaid: !!updated.isPaid,
+        currency: updated.currency ?? "",
+        priceCents:
+          typeof updated.priceCents === "number"
+            ? String(updated.priceCents)
+            : "",
       });
       setCourseSaveSuccess("Записано.");
       setCourseSaving(false);
@@ -335,6 +552,8 @@ export default function AdminCourseDetailPage() {
     setEditDraft({
       title: item.title,
       wikiSlug: item.wikiSlug ?? "",
+      taskId: item.taskId ?? "",
+      quizId: item.quizId ?? "",
       order: String(item.order),
     });
   };
@@ -365,6 +584,8 @@ export default function AdminCourseDetailPage() {
 
       const nextTitle = editDraft.title.trim();
       const nextWikiSlug = editDraft.wikiSlug.trim();
+      const nextTaskId = editDraft.taskId.trim();
+      const nextQuizId = editDraft.quizId.trim();
       const nextOrder = Number(editDraft.order);
 
       if (nextTitle && nextTitle !== item.title) {
@@ -374,6 +595,18 @@ export default function AdminCourseDetailPage() {
       if (item.itemType === "wiki") {
         if (nextWikiSlug && nextWikiSlug !== (item.wikiSlug ?? "")) {
           payload.wikiSlug = nextWikiSlug;
+        }
+      }
+
+      if (item.itemType === "quiz") {
+        if (nextQuizId && nextQuizId !== (item.quizId ?? "")) {
+          payload.quizId = nextQuizId;
+        }
+      }
+
+      if (item.itemType === "task") {
+        if (nextTaskId && nextTaskId !== (item.taskId ?? "")) {
+          payload.taskId = nextTaskId;
         }
       }
 
@@ -733,7 +966,25 @@ export default function AdminCourseDetailPage() {
           </button>
         </div>
 
-        <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-4">
+          <label className="space-y-1">
+            <span className="text-xs font-medium text-gray-600">Type</span>
+            <select
+              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900"
+              value={form.itemType}
+              onChange={(e) =>
+                setForm((p) => ({
+                  ...p,
+                  itemType: e.target.value as "wiki" | "quiz" | "task",
+                }))
+              }
+            >
+              <option value="wiki">wiki</option>
+              <option value="task">task</option>
+              <option value="quiz">quiz</option>
+            </select>
+          </label>
+
           <label className="space-y-1">
             <span className="text-xs font-medium text-gray-600">Title</span>
             <input
@@ -744,16 +995,58 @@ export default function AdminCourseDetailPage() {
               }
             />
           </label>
-          <label className="space-y-1">
-            <span className="text-xs font-medium text-gray-600">Wiki slug</span>
-            <input
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400"
-              value={form.wikiSlug}
-              onChange={(e) =>
-                setForm((p) => ({ ...p, wikiSlug: e.target.value }))
-              }
-            />
-          </label>
+
+          {form.itemType === "wiki" ? (
+            <label className="space-y-1">
+              <span className="text-xs font-medium text-gray-600">
+                Wiki slug
+              </span>
+              <input
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400"
+                value={form.wikiSlug}
+                onChange={(e) =>
+                  setForm((p) => ({ ...p, wikiSlug: e.target.value }))
+                }
+              />
+            </label>
+          ) : form.itemType === "task" ? (
+            <label className="space-y-1">
+              <span className="text-xs font-medium text-gray-600">Task</span>
+              <select
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900"
+                value={form.taskId}
+                onChange={(e) =>
+                  setForm((p) => ({ ...p, taskId: e.target.value }))
+                }
+              >
+                <option value="">(select task)</option>
+                {tasks.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.title} ({t.language}, {t.status})
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : (
+            <label className="space-y-1">
+              <span className="text-xs font-medium text-gray-600">Quiz</span>
+              <select
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900"
+                value={form.quizId}
+                onChange={(e) =>
+                  setForm((p) => ({ ...p, quizId: e.target.value }))
+                }
+              >
+                <option value="">(select quiz)</option>
+                {quizzes.map((q) => (
+                  <option key={q.id} value={q.id}>
+                    {q.title} ({q.language}, {q.status})
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+
           <label className="space-y-1">
             <span className="text-xs font-medium text-gray-600">
               Order (optional)
@@ -768,6 +1061,32 @@ export default function AdminCourseDetailPage() {
             />
           </label>
         </div>
+
+        {quizzesLoading && (
+          <p className="mt-3 text-sm text-gray-500">Loading quizzes...</p>
+        )}
+
+        {!quizzesLoading && quizzesError && (
+          <div
+            className="mt-3 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+            role="alert"
+          >
+            {quizzesError}
+          </div>
+        )}
+
+        {tasksLoading && (
+          <p className="mt-3 text-sm text-gray-500">Loading tasks...</p>
+        )}
+
+        {!tasksLoading && tasksError && (
+          <div
+            className="mt-3 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+            role="alert"
+          >
+            {tasksError}
+          </div>
+        )}
 
         {saveError && (
           <div
@@ -793,12 +1112,21 @@ export default function AdminCourseDetailPage() {
           disabled={
             saving ||
             !form.title.trim() ||
-            !form.wikiSlug.trim() ||
-            form.title.length < 1
+            (form.itemType === "wiki"
+              ? !form.wikiSlug.trim()
+              : form.itemType === "task"
+                ? !form.taskId.trim()
+                : !form.quizId.trim())
           }
-          onClick={() => void handleAddWikiItem()}
+          onClick={() => void handleAddCurriculumItem()}
         >
-          {saving ? "Adding..." : "Add wiki item"}
+          {saving
+            ? "Adding..."
+            : form.itemType === "wiki"
+              ? "Add wiki item"
+              : form.itemType === "task"
+                ? "Add task item"
+                : "Add quiz item"}
         </button>
 
         {actionError && (
@@ -880,6 +1208,50 @@ export default function AdminCourseDetailPage() {
                               }
                             />
                           </label>
+                        ) : item.itemType === "task" ? (
+                          <label className="space-y-1">
+                            <span className="text-[11px] font-medium text-gray-600">
+                              Task
+                            </span>
+                            <select
+                              className="w-full rounded-md border border-gray-300 px-2 py-1 text-sm text-gray-900"
+                              value={draft.taskId}
+                              onChange={(e) =>
+                                setEditDraft((p) =>
+                                  p ? { ...p, taskId: e.target.value } : p,
+                                )
+                              }
+                            >
+                              <option value="">(select task)</option>
+                              {tasks.map((t) => (
+                                <option key={t.id} value={t.id}>
+                                  {t.title} ({t.language}, {t.status})
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+                        ) : item.itemType === "quiz" ? (
+                          <label className="space-y-1">
+                            <span className="text-[11px] font-medium text-gray-600">
+                              Quiz
+                            </span>
+                            <select
+                              className="w-full rounded-md border border-gray-300 px-2 py-1 text-sm text-gray-900"
+                              value={draft.quizId}
+                              onChange={(e) =>
+                                setEditDraft((p) =>
+                                  p ? { ...p, quizId: e.target.value } : p,
+                                )
+                              }
+                            >
+                              <option value="">(select quiz)</option>
+                              {quizzes.map((q) => (
+                                <option key={q.id} value={q.id}>
+                                  {q.title} ({q.language}, {q.status})
+                                </option>
+                              ))}
+                            </select>
+                          </label>
                         ) : (
                           <div />
                         )}
@@ -892,7 +1264,31 @@ export default function AdminCourseDetailPage() {
                         <p className="text-xs text-gray-500">
                           {item.itemType}
                           {item.wikiSlug ? ` • ${item.wikiSlug}` : ""}
+                          {item.taskId ? ` • ${item.taskId}` : ""}
+                          {item.quizId ? ` • ${item.quizId}` : ""}
                         </p>
+                        {item.itemType === "task" && item.taskId && (
+                          <div className="mt-1">
+                            <Link
+                              href={`/admin/tasks/${item.taskId}`}
+                              className="text-xs font-medium text-green-700 hover:text-green-900 hover:underline"
+                            >
+                              {taskById.get(item.taskId)?.title ?? "Open task"}{" "}
+                              →
+                            </Link>
+                          </div>
+                        )}
+                        {item.itemType === "quiz" && item.quizId && (
+                          <div className="mt-1">
+                            <Link
+                              href={`/admin/quizzes/${item.quizId}`}
+                              className="text-xs font-medium text-green-700 hover:text-green-900 hover:underline"
+                            >
+                              {quizById.get(item.quizId)?.title ?? "Open quiz"}{" "}
+                              →
+                            </Link>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>

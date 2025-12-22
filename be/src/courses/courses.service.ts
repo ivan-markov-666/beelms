@@ -26,6 +26,7 @@ import { AdminUpdateCourseCurriculumItemDto } from './dto/admin-update-course-cu
 import { CourseCertificateDto } from './dto/course-certificate.dto';
 import { AdminGrantCourseAccessDto } from './dto/admin-grant-course-access.dto';
 import { Quiz } from '../assessments/quiz.entity';
+import { Task } from '../tasks/task.entity';
 
 @Injectable()
 export class CoursesService {
@@ -48,6 +49,8 @@ export class CoursesService {
     private readonly wikiVersionRepo: Repository<WikiArticleVersion>,
     @InjectRepository(Quiz)
     private readonly quizRepo: Repository<Quiz>,
+    @InjectRepository(Task)
+    private readonly taskRepo: Repository<Task>,
   ) {}
 
   private toSummary(course: Course): CourseSummaryDto {
@@ -150,8 +153,20 @@ export class CoursesService {
       throw new BadRequestException('wikiSlug is required for wiki items');
     }
 
-    if (itemType === 'task' && !taskId) {
-      throw new BadRequestException('taskId is required for task items');
+    if (itemType === 'task') {
+      if (!taskId) {
+        throw new BadRequestException('taskId is required for task items');
+      }
+      if (wikiSlug || quizId) {
+        throw new BadRequestException(
+          'wikiSlug/quizId are not allowed for task items',
+        );
+      }
+
+      const task = await this.taskRepo.findOne({ where: { id: taskId } });
+      if (!task || task.status !== 'active') {
+        throw new BadRequestException('taskId must reference an active task');
+      }
     }
 
     if (itemType === 'quiz') {
@@ -300,6 +315,45 @@ export class CoursesService {
       status: article.status,
       articleStatus: article.status,
       languageStatus: 'active',
+      updatedAt: updatedAt.toISOString(),
+    };
+  }
+
+  async getCourseTask(
+    userId: string,
+    courseId: string,
+    taskId: string,
+  ): Promise<{
+    id: string;
+    title: string;
+    description: string;
+    language: string;
+    status: string;
+    updatedAt: string;
+  }> {
+    await this.requireEnrollment(userId, courseId);
+
+    const curriculumItem = await this.curriculumRepo.findOne({
+      where: { courseId, itemType: 'task', taskId },
+    });
+
+    if (!curriculumItem) {
+      throw new NotFoundException('Task not found');
+    }
+
+    const task = await this.taskRepo.findOne({ where: { id: taskId } });
+    if (!task || task.status !== 'active') {
+      throw new NotFoundException('Task not found');
+    }
+
+    const updatedAt = task.updatedAt ?? task.createdAt ?? new Date();
+
+    return {
+      id: task.id,
+      title: task.title,
+      description: task.description,
+      language: task.language,
+      status: task.status,
       updatedAt: updatedAt.toISOString(),
     };
   }
@@ -896,6 +950,8 @@ export class CoursesService {
       title: string;
       itemType: string;
       wikiSlug: string | null;
+      taskId: string | null;
+      quizId: string | null;
       completed: boolean;
       completedAt: string | null;
     }>;
@@ -928,6 +984,8 @@ export class CoursesService {
         title: item.title,
         itemType: item.itemType,
         wikiSlug: item.wikiSlug ?? null,
+        taskId: item.taskId ?? null,
+        quizId: item.quizId ?? null,
         completed: completedAt !== null,
         completedAt: completedAt ? completedAt.toISOString() : null,
       };

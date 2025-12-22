@@ -1,6 +1,6 @@
 # STORY-ADMIN-6: Admin Quizzes Management (CRUD + Questions + Linking)
 
-_BMAD Story Spec | EPIC: EPIC-CORE-ADMIN | Status: 🟡 In Progress (BE CRUD + curriculum validation implemented)_
+_BMAD Story Spec | EPIC: EPIC-CORE-ADMIN | Status: ✅ Done_
 
 ---
 
@@ -46,7 +46,7 @@ _BMAD Story Spec | EPIC: EPIC-CORE-ADMIN | Status: 🟡 In Progress (BE CRUD + c
 |---|-----------|--------|
 | AC-8 | Admin може да свързва quiz към курс чрез curriculum item тип `quiz` | ✅ |
 | AC-9 | В curriculum се пази `quizId` (FK или uuid reference) | ✅ |
-| AC-10 | Admin UI позволява избор на quiz при добавяне на curriculum item | ❌ |
+| AC-10 | Admin UI позволява избор на quiz при добавяне на curriculum item | ✅ |
 
 ### 3.4 Security
 

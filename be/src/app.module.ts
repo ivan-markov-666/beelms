@@ -24,6 +24,8 @@ import { Quiz } from './assessments/quiz.entity';
 import { QuizQuestion } from './assessments/quiz-question.entity';
 import { QuizOption } from './assessments/quiz-option.entity';
 import { QuizAttempt } from './assessments/quiz-attempt.entity';
+import { TasksModule } from './tasks/tasks.module';
+import { Task } from './tasks/task.entity';
 
 @Module({
   imports: [
@@ -49,6 +51,7 @@ import { QuizAttempt } from './assessments/quiz-attempt.entity';
         QuizQuestion,
         QuizOption,
         QuizAttempt,
+        Task,
       ],
       synchronize: false,
     }),
@@ -57,6 +60,7 @@ import { QuizAttempt } from './assessments/quiz-attempt.entity';
     CoursesModule,
     PaymentsModule,
     AssessmentsModule,
+    TasksModule,
   ],
   controllers: [AppController],
   providers: [

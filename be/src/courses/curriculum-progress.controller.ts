@@ -58,6 +58,8 @@ export class CurriculumProgressController {
       title: string;
       itemType: string;
       wikiSlug: string | null;
+      taskId: string | null;
+      quizId: string | null;
       completed: boolean;
       completedAt: string | null;
     }>;
