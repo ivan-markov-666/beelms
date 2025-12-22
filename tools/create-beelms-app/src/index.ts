@@ -74,13 +74,24 @@ function toDbIdentifier(name: string): string {
 function main(): void {
   const args = process.argv.slice(2);
 
-  if (args.length === 0 || args[0] === "--help" || args[0] === "-h") {
+  const allowedFlags = new Set(["--api-only", "--no-web", "--help", "-h"]);
+
+  if (args.length === 0 || args.includes("--help") || args.includes("-h")) {
     printUsage();
     process.exit(args.length === 0 ? 1 : 0);
   }
 
   const projectName = args[0];
   const extraArgs = args.slice(1);
+
+  for (const flag of extraArgs) {
+    if (!allowedFlags.has(flag)) {
+      console.error(`Unknown option: ${flag}`);
+      printUsage();
+      process.exit(1);
+    }
+  }
+
   const apiOnly =
     extraArgs.includes("--api-only") || extraArgs.includes("--no-web");
 
@@ -106,21 +117,29 @@ function main(): void {
   const apiTemplateDir = path.join(templatesRoot, "api");
   const webTemplateDir = path.join(templatesRoot, "web");
 
-  // Dev fallback: determine the beelms core repo root relative to the compiled dist/index.js file
-  // dist/index.js -> ../.. -> create-beelms-app -> .. -> tools -> .. -> repo root
-  const repoRoot = path.resolve(__dirname, "../../..");
-  const beSrcDir = path.join(repoRoot, "be");
-  const feSrcDir = path.join(repoRoot, "fe");
+  if (
+    !fs.existsSync(apiTemplateDir) ||
+    !fs.statSync(apiTemplateDir).isDirectory()
+  ) {
+    console.error(
+      `Templates not found: ${apiTemplateDir}. Did you run "npm run prepack" or include templates in the package?`,
+    );
+    process.exit(1);
+  }
 
-  const apiSrcDir =
-    fs.existsSync(apiTemplateDir) && fs.statSync(apiTemplateDir).isDirectory()
-      ? apiTemplateDir
-      : beSrcDir;
+  if (
+    !apiOnly &&
+    (!fs.existsSync(webTemplateDir) ||
+      !fs.statSync(webTemplateDir).isDirectory())
+  ) {
+    console.error(
+      `Templates not found: ${webTemplateDir}. Did you run "npm run prepack" or include templates in the package?`,
+    );
+    process.exit(1);
+  }
 
-  const webSrcDir =
-    fs.existsSync(webTemplateDir) && fs.statSync(webTemplateDir).isDirectory()
-      ? webTemplateDir
-      : feSrcDir;
+  const apiSrcDir = apiTemplateDir;
+  const webSrcDir = webTemplateDir;
 
   const apiTargetDir = path.join(targetDir, "api");
   const webTargetDir = path.join(targetDir, "web");
