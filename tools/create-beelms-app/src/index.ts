@@ -218,10 +218,34 @@ export default nextConfig;
       POSTGRES_DB: ${dbName}
       POSTGRES_USER: ${dbName}
       POSTGRES_PASSWORD: ${dbName}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${dbName} -d ${dbName}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
     networks:
       - app-net
     volumes:
       - db-data:/var/lib/postgresql/data
+
+  migrate:
+    build:
+      context: ../api
+      dockerfile: Dockerfile
+    container_name: ${projectName}-migrate
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: development
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: ${dbName}
+      DB_USER: ${dbName}
+      DB_PASSWORD: ${dbName}
+    networks:
+      - app-net
+    command: ["sh", "-c", "npm run migration:run && npm run migration:check"]
 
   redis:
     image: redis:7-alpine
@@ -241,7 +265,10 @@ export default nextConfig;
     container_name: ${projectName}-api
     restart: unless-stopped
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     environment:
       NODE_ENV: development
       PORT: 3000
@@ -396,12 +423,15 @@ endlocal
     `1. Install dependencies:\n` +
     `   cd api\n` +
     `   npm install\n\n` +
-    `2. Prepare the database for tests (migrations + wiki seed):\n` +
-    `   npm run test:setup-db\n\n` +
-    `3. Run the local regression suite (unit + e2e, without perf tests):\n` +
-    `   npm run test:regression:local\n\n` +
-    `For the full manual template process and how this maps to WS-CORE-1..3, see:\n` +
-    `docs/sprint-artifacts/beelms-core-ws-core-4-manual-template.md in the beelms core repo.\n`;
+    `2. If you want to run the API locally (without Docker), make sure Postgres is running and then apply migrations + seeds:\n` +
+    `   npm run migration:run\n` +
+    `   npm run migration:check\n` +
+    `   npm run seed:wiki:dev\n` +
+    `   npm run seed:courses:dev\n\n` +
+    `3. Run the API in dev mode:\n` +
+    `   npm run start:dev\n\n` +
+    `4. Run tests (local):\n` +
+    `   npm run test:regression:local\n`;
 
   fs.writeFileSync(readmePath, readmeContent, { encoding: "utf8" });
 

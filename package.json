@@ -7,6 +7,17 @@
   "scripts": {
     "prepare": "husky install",
     "lint": "npm --prefix be run lint && npm --prefix fe run lint",
-    "format": "npm --prefix be run format && npm --prefix fe run format"
+    "format": "npm --prefix be run format && npm --prefix fe run format",
+
+    "be:migration:run": "npm --prefix be run migration:run",
+    "be:migration:revert": "npm --prefix be run migration:revert",
+    "be:migration:show": "npm --prefix be run migration:show",
+    "be:migration:check": "npm --prefix be run migration:check",
+
+    "be:seed:wiki": "npm --prefix be run seed:wiki",
+    "be:seed:courses": "npm --prefix be run seed:courses",
+    "be:seed:wiki:dev": "npm --prefix be run seed:wiki:dev",
+    "be:seed:courses:dev": "npm --prefix be run seed:courses:dev",
+    "be:seed:dev": "npm --prefix be run seed:wiki:dev && npm --prefix be run seed:courses:dev"
   }
 }

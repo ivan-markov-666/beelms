@@ -14,6 +14,7 @@ import { Quiz } from './src/assessments/quiz.entity';
 import { QuizQuestion } from './src/assessments/quiz-question.entity';
 import { QuizOption } from './src/assessments/quiz-option.entity';
 import { QuizAttempt } from './src/assessments/quiz-attempt.entity';
+import { Task } from './src/tasks/task.entity';
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -37,6 +38,7 @@ export const AppDataSource = new DataSource({
     QuizQuestion,
     QuizOption,
     QuizAttempt,
+    Task,
   ],
   migrations: ['src/migrations/*.ts'],
   synchronize: false,

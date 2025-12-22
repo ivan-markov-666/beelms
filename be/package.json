@@ -29,7 +29,9 @@
     "migration:show": "npm run typeorm -- migration:show",
     "migration:check": "node --require ts-node/register scripts/migration-check.ts",
     "seed:wiki": "node dist/src/seed/wiki.seed.js",
+    "seed:wiki:dev": "node --require ts-node/register src/seed/wiki.seed.ts",
     "seed:courses": "node dist/src/seed/courses.seed.js",
+    "seed:courses:dev": "node --require ts-node/register src/seed/courses.seed.ts",
     "test:perf": "node scripts/e2e-auth-account-perf.js",
     "start:prod:migrate": "npm run migration:run && npm run migration:check && npm run start:prod"
   },
