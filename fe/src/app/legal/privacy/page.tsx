@@ -53,6 +53,28 @@ export default async function PrivacyPage({
               </li>
             </ul>
             <h2 className="mt-4 text-base font-semibold text-zinc-900 dark:text-zinc-50">
+              Analytics (опционално, само с opt-in)
+            </h2>
+            <p>
+              BeeLMS използва privacy-friendly analytics само ако изрично дадете
+              съгласие (opt-in) чрез банера за аналитични бисквитки.
+            </p>
+            <p>
+              При активирана аналитика се записват само минимални данни за
+              използването на платформата, без IP/UA/имейл и без други
+              идентификатори на акаунта. Използваме технически идентификатор на
+              посетител (cookie) за измерване на сесии и продължителност.
+            </p>
+            <p>
+              Retention: analytics данните се пазят до 180 дни (best-effort
+              cleanup).
+            </p>
+            <p>
+              Можете да оттеглите съгласието си по всяко време като смените
+              настройката от банера (Decline) и/или изчистите локалните данни на
+              сайта (localStorage + cookies).
+            </p>
+            <h2 className="mt-4 text-base font-semibold text-zinc-900 dark:text-zinc-50">
               Вашите права по GDPR
             </h2>
             <p>
@@ -87,6 +109,27 @@ export default async function PrivacyPage({
                 etc.).
               </li>
             </ul>
+            <h2 className="mt-4 text-base font-semibold text-zinc-900 dark:text-zinc-50">
+              Analytics (optional, opt-in)
+            </h2>
+            <p>
+              BeeLMS uses privacy-friendly analytics only if you explicitly opt
+              in via the analytics consent banner.
+            </p>
+            <p>
+              When enabled, we store only minimal usage data without IP/UA/email
+              and without account identifiers. We use a technical visitor
+              identifier (cookie) to measure sessions and session duration.
+            </p>
+            <p>
+              Retention: analytics data is kept for up to 180 days (best-effort
+              cleanup).
+            </p>
+            <p>
+              You can withdraw consent at any time by switching the banner
+              setting to Decline and/or clearing the site&apos;s local storage
+              and cookies.
+            </p>
             <h2 className="mt-4 text-base font-semibold text-zinc-900 dark:text-zinc-50">
               Your GDPR rights
             </h2>

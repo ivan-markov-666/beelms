@@ -54,6 +54,36 @@ type AdminWikiViewsMetrics = {
   daily: Array<{ date: string; views: number }>;
 };
 
+type AdminAdvancedMetricsSourcePoint = {
+  source: string;
+  sessions: number;
+};
+
+type AdminAdvancedMetricsPageSourcePoint = {
+  source: string;
+  views: number;
+};
+
+type AdminAdvancedMetricsTopPage = {
+  path: string;
+  views: number;
+};
+
+type AdminAdvancedMetricsDailyPoint = {
+  date: string;
+  value: number;
+};
+
+type AdminAdvancedMetrics = {
+  totalSessions: number;
+  avgSessionDurationSeconds: number;
+  sessionSources: AdminAdvancedMetricsSourcePoint[];
+  pageViewSources: AdminAdvancedMetricsPageSourcePoint[];
+  topPages: AdminAdvancedMetricsTopPage[];
+  dailySessions: AdminAdvancedMetricsDailyPoint[];
+  dailyPageViews: AdminAdvancedMetricsDailyPoint[];
+};
+
 export default function AdminMetricsPage() {
   const lang = useCurrentLang();
   const [metrics, setMetrics] = useState<MetricsOverview | null>(null);
@@ -70,6 +100,13 @@ export default function AdminMetricsPage() {
   const [periodPreset, setPeriodPreset] = useState("");
   const [periodFrom, setPeriodFrom] = useState("");
   const [periodTo, setPeriodTo] = useState("");
+  const [advancedMetrics, setAdvancedMetrics] =
+    useState<AdminAdvancedMetrics | null>(null);
+  const [advancedError, setAdvancedError] = useState<string | null>(null);
+  const [exportingAdvanced, setExportingAdvanced] = useState(false);
+  const [exportAdvancedError, setExportAdvancedError] = useState<string | null>(
+    null,
+  );
   const todayIso = new Date().toLocaleDateString("en-CA");
 
   const formatMonthLabel = (key: string): string => {
@@ -86,6 +123,91 @@ export default function AdminMetricsPage() {
       year: "numeric",
       month: "short",
     });
+  };
+
+  const formatDuration = (seconds: number): string => {
+    const safe = Number.isFinite(seconds) && seconds > 0 ? seconds : 0;
+    const mins = Math.floor(safe / 60);
+    const secs = Math.floor(safe % 60);
+    return `${mins}:${String(secs).padStart(2, "0")}`;
+  };
+
+  const downloadAdvancedCsv = async () => {
+    setExportAdvancedError(null);
+    setExportingAdvanced(true);
+
+    try {
+      const token = getAccessToken();
+      if (!token) {
+        setExportAdvancedError(
+          t(lang, "common", "adminAdvancedMetricsExportError"),
+        );
+        return;
+      }
+
+      const now = new Date();
+      let fromDate: Date | null = null;
+      let toDate: Date | null = null;
+
+      if (periodPreset === "last_1d") {
+        fromDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+      } else if (periodPreset === "last_7d") {
+        fromDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      } else if (periodPreset === "last_30d") {
+        fromDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      } else if (periodPreset === "last_365d") {
+        fromDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+      } else if (periodPreset === "custom") {
+        if (periodFrom) {
+          fromDate = new Date(`${periodFrom}T00:00:00`);
+        }
+        if (periodTo) {
+          toDate = new Date(`${periodTo}T23:59:59.999`);
+        }
+      }
+
+      const params = new URLSearchParams();
+      if (fromDate) {
+        params.set("from", fromDate.toISOString());
+      }
+      if (toDate) {
+        params.set("to", toDate.toISOString());
+      }
+
+      const qs = params.toString();
+      const exportUrl = qs
+        ? `${API_BASE_URL}/admin/metrics/advanced/export?${qs}`
+        : `${API_BASE_URL}/admin/metrics/advanced/export`;
+
+      const res = await fetch(exportUrl, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) {
+        setExportAdvancedError(
+          t(lang, "common", "adminAdvancedMetricsExportError"),
+        );
+        return;
+      }
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "advanced-metrics.csv";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch {
+      setExportAdvancedError(
+        t(lang, "common", "adminAdvancedMetricsExportError"),
+      );
+    } finally {
+      setExportingAdvanced(false);
+    }
   };
 
   useEffect(() => {
@@ -188,6 +310,8 @@ export default function AdminMetricsPage() {
             setActivityStats(null);
             setUserTrend([]);
             setWikiViews(null);
+            setAdvancedMetrics(null);
+            setAdvancedError(null);
           }
           return;
         }
@@ -230,6 +354,10 @@ export default function AdminMetricsPage() {
           ? `${API_BASE_URL}/admin/metrics/wiki-views?${paramsString}`
           : `${API_BASE_URL}/admin/metrics/wiki-views`;
 
+        const advancedUrl = paramsString
+          ? `${API_BASE_URL}/admin/metrics/advanced?${paramsString}`
+          : `${API_BASE_URL}/admin/metrics/advanced`;
+
         type ActivitySummaryResponse = {
           userRegistered: number;
           userDeactivated: number;
@@ -242,13 +370,18 @@ export default function AdminMetricsPage() {
           }[];
         };
 
-        const [activityRes, wikiViewsRes] = await Promise.all([
+        const [activityRes, wikiViewsRes, advancedRes] = await Promise.all([
           fetch(activityUrl, {
             headers: {
               Authorization: `Bearer ${token}`,
             },
           }),
           fetch(wikiViewsUrl, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }),
+          fetch(advancedUrl, {
             headers: {
               Authorization: `Bearer ${token}`,
             },
@@ -274,6 +407,17 @@ export default function AdminMetricsPage() {
 
         setWikiViews(wikiViewsData);
 
+        const advancedData = advancedRes.ok
+          ? ((await advancedRes.json()) as AdminAdvancedMetrics)
+          : null;
+
+        setAdvancedMetrics(advancedData);
+        setAdvancedError(
+          advancedRes.ok
+            ? null
+            : t(lang, "common", "adminAdvancedMetricsError"),
+        );
+
         if (summary) {
           setActivityStats({
             userRegistered: summary.userRegistered,
@@ -298,6 +442,8 @@ export default function AdminMetricsPage() {
           setActivityStats(null);
           setUserTrend([]);
           setWikiViews(null);
+          setAdvancedMetrics(null);
+          setAdvancedError(t(lang, "common", "adminAdvancedMetricsError"));
         }
       }
     };
@@ -307,7 +453,7 @@ export default function AdminMetricsPage() {
     return () => {
       cancelled = true;
     };
-  }, [periodPreset, periodFrom, periodTo]);
+  }, [periodPreset, periodFrom, periodTo, lang]);
 
   const totalUsers = metrics?.totalUsers ?? userStats?.totalUsers ?? 0;
   const hasMetrics = !loading && !error && metrics !== null;
@@ -338,6 +484,9 @@ export default function AdminMetricsPage() {
       "adminDashboardCardUsersTrendSuffix",
     )}`;
   })();
+
+  const totalPageViews =
+    advancedMetrics?.dailyPageViews?.reduce((sum, p) => sum + p.value, 0) ?? 0;
 
   return (
     <div className="space-y-8">
@@ -1103,6 +1252,253 @@ export default function AdminMetricsPage() {
               );
             })()}
           </div>
+        </section>
+      )}
+
+      {!loading && !error && (
+        <section className="space-y-3">
+          <header className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div className="space-y-1">
+              <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
+                {t(lang, "common", "adminAdvancedMetricsTitle")}
+              </h2>
+              <p className="text-xs text-gray-600">
+                {t(lang, "common", "adminAdvancedMetricsSubtitle")}
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <button
+                type="button"
+                className="rounded-md border border-gray-300 bg-white px-4 py-2 text-xs font-semibold text-gray-800 hover:bg-gray-50 disabled:opacity-60"
+                onClick={() => void downloadAdvancedCsv()}
+                disabled={exportingAdvanced}
+              >
+                {exportingAdvanced
+                  ? t(lang, "common", "adminAdvancedMetricsExportLoading")
+                  : t(lang, "common", "adminAdvancedMetricsExportCsv")}
+              </button>
+            </div>
+          </header>
+
+          {advancedError && (
+            <p className="text-sm text-red-600" role="alert">
+              {advancedError}
+            </p>
+          )}
+          {exportAdvancedError && (
+            <p className="text-sm text-red-600" role="alert">
+              {exportAdvancedError}
+            </p>
+          )}
+
+          {advancedMetrics && (
+            <>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <div className="rounded-lg border border-gray-200 bg-white p-4">
+                  <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                    {t(lang, "common", "adminAdvancedMetricsTotalSessions")}
+                  </p>
+                  <p className="mt-1 text-2xl font-semibold text-gray-900">
+                    {advancedMetrics.totalSessions}
+                  </p>
+                </div>
+                <div className="rounded-lg border border-gray-200 bg-white p-4">
+                  <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                    {t(lang, "common", "adminAdvancedMetricsAvgDuration")}
+                  </p>
+                  <p className="mt-1 text-2xl font-semibold text-gray-900">
+                    {formatDuration(advancedMetrics.avgSessionDurationSeconds)}
+                  </p>
+                </div>
+                <div className="rounded-lg border border-gray-200 bg-white p-4">
+                  <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                    {t(lang, "common", "adminAdvancedMetricsTotalPageViews")}
+                  </p>
+                  <p className="mt-1 text-2xl font-semibold text-gray-900">
+                    {totalPageViews}
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <div className="rounded-lg border border-gray-200 bg-white p-4">
+                  <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                    {t(lang, "common", "adminAdvancedMetricsSessionSources")}
+                  </p>
+                  {advancedMetrics.sessionSources.length === 0 ? (
+                    <p className="mt-2 text-sm text-gray-500">-</p>
+                  ) : (
+                    <ul className="mt-2 space-y-1">
+                      {advancedMetrics.sessionSources.map((row) => (
+                        <li
+                          key={row.source}
+                          className="flex items-center justify-between"
+                        >
+                          <span className="text-sm text-gray-700">
+                            {row.source}
+                          </span>
+                          <span className="text-sm text-gray-700">
+                            {row.sessions}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+
+                <div className="rounded-lg border border-gray-200 bg-white p-4">
+                  <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                    {t(lang, "common", "adminAdvancedMetricsPageViewSources")}
+                  </p>
+                  {advancedMetrics.pageViewSources.length === 0 ? (
+                    <p className="mt-2 text-sm text-gray-500">-</p>
+                  ) : (
+                    <ul className="mt-2 space-y-1">
+                      {advancedMetrics.pageViewSources.map((row) => (
+                        <li
+                          key={row.source}
+                          className="flex items-center justify-between"
+                        >
+                          <span className="text-sm text-gray-700">
+                            {row.source}
+                          </span>
+                          <span className="text-sm text-gray-700">
+                            {row.views}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+
+                <div className="rounded-lg border border-gray-200 bg-white p-4">
+                  <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                    {t(lang, "common", "adminAdvancedMetricsTopPages")}
+                  </p>
+                  {advancedMetrics.topPages.length === 0 ? (
+                    <p className="mt-2 text-sm text-gray-500">-</p>
+                  ) : (
+                    <ul className="mt-2 space-y-1">
+                      {advancedMetrics.topPages.map((row) => (
+                        <li
+                          key={row.path}
+                          className="flex items-center justify-between"
+                        >
+                          <span className="text-sm text-gray-700">
+                            {row.path}
+                          </span>
+                          <span className="text-sm text-gray-700">
+                            {row.views}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="rounded-lg border border-gray-200 bg-white p-4">
+                  <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                    {t(lang, "common", "adminAdvancedMetricsDailySessions")}
+                  </p>
+                  {(() => {
+                    const points = advancedMetrics.dailySessions ?? [];
+                    if (!points.length) {
+                      return <p className="mt-2 text-sm text-gray-500">-</p>;
+                    }
+
+                    const max = points.reduce(
+                      (m, p) => (p.value > m ? p.value : m),
+                      0,
+                    );
+                    const safeMax = max > 0 ? max : 1;
+
+                    return (
+                      <div className="mt-3 space-y-2">
+                        {points.map((p) => {
+                          const width = Math.max(
+                            2,
+                            Math.round((p.value / safeMax) * 100),
+                          );
+
+                          return (
+                            <div
+                              key={p.date}
+                              className="flex items-center gap-3"
+                            >
+                              <div className="w-24 text-xs text-gray-600">
+                                {p.date}
+                              </div>
+                              <div className="flex-1 h-2 rounded-full bg-gray-100">
+                                <div
+                                  className="h-2 rounded-full bg-blue-500"
+                                  style={{ width: `${width}%` }}
+                                />
+                              </div>
+                              <div className="w-10 text-right text-xs text-gray-700">
+                                {p.value}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  })()}
+                </div>
+
+                <div className="rounded-lg border border-gray-200 bg-white p-4">
+                  <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                    {t(lang, "common", "adminAdvancedMetricsDailyPageViews")}
+                  </p>
+                  {(() => {
+                    const points = advancedMetrics.dailyPageViews ?? [];
+                    if (!points.length) {
+                      return <p className="mt-2 text-sm text-gray-500">-</p>;
+                    }
+
+                    const max = points.reduce(
+                      (m, p) => (p.value > m ? p.value : m),
+                      0,
+                    );
+                    const safeMax = max > 0 ? max : 1;
+
+                    return (
+                      <div className="mt-3 space-y-2">
+                        {points.map((p) => {
+                          const width = Math.max(
+                            2,
+                            Math.round((p.value / safeMax) * 100),
+                          );
+
+                          return (
+                            <div
+                              key={p.date}
+                              className="flex items-center gap-3"
+                            >
+                              <div className="w-24 text-xs text-gray-600">
+                                {p.date}
+                              </div>
+                              <div className="flex-1 h-2 rounded-full bg-gray-100">
+                                <div
+                                  className="h-2 rounded-full bg-green-500"
+                                  style={{ width: `${width}%` }}
+                                />
+                              </div>
+                              <div className="w-10 text-right text-xs text-gray-700">
+                                {p.value}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  })()}
+                </div>
+              </div>
+            </>
+          )}
         </section>
       )}
     </div>

@@ -4,6 +4,8 @@ import type { Repository } from 'typeorm';
 import { User } from './user.entity';
 import { WikiArticle } from '../wiki/wiki-article.entity';
 import { WikiArticleView } from '../wiki/wiki-article-view.entity';
+import { AnalyticsSession } from '../analytics/analytics-session.entity';
+import { AnalyticsPageViewDaily } from '../analytics/analytics-page-view-daily.entity';
 import {
   AdminMetricsService,
   type MetricsOverview,
@@ -14,6 +16,10 @@ describe('AdminMetricsService', () => {
   let usersRepo: jest.Mocked<Repository<User>>;
   let wikiArticleRepo: jest.Mocked<Repository<WikiArticle>>;
   let wikiArticleViewRepo: jest.Mocked<Repository<WikiArticleView>>;
+  let analyticsSessionRepo: jest.Mocked<Repository<AnalyticsSession>>;
+  let analyticsPageViewDailyRepo: jest.Mocked<
+    Repository<AnalyticsPageViewDaily>
+  >;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -37,6 +43,18 @@ describe('AdminMetricsService', () => {
             createQueryBuilder: jest.fn(),
           },
         },
+        {
+          provide: getRepositoryToken(AnalyticsSession),
+          useValue: {
+            createQueryBuilder: jest.fn(),
+          },
+        },
+        {
+          provide: getRepositoryToken(AnalyticsPageViewDaily),
+          useValue: {
+            createQueryBuilder: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
@@ -44,6 +62,10 @@ describe('AdminMetricsService', () => {
     usersRepo = module.get(getRepositoryToken(User));
     wikiArticleRepo = module.get(getRepositoryToken(WikiArticle));
     wikiArticleViewRepo = module.get(getRepositoryToken(WikiArticleView));
+    analyticsSessionRepo = module.get(getRepositoryToken(AnalyticsSession));
+    analyticsPageViewDailyRepo = module.get(
+      getRepositoryToken(AnalyticsPageViewDaily),
+    );
   });
 
   afterEach(() => {
@@ -148,5 +170,96 @@ describe('AdminMetricsService', () => {
         views: 12,
       },
     ]);
+  });
+
+  it('getAdvancedAnalytics returns aggregated sessions, sources, top pages and daily series', async () => {
+    const qbTotalSessions = {
+      select: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      getRawOne: jest.fn().mockResolvedValue({ total: '5' }),
+    };
+
+    const qbAvg = {
+      select: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      getRawOne: jest.fn().mockResolvedValue({ avgSeconds: '42' }),
+    };
+
+    const qbSessionSources = {
+      select: jest.fn().mockReturnThis(),
+      addSelect: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      groupBy: jest.fn().mockReturnThis(),
+      orderBy: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
+      getRawMany: jest
+        .fn()
+        .mockResolvedValue([{ source: 'direct', sessions: '5' }]),
+    };
+
+    const qbDailySessions = {
+      select: jest.fn().mockReturnThis(),
+      addSelect: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      groupBy: jest.fn().mockReturnThis(),
+      orderBy: jest.fn().mockReturnThis(),
+      getRawMany: jest
+        .fn()
+        .mockResolvedValue([{ date: '2025-12-22', value: '5' }]),
+    };
+
+    (analyticsSessionRepo.createQueryBuilder as jest.Mock)
+      .mockReturnValueOnce(qbTotalSessions)
+      .mockReturnValueOnce(qbAvg)
+      .mockReturnValueOnce(qbSessionSources)
+      .mockReturnValueOnce(qbDailySessions);
+
+    const qbPageViewSources = {
+      select: jest.fn().mockReturnThis(),
+      addSelect: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      groupBy: jest.fn().mockReturnThis(),
+      orderBy: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
+      getRawMany: jest
+        .fn()
+        .mockResolvedValue([{ source: 'direct', views: '9' }]),
+    };
+
+    const qbTopPages = {
+      select: jest.fn().mockReturnThis(),
+      addSelect: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      groupBy: jest.fn().mockReturnThis(),
+      orderBy: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
+      getRawMany: jest.fn().mockResolvedValue([{ path: '/', views: '9' }]),
+    };
+
+    const qbDailyPageViews = {
+      select: jest.fn().mockReturnThis(),
+      addSelect: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      groupBy: jest.fn().mockReturnThis(),
+      orderBy: jest.fn().mockReturnThis(),
+      getRawMany: jest
+        .fn()
+        .mockResolvedValue([{ date: '2025-12-22', value: '9' }]),
+    };
+
+    (analyticsPageViewDailyRepo.createQueryBuilder as jest.Mock)
+      .mockReturnValueOnce(qbPageViewSources)
+      .mockReturnValueOnce(qbTopPages)
+      .mockReturnValueOnce(qbDailyPageViews);
+
+    const res = await service.getAdvancedAnalytics(undefined, undefined, '10');
+
+    expect(res.totalSessions).toBe(5);
+    expect(res.avgSessionDurationSeconds).toBe(42);
+    expect(res.sessionSources).toEqual([{ source: 'direct', sessions: 5 }]);
+    expect(res.pageViewSources).toEqual([{ source: 'direct', views: 9 }]);
+    expect(res.topPages).toEqual([{ path: '/', views: 9 }]);
+    expect(res.dailySessions).toEqual([{ date: '2025-12-22', value: 5 }]);
+    expect(res.dailyPageViews).toEqual([{ date: '2025-12-22', value: 9 }]);
   });
 });

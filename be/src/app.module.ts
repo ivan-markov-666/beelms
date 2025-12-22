@@ -28,6 +28,9 @@ import { QuizOption } from './assessments/quiz-option.entity';
 import { QuizAttempt } from './assessments/quiz-attempt.entity';
 import { TasksModule } from './tasks/tasks.module';
 import { Task } from './tasks/task.entity';
+import { AnalyticsModule } from './analytics/analytics.module';
+import { AnalyticsSession } from './analytics/analytics-session.entity';
+import { AnalyticsPageViewDaily } from './analytics/analytics-page-view-daily.entity';
 
 @Module({
   imports: [
@@ -43,6 +46,8 @@ import { Task } from './tasks/task.entity';
         WikiArticleVersion,
         WikiArticleFeedback,
         WikiArticleView,
+        AnalyticsSession,
+        AnalyticsPageViewDaily,
         User,
         Course,
         CourseEnrollment,
@@ -61,6 +66,7 @@ import { Task } from './tasks/task.entity';
     }),
     WikiModule,
     AuthModule,
+    AnalyticsModule,
     CoursesModule,
     PaymentsModule,
     AssessmentsModule,

@@ -7,6 +7,8 @@ import { User } from './user.entity';
 import { WikiArticle } from '../wiki/wiki-article.entity';
 import { WikiArticleVersion } from '../wiki/wiki-article-version.entity';
 import { WikiArticleView } from '../wiki/wiki-article-view.entity';
+import { AnalyticsSession } from '../analytics/analytics-session.entity';
+import { AnalyticsPageViewDaily } from '../analytics/analytics-page-view-daily.entity';
 import { AccountService } from './account.service';
 import { AccountController } from './account.controller';
 import { JwtAuthGuard } from './jwt-auth.guard';
@@ -28,6 +30,8 @@ import { OptionalJwtAuthGuard } from './optional-jwt-auth.guard';
       WikiArticle,
       WikiArticleVersion,
       WikiArticleView,
+      AnalyticsSession,
+      AnalyticsPageViewDaily,
     ]),
     JwtModule.register({
       secret: process.env.JWT_SECRET ?? 'dev_jwt_secret_change_me',

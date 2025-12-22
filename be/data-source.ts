@@ -17,6 +17,8 @@ import { QuizQuestion } from './src/assessments/quiz-question.entity';
 import { QuizOption } from './src/assessments/quiz-option.entity';
 import { QuizAttempt } from './src/assessments/quiz-attempt.entity';
 import { Task } from './src/tasks/task.entity';
+import { AnalyticsSession } from './src/analytics/analytics-session.entity';
+import { AnalyticsPageViewDaily } from './src/analytics/analytics-page-view-daily.entity';
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -30,6 +32,8 @@ export const AppDataSource = new DataSource({
     WikiArticleVersion,
     WikiArticleFeedback,
     WikiArticleView,
+    AnalyticsSession,
+    AnalyticsPageViewDaily,
     User,
     Course,
     CourseEnrollment,
