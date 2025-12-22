@@ -23,7 +23,7 @@ _BMAD Story Spec | EPIC: EPIC-CORE-DX-CLI-INFRA | Status: 🟡 In Progress_
 
 | # | Criterion | Status |
 |---|-----------|--------|
-| AC-1 | CLI има ясна `--help` инструкция и валидира входните параметри | ⬜ |
+| AC-1 | CLI има ясна `--help` инструкция и валидира входните параметри | ✅ |
 | AC-2 | `--api-only` / `--no-web` създава проект без `web/` | ✅ |
 
 ### 3.2 Scaffold output correctness
@@ -38,13 +38,13 @@ _BMAD Story Spec | EPIC: EPIC-CORE-DX-CLI-INFRA | Status: 🟡 In Progress_
 
 | # | Criterion | Status |
 |---|-----------|--------|
-| AC-6 | `npm pack`/`prepack` гарантира, че `templates/` се включва и CLI работи и извън monorepo (без fallback към `be/`/`fe/`) | ⬜ |
+| AC-6 | `npm pack`/`prepack` гарантира, че `templates/` се включва и CLI работи и извън monorepo (без fallback към `be/`/`fe/`) | ✅ |
 
 ### 3.4 Smoke test
 
 | # | Criterion | Status |
 |---|-----------|--------|
-| AC-7 | `npm --prefix tools/create-beelms-app run smoke` минава стабилно (Windows-friendly) | ⬜ |
+| AC-7 | `npm --prefix tools/create-beelms-app run smoke` минава стабилно (Windows-friendly) | ✅ |
 
 ---
 
