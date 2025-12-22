@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { WikiArticle } from './wiki-article.entity';
 import { WikiArticleVersion } from './wiki-article-version.entity';
 import { WikiArticleFeedback } from './wiki-article-feedback.entity';
+import { WikiArticleView } from './wiki-article-view.entity';
 import { WikiService } from './wiki.service';
 import { WikiController } from './wiki.controller';
 import { AuthModule } from '../auth/auth.module';
@@ -15,6 +16,7 @@ import { User } from '../auth/user.entity';
       WikiArticle,
       WikiArticleVersion,
       WikiArticleFeedback,
+      WikiArticleView,
       User,
     ]),
     AuthModule,

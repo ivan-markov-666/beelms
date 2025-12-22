@@ -280,6 +280,12 @@ export const messages: Messages = {
       adminMetricsUserActivityArticleCreatedLink: "Виж новите статии (Wiki)",
       adminMetricsUserActivityArticleUpdatedLink:
         "Виж обновените статии (Wiki)",
+      adminWikiViewsTitle: "Гледания на Wiki статии",
+      adminWikiViewsSubtitle:
+        "Агрегирани гледания по ден (без лични данни) за избрания период.",
+      adminWikiViewsTotal: "Общо гледания",
+      adminWikiViewsTopArticles: "Топ статии",
+      adminWikiViewsDaily: "Гледания по дни",
       adminMetricsNetUsersChangeZero:
         "Няма нетна промяна в броя потребители за избрания период.",
       adminMetricsNetUsersChangePositiveSuffix:
@@ -569,6 +575,12 @@ export const messages: Messages = {
       adminMetricsUserActivityArticleCreatedLink: "View new articles (Wiki)",
       adminMetricsUserActivityArticleUpdatedLink:
         "View updated articles (Wiki)",
+      adminWikiViewsTitle: "Wiki article views",
+      adminWikiViewsSubtitle:
+        "Daily aggregated views (no personal data) for the selected period.",
+      adminWikiViewsTotal: "Total views",
+      adminWikiViewsTopArticles: "Top articles",
+      adminWikiViewsDaily: "Daily views",
       adminMetricsNetUsersChangeZero:
         "No net change in users for the selected period.",
       adminMetricsNetUsersChangePositiveSuffix:
@@ -848,6 +860,12 @@ export const messages: Messages = {
         "Neue Artikel anzeigen (Wiki)",
       adminMetricsUserActivityArticleUpdatedLink:
         "Aktualisierte Artikel anzeigen (Wiki)",
+      adminWikiViewsTitle: "Wiki-Artikelaufrufe",
+      adminWikiViewsSubtitle:
+        "Täglich aggregierte Aufrufe (keine personenbezogenen Daten) für den ausgewählten Zeitraum.",
+      adminWikiViewsTotal: "Aufrufe gesamt",
+      adminWikiViewsTopArticles: "Top-Artikel",
+      adminWikiViewsDaily: "Aufrufe pro Tag",
       adminMetricsNetUsersChangeZero:
         "Keine Nettoänderung der Benutzerzahl für den ausgewählten Zeitraum.",
       adminMetricsNetUsersChangePositiveSuffix:

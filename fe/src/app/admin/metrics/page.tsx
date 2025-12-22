@@ -48,6 +48,12 @@ type ActivityPeriodStats = {
   articleUpdated: number;
 };
 
+type AdminWikiViewsMetrics = {
+  totalViews: number;
+  topArticles: Array<{ slug: string; views: number }>;
+  daily: Array<{ date: string; views: number }>;
+};
+
 export default function AdminMetricsPage() {
   const lang = useCurrentLang();
   const [metrics, setMetrics] = useState<MetricsOverview | null>(null);
@@ -55,6 +61,9 @@ export default function AdminMetricsPage() {
   const [error, setError] = useState<string | null>(null);
   const [userStats, setUserStats] = useState<AdminUsersStats | null>(null);
   const [wikiStats, setWikiStats] = useState<WikiStats | null>(null);
+  const [wikiViews, setWikiViews] = useState<AdminWikiViewsMetrics | null>(
+    null,
+  );
   const [userTrend, setUserTrend] = useState<UsersTrendPoint[]>([]);
   const [activityStats, setActivityStats] =
     useState<ActivityPeriodStats | null>(null);
@@ -178,6 +187,7 @@ export default function AdminMetricsPage() {
           if (!cancelled) {
             setActivityStats(null);
             setUserTrend([]);
+            setWikiViews(null);
           }
           return;
         }
@@ -212,9 +222,13 @@ export default function AdminMetricsPage() {
         }
 
         const paramsString = params.toString();
-        const url = paramsString
+        const activityUrl = paramsString
           ? `${API_BASE_URL}/admin/metrics/activity-summary?${paramsString}`
           : `${API_BASE_URL}/admin/metrics/activity-summary`;
+
+        const wikiViewsUrl = paramsString
+          ? `${API_BASE_URL}/admin/metrics/wiki-views?${paramsString}`
+          : `${API_BASE_URL}/admin/metrics/wiki-views`;
 
         type ActivitySummaryResponse = {
           userRegistered: number;
@@ -228,42 +242,62 @@ export default function AdminMetricsPage() {
           }[];
         };
 
-        const res = await fetch(url, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const [activityRes, wikiViewsRes] = await Promise.all([
+          fetch(activityUrl, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }),
+          fetch(wikiViewsUrl, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }),
+        ]);
 
-        if (!res.ok) {
+        if (!activityRes.ok) {
           if (!cancelled) {
             setActivityStats(null);
             setUserTrend([]);
           }
-          return;
         }
 
-        const summary = (await res.json()) as ActivitySummaryResponse;
+        const summary = activityRes.ok
+          ? ((await activityRes.json()) as ActivitySummaryResponse)
+          : null;
 
         if (cancelled) return;
 
-        setActivityStats({
-          userRegistered: summary.userRegistered,
-          userDeactivated: summary.userDeactivated,
-          articleCreated: summary.articleCreated,
-          articleUpdated: summary.articleUpdated,
-        });
+        const wikiViewsData = wikiViewsRes.ok
+          ? ((await wikiViewsRes.json()) as AdminWikiViewsMetrics)
+          : null;
 
-        setUserTrend(
-          (summary.userTrend ?? []).map((point) => ({
-            month: point.month,
-            registered: point.userRegistered,
-            deactivated: point.userDeactivated,
-          })),
-        );
+        setWikiViews(wikiViewsData);
+
+        if (summary) {
+          setActivityStats({
+            userRegistered: summary.userRegistered,
+            userDeactivated: summary.userDeactivated,
+            articleCreated: summary.articleCreated,
+            articleUpdated: summary.articleUpdated,
+          });
+
+          setUserTrend(
+            (summary.userTrend ?? []).map((point) => ({
+              month: point.month,
+              registered: point.userRegistered,
+              deactivated: point.userDeactivated,
+            })),
+          );
+        } else {
+          setActivityStats(null);
+          setUserTrend([]);
+        }
       } catch {
         if (!cancelled) {
           setActivityStats(null);
           setUserTrend([]);
+          setWikiViews(null);
         }
       }
     };
@@ -971,6 +1005,103 @@ export default function AdminMetricsPage() {
                 </div>
               </div>
             </div>
+          </div>
+        </section>
+      )}
+
+      {/* Wiki views metrics */}
+      {wikiViews && !loading && !error && (
+        <section className="space-y-3">
+          <header className="space-y-1">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
+              {t(lang, "common", "adminWikiViewsTitle")}
+            </h2>
+            <p className="text-xs text-gray-600">
+              {t(lang, "common", "adminWikiViewsSubtitle")}
+            </p>
+          </header>
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div className="rounded-lg border border-gray-200 bg-white p-4">
+              <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                {t(lang, "common", "adminWikiViewsTotal")}
+              </p>
+              <p className="mt-1 text-2xl font-semibold text-gray-900">
+                {wikiViews.totalViews}
+              </p>
+            </div>
+
+            <div className="rounded-lg border border-gray-200 bg-white p-4 md:col-span-2">
+              <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                {t(lang, "common", "adminWikiViewsTopArticles")}
+              </p>
+              {wikiViews.topArticles.length === 0 ? (
+                <p className="mt-2 text-sm text-gray-500">-</p>
+              ) : (
+                <ul className="mt-2 space-y-1">
+                  {wikiViews.topArticles.map((row) => (
+                    <li
+                      key={row.slug}
+                      className="flex items-center justify-between"
+                    >
+                      <Link
+                        href={`/wiki/${encodeURIComponent(row.slug)}`}
+                        className="text-sm text-green-700 hover:text-green-800 hover:underline"
+                      >
+                        {row.slug}
+                      </Link>
+                      <span className="text-sm text-gray-700">{row.views}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+
+          <div className="rounded-lg border border-gray-200 bg-white p-4">
+            <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+              {t(lang, "common", "adminWikiViewsDaily")}
+            </p>
+            {(() => {
+              const points = wikiViews.daily ?? [];
+              if (!points.length) {
+                return <p className="mt-2 text-sm text-gray-500">-</p>;
+              }
+
+              const max = points.reduce(
+                (m, p) => (p.views > m ? p.views : m),
+                0,
+              );
+              const safeMax = max > 0 ? max : 1;
+
+              return (
+                <div className="mt-3 space-y-2">
+                  {points.map((p) => {
+                    const width = Math.max(
+                      2,
+                      Math.round((p.views / safeMax) * 100),
+                    );
+
+                    return (
+                      <div key={p.date} className="flex items-center gap-3">
+                        <div className="w-24 text-xs text-gray-600">
+                          {p.date}
+                        </div>
+                        <div className="flex-1 h-2 rounded-full bg-gray-100">
+                          <div
+                            className="h-2 rounded-full bg-green-500"
+                            style={{ width: `${width}%` }}
+                          />
+                        </div>
+                        <div className="w-10 text-right text-xs text-gray-700">
+                          {p.views}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })()}
           </div>
         </section>
       )}

@@ -3,6 +3,7 @@ import { DataSource } from 'typeorm';
 import { WikiArticle } from './src/wiki/wiki-article.entity';
 import { WikiArticleVersion } from './src/wiki/wiki-article-version.entity';
 import { WikiArticleFeedback } from './src/wiki/wiki-article-feedback.entity';
+import { WikiArticleView } from './src/wiki/wiki-article-view.entity';
 import { User } from './src/auth/user.entity';
 import { Course } from './src/courses/course.entity';
 import { CourseEnrollment } from './src/courses/course-enrollment.entity';
@@ -28,6 +29,7 @@ export const AppDataSource = new DataSource({
     WikiArticle,
     WikiArticleVersion,
     WikiArticleFeedback,
+    WikiArticleView,
     User,
     Course,
     CourseEnrollment,

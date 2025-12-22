@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { WikiArticle } from './wiki/wiki-article.entity';
 import { WikiArticleVersion } from './wiki/wiki-article-version.entity';
 import { WikiArticleFeedback } from './wiki/wiki-article-feedback.entity';
+import { WikiArticleView } from './wiki/wiki-article-view.entity';
 import { WikiModule } from './wiki/wiki.module';
 import { AuthModule } from './auth/auth.module';
 import { User } from './auth/user.entity';
@@ -41,6 +42,7 @@ import { Task } from './tasks/task.entity';
         WikiArticle,
         WikiArticleVersion,
         WikiArticleFeedback,
+        WikiArticleView,
         User,
         Course,
         CourseEnrollment,
