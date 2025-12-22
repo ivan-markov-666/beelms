@@ -5,6 +5,7 @@ import { WikiService } from './wiki.service';
 import { WikiArticle } from './wiki-article.entity';
 import { WikiArticleVersion } from './wiki-article-version.entity';
 import { WikiArticleFeedback } from './wiki-article-feedback.entity';
+import { WikiArticleView } from './wiki-article-view.entity';
 import { User } from '../auth/user.entity';
 
 /* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
@@ -60,6 +61,15 @@ describe('WikiService', () => {
             count: jest.fn(),
             save: jest.fn(),
             create: jest.fn((entity) => entity),
+          },
+        },
+        {
+          provide: getRepositoryToken(WikiArticleView),
+          useValue: {
+            findOne: jest.fn(),
+            save: jest.fn(),
+            create: jest.fn((entity) => entity),
+            delete: jest.fn(),
           },
         },
         {

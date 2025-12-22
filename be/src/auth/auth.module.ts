@@ -6,6 +6,7 @@ import { AuthController } from './auth.controller';
 import { User } from './user.entity';
 import { WikiArticle } from '../wiki/wiki-article.entity';
 import { WikiArticleVersion } from '../wiki/wiki-article-version.entity';
+import { WikiArticleView } from '../wiki/wiki-article-view.entity';
 import { AccountService } from './account.service';
 import { AccountController } from './account.controller';
 import { JwtAuthGuard } from './jwt-auth.guard';
@@ -22,7 +23,12 @@ import { OptionalJwtAuthGuard } from './optional-jwt-auth.guard';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, WikiArticle, WikiArticleVersion]),
+    TypeOrmModule.forFeature([
+      User,
+      WikiArticle,
+      WikiArticleVersion,
+      WikiArticleView,
+    ]),
     JwtModule.register({
       secret: process.env.JWT_SECRET ?? 'dev_jwt_secret_change_me',
       signOptions: {

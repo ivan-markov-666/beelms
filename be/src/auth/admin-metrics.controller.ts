@@ -5,6 +5,7 @@ import {
   AdminMetricsService,
   type MetricsOverview,
   type AdminMetricsActivitySummary,
+  type AdminWikiViewsMetrics,
 } from './admin-metrics.service';
 
 @Controller('admin/metrics')
@@ -23,5 +24,14 @@ export class AdminMetricsController {
     @Query('to') to?: string,
   ): Promise<AdminMetricsActivitySummary> {
     return this.metricsService.getActivitySummary(from, to);
+  }
+
+  @Get('wiki-views')
+  async getWikiViews(
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+    @Query('limit') limit?: string,
+  ): Promise<AdminWikiViewsMetrics> {
+    return this.metricsService.getWikiViews(from, to, limit);
   }
 }

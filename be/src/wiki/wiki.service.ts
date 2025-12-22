@@ -6,10 +6,11 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import * as fs from 'fs';
 import * as path from 'path';
-import { In, Repository } from 'typeorm';
+import { In, LessThan, Repository } from 'typeorm';
 import { WikiArticle } from './wiki-article.entity';
 import { WikiArticleVersion } from './wiki-article-version.entity';
 import { WikiArticleFeedback } from './wiki-article-feedback.entity';
+import { WikiArticleView } from './wiki-article-view.entity';
 import { User } from '../auth/user.entity';
 import { WikiListItemDto } from './dto/wiki-list-item.dto';
 import { AdminWikiListItemDto } from './dto/admin-wiki-list-item.dto';
@@ -69,9 +70,70 @@ export class WikiService {
     private readonly versionRepo: Repository<WikiArticleVersion>,
     @InjectRepository(WikiArticleFeedback)
     private readonly feedbackRepo: Repository<WikiArticleFeedback>,
+    @InjectRepository(WikiArticleView)
+    private readonly viewRepo: Repository<WikiArticleView>,
     @InjectRepository(User)
     private readonly usersRepo: Repository<User>,
   ) {}
+
+  private lastViewsRetentionRunDate: string | null = null;
+
+  private formatUtcDate(date: Date): string {
+    return date.toISOString().slice(0, 10);
+  }
+
+  private async cleanupOldViewsIfNeeded(todayIso: string): Promise<void> {
+    if (this.lastViewsRetentionRunDate === todayIso) {
+      return;
+    }
+
+    this.lastViewsRetentionRunDate = todayIso;
+
+    const cutoff = new Date();
+    cutoff.setUTCDate(cutoff.getUTCDate() - 180);
+    const cutoffIso = this.formatUtcDate(cutoff);
+
+    await this.viewRepo.delete({
+      viewDate: LessThan(cutoffIso),
+    });
+  }
+
+  private async recordArticleView(
+    articleId: string,
+    language: string,
+  ): Promise<void> {
+    const todayIso = this.formatUtcDate(new Date());
+
+    try {
+      await this.cleanupOldViewsIfNeeded(todayIso);
+
+      const existing = await this.viewRepo.findOne({
+        where: {
+          articleId,
+          language,
+          viewDate: todayIso,
+        },
+      });
+
+      if (existing) {
+        existing.viewCount = (existing.viewCount ?? 0) + 1;
+        await this.viewRepo.save(existing);
+        return;
+      }
+
+      await this.viewRepo.save(
+        this.viewRepo.create({
+          articleId,
+          language,
+          viewDate: todayIso,
+          viewCount: 1,
+        }),
+      );
+    } catch {
+      // best-effort tracking; do not break page rendering
+      return;
+    }
+  }
 
   async submitArticleFeedback(
     slug: string,
@@ -462,6 +524,9 @@ export class WikiService {
     } else {
       languageStatus = 'draft';
     }
+
+    // Privacy-friendly view tracking: aggregate by (articleId, language, day)
+    void this.recordArticleView(article.id, latest.language);
 
     return {
       id: article.id,

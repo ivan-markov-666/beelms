@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { User } from './user.entity';
 import { WikiArticle } from '../wiki/wiki-article.entity';
+import { WikiArticleView } from '../wiki/wiki-article-view.entity';
 
 export type MetricsOverview = {
   totalUsers: number;
@@ -32,6 +33,22 @@ export type AdminMetricsActivitySummary = {
   userTrend: AdminMetricsUserTrendPoint[];
 };
 
+export type AdminWikiViewsTopArticle = {
+  slug: string;
+  views: number;
+};
+
+export type AdminWikiViewsDailyPoint = {
+  date: string;
+  views: number;
+};
+
+export type AdminWikiViewsMetrics = {
+  totalViews: number;
+  topArticles: AdminWikiViewsTopArticle[];
+  daily: AdminWikiViewsDailyPoint[];
+};
+
 @Injectable()
 export class AdminMetricsService {
   constructor(
@@ -39,7 +56,13 @@ export class AdminMetricsService {
     private readonly usersRepo: Repository<User>,
     @InjectRepository(WikiArticle)
     private readonly wikiArticleRepo: Repository<WikiArticle>,
+    @InjectRepository(WikiArticleView)
+    private readonly wikiArticleViewRepo: Repository<WikiArticleView>,
   ) {}
+
+  private formatUtcDate(date: Date): string {
+    return date.toISOString().slice(0, 10);
+  }
 
   async getOverview(): Promise<MetricsOverview> {
     const totalUsers = await this.usersRepo.count();
@@ -88,6 +111,75 @@ export class AdminMetricsService {
       return null;
     }
     return date;
+  }
+
+  async getWikiViews(
+    from?: string,
+    to?: string,
+    limit?: string,
+  ): Promise<AdminWikiViewsMetrics> {
+    const parsedFrom = this.parseDateParam(from);
+    const parsedTo = this.parseDateParam(to);
+
+    const now = new Date();
+    const toDate = parsedTo ?? now;
+    const fromDate =
+      parsedFrom ?? new Date(toDate.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+    const fromIso = this.formatUtcDate(fromDate);
+    const toIso = this.formatUtcDate(toDate);
+
+    const safeLimit = (() => {
+      const n = limit ? Number(limit) : 10;
+      if (!Number.isFinite(n) || n <= 0) return 10;
+      return Math.min(50, Math.floor(n));
+    })();
+
+    const totalRow = await this.wikiArticleViewRepo
+      .createQueryBuilder('v')
+      .select('COALESCE(SUM(v.viewCount), 0)', 'total')
+      .where('v.viewDate BETWEEN :from AND :to', { from: fromIso, to: toIso })
+      .getRawOne<{ total: string }>();
+
+    const totalViews = Number(totalRow?.total ?? 0);
+
+    const topRows = await this.wikiArticleViewRepo
+      .createQueryBuilder('v')
+      .innerJoin(WikiArticle, 'a', 'a.id = v.articleId')
+      .select('a.slug', 'slug')
+      .addSelect('SUM(v.viewCount)', 'views')
+      .where('v.viewDate BETWEEN :from AND :to', { from: fromIso, to: toIso })
+      .groupBy('a.slug')
+      .orderBy('views', 'DESC')
+      .limit(safeLimit)
+      .getRawMany<{ slug: string; views: string }>();
+
+    const topArticles: AdminWikiViewsTopArticle[] = (topRows ?? []).map(
+      (r) => ({
+        slug: r.slug,
+        views: Number(r.views ?? 0),
+      }),
+    );
+
+    const dailyRows = await this.wikiArticleViewRepo
+      .createQueryBuilder('v')
+      .select('v.viewDate', 'date')
+      .addSelect('SUM(v.viewCount)', 'views')
+      .where('v.viewDate BETWEEN :from AND :to', { from: fromIso, to: toIso })
+      .groupBy('v.viewDate')
+      .orderBy('v.viewDate', 'ASC')
+      .getRawMany<{ date: string; views: string }>();
+
+    const daily: AdminWikiViewsDailyPoint[] = (dailyRows ?? []).map((r) => ({
+      date: r.date,
+      views: Number(r.views ?? 0),
+    }));
+
+    return {
+      totalViews,
+      topArticles,
+      daily,
+    };
   }
 
   // Small helper to build a TypeORM range condition for date fields
