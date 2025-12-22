@@ -13,12 +13,21 @@ jest.mock("next/navigation", () => {
   };
 });
 
-function mockFetchOnce(data: unknown, ok = true, status = 200) {
-  global.fetch = jest.fn().mockResolvedValue({
-    ok,
-    status,
-    json: async () => data,
-  } as unknown as Response);
+function mockFetchSequence(
+  responses: Array<{ data: unknown; ok?: boolean; status?: number }>,
+) {
+  global.fetch = jest.fn().mockImplementation(async () => {
+    const next = responses.shift();
+    if (!next) {
+      throw new Error("Unexpected fetch call");
+    }
+
+    return {
+      ok: next.ok ?? true,
+      status: next.status ?? 200,
+      json: async () => next.data,
+    } as unknown as Response;
+  });
 }
 
 describe("WikiArticlePage", () => {
@@ -27,19 +36,29 @@ describe("WikiArticlePage", () => {
   });
 
   it("renders wiki article detail from API", async () => {
-    mockFetchOnce(
+    mockFetchSequence([
       {
-        id: "1",
-        slug: "getting-started",
-        language: "bg",
-        title: "Начало с BeeLMS",
-        content: "Съдържание на статията",
-        status: "active",
-        updatedAt: "2025-11-25T00:00:00.000Z",
+        data: {
+          id: "1",
+          slug: "getting-started",
+          language: "bg",
+          title: "Начало с BeeLMS",
+          content: "Съдържание на статията",
+          status: "active",
+          updatedAt: "2025-11-25T00:00:00.000Z",
+        },
       },
-      true,
-      200,
-    );
+      {
+        data: {
+          helpfulYes: 0,
+          helpfulNo: 0,
+          total: 0,
+        },
+      },
+      {
+        data: [],
+      },
+    ]);
 
     const ui = await WikiArticlePage({
       params: { slug: "getting-started" },
@@ -56,19 +75,29 @@ describe("WikiArticlePage", () => {
   });
 
   it("passes lang query param to the API when provided", async () => {
-    mockFetchOnce(
+    mockFetchSequence([
       {
-        id: "1",
-        slug: "getting-started",
-        language: "en",
-        title: "Getting started with BeeLMS (EN)",
-        content: "Article content EN",
-        status: "active",
-        updatedAt: "2025-11-25T00:00:00.000Z",
+        data: {
+          id: "1",
+          slug: "getting-started",
+          language: "en",
+          title: "Getting started with BeeLMS (EN)",
+          content: "Article content EN",
+          status: "active",
+          updatedAt: "2025-11-25T00:00:00.000Z",
+        },
       },
-      true,
-      200,
-    );
+      {
+        data: {
+          helpfulYes: 0,
+          helpfulNo: 0,
+          total: 0,
+        },
+      },
+      {
+        data: [],
+      },
+    ]);
 
     const ui = await WikiArticlePage({
       params: { slug: "getting-started" },
@@ -76,7 +105,7 @@ describe("WikiArticlePage", () => {
     });
     render(ui);
 
-    expect(global.fetch).toHaveBeenCalledTimes(1);
+    expect(global.fetch).toHaveBeenCalledTimes(3);
     const [url] = (global.fetch as jest.Mock).mock.calls[0];
     expect(url).toContain("/api/wiki/articles/getting-started");
     expect(url).toContain("lang=en");
@@ -85,7 +114,16 @@ describe("WikiArticlePage", () => {
   it("calls notFound when article is missing (404)", async () => {
     const notFoundMock = notFound as unknown as jest.Mock;
 
-    mockFetchOnce({}, false, 404);
+    mockFetchSequence([
+      {
+        data: {},
+        ok: false,
+        status: 404,
+      },
+      {
+        data: {},
+      },
+    ]);
 
     await expect(
       WikiArticlePage({

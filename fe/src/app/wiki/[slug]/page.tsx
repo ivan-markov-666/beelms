@@ -5,6 +5,11 @@ import { WikiArticleMeta } from "../_components/wiki-article-meta";
 import { WikiArticleActions } from "../_components/wiki-article-actions";
 import { normalizeLang, type SupportedLang } from "../../../i18n/config";
 import { WikiMarkdown } from "../_components/wiki-markdown";
+import { WikiArticleFeedback } from "../_components/wiki-article-feedback";
+import {
+  WikiRelatedArticles,
+  type WikiRelatedArticle,
+} from "../_components/wiki-related-articles";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000";
@@ -19,6 +24,14 @@ type WikiArticleDetail = {
   status: string;
   updatedAt: string;
 };
+
+type WikiArticleFeedbackSummary = {
+  helpfulYes: number;
+  helpfulNo: number;
+  total: number;
+};
+
+type WikiRelatedArticlesResponse = WikiRelatedArticle[];
 
 function normalizeMarkdownContent(raw: string): string {
   if (!raw) {
@@ -78,6 +91,55 @@ async function fetchWikiArticle(
   return res.json();
 }
 
+async function fetchWikiArticleFeedbackSummary(
+  slug: string,
+): Promise<WikiArticleFeedbackSummary | undefined> {
+  try {
+    const url = new URL(
+      `${API_BASE_URL}/api/wiki/articles/${slug}/feedback/summary`,
+    );
+
+    const res = await fetch(url.toString(), {
+      cache: "no-store",
+    });
+
+    if (!res.ok) {
+      return undefined;
+    }
+
+    return res.json();
+  } catch {
+    return undefined;
+  }
+}
+
+async function fetchWikiRelatedArticles(
+  slug: string,
+  lang?: string,
+): Promise<WikiRelatedArticlesResponse> {
+  try {
+    const url = new URL(`${API_BASE_URL}/api/wiki/articles/${slug}/related`);
+
+    if (lang) {
+      url.searchParams.set("lang", lang);
+    }
+
+    url.searchParams.set("limit", "6");
+
+    const res = await fetch(url.toString(), {
+      cache: "no-store",
+    });
+
+    if (!res.ok) {
+      return [];
+    }
+
+    return res.json();
+  } catch {
+    return [];
+  }
+}
+
 export default async function WikiArticlePage(props: {
   params: { slug: string } | Promise<{ slug: string }>;
   searchParams?:
@@ -94,6 +156,10 @@ export default async function WikiArticlePage(props: {
   const apiLang = rawLang || undefined;
 
   const article = await fetchWikiArticle(resolvedParams.slug, apiLang);
+  const feedbackSummary = await fetchWikiArticleFeedbackSummary(
+    resolvedParams.slug,
+  );
+  const related = await fetchWikiRelatedArticles(resolvedParams.slug, apiLang);
 
   const markdownContent = normalizeMarkdownContent(article.content);
 
@@ -118,6 +184,14 @@ export default async function WikiArticlePage(props: {
       >
         <WikiMarkdown content={markdownContent} />
       </article>
+
+      <WikiArticleFeedback
+        slug={resolvedParams.slug}
+        lang={uiLang}
+        initialSummary={feedbackSummary}
+      />
+
+      <WikiRelatedArticles lang={uiLang} items={related} />
     </WikiMain>
   );
 }

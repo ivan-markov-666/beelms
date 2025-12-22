@@ -4,6 +4,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { WikiService } from './wiki.service';
 import { WikiArticle } from './wiki-article.entity';
 import { WikiArticleVersion } from './wiki-article-version.entity';
+import { WikiArticleFeedback } from './wiki-article-feedback.entity';
 import { User } from '../auth/user.entity';
 
 /* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
@@ -50,6 +51,15 @@ describe('WikiService', () => {
             save: jest.fn(),
             create: jest.fn((entity) => entity),
             remove: jest.fn(),
+          },
+        },
+        {
+          provide: getRepositoryToken(WikiArticleFeedback),
+          useValue: {
+            findOne: jest.fn(),
+            count: jest.fn(),
+            save: jest.fn(),
+            create: jest.fn((entity) => entity),
           },
         },
         {

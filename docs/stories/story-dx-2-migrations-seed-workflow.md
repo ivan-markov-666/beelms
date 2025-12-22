@@ -1,6 +1,6 @@
 # STORY-DX-2: Migrations / Seed workflow (DX)
 
-_BMAD Story Spec | EPIC: EPIC-CORE-DX-CLI-INFRA | Status: 🟡 In Progress_
+_BMAD Story Spec | EPIC: EPIC-CORE-DX-CLI-INFRA | Status: ✅ Implemented_
 
 ---
 
@@ -55,21 +55,23 @@ _BMAD Story Spec | EPIC: EPIC-CORE-DX-CLI-INFRA | Status: 🟡 In Progress_
 
 ## 4. Current State in Codebase
 
-- Има TypeORM CLI wiring в `be/package.json`:
-  - `migration:run`, `migration:revert`, `migration:show`, `migration:check`
-- Docker има `migrate` service, който се изпълнява преди `api` (`docker-compose.yml`).
-- Seed скриптове:
+- Root-level npm scripts: `npm run db:migrate`, `db:migrate:revert`, `db:migrate:show`, `db:migrate:check`, `db:seed`, `db:seed:wiki`, `db:seed:courses` (thin wrappers към `be/`).
+- Docker `migrate` service гарантира миграциите да вървят преди API (`docker-compose.yml`).
+- Seed scripts:
   - `be/src/seed/wiki.seed.ts`
   - `be/src/seed/courses.seed.ts`
-  - текущо се изпълняват като compiled JS (`node dist/...`), което изисква `npm run build` ако се пускат от host.
+  - `package.json` има `seed:wiki:dev` и `seed:courses:dev`, които ползват ts-node → няма нужда от `npm run build`.
+- Seeds са идемпотентни (използват `onConflict`/checks вътре в repo).
+- `be/data-source.ts` включва всички entity-та (Courses, Tasks, Quizzes, др.), така че `migration:generate` покрива целия модел.
+- `README.md` има секция “DB migrations & seed” с copy/paste команди за Docker и host.
 
 ---
 
 ## 5. Implementation Notes
 
-- Root-level scripts трябва да са thin wrappers към `npm --prefix be run ...`.
-- За seed в dev да се добавят отделни scripts (напр. `seed:wiki:dev`) които изпълняват `src/seed/*.ts` през ts-node.
-- `be/data-source.ts` трябва да се поддържа синхронизиран с реално използваните entities, за да работи `migration:generate` коректно.
+- Поддържай wrapper скриптовете синхронизирани с `be/package.json`, когато добавяме нови миграционни/seed команди.
+- При добавяне на нови entity-та → актуализирай `be/data-source.ts` преди `migration:generate`.
+- Ако се появят нови seed сценарии, следвай същия шаблон (`seed:<name>:dev` → ts-node, `seed:<name>` → dist).
 
 ---
 
@@ -78,3 +80,4 @@ _BMAD Story Spec | EPIC: EPIC-CORE-DX-CLI-INFRA | Status: 🟡 In Progress_
 | Date | Author | Change |
 |------|--------|--------|
 | 2025-12-22 | Cascade | Created story spec for DX-2 |
+| 2025-12-22 | Cascade | Marked ACs as done (scripts + docs shipped) |

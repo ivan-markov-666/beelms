@@ -29,6 +29,7 @@ const ADMIN_API_BASE_URL =
 type WikiArticleDetail = {
   id: string;
   slug: string;
+  tags?: string[];
   language: string;
   title: string;
   subtitle?: string;
@@ -43,6 +44,7 @@ type FormState = {
   language: string;
   title: string;
   subtitle: string;
+  tags: string;
   content: string;
   status: string;
 };
@@ -114,6 +116,32 @@ function formatDateTime(dateIso: string): string {
   } catch {
     return dateIso;
   }
+}
+
+function normalizeTagsInput(raw: string): string[] {
+  const parts = (raw ?? "")
+    .split(",")
+    .map((t) => t.trim())
+    .filter(Boolean);
+
+  const seen = new Set<string>();
+  const result: string[] = [];
+
+  for (const tag of parts) {
+    const key = tag.toLowerCase();
+    if (seen.has(key)) {
+      continue;
+    }
+    seen.add(key);
+    result.push(tag);
+  }
+
+  return result;
+}
+
+function formatTagsForInput(tags: string[] | undefined): string {
+  const cleaned = (tags ?? []).map((t) => (t ?? "").trim()).filter(Boolean);
+  return cleaned.join(", ");
 }
 
 function renderDiff(oldText: string, newText: string) {
@@ -260,6 +288,7 @@ export default function AdminWikiEditPage() {
               language: langToLoad,
               title: "",
               subtitle: "",
+              tags: "",
               content: "",
               status: "draft",
             };
@@ -288,6 +317,7 @@ export default function AdminWikiEditPage() {
           language: data.language ?? currentLanguage ?? "bg",
           title: data.title ?? "",
           subtitle: data.subtitle ?? "",
+          tags: formatTagsForInput(data.tags),
           content: data.content ?? "",
           status: effectiveStatus,
         };
@@ -450,6 +480,7 @@ export default function AdminWikiEditPage() {
             language: newLang,
             title: "",
             subtitle: "",
+            tags: "",
             content: "",
             status: "draft",
           },
@@ -479,6 +510,7 @@ export default function AdminWikiEditPage() {
       form.language !== lastSavedForm.language ||
       form.title !== lastSavedForm.title ||
       form.subtitle !== lastSavedForm.subtitle ||
+      form.tags !== lastSavedForm.tags ||
       form.content !== lastSavedForm.content ||
       form.status !== lastSavedForm.status);
 
@@ -595,6 +627,7 @@ export default function AdminWikiEditPage() {
             language: form.language,
             title: form.title,
             subtitle: form.subtitle,
+            tags: normalizeTagsInput(form.tags),
             content: form.content,
             status: form.status,
           }),
@@ -628,6 +661,7 @@ export default function AdminWikiEditPage() {
         language: updated.language ?? form.language,
         title: updated.title ?? form.title,
         subtitle: updated.subtitle ?? form.subtitle,
+        tags: formatTagsForInput(updated.tags) || form.tags,
         content: updated.content ?? form.content,
         status: effectiveStatus,
       };
@@ -949,6 +983,7 @@ export default function AdminWikiEditPage() {
           language: updated.language ?? current?.language ?? "bg",
           title: updated.title ?? current?.title ?? "",
           subtitle: updated.subtitle ?? current?.subtitle ?? "",
+          tags: formatTagsForInput(updated.tags) || current?.tags || "",
           content: updated.content ?? current?.content ?? "",
           status: effectiveStatus,
         };
@@ -1202,6 +1237,25 @@ export default function AdminWikiEditPage() {
                 value={form.subtitle}
                 onChange={handleChange("subtitle")}
               />
+            </div>
+
+            <div className="space-y-1">
+              <label
+                htmlFor="tags"
+                className="block text-sm font-medium text-zinc-800"
+              >
+                Тагове (разделени със запетая)
+              </label>
+              <input
+                id="tags"
+                type="text"
+                className="block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                value={form.tags}
+                onChange={handleChange("tags")}
+              />
+              <p className="text-xs text-zinc-500">
+                Пример: <code>intro, basics, setup</code>
+              </p>
             </div>
 
             <div className="space-y-1">

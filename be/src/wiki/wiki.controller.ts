@@ -1,7 +1,28 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Param,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
+import type { Request } from 'express';
 import { WikiService } from './wiki.service';
 import { WikiListItemDto } from './dto/wiki-list-item.dto';
 import { WikiArticleDetailDto } from './dto/wiki-article-detail.dto';
+import { CreateWikiArticleFeedbackDto } from './dto/create-wiki-article-feedback.dto';
+import { WikiRelatedArticleDto } from './dto/wiki-related-article.dto';
+import { OptionalJwtAuthGuard } from '../auth/optional-jwt-auth.guard';
+
+interface AuthenticatedRequest extends Request {
+  user?: {
+    userId: string;
+    email: string;
+  };
+}
 
 @Controller('wiki')
 export class WikiController {
@@ -30,5 +51,34 @@ export class WikiController {
     @Query('lang') lang?: string,
   ): Promise<WikiArticleDetailDto> {
     return this.wikiService.getArticleBySlug(slug, lang);
+  }
+
+  @Get('articles/:slug/related')
+  async getRelatedArticles(
+    @Param('slug') slug: string,
+    @Query('lang') lang?: string,
+    @Query('limit') limit?: string,
+  ): Promise<WikiRelatedArticleDto[]> {
+    const limitNum = limit ? Number(limit) : undefined;
+    return this.wikiService.getRelatedArticlesBySlug(slug, lang, limitNum);
+  }
+
+  @Get('articles/:slug/feedback/summary')
+  getArticleFeedbackSummary(
+    @Param('slug') slug: string,
+  ): Promise<{ helpfulYes: number; helpfulNo: number; total: number }> {
+    return this.wikiService.getArticleFeedbackSummary(slug);
+  }
+
+  @Post('articles/:slug/feedback')
+  @UseGuards(OptionalJwtAuthGuard)
+  @HttpCode(204)
+  async submitArticleFeedback(
+    @Param('slug') slug: string,
+    @Body() dto: CreateWikiArticleFeedbackDto,
+    @Req() req: AuthenticatedRequest,
+  ): Promise<void> {
+    const userId = req.user?.userId ?? null;
+    await this.wikiService.submitArticleFeedback(slug, userId, dto);
   }
 }

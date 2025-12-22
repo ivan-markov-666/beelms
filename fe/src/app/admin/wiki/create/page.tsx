@@ -11,10 +11,30 @@ const API_BASE_URL =
 export default function AdminWikiCreatePage() {
   const router = useRouter();
   const [slug, setSlug] = useState("");
+  const [tags, setTags] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [articleId, setArticleId] = useState<string | null>(null);
+
+  const normalizeTags = (raw: string): string[] => {
+    const parts = (raw ?? "")
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean);
+
+    const seen = new Set<string>();
+    const result: string[] = [];
+
+    for (const tag of parts) {
+      const key = tag.toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      result.push(tag);
+    }
+
+    return result;
+  };
 
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (
     event,
@@ -58,7 +78,12 @@ export default function AdminWikiCreatePage() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ slug: trimmedSlug, status: "draft", contents }),
+        body: JSON.stringify({
+          slug: trimmedSlug,
+          status: "draft",
+          tags: normalizeTags(tags),
+          contents,
+        }),
       });
 
       if (res.status === 400) {
@@ -200,6 +225,24 @@ export default function AdminWikiCreatePage() {
                   value={slug}
                   onChange={(event) => setSlug(event.target.value)}
                   placeholder="manual-testing-intro"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
+                />
+              </div>
+            </div>
+            <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
+              <div className="md:col-span-2">
+                <label
+                  htmlFor="wiki-tags"
+                  className="mb-1 block text-sm font-medium text-gray-700"
+                >
+                  Tags (comma-separated)
+                </label>
+                <input
+                  id="wiki-tags"
+                  type="text"
+                  value={tags}
+                  onChange={(event) => setTags(event.target.value)}
+                  placeholder="intro, basics, setup"
                   className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
                 />
               </div>
