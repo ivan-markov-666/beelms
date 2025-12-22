@@ -18,6 +18,27 @@
 
 ---
 
+## 1.1. DB migrations & seed (quick commands)
+
+Команди от root на репото (wrapper-и към `be/`):
+
+```bash
+# Migration run/check/show/revert
+npm run be:migration:run
+npm run be:migration:check
+npm run be:migration:show
+npm run be:migration:revert
+
+# Seed (dev, без build)
+npm run be:seed:dev
+
+# Seed (compiled, изисква `npm --prefix be run build` ако се пуска от host)
+npm run be:seed:wiki
+npm run be:seed:courses
+```
+
+---
+
 ## 2. Dev setup (без Docker) – локално стартиране с hot reload
 
 Този вариант е удобен, когато правите промени по кода (BE/FE) и искате **автоматичен reload**.

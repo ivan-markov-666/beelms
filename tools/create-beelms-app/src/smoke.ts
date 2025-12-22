@@ -59,6 +59,18 @@ function main(): void {
     encoding: "utf8",
   });
 
+  if (!dockerComposeContent.includes("healthcheck:")) {
+    throw new Error(
+      "[smoke] Expected db healthcheck in docker-compose.yml, but it was not found.",
+    );
+  }
+
+  if (!dockerComposeContent.includes("migrate:")) {
+    throw new Error(
+      "[smoke] Expected migrate service in docker-compose.yml, but it was not found.",
+    );
+  }
+
   if (dockerComposeContent.includes('"5432:5432"')) {
     throw new Error(
       "[smoke] Expected db port NOT to be published by default in docker-compose.yml, but found '5432:5432'.",
