@@ -9,15 +9,18 @@ import * as path from 'path';
 import { In, Repository } from 'typeorm';
 import { WikiArticle } from './wiki-article.entity';
 import { WikiArticleVersion } from './wiki-article-version.entity';
+import { WikiArticleFeedback } from './wiki-article-feedback.entity';
 import { User } from '../auth/user.entity';
 import { WikiListItemDto } from './dto/wiki-list-item.dto';
 import { AdminWikiListItemDto } from './dto/admin-wiki-list-item.dto';
 import { WikiArticleDetailDto } from './dto/wiki-article-detail.dto';
+import { WikiRelatedArticleDto } from './dto/wiki-related-article.dto';
 import { AdminUpdateWikiArticleDto } from './dto/admin-update-wiki-article.dto';
 import { AdminCreateWikiArticleDto } from './dto/admin-create-wiki-article.dto';
 import { AdminWikiArticleVersionDto } from './dto/admin-wiki-article-version.dto';
 import { AdminAutosaveWikiDraftDto } from './dto/admin-autosave-wiki-draft.dto';
 import { WikiMediaItemDto } from './dto/wiki-media-item.dto';
+import { CreateWikiArticleFeedbackDto } from './dto/create-wiki-article-feedback.dto';
 
 const DEFAULT_MEDIA_ROOT = path.join(process.cwd(), 'media');
 const WIKI_MEDIA_SUBDIR = 'wiki';
@@ -64,9 +67,204 @@ export class WikiService {
     private readonly articleRepo: Repository<WikiArticle>,
     @InjectRepository(WikiArticleVersion)
     private readonly versionRepo: Repository<WikiArticleVersion>,
+    @InjectRepository(WikiArticleFeedback)
+    private readonly feedbackRepo: Repository<WikiArticleFeedback>,
     @InjectRepository(User)
     private readonly usersRepo: Repository<User>,
   ) {}
+
+  async submitArticleFeedback(
+    slug: string,
+    userId: string | null,
+    dto: CreateWikiArticleFeedbackDto,
+  ): Promise<void> {
+    const article = await this.articleRepo.findOne({
+      where: { slug, status: 'active', visibility: 'public' },
+    });
+
+    if (!article) {
+      throw new NotFoundException('Article not found');
+    }
+
+    if (userId) {
+      const existing = await this.feedbackRepo.findOne({
+        where: { articleId: article.id, userId },
+      });
+
+      if (existing) {
+        existing.helpful = dto.helpful;
+        await this.feedbackRepo.save(existing);
+        return;
+      }
+
+      await this.feedbackRepo.save(
+        this.feedbackRepo.create({
+          articleId: article.id,
+          userId,
+          helpful: dto.helpful,
+        }),
+      );
+      return;
+    }
+
+    await this.feedbackRepo.save(
+      this.feedbackRepo.create({
+        articleId: article.id,
+        userId: null,
+        helpful: dto.helpful,
+      }),
+    );
+  }
+
+  async getArticleFeedbackSummary(slug: string): Promise<{
+    helpfulYes: number;
+    helpfulNo: number;
+    total: number;
+  }> {
+    const article = await this.articleRepo.findOne({
+      where: { slug, status: 'active', visibility: 'public' },
+    });
+
+    if (!article) {
+      throw new NotFoundException('Article not found');
+    }
+
+    const [helpfulYes, helpfulNo] = await Promise.all([
+      this.feedbackRepo.count({
+        where: { articleId: article.id, helpful: true },
+      }),
+      this.feedbackRepo.count({
+        where: { articleId: article.id, helpful: false },
+      }),
+    ]);
+
+    return {
+      helpfulYes,
+      helpfulNo,
+      total: helpfulYes + helpfulNo,
+    };
+  }
+
+  async getRelatedArticlesBySlug(
+    slug: string,
+    lang?: string,
+    limit?: number,
+  ): Promise<WikiRelatedArticleDto[]> {
+    const safeLimit = limit && limit > 0 ? Math.min(limit, 12) : 6;
+
+    const article = await this.articleRepo.findOne({
+      where: { slug, status: 'active', visibility: 'public' },
+    });
+
+    if (!article) {
+      throw new NotFoundException('Article not found');
+    }
+
+    const tags = (article.tags ?? [])
+      .map((t) => (t ?? '').trim())
+      .filter(Boolean);
+    if (!tags.length) {
+      return [];
+    }
+
+    const candidates = await this.articleRepo
+      .createQueryBuilder('a')
+      .leftJoinAndSelect('a.versions', 'v')
+      .where('a.status = :status', { status: 'active' })
+      .andWhere('a.visibility = :visibility', { visibility: 'public' })
+      .andWhere('a.slug != :slug', { slug })
+      .andWhere('a.tags && :tags', { tags })
+      .getMany();
+
+    const normalizedPreferredLang = lang?.trim() || undefined;
+    const defaultLang = 'bg';
+
+    const pickVersion = (
+      versions: WikiArticleVersion[],
+    ): WikiArticleVersion | null => {
+      const published = (versions ?? []).filter((v) => v.isPublished);
+      if (!published.length) return null;
+
+      const byLang = (target: string) =>
+        published.filter((v) => v.language === target);
+
+      let selectedPool: WikiArticleVersion[] = published;
+
+      if (normalizedPreferredLang) {
+        const preferred = byLang(normalizedPreferredLang);
+        if (preferred.length) {
+          selectedPool = preferred;
+        }
+      } else {
+        const defaults = byLang(defaultLang);
+        if (defaults.length) {
+          selectedPool = defaults;
+        }
+      }
+
+      selectedPool.sort((a, b) => {
+        const aTime = a.createdAt ? a.createdAt.getTime() : 0;
+        const bTime = b.createdAt ? b.createdAt.getTime() : 0;
+        return aTime - bTime;
+      });
+
+      return selectedPool[selectedPool.length - 1] ?? null;
+    };
+
+    const currentTagsSet = new Set(tags.map((t) => t.toLowerCase()));
+
+    const scored = candidates
+      .map((candidate) => {
+        const candidateTags = (candidate.tags ?? [])
+          .map((t) => (t ?? '').trim().toLowerCase())
+          .filter(Boolean);
+
+        const overlap = candidateTags.reduce(
+          (acc, t) => (currentTagsSet.has(t) ? acc + 1 : acc),
+          0,
+        );
+
+        const version = pickVersion(candidate.versions ?? []);
+        if (!version) {
+          return null;
+        }
+
+        const updatedAt =
+          version.createdAt ??
+          candidate.updatedAt ??
+          candidate.createdAt ??
+          new Date();
+
+        const dto: WikiRelatedArticleDto = {
+          slug: candidate.slug,
+          language: version.language,
+          title: version.title,
+          updatedAt: updatedAt.toISOString(),
+        };
+
+        return {
+          overlap,
+          updatedAt: updatedAt.getTime(),
+          dto,
+        };
+      })
+      .filter(
+        (
+          row,
+        ): row is {
+          overlap: number;
+          updatedAt: number;
+          dto: WikiRelatedArticleDto;
+        } => row !== null,
+      );
+
+    scored.sort((a, b) => {
+      if (b.overlap !== a.overlap) return b.overlap - a.overlap;
+      return b.updatedAt - a.updatedAt;
+    });
+
+    return scored.slice(0, safeLimit).map((r) => r.dto);
+  }
 
   async getActiveArticlesList(
     page?: number,

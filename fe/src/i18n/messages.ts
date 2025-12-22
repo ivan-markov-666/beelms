@@ -305,6 +305,12 @@ export const messages: Messages = {
       articleShareSuccess: "Споделено успешно.",
       articleShareClipboard: "Линкът е копиран в клипборда.",
       articleShareError: "Не успяхме да споделим линка. Опитайте ръчно.",
+      articleHelpfulPrompt: "Полезна ли беше тази статия?",
+      articleHelpfulYes: "Да",
+      articleHelpfulNo: "Не",
+      articleHelpfulThanks: "Благодарим за обратната връзка!",
+      articleHelpfulError: "Неуспешно изпращане. Моля, опитайте отново.",
+      relatedArticlesTitle: "Свързани статии",
     },
   },
   en: {
@@ -589,6 +595,12 @@ export const messages: Messages = {
       articleShareClipboard: "Link copied to clipboard.",
       articleShareError:
         "We couldn't share the link. Please share it manually.",
+      articleHelpfulPrompt: "Was this article helpful?",
+      articleHelpfulYes: "Yes",
+      articleHelpfulNo: "No",
+      articleHelpfulThanks: "Thanks for your feedback!",
+      articleHelpfulError: "Failed to submit. Please try again.",
+      relatedArticlesTitle: "Related articles",
     },
   },
   de: {
@@ -852,6 +864,12 @@ export const messages: Messages = {
       articleShareClipboard: "Link wurde in die Zwischenablage kopiert.",
       articleShareError:
         "Der Link konnte nicht geteilt werden. Bitte teilen Sie ihn manuell.",
+      articleHelpfulPrompt: "War dieser Artikel hilfreich?",
+      articleHelpfulYes: "Ja",
+      articleHelpfulNo: "Nein",
+      articleHelpfulThanks: "Danke für dein Feedback!",
+      articleHelpfulError: "Senden fehlgeschlagen. Bitte versuche es erneut.",
+      relatedArticlesTitle: "Ähnliche Artikel",
     },
   },
 };
