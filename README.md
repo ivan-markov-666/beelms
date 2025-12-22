@@ -151,14 +151,43 @@ Notes:
 docker compose up -d
 ```
 
-Това стартира три услуги:
+Това стартира услугите:
 
 - **db** – Postgres 16 (по подразбиране не е exposed към host)
+- **migrate** – one-off контейнер, който прилага TypeORM миграции
 - **api** – NestJS API на `http://localhost:3000`
 
 > Ако ти трябва DB достъп от host (psql, локален BE без Docker), ползвай override файла: `docker-compose.db-host.yml`.
 
 > Обърни внимание: `api` услугата се билдва от директорията `be/` чрез `be/Dockerfile`. Ако промениш BE кода, трябва да rebuild-неш контейнера.
+
+### 3.1.1. Docker dev workflow (cheatsheet)
+
+Команди от root (еквивалентни `npm run docker:*` wrapper-и също са налични в `package.json`):
+
+```bash
+# Start DB+migrations+API
+docker compose up -d
+
+# Stop containers (keep volumes)
+docker compose down
+
+# Stop + delete volumes (fresh DB)
+docker compose down -v
+
+# Rebuild только API container след промени в `be/`
+docker compose up -d --build api
+
+# Run migrations explicitly (one-off)
+docker compose run --rm migrate
+
+# Seed data (Wiki/Courses)
+docker compose exec api npm run seed:wiki
+docker compose exec api npm run seed:courses
+
+# Opt-in DB host access (publish DB port)
+docker compose -f docker-compose.yml -f docker-compose.db-host.yml up -d db
+```
 
 ### 3.2. Rebuild на BE контейнера след промени по кода
 
