@@ -6,7 +6,9 @@ import { AuthController } from './auth.controller';
 import { User } from './user.entity';
 import { WikiArticle } from '../wiki/wiki-article.entity';
 import { WikiArticleVersion } from '../wiki/wiki-article-version.entity';
+import { WikiArticleFeedback } from '../wiki/wiki-article-feedback.entity';
 import { WikiArticleView } from '../wiki/wiki-article-view.entity';
+import { WikiArticleIpViewDaily } from '../wiki/wiki-article-ip-view-daily.entity';
 import { AnalyticsSession } from '../analytics/analytics-session.entity';
 import { AnalyticsPageViewDaily } from '../analytics/analytics-page-view-daily.entity';
 import { AccountService } from './account.service';
@@ -29,7 +31,9 @@ import { OptionalJwtAuthGuard } from './optional-jwt-auth.guard';
       User,
       WikiArticle,
       WikiArticleVersion,
+      WikiArticleFeedback,
       WikiArticleView,
+      WikiArticleIpViewDaily,
       AnalyticsSession,
       AnalyticsPageViewDaily,
     ]),

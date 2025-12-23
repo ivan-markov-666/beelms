@@ -50,9 +50,46 @@ type ActivityPeriodStats = {
 
 type AdminWikiViewsMetrics = {
   totalViews: number;
+  totalUniqueVisitors: number;
   topArticles: Array<{ slug: string; views: number }>;
+  topArticlesByUniqueVisitors: Array<{ slug: string; uniqueVisitors: number }>;
   daily: Array<{ date: string; views: number }>;
+  dailyUniqueVisitors: Array<{ date: string; uniqueVisitors: number }>;
 };
+
+type AdminWikiFeedbackMetrics = {
+  totalHelpfulYes: number;
+  totalHelpfulNo: number;
+  total: number;
+  helpfulRate: number;
+  topArticlesByNotHelpful: Array<{
+    slug: string;
+    helpfulYes: number;
+    helpfulNo: number;
+    total: number;
+    notHelpfulRate: number;
+  }>;
+  daily: Array<{
+    date: string;
+    helpfulYes: number;
+    helpfulNo: number;
+    total: number;
+  }>;
+};
+
+type AdminWikiAttentionMetrics = {
+  items: Array<{
+    slug: string;
+    views: number;
+    helpfulYes: number;
+    helpfulNo: number;
+    totalFeedback: number;
+    notHelpfulRate: number;
+    score: number;
+  }>;
+};
+
+type WikiInsightsView = "all" | "views" | "feedback" | "attention";
 
 type AdminAdvancedMetricsSourcePoint = {
   source: string;
@@ -94,6 +131,12 @@ export default function AdminMetricsPage() {
   const [wikiViews, setWikiViews] = useState<AdminWikiViewsMetrics | null>(
     null,
   );
+  const [wikiFeedback, setWikiFeedback] =
+    useState<AdminWikiFeedbackMetrics | null>(null);
+  const [wikiAttention, setWikiAttention] =
+    useState<AdminWikiAttentionMetrics | null>(null);
+  const [wikiInsightsView, setWikiInsightsView] =
+    useState<WikiInsightsView>("all");
   const [userTrend, setUserTrend] = useState<UsersTrendPoint[]>([]);
   const [activityStats, setActivityStats] =
     useState<ActivityPeriodStats | null>(null);
@@ -310,6 +353,8 @@ export default function AdminMetricsPage() {
             setActivityStats(null);
             setUserTrend([]);
             setWikiViews(null);
+            setWikiFeedback(null);
+            setWikiAttention(null);
             setAdvancedMetrics(null);
             setAdvancedError(null);
           }
@@ -354,6 +399,14 @@ export default function AdminMetricsPage() {
           ? `${API_BASE_URL}/admin/metrics/wiki-views?${paramsString}`
           : `${API_BASE_URL}/admin/metrics/wiki-views`;
 
+        const wikiFeedbackUrl = paramsString
+          ? `${API_BASE_URL}/admin/metrics/wiki-feedback?${paramsString}`
+          : `${API_BASE_URL}/admin/metrics/wiki-feedback`;
+
+        const wikiAttentionUrl = paramsString
+          ? `${API_BASE_URL}/admin/metrics/wiki-attention?${paramsString}`
+          : `${API_BASE_URL}/admin/metrics/wiki-attention`;
+
         const advancedUrl = paramsString
           ? `${API_BASE_URL}/admin/metrics/advanced?${paramsString}`
           : `${API_BASE_URL}/admin/metrics/advanced`;
@@ -370,13 +423,29 @@ export default function AdminMetricsPage() {
           }[];
         };
 
-        const [activityRes, wikiViewsRes, advancedRes] = await Promise.all([
+        const [
+          activityRes,
+          wikiViewsRes,
+          wikiFeedbackRes,
+          wikiAttentionRes,
+          advancedRes,
+        ] = await Promise.all([
           fetch(activityUrl, {
             headers: {
               Authorization: `Bearer ${token}`,
             },
           }),
           fetch(wikiViewsUrl, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }),
+          fetch(wikiFeedbackUrl, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }),
+          fetch(wikiAttentionUrl, {
             headers: {
               Authorization: `Bearer ${token}`,
             },
@@ -406,6 +475,18 @@ export default function AdminMetricsPage() {
           : null;
 
         setWikiViews(wikiViewsData);
+
+        const wikiFeedbackData = wikiFeedbackRes.ok
+          ? ((await wikiFeedbackRes.json()) as AdminWikiFeedbackMetrics)
+          : null;
+
+        setWikiFeedback(wikiFeedbackData);
+
+        const wikiAttentionData = wikiAttentionRes.ok
+          ? ((await wikiAttentionRes.json()) as AdminWikiAttentionMetrics)
+          : null;
+
+        setWikiAttention(wikiAttentionData);
 
         const advancedData = advancedRes.ok
           ? ((await advancedRes.json()) as AdminAdvancedMetrics)
@@ -442,6 +523,8 @@ export default function AdminMetricsPage() {
           setActivityStats(null);
           setUserTrend([]);
           setWikiViews(null);
+          setWikiFeedback(null);
+          setWikiAttention(null);
           setAdvancedMetrics(null);
           setAdvancedError(t(lang, "common", "adminAdvancedMetricsError"));
         }
@@ -487,6 +570,13 @@ export default function AdminMetricsPage() {
 
   const totalPageViews =
     advancedMetrics?.dailyPageViews?.reduce((sum, p) => sum + p.value, 0) ?? 0;
+
+  const showWikiViews =
+    wikiInsightsView === "all" || wikiInsightsView === "views";
+  const showWikiFeedback =
+    wikiInsightsView === "all" || wikiInsightsView === "feedback";
+  const showWikiAttention =
+    wikiInsightsView === "all" || wikiInsightsView === "attention";
 
   return (
     <div className="space-y-8">
@@ -561,6 +651,7 @@ export default function AdminMetricsPage() {
                   {t(lang, "common", "adminDashboardMetricsLoading")}
                 </p>
               )}
+
               {!loading && error && (
                 <p className="text-sm text-red-600" role="alert">
                   {error}
@@ -715,6 +806,27 @@ export default function AdminMetricsPage() {
               {t(lang, "common", "adminMetricsUserActivityTitle")}
             </h2>
             <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-3">
+              <select
+                value={wikiInsightsView}
+                onChange={(event) =>
+                  setWikiInsightsView(event.target.value as WikiInsightsView)
+                }
+                className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
+              >
+                <option value="all">
+                  {t(lang, "common", "adminWikiInsightsViewAll")}
+                </option>
+                <option value="views">
+                  {t(lang, "common", "adminWikiInsightsViewViews")}
+                </option>
+                <option value="feedback">
+                  {t(lang, "common", "adminWikiInsightsViewFeedback")}
+                </option>
+                <option value="attention">
+                  {t(lang, "common", "adminWikiInsightsViewAttention")}
+                </option>
+              </select>
+
               <select
                 value={periodPreset}
                 onChange={(event) => {
@@ -1159,7 +1271,7 @@ export default function AdminMetricsPage() {
       )}
 
       {/* Wiki views metrics */}
-      {wikiViews && !loading && !error && (
+      {wikiViews && !loading && !error && showWikiViews && (
         <section className="space-y-3">
           <header className="space-y-1">
             <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
@@ -1177,6 +1289,15 @@ export default function AdminMetricsPage() {
               </p>
               <p className="mt-1 text-2xl font-semibold text-gray-900">
                 {wikiViews.totalViews}
+              </p>
+            </div>
+
+            <div className="rounded-lg border border-gray-200 bg-white p-4">
+              <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                {t(lang, "common", "adminWikiViewsTotalUniqueVisitors")}
+              </p>
+              <p className="mt-1 text-2xl font-semibold text-gray-900">
+                {wikiViews.totalUniqueVisitors}
               </p>
             </div>
 
@@ -1209,48 +1330,382 @@ export default function AdminMetricsPage() {
 
           <div className="rounded-lg border border-gray-200 bg-white p-4">
             <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
-              {t(lang, "common", "adminWikiViewsDaily")}
+              {t(lang, "common", "adminWikiViewsTopArticlesUniqueVisitors")}
             </p>
-            {(() => {
-              const points = wikiViews.daily ?? [];
-              if (!points.length) {
-                return <p className="mt-2 text-sm text-gray-500">-</p>;
-              }
+            {wikiViews.topArticlesByUniqueVisitors.length === 0 ? (
+              <p className="mt-2 text-sm text-gray-500">-</p>
+            ) : (
+              <ul className="mt-2 space-y-1">
+                {wikiViews.topArticlesByUniqueVisitors.map((row) => (
+                  <li
+                    key={row.slug}
+                    className="flex items-center justify-between"
+                  >
+                    <Link
+                      href={`/wiki/${encodeURIComponent(row.slug)}`}
+                      className="text-sm text-green-700 hover:text-green-800 hover:underline"
+                    >
+                      {row.slug}
+                    </Link>
+                    <span className="text-sm text-gray-700">
+                      {row.uniqueVisitors}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
 
-              const max = points.reduce(
-                (m, p) => (p.views > m ? p.views : m),
-                0,
-              );
-              const safeMax = max > 0 ? max : 1;
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="rounded-lg border border-gray-200 bg-white p-4">
+              <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                {t(lang, "common", "adminWikiViewsDaily")}
+              </p>
+              {(() => {
+                const points = wikiViews.daily ?? [];
+                if (!points.length) {
+                  return <p className="mt-2 text-sm text-gray-500">-</p>;
+                }
 
-              return (
-                <div className="mt-3 space-y-2">
-                  {points.map((p) => {
-                    const width = Math.max(
-                      2,
-                      Math.round((p.views / safeMax) * 100),
-                    );
+                const max = points.reduce(
+                  (m, p) => (p.views > m ? p.views : m),
+                  0,
+                );
+                const safeMax = max > 0 ? max : 1;
 
-                    return (
-                      <div key={p.date} className="flex items-center gap-3">
-                        <div className="w-24 text-xs text-gray-600">
-                          {p.date}
+                return (
+                  <div className="mt-3 space-y-2">
+                    {points.map((p) => {
+                      const width = Math.max(
+                        2,
+                        Math.round((p.views / safeMax) * 100),
+                      );
+
+                      return (
+                        <div key={p.date} className="flex items-center gap-3">
+                          <div className="w-24 text-xs text-gray-600">
+                            {p.date}
+                          </div>
+                          <div className="flex-1 h-2 rounded-full bg-gray-100">
+                            <div
+                              className="h-2 rounded-full bg-green-500"
+                              style={{ width: `${width}%` }}
+                            />
+                          </div>
+                          <div className="w-10 text-right text-xs text-gray-700">
+                            {p.views}
+                          </div>
                         </div>
-                        <div className="flex-1 h-2 rounded-full bg-gray-100">
-                          <div
-                            className="h-2 rounded-full bg-green-500"
-                            style={{ width: `${width}%` }}
-                          />
+                      );
+                    })}
+                  </div>
+                );
+              })()}
+            </div>
+
+            <div className="rounded-lg border border-gray-200 bg-white p-4">
+              <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                {t(lang, "common", "adminWikiViewsDailyUniqueVisitors")}
+              </p>
+              {(() => {
+                const points = wikiViews.dailyUniqueVisitors ?? [];
+                if (!points.length) {
+                  return <p className="mt-2 text-sm text-gray-500">-</p>;
+                }
+
+                const max = points.reduce(
+                  (m, p) => (p.uniqueVisitors > m ? p.uniqueVisitors : m),
+                  0,
+                );
+                const safeMax = max > 0 ? max : 1;
+
+                return (
+                  <div className="mt-3 space-y-2">
+                    {points.map((p) => {
+                      const width = Math.max(
+                        2,
+                        Math.round((p.uniqueVisitors / safeMax) * 100),
+                      );
+
+                      return (
+                        <div key={p.date} className="flex items-center gap-3">
+                          <div className="w-24 text-xs text-gray-600">
+                            {p.date}
+                          </div>
+                          <div className="flex-1 h-2 rounded-full bg-gray-100">
+                            <div
+                              className="h-2 rounded-full bg-blue-500"
+                              style={{ width: `${width}%` }}
+                            />
+                          </div>
+                          <div className="w-10 text-right text-xs text-gray-700">
+                            {p.uniqueVisitors}
+                          </div>
                         </div>
-                        <div className="w-10 text-right text-xs text-gray-700">
-                          {p.views}
+                      );
+                    })}
+                  </div>
+                );
+              })()}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {wikiFeedback && !loading && !error && showWikiFeedback && (
+        <section className="space-y-3">
+          <header className="space-y-1">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
+              {t(lang, "common", "adminWikiFeedbackTitle")}
+            </h2>
+            <p className="text-xs text-gray-600">
+              {t(lang, "common", "adminWikiFeedbackSubtitle")}
+            </p>
+          </header>
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+            <div className="rounded-lg border border-gray-200 bg-white p-4">
+              <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                {t(lang, "common", "adminWikiFeedbackTotal")}
+              </p>
+              <p className="mt-1 text-2xl font-semibold text-gray-900">
+                {wikiFeedback.total}
+              </p>
+            </div>
+
+            <div className="rounded-lg border border-gray-200 bg-white p-4">
+              <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                {t(lang, "common", "adminWikiFeedbackTotalYes")}
+              </p>
+              <p className="mt-1 text-2xl font-semibold text-gray-900">
+                {wikiFeedback.totalHelpfulYes}
+              </p>
+            </div>
+
+            <div className="rounded-lg border border-gray-200 bg-white p-4">
+              <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                {t(lang, "common", "adminWikiFeedbackTotalNo")}
+              </p>
+              <p className="mt-1 text-2xl font-semibold text-gray-900">
+                {wikiFeedback.totalHelpfulNo}
+              </p>
+            </div>
+
+            <div className="rounded-lg border border-gray-200 bg-white p-4">
+              <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                {t(lang, "common", "adminWikiFeedbackHelpfulRate")}
+              </p>
+              <p className="mt-1 text-2xl font-semibold text-gray-900">
+                {Math.round(wikiFeedback.helpfulRate)}%
+              </p>
+            </div>
+          </div>
+
+          <div className="rounded-lg border border-gray-200 bg-white p-4">
+            <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+              {t(lang, "common", "adminWikiFeedbackTopNotHelpful")}
+            </p>
+            {wikiFeedback.topArticlesByNotHelpful.length === 0 ? (
+              <p className="mt-2 text-sm text-gray-500">-</p>
+            ) : (
+              <ul className="mt-2 space-y-1">
+                {wikiFeedback.topArticlesByNotHelpful.map((row) => (
+                  <li
+                    key={row.slug}
+                    className="flex flex-col gap-1 border-b border-gray-100 pb-2 last:border-b-0 last:pb-0 md:flex-row md:items-center md:justify-between"
+                  >
+                    <Link
+                      href={`/wiki/${encodeURIComponent(row.slug)}`}
+                      className="text-sm text-green-700 hover:text-green-800 hover:underline"
+                    >
+                      {row.slug}
+                    </Link>
+                    <div className="flex flex-wrap items-center gap-3 text-xs text-gray-700">
+                      <span>
+                        {t(lang, "common", "adminWikiFeedbackNotHelpful")}:{" "}
+                        {row.helpfulNo}
+                      </span>
+                      <span>
+                        {t(lang, "common", "adminWikiFeedbackTotal")}:{" "}
+                        {row.total}
+                      </span>
+                      <span>
+                        {t(lang, "common", "adminWikiFeedbackNotHelpfulRate")}:{" "}
+                        {Math.round(row.notHelpfulRate)}%
+                      </span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="rounded-lg border border-gray-200 bg-white p-4">
+              <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                {t(lang, "common", "adminWikiFeedbackDailyTotal")}
+              </p>
+              {(() => {
+                const points = wikiFeedback.daily ?? [];
+                if (!points.length) {
+                  return <p className="mt-2 text-sm text-gray-500">-</p>;
+                }
+
+                const max = points.reduce(
+                  (m, p) => (p.total > m ? p.total : m),
+                  0,
+                );
+                const safeMax = max > 0 ? max : 1;
+
+                return (
+                  <div className="mt-3 space-y-2">
+                    {points.map((p) => {
+                      const width = Math.max(
+                        2,
+                        Math.round((p.total / safeMax) * 100),
+                      );
+
+                      return (
+                        <div key={p.date} className="flex items-center gap-3">
+                          <div className="w-24 text-xs text-gray-600">
+                            {p.date}
+                          </div>
+                          <div className="flex-1 h-2 rounded-full bg-gray-100">
+                            <div
+                              className="h-2 rounded-full bg-gray-500"
+                              style={{ width: `${width}%` }}
+                            />
+                          </div>
+                          <div className="w-10 text-right text-xs text-gray-700">
+                            {p.total}
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              );
-            })()}
+                      );
+                    })}
+                  </div>
+                );
+              })()}
+            </div>
+
+            <div className="rounded-lg border border-gray-200 bg-white p-4">
+              <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                {t(lang, "common", "adminWikiFeedbackDailyNotHelpful")}
+              </p>
+              {(() => {
+                const points = wikiFeedback.daily ?? [];
+                if (!points.length) {
+                  return <p className="mt-2 text-sm text-gray-500">-</p>;
+                }
+
+                const max = points.reduce(
+                  (m, p) => (p.helpfulNo > m ? p.helpfulNo : m),
+                  0,
+                );
+                const safeMax = max > 0 ? max : 1;
+
+                return (
+                  <div className="mt-3 space-y-2">
+                    {points.map((p) => {
+                      const width = Math.max(
+                        2,
+                        Math.round((p.helpfulNo / safeMax) * 100),
+                      );
+
+                      return (
+                        <div key={p.date} className="flex items-center gap-3">
+                          <div className="w-24 text-xs text-gray-600">
+                            {p.date}
+                          </div>
+                          <div className="flex-1 h-2 rounded-full bg-gray-100">
+                            <div
+                              className="h-2 rounded-full bg-red-500"
+                              style={{ width: `${width}%` }}
+                            />
+                          </div>
+                          <div className="w-10 text-right text-xs text-gray-700">
+                            {p.helpfulNo}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {wikiAttention && !loading && !error && showWikiAttention && (
+        <section className="space-y-3">
+          <header className="space-y-1">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
+              {t(lang, "common", "adminWikiAttentionTitle")}
+            </h2>
+            <p className="text-xs text-gray-600">
+              {t(lang, "common", "adminWikiAttentionSubtitle")}
+            </p>
+          </header>
+
+          <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">
+                    {t(lang, "common", "adminWikiAttentionArticle")}
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-600">
+                    {t(lang, "common", "adminWikiAttentionScore")}
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-600">
+                    {t(lang, "common", "adminWikiAttentionViews")}
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-600">
+                    {t(lang, "common", "adminWikiAttentionNotHelpfulRate")}
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-600">
+                    {t(lang, "common", "adminWikiAttentionVotes")}
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100 bg-white">
+                {wikiAttention.items.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={5}
+                      className="px-4 py-6 text-center text-sm text-gray-500"
+                    >
+                      -
+                    </td>
+                  </tr>
+                ) : (
+                  wikiAttention.items.map((row) => (
+                    <tr key={row.slug} className="hover:bg-gray-50">
+                      <td className="px-4 py-3 text-sm">
+                        <Link
+                          href={`/wiki/${encodeURIComponent(row.slug)}`}
+                          className="text-green-700 hover:text-green-800 hover:underline"
+                        >
+                          {row.slug}
+                        </Link>
+                      </td>
+                      <td className="px-4 py-3 text-right text-sm text-gray-700">
+                        {row.score.toFixed(1)}
+                      </td>
+                      <td className="px-4 py-3 text-right text-sm text-gray-700">
+                        {row.views}
+                      </td>
+                      <td className="px-4 py-3 text-right text-sm text-gray-700">
+                        {Math.round(row.notHelpfulRate)}%
+                      </td>
+                      <td className="px-4 py-3 text-right text-sm text-gray-700">
+                        {row.totalFeedback}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
         </section>
       )}

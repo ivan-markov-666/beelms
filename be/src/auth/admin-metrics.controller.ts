@@ -6,6 +6,8 @@ import {
   type MetricsOverview,
   type AdminMetricsActivitySummary,
   type AdminWikiViewsMetrics,
+  type AdminWikiFeedbackMetrics,
+  type AdminWikiAttentionMetrics,
   type AdminAdvancedMetrics,
 } from './admin-metrics.service';
 
@@ -34,6 +36,24 @@ export class AdminMetricsController {
     @Query('limit') limit?: string,
   ): Promise<AdminWikiViewsMetrics> {
     return this.metricsService.getWikiViews(from, to, limit);
+  }
+
+  @Get('wiki-feedback')
+  getWikiFeedback(
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+    @Query('limit') limit?: string,
+  ): Promise<AdminWikiFeedbackMetrics> {
+    return this.metricsService.getWikiFeedback(from, to, limit);
+  }
+
+  @Get('wiki-attention')
+  getWikiAttention(
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+    @Query('limit') limit?: string,
+  ): Promise<AdminWikiAttentionMetrics> {
+    return this.metricsService.getWikiAttention(from, to, limit);
   }
 
   @Get('advanced')

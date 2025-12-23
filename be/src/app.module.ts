@@ -7,6 +7,7 @@ import { WikiArticle } from './wiki/wiki-article.entity';
 import { WikiArticleVersion } from './wiki/wiki-article-version.entity';
 import { WikiArticleFeedback } from './wiki/wiki-article-feedback.entity';
 import { WikiArticleView } from './wiki/wiki-article-view.entity';
+import { WikiArticleIpViewDaily } from './wiki/wiki-article-ip-view-daily.entity';
 import { WikiModule } from './wiki/wiki.module';
 import { AuthModule } from './auth/auth.module';
 import { User } from './auth/user.entity';
@@ -46,6 +47,7 @@ import { AnalyticsPageViewDaily } from './analytics/analytics-page-view-daily.en
         WikiArticleVersion,
         WikiArticleFeedback,
         WikiArticleView,
+        WikiArticleIpViewDaily,
         AnalyticsSession,
         AnalyticsPageViewDaily,
         User,
