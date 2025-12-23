@@ -4,6 +4,7 @@ import { WikiArticle } from './wiki-article.entity';
 import { WikiArticleVersion } from './wiki-article-version.entity';
 import { WikiArticleFeedback } from './wiki-article-feedback.entity';
 import { WikiArticleView } from './wiki-article-view.entity';
+import { WikiArticleIpViewDaily } from './wiki-article-ip-view-daily.entity';
 import { WikiService } from './wiki.service';
 import { WikiController } from './wiki.controller';
 import { AuthModule } from '../auth/auth.module';
@@ -17,6 +18,7 @@ import { User } from '../auth/user.entity';
       WikiArticleVersion,
       WikiArticleFeedback,
       WikiArticleView,
+      WikiArticleIpViewDaily,
       User,
     ]),
     AuthModule,

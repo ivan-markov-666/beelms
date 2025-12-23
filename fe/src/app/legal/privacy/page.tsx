@@ -65,6 +65,18 @@ export default async function PrivacyPage({
               идентификатори на акаунта. Използваме технически идентификатор на
               посетител (cookie) за измерване на сесии и продължителност.
             </p>
+            <h2 className="mt-4 text-base font-semibold text-zinc-900 dark:text-zinc-50">
+              Wiki метрики (hashed IP)
+            </h2>
+            <p>
+              За метрики за посещения на публични Wiki статии BeeLMS използва
+              salted hash на IP адрес (не се съхранява raw IP), за да изчислява
+              „unique visitors“ и сесийни гледания с 15-минутен прозорец.
+            </p>
+            <p>
+              Retention: Wiki метриките се пазят до 180 дни (best-effort
+              cleanup).
+            </p>
             <p>
               Retention: analytics данните се пазят до 180 дни (best-effort
               cleanup).
@@ -120,6 +132,18 @@ export default async function PrivacyPage({
               When enabled, we store only minimal usage data without IP/UA/email
               and without account identifiers. We use a technical visitor
               identifier (cookie) to measure sessions and session duration.
+            </p>
+            <h2 className="mt-4 text-base font-semibold text-zinc-900 dark:text-zinc-50">
+              Wiki metrics (salted IP hash)
+            </h2>
+            <p>
+              For public Wiki visit metrics, BeeLMS uses a salted hash of the
+              visitor IP address (raw IP is not stored) to estimate unique
+              visitors and windowed sessions with a 15-minute session window.
+            </p>
+            <p>
+              Retention: wiki metrics are kept for up to 180 days (best-effort
+              cleanup).
             </p>
             <p>
               Retention: analytics data is kept for up to 180 days (best-effort

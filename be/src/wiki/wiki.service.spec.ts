@@ -6,6 +6,7 @@ import { WikiArticle } from './wiki-article.entity';
 import { WikiArticleVersion } from './wiki-article-version.entity';
 import { WikiArticleFeedback } from './wiki-article-feedback.entity';
 import { WikiArticleView } from './wiki-article-view.entity';
+import { WikiArticleIpViewDaily } from './wiki-article-ip-view-daily.entity';
 import { User } from '../auth/user.entity';
 
 /* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
@@ -70,6 +71,13 @@ describe('WikiService', () => {
             save: jest.fn(),
             create: jest.fn((entity) => entity),
             delete: jest.fn(),
+          },
+        },
+        {
+          provide: getRepositoryToken(WikiArticleIpViewDaily),
+          useValue: {
+            delete: jest.fn(),
+            query: jest.fn(),
           },
         },
         {

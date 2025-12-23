@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
 import { In, LessThan, Repository } from 'typeorm';
@@ -11,6 +12,7 @@ import { WikiArticle } from './wiki-article.entity';
 import { WikiArticleVersion } from './wiki-article-version.entity';
 import { WikiArticleFeedback } from './wiki-article-feedback.entity';
 import { WikiArticleView } from './wiki-article-view.entity';
+import { WikiArticleIpViewDaily } from './wiki-article-ip-view-daily.entity';
 import { User } from '../auth/user.entity';
 import { WikiListItemDto } from './dto/wiki-list-item.dto';
 import { AdminWikiListItemDto } from './dto/admin-wiki-list-item.dto';
@@ -26,6 +28,7 @@ import { CreateWikiArticleFeedbackDto } from './dto/create-wiki-article-feedback
 const DEFAULT_MEDIA_ROOT = path.join(process.cwd(), 'media');
 const WIKI_MEDIA_SUBDIR = 'wiki';
 const MAX_WIKI_MEDIA_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
+const WIKI_IP_VIEW_SESSION_WINDOW_MINUTES = 15;
 
 export interface WikiUploadedFile {
   mimetype?: string;
@@ -72,11 +75,14 @@ export class WikiService {
     private readonly feedbackRepo: Repository<WikiArticleFeedback>,
     @InjectRepository(WikiArticleView)
     private readonly viewRepo: Repository<WikiArticleView>,
+    @InjectRepository(WikiArticleIpViewDaily)
+    private readonly ipViewDailyRepo: Repository<WikiArticleIpViewDaily>,
     @InjectRepository(User)
     private readonly usersRepo: Repository<User>,
   ) {}
 
   private lastViewsRetentionRunDate: string | null = null;
+  private lastIpViewsRetentionRunDate: string | null = null;
 
   private formatUtcDate(date: Date): string {
     return date.toISOString().slice(0, 10);
@@ -96,6 +102,28 @@ export class WikiService {
     await this.viewRepo.delete({
       viewDate: LessThan(cutoffIso),
     });
+  }
+
+  private async cleanupOldIpViewsIfNeeded(todayIso: string): Promise<void> {
+    if (this.lastIpViewsRetentionRunDate === todayIso) {
+      return;
+    }
+
+    this.lastIpViewsRetentionRunDate = todayIso;
+
+    const cutoff = new Date();
+    cutoff.setUTCDate(cutoff.getUTCDate() - 180);
+    const cutoffIso = this.formatUtcDate(cutoff);
+
+    await this.ipViewDailyRepo.delete({
+      viewDate: LessThan(cutoffIso),
+    });
+  }
+
+  private hashIp(ip: string): string {
+    const salt =
+      process.env.WIKI_IP_HASH_SALT ?? 'dev_wiki_ip_salt_change_me_please';
+    return crypto.createHash('sha256').update(`${salt}|${ip}`).digest('hex');
   }
 
   private async recordArticleView(
@@ -131,6 +159,41 @@ export class WikiService {
       );
     } catch {
       // best-effort tracking; do not break page rendering
+      return;
+    }
+  }
+
+  private async recordArticleIpView(
+    articleId: string,
+    language: string,
+    clientIp: string,
+  ): Promise<void> {
+    const todayIso = this.formatUtcDate(new Date());
+    const now = new Date();
+    const ipHash = this.hashIp(clientIp);
+
+    try {
+      await this.cleanupOldIpViewsIfNeeded(todayIso);
+
+      await this.ipViewDailyRepo.query(
+        `
+          INSERT INTO wiki_article_ip_views_daily
+            (article_id, language, view_date, ip_hash, session_count, last_seen_at)
+          VALUES
+            ($1, $2, $3, $4, 1, $5)
+          ON CONFLICT (article_id, language, view_date, ip_hash)
+          DO UPDATE SET
+            session_count = CASE
+              WHEN wiki_article_ip_views_daily.last_seen_at < ($5::timestamptz - interval '${WIKI_IP_VIEW_SESSION_WINDOW_MINUTES} minutes')
+                THEN wiki_article_ip_views_daily.session_count + 1
+              ELSE wiki_article_ip_views_daily.session_count
+            END,
+            last_seen_at = GREATEST(wiki_article_ip_views_daily.last_seen_at, $5::timestamptz),
+            updated_at = now()
+        `,
+        [articleId, language, todayIso, ipHash, now.toISOString()],
+      );
+    } catch {
       return;
     }
   }
@@ -469,6 +532,7 @@ export class WikiService {
   async getArticleBySlug(
     slug: string,
     lang?: string,
+    clientIp?: string | null,
   ): Promise<WikiArticleDetailDto> {
     const article = await this.articleRepo.findOne({
       where: { slug, status: 'active', visibility: 'public' },
@@ -525,8 +589,11 @@ export class WikiService {
       languageStatus = 'draft';
     }
 
-    // Privacy-friendly view tracking: aggregate by (articleId, language, day)
     void this.recordArticleView(article.id, latest.language);
+
+    if (clientIp) {
+      void this.recordArticleIpView(article.id, latest.language, clientIp);
+    }
 
     return {
       id: article.id,

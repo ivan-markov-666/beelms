@@ -28,6 +28,31 @@ interface AuthenticatedRequest extends Request {
 export class WikiController {
   constructor(private readonly wikiService: WikiService) {}
 
+  private getClientIp(req: Request): string | null {
+    const rawForwarded = req.headers['x-forwarded-for'];
+    const forwarded =
+      typeof rawForwarded === 'string'
+        ? rawForwarded
+        : Array.isArray(rawForwarded)
+          ? rawForwarded[0]
+          : null;
+
+    const candidate = (forwarded ?? req.ip ?? '').trim();
+    if (!candidate) return null;
+
+    const first = candidate.split(',')[0]?.trim() ?? '';
+    if (!first) return null;
+
+    if (first.includes('.') && first.includes(':')) {
+      const [maybeIp, maybePort] = first.split(':');
+      if (maybeIp && maybePort && /^\d+$/.test(maybePort)) {
+        return maybeIp;
+      }
+    }
+
+    return first;
+  }
+
   @Get('articles')
   async findAll(
     @Query('page') page?: string,
@@ -49,8 +74,10 @@ export class WikiController {
   async findOne(
     @Param('slug') slug: string,
     @Query('lang') lang?: string,
+    @Req() req?: Request,
   ): Promise<WikiArticleDetailDto> {
-    return this.wikiService.getArticleBySlug(slug, lang);
+    const clientIp = req ? this.getClientIp(req) : null;
+    return this.wikiService.getArticleBySlug(slug, lang, clientIp);
   }
 
   @Get('articles/:slug/related')
