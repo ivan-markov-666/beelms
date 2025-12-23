@@ -4,17 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getAccessToken } from "../../../../auth-token";
-
-function apiUrl(path: string): string {
-  const base =
-    process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
-  const normalizedBase = base.endsWith("/api")
-    ? base
-    : `${base.replace(/\/$/, "")}/api`;
-
-  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-  return `${normalizedBase}${normalizedPath}`;
-}
+import { buildApiUrl } from "../../../../api-url";
 
 export default function CheckoutSuccessPage(props: {
   params: { courseId: string } | Promise<{ courseId: string }>;
@@ -47,7 +37,7 @@ export default function CheckoutSuccessPage(props: {
 
         try {
           const res = await fetch(
-            apiUrl(`/payments/courses/${args.courseId}/purchase/status`),
+            buildApiUrl(`/payments/courses/${args.courseId}/purchase/status`),
             {
               headers: {
                 Authorization: `Bearer ${args.token}`,
@@ -98,7 +88,7 @@ export default function CheckoutSuccessPage(props: {
         }
 
         const verifyRes = await fetch(
-          apiUrl(`/courses/${resolvedParams.courseId}/purchase/verify`),
+          buildApiUrl(`/courses/${resolvedParams.courseId}/purchase/verify`),
           {
             method: "POST",
             headers: {
@@ -134,7 +124,7 @@ export default function CheckoutSuccessPage(props: {
         }
 
         const enrollRes = await fetch(
-          apiUrl(`/courses/${resolvedParams.courseId}/enroll`),
+          buildApiUrl(`/courses/${resolvedParams.courseId}/enroll`),
           {
             method: "POST",
             headers: {

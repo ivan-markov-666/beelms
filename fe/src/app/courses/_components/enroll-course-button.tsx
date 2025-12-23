@@ -3,17 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { getAccessToken } from "../../auth-token";
-
-function apiUrl(path: string): string {
-  const base =
-    process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
-  const normalizedBase = base.endsWith("/api")
-    ? base
-    : `${base.replace(/\/$/, "")}/api`;
-
-  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-  return `${normalizedBase}${normalizedPath}`;
-}
+import { buildApiUrl } from "../../api-url";
 
 const STRIPE_PAYMENTS_ENABLED =
   process.env.NEXT_PUBLIC_STRIPE_PAYMENTS === "true";
@@ -63,7 +53,7 @@ export function EnrollCourseButton({
 
     const checkEnrolled = async () => {
       try {
-        const res = await fetch(apiUrl("/users/me/courses"), {
+        const res = await fetch(buildApiUrl("/users/me/courses"), {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -105,7 +95,7 @@ export function EnrollCourseButton({
 
     setPhase("unlocking");
 
-    const res = await fetch(apiUrl(`/courses/${courseId}/checkout`), {
+    const res = await fetch(buildApiUrl(`/courses/${courseId}/checkout`), {
       method: "POST",
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -159,7 +149,7 @@ export function EnrollCourseButton({
         setPhase("enrolling");
       }
 
-      const res = await fetch(apiUrl(`/courses/${courseId}/enroll`), {
+      const res = await fetch(buildApiUrl(`/courses/${courseId}/enroll`), {
         method: "POST",
         headers: {
           Authorization: `Bearer ${accessToken}`,

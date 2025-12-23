@@ -3,11 +3,13 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import ProfilePage from "../../profile/page";
 import { ACCESS_TOKEN_KEY } from "../../auth-token";
-
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
+import { buildApiUrl } from "../../api-url";
 
 const mockReplace = jest.fn();
+
+const usersMeUrl = buildApiUrl("/users/me");
+const usersMeChangePasswordUrl = buildApiUrl("/users/me/change-password");
+const usersMeExportUrl = buildApiUrl("/users/me/export");
 
 jest.mock("next/navigation", () => {
   const actual = jest.requireActual("next/navigation");
@@ -49,8 +51,10 @@ describe("ProfilePage email change behaviour", () => {
       async (input: RequestInfo | URL, init?: RequestInit) => {
         const url = typeof input === "string" ? input : input.toString();
 
+        const usersMeUrl = buildApiUrl("/users/me");
+
         if (
-          url === `${API_BASE_URL}/users/me` &&
+          url === usersMeUrl &&
           (!init || !init.method || init.method === "GET")
         ) {
           return {
@@ -66,11 +70,7 @@ describe("ProfilePage email change behaviour", () => {
           } as Response;
         }
 
-        if (
-          url === `${API_BASE_URL}/users/me` &&
-          init &&
-          init.method === "PATCH"
-        ) {
+        if (url === usersMeUrl && init && init.method === "PATCH") {
           const body = init.body ? JSON.parse(init.body as string) : {};
           return {
             ok: true,
@@ -135,7 +135,7 @@ describe("ProfilePage email change behaviour", () => {
 
     // ensure no new PATCH call was sent
     expect(global.fetch as jest.Mock).not.toHaveBeenCalledWith(
-      `${API_BASE_URL}/users/me`,
+      usersMeUrl,
       expect.objectContaining({ method: "PATCH" }),
     );
   });
@@ -221,7 +221,7 @@ describe("ProfilePage email change behaviour", () => {
         const url = typeof input === "string" ? input : input.toString();
 
         if (
-          url === `${API_BASE_URL}/users/me` &&
+          url === usersMeUrl &&
           (!init || !init.method || init.method === "GET")
         ) {
           return {
@@ -265,7 +265,7 @@ describe("ProfilePage email change behaviour", () => {
         const url = typeof input === "string" ? input : input.toString();
 
         if (
-          url === `${API_BASE_URL}/users/me` &&
+          url === usersMeUrl &&
           (!init || !init.method || init.method === "GET")
         ) {
           return {
@@ -281,11 +281,7 @@ describe("ProfilePage email change behaviour", () => {
           } as Response;
         }
 
-        if (
-          url === `${API_BASE_URL}/users/me` &&
-          init &&
-          init.method === "PATCH"
-        ) {
+        if (url === usersMeUrl && init && init.method === "PATCH") {
           return {
             ok: false,
             status: 429,
@@ -399,7 +395,7 @@ describe("ProfilePage critical actions", () => {
         const url = typeof input === "string" ? input : input.toString();
 
         if (
-          url === `${API_BASE_URL}/users/me` &&
+          url === usersMeUrl &&
           (!init || !init.method || init.method === "GET")
         ) {
           return {
@@ -415,10 +411,7 @@ describe("ProfilePage critical actions", () => {
           } as Response;
         }
 
-        if (
-          url === `${API_BASE_URL}/users/me/change-password` &&
-          init?.method === "POST"
-        ) {
+        if (url === usersMeChangePasswordUrl && init?.method === "POST") {
           return {
             ok: true,
             status: 200,
@@ -426,10 +419,7 @@ describe("ProfilePage critical actions", () => {
           } as Response;
         }
 
-        if (
-          url === `${API_BASE_URL}/users/me/export` &&
-          init?.method === "POST"
-        ) {
+        if (url === usersMeExportUrl && init?.method === "POST") {
           return {
             ok: true,
             status: 200,
@@ -442,7 +432,7 @@ describe("ProfilePage critical actions", () => {
           } as Response;
         }
 
-        if (url === `${API_BASE_URL}/users/me` && init?.method === "DELETE") {
+        if (url === usersMeUrl && init?.method === "DELETE") {
           return {
             ok: true,
             status: 204,
@@ -537,7 +527,7 @@ describe("ProfilePage critical actions", () => {
     expect((global.fetch as jest.Mock).mock.calls).toEqual(
       expect.arrayContaining([
         [
-          `${API_BASE_URL}/users/me/export`,
+          usersMeExportUrl,
           expect.objectContaining({
             method: "POST",
             body: JSON.stringify({ captchaToken: "dummy-captcha-token" }),

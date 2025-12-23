@@ -3,9 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getAccessToken } from "../../../auth-token";
-
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
+import { buildApiUrl } from "../../../api-url";
 
 type Status =
   | "idle"
@@ -72,7 +70,7 @@ export function VerifyEmailContent() {
       setMessage(null);
 
       try {
-        const res = await fetch(`${API_BASE_URL}/auth/verify-email`, {
+        const res = await fetch(buildApiUrl("/auth/verify-email"), {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

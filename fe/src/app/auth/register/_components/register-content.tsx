@@ -5,9 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCurrentLang } from "../../../../i18n/useCurrentLang";
 import { t } from "../../../../i18n/t";
 import { clearAccessToken, getAccessToken } from "../../../auth-token";
-
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
+import { buildApiUrl } from "../../../api-url";
 
 type FieldErrors = {
   email?: string;
@@ -43,7 +41,7 @@ export function RegisterContent() {
           return;
         }
 
-        const res = await fetch(`${API_BASE_URL}/users/me`, {
+        const res = await fetch(buildApiUrl("/users/me"), {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -129,7 +127,7 @@ export function RegisterContent() {
     setSubmitting(true);
 
     try {
-      const res = await fetch(`${API_BASE_URL}/auth/register`, {
+      const res = await fetch(buildApiUrl("/auth/register"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

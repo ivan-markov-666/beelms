@@ -1,11 +1,9 @@
 import Link from "next/link";
 import { WikiMain } from "./_components/wiki-main";
 import { WikiArticleMeta } from "./_components/wiki-article-meta";
+import { buildApiUrl } from "../api-url";
 
 export const dynamic = "force-dynamic";
-
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000";
 const PAGE_SIZE = 20;
 
 type WikiArticle = {
@@ -27,7 +25,7 @@ type WikiSearchParams = {
 async function fetchWikiArticles(
   params?: WikiSearchParams,
 ): Promise<WikiArticle[]> {
-  const url = new URL(`${API_BASE_URL}/api/wiki/articles`);
+  const url = new URL(buildApiUrl("/wiki/articles"));
 
   if (params?.q && params.q.trim()) {
     url.searchParams.set("q", params.q.trim());

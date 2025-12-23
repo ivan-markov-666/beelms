@@ -10,9 +10,7 @@ import {
   WikiRelatedArticles,
   type WikiRelatedArticle,
 } from "../_components/wiki-related-articles";
-
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000";
+import { buildApiUrl } from "../../api-url";
 
 type WikiArticleDetail = {
   id: string;
@@ -70,7 +68,7 @@ async function fetchWikiArticle(
   slug: string,
   lang?: string,
 ): Promise<WikiArticleDetail> {
-  const url = new URL(`${API_BASE_URL}/api/wiki/articles/${slug}`);
+  const url = new URL(buildApiUrl(`/wiki/articles/${slug}`));
 
   if (lang) {
     url.searchParams.set("lang", lang);
@@ -95,9 +93,7 @@ async function fetchWikiArticleFeedbackSummary(
   slug: string,
 ): Promise<WikiArticleFeedbackSummary | undefined> {
   try {
-    const url = new URL(
-      `${API_BASE_URL}/api/wiki/articles/${slug}/feedback/summary`,
-    );
+    const url = new URL(buildApiUrl(`/wiki/articles/${slug}/feedback/summary`));
 
     const res = await fetch(url.toString(), {
       cache: "no-store",
@@ -118,7 +114,7 @@ async function fetchWikiRelatedArticles(
   lang?: string,
 ): Promise<WikiRelatedArticlesResponse> {
   try {
-    const url = new URL(`${API_BASE_URL}/api/wiki/articles/${slug}/related`);
+    const url = new URL(buildApiUrl(`/wiki/articles/${slug}/related`));
 
     if (lang) {
       url.searchParams.set("lang", lang);

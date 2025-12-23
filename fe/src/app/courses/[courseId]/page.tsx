@@ -2,19 +2,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { EnrollCourseButton } from "../_components/enroll-course-button";
 import { CourseProgressPanel } from "../_components/course-progress-panel";
+import { buildApiUrl } from "../../api-url";
 
 export const dynamic = "force-dynamic";
-
-function apiUrl(path: string): string {
-  const base =
-    process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
-  const normalizedBase = base.endsWith("/api")
-    ? base
-    : `${base.replace(/\/$/, "")}/api`;
-
-  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-  return `${normalizedBase}${normalizedPath}`;
-}
 
 type CourseModuleItem = {
   id: string;
@@ -53,7 +43,7 @@ function formatPrice(currency: string, priceCents: number): string {
 }
 
 async function fetchCourseDetail(courseId: string): Promise<CourseDetail> {
-  const res = await fetch(apiUrl(`/courses/${courseId}`), {
+  const res = await fetch(buildApiUrl(`/courses/${courseId}`), {
     cache: "no-store",
   });
 

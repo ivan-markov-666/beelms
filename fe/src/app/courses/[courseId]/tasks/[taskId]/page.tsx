@@ -5,9 +5,7 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getAccessToken } from "../../../../auth-token";
 import { MarkTaskCompletedButton } from "../../../_components/mark-task-completed-button";
-
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000";
+import { buildApiUrl } from "../../../../api-url";
 
 type CourseTaskDetail = {
   id: string;
@@ -52,9 +50,11 @@ export default function CourseTaskPage() {
         setError(null);
 
         const res = await fetch(
-          `${API_BASE_URL}/api/courses/${encodeURIComponent(
-            courseId,
-          )}/tasks/${encodeURIComponent(taskId)}`,
+          buildApiUrl(
+            `/courses/${encodeURIComponent(
+              courseId,
+            )}/tasks/${encodeURIComponent(taskId)}`,
+          ),
           {
             cache: "no-store",
             headers: {

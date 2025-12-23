@@ -3,9 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { getAccessToken } from "../../auth-token";
-
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
+import { buildApiUrl } from "../../api-url";
 
 type CurriculumProgressItem = {
   id: string;
@@ -50,7 +48,9 @@ export function MarkAsReadButton({
 
     try {
       const res = await fetch(
-        `${API_BASE_URL}/courses/${encodeURIComponent(courseId)}/curriculum/progress`,
+        buildApiUrl(
+          `/courses/${encodeURIComponent(courseId)}/curriculum/progress`,
+        ),
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -100,7 +100,9 @@ export function MarkAsReadButton({
 
     try {
       const res = await fetch(
-        `${API_BASE_URL}/courses/${encodeURIComponent(courseId)}/curriculum/${encodeURIComponent(itemId)}/complete`,
+        buildApiUrl(
+          `/courses/${encodeURIComponent(courseId)}/curriculum/${encodeURIComponent(itemId)}/complete`,
+        ),
         {
           method: "POST",
           headers: {

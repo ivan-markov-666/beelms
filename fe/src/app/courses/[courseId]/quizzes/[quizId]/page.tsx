@@ -4,9 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { getAccessToken } from "../../../../auth-token";
-
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000";
+import { buildApiUrl } from "../../../../api-url";
 
 type QuizQuestion = {
   id: string;
@@ -72,9 +70,9 @@ export default function CourseQuizPage() {
         setError(null);
 
         const res = await fetch(
-          `${API_BASE_URL}/api/courses/${encodeURIComponent(
-            courseId,
-          )}/quizzes/${encodeURIComponent(quizId)}`,
+          buildApiUrl(
+            `/courses/${encodeURIComponent(courseId)}/quizzes/${encodeURIComponent(quizId)}`,
+          ),
           {
             cache: "no-store",
             headers: {
@@ -162,9 +160,9 @@ export default function CourseQuizPage() {
       };
 
       const res = await fetch(
-        `${API_BASE_URL}/api/courses/${encodeURIComponent(
-          courseId,
-        )}/quizzes/${encodeURIComponent(quizId)}/submit`,
+        buildApiUrl(
+          `/courses/${encodeURIComponent(courseId)}/quizzes/${encodeURIComponent(quizId)}/submit`,
+        ),
         {
           method: "POST",
           headers: {
