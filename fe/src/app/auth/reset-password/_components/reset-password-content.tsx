@@ -4,9 +4,7 @@ import { FormEvent, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCurrentLang } from "../../../../i18n/useCurrentLang";
 import { t } from "../../../../i18n/t";
-
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
+import { buildApiUrl } from "../../../api-url";
 
 type FieldErrors = {
   newPassword?: string;
@@ -72,7 +70,7 @@ export function ResetPasswordContent() {
     setSubmitting(true);
 
     try {
-      const res = await fetch(`${API_BASE_URL}/auth/reset-password`, {
+      const res = await fetch(buildApiUrl("/auth/reset-password"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

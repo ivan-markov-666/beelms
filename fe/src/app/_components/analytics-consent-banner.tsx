@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useCurrentLang } from "../../i18n/useCurrentLang";
 import { t } from "../../i18n/t";
 
@@ -28,11 +28,21 @@ function writeConsent(value: AnalyticsConsentValue): void {
   }
 }
 
+type ConsentState = AnalyticsConsentValue | null | "loading";
+
 export function AnalyticsConsentBanner() {
   const lang = useCurrentLang();
-  const [consent, setConsent] = useState<AnalyticsConsentValue | null>(() =>
-    readConsent(),
-  );
+  const [consent, setConsent] = useState<ConsentState>("loading");
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const handle = window.requestAnimationFrame(() => {
+      setConsent(readConsent());
+    });
+    return () => {
+      window.cancelAnimationFrame(handle);
+    };
+  }, []);
 
   const visible = useMemo(() => consent === null, [consent]);
 
@@ -52,7 +62,7 @@ export function AnalyticsConsentBanner() {
     } catch {}
   };
 
-  if (!visible) return null;
+  if (consent === "loading" || !visible) return null;
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-50 border-t border-gray-200 bg-white/95 backdrop-blur">

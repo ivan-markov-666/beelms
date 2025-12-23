@@ -8,9 +8,7 @@ import { WikiMarkdown } from "../../../../wiki/_components/wiki-markdown";
 import { MarkAsReadButton } from "../../../_components/mark-as-read-button";
 import { getAccessToken } from "../../../../auth-token";
 import { normalizeLang, type SupportedLang } from "../../../../../i18n/config";
-
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000";
+import { buildApiUrl } from "../../../../api-url";
 
 type CourseWikiArticleDetail = {
   id: string;
@@ -120,9 +118,11 @@ export default function CourseWikiArticlePage() {
     const run = async () => {
       try {
         const url = new URL(
-          `${API_BASE_URL}/api/courses/${encodeURIComponent(
-            courseId,
-          )}/wiki/${encodeURIComponent(slug)}`,
+          buildApiUrl(
+            `/courses/${encodeURIComponent(
+              courseId,
+            )}/wiki/${encodeURIComponent(slug)}`,
+          ),
         );
 
         if (apiLang) {

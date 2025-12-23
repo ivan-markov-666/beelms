@@ -3,17 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { getAccessToken } from "../../auth-token";
-
-function apiUrl(path: string): string {
-  const base =
-    process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
-  const normalizedBase = base.endsWith("/api")
-    ? base
-    : `${base.replace(/\/$/, "")}/api`;
-
-  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-  return `${normalizedBase}${normalizedPath}`;
-}
+import { buildApiUrl } from "../../api-url";
 
 type CurriculumProgressItem = {
   id: string;
@@ -60,7 +50,9 @@ export function CourseProgressPanel({
 
     try {
       const res = await fetch(
-        apiUrl(`/courses/${encodeURIComponent(courseId)}/curriculum/progress`),
+        buildApiUrl(
+          `/courses/${encodeURIComponent(courseId)}/curriculum/progress`,
+        ),
         {
           headers: {
             Authorization: `Bearer ${token}`,

@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import type { SupportedLang } from "../../../i18n/config";
 import { t } from "../../../i18n/t";
 import { getAccessToken } from "../../auth-token";
+import { buildApiUrl } from "../../api-url";
 
 type FeedbackSummary = {
   helpfulYes: number;
@@ -17,9 +18,6 @@ type WikiArticleFeedbackProps = {
   lang: SupportedLang;
   initialSummary?: FeedbackSummary;
 };
-
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000";
 
 export function WikiArticleFeedback({
   slug,
@@ -42,7 +40,7 @@ export function WikiArticleFeedback({
   const refreshSummary = async () => {
     try {
       const url = new URL(
-        `${API_BASE_URL}/api/wiki/articles/${slug}/feedback/summary`,
+        buildApiUrl(`/wiki/articles/${slug}/feedback/summary`),
       );
       const res = await fetch(url.toString(), { cache: "no-store" });
       if (!res.ok) {
@@ -61,17 +59,14 @@ export function WikiArticleFeedback({
 
     try {
       const token = getAccessToken();
-      const res = await fetch(
-        `${API_BASE_URL}/api/wiki/articles/${slug}/feedback`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
-          body: JSON.stringify({ helpful }),
+      const res = await fetch(buildApiUrl(`/wiki/articles/${slug}/feedback`), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-      );
+        body: JSON.stringify({ helpful }),
+      });
 
       if (!res.ok) {
         setError(t(lang, "wiki", "articleHelpfulError"));
