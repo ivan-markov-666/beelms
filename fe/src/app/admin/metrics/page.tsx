@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useCurrentLang } from "../../../i18n/useCurrentLang";
 import { t } from "../../../i18n/t";
@@ -89,6 +89,15 @@ type AdminWikiAttentionMetrics = {
   }>;
 };
 
+type WikiAttentionSortKey =
+  | "slug"
+  | "score"
+  | "views"
+  | "notHelpfulRate"
+  | "totalFeedback";
+
+type WikiAttentionSortDir = "asc" | "desc";
+
 type WikiInsightsView = "all" | "views" | "feedback" | "attention";
 
 type AdminAdvancedMetricsSourcePoint = {
@@ -137,6 +146,16 @@ export default function AdminMetricsPage() {
     useState<AdminWikiAttentionMetrics | null>(null);
   const [wikiInsightsView, setWikiInsightsView] =
     useState<WikiInsightsView>("all");
+
+  const [wikiAttentionSearch, setWikiAttentionSearch] = useState("");
+  const [wikiAttentionMinViews, setWikiAttentionMinViews] = useState("");
+  const [wikiAttentionMinVotes, setWikiAttentionMinVotes] = useState("");
+  const [wikiAttentionMinNotHelpfulRate, setWikiAttentionMinNotHelpfulRate] =
+    useState("");
+  const [wikiAttentionSortKey, setWikiAttentionSortKey] =
+    useState<WikiAttentionSortKey>("score");
+  const [wikiAttentionSortDir, setWikiAttentionSortDir] =
+    useState<WikiAttentionSortDir>("desc");
   const [userTrend, setUserTrend] = useState<UsersTrendPoint[]>([]);
   const [activityStats, setActivityStats] =
     useState<ActivityPeriodStats | null>(null);
@@ -577,6 +596,139 @@ export default function AdminMetricsPage() {
     wikiInsightsView === "all" || wikiInsightsView === "feedback";
   const showWikiAttention =
     wikiInsightsView === "all" || wikiInsightsView === "attention";
+
+  const wikiAttentionRows = useMemo(() => {
+    return wikiAttention?.items ?? [];
+  }, [wikiAttention]);
+
+  const filteredSortedWikiAttentionRows = useMemo(() => {
+    const q = wikiAttentionSearch.trim().toLowerCase();
+
+    const minViews = wikiAttentionMinViews.trim()
+      ? Number(wikiAttentionMinViews)
+      : null;
+    const minVotes = wikiAttentionMinVotes.trim()
+      ? Number(wikiAttentionMinVotes)
+      : null;
+    const minNotHelpfulRate = wikiAttentionMinNotHelpfulRate.trim()
+      ? Number(wikiAttentionMinNotHelpfulRate)
+      : null;
+
+    const filtered = wikiAttentionRows.filter((row) => {
+      if (q && !row.slug.toLowerCase().includes(q)) return false;
+
+      if (
+        minViews !== null &&
+        Number.isFinite(minViews) &&
+        row.views < minViews
+      ) {
+        return false;
+      }
+
+      if (
+        minVotes !== null &&
+        Number.isFinite(minVotes) &&
+        row.totalFeedback < minVotes
+      ) {
+        return false;
+      }
+
+      if (
+        minNotHelpfulRate !== null &&
+        Number.isFinite(minNotHelpfulRate) &&
+        row.notHelpfulRate < minNotHelpfulRate
+      ) {
+        return false;
+      }
+
+      return true;
+    });
+
+    const dirMultiplier = wikiAttentionSortDir === "asc" ? 1 : -1;
+
+    const sorted = [...filtered].sort((a, b) => {
+      const key = wikiAttentionSortKey;
+
+      if (key === "slug") {
+        return dirMultiplier * a.slug.localeCompare(b.slug);
+      }
+
+      const aValue = a[key];
+      const bValue = b[key];
+      return dirMultiplier * (aValue - bValue);
+    });
+
+    return sorted;
+  }, [
+    wikiAttentionRows,
+    wikiAttentionSearch,
+    wikiAttentionMinViews,
+    wikiAttentionMinVotes,
+    wikiAttentionMinNotHelpfulRate,
+    wikiAttentionSortKey,
+    wikiAttentionSortDir,
+  ]);
+
+  const toggleWikiAttentionSort = (key: WikiAttentionSortKey) => {
+    if (wikiAttentionSortKey === key) {
+      setWikiAttentionSortDir((prev) => (prev === "asc" ? "desc" : "asc"));
+      return;
+    }
+
+    setWikiAttentionSortKey(key);
+    setWikiAttentionSortDir(key === "slug" ? "asc" : "desc");
+  };
+
+  const exportWikiAttentionCsv = () => {
+    if (
+      filteredSortedWikiAttentionRows.length === 0 ||
+      typeof window === "undefined"
+    ) {
+      return;
+    }
+
+    const escapeCsv = (value: string | number): string => {
+      const str = String(value);
+      if (str.includes('"') || str.includes(",") || str.includes("\n")) {
+        return `"${str.replaceAll('"', '""')}"`;
+      }
+      return str;
+    };
+
+    const header = [
+      t(lang, "common", "adminWikiAttentionArticle"),
+      t(lang, "common", "adminWikiAttentionScore"),
+      t(lang, "common", "adminWikiAttentionViews"),
+      t(lang, "common", "adminWikiAttentionNotHelpfulRate"),
+      t(lang, "common", "adminWikiAttentionVotes"),
+      t(lang, "common", "adminWikiAttentionHelpfulYes"),
+      t(lang, "common", "adminWikiAttentionHelpfulNo"),
+    ];
+
+    const rows = filteredSortedWikiAttentionRows.map((row) => [
+      row.slug,
+      row.score.toFixed(2),
+      row.views,
+      row.notHelpfulRate.toFixed(2),
+      row.totalFeedback,
+      row.helpfulYes,
+      row.helpfulNo,
+    ]);
+
+    const csv = [header, ...rows]
+      .map((r) => r.map(escapeCsv).join(","))
+      .join("\n");
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "wiki-attention.csv";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  };
 
   return (
     <div className="space-y-8">
@@ -1647,29 +1799,166 @@ export default function AdminMetricsPage() {
             </p>
           </header>
 
+          <div className="rounded-lg border border-gray-200 bg-white p-4">
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
+              <label className="flex flex-col gap-1 text-xs text-gray-600">
+                <span>
+                  {t(lang, "common", "adminWikiAttentionFilterSearch")}
+                </span>
+                <input
+                  value={wikiAttentionSearch}
+                  onChange={(e) => setWikiAttentionSearch(e.target.value)}
+                  className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder={t(
+                    lang,
+                    "common",
+                    "adminWikiAttentionFilterSearchPlaceholder",
+                  )}
+                />
+              </label>
+
+              <label className="flex flex-col gap-1 text-xs text-gray-600">
+                <span>
+                  {t(lang, "common", "adminWikiAttentionFilterMinViews")}
+                </span>
+                <input
+                  type="number"
+                  value={wikiAttentionMinViews}
+                  onChange={(e) => setWikiAttentionMinViews(e.target.value)}
+                  className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  min={0}
+                />
+              </label>
+
+              <label className="flex flex-col gap-1 text-xs text-gray-600">
+                <span>
+                  {t(lang, "common", "adminWikiAttentionFilterMinVotes")}
+                </span>
+                <input
+                  type="number"
+                  value={wikiAttentionMinVotes}
+                  onChange={(e) => setWikiAttentionMinVotes(e.target.value)}
+                  className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  min={0}
+                />
+              </label>
+
+              <label className="flex flex-col gap-1 text-xs text-gray-600">
+                <span>
+                  {t(
+                    lang,
+                    "common",
+                    "adminWikiAttentionFilterMinNotHelpfulRate",
+                  )}
+                </span>
+                <input
+                  type="number"
+                  value={wikiAttentionMinNotHelpfulRate}
+                  onChange={(e) =>
+                    setWikiAttentionMinNotHelpfulRate(e.target.value)
+                  }
+                  className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  min={0}
+                  max={100}
+                  step={1}
+                />
+              </label>
+            </div>
+
+            <div className="mt-3 flex flex-col justify-between gap-3 md:flex-row md:items-center">
+              <p className="text-xs text-gray-600">
+                {t(lang, "common", "adminWikiAttentionFilterShowingPrefix")}{" "}
+                {filteredSortedWikiAttentionRows.length} /{" "}
+                {wikiAttentionRows.length}
+              </p>
+              <button
+                type="button"
+                onClick={exportWikiAttentionCsv}
+                className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1"
+              >
+                {t(lang, "common", "adminWikiAttentionExportCsv")}
+              </button>
+            </div>
+          </div>
+
           <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">
-                    {t(lang, "common", "adminWikiAttentionArticle")}
+                    <button
+                      type="button"
+                      onClick={() => toggleWikiAttentionSort("slug")}
+                      className="inline-flex items-center gap-1 hover:text-gray-800"
+                    >
+                      {t(lang, "common", "adminWikiAttentionArticle")}
+                      {wikiAttentionSortKey === "slug" && (
+                        <span aria-hidden="true">
+                          {wikiAttentionSortDir === "asc" ? "▲" : "▼"}
+                        </span>
+                      )}
+                    </button>
                   </th>
                   <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-600">
-                    {t(lang, "common", "adminWikiAttentionScore")}
+                    <button
+                      type="button"
+                      onClick={() => toggleWikiAttentionSort("score")}
+                      className="inline-flex items-center gap-1 hover:text-gray-800"
+                    >
+                      {t(lang, "common", "adminWikiAttentionScore")}
+                      {wikiAttentionSortKey === "score" && (
+                        <span aria-hidden="true">
+                          {wikiAttentionSortDir === "asc" ? "▲" : "▼"}
+                        </span>
+                      )}
+                    </button>
                   </th>
                   <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-600">
-                    {t(lang, "common", "adminWikiAttentionViews")}
+                    <button
+                      type="button"
+                      onClick={() => toggleWikiAttentionSort("views")}
+                      className="inline-flex items-center gap-1 hover:text-gray-800"
+                    >
+                      {t(lang, "common", "adminWikiAttentionViews")}
+                      {wikiAttentionSortKey === "views" && (
+                        <span aria-hidden="true">
+                          {wikiAttentionSortDir === "asc" ? "▲" : "▼"}
+                        </span>
+                      )}
+                    </button>
                   </th>
                   <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-600">
-                    {t(lang, "common", "adminWikiAttentionNotHelpfulRate")}
+                    <button
+                      type="button"
+                      onClick={() => toggleWikiAttentionSort("notHelpfulRate")}
+                      className="inline-flex items-center gap-1 hover:text-gray-800"
+                    >
+                      {t(lang, "common", "adminWikiAttentionNotHelpfulRate")}
+                      {wikiAttentionSortKey === "notHelpfulRate" && (
+                        <span aria-hidden="true">
+                          {wikiAttentionSortDir === "asc" ? "▲" : "▼"}
+                        </span>
+                      )}
+                    </button>
                   </th>
                   <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-600">
-                    {t(lang, "common", "adminWikiAttentionVotes")}
+                    <button
+                      type="button"
+                      onClick={() => toggleWikiAttentionSort("totalFeedback")}
+                      className="inline-flex items-center gap-1 hover:text-gray-800"
+                    >
+                      {t(lang, "common", "adminWikiAttentionVotes")}
+                      {wikiAttentionSortKey === "totalFeedback" && (
+                        <span aria-hidden="true">
+                          {wikiAttentionSortDir === "asc" ? "▲" : "▼"}
+                        </span>
+                      )}
+                    </button>
                   </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 bg-white">
-                {wikiAttention.items.length === 0 ? (
+                {filteredSortedWikiAttentionRows.length === 0 ? (
                   <tr>
                     <td
                       colSpan={5}
@@ -1679,15 +1968,23 @@ export default function AdminMetricsPage() {
                     </td>
                   </tr>
                 ) : (
-                  wikiAttention.items.map((row) => (
+                  filteredSortedWikiAttentionRows.map((row) => (
                     <tr key={row.slug} className="hover:bg-gray-50">
                       <td className="px-4 py-3 text-sm">
-                        <Link
-                          href={`/wiki/${encodeURIComponent(row.slug)}`}
-                          className="text-green-700 hover:text-green-800 hover:underline"
-                        >
-                          {row.slug}
-                        </Link>
+                        <div className="flex flex-col gap-1">
+                          <Link
+                            href={`/wiki/${encodeURIComponent(row.slug)}`}
+                            className="text-green-700 hover:text-green-800 hover:underline"
+                          >
+                            {row.slug}
+                          </Link>
+                          <Link
+                            href={`/admin/wiki/${encodeURIComponent(row.slug)}/edit`}
+                            className="text-xs font-medium text-blue-600 hover:text-blue-700"
+                          >
+                            {t(lang, "common", "adminWikiAttentionEdit")}
+                          </Link>
+                        </div>
                       </td>
                       <td className="px-4 py-3 text-right text-sm text-gray-700">
                         {row.score.toFixed(1)}
