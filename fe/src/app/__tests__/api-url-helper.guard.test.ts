@@ -29,10 +29,14 @@ function collectFiles(dir: string, acc: string[] = []): string[] {
 describe("API URL helper guard", () => {
   it("ensures NEXT_PUBLIC_API_BASE_URL env is only read via api-url.ts", () => {
     const appDir = path.join(__dirname, "..");
+    const guardTestFile = path.resolve(__filename);
     const files = collectFiles(appDir);
 
     const violations = files.filter((filePath) => {
-      if (filePath.endsWith(`${path.sep}api-url.ts`)) {
+      if (
+        filePath.endsWith(`${path.sep}api-url.ts`) ||
+        path.resolve(filePath) === guardTestFile
+      ) {
         return false;
       }
 

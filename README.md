@@ -124,6 +124,36 @@ NEXT_PUBLIC_API_BASE_URL=http://localhost:3000/api
 
 - В репото има Jest guard, който фейлва, ако се появи директна употреба на `NEXT_PUBLIC_API_BASE_URL` извън `api-url.ts`.
 
+#### 2.4.1.2. CAPTCHA / reCAPTCHA (anti-bot) – env vars
+
+CAPTCHA е имплементирана като **Google reCAPTCHA (v2 checkbox)**.
+
+- FE (`fe/.env.local`):
+
+```bash
+NEXT_PUBLIC_RECAPTCHA_SITE_KEY=your_site_key
+```
+
+- BE (`be/.env` / env на процеса):
+
+```bash
+RECAPTCHA_SECRET_KEY=your_secret_key
+
+# включва captcha изискване за /auth/register и /auth/forgot-password
+AUTH_REQUIRE_CAPTCHA=true
+
+# включва captcha изискване за /users/me/export
+ACCOUNT_EXPORT_REQUIRE_CAPTCHA=true
+
+# по избор: dev bypass на външната проверка към Google
+CAPTCHA_VERIFY_DISABLED=true
+```
+
+Notes:
+
+- В **dev/test** среда BE не прави реална HTTP верификация към Google (за да не блокира локалната работа), но когато `AUTH_REQUIRE_CAPTCHA=true` / `ACCOUNT_EXPORT_REQUIRE_CAPTCHA=true` се изисква да се подаде **непразен** `captchaToken`.
+- В **production** (`NODE_ENV=production`) BE валидира `captchaToken` чрез `https://www.google.com/recaptcha/api/siteverify`.
+
 #### 2.4.1. Stripe payments (Paid courses) – env vars
 
 За да работи Stripe checkout flow за paid courses (STORY-PAYMENTS-1):

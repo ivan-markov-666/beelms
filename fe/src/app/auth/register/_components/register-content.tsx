@@ -6,12 +6,16 @@ import { useCurrentLang } from "../../../../i18n/useCurrentLang";
 import { t } from "../../../../i18n/t";
 import { clearAccessToken, getAccessToken } from "../../../auth-token";
 import { buildApiUrl } from "../../../api-url";
+import { RecaptchaWidget } from "../../../_components/recaptcha-widget";
+
+const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
 
 type FieldErrors = {
   email?: string;
   password?: string;
   confirmPassword?: string;
   terms?: string;
+  captcha?: string;
 };
 
 export function RegisterContent() {
@@ -22,6 +26,7 @@ export function RegisterContent() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [acceptTerms, setAcceptTerms] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
@@ -111,6 +116,10 @@ export function RegisterContent() {
       errors.terms = t(lang, "auth", "registerErrorTermsRequired");
     }
 
+    if (RECAPTCHA_SITE_KEY && !captchaToken) {
+      errors.captcha = t(lang, "auth", "registerErrorCaptchaRequired");
+    }
+
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -136,6 +145,9 @@ export function RegisterContent() {
           email,
           password,
           acceptTerms,
+          captchaToken: RECAPTCHA_SITE_KEY
+            ? (captchaToken ?? undefined)
+            : undefined,
         }),
       });
 
@@ -293,9 +305,26 @@ export function RegisterContent() {
               <p className="text-xs text-red-600">{fieldErrors.terms}</p>
             )}
 
-            <div className="rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-xs text-gray-600">
-              {t(lang, "auth", "registerCaptchaPlaceholder")}
-            </div>
+            {RECAPTCHA_SITE_KEY ? (
+              <div className="space-y-2">
+                <p className="text-xs text-gray-600">
+                  {t(lang, "auth", "registerCaptchaLabel")}
+                </p>
+                <RecaptchaWidget
+                  siteKey={RECAPTCHA_SITE_KEY}
+                  lang={lang}
+                  disabled={submitting}
+                  onTokenChange={setCaptchaToken}
+                />
+                {fieldErrors.captcha && (
+                  <p className="text-xs text-red-600">{fieldErrors.captcha}</p>
+                )}
+              </div>
+            ) : (
+              <div className="rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-xs text-gray-600">
+                {t(lang, "auth", "registerCaptchaPlaceholder")}
+              </div>
+            )}
 
             {formError && (
               <p className="text-sm text-red-600" role="alert">

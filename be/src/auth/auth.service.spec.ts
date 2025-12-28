@@ -14,13 +14,25 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { CaptchaService } from '../security/captcha/captcha.service';
 
 describe('AuthService', () => {
   let service: AuthService;
   let usersRepo: jest.Mocked<Repository<User>>;
   let jwtService: JwtService;
+  let captchaService: { verifyCaptchaToken: jest.Mock };
 
   beforeEach(async () => {
+    captchaService = {
+      verifyCaptchaToken: jest
+        .fn()
+        .mockImplementation(async (args: { token: string }) => {
+          if (!args.token || args.token.trim().length === 0) {
+            throw new BadRequestException('captcha verification required');
+          }
+        }),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       imports: [
         JwtModule.register({
@@ -30,6 +42,10 @@ describe('AuthService', () => {
       ],
       providers: [
         AuthService,
+        {
+          provide: CaptchaService,
+          useValue: captchaService,
+        },
         {
           provide: getRepositoryToken(User),
           useValue: {

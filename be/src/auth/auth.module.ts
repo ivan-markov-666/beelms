@@ -24,6 +24,7 @@ import { AdminActivityController } from './admin-activity.controller';
 import { InMemoryLoginAttemptStore } from '../security/account-protection/login-attempts.store';
 import { LoginProtectionInterceptor } from '../security/account-protection/login-protection.interceptor';
 import { OptionalJwtAuthGuard } from './optional-jwt-auth.guard';
+import { CaptchaService } from '../security/captcha/captcha.service';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { OptionalJwtAuthGuard } from './optional-jwt-auth.guard';
   providers: [
     AuthService,
     AccountService,
+    CaptchaService,
     JwtAuthGuard,
     OptionalJwtAuthGuard,
     AdminGuard,

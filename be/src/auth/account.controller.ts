@@ -19,6 +19,7 @@ import { ChangePasswordDto } from './dto/change-password.dto';
 import { AccountExportRequestDto } from './dto/account-export-request.dto';
 import { UserExportDto } from './dto/user-export.dto';
 import { RateLimit } from '../security/rate-limit/rate-limit.decorator';
+import { CaptchaService } from '../security/captcha/captcha.service';
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -29,7 +30,10 @@ interface AuthenticatedRequest extends Request {
 
 @Controller('users')
 export class AccountController {
-  constructor(private readonly accountService: AccountService) {}
+  constructor(
+    private readonly accountService: AccountService,
+    private readonly captchaService: CaptchaService,
+  ) {}
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
@@ -90,7 +94,7 @@ export class AccountController {
   @Post('me/export')
   @RateLimit({ limit: 3, windowSeconds: 86400, key: 'userId' })
   @HttpCode(200)
-  exportMe(
+  async exportMe(
     @Req() req: AuthenticatedRequest,
     @Body() dto: AccountExportRequestDto,
   ): Promise<UserExportDto> {
@@ -100,8 +104,16 @@ export class AccountController {
 
     const requireCaptcha =
       process.env.ACCOUNT_EXPORT_REQUIRE_CAPTCHA === 'true';
-    if (requireCaptcha && !dto.captchaToken) {
-      throw new BadRequestException('captcha verification required');
+    if (requireCaptcha) {
+      const token = dto.captchaToken ?? '';
+      if (token.trim().length === 0) {
+        throw new BadRequestException('captcha verification required');
+      }
+
+      await this.captchaService.verifyCaptchaToken({
+        token,
+        remoteIp: req.ip,
+      });
     }
 
     return this.accountService.exportData(req.user.userId);

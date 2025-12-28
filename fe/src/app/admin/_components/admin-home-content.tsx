@@ -5,9 +5,9 @@ import Link from "next/link";
 import { useCurrentLang } from "../../../i18n/useCurrentLang";
 import { t } from "../../../i18n/t";
 import { getAccessToken } from "../../auth-token";
+import { getApiBaseUrl } from "../../api-url";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
+const API_BASE_URL = getApiBaseUrl();
 
 type MetricsOverview = {
   totalUsers: number;

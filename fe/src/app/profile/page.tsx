@@ -3,9 +3,11 @@
 import { useEffect, useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { clearAccessToken, getAccessToken } from "../auth-token";
+import { getApiBaseUrl } from "../api-url";
+import { RecaptchaWidget } from "../_components/recaptcha-widget";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
+const API_BASE_URL = getApiBaseUrl();
+const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
 
 type UserProfile = {
   id: string;
@@ -87,6 +89,9 @@ export default function ProfilePage() {
   const [exportSuccess, setExportSuccess] = useState<string | null>(null);
   const [exportError, setExportError] = useState<string | null>(null);
   const [exportData, setExportData] = useState<UserExport | null>(null);
+  const [exportCaptchaToken, setExportCaptchaToken] = useState<string | null>(
+    null,
+  );
 
   const [deleteStep1Open, setDeleteStep1Open] = useState(false);
   const [deleteStep2Open, setDeleteStep2Open] = useState(false);
@@ -316,6 +321,12 @@ export default function ProfilePage() {
     setExportData(null);
     setExportSubmitting(true);
 
+    if (RECAPTCHA_SITE_KEY && !exportCaptchaToken) {
+      setExportError("Моля, потвърдете, че не сте робот.");
+      setExportSubmitting(false);
+      return;
+    }
+
     try {
       const res = await fetch(`${API_BASE_URL}/users/me/export`, {
         method: "POST",
@@ -323,7 +334,11 @@ export default function ProfilePage() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${authToken}`,
         },
-        body: JSON.stringify({ captchaToken: "dummy-captcha-token" }),
+        body: JSON.stringify({
+          captchaToken: RECAPTCHA_SITE_KEY
+            ? (exportCaptchaToken ?? undefined)
+            : "dummy-captcha-token",
+        }),
       });
 
       if (!res.ok) {
@@ -721,10 +736,21 @@ export default function ProfilePage() {
               други свързани данни.
             </p>
           </div>
-          <div className="mb-4 rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-xs text-gray-600">
-            CAPTCHA / reCAPTCHA (placeholder за защита от ботове при заявка за
-            експорт на лични данни)
-          </div>
+          {RECAPTCHA_SITE_KEY ? (
+            <div className="mb-4 space-y-2">
+              <p className="text-xs text-gray-600">CAPTCHA / reCAPTCHA</p>
+              <RecaptchaWidget
+                siteKey={RECAPTCHA_SITE_KEY}
+                disabled={exportSubmitting}
+                onTokenChange={setExportCaptchaToken}
+              />
+            </div>
+          ) : (
+            <div className="mb-4 rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-xs text-gray-600">
+              CAPTCHA / reCAPTCHA (placeholder за защита от ботове при заявка за
+              експорт на лични данни)
+            </div>
+          )}
           <button
             type="button"
             onClick={handleExport}

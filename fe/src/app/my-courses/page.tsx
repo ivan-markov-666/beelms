@@ -4,17 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getAccessToken } from "../auth-token";
-
-function apiUrl(path: string): string {
-  const base =
-    process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
-  const normalizedBase = base.endsWith("/api")
-    ? base
-    : `${base.replace(/\/$/, "")}/api`;
-
-  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-  return `${normalizedBase}${normalizedPath}`;
-}
+import { buildApiUrl } from "../api-url";
 
 type MyCourseListItem = {
   id: string;
@@ -69,7 +59,7 @@ export default function MyCoursesPage() {
       }
 
       try {
-        const res = await fetch(apiUrl("/users/me/courses"), {
+        const res = await fetch(buildApiUrl("/users/me/courses"), {
           headers: {
             Authorization: `Bearer ${token}`,
           },

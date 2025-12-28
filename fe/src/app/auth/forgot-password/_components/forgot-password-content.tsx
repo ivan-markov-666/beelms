@@ -5,9 +5,13 @@ import { useRouter } from "next/navigation";
 import { useCurrentLang } from "../../../../i18n/useCurrentLang";
 import { t } from "../../../../i18n/t";
 import { buildApiUrl } from "../../../api-url";
+import { RecaptchaWidget } from "../../../_components/recaptcha-widget";
+
+const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
 
 type FieldErrors = {
   email?: string;
+  captcha?: string;
 };
 
 export function ForgotPasswordContent() {
@@ -15,6 +19,7 @@ export function ForgotPasswordContent() {
   const lang = useCurrentLang();
 
   const [email, setEmail] = useState("");
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [formSuccess, setFormSuccess] = useState<string | null>(null);
@@ -30,6 +35,10 @@ export function ForgotPasswordContent() {
       if (!emailRegex.test(email)) {
         errors.email = t(lang, "auth", "forgotErrorEmailInvalid");
       }
+    }
+
+    if (RECAPTCHA_SITE_KEY && !captchaToken) {
+      errors.captcha = t(lang, "auth", "forgotErrorCaptchaRequired");
     }
 
     setFieldErrors(errors);
@@ -55,6 +64,9 @@ export function ForgotPasswordContent() {
         },
         body: JSON.stringify({
           email,
+          captchaToken: RECAPTCHA_SITE_KEY
+            ? (captchaToken ?? undefined)
+            : undefined,
         }),
       });
 
@@ -111,9 +123,26 @@ export function ForgotPasswordContent() {
               </p>
             </div>
 
-            <div className="rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-xs text-gray-600">
-              {t(lang, "auth", "forgotCaptchaPlaceholder")}
-            </div>
+            {RECAPTCHA_SITE_KEY ? (
+              <div className="space-y-2">
+                <p className="text-xs text-gray-600">
+                  {t(lang, "auth", "forgotCaptchaLabel")}
+                </p>
+                <RecaptchaWidget
+                  siteKey={RECAPTCHA_SITE_KEY}
+                  lang={lang}
+                  disabled={submitting}
+                  onTokenChange={setCaptchaToken}
+                />
+                {fieldErrors.captcha && (
+                  <p className="text-xs text-red-600">{fieldErrors.captcha}</p>
+                )}
+              </div>
+            ) : (
+              <div className="rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-xs text-gray-600">
+                {t(lang, "auth", "forgotCaptchaPlaceholder")}
+              </div>
+            )}
 
             {formError && (
               <p className="text-sm text-red-600" role="alert">
