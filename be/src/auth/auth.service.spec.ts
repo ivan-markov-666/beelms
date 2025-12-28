@@ -15,12 +15,14 @@ import { LoginDto } from './dto/login.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { CaptchaService } from '../security/captcha/captcha.service';
+import { InMemoryLoginAttemptStore } from '../security/account-protection/login-attempts.store';
 
 describe('AuthService', () => {
   let service: AuthService;
   let usersRepo: jest.Mocked<Repository<User>>;
   let jwtService: JwtService;
   let captchaService: { verifyCaptchaToken: jest.Mock };
+  let loginAttemptStore: { shouldRequireCaptcha: jest.Mock };
 
   beforeEach(async () => {
     captchaService = {
@@ -31,6 +33,10 @@ describe('AuthService', () => {
             throw new BadRequestException('captcha verification required');
           }
         }),
+    };
+
+    loginAttemptStore = {
+      shouldRequireCaptcha: jest.fn().mockReturnValue(false),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -45,6 +51,10 @@ describe('AuthService', () => {
         {
           provide: CaptchaService,
           useValue: captchaService,
+        },
+        {
+          provide: InMemoryLoginAttemptStore,
+          useValue: loginAttemptStore,
         },
         {
           provide: getRepositoryToken(User),
@@ -65,6 +75,8 @@ describe('AuthService', () => {
   afterEach(() => {
     jest.resetAllMocks();
     delete process.env.AUTH_REQUIRE_CAPTCHA;
+    delete process.env.AUTH_LOGIN_CAPTCHA_THRESHOLD;
+    delete process.env.AUTH_LOGIN_CAPTCHA_TEST_MODE;
   });
 
   it('registers a new user when email is free', async () => {
@@ -216,6 +228,47 @@ describe('AuthService', () => {
     await expect(service.login(dto)).rejects.toBeInstanceOf(
       UnauthorizedException,
     );
+  });
+
+  it('requires captcha for login when threshold is reached', async () => {
+    process.env.AUTH_LOGIN_CAPTCHA_TEST_MODE = 'true';
+    process.env.AUTH_LOGIN_CAPTCHA_THRESHOLD = '1';
+    loginAttemptStore.shouldRequireCaptcha.mockReturnValue(true);
+
+    const dto: LoginDto = {
+      email: 'test@example.com',
+      password: 'Password1234',
+    };
+
+    await expect(
+      service.login(dto, { ip: '127.0.0.1' }),
+    ).rejects.toBeInstanceOf(BadRequestException);
+    expect(captchaService.verifyCaptchaToken).toHaveBeenCalled();
+  });
+
+  it('allows login with captcha token when required', async () => {
+    process.env.AUTH_LOGIN_CAPTCHA_TEST_MODE = 'true';
+    process.env.AUTH_LOGIN_CAPTCHA_THRESHOLD = '1';
+    loginAttemptStore.shouldRequireCaptcha.mockReturnValue(true);
+
+    const user: Partial<User> = {
+      id: 'user-id',
+      email: 'test@example.com',
+      active: true,
+      passwordHash: await bcrypt.hash('Password1234', 10),
+      tokenVersion: 1,
+    };
+
+    (usersRepo.findOne as jest.Mock).mockResolvedValue(user);
+
+    const dto: LoginDto = {
+      email: 'test@example.com',
+      password: 'Password1234',
+      captchaToken: 'token',
+    };
+
+    const result = await service.login(dto, { ip: '127.0.0.1' });
+    expect(result.accessToken).toBeTruthy();
   });
 
   it('throws UnauthorizedException when password is invalid', async () => {
