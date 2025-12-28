@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { clearAccessToken, getAccessToken } from "../auth-token";
+import { getApiBaseUrl } from "../api-url";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
+const API_BASE_URL = getApiBaseUrl();
 
 type AdminStatus = "loading" | "forbidden" | "ready";
 

@@ -19,6 +19,7 @@ import { AuthTokenDto } from './dto/auth-token.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
+import { CaptchaService } from '../security/captcha/captcha.service';
 
 const RESET_PASSWORD_TOKEN_TTL_MS = 24 * 60 * 60 * 1000;
 const EMAIL_VERIFICATION_TOKEN_TTL_MS = 24 * 60 * 60 * 1000;
@@ -31,12 +32,15 @@ export class AuthService {
     @InjectRepository(User)
     private readonly usersRepo: Repository<User>,
     private readonly jwtService: JwtService,
+    private readonly captchaService: CaptchaService,
   ) {}
 
   async register(dto: RegisterDto): Promise<UserProfileDto> {
     const requireCaptcha = process.env.AUTH_REQUIRE_CAPTCHA === 'true';
-    if (requireCaptcha && !dto.captchaToken) {
-      throw new BadRequestException('captcha verification required');
+    if (requireCaptcha) {
+      await this.captchaService.verifyCaptchaToken({
+        token: dto.captchaToken ?? '',
+      });
     }
 
     if (dto.acceptTerms !== true) {
@@ -120,8 +124,10 @@ export class AuthService {
 
   async forgotPassword(dto: ForgotPasswordDto): Promise<void> {
     const requireCaptcha = process.env.AUTH_REQUIRE_CAPTCHA === 'true';
-    if (requireCaptcha && !dto.captchaToken) {
-      throw new BadRequestException('captcha verification required');
+    if (requireCaptcha) {
+      await this.captchaService.verifyCaptchaToken({
+        token: dto.captchaToken ?? '',
+      });
     }
 
     const email = dto.email.toLowerCase().trim();

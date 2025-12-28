@@ -1,17 +1,7 @@
 import Link from "next/link";
+import { buildApiUrl } from "../api-url";
 
 export const dynamic = "force-dynamic";
-
-function apiUrl(path: string): string {
-  const base =
-    process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
-  const normalizedBase = base.endsWith("/api")
-    ? base
-    : `${base.replace(/\/$/, "")}/api`;
-
-  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-  return `${normalizedBase}${normalizedPath}`;
-}
 
 type CourseSummary = {
   id: string;
@@ -39,7 +29,7 @@ function formatPrice(currency: string, priceCents: number): string {
 }
 
 async function fetchCourses(): Promise<CourseSummary[]> {
-  const res = await fetch(apiUrl("/courses"), {
+  const res = await fetch(buildApiUrl("/courses"), {
     cache: "no-store",
   });
 

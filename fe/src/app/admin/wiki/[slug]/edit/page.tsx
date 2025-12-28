@@ -9,6 +9,7 @@ import dynamic from "next/dynamic";
 import { useParams } from "next/navigation";
 import { WikiMarkdown } from "../../../../wiki/_components/wiki-markdown";
 import { getAccessToken } from "../../../../auth-token";
+import { getApiBaseUrl } from "../../../../api-url";
 
 const WikiRichEditor = dynamic(
   () =>
@@ -23,8 +24,7 @@ const WikiRichEditor = dynamic(
   },
 );
 
-const ADMIN_API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
+const ADMIN_API_BASE_URL = getApiBaseUrl();
 
 type WikiArticleDetail = {
   id: string;

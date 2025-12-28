@@ -6,9 +6,9 @@ import {
   ANALYTICS_CONSENT_KEY,
   type AnalyticsConsentValue,
 } from "./analytics-consent-banner";
+import { getApiBaseUrl } from "../api-url";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
+const API_BASE_URL = getApiBaseUrl();
 
 const VISITOR_ID_COOKIE = "beelms_visitor_id";
 

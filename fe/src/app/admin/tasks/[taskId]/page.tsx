@@ -4,9 +4,9 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { getAccessToken } from "../../../auth-token";
+import { getApiBaseUrl } from "../../../api-url";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api";
+const API_BASE_URL = getApiBaseUrl();
 
 type AdminTask = {
   id: string;
