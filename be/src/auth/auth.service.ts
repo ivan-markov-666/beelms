@@ -20,6 +20,12 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import { CaptchaService } from '../security/captcha/captcha.service';
+import { InMemoryLoginAttemptStore } from '../security/account-protection/login-attempts.store';
+import {
+  buildLoginAttemptKey,
+  LOGIN_PROTECTION_WINDOW_MS,
+  normalizeLoginEmailValue,
+} from '../security/account-protection/login-protection.utils';
 
 const RESET_PASSWORD_TOKEN_TTL_MS = 24 * 60 * 60 * 1000;
 const EMAIL_VERIFICATION_TOKEN_TTL_MS = 24 * 60 * 60 * 1000;
@@ -33,6 +39,7 @@ export class AuthService {
     private readonly usersRepo: Repository<User>,
     private readonly jwtService: JwtService,
     private readonly captchaService: CaptchaService,
+    private readonly loginAttemptStore: InMemoryLoginAttemptStore,
   ) {}
 
   async register(dto: RegisterDto): Promise<UserProfileDto> {
@@ -95,7 +102,38 @@ export class AuthService {
     }
   }
 
-  async login(dto: LoginDto): Promise<AuthTokenDto> {
+  async login(
+    dto: LoginDto,
+    requestContext?: { ip?: string },
+  ): Promise<AuthTokenDto> {
+    const ip = (requestContext?.ip ?? '').trim() || 'unknown';
+
+    const shouldEnforceLoginCaptcha =
+      process.env.NODE_ENV !== 'test' ||
+      process.env.AUTH_LOGIN_CAPTCHA_TEST_MODE === 'true';
+
+    if (shouldEnforceLoginCaptcha) {
+      const thresholdRaw = process.env.AUTH_LOGIN_CAPTCHA_THRESHOLD;
+      const threshold = thresholdRaw ? Number(thresholdRaw) : 3;
+
+      const emailKey = normalizeLoginEmailValue(dto.email);
+      const key = buildLoginAttemptKey(ip, emailKey);
+
+      if (
+        this.loginAttemptStore.shouldRequireCaptcha(
+          key,
+          Date.now(),
+          LOGIN_PROTECTION_WINDOW_MS,
+          Number.isFinite(threshold) ? threshold : 3,
+        )
+      ) {
+        await this.captchaService.verifyCaptchaToken({
+          token: dto.captchaToken ?? '',
+          remoteIp: ip,
+        });
+      }
+    }
+
     const user = await this.usersRepo.findOne({
       where: { email: dto.email, active: true },
     });

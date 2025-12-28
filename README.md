@@ -132,6 +132,10 @@ CAPTCHA е имплементирана като **Google reCAPTCHA (v2 checkbox
 
 ```bash
 NEXT_PUBLIC_RECAPTCHA_SITE_KEY=your_site_key
+
+# (по избор) DEV bypass ако reCAPTCHA script-ът е блокиран локално.
+# Работи само когато NODE_ENV != production.
+NEXT_PUBLIC_RECAPTCHA_DEV_BYPASS=true
 ```
 
 - BE (`be/.env` / env на процеса):
@@ -145,6 +149,9 @@ AUTH_REQUIRE_CAPTCHA=true
 # включва captcha изискване за /users/me/export
 ACCOUNT_EXPORT_REQUIRE_CAPTCHA=true
 
+# (по избор) изисква captcha при /auth/login след N неуспешни опита (default 3)
+AUTH_LOGIN_CAPTCHA_THRESHOLD=3
+
 # по избор: dev bypass на външната проверка към Google
 CAPTCHA_VERIFY_DISABLED=true
 ```
@@ -153,6 +160,9 @@ Notes:
 
 - В **dev/test** среда BE не прави реална HTTP верификация към Google (за да не блокира локалната работа), но когато `AUTH_REQUIRE_CAPTCHA=true` / `ACCOUNT_EXPORT_REQUIRE_CAPTCHA=true` се изисква да се подаде **непразен** `captchaToken`.
 - В **production** (`NODE_ENV=production`) BE валидира `captchaToken` чрез `https://www.google.com/recaptcha/api/siteverify`.
+- `AUTH_LOGIN_CAPTCHA_THRESHOLD` контролира след колко неуспешни login опита (за комбинацията `ip+email`) FE ще поиска CAPTCHA и BE ще започне да изисква `captchaToken`.
+- В `NODE_ENV=test` login CAPTCHA е изключена по подразбиране (за да не влияе на e2e тестовете). Ако е нужно да се тества изрично, може да се включи с `AUTH_LOGIN_CAPTCHA_TEST_MODE=true`.
+- Ако reCAPTCHA widget не се визуализира локално, най-честата причина е блокиране на `recaptcha/api.js` от adblock/Brave shields/корпоративна мрежа. FE пробва и fallback домейн `https://www.recaptcha.net/recaptcha/api.js`.
 
 #### 2.4.1. Stripe payments (Paid courses) – env vars
 
