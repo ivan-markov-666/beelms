@@ -110,6 +110,20 @@ npm run dev -- -p 3001
 NEXT_PUBLIC_API_BASE_URL=http://localhost:3000/api
 ```
 
+#### 2.4.1.1. API URL helper (frontend)
+
+- **Никога не конкатенирай `/api` ръчно.** Вместо това използвай споделения helper `fe/src/app/api-url.ts`.
+- `getApiBaseUrl()` връща нормализираната стойност (гарантира, че завършва на `/api`, дори env да е без него).
+- `buildApiUrl("/auth/login")` добавя пътя със сигурен водещ `/`.
+- Това означава, че компонентите/страниците просто викат:
+
+  ```ts
+  import { buildApiUrl } from "../api-url";
+  await fetch(buildApiUrl("/auth/login"), { ... });
+  ```
+
+- В репото има Jest guard, който фейлва, ако се появи директна употреба на `NEXT_PUBLIC_API_BASE_URL` извън `api-url.ts`.
+
 #### 2.4.1. Stripe payments (Paid courses) – env vars
 
 За да работи Stripe checkout flow за paid courses (STORY-PAYMENTS-1):
