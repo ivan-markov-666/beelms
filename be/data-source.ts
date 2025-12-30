@@ -20,6 +20,8 @@ import { QuizAttempt } from './src/assessments/quiz-attempt.entity';
 import { Task } from './src/tasks/task.entity';
 import { AnalyticsSession } from './src/analytics/analytics-session.entity';
 import { AnalyticsPageViewDaily } from './src/analytics/analytics-page-view-daily.entity';
+import { InstanceConfig } from './src/settings/instance-config.entity';
+import { LegalPage } from './src/legal/legal-page.entity';
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -49,6 +51,8 @@ export const AppDataSource = new DataSource({
     QuizOption,
     QuizAttempt,
     Task,
+    InstanceConfig,
+    LegalPage,
   ],
   migrations: ['src/migrations/*.ts'],
   synchronize: false,

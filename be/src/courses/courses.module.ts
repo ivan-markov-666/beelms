@@ -17,6 +17,7 @@ import { CurriculumProgressController } from './curriculum-progress.controller';
 import { CoursePurchase } from './course-purchase.entity';
 import { Quiz } from '../assessments/quiz.entity';
 import { Task } from '../tasks/task.entity';
+import { SettingsModule } from '../settings/settings.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { Task } from '../tasks/task.entity';
       Task,
     ]),
     AuthModule,
+    SettingsModule,
   ],
   controllers: [
     CoursesController,

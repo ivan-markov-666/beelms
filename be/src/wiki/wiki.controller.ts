@@ -16,6 +16,7 @@ import { WikiArticleDetailDto } from './dto/wiki-article-detail.dto';
 import { CreateWikiArticleFeedbackDto } from './dto/create-wiki-article-feedback.dto';
 import { WikiRelatedArticleDto } from './dto/wiki-related-article.dto';
 import { OptionalJwtAuthGuard } from '../auth/optional-jwt-auth.guard';
+import { FeatureEnabledGuard } from '../settings/feature-enabled.guard';
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -25,6 +26,7 @@ interface AuthenticatedRequest extends Request {
 }
 
 @Controller('wiki')
+@UseGuards(FeatureEnabledGuard('wikiPublic'))
 export class WikiController {
   constructor(private readonly wikiService: WikiService) {}
 

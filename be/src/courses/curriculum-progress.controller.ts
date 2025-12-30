@@ -10,6 +10,7 @@ import {
   ParseUUIDPipe,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { FeatureEnabledGuard } from '../settings/feature-enabled.guard';
 import { CoursesService } from './courses.service';
 
 interface AuthRequest {
@@ -20,7 +21,7 @@ interface AuthRequest {
 }
 
 @Controller('courses/:courseId/curriculum')
-@UseGuards(JwtAuthGuard)
+@UseGuards(FeatureEnabledGuard('courses'), JwtAuthGuard)
 export class CurriculumProgressController {
   constructor(private readonly coursesService: CoursesService) {}
 

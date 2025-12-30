@@ -16,6 +16,7 @@ import { CourseDetailDto } from './dto/course-detail.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { WikiArticleDetailDto } from '../wiki/dto/wiki-article-detail.dto';
 import { CourseCertificateDto } from './dto/course-certificate.dto';
+import { FeatureEnabledGuard } from '../settings/feature-enabled.guard';
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -25,6 +26,7 @@ interface AuthenticatedRequest extends Request {
 }
 
 @Controller('courses')
+@UseGuards(FeatureEnabledGuard('courses'))
 export class CoursesController {
   constructor(private readonly coursesService: CoursesService) {}
 

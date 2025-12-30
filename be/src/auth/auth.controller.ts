@@ -4,6 +4,7 @@ import {
   HttpCode,
   Post,
   Req,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import type { Request } from 'express';
@@ -18,8 +19,10 @@ import { VerifyEmailDto } from './dto/verify-email.dto';
 import { RateLimit } from '../security/rate-limit/rate-limit.decorator';
 import { LoginProtectionInterceptor } from '../security/account-protection/login-protection.interceptor';
 import { getClientIp } from '../security/account-protection/login-protection.utils';
+import { FeatureEnabledGuard } from '../settings/feature-enabled.guard';
 
 @Controller('auth')
+@UseGuards(FeatureEnabledGuard('auth'))
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 

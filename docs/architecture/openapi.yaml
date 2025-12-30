@@ -39,6 +39,128 @@ components:
           type: string
           example: Bearer
 
+    PublicSettings:
+      type: object
+      properties:
+        branding:
+          type: object
+          properties:
+            appName:
+              type: string
+            logoUrl:
+              type: string
+              nullable: true
+            primaryColor:
+              type: string
+              nullable: true
+          required: [appName]
+        features:
+          type: object
+          properties:
+            wikiPublic:
+              type: boolean
+            courses:
+              type: boolean
+            auth:
+              type: boolean
+            paidCourses:
+              type: boolean
+            gdprLegal:
+              type: boolean
+            infraRedis:
+              type: boolean
+            infraRabbitmq:
+              type: boolean
+            infraMonitoring:
+              type: boolean
+            infraErrorTracking:
+              type: boolean
+          required:
+            [wikiPublic, courses, auth, paidCourses, gdprLegal, infraRedis, infraRabbitmq, infraMonitoring, infraErrorTracking]
+        languages:
+          type: object
+          properties:
+            supported:
+              type: array
+              items:
+                type: string
+            default:
+              type: string
+          required: [supported, default]
+      required: [branding, features, languages]
+
+    LegalPage:
+      type: object
+      properties:
+        slug:
+          type: string
+          example: terms
+        title:
+          type: string
+          example: Terms and Conditions
+        contentMarkdown:
+          type: string
+          example: "# Terms\n\nPlaceholder terms content."
+        updatedAt:
+          type: string
+          format: date-time
+      required: [slug, title, contentMarkdown, updatedAt]
+
+    AdminUpdateLegalPageInput:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 256
+        contentMarkdown:
+          type: string
+      required: [contentMarkdown]
+
+    AdminUpdateInstanceSettingsInput:
+      type: object
+      properties:
+        branding:
+          type: object
+          properties:
+            appName:
+              type: string
+            logoUrl:
+              type: string
+              nullable: true
+            primaryColor:
+              type: string
+              nullable: true
+        features:
+          type: object
+          properties:
+            wikiPublic:
+              type: boolean
+            courses:
+              type: boolean
+            auth:
+              type: boolean
+            paidCourses:
+              type: boolean
+            gdprLegal:
+              type: boolean
+            infraRedis:
+              type: boolean
+            infraRabbitmq:
+              type: boolean
+            infraMonitoring:
+              type: boolean
+            infraErrorTracking:
+              type: boolean
+        languages:
+          type: object
+          properties:
+            supported:
+              type: array
+              items:
+                type: string
+            default:
+              type: string
+
     UserProfile:
       type: object
       properties:
@@ -1269,6 +1391,140 @@ paths:
                     type: string
                     enum: [ok]
 
+  /public/settings:
+    get:
+      tags: [Settings]
+      summary: Public instance settings (branding + feature toggles + languages)
+      description: |
+        Публични настройки за UI адаптация (feature toggles, branding, езици).
+        Endpoint-ът е cacheable (MVP).
+      security: []
+      responses:
+        "200":
+          description: Current public settings
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+              example: public, max-age=60
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicSettings'
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /admin/legal/pages:
+    get:
+      tags: [Admin, Legal]
+      summary: List legal pages (terms/privacy) (admin)
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: List of legal pages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LegalPage'
+        "401":
+          description: Неоторизиран достъп
+        "403":
+          description: Forbidden
+
+  /admin/legal/pages/{slug}:
+    put:
+      tags: [Admin, Legal]
+      summary: Update legal page content (admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: slug
+          required: true
+          schema:
+            type: string
+          example: terms
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminUpdateLegalPageInput'
+      responses:
+        "200":
+          description: Updated legal page
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LegalPage'
+        "400":
+          description: Невалидни данни
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "401":
+          description: Неоторизиран достъп
+        "403":
+          description: Forbidden
+        "404":
+          description: Legal page not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /legal/terms:
+    get:
+      tags: [Legal]
+      summary: Public Terms and Conditions (markdown)
+      description: |
+        Връща текущото Terms съдържание (markdown). Endpoint-ът е публичен,
+        но се изключва когато `features.gdprLegal=false`.
+      security: []
+      responses:
+        "200":
+          description: Current Terms content
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LegalPage'
+        "404":
+          description: Not found (feature disabled или липсваща страница)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /legal/privacy:
+    get:
+      tags: [Legal]
+      summary: Public Privacy / GDPR (markdown)
+      description: |
+        Връща текущото Privacy/GDPR съдържание (markdown). Endpoint-ът е публичен,
+        но се изключва когато `features.gdprLegal=false`.
+      security: []
+      responses:
+        "200":
+          description: Current Privacy content
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LegalPage'
+        "404":
+          description: Not found (feature disabled или липсваща страница)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   /users/me/export:
     post:
       tags: [Account]
@@ -1717,6 +1973,61 @@ paths:
                 $ref: '#/components/schemas/PurchaseStatusResponse'
         "401":
           description: Неоторизиран достъп
+
+  /admin/settings:
+    get:
+      tags: [Admin]
+      summary: Current instance settings (admin)
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Current instance settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicSettings'
+        "401":
+          description: Неоторизиран достъп
+        "403":
+          description: Admin access required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    patch:
+      tags: [Admin]
+      summary: Update instance settings (admin)
+      description: Partial update (PATCH) for branding/features/languages.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminUpdateInstanceSettingsInput'
+      responses:
+        "200":
+          description: Updated instance settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicSettings'
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "401":
+          description: Неоторизиран достъп
+        "403":
+          description: Admin access required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
   /admin/users:
     get:
