@@ -1,6 +1,6 @@
-# MTX-POST-1: Advanced admin metrics dashboard (privacy-friendly)
+# STORY-MTX-POST-1: Advanced admin metrics dashboard (privacy-friendly)
 
-_BMAD Story Spec | EPIC: POST-MVP-METRICS | Status: ✅ Implemented_
+_BMAD Story Spec | EPIC: EPIC-POST-MVP-METRICS | Status: ✅ Implemented_
 
 ---
 
@@ -120,4 +120,4 @@ _BMAD Story Spec | EPIC: POST-MVP-METRICS | Status: ✅ Implemented_
 
 | Date | Author | Change |
 |------|--------|--------|
-| 2025-12-22 | Cascade | Реализирано MTX-POST-1: consent + tracking + advanced admin metrics + export |
+| 2025-12-22 | Cascade | Реализирано STORY-MTX-POST-1: consent + tracking + advanced admin metrics + export |

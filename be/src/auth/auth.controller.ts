@@ -3,8 +3,10 @@ import {
   Controller,
   HttpCode,
   Post,
+  Req,
   UseInterceptors,
 } from '@nestjs/common';
+import type { Request } from 'express';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -15,6 +17,7 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import { RateLimit } from '../security/rate-limit/rate-limit.decorator';
 import { LoginProtectionInterceptor } from '../security/account-protection/login-protection.interceptor';
+import { getClientIp } from '../security/account-protection/login-protection.utils';
 
 @Controller('auth')
 export class AuthController {
@@ -30,8 +33,10 @@ export class AuthController {
   @Post('login')
   @RateLimit({ limit: 10, windowSeconds: 60, key: 'ip+email' })
   @UseInterceptors(LoginProtectionInterceptor)
-  login(@Body() dto: LoginDto): Promise<AuthTokenDto> {
-    return this.authService.login(dto);
+  login(@Req() req: Request, @Body() dto: LoginDto): Promise<AuthTokenDto> {
+    return this.authService.login(dto, {
+      ip: getClientIp(req),
+    });
   }
 
   @HttpCode(200)

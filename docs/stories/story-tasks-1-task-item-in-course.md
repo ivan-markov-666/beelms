@@ -1,6 +1,6 @@
 # STORY-TASKS-1: Task item in Course (MVP)
 
-_BMAD Story Spec | EPIC: EPIC-CORE-TASKS | Status: 🟡 In Progress_
+_BMAD Story Spec | EPIC: EPIC-CORE-TASKS | Status: ✅ Implemented_
 
 ---
 
@@ -58,7 +58,17 @@ _BMAD Story Spec | EPIC: EPIC-CORE-TASKS | Status: 🟡 In Progress_
   - `be/src/courses/course-curriculum-item.entity.ts`
   - `be/src/courses/dto/admin-create-course-curriculum-item.dto.ts`
   - `be/src/courses/dto/admin-update-course-curriculum-item.dto.ts`
-- Липсва `Task` entity и admin endpoints за tasks.
+- Има `Task` entity и admin endpoints за tasks:
+  - `be/src/tasks/task.entity.ts`
+  - `be/src/tasks/admin-tasks.controller.ts`
+  - `be/src/tasks/admin-tasks.service.ts`
+  - `be/src/tasks/dto/admin-task.dto.ts`
+- Има admin UI за tasks:
+  - `fe/src/app/admin/tasks/page.tsx`
+  - `fe/src/app/admin/tasks/[taskId]/page.tsx`
+- Има learner task detail view (JWT):
+  - `be/src/courses/courses.controller.ts` → `GET /api/courses/:courseId/tasks/:taskId`
+  - `fe/src/app/courses/[courseId]/tasks/[taskId]/page.tsx`
 
 ---
 

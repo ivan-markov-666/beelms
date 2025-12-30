@@ -9,6 +9,29 @@ type AttemptState = {
 export class InMemoryLoginAttemptStore {
   private readonly states = new Map<string, AttemptState>();
 
+  getFailureCount(key: string, nowMs: number, windowMs: number): number {
+    const state = this.states.get(key);
+    if (!state) {
+      return 0;
+    }
+
+    this.prune(key, state, nowMs, windowMs);
+    return state.failures.length;
+  }
+
+  shouldRequireCaptcha(
+    key: string,
+    nowMs: number,
+    windowMs: number,
+    threshold: number,
+  ): boolean {
+    if (threshold <= 0) {
+      return false;
+    }
+
+    return this.getFailureCount(key, nowMs, windowMs) >= threshold;
+  }
+
   isBlocked(key: string, nowMs: number): boolean {
     return this.getBlockedUntilMs(key, nowMs) !== undefined;
   }

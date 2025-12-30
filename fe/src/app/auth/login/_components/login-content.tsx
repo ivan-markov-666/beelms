@@ -10,10 +10,14 @@ import {
   setAccessToken,
 } from "../../../auth-token";
 import { buildApiUrl } from "../../../api-url";
+import { RecaptchaWidget } from "../../../_components/recaptcha-widget";
+
+const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
 
 type FieldErrors = {
   email?: string;
   password?: string;
+  captcha?: string;
 };
 
 export function LoginContent() {
@@ -24,6 +28,8 @@ export function LoginContent() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [captchaRequired, setCaptchaRequired] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -91,6 +97,10 @@ export function LoginContent() {
       errors.password = t(lang, "auth", "loginErrorPasswordRequired");
     }
 
+    if (captchaRequired && RECAPTCHA_SITE_KEY && !captchaToken) {
+      errors.captcha = t(lang, "auth", "loginErrorCaptchaRequired");
+    }
+
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -111,11 +121,38 @@ export function LoginContent() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({
+          email,
+          password,
+          captchaToken:
+            captchaRequired && RECAPTCHA_SITE_KEY
+              ? (captchaToken ?? undefined)
+              : undefined,
+        }),
       });
 
       if (!res.ok) {
-        if (res.status === 401) {
+        if (res.status === 400) {
+          try {
+            const data = (await res.json()) as { message?: unknown };
+            const msg =
+              typeof data?.message === "string"
+                ? data.message
+                : Array.isArray(data?.message)
+                  ? String(data.message[0] ?? "")
+                  : "";
+
+            if (msg.includes("captcha verification required")) {
+              setCaptchaRequired(true);
+              setFormError(t(lang, "auth", "loginErrorCaptchaRequired"));
+              return;
+            }
+          } catch {
+            // ignore
+          }
+
+          setFormError(t(lang, "auth", "loginErrorGeneric"));
+        } else if (res.status === 401) {
           setFormError(t(lang, "auth", "loginErrorInvalidCredentials"));
         } else {
           setFormError(t(lang, "auth", "loginErrorGeneric"));
@@ -244,6 +281,23 @@ export function LoginContent() {
             <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 px-4 py-3 text-xs text-gray-600">
               {t(lang, "auth", "loginCaptchaPlaceholder")}
             </div>
+
+            {captchaRequired && RECAPTCHA_SITE_KEY && (
+              <div className="space-y-2">
+                <p className="text-xs text-gray-600">
+                  {t(lang, "auth", "loginCaptchaLabel")}
+                </p>
+                <RecaptchaWidget
+                  siteKey={RECAPTCHA_SITE_KEY}
+                  lang={lang}
+                  disabled={submitting}
+                  onTokenChange={setCaptchaToken}
+                />
+                {fieldErrors.captcha && (
+                  <p className="text-xs text-red-600">{fieldErrors.captcha}</p>
+                )}
+              </div>
+            )}
 
             <button
               type="submit"

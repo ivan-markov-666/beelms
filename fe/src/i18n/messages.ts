@@ -44,10 +44,12 @@ export const messages: Messages = {
       loginRememberMeLabel: "Remember me",
       loginCaptchaPlaceholder:
         "CAPTCHA / reCAPTCHA (placeholder) – в реалната система се показва само след няколко последователни неуспешни опита за вход.",
+      loginCaptchaLabel: "CAPTCHA / reCAPTCHA",
       loginErrorEmailRequired: "Моля, въведете имейл.",
       loginErrorEmailInvalid: "Моля, въведете валиден имейл адрес.",
       loginErrorPasswordRequired: "Моля, въведете парола.",
       loginErrorInvalidCredentials: "Невалидни данни за вход.",
+      loginErrorCaptchaRequired: "Моля, потвърдете, че не сте робот.",
       loginErrorGeneric: "Входът не успя. Моля, опитайте отново по-късно.",
       loginErrorNetwork: "Възникна грешка при връзката със сървъра.",
       loginLoading: "Зареждане...",
@@ -402,10 +404,12 @@ export const messages: Messages = {
       loginRememberMeLabel: "Remember me",
       loginCaptchaPlaceholder:
         "CAPTCHA / reCAPTCHA (placeholder) – in the real system it appears only after several consecutive failed login attempts.",
+      loginCaptchaLabel: "CAPTCHA / reCAPTCHA",
       loginErrorEmailRequired: "Please enter your email.",
       loginErrorEmailInvalid: "Please enter a valid email address.",
       loginErrorPasswordRequired: "Please enter your password.",
       loginErrorInvalidCredentials: "Invalid login details.",
+      loginErrorCaptchaRequired: "Please confirm that you are not a robot.",
       loginErrorGeneric: "Sign in failed. Please try again later.",
       loginErrorNetwork:
         "A network error occurred while contacting the server.",
@@ -757,14 +761,15 @@ export const messages: Messages = {
       loginRememberMeLabel: "Angemeldet bleiben",
       loginCaptchaPlaceholder:
         "CAPTCHA / reCAPTCHA (Platzhalter) – im echten System erscheint es nur nach mehreren fehlgeschlagenen Anmeldeversuchen.",
+      loginCaptchaLabel: "CAPTCHA / reCAPTCHA",
       loginErrorEmailRequired: "Bitte gib deine E-Mail-Adresse ein.",
       loginErrorEmailInvalid: "Bitte gib eine gültige E-Mail-Adresse ein.",
       loginErrorPasswordRequired: "Bitte gib dein Passwort ein.",
       loginErrorInvalidCredentials: "Ungültige Anmeldedaten.",
+      loginErrorCaptchaRequired: "Bitte bestätige, dass du kein Roboter bist.",
       loginErrorGeneric:
         "Anmeldung fehlgeschlagen. Bitte versuche es später erneut.",
-      loginErrorNetwork:
-        "Beim Kontakt mit dem Server ist ein Netzwerkfehler aufgetreten.",
+      loginErrorNetwork: "Es ist ein Netzwerkfehler aufgetreten.",
       loginLoading: "Laden...",
       registerTitle: "Konto erstellen",
       registerSubtitle:

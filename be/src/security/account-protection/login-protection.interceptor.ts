@@ -10,12 +10,16 @@ import {
 import type { Request, Response } from 'express';
 import { catchError, Observable, tap, throwError } from 'rxjs';
 import { InMemoryLoginAttemptStore } from './login-attempts.store';
-
-type LoginBody = { email?: unknown };
+import {
+  buildLoginAttemptKey,
+  getClientIp,
+  getLoginEmailFromRequest,
+  LOGIN_PROTECTION_WINDOW_MS,
+} from './login-protection.utils';
 
 @Injectable()
 export class LoginProtectionInterceptor implements NestInterceptor {
-  private readonly windowMs = 5 * 60 * 1000;
+  private readonly windowMs = LOGIN_PROTECTION_WINDOW_MS;
   private readonly maxFailures = 5;
   private readonly blockMs = 15 * 60 * 1000;
 
@@ -37,9 +41,9 @@ export class LoginProtectionInterceptor implements NestInterceptor {
     const req = http.getRequest<Request>();
     const res = http.getResponse<Response>();
 
-    const ip = this.getClientIp(req);
-    const email = this.getEmail(req);
-    const key = `${ip}|${email}`;
+    const ip = getClientIp(req);
+    const email = getLoginEmailFromRequest(req);
+    const key = buildLoginAttemptKey(ip, email);
 
     const nowMs = Date.now();
 
@@ -74,30 +78,5 @@ export class LoginProtectionInterceptor implements NestInterceptor {
         return throwError(() => error);
       }),
     );
-  }
-
-  private getEmail(req: Request): string {
-    const emailRaw = (req.body as LoginBody | undefined)?.email;
-
-    if (typeof emailRaw === 'string') {
-      const normalized = emailRaw.trim().toLowerCase();
-      return normalized.length > 0 ? normalized : 'unknown';
-    }
-
-    return 'unknown';
-  }
-
-  private getClientIp(req: Request): string {
-    const raw = req.headers['x-forwarded-for'];
-
-    if (typeof raw === 'string' && raw.trim().length > 0) {
-      return raw.split(',')[0].trim();
-    }
-
-    if (Array.isArray(raw) && raw.length > 0) {
-      return String(raw[0]).trim();
-    }
-
-    return (req.ip ?? '').trim() || 'unknown';
   }
 }

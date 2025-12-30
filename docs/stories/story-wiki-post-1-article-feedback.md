@@ -1,6 +1,6 @@
-# WIKI-POST-1: Wiki article helpful feedback (Post-MVP)
+# STORY-WIKI-POST-1: Wiki article helpful feedback (Post-MVP)
 
-_BMAD Story Spec | EPIC: POST-MVP-WIKI | Status: ✅ Implemented_
+_BMAD Story Spec | EPIC: EPIC-POST-MVP-WIKI | Status: ✅ Implemented_
 
 ---
 

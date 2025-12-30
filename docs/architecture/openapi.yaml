@@ -134,6 +134,51 @@ components:
           enum: [draft, active, inactive]
       required: [language, title, content]
 
+    WikiRelatedArticle:
+      type: object
+      properties:
+        slug:
+          type: string
+        language:
+          type: string
+        title:
+          type: string
+        updatedAt:
+          type: string
+          format: date-time
+      required: [slug, language, title, updatedAt]
+
+    WikiArticleFeedbackSummary:
+      type: object
+      properties:
+        helpfulYes:
+          type: integer
+        helpfulNo:
+          type: integer
+        total:
+          type: integer
+      required: [helpfulYes, helpfulNo, total]
+
+    CreateWikiArticleFeedbackInput:
+      type: object
+      properties:
+        helpful:
+          type: boolean
+      required: [helpful]
+
+    AdminGrantCourseAccessInput:
+      type: object
+      properties:
+        userId:
+          type: string
+        enroll:
+          type: boolean
+          nullable: true
+        grantReason:
+          type: string
+          nullable: true
+      required: [userId]
+
     WikiArticleVersion:
       type: object
       properties:
@@ -216,6 +261,23 @@ components:
           enum: [draft, active, inactive]
       required: [language, title, content, status]
 
+    AdminAutosaveWikiDraftInput:
+      type: object
+      properties:
+        language:
+          type: string
+          example: bg
+        title:
+          type: string
+          nullable: true
+        subtitle:
+          type: string
+          nullable: true
+        content:
+          type: string
+          nullable: true
+      required: [language]
+
     AdminUpdateWikiStatusInput:
       type: object
       properties:
@@ -265,6 +327,276 @@ components:
           description: >-
             Процент промяна на общия брой потребители спрямо броя им в края на
             предходния календарен месец.
+
+    AdminUsersStats:
+      type: object
+      properties:
+        totalUsers:
+          type: integer
+        activeUsers:
+          type: integer
+        deactivatedUsers:
+          type: integer
+        adminUsers:
+          type: integer
+
+    AdminActivityItem:
+      type: object
+      properties:
+        occurredAt:
+          type: string
+          format: date-time
+        type:
+          type: string
+          enum: [wiki, user]
+        action:
+          type: string
+          enum: [article_created, article_updated, user_registered, user_deactivated]
+        entityId:
+          type: string
+        entityLabel:
+          type: string
+        actorLabel:
+          type: string
+          nullable: true
+
+    TrackAnalyticsInput:
+      type: object
+      properties:
+        visitorId:
+          type: string
+          description: Pseudonymous visitor identifier (client-generated)
+        path:
+          type: string
+          description: Page path (normalized to pathname)
+        referrer:
+          type: string
+          nullable: true
+      required: [visitorId, path]
+
+    AdminMetricsUserTrendPoint:
+      type: object
+      properties:
+        month:
+          type: string
+          description: YYYY-MM
+        userRegistered:
+          type: integer
+        userDeactivated:
+          type: integer
+
+    AdminMetricsActivitySummary:
+      type: object
+      properties:
+        userRegistered:
+          type: integer
+        userDeactivated:
+          type: integer
+        articleCreated:
+          type: integer
+        articleUpdated:
+          type: integer
+        userTrend:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminMetricsUserTrendPoint'
+
+    AdminWikiViewsTopArticle:
+      type: object
+      properties:
+        slug:
+          type: string
+        views:
+          type: integer
+
+    AdminWikiUniqueVisitorsTopArticle:
+      type: object
+      properties:
+        slug:
+          type: string
+        uniqueVisitors:
+          type: integer
+
+    AdminWikiViewsDailyPoint:
+      type: object
+      properties:
+        date:
+          type: string
+          description: YYYY-MM-DD
+        views:
+          type: integer
+
+    AdminWikiUniqueVisitorsDailyPoint:
+      type: object
+      properties:
+        date:
+          type: string
+          description: YYYY-MM-DD
+        uniqueVisitors:
+          type: integer
+
+    AdminWikiViewsMetrics:
+      type: object
+      properties:
+        totalViews:
+          type: integer
+        totalUniqueVisitors:
+          type: integer
+        topArticles:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminWikiViewsTopArticle'
+        topArticlesByUniqueVisitors:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminWikiUniqueVisitorsTopArticle'
+        daily:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminWikiViewsDailyPoint'
+        dailyUniqueVisitors:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminWikiUniqueVisitorsDailyPoint'
+
+    AdminWikiFeedbackTopArticle:
+      type: object
+      properties:
+        slug:
+          type: string
+        helpfulYes:
+          type: integer
+        helpfulNo:
+          type: integer
+        total:
+          type: integer
+        notHelpfulRate:
+          type: number
+          format: float
+
+    AdminWikiFeedbackDailyPoint:
+      type: object
+      properties:
+        date:
+          type: string
+          description: YYYY-MM-DD
+        helpfulYes:
+          type: integer
+        helpfulNo:
+          type: integer
+        total:
+          type: integer
+
+    AdminWikiFeedbackMetrics:
+      type: object
+      properties:
+        totalHelpfulYes:
+          type: integer
+        totalHelpfulNo:
+          type: integer
+        total:
+          type: integer
+        helpfulRate:
+          type: number
+          format: float
+        topArticlesByNotHelpful:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminWikiFeedbackTopArticle'
+        daily:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminWikiFeedbackDailyPoint'
+
+    AdminWikiAttentionItem:
+      type: object
+      properties:
+        slug:
+          type: string
+        views:
+          type: integer
+        helpfulYes:
+          type: integer
+        helpfulNo:
+          type: integer
+        totalFeedback:
+          type: integer
+        notHelpfulRate:
+          type: number
+          format: float
+        score:
+          type: number
+          format: float
+
+    AdminWikiAttentionMetrics:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminWikiAttentionItem'
+
+    AdminAdvancedMetricsSourcePoint:
+      type: object
+      properties:
+        source:
+          type: string
+        sessions:
+          type: integer
+
+    AdminAdvancedMetricsPageSourcePoint:
+      type: object
+      properties:
+        source:
+          type: string
+        views:
+          type: integer
+
+    AdminAdvancedMetricsTopPage:
+      type: object
+      properties:
+        path:
+          type: string
+        views:
+          type: integer
+
+    AdminAdvancedMetricsDailyPoint:
+      type: object
+      properties:
+        date:
+          type: string
+          description: YYYY-MM-DD
+        value:
+          type: integer
+
+    AdminAdvancedMetrics:
+      type: object
+      properties:
+        totalSessions:
+          type: integer
+        avgSessionDurationSeconds:
+          type: number
+          format: float
+        sessionSources:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminAdvancedMetricsSourcePoint'
+        pageViewSources:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminAdvancedMetricsPageSourcePoint'
+        topPages:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminAdvancedMetricsTopPage'
+        dailySessions:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminAdvancedMetricsDailyPoint'
+        dailyPageViews:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminAdvancedMetricsDailyPoint'
 
     WikiMediaItem:
       type: object
@@ -355,6 +687,325 @@ components:
           type: string
         description:
           type: string
+
+    CurriculumProgressItem:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        itemType:
+          type: string
+        wikiSlug:
+          type: string
+          nullable: true
+        taskId:
+          type: string
+          nullable: true
+        quizId:
+          type: string
+          nullable: true
+        completed:
+          type: boolean
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    CurriculumProgress:
+      type: object
+      properties:
+        totalItems:
+          type: integer
+        completedItems:
+          type: integer
+        progressPercent:
+          type: integer
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CurriculumProgressItem'
+
+    CourseTaskDetail:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        language:
+          type: string
+        status:
+          type: string
+        updatedAt:
+          type: string
+          format: date-time
+
+    CourseCertificate:
+      type: object
+      properties:
+        courseId:
+          type: string
+        courseTitle:
+          type: string
+        userId:
+          type: string
+        userEmail:
+          type: string
+        completedAt:
+          type: string
+          format: date-time
+        issuedAt:
+          type: string
+          format: date-time
+
+    AdminTask:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        language:
+          type: string
+        status:
+          type: string
+          enum: [draft, active, inactive]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    AdminCreateTaskInput:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        language:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [draft, active, inactive]
+          nullable: true
+      required: [title, description]
+
+    AdminUpdateTaskInput:
+      type: object
+      properties:
+        title:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        language:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [draft, active, inactive]
+          nullable: true
+
+    AdminQuizQuestion:
+      type: object
+      properties:
+        id:
+          type: string
+        text:
+          type: string
+        options:
+          type: array
+          items:
+            type: string
+        correctOptionIndex:
+          type: integer
+        order:
+          type: integer
+
+    AdminQuiz:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        language:
+          type: string
+        status:
+          type: string
+          enum: [draft, active, inactive]
+        passingScore:
+          type: integer
+          nullable: true
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminQuizQuestion'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    AdminCreateQuizInput:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        language:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [draft, active, inactive]
+          nullable: true
+        passingScore:
+          type: integer
+          nullable: true
+      required: [title]
+
+    AdminUpdateQuizInput:
+      type: object
+      properties:
+        title:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        language:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [draft, active, inactive]
+          nullable: true
+        passingScore:
+          type: integer
+          nullable: true
+
+    AdminCreateQuizQuestionInput:
+      type: object
+      properties:
+        text:
+          type: string
+        options:
+          type: array
+          items:
+            type: string
+        correctOptionIndex:
+          type: integer
+        order:
+          type: integer
+          nullable: true
+      required: [text, options, correctOptionIndex]
+
+    AdminUpdateQuizQuestionInput:
+      type: object
+      properties:
+        text:
+          type: string
+        options:
+          type: array
+          items:
+            type: string
+        correctOptionIndex:
+          type: integer
+        order:
+          type: integer
+          nullable: true
+      required: [text, options, correctOptionIndex]
+
+    CreateCheckoutResponse:
+      type: object
+      properties:
+        url:
+          type: string
+
+    VerifyPurchaseInput:
+      type: object
+      properties:
+        sessionId:
+          type: string
+      required: [sessionId]
+
+    PurchaseStatusResponse:
+      type: object
+      properties:
+        purchased:
+          type: boolean
+
+    AdminPaymentSettings:
+      type: object
+      properties:
+        currency:
+          type: string
+        priceCents:
+          type: integer
+      required: [currency, priceCents]
+
+    AdminUpdatePaymentSettingsInput:
+      type: object
+      properties:
+        currency:
+          type: string
+          nullable: true
+        priceCents:
+          type: integer
+          nullable: true
+
+    AdminStripeWebhookEvent:
+      type: object
+      properties:
+        id:
+          type: string
+        eventId:
+          type: string
+        eventType:
+          type: string
+        status:
+          type: string
+          enum: [received, processed, failed]
+        errorMessage:
+          type: string
+          nullable: true
+        processedAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    AdminRetryWebhookEventResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [processed, failed]
+        errorMessage:
+          type: string
+          nullable: true
 
     Quiz:
       type: object
@@ -561,7 +1212,6 @@ paths:
                 $ref: '#/components/schemas/UserProfile'
         "401":
           description: Неоторизиран достъп
-
     patch:
       tags: [Account]
       summary: Обновяване на профилна информация на текущия потребител
@@ -591,7 +1241,6 @@ paths:
           description: Невалидни данни
         "401":
           description: Неоторизиран достъп
-
     delete:
       tags: [Account]
       summary: Деактивиране/изтриване на акаунт на текущия потребител
@@ -602,6 +1251,23 @@ paths:
           description: Акаунтът е деактивиран
         "401":
           description: Неоторизиран достъп
+
+  /health:
+    get:
+      tags: [System]
+      summary: Health check
+      security: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [ok]
 
   /users/me/export:
     post:
@@ -743,10 +1409,111 @@ paths:
         "404":
           description: Курсът не е намерен
 
-  /courses/{courseId}/tasks/{taskId}/complete:
+  /courses/{courseId}/checkout:
+    post:
+      tags: [Payments]
+      summary: Stripe Checkout (create session)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: courseId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Checkout URL
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateCheckoutResponse'
+        "401":
+          description: Неоторизиран достъп
+        "404":
+          description: Курсът не е намерен
+
+  /courses/{courseId}/purchase/verify:
+    post:
+      tags: [Payments]
+      summary: Verify Stripe Checkout session and record purchase
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: courseId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyPurchaseInput'
+      responses:
+        "204":
+          description: Purchase verified
+        "400":
+          description: Невалидни данни
+        "401":
+          description: Неоторизиран достъп
+        "404":
+          description: Курсът не е намерен
+
+  /courses/{courseId}/curriculum/{itemId}/complete:
     post:
       tags: [Courses]
-      summary: Маркиране на задача като изпълнена (completed)
+      summary: Маркиране на curriculum item като изпълнен
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: courseId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: itemId
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Item е маркиран като изпълнен
+        "401":
+          description: Неоторизиран достъп
+        "403":
+          description: Потребителят не е записан в курса
+        "404":
+          description: Курсът или item-ът не са намерени
+
+  /courses/{courseId}/curriculum/progress:
+    get:
+      tags: [Courses]
+      summary: Прогрес по curriculum items за курс
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: courseId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Curriculum progress
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurriculumProgress'
+        "401":
+          description: Неоторизиран достъп
+
+  /courses/{courseId}/tasks/{taskId}:
+    get:
+      tags: [Courses]
+      summary: Детайл на task (в рамките на курс)
       security:
         - bearerAuth: []
       parameters:
@@ -761,12 +1528,78 @@ paths:
           schema:
             type: string
       responses:
-        "204":
-          description: Задачата е маркирана като изпълнена
+        "200":
+          description: Task detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseTaskDetail'
         "401":
           description: Неоторизиран достъп
+        "403":
+          description: Няма достъп (не е записан / няма purchase)
         "404":
-          description: Курсът или задачата не са намерени
+          description: Task-ът не е намерен
+
+  /courses/{courseId}/wiki/{slug}:
+    get:
+      tags: [Courses, Wiki]
+      summary: Детайл на wiki статия в рамките на курс
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: courseId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: slug
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: lang
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Wiki article detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WikiArticle'
+        "401":
+          description: Неоторизиран достъп
+        "403":
+          description: Няма достъп (не е записан / няма purchase)
+        "404":
+          description: Статията не е намерена
+
+  /courses/{courseId}/certificate:
+    get:
+      tags: [Courses]
+      summary: Certificate за завършен курс
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: courseId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Course certificate
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseCertificate'
+        "401":
+          description: Неоторизиран достъп
+        "403":
+          description: Course not completed
 
   /courses/{courseId}/quizzes/{quizId}:
     get:
@@ -834,6 +1667,57 @@ paths:
         "404":
           description: Курсът или quiz-ът не са намерени
 
+  /payments/webhook:
+    post:
+      tags: [Payments]
+      summary: Stripe webhook endpoint
+      security: []
+      parameters:
+        - in: header
+          name: stripe-signature
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: Webhook received
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  received:
+                    type: boolean
+
+  /payments/courses/{courseId}/purchase/status:
+    get:
+      tags: [Payments]
+      summary: Purchase status for current user and course
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: courseId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Purchase status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PurchaseStatusResponse'
+        "401":
+          description: Неоторизиран достъп
+
   /admin/users:
     get:
       tags: [Admin]
@@ -846,6 +1730,20 @@ paths:
           schema:
             type: string
           description: Търсене по имейл
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            enum: [active, deactivated]
+          description: Филтър по статус
+        - in: query
+          name: role
+          required: false
+          schema:
+            type: string
+            enum: [user, admin]
+          description: Филтър по роля
         - in: query
           name: page
           schema:
@@ -903,6 +1801,436 @@ paths:
           description: Неоторизиран достъп
         "404":
           description: Потребителят не е намерен
+
+  /admin/tasks:
+    get:
+      tags: [Admin]
+      summary: Списък с tasks (admin)
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: List of tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AdminTask'
+        "401":
+          description: Неоторизиран достъп
+
+    post:
+      tags: [Admin]
+      summary: Създаване на task (admin)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminCreateTaskInput'
+      responses:
+        "201":
+          description: Task created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminTask'
+        "400":
+          description: Невалидни данни
+        "401":
+          description: Неоторизиран достъп
+
+  /admin/tasks/{taskId}:
+    get:
+      tags: [Admin]
+      summary: Детайл на task (admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: taskId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Task detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminTask'
+        "401":
+          description: Неоторизиран достъп
+        "404":
+          description: Task not found
+
+    patch:
+      tags: [Admin]
+      summary: Редакция на task (admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: taskId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminUpdateTaskInput'
+      responses:
+        "200":
+          description: Task updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminTask'
+        "400":
+          description: Невалидни данни
+        "401":
+          description: Неоторизиран достъп
+        "404":
+          description: Task not found
+
+    delete:
+      tags: [Admin]
+      summary: Изтриване на task (admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: taskId
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Task deleted
+        "401":
+          description: Неоторизиран достъп
+        "404":
+          description: Task not found
+
+  /admin/quizzes:
+    get:
+      tags: [Admin]
+      summary: Списък с quizzes (admin)
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: List of quizzes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AdminQuiz'
+        "401":
+          description: Неоторизиран достъп
+
+    post:
+      tags: [Admin]
+      summary: Създаване на quiz (admin)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminCreateQuizInput'
+      responses:
+        "201":
+          description: Quiz created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminQuiz'
+        "400":
+          description: Невалидни данни
+        "401":
+          description: Неоторизиран достъп
+
+  /admin/quizzes/{quizId}:
+    get:
+      tags: [Admin]
+      summary: Детайл на quiz (admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: quizId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Quiz detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminQuiz'
+        "401":
+          description: Неоторизиран достъп
+        "404":
+          description: Quiz not found
+
+    patch:
+      tags: [Admin]
+      summary: Редакция на quiz (admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: quizId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminUpdateQuizInput'
+      responses:
+        "200":
+          description: Quiz updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminQuiz'
+        "400":
+          description: Невалидни данни
+        "401":
+          description: Неоторизиран достъп
+        "404":
+          description: Quiz not found
+
+    delete:
+      tags: [Admin]
+      summary: Изтриване на quiz (admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: quizId
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Quiz deleted
+        "401":
+          description: Неоторизиран достъп
+        "404":
+          description: Quiz not found
+
+  /admin/quizzes/{quizId}/questions:
+    post:
+      tags: [Admin]
+      summary: Добавяне на въпрос към quiz (admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: quizId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminCreateQuizQuestionInput'
+      responses:
+        "200":
+          description: Quiz updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminQuiz'
+        "400":
+          description: Невалидни данни
+        "401":
+          description: Неоторизиран достъп
+        "404":
+          description: Quiz not found
+
+  /admin/quizzes/{quizId}/questions/{questionId}:
+    patch:
+      tags: [Admin]
+      summary: Редакция на въпрос в quiz (admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: quizId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: questionId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminUpdateQuizQuestionInput'
+      responses:
+        "200":
+          description: Quiz updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminQuiz'
+        "400":
+          description: Невалидни данни
+        "401":
+          description: Неоторизиран достъп
+        "404":
+          description: Quiz/question not found
+
+    delete:
+      tags: [Admin]
+      summary: Изтриване на въпрос от quiz (admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: quizId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: questionId
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Question deleted
+        "401":
+          description: Неоторизиран достъп
+        "404":
+          description: Quiz/question not found
+
+  /admin/payments/currencies:
+    get:
+      tags: [Admin]
+      summary: Supported payment currencies
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Supported currencies
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        "401":
+          description: Неоторизиран достъп
+
+  /admin/payments/settings:
+    get:
+      tags: [Admin]
+      summary: Payment settings
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Payment settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminPaymentSettings'
+        "401":
+          description: Неоторизиран достъп
+
+    patch:
+      tags: [Admin]
+      summary: Update payment settings
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminUpdatePaymentSettingsInput'
+      responses:
+        "204":
+          description: Settings updated
+        "400":
+          description: Невалидни данни
+        "401":
+          description: Неоторизиран достъп
+
+  /admin/payments/webhook-events:
+    get:
+      tags: [Admin]
+      summary: List Stripe webhook events
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            enum: [received, processed, failed]
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Webhook events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AdminStripeWebhookEvent'
+        "400":
+          description: Невалидни данни
+        "401":
+          description: Неоторизиран достъп
+
+  /admin/payments/webhook-events/{eventId}/retry:
+    post:
+      tags: [Admin]
+      summary: Retry processing of a webhook event
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: eventId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Retry result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminRetryWebhookEventResponse'
+        "401":
+          description: Неоторизиран достъп
 
   ############################
   # Admin Courses (CRUD)
@@ -1028,6 +2356,34 @@ paths:
           description: Неоторизиран достъп
         "404":
           description: Курсът не е намерен
+
+  /admin/courses/{courseId}/grants:
+    post:
+      tags: [Admin, Courses]
+      summary: Grant access до paid course (admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: courseId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminGrantCourseAccessInput'
+      responses:
+        "204":
+          description: Access granted
+        "400":
+          description: Невалидни данни
+        "401":
+          description: Неоторизиран достъп
+        "404":
+          description: Курсът или потребителят не са намерени
 
   /admin/courses/{courseId}/curriculum:
     get:
@@ -1248,6 +2604,85 @@ paths:
         "404":
           description: Статията не е намерена
 
+  /wiki/articles/{slug}/related:
+    get:
+      tags: [Wiki]
+      summary: Свързани Wiki статии по slug
+      security: []
+      parameters:
+        - in: path
+          name: slug
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: lang
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Related articles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WikiRelatedArticle'
+        "404":
+          description: Статията не е намерена
+
+  /wiki/articles/{slug}/feedback/summary:
+    get:
+      tags: [Wiki]
+      summary: Feedback summary за Wiki статия
+      security: []
+      parameters:
+        - in: path
+          name: slug
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Feedback summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WikiArticleFeedbackSummary'
+        "404":
+          description: Статията не е намерена
+
+  /wiki/articles/{slug}/feedback:
+    post:
+      tags: [Wiki]
+      summary: Submit helpful feedback за Wiki статия
+      security: []
+      parameters:
+        - in: path
+          name: slug
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWikiArticleFeedbackInput'
+      responses:
+        "204":
+          description: Feedback recorded
+        "400":
+          description: Невалидни данни
+        "404":
+          description: Статията не е намерена
+
   ############################
   # Admin Wiki (CRUD + версии)
   ############################
@@ -1269,6 +2704,18 @@ paths:
           schema:
             type: string
           description: Код на езика (напр. bg, en)
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: pageSize
+          required: false
+          schema:
+            type: integer
+            default: 20
       responses:
         "200":
           description: Списък със статии
@@ -1304,6 +2751,35 @@ paths:
         "401":
           description: Неоторизиран достъп
 
+  /admin/wiki/articles/by-slug/{slug}:
+    get:
+      tags: [Admin, Wiki]
+      summary: Детайл на Wiki статия по slug (admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: slug
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: lang
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Wiki article detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WikiArticle'
+        "401":
+          description: Неоторизиран достъп
+        "404":
+          description: Статията не е намерена
+
   /admin/wiki/articles/{id}:
     put:
       tags: [Admin, Wiki]
@@ -1321,7 +2797,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/WikiArticleInput'
+              $ref: '#/components/schemas/AdminWikiArticleUpdateInput'
       responses:
         "200":
           description: Обновена статия
@@ -1329,6 +2805,53 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WikiArticle'
+        "400":
+          description: Невалидни данни
+        "401":
+          description: Неоторизиран достъп
+        "404":
+          description: Статията не е намерена
+
+    delete:
+      tags: [Admin, Wiki]
+      summary: Изтриване на Wiki статия
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Статията е изтрита
+        "401":
+          description: Неоторизиран достъп
+        "404":
+          description: Статията не е намерена
+
+  /admin/wiki/articles/{id}/draft-autosave:
+    patch:
+      tags: [Admin, Wiki]
+      summary: Autosave на draft (admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminAutosaveWikiDraftInput'
+      responses:
+        "204":
+          description: Draft saved
         "400":
           description: Невалидни данни
         "401":
@@ -1551,5 +3074,268 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MetricsOverview'
+        "401":
+          description: Неоторизиран достъп
+
+  /admin/users/stats:
+    get:
+      tags: [Admin]
+      summary: Статистика за потребители (admin)
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Aggregated stats for users
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminUsersStats'
+        "401":
+          description: Неоторизиран достъп
+
+  ############################
+  # Admin / Activity
+  ############################
+
+  /admin/activity:
+    get:
+      tags: [Admin]
+      summary: Activity log (wiki + users)
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Списък с activity items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AdminActivityItem'
+        "401":
+          description: Неоторизиран достъп
+
+  ############################
+  # Analytics (Public)
+  ############################
+
+  /analytics/track:
+    post:
+      tags: [Analytics]
+      summary: Public analytics tracking (best-effort)
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TrackAnalyticsInput'
+      responses:
+        "204":
+          description: Tracking записан (или best-effort ignored)
+        "400":
+          description: Невалидни данни
+
+  /admin/metrics/activity-summary:
+    get:
+      tags: [Admin]
+      summary: Activity summary (users + wiki) for selected period
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: from
+          schema:
+            type: string
+            format: date-time
+          required: false
+        - in: query
+          name: to
+          schema:
+            type: string
+            format: date-time
+          required: false
+      responses:
+        "200":
+          description: Activity summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminMetricsActivitySummary'
+        "401":
+          description: Неоторизиран достъп
+
+  /admin/metrics/wiki-views:
+    get:
+      tags: [Admin]
+      summary: Wiki views metrics for selected period
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: from
+          schema:
+            type: string
+            format: date-time
+          required: false
+        - in: query
+          name: to
+          schema:
+            type: string
+            format: date-time
+          required: false
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+          required: false
+      responses:
+        "200":
+          description: Wiki views metrics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminWikiViewsMetrics'
+        "401":
+          description: Неоторизиран достъп
+
+  /admin/metrics/wiki-feedback:
+    get:
+      tags: [Admin]
+      summary: Wiki feedback metrics for selected period
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: from
+          schema:
+            type: string
+            format: date-time
+          required: false
+        - in: query
+          name: to
+          schema:
+            type: string
+            format: date-time
+          required: false
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+          required: false
+      responses:
+        "200":
+          description: Wiki feedback metrics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminWikiFeedbackMetrics'
+        "401":
+          description: Неоторизиран достъп
+
+  /admin/metrics/wiki-attention:
+    get:
+      tags: [Admin]
+      summary: Wiki attention score metrics for selected period
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: from
+          schema:
+            type: string
+            format: date-time
+          required: false
+        - in: query
+          name: to
+          schema:
+            type: string
+            format: date-time
+          required: false
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+          required: false
+      responses:
+        "200":
+          description: Wiki attention metrics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminWikiAttentionMetrics'
+        "401":
+          description: Неоторизиран достъп
+
+  /admin/metrics/advanced:
+    get:
+      tags: [Admin]
+      summary: Advanced analytics metrics (post-MVP)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: from
+          schema:
+            type: string
+            format: date-time
+          required: false
+        - in: query
+          name: to
+          schema:
+            type: string
+            format: date-time
+          required: false
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+          required: false
+      responses:
+        "200":
+          description: Advanced analytics metrics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminAdvancedMetrics'
+        "401":
+          description: Неоторизиран достъп
+
+  /admin/metrics/advanced/export:
+    get:
+      tags: [Admin]
+      summary: Export advanced analytics metrics (CSV)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: from
+          schema:
+            type: string
+            format: date-time
+          required: false
+        - in: query
+          name: to
+          schema:
+            type: string
+            format: date-time
+          required: false
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+          required: false
+      responses:
+        "200":
+          description: CSV export
+          content:
+            text/csv:
+              schema:
+                type: string
         "401":
           description: Неоторизиран достъп

@@ -1,6 +1,6 @@
-# STORY-WIKI-1: Admin Wiki Editor Upgrades (Safe Deletes + Mermaid Preview + Rich Editor)
+# STORY-WIKI-ADMIN-1: Admin Wiki Editor Upgrades (Safe Deletes + Mermaid Preview + Rich Editor)
 
-_BMAD Story Spec | EPIC: EPIC-CORE-WIKI-ADMIN | Status: ✅ Implemented_
+_BMAD Story Spec | EPIC: EPIC-CORE-ADMIN | Status: ✅ Implemented_
 
 ---
 
