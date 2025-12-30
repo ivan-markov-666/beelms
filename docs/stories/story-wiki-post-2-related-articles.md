@@ -1,12 +1,12 @@
-# WIKI-POST-2: Свързани Wiki статии (Related articles)
+# STORY-WIKI-POST-2: Свързани Wiki статии (Related articles)
 
-_BMAD Story Spec | EPIC: POST-MVP-WIKI | Status: ✅ Implemented_
+_BMAD Story Spec | EPIC: EPIC-POST-MVP-WIKI | Status: ✅ Implemented_
 
 ---
 
 ## 1. Цел
 
-Да се показва блок **„Свързани статии“** под публичните Wiki статии, за да се улесни навигацията и откриването на релевантно съдържание.
+Да се показва блок **„Свързани статии”** под публичните Wiki статии, за да се улесни навигацията и откриването на релевантно съдържание.
 
 Подход: **автоматично свързване по общи `tags`**.
 
@@ -87,4 +87,4 @@ _BMAD Story Spec | EPIC: POST-MVP-WIKI | Status: ✅ Implemented_
 
 | Date | Author | Change |
 |------|--------|--------|
-| 2025-12-22 | Cascade | Реализирано WIKI-POST-2: BE endpoint + FE блок + admin tags UI + i18n |
+| 2025-12-22 | Cascade | Реализирано STORY-WIKI-POST-2: BE endpoint + FE блок + admin tags UI + i18n |

@@ -1,6 +1,6 @@
-# WIKI-POST-3: Wiki view metrics (privacy-friendly)
+# STORY-WIKI-POST-3: Wiki view metrics (privacy-friendly)
 
-_BMAD Story Spec | EPIC: POST-MVP-WIKI | Status: ✅ Implemented_
+_BMAD Story Spec | EPIC: EPIC-POST-MVP-WIKI | Status: ✅ Implemented_
 
 ---
 
@@ -82,4 +82,4 @@ _BMAD Story Spec | EPIC: POST-MVP-WIKI | Status: ✅ Implemented_
 
 | Date | Author | Change |
 |------|--------|--------|
-| 2025-12-22 | Cascade | Реализирано WIKI-POST-3: агрегирани дневни гледания + admin метрики + UI |
+| 2025-12-22 | Cascade | Реализирано STORY-WIKI-POST-3: агрегирани дневни гледания + admin метрики + UI |
