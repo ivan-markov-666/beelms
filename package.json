@@ -9,6 +9,8 @@
     "lint": "npm --prefix be run lint && npm --prefix fe run lint",
     "format": "npm --prefix be run format && npm --prefix fe run format",
 
+    "docs:openapi:lint": "npx -y @redocly/cli@1.34.5 lint docs/architecture/openapi.yaml",
+
     "be:migration:run": "npm --prefix be run migration:run",
     "be:migration:revert": "npm --prefix be run migration:revert",
     "be:migration:show": "npm --prefix be run migration:show",
