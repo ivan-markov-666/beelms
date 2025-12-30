@@ -86,6 +86,28 @@ describe('Admin Users endpoints (e2e)', () => {
       .expect(403);
   });
 
+  it('GET /api/admin/users returns 403 for monitoring user', async () => {
+    const { email, accessToken } = await registerAndLogin(
+      app,
+      'admin-users-list-monitoring',
+    );
+
+    const user = await userRepo.findOne({ where: { email } });
+    expect(user).toBeDefined();
+
+    if (!user) {
+      throw new Error('User not found after registerAndLogin');
+    }
+
+    user.role = 'monitoring';
+    await userRepo.save(user);
+
+    await request(app.getHttpServer())
+      .get('/api/admin/users')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .expect(403);
+  });
+
   it('PATCH /api/admin/users/:id toggles active flag for target user', async () => {
     const { email: adminEmail, accessToken } = await registerAndLogin(
       app,
@@ -168,6 +190,29 @@ describe('Admin Users endpoints (e2e)', () => {
       .patch(`/api/admin/users/${targetUser.id}`)
       .set('Authorization', `Bearer ${accessToken}`)
       .send({ active: false })
+      .expect(403);
+  });
+
+  it('PATCH /api/admin/users/:id returns 403 when admin tries to change own role', async () => {
+    const { email, accessToken } = await registerAndLogin(
+      app,
+      'admin-users-self-demotion',
+    );
+
+    const adminUser = await userRepo.findOne({ where: { email } });
+    expect(adminUser).toBeDefined();
+
+    if (!adminUser) {
+      throw new Error('Admin user not found after registerAndLogin');
+    }
+
+    adminUser.role = 'admin';
+    await userRepo.save(adminUser);
+
+    await request(app.getHttpServer())
+      .patch(`/api/admin/users/${adminUser.id}`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({ role: 'user' })
       .expect(403);
   });
 });

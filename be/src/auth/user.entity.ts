@@ -5,6 +5,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import type { UserRole } from './user-role';
 
 @Entity('users')
 export class User {
@@ -21,7 +22,7 @@ export class User {
   active: boolean;
 
   @Column({ name: 'role', type: 'varchar', length: 20, default: 'user' })
-  role: string;
+  role: UserRole;
 
   @Column({ name: 'token_version', type: 'integer', default: 0 })
   tokenVersion: number;

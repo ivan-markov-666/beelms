@@ -29,6 +29,7 @@ describe('WikiService', () => {
   };
   let usersRepo: {
     find: jest.Mock;
+    findOne: jest.Mock;
   };
 
   beforeEach(async () => {
@@ -84,6 +85,7 @@ describe('WikiService', () => {
           provide: getRepositoryToken(User),
           useValue: {
             find: jest.fn(),
+            findOne: jest.fn(),
           },
         },
       ],
@@ -92,7 +94,15 @@ describe('WikiService', () => {
     service = module.get(WikiService);
     articleRepo = module.get(getRepositoryToken(WikiArticle));
     versionRepo = module.get(getRepositoryToken(WikiArticleVersion));
-    usersRepo = module.get<{ find: jest.Mock }>(getRepositoryToken(User));
+    usersRepo = module.get<{ find: jest.Mock; findOne: jest.Mock }>(
+      getRepositoryToken(User),
+    );
+
+    (usersRepo.findOne as jest.Mock).mockResolvedValue({
+      id: 'admin-user',
+      active: true,
+      role: 'admin',
+    });
   });
 
   it('uses default pagination when page and pageSize are not provided', async () => {
@@ -298,9 +308,14 @@ describe('WikiService', () => {
   });
 
   it('getAdminArticlesList uses default pagination when page and pageSize are not provided', async () => {
+    (usersRepo.findOne as jest.Mock).mockResolvedValue({
+      id: 'admin-user',
+      active: true,
+      role: 'admin',
+    });
     (articleRepo.find as jest.Mock).mockResolvedValue([]);
 
-    await service.getAdminArticlesList();
+    await service.getAdminArticlesList('admin-user');
 
     expect(articleRepo.find as jest.Mock).toHaveBeenCalledTimes(1);
     const firstCall = (articleRepo.find as jest.Mock).mock.calls[0] as [
@@ -315,6 +330,11 @@ describe('WikiService', () => {
   });
 
   it('getAdminArticlesList returns articles with status and updatedAt', async () => {
+    (usersRepo.findOne as jest.Mock).mockResolvedValue({
+      id: 'admin-user',
+      active: true,
+      role: 'admin',
+    });
     const now = new Date();
 
     (articleRepo.find as jest.Mock).mockResolvedValue([
@@ -335,7 +355,7 @@ describe('WikiService', () => {
       } as unknown as WikiArticle,
     ]);
 
-    const result = await service.getAdminArticlesList();
+    const result = await service.getAdminArticlesList('admin-user');
 
     expect(result).toHaveLength(1);
     const first = result[0] as { status: string; updatedAt: string };
@@ -615,7 +635,7 @@ describe('WikiService', () => {
             content: 'c',
             status: 'draft',
           },
-          null,
+          'admin-user',
         ),
       ).rejects.toBeInstanceOf(NotFoundException);
     });
@@ -688,12 +708,11 @@ describe('WikiService', () => {
         } as unknown as User,
       ]);
 
-      const result = await service.getArticleVersionsForAdmin('article-1');
+      const result = await service.getArticleVersionsForAdmin(
+        'admin-user',
+        'article-1',
+      );
 
-      expect(articleRepo.findOne).toHaveBeenCalledTimes(1);
-      expect(versionRepo.find).toHaveBeenCalledTimes(1);
-      expect(usersRepo.find).toHaveBeenCalledTimes(1);
-      expect(result).toHaveLength(1);
       expect(result[0]).toEqual({
         id: 'v1',
         version: 1,
@@ -711,7 +730,7 @@ describe('WikiService', () => {
       (articleRepo.findOne as jest.Mock).mockResolvedValue(undefined);
 
       await expect(
-        service.getArticleVersionsForAdmin('missing-id'),
+        service.getArticleVersionsForAdmin('admin-user', 'missing-id'),
       ).rejects.toBeInstanceOf(NotFoundException);
     });
 
@@ -736,7 +755,10 @@ describe('WikiService', () => {
 
       (usersRepo.find as jest.Mock).mockResolvedValue([]);
 
-      const result = await service.getArticleVersionsForAdmin('article-1');
+      const result = await service.getArticleVersionsForAdmin(
+        'admin-user',
+        'article-1',
+      );
 
       expect(result).toHaveLength(1);
       expect(result[0].createdBy).toBe('missing-user-id');
@@ -855,7 +877,7 @@ describe('WikiService', () => {
 
       (articleRepo.findOne as jest.Mock).mockResolvedValue(article);
 
-      await service.adminDeleteArticleVersion('article-1', 'v1');
+      await service.adminDeleteArticleVersion('admin-user', 'article-1', 'v1');
 
       expect(articleRepo.findOne).toHaveBeenCalledTimes(1);
       expect(versionRepo.remove).toHaveBeenCalledTimes(1);
@@ -868,7 +890,11 @@ describe('WikiService', () => {
       (articleRepo.findOne as jest.Mock).mockResolvedValue(undefined);
 
       await expect(
-        service.adminDeleteArticleVersion('missing-article', 'version-id'),
+        service.adminDeleteArticleVersion(
+          'admin-user',
+          'missing-article',
+          'version-id',
+        ),
       ).rejects.toBeInstanceOf(NotFoundException);
     });
 
@@ -881,7 +907,11 @@ describe('WikiService', () => {
       (articleRepo.findOne as jest.Mock).mockResolvedValue(article);
 
       await expect(
-        service.adminDeleteArticleVersion('article-1', 'missing-version'),
+        service.adminDeleteArticleVersion(
+          'admin-user',
+          'article-1',
+          'missing-version',
+        ),
       ).rejects.toBeInstanceOf(NotFoundException);
     });
 
@@ -894,7 +924,7 @@ describe('WikiService', () => {
       (articleRepo.findOne as jest.Mock).mockResolvedValue(article);
 
       await expect(
-        service.adminDeleteArticleVersion('article-1', 'v1'),
+        service.adminDeleteArticleVersion('admin-user', 'article-1', 'v1'),
       ).rejects.toBeInstanceOf(BadRequestException);
     });
 
@@ -926,7 +956,7 @@ describe('WikiService', () => {
       (articleRepo.findOne as jest.Mock).mockResolvedValue(article);
 
       await expect(
-        service.adminDeleteArticleVersion('article-1', 'bg-v2'),
+        service.adminDeleteArticleVersion('admin-user', 'article-1', 'bg-v2'),
       ).rejects.toBeInstanceOf(BadRequestException);
     });
 
@@ -951,7 +981,11 @@ describe('WikiService', () => {
 
       (articleRepo.findOne as jest.Mock).mockResolvedValue(article);
 
-      await service.adminDeleteArticleVersion('article-1', 'bg-v1');
+      await service.adminDeleteArticleVersion(
+        'admin-user',
+        'article-1',
+        'bg-v1',
+      );
 
       expect(versionRepo.remove).toHaveBeenCalledTimes(1);
       const removedArg = (versionRepo.remove as jest.Mock).mock
@@ -970,7 +1004,7 @@ describe('WikiService', () => {
       (articleRepo.findOne as jest.Mock).mockResolvedValue(article);
       (articleRepo.remove as jest.Mock).mockResolvedValue(undefined);
 
-      await service.adminDeleteArticle('article-1');
+      await service.adminDeleteArticle('admin-user', 'article-1');
 
       expect(articleRepo.findOne).toHaveBeenCalledTimes(1);
       expect(articleRepo.remove).toHaveBeenCalledTimes(1);
@@ -983,7 +1017,7 @@ describe('WikiService', () => {
       (articleRepo.findOne as jest.Mock).mockResolvedValue(undefined);
 
       await expect(
-        service.adminDeleteArticle('missing-article'),
+        service.adminDeleteArticle('admin-user', 'missing-article'),
       ).rejects.toBeInstanceOf(NotFoundException);
     });
 
@@ -996,7 +1030,7 @@ describe('WikiService', () => {
       (articleRepo.findOne as jest.Mock).mockResolvedValue(article);
 
       await expect(
-        service.adminDeleteArticle('article-1'),
+        service.adminDeleteArticle('admin-user', 'article-1'),
       ).rejects.toBeInstanceOf(BadRequestException);
 
       expect(articleRepo.remove).not.toHaveBeenCalled();

@@ -69,7 +69,11 @@ describe("AdminUsersPage", () => {
 
     await waitFor(() => {
       expect(screen.getByText("admin@example.com")).toBeInTheDocument();
-      expect(screen.getByText("admin")).toBeInTheDocument();
+      expect(
+        screen.getByRole("combobox", {
+          name: "Role for admin@example.com",
+        }),
+      ).toHaveValue("admin");
       expect(
         screen.getByRole("button", { name: "Active" }),
       ).toBeInTheDocument();

@@ -157,6 +157,8 @@ export const messages: Messages = {
       adminUsersNoData: "Няма потребители за показване.",
       adminUsersToggleError:
         "Неуспешно обновяване на статуса на потребителя. Моля, опитайте отново.",
+      adminUsersRoleUpdateError:
+        "Неуспешно обновяване на ролята на потребителя. Моля, опитайте отново.",
       adminUsersNoToken:
         "Липсва достъп до Admin API. Моля, влезте отново като администратор.",
       adminUsersColEmail: "Email",
@@ -518,6 +520,8 @@ export const messages: Messages = {
       adminUsersError: "An error occurred while loading the users list.",
       adminUsersNoData: "No users to display.",
       adminUsersToggleError: "Failed to update user status. Please try again.",
+      adminUsersRoleUpdateError:
+        "Failed to update user role. Please try again.",
       adminUsersNoToken:
         "No access to the Admin API. Please sign in again as an administrator.",
       adminUsersColEmail: "Email",
@@ -875,6 +879,34 @@ export const messages: Messages = {
       accountDeletedSecondaryCta: "Zu den Wiki-Artikeln",
     },
     common: {
+      adminUsersTitle: "Admin Users",
+      adminUsersSubtitle: "Liste der Benutzer und Kontostatus (aktiv/inaktiv).",
+      adminUsersSearchPlaceholder: "Suche nach E-Mail...",
+      adminUsersSearchButton: "Suchen",
+      adminUsersLoading: "Benutzer werden geladen...",
+      adminUsersError:
+        "Beim Laden der Benutzerliste ist ein Fehler aufgetreten.",
+      adminUsersNoData: "Keine Benutzer zum Anzeigen.",
+      adminUsersToggleError:
+        "Benutzerstatus konnte nicht aktualisiert werden. Bitte versuche es erneut.",
+      adminUsersRoleUpdateError:
+        "Benutzerrolle konnte nicht aktualisiert werden. Bitte versuche es erneut.",
+      adminUsersNoToken:
+        "Kein Zugriff auf die Admin-API. Bitte melde dich erneut als Administrator an.",
+      adminUsersColEmail: "E-Mail",
+      adminUsersColRole: "Rolle",
+      adminUsersColActive: "Aktiv",
+      adminUsersColCreated: "Erstellt",
+      adminUsersStatusActive: "Aktiv",
+      adminUsersStatusInactive: "Inaktiv",
+      adminUsersStatusUpdating: "Aktualisierung...",
+      adminUsersStatsTotal: "Benutzer gesamt",
+      adminUsersStatsActive: "Aktive",
+      adminUsersStatsDeactivated: "Deaktiviert",
+      adminUsersStatsAdmins: "Admins",
+      adminUsersStatsLoading: "Benutzerstatistiken werden geladen...",
+      adminUsersStatsError:
+        "Beim Laden der Benutzerstatistiken ist ein Fehler aufgetreten.",
       adminWikiStatsTotal: "Wiki-Artikel gesamt",
       adminWikiStatsActive: "Aktiv",
       adminWikiStatsDraft: "Entwürfe",

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { clearAccessToken, getAccessToken } from "../auth-token";
 import { getApiBaseUrl } from "../api-url";
 
@@ -9,12 +9,15 @@ const API_BASE_URL = getApiBaseUrl();
 
 type AdminStatus = "loading" | "forbidden" | "ready";
 
+type UserRole = "user" | "admin" | "monitoring" | "teacher" | "author";
+
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [status, setStatus] = useState<AdminStatus>("loading");
 
   useEffect(() => {
@@ -51,18 +54,53 @@ export default function AdminLayout({
           return;
         }
 
-        const data = (await res.json()) as { role?: string };
+        const data = (await res.json()) as { role?: UserRole };
 
         if (cancelled) {
           return;
         }
 
-        if (data.role !== "admin") {
-          setStatus("forbidden");
+        const role = data.role;
+
+        if (role === "admin") {
+          setStatus("ready");
           return;
         }
 
-        setStatus("ready");
+        if (role === "monitoring") {
+          const isMetricsPath = (pathname ?? "").startsWith("/admin/metrics");
+          if (!isMetricsPath) {
+            router.replace("/admin/metrics");
+            return;
+          }
+
+          setStatus("ready");
+          return;
+        }
+
+        if (role === "teacher") {
+          const isCoursesPath = (pathname ?? "").startsWith("/admin/courses");
+          if (!isCoursesPath) {
+            router.replace("/admin/courses");
+            return;
+          }
+
+          setStatus("ready");
+          return;
+        }
+
+        if (role === "author") {
+          const isWikiPath = (pathname ?? "").startsWith("/admin/wiki");
+          if (!isWikiPath) {
+            router.replace("/admin/wiki");
+            return;
+          }
+
+          setStatus("ready");
+          return;
+        }
+
+        setStatus("forbidden");
       } catch {
         if (!cancelled) {
           setStatus("forbidden");
@@ -75,7 +113,7 @@ export default function AdminLayout({
     return () => {
       cancelled = true;
     };
-  }, [router]);
+  }, [router, pathname]);
 
   if (status === "loading") {
     return (

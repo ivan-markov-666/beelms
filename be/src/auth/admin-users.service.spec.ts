@@ -129,7 +129,7 @@ describe('AdminUsersService', () => {
     });
   });
 
-  it('updateUserActive updates active flag when user exists', async () => {
+  it('updateUser updates active flag when user exists', async () => {
     const existing = new TestUser({
       id: '123',
       email: 'user@example.com',
@@ -141,7 +141,7 @@ describe('AdminUsersService', () => {
     (usersRepo.findOne as jest.Mock).mockResolvedValue(existing);
     (usersRepo.save as jest.Mock).mockImplementation(async (u: User) => u);
 
-    const result = await service.updateUserActive('123', false);
+    const result = await service.updateUser('123', { active: false });
 
     expect(usersRepo.findOne).toHaveBeenCalledWith({ where: { id: '123' } });
     expect(usersRepo.save).toHaveBeenCalledTimes(1);
@@ -149,12 +149,12 @@ describe('AdminUsersService', () => {
     expect(result.active).toBe(false);
   });
 
-  it('updateUserActive throws when user is not found', async () => {
+  it('updateUser throws when user is not found', async () => {
     (usersRepo.findOne as jest.Mock).mockResolvedValue(undefined);
 
-    await expect(service.updateUserActive('missing-id', false)).rejects.toThrow(
-      'User not found',
-    );
+    await expect(
+      service.updateUser('missing-id', { active: false }),
+    ).rejects.toThrow('User not found');
   });
 
   it('getAdminUsersStats returns aggregated counts', async () => {

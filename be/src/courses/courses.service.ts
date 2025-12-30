@@ -7,6 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Repository } from 'typeorm';
 import { User } from '../auth/user.entity';
+import type { UserRole } from '../auth/user-role';
 import { Course } from './course.entity';
 import { CourseEnrollment } from './course-enrollment.entity';
 import { CourseCurriculumItem } from './course-curriculum-item.entity';
@@ -65,6 +66,39 @@ export class CoursesService {
       priceCents:
         typeof course.priceCents === 'number' ? course.priceCents : null,
     };
+  }
+
+  private async getActiveUserRole(userId: string): Promise<UserRole> {
+    const user = await this.usersRepo.findOne({
+      where: { id: userId, active: true },
+    });
+
+    if (!user) {
+      throw new ForbiddenException('Access denied');
+    }
+
+    return user.role;
+  }
+
+  private async requireCourseOwnershipForTeacher(
+    userId: string,
+    courseId: string,
+  ): Promise<void> {
+    const role = await this.getActiveUserRole(userId);
+
+    if (role !== 'teacher') {
+      return;
+    }
+
+    const course = await this.courseRepo.findOne({ where: { id: courseId } });
+
+    if (!course) {
+      throw new NotFoundException('Course not found');
+    }
+
+    if (course.createdByUserId !== userId) {
+      throw new NotFoundException('Course not found');
+    }
   }
 
   private toCurriculumItemDto(item: CourseCurriculumItem): CourseModuleItemDto {
@@ -358,15 +392,23 @@ export class CoursesService {
     };
   }
 
-  async getAdminCoursesList(): Promise<CourseSummaryDto[]> {
+  async getAdminCoursesList(actorUserId: string): Promise<CourseSummaryDto[]> {
+    const role = await this.getActiveUserRole(actorUserId);
+
     const courses = await this.courseRepo.find({
+      where: role === 'teacher' ? { createdByUserId: actorUserId } : undefined,
       order: { createdAt: 'DESC' },
     });
 
     return courses.map((c) => this.toSummary(c));
   }
 
-  async getAdminCourseDetail(courseId: string): Promise<CourseDetailDto> {
+  async getAdminCourseDetail(
+    courseId: string,
+    actorUserId: string,
+  ): Promise<CourseDetailDto> {
+    await this.requireCourseOwnershipForTeacher(actorUserId, courseId);
+
     const course = await this.courseRepo.findOne({ where: { id: courseId } });
 
     if (!course) {
@@ -381,7 +423,15 @@ export class CoursesService {
     };
   }
 
-  async adminCreateCourse(dto: AdminCreateCourseDto): Promise<CourseDetailDto> {
+  async adminCreateCourse(
+    dto: AdminCreateCourseDto,
+    actorUserId: string,
+  ): Promise<CourseDetailDto> {
+    const role = await this.getActiveUserRole(actorUserId);
+    if (role !== 'admin' && role !== 'teacher') {
+      throw new ForbiddenException('Access denied');
+    }
+
     const isPaid = dto.isPaid ?? false;
     const currency =
       typeof dto.currency === 'string'
@@ -409,6 +459,7 @@ export class CoursesService {
       isPaid,
       currency: isPaid && currency ? currency : null,
       priceCents: isPaid && priceCents && priceCents > 0 ? priceCents : null,
+      createdByUserId: actorUserId,
     });
 
     const saved = await this.courseRepo.save(course);
@@ -424,7 +475,10 @@ export class CoursesService {
   async adminUpdateCourse(
     courseId: string,
     dto: AdminUpdateCourseDto,
+    actorUserId: string,
   ): Promise<CourseDetailDto> {
+    await this.requireCourseOwnershipForTeacher(actorUserId, courseId);
+
     const course = await this.courseRepo.findOne({ where: { id: courseId } });
 
     if (!course) {
@@ -500,7 +554,10 @@ export class CoursesService {
 
   async getAdminCourseCurriculum(
     courseId: string,
+    actorUserId: string,
   ): Promise<CourseModuleItemDto[]> {
+    await this.requireCourseOwnershipForTeacher(actorUserId, courseId);
+
     const course = await this.courseRepo.findOne({ where: { id: courseId } });
     if (!course) {
       throw new NotFoundException('Course not found');
@@ -512,7 +569,10 @@ export class CoursesService {
   async adminAddCurriculumItem(
     courseId: string,
     dto: AdminCreateCourseCurriculumItemDto,
+    actorUserId: string,
   ): Promise<CourseModuleItemDto> {
+    await this.requireCourseOwnershipForTeacher(actorUserId, courseId);
+
     const course = await this.courseRepo.findOne({ where: { id: courseId } });
     if (!course) {
       throw new NotFoundException('Course not found');
@@ -570,7 +630,10 @@ export class CoursesService {
     courseId: string,
     itemId: string,
     dto: AdminUpdateCourseCurriculumItemDto,
+    actorUserId: string,
   ): Promise<CourseModuleItemDto> {
+    await this.requireCourseOwnershipForTeacher(actorUserId, courseId);
+
     const course = await this.courseRepo.findOne({ where: { id: courseId } });
     if (!course) {
       throw new NotFoundException('Course not found');
@@ -674,7 +737,10 @@ export class CoursesService {
   async adminDeleteCurriculumItem(
     courseId: string,
     itemId: string,
+    actorUserId: string,
   ): Promise<void> {
+    await this.requireCourseOwnershipForTeacher(actorUserId, courseId);
+
     const course = await this.courseRepo.findOne({ where: { id: courseId } });
     if (!course) {
       throw new NotFoundException('Course not found');
