@@ -1,6 +1,6 @@
 # STORY-PAYMENTS-5: Stripe Async Payment Webhooks
 
-_BMAD Story Spec | EPIC: EPIC-PAYMENTS-OPS | Status: 🟢 Done_
+_BMAD Story Spec | EPIC: EPIC-PAYMENTS-OPS | Status: 🟢 Implemented_
 
 ---
 

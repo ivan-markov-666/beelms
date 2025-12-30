@@ -1,6 +1,6 @@
 # STORY-RBAC-2: Teacher/Author Ownership (Courses + Wiki)
 
-_BMAD Story Spec | EPIC: EPIC-CORE-RBAC | Status: 🟡 Planned_
+_BMAD Story Spec | EPIC: EPIC-CORE-RBAC | Status: ✅ Implemented_
 
 ---
 

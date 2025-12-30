@@ -1,6 +1,6 @@
 # STORY-PAYMENTS-4: Refunds / Disputes / Chargebacks (Access Revocation)
 
-_BMAD Story Spec | EPIC: EPIC-PAYMENTS-OPS | Status: 🟢 Done_
+_BMAD Story Spec | EPIC: EPIC-PAYMENTS-OPS | Status: 🟢 Implemented_
 
 ---
 

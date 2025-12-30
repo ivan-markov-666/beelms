@@ -1,6 +1,6 @@
 # STORY-TASKS-2: Mark Task as Completed (affects progress)
 
-_BMAD Story Spec | EPIC: EPIC-CORE-TASKS | Status: ✅ Done_
+_BMAD Story Spec | EPIC: EPIC-CORE-TASKS | Status: ✅ Implemented_
 
 ---
 

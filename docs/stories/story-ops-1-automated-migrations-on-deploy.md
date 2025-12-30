@@ -1,6 +1,6 @@
 # STORY-OPS-1: Automated DB Migrations on Deploy
 
-_BMAD Story Spec | Status: 🟢 Done_
+_BMAD Story Spec | Status: 🟢 Implemented_
 
 ---
 

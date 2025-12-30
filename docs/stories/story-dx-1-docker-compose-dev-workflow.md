@@ -1,6 +1,6 @@
 # STORY-DX-1: docker-compose dev workflow (DX)
 
-_BMAD Story Spec | EPIC: EPIC-CORE-DX-CLI-INFRA | Status: ✅ Done_
+_BMAD Story Spec | EPIC: EPIC-CORE-DX-CLI-INFRA | Status: ✅ Implemented_
 
 ---
 

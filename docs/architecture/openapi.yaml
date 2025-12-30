@@ -1,14 +1,16 @@
-openapi: 3.1.0
+openapi: 3.0.3
 info:
   title: beelms API
   version: 0.1.0
+  license:
+    name: UNLICENSED
   description: |
     OpenAPI спецификация за основните MVP услуги на beelms.
 
 servers:
-  - url: https://api.example.com/api
+  - url: https://api.beelms.com/api
     description: Production (примерен домейн, с /api префикс)
-  - url: http://localhost:3000/api
+  - url: http://127.0.0.1:3000/api
     description: Local development (с /api префикс)
 
 components:
@@ -1552,7 +1554,6 @@ paths:
               properties:
                 captchaToken:
                   type: string
-              required: []
       responses:
         "200":
           description: Експортът е генериран

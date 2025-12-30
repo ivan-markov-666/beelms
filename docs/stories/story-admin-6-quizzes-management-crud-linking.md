@@ -1,6 +1,6 @@
 # STORY-ADMIN-6: Admin Quizzes Management (CRUD + Questions + Linking)
 
-_BMAD Story Spec | EPIC: EPIC-CORE-ADMIN | Status: ✅ Done_
+_BMAD Story Spec | EPIC: EPIC-CORE-ADMIN | Status: ✅ Implemented_
 
 ---
 
