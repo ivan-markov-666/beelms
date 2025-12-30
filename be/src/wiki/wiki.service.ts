@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -14,6 +15,7 @@ import { WikiArticleFeedback } from './wiki-article-feedback.entity';
 import { WikiArticleView } from './wiki-article-view.entity';
 import { WikiArticleIpViewDaily } from './wiki-article-ip-view-daily.entity';
 import { User } from '../auth/user.entity';
+import type { UserRole } from '../auth/user-role';
 import { WikiListItemDto } from './dto/wiki-list-item.dto';
 import { AdminWikiListItemDto } from './dto/admin-wiki-list-item.dto';
 import { WikiArticleDetailDto } from './dto/wiki-article-detail.dto';
@@ -83,6 +85,37 @@ export class WikiService {
 
   private lastViewsRetentionRunDate: string | null = null;
   private lastIpViewsRetentionRunDate: string | null = null;
+
+  private async getActiveUserRole(userId: string): Promise<UserRole> {
+    const user = await this.usersRepo.findOne({
+      where: { id: userId, active: true },
+    });
+
+    if (!user) {
+      throw new ForbiddenException('Access denied');
+    }
+
+    return user.role;
+  }
+
+  private async requireArticleOwnershipForAuthor(
+    actorUserId: string,
+    article: WikiArticle | null,
+  ): Promise<void> {
+    const role = await this.getActiveUserRole(actorUserId);
+
+    if (role !== 'author') {
+      return;
+    }
+
+    if (!article) {
+      throw new NotFoundException('Article not found');
+    }
+
+    if (article.createdByUserId !== actorUserId) {
+      throw new NotFoundException('Article not found');
+    }
+  }
 
   private formatUtcDate(date: Date): string {
     return date.toISOString().slice(0, 10);
@@ -465,12 +498,16 @@ export class WikiService {
   }
 
   async getAdminArticlesList(
+    actorUserId: string,
     page?: number,
     pageSize?: number,
     q?: string,
     lang?: string,
   ): Promise<AdminWikiListItemDto[]> {
+    const role = await this.getActiveUserRole(actorUserId);
+
     const articles = await this.articleRepo.find({
+      where: role === 'author' ? { createdByUserId: actorUserId } : undefined,
       relations: ['versions'],
       order: { updatedAt: 'DESC' },
     });
@@ -612,6 +649,7 @@ export class WikiService {
   }
 
   async getArticleBySlugForAdmin(
+    actorUserId: string,
     slug: string,
     lang?: string,
   ): Promise<WikiArticleDetailDto> {
@@ -619,6 +657,8 @@ export class WikiService {
       where: { slug },
       relations: ['versions'],
     });
+
+    await this.requireArticleOwnershipForAuthor(actorUserId, article);
 
     if (!article) {
       throw new NotFoundException('Article not found');
@@ -686,10 +726,15 @@ export class WikiService {
     };
   }
 
-  async adminListArticleMedia(articleId: string): Promise<WikiMediaItemDto[]> {
+  async adminListArticleMedia(
+    actorUserId: string,
+    articleId: string,
+  ): Promise<WikiMediaItemDto[]> {
     const article = await this.articleRepo.findOne({
       where: { id: articleId },
     });
+
+    await this.requireArticleOwnershipForAuthor(actorUserId, article);
 
     if (!article) {
       throw new NotFoundException('Article not found');
@@ -717,12 +762,15 @@ export class WikiService {
   }
 
   async adminUploadArticleMedia(
+    actorUserId: string,
     articleId: string,
     file: WikiUploadedFile | undefined,
   ): Promise<WikiMediaItemDto> {
     const article = await this.articleRepo.findOne({
       where: { id: articleId },
     });
+
+    await this.requireArticleOwnershipForAuthor(actorUserId, article);
 
     if (!article) {
       throw new NotFoundException('Article not found');
@@ -802,12 +850,15 @@ export class WikiService {
   }
 
   async adminDeleteArticleMedia(
+    actorUserId: string,
     articleId: string,
     filename: string,
   ): Promise<void> {
     const article = await this.articleRepo.findOne({
       where: { id: articleId },
     });
+
+    await this.requireArticleOwnershipForAuthor(actorUserId, article);
 
     if (!article) {
       throw new NotFoundException('Article not found');
@@ -830,7 +881,7 @@ export class WikiService {
 
   async adminCreateArticle(
     dto: AdminCreateWikiArticleDto,
-    userId: string | null,
+    actorUserId: string,
   ): Promise<WikiArticleDetailDto> {
     const existingBySlug = await this.articleRepo.findOne({
       where: { slug: dto.slug },
@@ -845,6 +896,7 @@ export class WikiService {
       status: dto.status,
       visibility: dto.visibility ?? 'public',
       tags: dto.tags ?? [],
+      createdByUserId: actorUserId,
     });
 
     const savedArticle = await this.articleRepo.save(article);
@@ -857,7 +909,7 @@ export class WikiService {
         subtitle: content.subtitle ?? null,
         content: content.content,
         versionNumber: 1,
-        createdByUserId: userId,
+        createdByUserId: actorUserId,
         isPublished: dto.status === 'active',
       }),
     );
@@ -899,8 +951,14 @@ export class WikiService {
     };
   }
 
-  async adminUpdateArticleStatus(id: string, status: string): Promise<void> {
+  async adminUpdateArticleStatus(
+    actorUserId: string,
+    id: string,
+    status: string,
+  ): Promise<void> {
     const article = await this.articleRepo.findOne({ where: { id } });
+
+    await this.requireArticleOwnershipForAuthor(actorUserId, article);
 
     if (!article) {
       throw new NotFoundException('Article not found');
@@ -913,12 +971,14 @@ export class WikiService {
   async adminUpdateArticle(
     id: string,
     dto: AdminUpdateWikiArticleDto,
-    userId: string | null,
+    actorUserId: string,
   ): Promise<WikiArticleDetailDto> {
     const article = await this.articleRepo.findOne({
       where: { id },
       relations: ['versions'],
     });
+
+    await this.requireArticleOwnershipForAuthor(actorUserId, article);
 
     if (!article) {
       throw new NotFoundException('Article not found');
@@ -971,7 +1031,7 @@ export class WikiService {
           subtitle: dto.subtitle ?? null,
           content: dto.content,
           versionNumber: nextVersionNumber,
-          createdByUserId: userId,
+          createdByUserId: actorUserId,
           isPublished: dto.status === 'active',
         });
 
@@ -991,7 +1051,7 @@ export class WikiService {
         subtitle: dto.subtitle ?? null,
         content: dto.content,
         versionNumber: 1,
-        createdByUserId: userId,
+        createdByUserId: actorUserId,
         isPublished: dto.status === 'active',
       });
 
@@ -1035,12 +1095,14 @@ export class WikiService {
   async adminAutosaveDraft(
     id: string,
     dto: AdminAutosaveWikiDraftDto,
-    userId: string | null,
+    actorUserId: string,
   ): Promise<void> {
     const article = await this.articleRepo.findOne({
       where: { id },
       relations: ['versions'],
     });
+
+    await this.requireArticleOwnershipForAuthor(actorUserId, article);
 
     if (!article) {
       throw new NotFoundException('Article not found');
@@ -1072,7 +1134,7 @@ export class WikiService {
         subtitle: dto.subtitle ?? null,
         content: dto.content ?? '',
         versionNumber: 1,
-        createdByUserId: userId,
+        createdByUserId: actorUserId,
         isPublished: false,
       });
 
@@ -1094,19 +1156,20 @@ export class WikiService {
       latest.subtitle = dto.subtitle;
     }
 
-    if (userId) {
-      latest.createdByUserId = userId;
-    }
+    latest.createdByUserId = actorUserId;
 
     await this.versionRepo.save(latest);
   }
 
   async getArticleVersionsForAdmin(
+    actorUserId: string,
     articleId: string,
   ): Promise<AdminWikiArticleVersionDto[]> {
     const article = await this.articleRepo.findOne({
       where: { id: articleId },
     });
+
+    await this.requireArticleOwnershipForAuthor(actorUserId, article);
 
     if (!article) {
       throw new NotFoundException('Article not found');
@@ -1177,11 +1240,13 @@ export class WikiService {
   async restoreArticleVersionForAdmin(
     articleId: string,
     versionId: string,
-    userId: string | null,
+    actorUserId: string,
   ): Promise<WikiArticleDetailDto> {
     const article = await this.articleRepo.findOne({
       where: { id: articleId },
     });
+
+    await this.requireArticleOwnershipForAuthor(actorUserId, article);
 
     if (!article) {
       throw new NotFoundException('Article not found');
@@ -1198,9 +1263,7 @@ export class WikiService {
 
     const now = new Date();
 
-    if (userId) {
-      targetVersion.createdByUserId = userId;
-    }
+    targetVersion.createdByUserId = actorUserId;
 
     if (article.status === 'active') {
       targetVersion.isPublished = true;
@@ -1238,8 +1301,10 @@ export class WikiService {
     };
   }
 
-  async adminDeleteArticle(id: string): Promise<void> {
+  async adminDeleteArticle(actorUserId: string, id: string): Promise<void> {
     const article = await this.articleRepo.findOne({ where: { id } });
+
+    await this.requireArticleOwnershipForAuthor(actorUserId, article);
 
     if (!article) {
       throw new NotFoundException('Article not found');
@@ -1255,6 +1320,7 @@ export class WikiService {
   }
 
   async adminDeleteArticleVersion(
+    actorUserId: string,
     articleId: string,
     versionId: string,
   ): Promise<void> {
@@ -1262,6 +1328,8 @@ export class WikiService {
       where: { id: articleId },
       relations: ['versions'],
     });
+
+    await this.requireArticleOwnershipForAuthor(actorUserId, article);
 
     if (!article) {
       throw new NotFoundException('Article not found');

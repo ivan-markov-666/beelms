@@ -25,6 +25,9 @@ export class WikiArticle {
   @Column({ type: 'text', array: true, default: () => "'{}'" })
   tags: string[];
 
+  @Column({ name: 'created_by_user_id', type: 'uuid', nullable: true })
+  createdByUserId: string | null;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

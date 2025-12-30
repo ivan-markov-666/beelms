@@ -1,6 +1,6 @@
 import { Controller, Get, Header, Query, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from './jwt-auth.guard';
-import { AdminGuard } from './admin.guard';
+import { MonitoringGuard } from './monitoring.guard';
 import {
   AdminMetricsService,
   type MetricsOverview,
@@ -12,7 +12,7 @@ import {
 } from './admin-metrics.service';
 
 @Controller('admin/metrics')
-@UseGuards(JwtAuthGuard, AdminGuard)
+@UseGuards(JwtAuthGuard, MonitoringGuard)
 export class AdminMetricsController {
   constructor(private readonly metricsService: AdminMetricsService) {}
 

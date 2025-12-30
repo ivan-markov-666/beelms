@@ -72,6 +72,31 @@ describe('Admin Metrics endpoint (e2e)', () => {
     ).toBe(true);
   });
 
+  it('GET /api/admin/metrics/overview returns metrics for monitoring user', async () => {
+    const { email, accessToken } = await registerAndLogin(
+      app,
+      'admin-metrics-monitoring',
+    );
+
+    const user = await userRepo.findOne({ where: { email } });
+    expect(user).toBeDefined();
+
+    if (!user) {
+      throw new Error('User not found after registerAndLogin');
+    }
+
+    user.role = 'monitoring';
+    await userRepo.save(user);
+
+    const res = await request(app.getHttpServer())
+      .get('/api/admin/metrics/overview')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .expect(200);
+
+    const body = res.body as MetricsOverview;
+    expect(typeof body.totalUsers).toBe('number');
+  });
+
   it('GET /api/admin/metrics/overview returns 401 without token', async () => {
     await request(app.getHttpServer())
       .get('/api/admin/metrics/overview')

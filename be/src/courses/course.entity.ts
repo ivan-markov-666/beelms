@@ -32,6 +32,9 @@ export class Course {
   @Column({ name: 'price_cents', type: 'int', nullable: true })
   priceCents: number | null;
 
+  @Column({ name: 'created_by_user_id', type: 'uuid', nullable: true })
+  createdByUserId: string | null;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

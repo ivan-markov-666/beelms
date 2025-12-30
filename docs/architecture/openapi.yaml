@@ -208,12 +208,22 @@ components:
           format: email
         role:
           type: string
-          description: Роля на потребителя (напр. "user", "admin")
+          description: Роля на потребителя (напр. "user", "admin", "monitoring", "teacher", "author")
+          enum: [user, admin, monitoring, teacher, author]
         active:
           type: boolean
         createdAt:
           type: string
           format: date-time
+
+    AdminUpdateUserInput:
+      type: object
+      properties:
+        active:
+          type: boolean
+        role:
+          type: string
+          enum: [user, admin, monitoring, teacher, author]
 
     WikiArticle:
       type: object
@@ -2053,7 +2063,7 @@ paths:
           required: false
           schema:
             type: string
-            enum: [user, admin]
+            enum: [user, admin, monitoring, teacher, author]
           description: Филтър по роля
         - in: query
           name: page
@@ -2096,11 +2106,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                active:
-                  type: boolean
-              required: [active]
+              $ref: '#/components/schemas/AdminUpdateUserInput'
       responses:
         "200":
           description: Обновен потребител

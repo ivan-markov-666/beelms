@@ -10,6 +10,7 @@ import {
   Put,
   Query,
   Req,
+  UnauthorizedException,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -19,7 +20,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { WikiService } from './wiki.service';
 import type { WikiUploadedFile } from './wiki.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { AdminGuard } from '../auth/admin.guard';
+import { AuthorGuard } from '../auth/author.guard';
 import { AdminWikiListItemDto } from './dto/admin-wiki-list-item.dto';
 import { AdminUpdateWikiArticleDto } from './dto/admin-update-wiki-article.dto';
 import { WikiArticleDetailDto } from './dto/wiki-article-detail.dto';
@@ -29,38 +30,67 @@ import { AdminCreateWikiArticleDto } from './dto/admin-create-wiki-article.dto';
 import { WikiMediaItemDto } from './dto/wiki-media-item.dto';
 import { AdminAutosaveWikiDraftDto } from './dto/admin-autosave-wiki-draft.dto';
 
+interface AuthenticatedRequest extends Request {
+  user?: {
+    userId: string;
+    email: string;
+  };
+}
+
 @Controller('admin/wiki')
-@UseGuards(JwtAuthGuard, AdminGuard)
+@UseGuards(JwtAuthGuard, AuthorGuard)
 export class AdminWikiController {
   constructor(private readonly wikiService: WikiService) {}
 
   @Get('articles')
   async findAll(
+    @Req() req: AuthenticatedRequest,
     @Query('page') page?: string,
     @Query('pageSize') pageSize?: string,
     @Query('q') q?: string,
     @Query('lang') lang?: string,
   ): Promise<AdminWikiListItemDto[]> {
+    const userId = req.user?.userId;
+    if (!userId) {
+      throw new UnauthorizedException('Authenticated user not found');
+    }
+
     const pageNum = page ? Number(page) : undefined;
     const pageSizeNum = pageSize ? Number(pageSize) : undefined;
 
-    return this.wikiService.getAdminArticlesList(pageNum, pageSizeNum, q, lang);
+    return this.wikiService.getAdminArticlesList(
+      userId,
+      pageNum,
+      pageSizeNum,
+      q,
+      lang,
+    );
   }
 
   @Get('articles/by-slug/:slug')
   async findOneBySlug(
     @Param('slug') slug: string,
+    @Req() req: AuthenticatedRequest,
     @Query('lang') lang?: string,
   ): Promise<WikiArticleDetailDto> {
-    return this.wikiService.getArticleBySlugForAdmin(slug, lang);
+    const userId = req.user?.userId;
+    if (!userId) {
+      throw new UnauthorizedException('Authenticated user not found');
+    }
+
+    return this.wikiService.getArticleBySlugForAdmin(userId, slug, lang);
   }
 
   @Post('articles')
   async createArticle(
     @Body() dto: AdminCreateWikiArticleDto,
-    @Req() req: Request & { user?: { userId: string } },
+    @Req() req: AuthenticatedRequest,
   ): Promise<WikiArticleDetailDto> {
-    const userId = req.user?.userId ?? null;
+    const userId = req.user?.userId;
+    if (!userId) {
+      throw new UnauthorizedException('Authenticated user not found');
+    }
+
     return this.wikiService.adminCreateArticle(dto, userId);
   }
 
@@ -68,9 +98,13 @@ export class AdminWikiController {
   async updateArticle(
     @Param('id') id: string,
     @Body() dto: AdminUpdateWikiArticleDto,
-    @Req() req: Request & { user?: { userId: string } },
+    @Req() req: AuthenticatedRequest,
   ): Promise<WikiArticleDetailDto> {
-    const userId = req.user?.userId ?? null;
+    const userId = req.user?.userId;
+    if (!userId) {
+      throw new UnauthorizedException('Authenticated user not found');
+    }
+
     return this.wikiService.adminUpdateArticle(id, dto, userId);
   }
 
@@ -79,14 +113,28 @@ export class AdminWikiController {
   async updateArticleStatus(
     @Param('id') id: string,
     @Body() dto: AdminUpdateWikiStatusDto,
+    @Req() req: AuthenticatedRequest,
   ): Promise<void> {
-    await this.wikiService.adminUpdateArticleStatus(id, dto.status);
+    const userId = req.user?.userId;
+    if (!userId) {
+      throw new UnauthorizedException('Authenticated user not found');
+    }
+
+    await this.wikiService.adminUpdateArticleStatus(userId, id, dto.status);
   }
 
   @Delete('articles/:id')
   @HttpCode(204)
-  async deleteArticle(@Param('id') id: string): Promise<void> {
-    await this.wikiService.adminDeleteArticle(id);
+  async deleteArticle(
+    @Param('id') id: string,
+    @Req() req: AuthenticatedRequest,
+  ): Promise<void> {
+    const userId = req.user?.userId;
+    if (!userId) {
+      throw new UnauthorizedException('Authenticated user not found');
+    }
+
+    await this.wikiService.adminDeleteArticle(userId, id);
   }
 
   @Patch('articles/:id/draft-autosave')
@@ -94,17 +142,27 @@ export class AdminWikiController {
   async autosaveDraft(
     @Param('id') id: string,
     @Body() dto: AdminAutosaveWikiDraftDto,
-    @Req() req: Request & { user?: { userId: string } },
+    @Req() req: AuthenticatedRequest,
   ): Promise<void> {
-    const userId = req.user?.userId ?? null;
+    const userId = req.user?.userId;
+    if (!userId) {
+      throw new UnauthorizedException('Authenticated user not found');
+    }
+
     await this.wikiService.adminAutosaveDraft(id, dto, userId);
   }
 
   @Get('articles/:id/versions')
   async getArticleVersions(
     @Param('id') id: string,
+    @Req() req: AuthenticatedRequest,
   ): Promise<AdminWikiArticleVersionDto[]> {
-    return this.wikiService.getArticleVersionsForAdmin(id);
+    const userId = req.user?.userId;
+    if (!userId) {
+      throw new UnauthorizedException('Authenticated user not found');
+    }
+
+    return this.wikiService.getArticleVersionsForAdmin(userId, id);
   }
 
   @Post('articles/:id/versions/:versionId/restore')
@@ -112,9 +170,13 @@ export class AdminWikiController {
   async restoreArticleVersion(
     @Param('id') id: string,
     @Param('versionId') versionId: string,
-    @Req() req: Request & { user?: { userId: string } },
+    @Req() req: AuthenticatedRequest,
   ): Promise<WikiArticleDetailDto> {
-    const userId = req.user?.userId ?? null;
+    const userId = req.user?.userId;
+    if (!userId) {
+      throw new UnauthorizedException('Authenticated user not found');
+    }
+
     return this.wikiService.restoreArticleVersionForAdmin(
       id,
       versionId,
@@ -127,13 +189,27 @@ export class AdminWikiController {
   async deleteArticleVersion(
     @Param('id') id: string,
     @Param('versionId') versionId: string,
+    @Req() req: AuthenticatedRequest,
   ): Promise<void> {
-    await this.wikiService.adminDeleteArticleVersion(id, versionId);
+    const userId = req.user?.userId;
+    if (!userId) {
+      throw new UnauthorizedException('Authenticated user not found');
+    }
+
+    await this.wikiService.adminDeleteArticleVersion(userId, id, versionId);
   }
 
   @Get('articles/:id/media')
-  async listArticleMedia(@Param('id') id: string): Promise<WikiMediaItemDto[]> {
-    return this.wikiService.adminListArticleMedia(id);
+  async listArticleMedia(
+    @Param('id') id: string,
+    @Req() req: AuthenticatedRequest,
+  ): Promise<WikiMediaItemDto[]> {
+    const userId = req.user?.userId;
+    if (!userId) {
+      throw new UnauthorizedException('Authenticated user not found');
+    }
+
+    return this.wikiService.adminListArticleMedia(userId, id);
   }
 
   @Post('articles/:id/media')
@@ -142,8 +218,14 @@ export class AdminWikiController {
   async uploadArticleMedia(
     @Param('id') id: string,
     @UploadedFile() file: WikiUploadedFile | undefined,
+    @Req() req: AuthenticatedRequest,
   ): Promise<WikiMediaItemDto> {
-    return this.wikiService.adminUploadArticleMedia(id, file);
+    const userId = req.user?.userId;
+    if (!userId) {
+      throw new UnauthorizedException('Authenticated user not found');
+    }
+
+    return this.wikiService.adminUploadArticleMedia(userId, id, file);
   }
 
   @Delete('articles/:id/media/:filename')
@@ -151,7 +233,13 @@ export class AdminWikiController {
   async deleteArticleMedia(
     @Param('id') id: string,
     @Param('filename') filename: string,
+    @Req() req: AuthenticatedRequest,
   ): Promise<void> {
-    await this.wikiService.adminDeleteArticleMedia(id, filename);
+    const userId = req.user?.userId;
+    if (!userId) {
+      throw new UnauthorizedException('Authenticated user not found');
+    }
+
+    await this.wikiService.adminDeleteArticleMedia(userId, id, filename);
   }
 }

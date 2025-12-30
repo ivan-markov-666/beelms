@@ -1,9 +1,16 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import { AdminUserSummaryDto } from './dto/admin-user-summary.dto';
 import { AdminUsersStatsDto } from './dto/admin-users-stats.dto';
+import { USER_ROLES, type UserRole } from './user-role';
+import type { AdminUpdateUserDto } from './dto/admin-update-user.dto';
 
 @Injectable()
 export class AdminUsersService {
@@ -27,7 +34,7 @@ export class AdminUsersService {
     pageSize?: number,
     q?: string,
     status?: 'active' | 'deactivated',
-    role?: 'user' | 'admin',
+    role?: UserRole,
   ): Promise<AdminUserSummaryDto[]> {
     const safePage = page && page > 0 ? page : 1;
     const safePageSize = pageSize && pageSize > 0 ? pageSize : 20;
@@ -64,7 +71,7 @@ export class AdminUsersService {
       }
     }
 
-    if (role === 'admin' || role === 'user') {
+    if (role && USER_ROLES.includes(role)) {
       if (hasConditions) {
         qb.andWhere('user.role = :role', { role });
       } else {
@@ -91,17 +98,39 @@ export class AdminUsersService {
     };
   }
 
-  async updateUserActive(
+  async updateUser(
     id: string,
-    active: boolean,
+    dto: AdminUpdateUserDto,
+    actorUserId?: string,
   ): Promise<AdminUserSummaryDto> {
+    if (dto.active === undefined && dto.role === undefined) {
+      throw new BadRequestException('No changes provided');
+    }
+
     const user = await this.usersRepo.findOne({ where: { id } });
 
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
-    user.active = active;
+    if (dto.role !== undefined) {
+      const nextRole = dto.role;
+
+      if (!USER_ROLES.includes(nextRole)) {
+        throw new BadRequestException('Invalid role');
+      }
+
+      if (actorUserId && actorUserId === user.id && nextRole !== 'admin') {
+        throw new ForbiddenException('Cannot change own role');
+      }
+
+      user.role = nextRole;
+    }
+
+    if (dto.active !== undefined) {
+      user.active = dto.active;
+    }
+
     const saved = await this.usersRepo.save(user);
 
     return this.toSummary(saved);

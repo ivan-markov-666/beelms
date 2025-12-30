@@ -12,10 +12,20 @@ const API_BASE_URL = getApiBaseUrl();
 
 const PAGE_SIZE = 20;
 
+type UserRole = "user" | "admin" | "monitoring" | "teacher" | "author";
+
+const USER_ROLES: readonly UserRole[] = [
+  "user",
+  "admin",
+  "monitoring",
+  "teacher",
+  "author",
+];
+
 type AdminUser = {
   id: string;
   email: string;
-  role: string;
+  role: UserRole;
   active: boolean;
   createdAt: string;
 };
@@ -74,6 +84,8 @@ export default function AdminUsersPage() {
   const [roleFilter, setRoleFilter] = useState("");
   const [toggleError, setToggleError] = useState<string | null>(null);
   const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [roleUpdateError, setRoleUpdateError] = useState<string | null>(null);
+  const [roleUpdatingId, setRoleUpdatingId] = useState<string | null>(null);
   const [stats, setStats] = useState<AdminUsersStats | null>(null);
   const [statsError, setStatsError] = useState<string | null>(null);
   const [statsLoading, setStatsLoading] = useState(false);
@@ -89,7 +101,7 @@ export default function AdminUsersPage() {
       setStatusFilter(statusParam);
     }
 
-    if (roleParam === "user" || roleParam === "admin") {
+    if (USER_ROLES.includes(roleParam as UserRole)) {
       setRoleFilter(roleParam);
     }
 
@@ -108,6 +120,7 @@ export default function AdminUsersPage() {
       setLoading(true);
       setError(null);
       setToggleError(null);
+      setRoleUpdateError(null);
 
       const query = options?.query;
       const page = options?.page && options.page > 0 ? options.page : 1;
@@ -213,6 +226,53 @@ export default function AdminUsersPage() {
     const trimmed = search.trim();
     setCurrentPage(1);
     setEffectiveSearch(trimmed);
+  };
+
+  const handleChangeRole = async (userId: string, nextRole: UserRole) => {
+    if (typeof window === "undefined") return;
+
+    setRoleUpdateError(null);
+    setRoleUpdatingId(userId);
+
+    const previousUsers = users;
+
+    const optimisticUsers = users.map((user) =>
+      user.id === userId ? { ...user, role: nextRole } : user,
+    );
+    setUsers(optimisticUsers);
+
+    try {
+      const token = getAccessToken();
+      if (!token) {
+        throw new Error("missing-token");
+      }
+
+      const res = await fetch(`${API_BASE_URL}/admin/users/${userId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ role: nextRole }),
+      });
+
+      if (!res.ok) {
+        throw new Error(`failed-${res.status}`);
+      }
+
+      const updated = (await res.json()) as AdminUser;
+
+      setUsers((current) =>
+        current.map((user) =>
+          user.id === userId ? { ...user, ...updated } : user,
+        ),
+      );
+    } catch {
+      setUsers(previousUsers);
+      setRoleUpdateError(t(lang, "common", "adminUsersRoleUpdateError"));
+    } finally {
+      setRoleUpdatingId(null);
+    }
   };
 
   const handleToggleActive = async (userId: string, currentActive: boolean) => {
@@ -546,6 +606,9 @@ export default function AdminUsersPage() {
                 <option value="">All Roles</option>
                 <option value="user">User</option>
                 <option value="admin">Admin</option>
+                <option value="monitoring">Monitoring</option>
+                <option value="teacher">Teacher</option>
+                <option value="author">Author</option>
               </select>
             </div>
           </div>
@@ -576,6 +639,11 @@ export default function AdminUsersPage() {
                 {toggleError}
               </p>
             )}
+            {roleUpdateError && (
+              <p className="mb-3 text-sm text-red-600" role="alert">
+                {roleUpdateError}
+              </p>
+            )}
             <div className="overflow-x-auto">
               <table className="min-w-full table-fixed border-collapse text-sm">
                 <thead>
@@ -600,6 +668,7 @@ export default function AdminUsersPage() {
                 <tbody>
                   {users.map((user) => {
                     const isTogglingThis = togglingId === user.id;
+                    const isUpdatingRoleThis = roleUpdatingId === user.id;
 
                     return (
                       <tr
@@ -647,18 +716,24 @@ export default function AdminUsersPage() {
                           {formatDateTime(user.createdAt)}
                         </td>
                         <td className="px-3 py-2 align-middle">
-                          <span
-                            className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${
-                              {
-                                admin:
-                                  "border-purple-200 bg-purple-50 text-purple-700",
-                                user: "border-blue-200 bg-blue-50 text-blue-700",
-                              }[user.role] ??
-                              "border-zinc-200 bg-zinc-50 text-zinc-700"
-                            }`}
+                          <select
+                            aria-label={`Role for ${user.email}`}
+                            value={user.role}
+                            disabled={isUpdatingRoleThis}
+                            onChange={(event) =>
+                              void handleChangeRole(
+                                user.id,
+                                event.target.value as UserRole,
+                              )
+                            }
+                            className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-70"
                           >
-                            {user.role}
-                          </span>
+                            {USER_ROLES.map((role) => (
+                              <option key={role} value={role}>
+                                {role}
+                              </option>
+                            ))}
+                          </select>
                         </td>
                         <td className="px-3 py-2 align-middle text-right text-sm">
                           <button
