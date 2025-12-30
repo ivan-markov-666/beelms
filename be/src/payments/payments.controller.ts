@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import type { Request } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { FeatureEnabledGuard } from '../settings/feature-enabled.guard';
 import { PaymentsService } from './payments.service';
 import { VerifyPurchaseDto } from './dto/verify-purchase.dto';
 
@@ -26,7 +27,7 @@ export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
   @Post(':courseId/checkout')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(FeatureEnabledGuard('paidCourses'), JwtAuthGuard)
   async createCheckout(
     @Param('courseId', new ParseUUIDPipe({ version: '4' })) courseId: string,
     @Req() req: AuthenticatedRequest,
@@ -44,7 +45,7 @@ export class PaymentsController {
   }
 
   @Post(':courseId/purchase/verify')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(FeatureEnabledGuard('paidCourses'), JwtAuthGuard)
   @HttpCode(204)
   async verifyPurchase(
     @Param('courseId', new ParseUUIDPipe({ version: '4' })) courseId: string,

@@ -20,6 +20,7 @@ import { AccountExportRequestDto } from './dto/account-export-request.dto';
 import { UserExportDto } from './dto/user-export.dto';
 import { RateLimit } from '../security/rate-limit/rate-limit.decorator';
 import { CaptchaService } from '../security/captcha/captcha.service';
+import { FeatureEnabledGuard } from '../settings/feature-enabled.guard';
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -78,7 +79,7 @@ export class AccountController {
     );
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(FeatureEnabledGuard('gdprLegal'), JwtAuthGuard)
   @Delete('me')
   @RateLimit({ limit: 3, windowSeconds: 86400, key: 'userId' })
   @HttpCode(204)
@@ -90,7 +91,7 @@ export class AccountController {
     await this.accountService.deleteAccount(req.user.userId);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(FeatureEnabledGuard('gdprLegal'), JwtAuthGuard)
   @Post('me/export')
   @RateLimit({ limit: 3, windowSeconds: 86400, key: 'userId' })
   @HttpCode(200)

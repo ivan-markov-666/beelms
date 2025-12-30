@@ -1,6 +1,6 @@
 # STORY-SETTINGS-2: Feature Toggles Admin (Modules + Infra + Languages)
 
-_BMAD Story Spec | EPIC: EPIC-CORE-INSTANCE-SETTINGS | Status: 🟡 Planned_
+_BMAD Story Spec | EPIC: EPIC-CORE-INSTANCE-SETTINGS | Status: ✅ Implemented_
 
 ---
 
@@ -36,28 +36,28 @@ _BMAD Story Spec | EPIC: EPIC-CORE-INSTANCE-SETTINGS | Status: 🟡 Planned_
 
 | # | Criterion | Status |
 |---|-----------|--------|
-| AC-1 | `GET /api/admin/settings` връща текущите settings (features + languages + branding) | ⬜ |
-| AC-2 | `PATCH /api/admin/settings` обновява settings (partial update) | ⬜ |
-| AC-3 | Само `admin` има достъп (JwtAuthGuard + AdminGuard) | ⬜ |
-| AC-4 | `languages.supported` има минимум 1 език; `languages.default` е в supported | ⬜ |
+| AC-1 | `GET /api/admin/settings` връща текущите settings (features + languages + branding) | ✅ |
+| AC-2 | `PATCH /api/admin/settings` обновява settings (partial update) | ✅ |
+| AC-3 | Само `admin` има достъп (JwtAuthGuard + AdminGuard) | ✅ |
+| AC-4 | `languages.supported` има минимум 1 език; `languages.default` е в supported | ✅ |
 
 ### 3.2 Backend: Runtime enforcement
 
 | # | Criterion | Status |
 |---|-----------|--------|
-| AC-5 | Ако `features.auth=false`, auth endpoints (register/login/forgot/reset/verify) са disabled (връщат 404 или 403, консистентно) | ⬜ |
-| AC-6 | Ако `features.wikiPublic=false`, public wiki endpoints са disabled (list/article) | ⬜ |
-| AC-7 | Ако `features.courses=false`, публичният каталог + enroll + my courses са disabled | ⬜ |
-| AC-8 | Ако `features.paidCourses=false`, paid course unlock flow е disabled | ⬜ |
-| AC-9 | Ако `features.gdprLegal=false`, GDPR endpoints (export/delete) са disabled и FE скрива legal pages/navigation | ⬜ |
+| AC-5 | Ако `features.auth=false`, auth endpoints (register/login/forgot/reset/verify) са disabled (връщат 404 или 403, консистентно) | ✅ |
+| AC-6 | Ако `features.wikiPublic=false`, public wiki endpoints са disabled (list/article) | ✅ |
+| AC-7 | Ако `features.courses=false`, публичният каталог + enroll + my courses са disabled | ✅ |
+| AC-8 | Ако `features.paidCourses=false`, paid course unlock flow е disabled | ✅ |
+| AC-9 | Ако `features.gdprLegal=false`, GDPR endpoints (export/delete) са disabled и FE скрива legal pages/navigation | ✅ |
 
 ### 3.3 Frontend: Admin UI
 
 | # | Criterion | Status |
 |---|-----------|--------|
-| AC-10 | `/admin/settings` страница показва toggle-и + languages config и позволява save | ⬜ |
-| AC-11 | UI има confirmation за risky toggles (напр. auth off) | ⬜ |
-| AC-12 | Public UI (navbar/footer) се адаптира спрямо `GET /api/public/settings` | ⬜ |
+| AC-10 | `/admin/settings` страница показва toggle-и + languages config и позволява save | ✅ |
+| AC-11 | UI има confirmation за risky toggles (напр. auth off) | ✅ |
+| AC-12 | Public UI (navbar/footer) се адаптира спрямо `GET /api/public/settings` | ✅ |
 
 ---
 

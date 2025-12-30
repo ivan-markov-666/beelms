@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
@@ -25,6 +25,7 @@ import { InMemoryLoginAttemptStore } from '../security/account-protection/login-
 import { LoginProtectionInterceptor } from '../security/account-protection/login-protection.interceptor';
 import { OptionalJwtAuthGuard } from './optional-jwt-auth.guard';
 import { CaptchaService } from '../security/captcha/captcha.service';
+import { SettingsModule } from '../settings/settings.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { CaptchaService } from '../security/captcha/captcha.service';
         expiresIn: process.env.JWT_EXPIRES_IN ?? '900s',
       },
     }),
+    forwardRef(() => SettingsModule),
   ],
   providers: [
     AuthService,

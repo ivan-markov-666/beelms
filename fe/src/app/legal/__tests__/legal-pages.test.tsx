@@ -3,6 +3,28 @@ import PrivacyPage from "../privacy/page";
 import TermsPage from "../terms/page";
 
 describe("Legal pages", () => {
+  const mockLegalPage = {
+    slug: "terms",
+    title: "Legal page",
+    contentMarkdown: "# Heading\n\nSome content",
+    updatedAt: new Date().toISOString(),
+  };
+
+  beforeEach(() => {
+    const globalWithFetch = global as typeof global & {
+      fetch: jest.Mock;
+    };
+
+    globalWithFetch.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => mockLegalPage,
+    } as Response);
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
   it("renders Privacy/GDPR page title", async () => {
     const ui = await PrivacyPage({ searchParams: { lang: "bg" } });
     render(ui);

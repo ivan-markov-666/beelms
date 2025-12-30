@@ -10,6 +10,7 @@ import { WikiController } from './wiki.controller';
 import { AuthModule } from '../auth/auth.module';
 import { AdminWikiController } from './admin-wiki.controller';
 import { User } from '../auth/user.entity';
+import { SettingsModule } from '../settings/settings.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { User } from '../auth/user.entity';
       User,
     ]),
     AuthModule,
+    SettingsModule,
   ],
   providers: [WikiService],
   controllers: [WikiController, AdminWikiController],

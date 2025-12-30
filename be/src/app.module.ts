@@ -32,6 +32,10 @@ import { Task } from './tasks/task.entity';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { AnalyticsSession } from './analytics/analytics-session.entity';
 import { AnalyticsPageViewDaily } from './analytics/analytics-page-view-daily.entity';
+import { SettingsModule } from './settings/settings.module';
+import { InstanceConfig } from './settings/instance-config.entity';
+import { LegalModule } from './legal/legal.module';
+import { LegalPage } from './legal/legal-page.entity';
 
 @Module({
   imports: [
@@ -63,6 +67,8 @@ import { AnalyticsPageViewDaily } from './analytics/analytics-page-view-daily.en
         QuizOption,
         QuizAttempt,
         Task,
+        InstanceConfig,
+        LegalPage,
       ],
       synchronize: false,
     }),
@@ -73,6 +79,8 @@ import { AnalyticsPageViewDaily } from './analytics/analytics-page-view-daily.en
     PaymentsModule,
     AssessmentsModule,
     TasksModule,
+    SettingsModule,
+    LegalModule,
   ],
   controllers: [AppController],
   providers: [

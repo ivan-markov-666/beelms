@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import type { Request } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { FeatureEnabledGuard } from '../settings/feature-enabled.guard';
 import { CoursesService } from './courses.service';
 import { MyCourseListItemDto } from './dto/my-course-list-item.dto';
 
@@ -18,7 +19,7 @@ interface AuthenticatedRequest extends Request {
 }
 
 @Controller('users/me/courses')
-@UseGuards(JwtAuthGuard)
+@UseGuards(FeatureEnabledGuard('courses'), JwtAuthGuard)
 export class MyCoursesController {
   constructor(private readonly coursesService: CoursesService) {}
 

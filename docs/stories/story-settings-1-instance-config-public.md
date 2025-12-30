@@ -1,6 +1,6 @@
 # STORY-SETTINGS-1: Instance Config (Branding + Public Settings Read)
 
-_BMAD Story Spec | EPIC: EPIC-CORE-INSTANCE-SETTINGS | Status: 🟡 Planned_
+_BMAD Story Spec | EPIC: EPIC-CORE-INSTANCE-SETTINGS | Status: ✅ Implemented_
 
 ---
 
@@ -33,23 +33,23 @@ _BMAD Story Spec | EPIC: EPIC-CORE-INSTANCE-SETTINGS | Status: 🟡 Planned_
 
 | # | Criterion | Status |
 |---|-----------|--------|
-| AC-1 | Има таблица/Entity `instance_config` (единичен ред) с branding + settings JSON | ⬜ |
-| AC-2 | Има migration за `instance_config` | ⬜ |
-| AC-3 | При празна база, `instance_config` се инициализира (seed или on-demand create) | ⬜ |
+| AC-1 | Има таблица/Entity `instance_config` (единичен ред) с branding + settings JSON | ✅ |
+| AC-2 | Има migration за `instance_config` | ✅ |
+| AC-3 | При празна база, `instance_config` се инициализира (seed или on-demand create) | ✅ |
 
 ### 3.2 Backend: Public API
 
 | # | Criterion | Status |
 |---|-----------|--------|
-| AC-4 | `GET /api/public/settings` връща публични настройки (без чувствителни данни) | ⬜ |
-| AC-5 | Response съдържа: `branding` + `features` + `languages` | ⬜ |
-| AC-6 | Endpoint е cacheable (MVP: in-memory cache 30–60s или HTTP cache headers) | ⬜ |
+| AC-4 | `GET /api/public/settings` връща публични настройки (без чувствителни данни) | ✅ |
+| AC-5 | Response съдържа: `branding` + `features` + `languages` | ✅ |
+| AC-6 | Endpoint е cacheable (MVP: in-memory cache 30–60s или HTTP cache headers) | ✅ |
 
 ### 3.3 Frontend (minimal)
 
 | # | Criterion | Status |
 |---|-----------|--------|
-| AC-7 | FE има helper `getPublicSettings()` и може да скрива меню/CTA за деактивирани модули | ⬜ |
+| AC-7 | FE има helper `getPublicSettings()` и може да скрива меню/CTA за деактивирани модули | ✅ |
 
 ---
 

@@ -9,6 +9,7 @@ import { PaymentsController } from './payments.controller';
 import { AdminPaymentsController } from './admin-payments.controller';
 import { PaymentsWebhookController } from './payments-webhook.controller';
 import { PaymentsService } from './payments.service';
+import { SettingsModule } from '../settings/settings.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { PaymentsService } from './payments.service';
       StripeWebhookEvent,
     ]),
     AuthModule,
+    SettingsModule,
   ],
   controllers: [
     PaymentsController,

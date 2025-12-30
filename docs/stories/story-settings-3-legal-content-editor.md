@@ -1,6 +1,6 @@
 # STORY-SETTINGS-3: Admin Legal Content Editor (Terms/Privacy)
 
-_BMAD Story Spec | EPIC: EPIC-CORE-INSTANCE-SETTINGS | Status: 🟡 Planned_
+_BMAD Story Spec | EPIC: EPIC-CORE-INSTANCE-SETTINGS | Status: ✅ Implemented_
 
 ---
 
@@ -29,33 +29,33 @@ MVP scope:
 
 | # | Criterion | Status |
 |---|-----------|--------|
-| AC-1 | Има таблица/Entity за legal pages (напр. `legal_pages`) със `slug` + `title` + `contentMarkdown` + `updatedAt` | ⬜ |
-| AC-2 | Има migration за legal pages | ⬜ |
-| AC-3 | Има seed за default Terms/Privacy (placeholder content) | ⬜ |
+| AC-1 | Има таблица/Entity за legal pages (напр. `legal_pages`) със `slug` + `title` + `contentMarkdown` + `updatedAt` | ✅ |
+| AC-2 | Има migration за legal pages | ✅ |
+| AC-3 | Има seed за default Terms/Privacy (placeholder content) | ✅ |
 
 ### 3.2 Backend: Public legal endpoints
 
 | # | Criterion | Status |
 |---|-----------|--------|
-| AC-4 | `GET /api/legal/terms` връща текущото Terms съдържание | ⬜ |
-| AC-5 | `GET /api/legal/privacy` връща текущото Privacy съдържание | ⬜ |
-| AC-6 | Ако `features.gdprLegal=false`, legal endpoints са disabled (consistency с STORY-SETTINGS-2) | ⬜ |
+| AC-4 | `GET /api/legal/terms` връща текущото Terms съдържание | ✅ |
+| AC-5 | `GET /api/legal/privacy` връща текущото Privacy съдържание | ✅ |
+| AC-6 | Ако `features.gdprLegal=false`, legal endpoints са disabled (consistency с STORY-SETTINGS-2) | ✅ |
 
 ### 3.3 Backend: Admin endpoints
 
 | # | Criterion | Status |
 |---|-----------|--------|
-| AC-7 | `GET /api/admin/legal/pages` връща списък (terms/privacy) | ⬜ |
-| AC-8 | `PUT /api/admin/legal/pages/:slug` обновява съдържание (markdown) | ⬜ |
-| AC-9 | Само admin има достъп | ⬜ |
+| AC-7 | `GET /api/admin/legal/pages` връща списък (terms/privacy) | ✅ |
+| AC-8 | `PUT /api/admin/legal/pages/:slug` обновява съдържание (markdown) | ✅ |
+| AC-9 | Само admin има достъп | ✅ |
 
 ### 3.4 Frontend
 
 | # | Criterion | Status |
 |---|-----------|--------|
-| AC-10 | Публичните `/legal/terms` и `/legal/privacy` страници рендерират съдържанието от API (SSR/ISR) | ⬜ |
-| AC-11 | Admin UI `/admin/legal` позволява edit + preview на markdown | ⬜ |
-| AC-12 | Има success/error states; при save няма refresh issues | ⬜ |
+| AC-10 | Публичните `/legal/terms` и `/legal/privacy` страници рендерират съдържанието от API (SSR/ISR) | ✅ |
+| AC-11 | Admin UI `/admin/legal` позволява edit + preview на markdown | ✅ |
+| AC-12 | Има success/error states; при save няма refresh issues | ✅ |
 
 ---
 

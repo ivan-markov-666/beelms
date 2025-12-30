@@ -8,6 +8,10 @@ import { t } from "../../i18n/t";
 import { LanguageSwitcher } from "../wiki/_components/language-switcher";
 import { clearAccessToken, getAccessToken } from "../auth-token";
 import { getApiBaseUrl } from "../api-url";
+import {
+  getPublicSettings,
+  type PublicSettings,
+} from "../_data/public-settings";
 
 const API_BASE_URL = getApiBaseUrl();
 
@@ -16,6 +20,9 @@ export function HeaderNav() {
   const pathname = usePathname();
   const [hasToken, setHasToken] = useState<boolean | null>(null);
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const [publicSettings, setPublicSettings] = useState<PublicSettings | null>(
+    null,
+  );
 
   const handleLogout = () => {
     if (typeof window !== "undefined") {
@@ -93,22 +100,54 @@ export function HeaderNav() {
     };
   }, [pathname]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    let cancelled = false;
+
+    const initPublicSettings = async () => {
+      try {
+        const s = await getPublicSettings();
+        if (cancelled) return;
+        setPublicSettings(s);
+      } catch {
+        if (cancelled) return;
+        setPublicSettings(null);
+      }
+    };
+
+    void initPublicSettings();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const features = publicSettings?.features;
+  const showWiki = features?.wikiPublic !== false;
+  const showCourses = features?.courses !== false;
+  const showAuth = features?.auth !== false;
+
   return (
     <header className="bg-white border-b border-gray-200">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4">
         <div className="flex items-center">
           <Link href="/" className="text-2xl font-bold text-green-600">
-            BeeLMS
+            {publicSettings?.branding?.appName ?? "BeeLMS"}
           </Link>
         </div>
 
         <nav className="hidden items-center space-x-6 text-sm text-gray-700 md:flex">
-          <Link href="/wiki" className="hover:text-green-600">
-            {t(lang, "nav", "wiki")}
-          </Link>
-          <Link href="/courses" className="hover:text-green-600">
-            {t(lang, "nav", "courses")}
-          </Link>
+          {showWiki && (
+            <Link href="/wiki" className="hover:text-green-600">
+              {t(lang, "nav", "wiki")}
+            </Link>
+          )}
+          {showCourses && (
+            <Link href="/courses" className="hover:text-green-600">
+              {t(lang, "nav", "courses")}
+            </Link>
+          )}
           {hasToken === true && (
             <Link href="/my-courses" className="hover:text-green-600">
               {t(lang, "nav", "myCourses")}
@@ -122,7 +161,7 @@ export function HeaderNav() {
         </nav>
 
         <div className="flex items-center gap-4 text-sm text-gray-700">
-          {hasToken === false && (
+          {hasToken === false && showAuth && (
             <>
               <Link href="/auth/login" className="hover:text-green-600">
                 {t(lang, "nav", "login")}

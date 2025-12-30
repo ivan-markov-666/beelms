@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common';
 import type { Request } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { FeatureEnabledGuard } from '../settings/feature-enabled.guard';
 import { PaymentsService } from './payments.service';
 
 interface AuthenticatedRequest extends Request {
@@ -46,7 +47,7 @@ export class PaymentsWebhookController {
   }
 
   @Get('courses/:courseId/purchase/status')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(FeatureEnabledGuard('paidCourses'), JwtAuthGuard)
   async getPurchaseStatus(
     @Param('courseId', new ParseUUIDPipe({ version: '4' })) courseId: string,
     @Req() req: AuthenticatedRequest,
