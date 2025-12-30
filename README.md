@@ -9,6 +9,12 @@
 
 ---
 
+## 0. Статус и текущ фокус
+
+- 2025-12-30: Завършен **Deep Audit Pass #7** – BE ↔ OpenAPI, backlog ↔ story specs и FE routes са синхронизирани. `STORY-TASKS-1` е маркиран като ✅ Implemented. Следващ фокус: автоматизиране на OpenAPI синка (STORY-DOCS-1).
+
+---
+
 ## 1. Структура на проекта (накратко)
 
 - `fe/` – Next.js frontend
@@ -28,6 +34,9 @@ npm run be:migration:run
 npm run be:migration:check
 npm run be:migration:show
 npm run be:migration:revert
+
+# OpenAPI
+npm run docs:openapi:lint
 
 # Seed (dev, без build)
 npm run be:seed:dev
