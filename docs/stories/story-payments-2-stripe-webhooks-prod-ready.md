@@ -1,6 +1,6 @@
 # STORY-PAYMENTS-2: Stripe Webhooks (Prod-ready)
 
-_BMAD Story Spec | EPIC: EPIC-COURSES-PAID | Status: 🟢 Done_
+_BMAD Story Spec | EPIC: EPIC-COURSES-PAID | Status: 🟢 Implemented_
 
 ---
 

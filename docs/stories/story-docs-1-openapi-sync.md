@@ -32,7 +32,7 @@ _BMAD Story Spec | EPIC: EPIC-CORE-API-CONTRACT | Status: 🟡 In Progress_
 | AC-1 | OpenAPI включва `GET /api/health` | ✅ |
 | AC-2 | OpenAPI включва payments/admin-payments endpoints, които са част от MVP scope (ако са shipped) | ✅ |
 | AC-3 | OpenAPI включва analytics endpoints (ако са shipped) | ✅ |
-| AC-4 | OpenAPI включва admin settings/legal endpoints (след STORY-SETTINGS-2/3) | ⬜ |
+| AC-4 | OpenAPI включва admin settings/legal endpoints (след STORY-SETTINGS-2/3) | ✅ |
 | AC-5 | OpenAPI включва course categories endpoints (след STORY-COURSES-10) | ⬜ |
 
 ### 3.2 Contract quality

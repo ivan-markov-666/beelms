@@ -1,6 +1,6 @@
 # STORY-RBAC-1: Roles & Access Control (Admin/Monitoring/Teacher/Author)
 
-_BMAD Story Spec | EPIC: EPIC-CORE-RBAC | Status: 🟡 Planned_
+_BMAD Story Spec | EPIC: EPIC-CORE-RBAC | Status: ✅ Implemented_
 
 ---
 

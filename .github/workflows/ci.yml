@@ -1,6 +1,16 @@
-name: CI (disabled)
+name: CI
 
 on:
+  pull_request:
+    paths:
+      - docs/architecture/openapi.yaml
+      - .github/workflows/ci.yml
+  push:
+    branches:
+      - main
+    paths:
+      - docs/architecture/openapi.yaml
+      - .github/workflows/ci.yml
   workflow_dispatch:
 
 jobs:
@@ -19,6 +29,7 @@ jobs:
         run: npx -y @redocly/cli@1.34.5 lint docs/architecture/openapi.yaml
 
   backend-tests:
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -61,6 +72,7 @@ jobs:
           NODE_ENV: test
 
   frontend-tests:
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -80,6 +92,7 @@ jobs:
         working-directory: fe
 
   cli-smoke:
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

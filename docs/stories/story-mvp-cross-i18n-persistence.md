@@ -1,6 +1,6 @@
 # STORY-MVP-CROSS-I18N-PERSISTENCE: Persist language (cookie) + SSR lang
 
-_BMAD Story Spec | EPIC: EPIC-CROSS-I18N | Status: ✅ Done_
+_BMAD Story Spec | EPIC: EPIC-CROSS-I18N | Status: ✅ Implemented_
 
 ---
 

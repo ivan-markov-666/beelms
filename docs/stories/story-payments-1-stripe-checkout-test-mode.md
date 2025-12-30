@@ -1,6 +1,6 @@
 # STORY-PAYMENTS-1: Stripe Checkout (Test Mode) for Paid Courses
 
-_BMAD Story Spec | EPIC: EPIC-COURSES-PAID | Status: 🟢 Done_
+_BMAD Story Spec | EPIC: EPIC-COURSES-PAID | Status: 🟢 Implemented_
 
 ---
 
