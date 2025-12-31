@@ -4,6 +4,7 @@ info:
   version: 0.1.0
   license:
     name: UNLICENSED
+    url: https://example.com/unlicense
   description: |
     OpenAPI спецификация за основните MVP услуги на beelms.
 
@@ -249,25 +250,6 @@ components:
           type: string
           format: date-time
 
-    WikiArticleInput:
-      type: object
-      properties:
-        slug:
-          type: string
-          description: Уникален идентификатор/част от URL-а за статията
-        language:
-          type: string
-          example: bg
-        title:
-          type: string
-        content:
-          type: string
-        status:
-          type: string
-          description: Статус на статията при създаване/редакция (draft, active, inactive)
-          enum: [draft, active, inactive]
-      required: [language, title, content]
-
     WikiRelatedArticle:
       type: object
       properties:
@@ -312,28 +294,6 @@ components:
           type: string
           nullable: true
       required: [userId]
-
-    WikiArticleVersion:
-      type: object
-      properties:
-        id:
-          type: string
-        articleId:
-          type: string
-        version:
-          type: integer
-        language:
-          type: string
-        title:
-          type: string
-        content:
-          type: string
-        createdAt:
-          type: string
-          format: date-time
-        createdBy:
-          type: string
-          description: Идентификатор на потребителя, направил промяната
 
     AdminWikiArticleListItem:
       type: object
@@ -761,6 +721,42 @@ components:
         isPaid:
           type: boolean
           description: Дали курсът е платен (изисква плащане преди enrollment)
+        currency:
+          type: string
+          nullable: true
+        priceCents:
+          type: integer
+          nullable: true
+        categoryId:
+          type: string
+          nullable: true
+        category:
+          oneOf:
+            - $ref: '#/components/schemas/CourseCategorySummary'
+            - type: object
+              nullable: true
+
+    CourseCategorySummary:
+      type: object
+      properties:
+        slug:
+          type: string
+        title:
+          type: string
+
+    CourseCategory:
+      type: object
+      properties:
+        id:
+          type: string
+        slug:
+          type: string
+        title:
+          type: string
+        order:
+          type: integer
+        active:
+          type: boolean
 
     CourseModuleItem:
       type: object
@@ -811,16 +807,6 @@ components:
               type: string
               format: date-time
               nullable: true
-
-    Task:
-      type: object
-      properties:
-        id:
-          type: string
-        title:
-          type: string
-        description:
-          type: string
 
     CurriculumProgressItem:
       type: object
@@ -1203,6 +1189,7 @@ paths:
 
   /auth/register:
     post:
+      operationId: registerUser
       tags: [Auth]
       summary: Регистрация на нов потребител
       security: []
@@ -1235,6 +1222,7 @@ paths:
 
   /auth/login:
     post:
+      operationId: loginUser
       tags: [Auth]
       summary: Вход на потребител
       security: []
@@ -1267,6 +1255,7 @@ paths:
 
   /auth/forgot-password:
     post:
+      operationId: forgotPassword
       tags: [Auth]
       summary: Заявка за смяна на забравена парола
       security: []
@@ -1289,6 +1278,7 @@ paths:
 
   /auth/reset-password:
     post:
+      operationId: resetPassword
       tags: [Auth]
       summary: Смяна на парола чрез токен
       security: []
@@ -1312,6 +1302,7 @@ paths:
 
   /auth/verify-email:
     post:
+      operationId: verifyEmail
       tags: [Auth]
       summary: Потвърждение на имейл чрез verification токен
       security: []
@@ -1333,6 +1324,7 @@ paths:
 
   /users/me:
     get:
+      operationId: getCurrentUserProfile
       tags: [Account]
       summary: Връща профилна информация за текущия потребител
       security:
@@ -1347,6 +1339,7 @@ paths:
         "401":
           description: Неоторизиран достъп
     patch:
+      operationId: updateCurrentUserProfile
       tags: [Account]
       summary: Обновяване на профилна информация на текущия потребител
       description: |
@@ -1376,6 +1369,7 @@ paths:
         "401":
           description: Неоторизиран достъп
     delete:
+      operationId: deleteCurrentUserAccount
       tags: [Account]
       summary: Деактивиране/изтриване на акаунт на текущия потребител
       security:
@@ -1388,6 +1382,7 @@ paths:
 
   /health:
     get:
+      operationId: healthCheck
       tags: [System]
       summary: Health check
       security: []
@@ -1402,9 +1397,14 @@ paths:
                   status:
                     type: string
                     enum: [ok]
+        "400":
+          description: Bad request
+        "500":
+          description: Service unavailable
 
   /public/settings:
     get:
+      operationId: getPublicSettings
       tags: [Settings]
       summary: Public instance settings (branding + feature toggles + languages)
       description: |
@@ -1423,6 +1423,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PublicSettings'
+        "400":
+          description: Bad request
         "500":
           description: Server error
           content:
@@ -1432,6 +1434,7 @@ paths:
 
   /admin/legal/pages:
     get:
+      operationId: listAdminLegalPages
       tags: [Admin, Legal]
       summary: List legal pages (terms/privacy) (admin)
       security:
@@ -1452,6 +1455,7 @@ paths:
 
   /admin/legal/pages/{slug}:
     put:
+      operationId: updateAdminLegalPage
       tags: [Admin, Legal]
       summary: Update legal page content (admin)
       security:
@@ -1495,6 +1499,7 @@ paths:
 
   /legal/terms:
     get:
+      operationId: getLegalTerms
       tags: [Legal]
       summary: Public Terms and Conditions (markdown)
       description: |
@@ -1517,6 +1522,7 @@ paths:
 
   /legal/privacy:
     get:
+      operationId: getLegalPrivacy
       tags: [Legal]
       summary: Public Privacy / GDPR (markdown)
       description: |
@@ -1539,6 +1545,7 @@ paths:
 
   /users/me/export:
     post:
+      operationId: exportCurrentUserData
       tags: [Account]
       summary: Заявка за експорт на лични данни (GDPR)
       description: |
@@ -1568,6 +1575,7 @@ paths:
 
   /users/me/change-password:
     post:
+      operationId: changeCurrentUserPassword
       tags: [Account]
       summary: Смяна на парола на текущия потребител
       security:
@@ -1594,6 +1602,7 @@ paths:
 
   /users/me/courses:
     get:
+      operationId: getCurrentUserCourses
       tags: [Courses]
       summary: Списък с курсове за текущия потребител (My Courses)
       security:
@@ -1616,9 +1625,17 @@ paths:
 
   /courses:
     get:
+      operationId: listCourses
       tags: [Courses]
       summary: Списък с курсове (catalog)
       security: []
+      parameters:
+        - in: query
+          name: category
+          required: false
+          schema:
+            type: string
+          description: Филтър по category slug
       responses:
         "200":
           description: Списък с курсове
@@ -1628,9 +1645,32 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/CourseSummary'
+        "400":
+          description: Невалидни параметри
+
+  /course-categories:
+    get:
+      operationId: listCourseCategories
+      tags: [Courses]
+      summary: Списък с категории за курсове (public)
+      security: []
+      responses:
+        "200":
+          description: Списък с активни категории
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CourseCategory'
+        "400":
+          description: Bad request
+        "500":
+          description: Server error
 
   /courses/{courseId}:
     get:
+      operationId: getCourse
       tags: [Courses]
       summary: Детайл на курс
       security: []
@@ -1652,6 +1692,7 @@ paths:
 
   /courses/{courseId}/enroll:
     post:
+      operationId: enrollInCourse
       tags: [Courses]
       summary: Записване (enroll) в курс
       security:
@@ -1678,6 +1719,7 @@ paths:
 
   /courses/{courseId}/checkout:
     post:
+      operationId: createCourseCheckout
       tags: [Payments]
       summary: Stripe Checkout (create session)
       security:
@@ -1702,6 +1744,7 @@ paths:
 
   /courses/{courseId}/purchase/verify:
     post:
+      operationId: verifyCoursePurchase
       tags: [Payments]
       summary: Verify Stripe Checkout session and record purchase
       security:
@@ -1730,6 +1773,7 @@ paths:
 
   /courses/{courseId}/curriculum/{itemId}/complete:
     post:
+      operationId: completeCourseCurriculumItem
       tags: [Courses]
       summary: Маркиране на curriculum item като изпълнен
       security:
@@ -1757,6 +1801,7 @@ paths:
 
   /courses/{courseId}/curriculum/progress:
     get:
+      operationId: getCourseCurriculumProgress
       tags: [Courses]
       summary: Прогрес по curriculum items за курс
       security:
@@ -1779,6 +1824,7 @@ paths:
 
   /courses/{courseId}/tasks/{taskId}:
     get:
+      operationId: getCourseTask
       tags: [Courses]
       summary: Детайл на task (в рамките на курс)
       security:
@@ -1810,6 +1856,7 @@ paths:
 
   /courses/{courseId}/wiki/{slug}:
     get:
+      operationId: getCourseWikiArticle
       tags: [Courses, Wiki]
       summary: Детайл на wiki статия в рамките на курс
       security:
@@ -1846,6 +1893,7 @@ paths:
 
   /courses/{courseId}/certificate:
     get:
+      operationId: getCourseCertificate
       tags: [Courses]
       summary: Certificate за завършен курс
       security:
@@ -1870,6 +1918,7 @@ paths:
 
   /courses/{courseId}/quizzes/{quizId}:
     get:
+      operationId: getCourseQuiz
       tags: [Assessments]
       summary: Зареждане на quiz
       security:
@@ -1899,6 +1948,7 @@ paths:
 
   /courses/{courseId}/quizzes/{quizId}/submit:
     post:
+      operationId: submitCourseQuiz
       tags: [Assessments]
       summary: Submit на quiz отговори и връщане на резултат
       security:
@@ -1936,6 +1986,7 @@ paths:
 
   /payments/webhook:
     post:
+      operationId: handlePaymentWebhook
       tags: [Payments]
       summary: Stripe webhook endpoint
       security: []
@@ -1962,9 +2013,12 @@ paths:
                 properties:
                   received:
                     type: boolean
+        "400":
+          description: Invalid webhook signature
 
   /payments/courses/{courseId}/purchase/status:
     get:
+      operationId: getCoursePurchaseStatus
       tags: [Payments]
       summary: Purchase status for current user and course
       security:
@@ -1987,6 +2041,7 @@ paths:
 
   /admin/settings:
     get:
+      operationId: getAdminSettings
       tags: [Admin]
       summary: Current instance settings (admin)
       security:
@@ -2007,6 +2062,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
     patch:
+      operationId: updateAdminSettings
       tags: [Admin]
       summary: Update instance settings (admin)
       description: Partial update (PATCH) for branding/features/languages.
@@ -2042,6 +2098,7 @@ paths:
 
   /admin/users:
     get:
+      operationId: listAdminUsers
       tags: [Admin]
       summary: Списък с потребители
       security:
@@ -2092,6 +2149,7 @@ paths:
 
   /admin/users/{id}:
     patch:
+      operationId: updateAdminUser
       tags: [Admin]
       summary: Активиране/деактивиране на потребителски акаунт
       security:
@@ -2122,6 +2180,7 @@ paths:
 
   /admin/tasks:
     get:
+      operationId: listAdminTasks
       tags: [Admin]
       summary: Списък с tasks (admin)
       security:
@@ -2139,6 +2198,7 @@ paths:
           description: Неоторизиран достъп
 
     post:
+      operationId: createAdminTask
       tags: [Admin]
       summary: Създаване на task (admin)
       security:
@@ -2163,6 +2223,7 @@ paths:
 
   /admin/tasks/{taskId}:
     get:
+      operationId: getAdminTask
       tags: [Admin]
       summary: Детайл на task (admin)
       security:
@@ -2186,6 +2247,7 @@ paths:
           description: Task not found
 
     patch:
+      operationId: updateAdminTask
       tags: [Admin]
       summary: Редакция на task (admin)
       security:
@@ -2217,6 +2279,7 @@ paths:
           description: Task not found
 
     delete:
+      operationId: deleteAdminTask
       tags: [Admin]
       summary: Изтриване на task (admin)
       security:
@@ -2237,6 +2300,7 @@ paths:
 
   /admin/quizzes:
     get:
+      operationId: listAdminQuizzes
       tags: [Admin]
       summary: Списък с quizzes (admin)
       security:
@@ -2254,6 +2318,7 @@ paths:
           description: Неоторизиран достъп
 
     post:
+      operationId: createAdminQuiz
       tags: [Admin]
       summary: Създаване на quiz (admin)
       security:
@@ -2278,6 +2343,7 @@ paths:
 
   /admin/quizzes/{quizId}:
     get:
+      operationId: getAdminQuiz
       tags: [Admin]
       summary: Детайл на quiz (admin)
       security:
@@ -2301,6 +2367,7 @@ paths:
           description: Quiz not found
 
     patch:
+      operationId: updateAdminQuiz
       tags: [Admin]
       summary: Редакция на quiz (admin)
       security:
@@ -2332,6 +2399,7 @@ paths:
           description: Quiz not found
 
     delete:
+      operationId: deleteAdminQuiz
       tags: [Admin]
       summary: Изтриване на quiz (admin)
       security:
@@ -2352,6 +2420,7 @@ paths:
 
   /admin/quizzes/{quizId}/questions:
     post:
+      operationId: createAdminQuizQuestion
       tags: [Admin]
       summary: Добавяне на въпрос към quiz (admin)
       security:
@@ -2384,6 +2453,7 @@ paths:
 
   /admin/quizzes/{quizId}/questions/{questionId}:
     patch:
+      operationId: updateAdminQuizQuestion
       tags: [Admin]
       summary: Редакция на въпрос в quiz (admin)
       security:
@@ -2420,6 +2490,7 @@ paths:
           description: Quiz/question not found
 
     delete:
+      operationId: deleteAdminQuizQuestion
       tags: [Admin]
       summary: Изтриване на въпрос от quiz (admin)
       security:
@@ -2445,6 +2516,7 @@ paths:
 
   /admin/payments/currencies:
     get:
+      operationId: listAdminPaymentCurrencies
       tags: [Admin]
       summary: Supported payment currencies
       security:
@@ -2463,6 +2535,7 @@ paths:
 
   /admin/payments/settings:
     get:
+      operationId: getAdminPaymentSettings
       tags: [Admin]
       summary: Payment settings
       security:
@@ -2478,6 +2551,7 @@ paths:
           description: Неоторизиран достъп
 
     patch:
+      operationId: updateAdminPaymentSettings
       tags: [Admin]
       summary: Update payment settings
       security:
@@ -2498,6 +2572,7 @@ paths:
 
   /admin/payments/webhook-events:
     get:
+      operationId: listAdminPaymentWebhookEvents
       tags: [Admin]
       summary: List Stripe webhook events
       security:
@@ -2530,6 +2605,7 @@ paths:
 
   /admin/payments/webhook-events/{eventId}/retry:
     post:
+      operationId: retryAdminPaymentWebhookEvent
       tags: [Admin]
       summary: Retry processing of a webhook event
       security:
@@ -2554,8 +2630,102 @@ paths:
   # Admin Courses (CRUD)
   ############################
 
+  /admin/course-categories:
+    get:
+      operationId: listAdminCourseCategories
+      tags: [Admin, Courses]
+      summary: Списък с категории за курсове (admin)
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Списък с категории
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CourseCategory'
+        "401":
+          description: Неоторизиран достъп
+
+    post:
+      operationId: createAdminCourseCategory
+      tags: [Admin, Courses]
+      summary: Създаване на категория за курсове
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                slug:
+                  type: string
+                title:
+                  type: string
+                order:
+                  type: integer
+                active:
+                  type: boolean
+              required: [slug, title]
+      responses:
+        "201":
+          description: Категорията е създадена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseCategory'
+        "400":
+          description: Невалидни данни
+        "401":
+          description: Неоторизиран достъп
+
+  /admin/course-categories/{id}:
+    patch:
+      operationId: updateAdminCourseCategory
+      tags: [Admin, Courses]
+      summary: Редакция на категория за курсове
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                slug:
+                  type: string
+                title:
+                  type: string
+                order:
+                  type: integer
+                active:
+                  type: boolean
+      responses:
+        "200":
+          description: Обновена категория
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseCategory'
+        "400":
+          description: Невалидни данни
+        "401":
+          description: Неоторизиран достъп
+
   /admin/courses:
     get:
+      operationId: listAdminCourses
       tags: [Admin, Courses]
       summary: Списък с курсове за администрация
       security:
@@ -2573,6 +2743,7 @@ paths:
           description: Неоторизиран достъп
 
     post:
+      operationId: createAdminCourse
       tags: [Admin, Courses]
       summary: Създаване на нов курс
       security:
@@ -2595,6 +2766,15 @@ paths:
                   enum: [draft, active, inactive]
                 isPaid:
                   type: boolean
+                currency:
+                  type: string
+                  nullable: true
+                priceCents:
+                  type: integer
+                  nullable: true
+                categoryId:
+                  type: string
+                  nullable: true
               required: [title, description, language, status]
       responses:
         "201":
@@ -2610,6 +2790,7 @@ paths:
 
   /admin/courses/{courseId}:
     get:
+      operationId: getAdminCourse
       tags: [Admin, Courses]
       summary: Детайл на курс за администрация
       security:
@@ -2633,6 +2814,7 @@ paths:
           description: Курсът не е намерен
 
     patch:
+      operationId: updateAdminCourse
       tags: [Admin, Courses]
       summary: Редакция на курс
       security:
@@ -2661,6 +2843,15 @@ paths:
                   enum: [draft, active, inactive]
                 isPaid:
                   type: boolean
+                currency:
+                  type: string
+                  nullable: true
+                priceCents:
+                  type: integer
+                  nullable: true
+                categoryId:
+                  type: string
+                  nullable: true
       responses:
         "200":
           description: Обновен курс
@@ -2677,6 +2868,7 @@ paths:
 
   /admin/courses/{courseId}/grants:
     post:
+      operationId: grantAdminCourseAccess
       tags: [Admin, Courses]
       summary: Grant access до paid course (admin)
       security:
@@ -2705,6 +2897,7 @@ paths:
 
   /admin/courses/{courseId}/curriculum:
     get:
+      operationId: getAdminCourseCurriculum
       tags: [Admin, Courses]
       summary: Curriculum за курс (admin)
       security:
@@ -2730,6 +2923,7 @@ paths:
           description: Курсът не е намерен
 
     post:
+      operationId: createAdminCourseCurriculumItem
       tags: [Admin, Courses]
       summary: Добавяне на curriculum item към курс (admin)
       security:
@@ -2782,6 +2976,7 @@ paths:
 
   /admin/courses/{courseId}/curriculum/{itemId}:
     patch:
+      operationId: updateAdminCourseCurriculumItem
       tags: [Admin, Courses]
       summary: Обновяване/преместване на curriculum item (admin)
       security:
@@ -2833,6 +3028,7 @@ paths:
           description: Курсът или item-ът не са намерени
 
     delete:
+      operationId: deleteAdminCourseCurriculumItem
       tags: [Admin, Courses]
       summary: Изтриване на curriculum item (admin)
       security:
@@ -2862,6 +3058,7 @@ paths:
 
   /wiki/articles:
     get:
+      operationId: listWikiArticles
       tags: [Wiki]
       summary: Списък с Wiki статии
       security: []
@@ -2895,9 +3092,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/WikiArticle'
+        "400":
+          description: Невалидни параметри
 
   /wiki/articles/{slug}:
     get:
+      operationId: getWikiArticle
       tags: [Wiki]
       summary: Връща една Wiki статия по slug
       security: []
@@ -2924,6 +3124,7 @@ paths:
 
   /wiki/articles/{slug}/related:
     get:
+      operationId: getWikiArticleRelated
       tags: [Wiki]
       summary: Свързани Wiki статии по slug
       security: []
@@ -2957,6 +3158,7 @@ paths:
 
   /wiki/articles/{slug}/feedback/summary:
     get:
+      operationId: getWikiArticleFeedbackSummary
       tags: [Wiki]
       summary: Feedback summary за Wiki статия
       security: []
@@ -2978,6 +3180,7 @@ paths:
 
   /wiki/articles/{slug}/feedback:
     post:
+      operationId: submitWikiArticleFeedback
       tags: [Wiki]
       summary: Submit helpful feedback за Wiki статия
       security: []
@@ -3001,12 +3204,39 @@ paths:
         "404":
           description: Статията не е намерена
 
-  ############################
-  # Admin Wiki (CRUD + версии)
-  ############################
+  /admin/wiki/articles/by-slug/{slug}:
+    get:
+      operationId: getAdminWikiArticleBySlug
+      tags: [Admin, Wiki]
+      summary: Детайл на Wiki статия по slug (admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: slug
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: lang
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Wiki article detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WikiArticle'
+        "401":
+          description: Неоторизиран достъп
+        "404":
+          description: Статията не е намерена
 
   /admin/wiki/articles:
     get:
+      operationId: listAdminWikiArticles
       tags: [Admin, Wiki]
       summary: Списък с Wiki статии за администрация
       security:
@@ -3047,6 +3277,7 @@ paths:
           description: Неоторизиран достъп
 
     post:
+      operationId: createAdminWikiArticle
       tags: [Admin, Wiki]
       summary: Създаване на нова Wiki статия
       security:
@@ -3069,37 +3300,9 @@ paths:
         "401":
           description: Неоторизиран достъп
 
-  /admin/wiki/articles/by-slug/{slug}:
-    get:
-      tags: [Admin, Wiki]
-      summary: Детайл на Wiki статия по slug (admin)
-      security:
-        - bearerAuth: []
-      parameters:
-        - in: path
-          name: slug
-          required: true
-          schema:
-            type: string
-        - in: query
-          name: lang
-          required: false
-          schema:
-            type: string
-      responses:
-        "200":
-          description: Wiki article detail
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/WikiArticle'
-        "401":
-          description: Неоторизиран достъп
-        "404":
-          description: Статията не е намерена
-
   /admin/wiki/articles/{id}:
     put:
+      operationId: updateAdminWikiArticle
       tags: [Admin, Wiki]
       summary: Редакция на съществуваща Wiki статия
       security:
@@ -3130,27 +3333,8 @@ paths:
         "404":
           description: Статията не е намерена
 
-    delete:
-      tags: [Admin, Wiki]
-      summary: Изтриване на Wiki статия
-      security:
-        - bearerAuth: []
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-      responses:
-        "204":
-          description: Статията е изтрита
-        "401":
-          description: Неоторизиран достъп
-        "404":
-          description: Статията не е намерена
-
-  /admin/wiki/articles/{id}/draft-autosave:
     patch:
+      operationId: autosaveAdminWikiDraft
       tags: [Admin, Wiki]
       summary: Autosave на draft (admin)
       security:
@@ -3177,8 +3361,29 @@ paths:
         "404":
           description: Статията не е намерена
 
-  /admin/wiki/articles/{id}/status:
+    delete:
+      operationId: deleteAdminWikiArticle
+      tags: [Admin, Wiki]
+      summary: Изтриване на Wiki статия
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Статията е изтрита
+        "401":
+          description: Неоторизиран достъп
+        "404":
+          description: Статията не е намерена
+
+  /admin/wiki/articles/{id}/draft-autosave:
     patch:
+      operationId: updateAdminWikiArticleStatus
       tags: [Admin, Wiki]
       summary: Промяна на статуса на Wiki статия (draft/active/inactive)
       security:
@@ -3205,8 +3410,9 @@ paths:
         "404":
           description: Статията не е намерена
 
-  /admin/wiki/articles/{id}/versions:
+  /admin/wiki/articles/{id}/status:
     get:
+      operationId: listAdminWikiArticleVersions
       tags: [Admin, Wiki]
       summary: История на версиите за дадена Wiki статия
       security:
@@ -3233,6 +3439,7 @@ paths:
 
   /admin/wiki/articles/{id}/versions/{versionId}/restore:
     post:
+      operationId: restoreAdminWikiArticleVersion
       tags: [Admin, Wiki]
       summary: Връщане към избрана версия на Wiki статия (rollback)
       security:
@@ -3262,6 +3469,7 @@ paths:
 
   /admin/wiki/articles/{id}/versions/{versionId}:
     delete:
+      operationId: deleteAdminWikiArticleVersion
       tags: [Admin, Wiki]
       summary: Изтриване на избрана версия на Wiki статия (без да се засяга текущата)
       security:
@@ -3287,6 +3495,7 @@ paths:
 
   /admin/wiki/articles/{id}/media:
     get:
+      operationId: listAdminWikiArticleMedia
       tags: [Admin, Wiki]
       summary: Списък с изображения (media) за дадена Wiki статия
       security:
@@ -3312,6 +3521,7 @@ paths:
           description: Статията не е намерена
 
     post:
+      operationId: uploadAdminWikiArticleMedia
       tags: [Admin, Wiki]
       summary: Качване на ново изображение (media) за дадена Wiki статия
       description: |
@@ -3351,6 +3561,7 @@ paths:
 
   /admin/wiki/articles/{id}/media/{filename}:
     delete:
+      operationId: deleteAdminWikiArticleMedia
       tags: [Admin, Wiki]
       summary: Изтриване на изображение, асоциирано с дадена Wiki статия
       security:
@@ -3381,6 +3592,7 @@ paths:
 
   /admin/metrics/overview:
     get:
+      operationId: getAdminMetricsOverview
       tags: [Admin]
       summary: Базов преглед на метрики за администраторски табло
       security:
@@ -3397,6 +3609,7 @@ paths:
 
   /admin/users/stats:
     get:
+      operationId: getAdminUsersStats
       tags: [Admin]
       summary: Статистика за потребители (admin)
       security:
@@ -3417,6 +3630,7 @@ paths:
 
   /admin/activity:
     get:
+      operationId: getAdminActivityLog
       tags: [Admin]
       summary: Activity log (wiki + users)
       security:
@@ -3439,6 +3653,7 @@ paths:
 
   /analytics/track:
     post:
+      operationId: trackAnalytics
       tags: [Analytics]
       summary: Public analytics tracking (best-effort)
       security: []
@@ -3456,6 +3671,7 @@ paths:
 
   /admin/metrics/activity-summary:
     get:
+      operationId: getAdminMetricsActivitySummary
       tags: [Admin]
       summary: Activity summary (users + wiki) for selected period
       security:
@@ -3485,6 +3701,7 @@ paths:
 
   /admin/metrics/wiki-views:
     get:
+      operationId: getAdminMetricsWikiViews
       tags: [Admin]
       summary: Wiki views metrics for selected period
       security:
@@ -3520,6 +3737,7 @@ paths:
 
   /admin/metrics/wiki-feedback:
     get:
+      operationId: getAdminMetricsWikiFeedback
       tags: [Admin]
       summary: Wiki feedback metrics for selected period
       security:
@@ -3555,6 +3773,7 @@ paths:
 
   /admin/metrics/wiki-attention:
     get:
+      operationId: getAdminMetricsWikiAttention
       tags: [Admin]
       summary: Wiki attention score metrics for selected period
       security:
@@ -3590,6 +3809,7 @@ paths:
 
   /admin/metrics/advanced:
     get:
+      operationId: getAdminMetricsAdvanced
       tags: [Admin]
       summary: Advanced analytics metrics (post-MVP)
       security:
@@ -3625,6 +3845,7 @@ paths:
 
   /admin/metrics/advanced/export:
     get:
+      operationId: exportAdminMetricsAdvanced
       tags: [Admin]
       summary: Export advanced analytics metrics (CSV)
       security:

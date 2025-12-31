@@ -7,6 +7,7 @@ import { WikiArticleView } from './src/wiki/wiki-article-view.entity';
 import { WikiArticleIpViewDaily } from './src/wiki/wiki-article-ip-view-daily.entity';
 import { User } from './src/auth/user.entity';
 import { Course } from './src/courses/course.entity';
+import { CourseCategory } from './src/courses/course-category.entity';
 import { CourseEnrollment } from './src/courses/course-enrollment.entity';
 import { CourseCurriculumItem } from './src/courses/course-curriculum-item.entity';
 import { UserCurriculumProgress } from './src/courses/user-curriculum-progress.entity';
@@ -40,6 +41,7 @@ export const AppDataSource = new DataSource({
     AnalyticsPageViewDaily,
     User,
     Course,
+    CourseCategory,
     CourseEnrollment,
     CoursePurchase,
     PaymentSettings,

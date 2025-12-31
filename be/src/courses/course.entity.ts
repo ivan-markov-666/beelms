@@ -2,9 +2,12 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { CourseCategory } from './course-category.entity';
 
 @Entity('courses')
 export class Course {
@@ -34,6 +37,13 @@ export class Course {
 
   @Column({ name: 'created_by_user_id', type: 'uuid', nullable: true })
   createdByUserId: string | null;
+
+  @Column({ name: 'category_id', type: 'uuid', nullable: true })
+  categoryId: string | null;
+
+  @ManyToOne(() => CourseCategory, { onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'category_id' })
+  category: CourseCategory | null;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

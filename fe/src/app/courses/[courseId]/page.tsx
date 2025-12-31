@@ -25,6 +25,11 @@ type CourseDetail = {
   isPaid: boolean;
   currency: string | null;
   priceCents: number | null;
+  categoryId: string | null;
+  category: {
+    slug: string;
+    title: string;
+  } | null;
   curriculum: CourseModuleItem[];
 };
 
@@ -76,6 +81,13 @@ export default async function CourseDetailPage(props: {
         </Link>
         <h1 className="text-3xl font-semibold text-zinc-900">{course.title}</h1>
         <p className="text-sm text-zinc-600">{course.description}</p>
+        {course.category?.title && (
+          <div>
+            <span className="inline-flex rounded bg-gray-100 px-2 py-1 text-xs text-gray-700">
+              {course.category.title}
+            </span>
+          </div>
+        )}
         <div className="flex items-center gap-2 text-xs text-gray-500">
           <span
             className={`rounded-full px-2 py-1 text-[11px] font-semibold ${

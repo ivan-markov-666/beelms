@@ -12,6 +12,19 @@ type CourseSummary = {
   isPaid: boolean;
   currency: string | null;
   priceCents: number | null;
+  categoryId: string | null;
+  category: {
+    slug: string;
+    title: string;
+  } | null;
+};
+
+type CourseCategory = {
+  id: string;
+  slug: string;
+  title: string;
+  order: number;
+  active: boolean;
 };
 
 function formatPrice(currency: string, priceCents: number): string {
@@ -28,8 +41,12 @@ function formatPrice(currency: string, priceCents: number): string {
   }
 }
 
-async function fetchCourses(): Promise<CourseSummary[]> {
-  const res = await fetch(buildApiUrl("/courses"), {
+async function fetchCourses(category?: string): Promise<CourseSummary[]> {
+  const url = category
+    ? buildApiUrl(`/courses?category=${encodeURIComponent(category)}`)
+    : buildApiUrl("/courses");
+
+  const res = await fetch(url, {
     cache: "no-store",
   });
 
@@ -40,11 +57,35 @@ async function fetchCourses(): Promise<CourseSummary[]> {
   return res.json();
 }
 
-export default async function CoursesPage() {
+async function fetchCategories(): Promise<CourseCategory[]> {
+  const res = await fetch(buildApiUrl("/course-categories"), {
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    return [];
+  }
+
+  const data = (await res.json()) as CourseCategory[];
+  return Array.isArray(data) ? data : [];
+}
+
+export default async function CoursesPage({
+  searchParams,
+}: {
+  searchParams?: { category?: string | string[] };
+}) {
+  const selectedCategory =
+    typeof searchParams?.category === "string" ? searchParams.category : "";
+
   let courses: CourseSummary[] = [];
+  let categories: CourseCategory[] = [];
 
   try {
-    courses = await fetchCourses();
+    [courses, categories] = await Promise.all([
+      fetchCourses(selectedCategory || undefined),
+      fetchCategories(),
+    ]);
   } catch (error) {
     void error;
     return (
@@ -82,6 +123,34 @@ export default async function CoursesPage() {
         </p>
       </header>
 
+      {categories.length > 0 && (
+        <section className="flex flex-wrap gap-2">
+          <Link
+            href="/courses"
+            className={`rounded-full border px-3 py-1 text-sm transition hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2 ${
+              !selectedCategory
+                ? "border-green-600 bg-green-50 text-green-800"
+                : "border-gray-200 bg-white text-gray-700"
+            }`}
+          >
+            All
+          </Link>
+          {categories.map((c) => (
+            <Link
+              key={c.id}
+              href={`/courses?category=${encodeURIComponent(c.slug)}`}
+              className={`rounded-full border px-3 py-1 text-sm transition hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2 ${
+                selectedCategory === c.slug
+                  ? "border-green-600 bg-green-50 text-green-800"
+                  : "border-gray-200 bg-white text-gray-700"
+              }`}
+            >
+              {c.title}
+            </Link>
+          ))}
+        </section>
+      )}
+
       <section className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {courses.map((course) => (
           <Link
@@ -116,6 +185,14 @@ export default async function CoursesPage() {
             <p className="text-sm text-gray-600 line-clamp-4">
               {course.description}
             </p>
+
+            {course.category?.title && (
+              <div className="mt-3">
+                <span className="inline-flex rounded bg-gray-100 px-2 py-1 text-xs text-gray-700">
+                  {course.category.title}
+                </span>
+              </div>
+            )}
             <div className="mt-4 flex items-center gap-2 text-xs text-gray-500">
               <span className="rounded bg-gray-100 px-2 py-1">
                 {course.language}

@@ -18,6 +18,11 @@ type CourseSummary = {
   isPaid: boolean;
   currency: string | null;
   priceCents: number | null;
+  categoryId: string | null;
+  category: {
+    slug: string;
+    title: string;
+  } | null;
 };
 
 type CourseDetail = CourseSummary & {
@@ -210,6 +215,14 @@ export default function AdminCoursesPage() {
             Courses
           </h1>
           <p className="text-gray-600">Администрация на курсове (MVP).</p>
+          <div className="mt-2">
+            <Link
+              href="/admin/courses/categories"
+              className="text-sm font-medium text-green-700 hover:text-green-900 hover:underline"
+            >
+              Manage course categories →
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -392,6 +405,7 @@ export default function AdminCoursesPage() {
               <thead className="border-b border-gray-200 text-xs uppercase tracking-wide text-gray-500">
                 <tr>
                   <th className="px-2 py-2">Title</th>
+                  <th className="px-2 py-2">Category</th>
                   <th className="px-2 py-2">Language</th>
                   <th className="px-2 py-2">Status</th>
                   <th className="px-2 py-2">Paid</th>
@@ -411,6 +425,9 @@ export default function AdminCoursesPage() {
                       <p className="mt-0.5 line-clamp-1 text-xs text-gray-500">
                         {course.description}
                       </p>
+                    </td>
+                    <td className="px-2 py-2 text-gray-700">
+                      {course.category?.title ?? "-"}
                     </td>
                     <td className="px-2 py-2 text-gray-700">
                       {course.language}

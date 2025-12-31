@@ -16,6 +16,7 @@ import { InMemoryRateLimitStore } from './security/rate-limit/rate-limit.store';
 import { CoursesModule } from './courses/courses.module';
 import { PaymentsModule } from './payments/payments.module';
 import { Course } from './courses/course.entity';
+import { CourseCategory } from './courses/course-category.entity';
 import { CourseEnrollment } from './courses/course-enrollment.entity';
 import { CourseCurriculumItem } from './courses/course-curriculum-item.entity';
 import { UserCurriculumProgress } from './courses/user-curriculum-progress.entity';
@@ -56,6 +57,7 @@ import { LegalPage } from './legal/legal-page.entity';
         AnalyticsPageViewDaily,
         User,
         Course,
+        CourseCategory,
         CourseEnrollment,
         CoursePurchase,
         PaymentSettings,
