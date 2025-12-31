@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Course } from './course.entity';
+import { CourseCategory } from './course-category.entity';
 import { CoursesController } from './courses.controller';
 import { CoursesService } from './courses.service';
 import { CourseEnrollment } from './course-enrollment.entity';
@@ -10,6 +11,8 @@ import { User } from '../auth/user.entity';
 import { AdminCoursesController } from './admin-courses.controller';
 import { CourseCurriculumItem } from './course-curriculum-item.entity';
 import { AdminCourseCurriculumController } from './admin-course-curriculum.controller';
+import { CourseCategoriesController } from './course-categories.controller';
+import { AdminCourseCategoriesController } from './admin-course-categories.controller';
 import { WikiArticle } from '../wiki/wiki-article.entity';
 import { WikiArticleVersion } from '../wiki/wiki-article-version.entity';
 import { UserCurriculumProgress } from './user-curriculum-progress.entity';
@@ -24,6 +27,7 @@ import { SettingsModule } from '../settings/settings.module';
     TypeOrmModule.forFeature([
       User,
       Course,
+      CourseCategory,
       CourseEnrollment,
       CoursePurchase,
       CourseCurriculumItem,
@@ -38,8 +42,10 @@ import { SettingsModule } from '../settings/settings.module';
   ],
   controllers: [
     CoursesController,
+    CourseCategoriesController,
     MyCoursesController,
     AdminCoursesController,
+    AdminCourseCategoriesController,
     AdminCourseCurriculumController,
     CurriculumProgressController,
   ],

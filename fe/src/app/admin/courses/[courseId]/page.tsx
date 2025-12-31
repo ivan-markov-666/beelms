@@ -27,6 +27,11 @@ type CourseDetail = {
   isPaid: boolean;
   currency: string | null;
   priceCents: number | null;
+  categoryId: string | null;
+  category: {
+    slug: string;
+    title: string;
+  } | null;
   curriculum: CourseModuleItem[];
 };
 
@@ -38,6 +43,15 @@ type CourseEditForm = {
   isPaid: boolean;
   currency: string;
   priceCents: string;
+  categoryId: string;
+};
+
+type CourseCategory = {
+  id: string;
+  slug: string;
+  title: string;
+  order: number;
+  active: boolean;
 };
 
 type CreateCurriculumItemForm = {
@@ -101,6 +115,9 @@ export default function AdminCourseDetailPage() {
   const [tasksLoading, setTasksLoading] = useState(false);
   const [tasksError, setTasksError] = useState<string | null>(null);
 
+  const [categories, setCategories] = useState<CourseCategory[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(false);
+
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
   const [actionBusyId, setActionBusyId] = useState<string | null>(null);
@@ -122,6 +139,7 @@ export default function AdminCourseDetailPage() {
       courseForm.language !== course.language ||
       courseForm.status !== course.status ||
       courseForm.isPaid !== course.isPaid ||
+      (courseForm.categoryId || "") !== (course.categoryId ?? "") ||
       (courseForm.currency.trim() || "") !== (course.currency ?? "") ||
       (courseForm.priceCents.trim() || "") !==
         (typeof course.priceCents === "number" ? String(course.priceCents) : "")
@@ -202,6 +220,7 @@ export default function AdminCourseDetailPage() {
         language: detail.language,
         status: detail.status,
         isPaid: !!detail.isPaid,
+        categoryId: detail.categoryId ?? "",
         currency: detail.currency ?? "",
         priceCents:
           typeof detail.priceCents === "number"
@@ -269,6 +288,27 @@ export default function AdminCourseDetailPage() {
     }
   }, []);
 
+  const loadCategories = useCallback(async () => {
+    if (typeof window === "undefined") return;
+
+    setCategoriesLoading(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/course-categories`);
+      if (!res.ok) {
+        setCategories([]);
+        setCategoriesLoading(false);
+        return;
+      }
+
+      const data = (await res.json()) as CourseCategory[];
+      setCategories(Array.isArray(data) ? data : []);
+      setCategoriesLoading(false);
+    } catch {
+      setCategories([]);
+      setCategoriesLoading(false);
+    }
+  }, []);
+
   const loadTasks = useCallback(async () => {
     if (typeof window === "undefined") return;
 
@@ -323,6 +363,16 @@ export default function AdminCourseDetailPage() {
       window.clearTimeout(timer);
     };
   }, [loadTasks]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      void loadCategories();
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [loadCategories]);
 
   const handleAddCurriculumItem = async () => {
     if (typeof window === "undefined") return;
@@ -450,6 +500,12 @@ export default function AdminCourseDetailPage() {
       if (courseForm.status !== course.status) {
         payload.status = courseForm.status;
       }
+
+      const nextCategoryId = courseForm.categoryId.trim();
+      const currentCategoryId = course.categoryId ?? "";
+      if (nextCategoryId !== currentCategoryId) {
+        payload.categoryId = nextCategoryId ? nextCategoryId : null;
+      }
       if (courseForm.isPaid !== course.isPaid) {
         payload.isPaid = courseForm.isPaid;
       }
@@ -531,6 +587,7 @@ export default function AdminCourseDetailPage() {
         language: updated.language,
         status: updated.status,
         isPaid: !!updated.isPaid,
+        categoryId: updated.categoryId ?? "",
         currency: updated.currency ?? "",
         priceCents:
           typeof updated.priceCents === "number"
@@ -889,6 +946,27 @@ export default function AdminCourseDetailPage() {
               <option value="draft">draft</option>
               <option value="active">active</option>
               <option value="inactive">inactive</option>
+            </select>
+          </label>
+
+          <label className="space-y-1">
+            <span className="text-xs font-medium text-gray-600">Category</span>
+            <select
+              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900"
+              value={courseForm?.categoryId ?? ""}
+              onChange={(e) =>
+                setCourseForm((p) =>
+                  p ? { ...p, categoryId: e.target.value } : p,
+                )
+              }
+              disabled={categoriesLoading}
+            >
+              <option value="">(none)</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.title}
+                </option>
+              ))}
             </select>
           </label>
 

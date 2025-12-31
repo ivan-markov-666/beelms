@@ -31,8 +31,10 @@ export class CoursesController {
   constructor(private readonly coursesService: CoursesService) {}
 
   @Get()
-  async listPublicCatalog(): Promise<CourseSummaryDto[]> {
-    return this.coursesService.getPublicCatalog();
+  async listPublicCatalog(
+    @Query('category') category?: string,
+  ): Promise<CourseSummaryDto[]> {
+    return this.coursesService.getPublicCatalog(category);
   }
 
   @Get(':courseId')

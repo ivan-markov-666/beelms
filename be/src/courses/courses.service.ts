@@ -9,6 +9,7 @@ import { IsNull, Repository } from 'typeorm';
 import { User } from '../auth/user.entity';
 import type { UserRole } from '../auth/user-role';
 import { Course } from './course.entity';
+import { CourseCategory } from './course-category.entity';
 import { CourseEnrollment } from './course-enrollment.entity';
 import { CourseCurriculumItem } from './course-curriculum-item.entity';
 import { UserCurriculumProgress } from './user-curriculum-progress.entity';
@@ -20,12 +21,17 @@ import { CourseSummaryDto } from './dto/course-summary.dto';
 import { CourseDetailDto } from './dto/course-detail.dto';
 import { CourseModuleItemDto } from './dto/course-module-item.dto';
 import { MyCourseListItemDto } from './dto/my-course-list-item.dto';
+import { CourseCategoryDto } from './dto/course-category.dto';
 import { AdminCreateCourseDto } from './dto/admin-create-course.dto';
 import { AdminUpdateCourseDto } from './dto/admin-update-course.dto';
 import { AdminCreateCourseCurriculumItemDto } from './dto/admin-create-course-curriculum-item.dto';
 import { AdminUpdateCourseCurriculumItemDto } from './dto/admin-update-course-curriculum-item.dto';
 import { CourseCertificateDto } from './dto/course-certificate.dto';
 import { AdminGrantCourseAccessDto } from './dto/admin-grant-course-access.dto';
+import {
+  AdminCreateCourseCategoryDto,
+  AdminUpdateCourseCategoryDto,
+} from './dto/admin-course-category.dto';
 import { Quiz } from '../assessments/quiz.entity';
 import { Task } from '../tasks/task.entity';
 
@@ -36,6 +42,8 @@ export class CoursesService {
     private readonly usersRepo: Repository<User>,
     @InjectRepository(Course)
     private readonly courseRepo: Repository<Course>,
+    @InjectRepository(CourseCategory)
+    private readonly courseCategoryRepo: Repository<CourseCategory>,
     @InjectRepository(CourseEnrollment)
     private readonly enrollmentRepo: Repository<CourseEnrollment>,
     @InjectRepository(CoursePurchase)
@@ -54,6 +62,16 @@ export class CoursesService {
     private readonly taskRepo: Repository<Task>,
   ) {}
 
+  private toCategoryDto(category: CourseCategory): CourseCategoryDto {
+    return {
+      id: category.id,
+      slug: category.slug,
+      title: category.title,
+      order: category.order,
+      active: !!category.active,
+    };
+  }
+
   private toSummary(course: Course): CourseSummaryDto {
     return {
       id: course.id,
@@ -65,7 +83,98 @@ export class CoursesService {
       currency: course.currency ?? null,
       priceCents:
         typeof course.priceCents === 'number' ? course.priceCents : null,
+      categoryId: course.categoryId ?? null,
+      category:
+        course.category && course.category.slug && course.category.title
+          ? {
+              slug: course.category.slug,
+              title: course.category.title,
+            }
+          : null,
     };
+  }
+
+  async getPublicCourseCategories(): Promise<CourseCategoryDto[]> {
+    const categories = await this.courseCategoryRepo.find({
+      where: { active: true },
+      order: { order: 'ASC', title: 'ASC' },
+    });
+
+    return categories.map((c) => this.toCategoryDto(c));
+  }
+
+  async getAdminCourseCategories(): Promise<CourseCategoryDto[]> {
+    const categories = await this.courseCategoryRepo.find({
+      order: { order: 'ASC', title: 'ASC' },
+    });
+
+    return categories.map((c) => this.toCategoryDto(c));
+  }
+
+  async adminCreateCourseCategory(
+    dto: AdminCreateCourseCategoryDto,
+  ): Promise<CourseCategoryDto> {
+    const slug = dto.slug.trim().toLowerCase();
+    const title = dto.title.trim();
+
+    const existing = await this.courseCategoryRepo.findOne({
+      where: { slug },
+    });
+
+    if (existing) {
+      throw new BadRequestException('Category slug already exists');
+    }
+
+    const created = this.courseCategoryRepo.create({
+      slug,
+      title,
+      order: typeof dto.order === 'number' ? dto.order : 0,
+      active: typeof dto.active === 'boolean' ? dto.active : true,
+    });
+
+    const saved = await this.courseCategoryRepo.save(created);
+    return this.toCategoryDto(saved);
+  }
+
+  async adminUpdateCourseCategory(
+    id: string,
+    dto: AdminUpdateCourseCategoryDto,
+  ): Promise<CourseCategoryDto> {
+    const category = await this.courseCategoryRepo.findOne({ where: { id } });
+    if (!category) {
+      throw new NotFoundException('Category not found');
+    }
+
+    if (typeof dto.slug === 'string') {
+      const nextSlug = dto.slug.trim().toLowerCase();
+      if (nextSlug && nextSlug !== category.slug) {
+        const existing = await this.courseCategoryRepo.findOne({
+          where: { slug: nextSlug },
+        });
+        if (existing && existing.id !== category.id) {
+          throw new BadRequestException('Category slug already exists');
+        }
+        category.slug = nextSlug;
+      }
+    }
+
+    if (typeof dto.title === 'string') {
+      const nextTitle = dto.title.trim();
+      if (nextTitle) {
+        category.title = nextTitle;
+      }
+    }
+
+    if (typeof dto.order === 'number' && Number.isInteger(dto.order)) {
+      category.order = dto.order;
+    }
+
+    if (typeof dto.active === 'boolean') {
+      category.active = dto.active;
+    }
+
+    const saved = await this.courseCategoryRepo.save(category);
+    return this.toCategoryDto(saved);
   }
 
   private async getActiveUserRole(userId: string): Promise<UserRole> {
@@ -259,17 +368,35 @@ export class CoursesService {
     }
   }
 
-  async getPublicCatalog(): Promise<CourseSummaryDto[]> {
-    const courses = await this.courseRepo.find({
-      where: { status: 'active' },
-      order: { createdAt: 'DESC' },
-    });
+  async getPublicCatalog(categorySlug?: string): Promise<CourseSummaryDto[]> {
+    const normalizedSlug = categorySlug?.trim().toLowerCase();
 
+    const qb = this.courseRepo
+      .createQueryBuilder('course')
+      .where('course.status = :status', { status: 'active' })
+      .orderBy('course.createdAt', 'DESC');
+
+    if (normalizedSlug) {
+      qb.innerJoinAndSelect(
+        'course.category',
+        'category',
+        'category.slug = :slug AND category.active = true',
+        { slug: normalizedSlug },
+      );
+    } else {
+      qb.leftJoinAndSelect('course.category', 'category');
+    }
+
+    const courses = await qb.getMany();
     return courses.map((c) => this.toSummary(c));
   }
 
   async getPublicCourseDetail(courseId: string): Promise<CourseDetailDto> {
-    const course = await this.courseRepo.findOne({ where: { id: courseId } });
+    const course = await this.courseRepo
+      .createQueryBuilder('course')
+      .leftJoinAndSelect('course.category', 'category')
+      .where('course.id = :id', { id: courseId })
+      .getOne();
 
     if (!course || course.status !== 'active') {
       throw new NotFoundException('Course not found');
@@ -395,10 +522,16 @@ export class CoursesService {
   async getAdminCoursesList(actorUserId: string): Promise<CourseSummaryDto[]> {
     const role = await this.getActiveUserRole(actorUserId);
 
-    const courses = await this.courseRepo.find({
-      where: role === 'teacher' ? { createdByUserId: actorUserId } : undefined,
-      order: { createdAt: 'DESC' },
-    });
+    const qb = this.courseRepo
+      .createQueryBuilder('course')
+      .leftJoinAndSelect('course.category', 'category')
+      .orderBy('course.createdAt', 'DESC');
+
+    if (role === 'teacher') {
+      qb.where('course.createdByUserId = :userId', { userId: actorUserId });
+    }
+
+    const courses = await qb.getMany();
 
     return courses.map((c) => this.toSummary(c));
   }
@@ -409,7 +542,11 @@ export class CoursesService {
   ): Promise<CourseDetailDto> {
     await this.requireCourseOwnershipForTeacher(actorUserId, courseId);
 
-    const course = await this.courseRepo.findOne({ where: { id: courseId } });
+    const course = await this.courseRepo
+      .createQueryBuilder('course')
+      .leftJoinAndSelect('course.category', 'category')
+      .where('course.id = :id', { id: courseId })
+      .getOne();
 
     if (!course) {
       throw new NotFoundException('Course not found');
@@ -462,12 +599,35 @@ export class CoursesService {
       createdByUserId: actorUserId,
     });
 
+    if (dto.categoryId !== undefined) {
+      if (dto.categoryId === null) {
+        course.categoryId = null;
+      } else if (typeof dto.categoryId === 'string') {
+        const categoryId = dto.categoryId;
+        const category = await this.courseCategoryRepo.findOne({
+          where: { id: categoryId },
+        });
+        if (!category) {
+          throw new BadRequestException('Category not found');
+        }
+        course.categoryId = category.id;
+      }
+    }
+
     const saved = await this.courseRepo.save(course);
+
+    const savedWithCategory = await this.courseRepo
+      .createQueryBuilder('course')
+      .leftJoinAndSelect('course.category', 'category')
+      .where('course.id = :id', { id: saved.id })
+      .getOne();
+
+    const effectiveCourse = savedWithCategory ?? saved;
 
     const curriculum = await this.loadCurriculum(saved.id);
 
     return {
-      ...this.toSummary(saved),
+      ...this.toSummary(effectiveCourse),
       curriculum,
     };
   }
@@ -526,6 +686,21 @@ export class CoursesService {
       }
     }
 
+    if (dto.categoryId !== undefined) {
+      if (dto.categoryId === null) {
+        course.categoryId = null;
+      } else if (typeof dto.categoryId === 'string') {
+        const categoryId = dto.categoryId;
+        const category = await this.courseCategoryRepo.findOne({
+          where: { id: categoryId },
+        });
+        if (!category) {
+          throw new BadRequestException('Category not found');
+        }
+        course.categoryId = category.id;
+      }
+    }
+
     if (!course.isPaid) {
       course.currency = null;
       course.priceCents = null;
@@ -544,10 +719,18 @@ export class CoursesService {
 
     const saved = await this.courseRepo.save(course);
 
+    const savedWithCategory = await this.courseRepo
+      .createQueryBuilder('course')
+      .leftJoinAndSelect('course.category', 'category')
+      .where('course.id = :id', { id: saved.id })
+      .getOne();
+
+    const effectiveCourse = savedWithCategory ?? saved;
+
     const curriculum = await this.loadCurriculum(saved.id);
 
     return {
-      ...this.toSummary(saved),
+      ...this.toSummary(effectiveCourse),
       curriculum,
     };
   }
@@ -884,7 +1067,7 @@ export class CoursesService {
   async getMyCourses(userId: string): Promise<MyCourseListItemDto[]> {
     const enrollments = await this.enrollmentRepo.find({
       where: { userId },
-      relations: ['course'],
+      relations: ['course', 'course.category'],
       order: { enrolledAt: 'DESC' },
     });
 

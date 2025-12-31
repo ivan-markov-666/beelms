@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 import { DataSource } from 'typeorm';
 import { Course } from '../courses/course.entity';
+import { CourseCategory } from '../courses/course-category.entity';
 
 const SeedDataSource = new DataSource({
   type: 'postgres',
@@ -9,7 +10,7 @@ const SeedDataSource = new DataSource({
   username: process.env.DB_USER ?? 'beelms',
   password: process.env.DB_PASSWORD ?? 'beelms',
   database: process.env.DB_NAME ?? 'beelms',
-  entities: [Course],
+  entities: [Course, CourseCategory],
   synchronize: false,
 });
 

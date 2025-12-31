@@ -6,10 +6,15 @@
   },
   "scripts": {
     "prepare": "husky install",
-    "lint": "npm --prefix be run lint && npm --prefix fe run lint",
+    "lint": "npm --prefix be run lint && npm --prefix fe run lint && npx --yes @redocly/cli@latest lint --config .redocly.yaml docs/architecture/openapi.yaml",
+    "lint:log": "npm run lint > lint.log 2>&1",
     "format": "npm --prefix be run format && npm --prefix fe run format",
-
-    "docs:openapi:lint": "npx -y @redocly/cli@1.34.5 lint docs/architecture/openapi.yaml",
+    "format:log": "npm run format > format.log 2>&1",
+    "docs:openapi:lint": "npx -y @redocly/cli@latest lint --config .redocly.yaml docs/architecture/openapi.yaml",
+    "test:be": "npm --prefix be run test:regression:local",
+    "test:be:log": "npm run test:be > test-be.log 2>&1",
+    "test:fe": "npm --prefix fe run test",
+    "test:fe:log": "npm run test:fe > test-fe.log 2>&1",
 
     "be:migration:run": "npm --prefix be run migration:run",
     "be:migration:revert": "npm --prefix be run migration:revert",

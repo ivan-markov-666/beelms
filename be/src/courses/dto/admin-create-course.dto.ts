@@ -5,6 +5,7 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
+  IsUUID,
   Length,
   Min,
 } from 'class-validator';
@@ -39,4 +40,8 @@ export class AdminCreateCourseDto {
   @IsInt()
   @Min(1)
   priceCents?: number | null;
+
+  @IsOptional()
+  @IsUUID('4')
+  categoryId?: string | null;
 }
