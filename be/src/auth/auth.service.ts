@@ -19,6 +19,7 @@ import { AuthTokenDto } from './dto/auth-token.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
+import type { GoogleProfile } from './google-oauth.service';
 import { CaptchaService } from '../security/captcha/captcha.service';
 import { InMemoryLoginAttemptStore } from '../security/account-protection/login-attempts.store';
 import {
@@ -158,17 +159,7 @@ export class AuthService {
       throw new UnauthorizedException('invalid credentials');
     }
 
-    const payload = {
-      sub: user.id,
-      email: user.email,
-      tokenVersion: user.tokenVersion,
-    };
-    const accessToken = await this.jwtService.signAsync(payload);
-
-    return {
-      accessToken,
-      tokenType: 'Bearer',
-    };
+    return this.issueAuthToken(user);
   }
 
   async forgotPassword(dto: ForgotPasswordDto): Promise<void> {
@@ -226,6 +217,49 @@ export class AuthService {
     user.passwordLastChangedAt = now;
 
     await this.usersRepo.save(user);
+  }
+
+  async loginWithGoogle(profile: GoogleProfile): Promise<AuthTokenDto> {
+    const normalizedEmail = profile.email.trim().toLowerCase();
+    let user = await this.usersRepo.findOne({
+      where: { email: normalizedEmail, active: true },
+    });
+
+    if (!user) {
+      const now = new Date();
+      const randomPassword = randomBytes(32).toString('hex');
+      const passwordHash = await bcrypt.hash(randomPassword, 10);
+
+      user = this.usersRepo.create({
+        email: normalizedEmail,
+        passwordHash,
+        active: true,
+        emailVerified: true,
+        passwordLastChangedAt: now,
+        termsAcceptedAt: now,
+        privacyAcceptedAt: now,
+      });
+      user = await this.usersRepo.save(user);
+    } else if (!user.emailVerified) {
+      user.emailVerified = true;
+      await this.usersRepo.save(user);
+    }
+
+    return this.issueAuthToken(user);
+  }
+
+  private async issueAuthToken(user: User): Promise<AuthTokenDto> {
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      tokenVersion: user.tokenVersion,
+    };
+    const accessToken = await this.jwtService.signAsync(payload);
+
+    return {
+      accessToken,
+      tokenType: 'Bearer',
+    };
   }
 
   async verifyEmail(dto: VerifyEmailDto): Promise<void> {

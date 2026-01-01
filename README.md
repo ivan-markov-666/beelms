@@ -199,6 +199,30 @@ Notes:
 
 Така Admin UI (напр. `/admin/wiki`) ще вика реалните NestJS endpoint-и.
 
+#### 2.4.2. Google OAuth (Login/Register with Google) – env vars
+
+За STORY-AUTH-5 (Google социален login) трябва да създадеш **OAuth 2.0 Client** в [Google Cloud Console](https://console.cloud.google.com/apis/credentials):
+
+1. Тип “Web application”.
+2. Добави `http://localhost:3000` (BE) и `http://localhost:3001` (FE) като **Authorized JavaScript origins** в dev.
+3. Добави `http://localhost:3000/api/auth/google/callback` като **Authorized redirect URI** (същият URL трябва да влезе и в `GOOGLE_OAUTH_REDIRECT_URL`).
+
+След това попълни новите BE env променливи (в `be/.env` или секретния ви мениджър):
+
+```bash
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+GOOGLE_OAUTH_REDIRECT_URL=http://localhost:3000/api/auth/google/callback
+```
+
+Tip: `FRONTEND_ORIGIN` трябва да сочи към FE URL (примерно `http://localhost:3001`), за да може backend-ът да редиректне потребителя обратно след `/auth/google/callback`.
+
+Проверка, че конфигурацията работи (без още да имаме FE бутон):
+
+1. `npm --prefix be run start:dev`
+2. `curl "http://localhost:3000/api/auth/google/authorize"` – отговорът съдържа `url` и `state`.
+3. Отвори върнатия `url` в браузър, завърши Google consent flow → backend редиректва към `FRONTEND_ORIGIN/auth/social-callback?...`.
+
 ---
 
 ## 3. Local Docker setup – db + api

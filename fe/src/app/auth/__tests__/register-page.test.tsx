@@ -63,7 +63,7 @@ describe("RegisterPage", () => {
     const confirmPasswordInput =
       await screen.findByLabelText(/Потвърди паролата/);
     const submitButton = await screen.findByRole("button", {
-      name: "Регистрация",
+      name: /^Регистрация$/,
     });
 
     fireEvent.change(emailInput, { target: { value: "invalid-email" } });
@@ -1024,7 +1024,7 @@ describe("RegisterPage", () => {
       name: /Съгласен съм/i,
     });
     const submitButton = await screen.findByRole("button", {
-      name: /Регистрация/,
+      name: /^Регистрация$/,
     });
 
     fireEvent.change(emailInput, { target: { value: "test@example.com" } });
@@ -1065,7 +1065,7 @@ describe("RegisterPage", () => {
       name: /Съгласен съм/i,
     });
     const submitButton = await screen.findByRole("button", {
-      name: /Регистрация/,
+      name: /^Регистрация$/,
     });
 
     fireEvent.change(emailInput, { target: { value: "test@example.com" } });
@@ -1125,7 +1125,7 @@ describe("RegisterPage", () => {
       name: /Съгласен съм/i,
     });
     const submitButton = await screen.findByRole("button", {
-      name: /Регистрация/,
+      name: /^Регистрация$/,
     });
 
     fireEvent.change(emailInput, { target: { value: "test@example.com" } });
