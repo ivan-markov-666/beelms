@@ -1,14 +1,12 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useCurrentLang } from "../../../../i18n/useCurrentLang";
 import { t } from "../../../../i18n/t";
 import { clearAccessToken, getAccessToken } from "../../../auth-token";
 import { buildApiUrl } from "../../../api-url";
 import { RecaptchaWidget } from "../../../_components/recaptcha-widget";
-
-const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
 
 type FieldErrors = {
   email?: string;
@@ -22,17 +20,45 @@ export function RegisterContent() {
   const router = useRouter();
   const lang = useCurrentLang();
 
+  const recaptchaSiteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [formSuccess, setFormSuccess] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [checkingSession, setCheckingSession] = useState(true);
+
+  const passwordStrength = useMemo(() => {
+    if (!password) return null;
+
+    const hasLength = password.length >= 8;
+    const hasUppercase = /[A-Z]/.test(password);
+    const hasLowercase = /[a-z]/.test(password);
+    const hasDigit = /\d/.test(password);
+    const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(
+      password,
+    );
+
+    const criteriaMet = [
+      hasLength,
+      hasUppercase,
+      hasLowercase,
+      hasDigit,
+      hasSpecialChar,
+    ].filter(Boolean).length;
+
+    if (criteriaMet === 5) return "strong";
+    if (hasLength && criteriaMet >= 3) return "medium";
+    return "weak";
+  }, [password]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -80,13 +106,42 @@ export function RegisterContent() {
     };
   }, [router]);
 
+  // Form persistence
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    try {
+      const saved = localStorage.getItem("register-form-data");
+      if (saved) {
+        const data = JSON.parse(saved);
+        setEmail(data.email || "");
+        setPassword(data.password || "");
+        setConfirmPassword(data.confirmPassword || "");
+        setAcceptTerms(data.acceptTerms || false);
+      }
+    } catch {
+      // ignore localStorage errors
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    try {
+      const data = { email, password, confirmPassword, acceptTerms };
+      localStorage.setItem("register-form-data", JSON.stringify(data));
+    } catch {
+      // ignore localStorage errors
+    }
+  }, [email, password, confirmPassword, acceptTerms]);
+
   const validate = (): boolean => {
     const errors: FieldErrors = {};
 
     if (!email) {
       errors.email = t(lang, "auth", "registerErrorEmailRequired");
     } else {
-      const emailRegex = /.+@.+\..+/;
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
         errors.email = t(lang, "auth", "registerErrorEmailInvalid");
       }
@@ -96,6 +151,35 @@ export function RegisterContent() {
       errors.password = t(lang, "auth", "registerErrorPasswordRequired");
     } else if (password.length < 8) {
       errors.password = t(lang, "auth", "registerErrorPasswordTooShort");
+    } else {
+      const hasUppercase = /[A-Z]/.test(password);
+      const hasLowercase = /[a-z]/.test(password);
+      const hasDigit = /\d/.test(password);
+      const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(
+        password,
+      );
+
+      if (!hasUppercase) {
+        errors.password = t(
+          lang,
+          "auth",
+          "registerErrorPasswordMissingUppercase",
+        );
+      } else if (!hasLowercase) {
+        errors.password = t(
+          lang,
+          "auth",
+          "registerErrorPasswordMissingLowercase",
+        );
+      } else if (!hasDigit) {
+        errors.password = t(lang, "auth", "registerErrorPasswordMissingDigit");
+      } else if (!hasSpecialChar) {
+        errors.password = t(
+          lang,
+          "auth",
+          "registerErrorPasswordMissingSpecialChar",
+        );
+      }
     }
 
     if (!confirmPassword) {
@@ -116,7 +200,7 @@ export function RegisterContent() {
       errors.terms = t(lang, "auth", "registerErrorTermsRequired");
     }
 
-    if (RECAPTCHA_SITE_KEY && !captchaToken) {
+    if (recaptchaSiteKey && !captchaToken) {
       errors.captcha = t(lang, "auth", "registerErrorCaptchaRequired");
     }
 
@@ -145,7 +229,7 @@ export function RegisterContent() {
           email,
           password,
           acceptTerms,
-          captchaToken: RECAPTCHA_SITE_KEY
+          captchaToken: recaptchaSiteKey
             ? (captchaToken ?? undefined)
             : undefined,
         }),
@@ -161,6 +245,12 @@ export function RegisterContent() {
         }
       } else {
         setFormSuccess(t(lang, "auth", "registerSuccess"));
+        // Clear form on success
+        setEmail("");
+        setPassword("");
+        setConfirmPassword("");
+        setAcceptTerms(false);
+        setCaptchaToken(null);
         setTimeout(() => {
           router.push("/auth/login");
         }, 13000);
@@ -211,11 +301,18 @@ export function RegisterContent() {
                 placeholder="your@email.com"
                 className="block w-full rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-green-600 focus:outline-none focus:ring-1 focus:ring-green-600"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setFieldErrors((prev) => ({ ...prev, email: undefined }));
+                }}
+                onBlur={validate}
+                aria-describedby={fieldErrors.email ? "email-error" : undefined}
                 disabled={submitting}
               />
               {fieldErrors.email && (
-                <p className="text-xs text-red-600">{fieldErrors.email}</p>
+                <p id="email-error" className="text-xs text-red-600">
+                  {fieldErrors.email}
+                </p>
               )}
             </div>
 
@@ -227,22 +324,115 @@ export function RegisterContent() {
                 {t(lang, "auth", "registerPasswordLabel")}
                 <span className="text-red-500">*</span>
               </label>
-              <input
-                id="password"
-                type="password"
-                autoComplete="new-password"
-                placeholder="********"
-                className="block w-full rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-green-600 focus:outline-none focus:ring-1 focus:ring-green-600"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={submitting}
-              />
+              <div className="relative">
+                <input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="new-password"
+                  placeholder="********"
+                  className="block w-full rounded-lg border border-gray-300 px-4 py-2 pr-10 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-green-600 focus:outline-none focus:ring-1 focus:ring-green-600"
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    setFieldErrors((prev) => ({
+                      ...prev,
+                      password: undefined,
+                    }));
+                  }}
+                  onBlur={validate}
+                  onCopy={(e) => e.preventDefault()}
+                  maxLength={100}
+                  aria-describedby={
+                    fieldErrors.password ? "password-error" : undefined
+                  }
+                  disabled={submitting}
+                />
+                <button
+                  type="button"
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+                  onClick={() => setShowPassword(!showPassword)}
+                  disabled={submitting}
+                  tabIndex={-1}
+                  aria-label={
+                    showPassword
+                      ? t(lang, "common", "hidePassword")
+                      : t(lang, "common", "showPassword")
+                  }
+                >
+                  {showPassword ? (
+                    <svg
+                      className="h-5 w-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S3.732 16.057 2.458 12z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                    </svg>
+                  ) : (
+                    <svg
+                      className="h-5 w-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S3.732 16.057 2.458 12z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M3 3l18 18"
+                      />
+                    </svg>
+                  )}
+                </button>
+              </div>
               {fieldErrors.password && (
-                <p className="text-xs text-red-600">{fieldErrors.password}</p>
+                <p id="password-error" className="text-xs text-red-600">
+                  {fieldErrors.password}
+                </p>
               )}
               <p className="mt-1 text-xs text-gray-500">
                 {t(lang, "auth", "registerPasswordHint")}
               </p>
+              {passwordStrength && (
+                <p
+                  className={`mt-1 text-xs ${
+                    passwordStrength === "strong"
+                      ? "text-green-600"
+                      : passwordStrength === "medium"
+                        ? "text-yellow-600"
+                        : "text-red-600"
+                  }`}
+                >
+                  {passwordStrength === "strong"
+                    ? "Силна парола"
+                    : passwordStrength === "medium"
+                      ? "Средна парола"
+                      : "Слаба парола"}
+                </p>
+              )}
             </div>
 
             <div className="space-y-1">
@@ -253,18 +443,101 @@ export function RegisterContent() {
                 {t(lang, "auth", "registerConfirmPasswordLabel")}
                 <span className="text-red-500">*</span>
               </label>
-              <input
-                id="confirmPassword"
-                type="password"
-                autoComplete="new-password"
-                placeholder="********"
-                className="block w-full rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-green-600 focus:outline-none focus:ring-1 focus:ring-green-600"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                disabled={submitting}
-              />
+              <div className="relative">
+                <input
+                  id="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  autoComplete="new-password"
+                  placeholder="********"
+                  className="block w-full rounded-lg border border-gray-300 px-4 py-2 pr-10 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-green-600 focus:outline-none focus:ring-1 focus:ring-green-600"
+                  value={confirmPassword}
+                  onChange={(e) => {
+                    setConfirmPassword(e.target.value);
+                    setFieldErrors((prev) => ({
+                      ...prev,
+                      confirmPassword: undefined,
+                    }));
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key !== "Enter") return;
+                    e.preventDefault();
+                    const form = e.currentTarget.form;
+                    if (form && typeof form.requestSubmit === "function") {
+                      form.requestSubmit();
+                      return;
+                    }
+                    form?.dispatchEvent(
+                      new Event("submit", { bubbles: true, cancelable: true }),
+                    );
+                  }}
+                  onBlur={validate}
+                  onCopy={(e) => e.preventDefault()}
+                  maxLength={100}
+                  disabled={submitting}
+                />
+                <button
+                  type="button"
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  disabled={submitting}
+                  tabIndex={-1}
+                  aria-label={
+                    showConfirmPassword
+                      ? t(lang, "common", "hidePassword")
+                      : t(lang, "common", "showPassword")
+                  }
+                >
+                  {showConfirmPassword ? (
+                    <svg
+                      className="h-5 w-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S3.732 16.057 2.458 12z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                    </svg>
+                  ) : (
+                    <svg
+                      className="h-5 w-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S3.732 16.057 2.458 12z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M3 3l18 18"
+                      />
+                    </svg>
+                  )}
+                </button>
+              </div>
               {fieldErrors.confirmPassword && (
-                <p className="text-xs text-red-600">
+                <p id="confirm-password-error" className="text-xs text-red-600">
                   {fieldErrors.confirmPassword}
                 </p>
               )}
@@ -276,7 +549,10 @@ export function RegisterContent() {
                 type="checkbox"
                 className="mt-1 h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500"
                 checked={acceptTerms}
-                onChange={(e) => setAcceptTerms(e.target.checked)}
+                onChange={(e) => {
+                  setAcceptTerms(e.target.checked);
+                  setFieldErrors((prev) => ({ ...prev, terms: undefined }));
+                }}
                 disabled={submitting}
               />
               <label htmlFor="terms" className="text-xs text-gray-700">
@@ -305,16 +581,19 @@ export function RegisterContent() {
               <p className="text-xs text-red-600">{fieldErrors.terms}</p>
             )}
 
-            {RECAPTCHA_SITE_KEY ? (
+            {recaptchaSiteKey ? (
               <div className="space-y-2">
                 <p className="text-xs text-gray-600">
                   {t(lang, "auth", "registerCaptchaLabel")}
                 </p>
                 <RecaptchaWidget
-                  siteKey={RECAPTCHA_SITE_KEY}
+                  siteKey={recaptchaSiteKey}
                   lang={lang}
                   disabled={submitting}
-                  onTokenChange={setCaptchaToken}
+                  onTokenChange={(token) => {
+                    setCaptchaToken(token);
+                    setFieldErrors((prev) => ({ ...prev, captcha: undefined }));
+                  }}
                 />
                 {fieldErrors.captcha && (
                   <p className="text-xs text-red-600">{fieldErrors.captcha}</p>
@@ -325,6 +604,17 @@ export function RegisterContent() {
                 {t(lang, "auth", "registerCaptchaPlaceholder")}
               </div>
             )}
+
+            {/* Honeypot field for bot detection */}
+            <input
+              type="text"
+              name="honeypot"
+              style={{ display: "none" }}
+              tabIndex={-1}
+              autoComplete="off"
+              value=""
+              readOnly
+            />
 
             {formError && (
               <p className="text-sm text-red-600" role="alert">

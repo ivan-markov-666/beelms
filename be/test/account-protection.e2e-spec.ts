@@ -32,7 +32,7 @@ describe('Account protection (e2e)', () => {
 
   it('POST /api/auth/login returns 429 after repeated invalid credentials', async () => {
     const email = uniqueEmail('account-protection-login');
-    const password = 'Password1234';
+    const password = 'Password123!';
 
     await request(app.getHttpServer())
       .post('/api/auth/register')
@@ -47,13 +47,13 @@ describe('Account protection (e2e)', () => {
     for (let i = 0; i < 5; i += 1) {
       await request(app.getHttpServer())
         .post('/api/auth/login')
-        .send({ email, password: 'WrongPassword1234' })
+        .send({ email, password: 'WrongPassword123!' })
         .expect(401);
     }
 
     const res = await request(app.getHttpServer())
       .post('/api/auth/login')
-      .send({ email, password: 'WrongPassword1234' })
+      .send({ email, password: 'WrongPassword123!' })
       .expect(429);
 
     const retryAfter = Number(res.headers['retry-after']);
@@ -63,7 +63,7 @@ describe('Account protection (e2e)', () => {
 
   it('successful login clears lockout for the same ip+email', async () => {
     const email = uniqueEmail('account-protection-clear');
-    const password = 'Password1234';
+    const password = 'Password123!';
 
     await request(app.getHttpServer())
       .post('/api/auth/register')
@@ -78,7 +78,7 @@ describe('Account protection (e2e)', () => {
     for (let i = 0; i < 4; i += 1) {
       await request(app.getHttpServer())
         .post('/api/auth/login')
-        .send({ email, password: 'WrongPassword1234' })
+        .send({ email, password: 'WrongPassword123!' })
         .expect(401);
     }
 
@@ -90,13 +90,13 @@ describe('Account protection (e2e)', () => {
     for (let i = 0; i < 5; i += 1) {
       await request(app.getHttpServer())
         .post('/api/auth/login')
-        .send({ email, password: 'WrongPassword1234' })
+        .send({ email, password: 'WrongPassword123!' })
         .expect(401);
     }
 
     await request(app.getHttpServer())
       .post('/api/auth/login')
-      .send({ email, password: 'WrongPassword1234' })
+      .send({ email, password: 'WrongPassword123!' })
       .expect(429);
   });
 });

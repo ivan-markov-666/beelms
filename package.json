@@ -7,16 +7,19 @@
   "scripts": {
     "prepare": "husky install",
     "lint": "npm --prefix be run lint && npm --prefix fe run lint && npx --yes @redocly/cli@latest lint --config .redocly.yaml docs/architecture/openapi.yaml",
-    "lint:log": "npm run lint > lint.log 2>&1",
+    "lint:log": "node lint-log.js",
     "format": "npm --prefix be run format && npm --prefix fe run format",
     "format:log": "npm run format > format.log 2>&1",
     "docs:openapi:lint": "npx -y @redocly/cli@latest lint --config .redocly.yaml docs/architecture/openapi.yaml",
     "test:be": "npm --prefix be run test:regression:local",
-    "test:be:log": "npm run test:be > test-be.log 2>&1",
     "test:fe": "npm --prefix fe run test",
-    "test:fe:log": "npm run test:fe > test-fe.log 2>&1",
-
-    "be:migration:run": "npm --prefix be run migration:run",
+    "test:be:log": "node test-be-log.js",
+    "test:be:log:clean": "npm run test:be > test-be.log 2>&1 && node clean-logs.js test-be.log",
+    "test:fe:log": "node test-fe-log.js",
+    "test:fe:log:clean": "npm run test:fe > test-fe.log 2>&1 && node clean-logs.js test-fe.log",
+    "lint:log:clean": "npm run lint > lint.log 2>&1 && node clean-logs.js lint.log",
+    "format:log:clean": "npm run format > format.log 2>&1 && node clean-logs.js format.log",
+    "clean:logs": "node clean-logs.js",
     "be:migration:revert": "npm --prefix be run migration:revert",
     "be:migration:show": "npm --prefix be run migration:show",
     "be:migration:check": "npm --prefix be run migration:check",
@@ -34,6 +37,7 @@
     "docker:migrate": "docker compose run --rm migrate",
     "docker:seed:wiki": "docker compose exec api npm run seed:wiki",
     "docker:seed:courses": "docker compose exec api npm run seed:courses",
-    "docker:db:host": "docker compose -f docker-compose.yml -f docker-compose.db-host.yml up -d db"
+    "docker:db:host": "docker compose -f docker-compose.yml -f docker-compose.db-host.yml up -d db",
+    "load-test": "artillery run artillery.yml"
   }
 }

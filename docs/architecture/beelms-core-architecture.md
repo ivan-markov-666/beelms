@@ -196,6 +196,12 @@
 - **Auth & Security**
   - JWT auth, защити срещу brute force, rate limiting за чувствителни операции.
   - CSRF/XSS/SQL injection защити според рамките на NestJS/ORM и допълнителни middleware-и.
+  - **CSRF Strategy**: За Bearer token (JWT) authentication CSRF защита е **N/A**, защото `Authorization` header-ът не се изпраща автоматично от браузъра към third-party origins. CORS + JWT guards осигуряват достатъчна защита.
+  - **CSRF Trigger Conditions**: CSRF става релевантно при:
+    - Преминаване към cookie-based session authentication (HttpOnly cookies)
+    - Включване на `credentials: "include"` за cross-site cookie sharing
+    - Добавяне на state-changing публични endpoints без token изисквания
+    - В тези случаи се имплементира Double-submit cookie pattern или Synchronizer token pattern.
 
 - **GDPR**
   - API и UI потоци за delete/export на данни.

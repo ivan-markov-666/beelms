@@ -128,7 +128,7 @@ describe('Admin Users endpoints (e2e)', () => {
 
     await request(app.getHttpServer())
       .post('/api/auth/register')
-      .send({ email: targetEmail, password: 'Password1234', acceptTerms: true })
+      .send({ email: targetEmail, password: 'Password123!', acceptTerms: true })
       .expect(201);
 
     const targetUser = await userRepo.findOne({
@@ -174,7 +174,7 @@ describe('Admin Users endpoints (e2e)', () => {
 
     await request(app.getHttpServer())
       .post('/api/auth/register')
-      .send({ email: targetEmail, password: 'Password1234', acceptTerms: true })
+      .send({ email: targetEmail, password: 'Password123!', acceptTerms: true })
       .expect(201);
 
     const targetUser = await userRepo.findOne({

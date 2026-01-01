@@ -1,33 +1,5 @@
 Виж какво е останало:
 @story-courses-10-course-categories.md е със статус Planned_ .
 @story-docs-1-openapi-sync.md е със статус In Progress_
-@story-rbac-1-roles-and-access-mvp.md е със статус Planned_
-@story-rbac-2-teacher-author-ownership.md е със статус Planned_
 @story-sec-1-csrf-strategy-jwt-browser-clients.md е със статус Planned_
 Предполагам, че трябва да изберем едно измежду тези story-та.
-
-
-
-
-BE: да финализирам CoursesService.adminUpdateCourse да връща course със зареден category relation (вече е направено при create; при update също го направихме, но трябва да сме сигурни, че няма останали TS/ESLint проблеми).
-BE: да проверя дали миграциите са включени/редът е ОК и дали няма конфликт със съществуващи колони (важно: в Course добавихме categoryId и relation).
-Tests: e2e типове в be/test/*.e2e-spec.ts още са със стари CourseSummary типове (трябва да добавим categoryId и category, иначе TypeScript компилация на тестовете може да падне).
-FE: опционално да добавя category колонка и в public courses cards вече има; admin courses list вече има category column.
-
-Какво ми трябва от теб (1 действие)
-Пусни локално тест/линт, за да видим какви exact грешки са останали (ако има), и ще ги затворя бързо:
-
-1) BE tests
-cmd
-npm test
-(в d:\Projects\beelms\be)
-
-2) E2E tests (ако искаш директно)
-cmd
-npm run test:e2e
-3) OpenAPI lint
-cmd
-npx --yes "@redocly/cli@1.34.5" lint docs/architecture/openapi.yaml
-(в d:\Projects\beelms)
-
-Копирай ми output-а (ако има грешки), и продължавам с точните фиксове.

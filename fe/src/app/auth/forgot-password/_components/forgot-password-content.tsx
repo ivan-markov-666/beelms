@@ -31,7 +31,7 @@ export function ForgotPasswordContent() {
     if (!email) {
       errors.email = t(lang, "auth", "forgotErrorEmailRequired");
     } else {
-      const emailRegex = /.+@.+\..+/;
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
         errors.email = t(lang, "auth", "forgotErrorEmailInvalid");
       }

@@ -23,7 +23,7 @@ export async function registerAndLogin(
   tokenType: string;
 }> {
   const email = uniqueEmail(suffix);
-  const password = 'Password1234';
+  const password = 'Password123!';
 
   const registerRes = await request(app.getHttpServer())
     .post('/api/auth/register')

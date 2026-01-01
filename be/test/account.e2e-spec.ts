@@ -7,6 +7,11 @@ import { AppModule } from '../src/app.module';
 import { User } from '../src/auth/user.entity';
 import { registerAndLogin, uniqueEmail } from './utils/auth-helpers';
 
+declare global {
+  // Provided by rate-limit bootstrap in tests
+  var clearRateLimitStore: (() => void) | undefined;
+}
+
 describe('Account endpoints (e2e)', () => {
   let app: INestApplication;
   let userRepo: Repository<User>;
@@ -31,6 +36,12 @@ describe('Account endpoints (e2e)', () => {
 
   afterAll(async () => {
     await app.close();
+  });
+
+  beforeEach(() => {
+    if (global.clearRateLimitStore) {
+      global.clearRateLimitStore();
+    }
   });
 
   it('GET /api/users/me returns current user profile for valid token', async () => {
@@ -162,7 +173,7 @@ describe('Account endpoints (e2e)', () => {
       .post('/api/users/me/change-password')
       .set('Authorization', `Bearer ${accessToken}`)
       .send({
-        currentPassword: 'WrongPassword1234',
+        currentPassword: 'WrongPassword123!',
         newPassword: 'NewPassword5678',
       })
       .expect(400);
@@ -184,7 +195,7 @@ describe('Account endpoints (e2e)', () => {
   it('POST /api/users/me/change-password returns 401 when Authorization header is missing', async () => {
     await request(app.getHttpServer())
       .post('/api/users/me/change-password')
-      .send({ currentPassword: 'Password1234', newPassword: 'NewPassword5678' })
+      .send({ currentPassword: 'Password123!', newPassword: 'NewPassword5678' })
       .expect(401);
   });
 
@@ -469,7 +480,7 @@ describe('Account endpoints (e2e)', () => {
 
   it('allows deleting an account and re-registering with the same email', async () => {
     const email = uniqueEmail('delete-reregister');
-    const password = 'Password1234';
+    const password = 'Password123!';
 
     // 1) Initial registration
     await request(app.getHttpServer())

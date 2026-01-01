@@ -1,6 +1,6 @@
 # STORY-SEC-1: CSRF strategy for JWT + browser clients
 
-_BMAD Story Spec | EPIC: EPIC-CROSS-SECURITY | Status: 🟡 Planned_
+_BMAD Story Spec | EPIC: EPIC-CROSS-SECURITY | Status: ✅ Completed_
 
 ---
 

@@ -1,6 +1,6 @@
 # STORY-COURSES-10: Course Categories (Catalog Grouping)
 
-_BMAD Story Spec | EPIC: EPIC-CORE-COURSES-PROGRESS | Status: 🟡 Planned_
+_BMAD Story Spec | EPIC: EPIC-CORE-COURSES-PROGRESS | Status: ✅ Implemented_
 
 ---
 

@@ -17,6 +17,11 @@ type CourseSummary = {
   isPaid: boolean;
   currency: string | null;
   priceCents: number | null;
+  categoryId: string | null;
+  category: {
+    slug: string;
+    title: string;
+  } | null;
 };
 
 type CourseDetail = CourseSummary & {

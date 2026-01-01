@@ -87,7 +87,7 @@ export function LoginContent() {
     if (!email) {
       errors.email = t(lang, "auth", "loginErrorEmailRequired");
     } else {
-      const emailRegex = /.+@.+\..+/;
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
         errors.email = t(lang, "auth", "loginErrorEmailInvalid");
       }
