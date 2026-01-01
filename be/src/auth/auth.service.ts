@@ -20,6 +20,7 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import type { GoogleProfile } from './google-oauth.service';
+import type { FacebookProfile } from './facebook-oauth.service';
 import { CaptchaService } from '../security/captcha/captcha.service';
 import { InMemoryLoginAttemptStore } from '../security/account-protection/login-attempts.store';
 import {
@@ -220,7 +221,17 @@ export class AuthService {
   }
 
   async loginWithGoogle(profile: GoogleProfile): Promise<AuthTokenDto> {
-    const normalizedEmail = profile.email.trim().toLowerCase();
+    const user = await this.upsertSocialUser(profile.email);
+    return this.issueAuthToken(user);
+  }
+
+  async loginWithFacebook(profile: FacebookProfile): Promise<AuthTokenDto> {
+    const user = await this.upsertSocialUser(profile.email);
+    return this.issueAuthToken(user);
+  }
+
+  private async upsertSocialUser(email: string): Promise<User> {
+    const normalizedEmail = email.trim().toLowerCase();
     let user = await this.usersRepo.findOne({
       where: { email: normalizedEmail, active: true },
     });
@@ -245,7 +256,7 @@ export class AuthService {
       await this.usersRepo.save(user);
     }
 
-    return this.issueAuthToken(user);
+    return user;
   }
 
   private async issueAuthToken(user: User): Promise<AuthTokenDto> {

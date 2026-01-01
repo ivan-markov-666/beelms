@@ -15,6 +15,8 @@ import {
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { AuthService } from './auth.service';
+import { GoogleOAuthService } from './google-oauth.service';
+import { FacebookOAuthService } from './facebook-oauth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { UserProfileDto } from './dto/user-profile.dto';
@@ -26,7 +28,6 @@ import { RateLimit } from '../security/rate-limit/rate-limit.decorator';
 import { LoginProtectionInterceptor } from '../security/account-protection/login-protection.interceptor';
 import { getClientIp } from '../security/account-protection/login-protection.utils';
 import { FeatureEnabledGuard } from '../settings/feature-enabled.guard';
-import { GoogleOAuthService } from './google-oauth.service';
 
 @Controller('auth')
 @UseGuards(FeatureEnabledGuard('auth'))
@@ -34,6 +35,7 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly googleOAuthService: GoogleOAuthService,
+    private readonly facebookOAuthService: FacebookOAuthService,
   ) {}
 
   @Get('register')
@@ -42,6 +44,71 @@ export class AuthController {
       'Method Not Allowed',
       HttpStatus.METHOD_NOT_ALLOWED,
     );
+  }
+
+  @Get('facebook/authorize')
+  facebookAuthorize(@Query('redirectPath') redirectPath?: string): {
+    url: string;
+    state: string;
+  } {
+    if (!this.facebookOAuthService.isConfigured()) {
+      throw new ServiceUnavailableException('Facebook login is not available');
+    }
+
+    return this.facebookOAuthService.createAuthorizationUrl(redirectPath);
+  }
+
+  @Get('facebook/callback')
+  async facebookCallback(
+    @Query('code') code: string | undefined,
+    @Query('state') state: string | undefined,
+    @Query('error') error: string | undefined,
+    @Res() res: Response,
+  ): Promise<void> {
+    const fallbackRedirect =
+      this.facebookOAuthService.extractRedirectPathFromState(state);
+
+    if (!this.facebookOAuthService.isConfigured()) {
+      res.redirect(
+        this.facebookOAuthService.buildFrontendRedirectUrl({
+          redirectPath: fallbackRedirect,
+          error: 'facebook_unavailable',
+        }),
+      );
+      return;
+    }
+
+    if (error || !code) {
+      res.redirect(
+        this.facebookOAuthService.buildFrontendRedirectUrl({
+          redirectPath: fallbackRedirect,
+          error: error ?? 'missing_code',
+        }),
+      );
+      return;
+    }
+
+    try {
+      const profile = await this.facebookOAuthService.exchangeCodeForProfile(
+        code,
+        state ?? '',
+      );
+      const token = await this.authService.loginWithFacebook(profile);
+
+      res.redirect(
+        this.facebookOAuthService.buildFrontendRedirectUrl({
+          redirectPath: profile.redirectPath,
+          token: token.accessToken,
+        }),
+      );
+    } catch {
+      res.redirect(
+        this.facebookOAuthService.buildFrontendRedirectUrl({
+          redirectPath: fallbackRedirect,
+          error: 'facebook_oauth_failed',
+        }),
+      );
+    }
   }
 
   @Post('register')

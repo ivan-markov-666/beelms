@@ -2,11 +2,18 @@
 
 import { buildApiUrl } from "../api-url";
 
+export const DEFAULT_SOCIAL_REDIRECT = "/wiki";
+
+type SocialProvider = "google" | "facebook";
+
+const AUTHORIZE_ENDPOINT: Record<SocialProvider, string> = {
+  google: "/auth/google/authorize",
+  facebook: "/auth/facebook/authorize",
+};
+
 type SocialAuthorizeResponse = {
   url: string;
 };
-
-export const DEFAULT_SOCIAL_REDIRECT = "/wiki";
 
 export function normalizeSocialRedirectPath(
   input?: string | null,
@@ -22,11 +29,16 @@ export function normalizeSocialRedirectPath(
   return undefined;
 }
 
-export async function startGoogleOAuth(options?: {
+type StartSocialOAuthOptions = {
+  provider: SocialProvider;
   redirectPath?: string | null;
-}): Promise<void> {
+};
+
+export async function startSocialOAuth(
+  options: StartSocialOAuthOptions,
+): Promise<void> {
   const redirectPath =
-    normalizeSocialRedirectPath(options?.redirectPath) ??
+    normalizeSocialRedirectPath(options.redirectPath) ??
     DEFAULT_SOCIAL_REDIRECT;
 
   const params = new URLSearchParams();
@@ -35,7 +47,7 @@ export async function startGoogleOAuth(options?: {
   }
 
   const res = await fetch(
-    `${buildApiUrl("/auth/google/authorize")}?${params.toString()}`,
+    `${buildApiUrl(AUTHORIZE_ENDPOINT[options.provider])}?${params.toString()}`,
     {
       method: "GET",
       headers: {
@@ -45,14 +57,32 @@ export async function startGoogleOAuth(options?: {
   );
 
   if (!res.ok) {
-    throw new Error("Google OAuth authorize request failed");
+    throw new Error(`${options.provider} OAuth authorize request failed`);
   }
 
   const data = (await res.json()) as Partial<SocialAuthorizeResponse>;
 
   if (!data?.url) {
-    throw new Error("Google OAuth authorize response missing url");
+    throw new Error(`${options.provider} OAuth authorize response missing url`);
   }
 
   window.location.assign(data.url);
+}
+
+export function startGoogleOAuth(options?: {
+  redirectPath?: string | null;
+}): Promise<void> {
+  return startSocialOAuth({
+    provider: "google",
+    redirectPath: options?.redirectPath,
+  });
+}
+
+export function startFacebookOAuth(options?: {
+  redirectPath?: string | null;
+}): Promise<void> {
+  return startSocialOAuth({
+    provider: "facebook",
+    redirectPath: options?.redirectPath,
+  });
 }

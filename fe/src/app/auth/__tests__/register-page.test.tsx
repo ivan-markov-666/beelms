@@ -12,6 +12,18 @@ const mockPush = jest.fn();
 const mockReplace = jest.fn();
 
 const ORIGINAL_RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
+let mockSearchParams = "lang=bg";
+
+const startGoogleOAuth = jest.fn();
+const startFacebookOAuth = jest.fn();
+
+jest.mock("../social-login", () => ({
+  DEFAULT_SOCIAL_REDIRECT: "/wiki",
+  normalizeSocialRedirectPath:
+    jest.requireActual("../social-login").normalizeSocialRedirectPath,
+  startGoogleOAuth: (...args: unknown[]) => startGoogleOAuth(...args),
+  startFacebookOAuth: (...args: unknown[]) => startFacebookOAuth(...args),
+}));
 
 jest.mock("next/navigation", () => {
   const actual = jest.requireActual("next/navigation");
@@ -22,7 +34,7 @@ jest.mock("next/navigation", () => {
       replace: mockReplace,
       prefetch: jest.fn(),
     }),
-    useSearchParams: () => new URLSearchParams("lang=bg"),
+    useSearchParams: () => new URLSearchParams(mockSearchParams),
   };
 });
 
@@ -43,6 +55,7 @@ describe("RegisterPage", () => {
     // environment, the form requires a captcha token and most tests will fail
     // because validation prevents submission.
     delete process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
+    mockSearchParams = "lang=bg";
   });
 
   afterAll(() => {
