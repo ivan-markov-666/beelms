@@ -252,6 +252,34 @@ The Auth module is configured via environment variables:
 - `AUTH_REQUIRE_CAPTCHA` – when set to `true`, the `POST /api/auth/register` and `POST /api/auth/forgot-password` endpoints require a non-empty `captchaToken` field in the request body.
  - `FRONTEND_ORIGIN` – origin allowed by CORS for browser clients (default: `http://localhost:3001`), used by `app.enableCors` in `be/src/main.ts`.
 
+### GitHub OAuth конфигурация
+
+За да активирате социален вход с GitHub за локална разработка:
+
+1. Влезте в [GitHub Developer settings › OAuth Apps](https://github.com/settings/developers) и създайте нова OAuth App.
+   - **Homepage URL**: `http://localhost:3001`
+   - **Authorization callback URL**: `http://localhost:3000/api/auth/github/callback`
+2. Копирайте `Client ID` и генерирайте `Client Secret`.
+3. В `be/.env` добавете:
+
+   ```env
+   GITHUB_CLIENT_ID=<GitHub OAuth Client ID>
+   GITHUB_CLIENT_SECRET=<GitHub OAuth Client Secret>
+   GITHUB_OAUTH_REDIRECT_URL=http://localhost:3000/api/auth/github/callback
+   ```
+
+4. Рестартирайте backend сървъра, за да заредите новите променливи.
+
+#### Проверка с curl
+
+След като променливите са налични, можете да валидирате, че `/api/auth/github/authorize` връща коректния redirect към GitHub:
+
+```bash
+curl -I "http://localhost:3000/api/auth/github/authorize?redirect=/wiki/article"
+```
+
+Очаквайте `302 Found` с `Location` заглавие, сочещо към `https://github.com/login/oauth/authorize?...state=<STATE>`. Отворете върнатия URL в браузър, за да завършите OAuth потока. След успешен вход GitHub ще върне потребителя към `http://localhost:3000/api/auth/github/callback`, откъдето backend-ът ще изгради крайната препратка към фронтенда (`/auth/social-callback`).
+
 ### Account / Profile API (WS-2)
 
 All account endpoints are protected with JWT and are available under the `/api/users` prefix (the global Nest prefix is `api`). A valid access token from `POST /api/auth/login` must be sent as:
