@@ -11,7 +11,7 @@ import {
 } from "../../../auth-token";
 import { buildApiUrl } from "../../../api-url";
 import { RecaptchaWidget } from "../../../_components/recaptcha-widget";
-import { startGoogleOAuth } from "../../social-login";
+import { startFacebookOAuth, startGoogleOAuth } from "../../social-login";
 
 const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
 
@@ -38,21 +38,36 @@ export function LoginContent() {
   const [submitting, setSubmitting] = useState(false);
   const [checkingSession, setCheckingSession] = useState(true);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [facebookLoading, setFacebookLoading] = useState(false);
 
-  const handleGoogleLogin = async () => {
-    if (googleLoading) return;
+  const handleSocialLogin = async (provider: "google" | "facebook") => {
+    const isGoogle = provider === "google";
+    if ((isGoogle && googleLoading) || (!isGoogle && facebookLoading)) {
+      return;
+    }
 
     setSocialError(null);
-    setGoogleLoading(true);
+    if (isGoogle) {
+      setGoogleLoading(true);
+    } else {
+      setFacebookLoading(true);
+    }
 
     try {
-      await startGoogleOAuth({
+      const startFn = isGoogle ? startGoogleOAuth : startFacebookOAuth;
+      await startFn({
         redirectPath: searchParams.get("redirect"),
       });
     } catch (error) {
-      console.error("Google OAuth authorize failed", error);
-      setSocialError(t(lang, "auth", "loginGoogleError"));
-      setGoogleLoading(false);
+      console.error(`${provider} OAuth authorize failed`, error);
+      setSocialError(
+        t(lang, "auth", isGoogle ? "loginGoogleError" : "loginFacebookError"),
+      );
+      if (isGoogle) {
+        setGoogleLoading(false);
+      } else {
+        setFacebookLoading(false);
+      }
     }
   };
 
@@ -227,8 +242,8 @@ export function LoginContent() {
           <div className="space-y-3">
             <button
               type="button"
-              onClick={handleGoogleLogin}
-              disabled={submitting || googleLoading}
+              onClick={() => handleSocialLogin("google")}
+              disabled={submitting || googleLoading || facebookLoading}
               className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-70"
             >
               <svg
@@ -258,6 +273,27 @@ export function LoginContent() {
               {googleLoading
                 ? t(lang, "auth", "loginGoogleLoading")
                 : t(lang, "auth", "loginGoogleCta")}
+            </button>
+            <button
+              type="button"
+              onClick={() => handleSocialLogin("facebook")}
+              disabled={submitting || facebookLoading || googleLoading}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              <svg
+                className="h-5 w-5"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <path
+                  fill="#1877F2"
+                  d="M24 12.073C24 5.404 18.627 0 12 0S0 5.404 0 12.073c0 6.034 4.388 11.045 10.125 11.875V15.563H7.078v-3.49h3.047V9.356c0-3.007 1.792-4.668 4.533-4.668 1.313 0 2.686.235 2.686.235v2.953h-1.513c-1.491 0-1.953.93-1.953 1.887v2.259h3.328l-.532 3.49h-2.796v8.385C19.612 23.118 24 18.107 24 12.073z"
+                />
+              </svg>
+              {facebookLoading
+                ? t(lang, "auth", "loginFacebookLoading")
+                : t(lang, "auth", "loginFacebookCta")}
             </button>
             {socialError && (
               <p className="text-xs text-red-600" role="alert">

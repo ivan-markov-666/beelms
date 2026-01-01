@@ -41,8 +41,11 @@ export const messages: Messages = {
       loginSubmitLoading: "Вписване...",
       loginGoogleCta: "Вход с Google",
       loginGoogleLoading: "Свързване...",
+      loginFacebookCta: "Вход с Facebook",
+      loginFacebookLoading: "Свързване...",
       loginSocialDivider: "или продължете с имейл",
       loginGoogleError: "Google входът неуспя. Моля, опитайте отново.",
+      loginFacebookError: "Facebook входът неуспя. Моля, опитайте отново.",
       loginForgotLink: "Забравена парола?",
       loginRegisterLink: "Нямате акаунт?",
       loginRememberMeLabel: "Remember me",
@@ -76,9 +79,13 @@ export const messages: Messages = {
       registerSubmitLoading: "Изпращане...",
       registerGoogleCta: "Регистрация с Google",
       registerGoogleLoading: "Свързване...",
+      registerFacebookCta: "Регистрация с Facebook",
+      registerFacebookLoading: "Свързване...",
       registerSocialDivider: "или попълнете формата",
       registerGoogleError:
         "Регистрацията с Google неуспя. Моля, опитайте отново.",
+      registerFacebookError:
+        "Регистрацията с Facebook неуспя. Моля, опитайте отново.",
       registerHasAccount: "Вече имате акаунт?",
       registerLoginLink: "Вход",
       registerErrorEmailRequired: "Моля, въведете имейл.",
@@ -153,12 +160,12 @@ export const messages: Messages = {
         "Паролата беше сменена успешно. Ще ви пренасочим към страницата за вход...",
       socialCallbackTitle: "Обработка на социален вход",
       socialCallbackProcessing:
-        "Моля, изчакайте. Завършваме входа ви чрез Google.",
+        "Моля, изчакайте. Завършваме входа ви чрез Google/Facebook.",
       socialCallbackRedirectNotice:
         "Ще ви пренасочим автоматично в рамките на няколко секунди.",
       socialCallbackErrorTitle: "Неуспешен социален вход",
       socialCallbackError:
-        "Не успяхме да ви впишем чрез Google. Моля, опитайте отново.",
+        "Не успяхме да ви впишем чрез социален профил. Моля, опитайте отново.",
       socialCallbackErrorCta: "Обратно към страницата за вход",
       resetPasswordRequirementsTitle: "Изисквания за парола:",
       resetPasswordRequirementsItemMinLength: "Минимум 8 символа",

@@ -17,6 +17,7 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 import { CaptchaService } from '../security/captcha/captcha.service';
 import { InMemoryLoginAttemptStore } from '../security/account-protection/login-attempts.store';
 import type { GoogleProfile } from './google-oauth.service';
+import type { FacebookProfile } from './facebook-oauth.service';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -71,6 +72,76 @@ describe('AuthService', () => {
     service = module.get<AuthService>(AuthService);
     usersRepo = module.get(getRepositoryToken(User));
     jwtService = module.get<JwtService>(JwtService);
+  });
+
+  describe('loginWithFacebook', () => {
+    const baseProfile: FacebookProfile = {
+      email: 'fb.user@example.com',
+      emailVerified: true,
+      redirectPath: '/wiki',
+    };
+
+    it('creates and logs in a new Facebook user', async () => {
+      (usersRepo.findOne as jest.Mock).mockResolvedValue(undefined);
+      (usersRepo.create as jest.Mock).mockImplementation((payload) => payload);
+      (usersRepo.save as jest.Mock)
+        .mockImplementationOnce(async (user) => ({
+          ...user,
+          id: 'facebook-user-id',
+          tokenVersion: 0,
+        }))
+        .mockImplementationOnce(async (user) => user);
+
+      const token = await service.loginWithFacebook(baseProfile);
+
+      const [[createdUserPayload]] = (
+        usersRepo.create as jest.MockedFunction<typeof usersRepo.create>
+      ).mock.calls;
+      expect(createdUserPayload?.email).toBe(baseProfile.email);
+      expect(createdUserPayload?.emailVerified).toBe(true);
+      expect(createdUserPayload?.termsAcceptedAt).toBeInstanceOf(Date);
+      expect(createdUserPayload?.privacyAcceptedAt).toBeInstanceOf(Date);
+      expect(usersRepo.save).toHaveBeenCalledTimes(1);
+
+      const payload = await jwtService.verifyAsync<{
+        sub: string;
+        email: string;
+        tokenVersion: number;
+      }>(token.accessToken);
+      expect(payload.sub).toBe('facebook-user-id');
+      expect(payload.email).toBe(baseProfile.email);
+      expect(payload.tokenVersion).toBe(0);
+    });
+
+    it('verifies existing Facebook user and issues token', async () => {
+      const existingUser: Partial<User> = {
+        id: 'existing-facebook-user',
+        email: baseProfile.email,
+        emailVerified: false,
+        tokenVersion: 3,
+        active: true,
+      };
+
+      (usersRepo.findOne as jest.Mock).mockResolvedValue(existingUser);
+      (usersRepo.save as jest.Mock).mockImplementation(async (user) => user);
+
+      const token = await service.loginWithFacebook(baseProfile);
+
+      expect(usersRepo.save).toHaveBeenCalledWith(
+        expect.objectContaining({
+          emailVerified: true,
+        }),
+      );
+
+      const payload = await jwtService.verifyAsync<{
+        sub: string;
+        email: string;
+        tokenVersion: number;
+      }>(token.accessToken);
+      expect(payload.sub).toBe(existingUser.id);
+      expect(payload.email).toBe(existingUser.email);
+      expect(payload.tokenVersion).toBe(existingUser.tokenVersion);
+    });
   });
 
   afterEach(() => {

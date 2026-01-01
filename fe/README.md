@@ -102,7 +102,8 @@ The Wiki FE tests run in a Jest/Node environment, while some markdown-related de
 To keep the tests simple and stable, we mock these modules in Jest:
 
 - Jest config: `fe/jest.config.cjs`
-  - `moduleNameMapper` maps `react-markdown`, `remark-gfm` and `rehype-raw` to local mocks.
+  - `moduleNameMapper` maps `react-markdown`, `remark-gfm` and `rehype-raw`### Google Social Login
+
 - Mocks live in `fe/test/__mocks__/`:
   - `react-markdown.tsx` – renders children inside a simple wrapper component;
   - `remark-gfm.ts`, `rehype-raw.ts` – no-op plugin mocks.

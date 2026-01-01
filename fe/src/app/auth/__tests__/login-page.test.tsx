@@ -4,6 +4,18 @@ import { ACCESS_TOKEN_KEY } from "../../auth-token";
 
 const mockPush = jest.fn();
 const mockReplace = jest.fn();
+let mockSearchParams = "lang=bg";
+
+const startGoogleOAuth = jest.fn();
+const startFacebookOAuth = jest.fn();
+
+jest.mock("../social-login", () => ({
+  DEFAULT_SOCIAL_REDIRECT: "/wiki",
+  normalizeSocialRedirectPath:
+    jest.requireActual("../social-login").normalizeSocialRedirectPath,
+  startGoogleOAuth: (...args: unknown[]) => startGoogleOAuth(...args),
+  startFacebookOAuth: (...args: unknown[]) => startFacebookOAuth(...args),
+}));
 
 jest.mock("next/navigation", () => {
   const actual = jest.requireActual("next/navigation");
@@ -14,7 +26,7 @@ jest.mock("next/navigation", () => {
       replace: mockReplace,
       prefetch: jest.fn(),
     }),
-    useSearchParams: () => new URLSearchParams("lang=bg"),
+    useSearchParams: () => new URLSearchParams(mockSearchParams),
   };
 });
 
@@ -30,6 +42,7 @@ describe("LoginPage", () => {
   beforeEach(() => {
     jest.resetAllMocks();
     window.localStorage.clear();
+    mockSearchParams = "lang=bg";
   });
 
   it("renders email and password fields", async () => {
@@ -99,6 +112,46 @@ describe("LoginPage", () => {
 
     expect(
       await screen.findByText("Невалидни данни за вход."),
+    ).toBeInTheDocument();
+  });
+
+  it("starts Google OAuth when Google button is clicked", async () => {
+    mockSearchParams = "lang=bg&redirect=/courses";
+    render(<LoginPage />);
+
+    const googleButton = await screen.findByRole("button", {
+      name: "Вход с Google",
+    });
+
+    fireEvent.click(googleButton);
+
+    await waitFor(() => {
+      expect(startGoogleOAuth).toHaveBeenCalledWith({
+        redirectPath: "/courses",
+      });
+    });
+    expect(
+      screen.getByRole("button", { name: "Свързване..." }),
+    ).toBeInTheDocument();
+  });
+
+  it("starts Facebook OAuth when Facebook button is clicked", async () => {
+    mockSearchParams = "lang=bg&redirect=/profile";
+    render(<LoginPage />);
+
+    const facebookButton = await screen.findByRole("button", {
+      name: "Вход с Facebook",
+    });
+
+    fireEvent.click(facebookButton);
+
+    await waitFor(() => {
+      expect(startFacebookOAuth).toHaveBeenCalledWith({
+        redirectPath: "/profile",
+      });
+    });
+    expect(
+      screen.getByRole("button", { name: "Свързване..." }),
     ).toBeInTheDocument();
   });
 });
