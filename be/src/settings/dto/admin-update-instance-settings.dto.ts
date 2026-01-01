@@ -45,6 +45,22 @@ export class AdminUpdateFeaturesDto {
 
   @IsOptional()
   @IsBoolean()
+  socialGoogle?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  socialFacebook?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  socialGithub?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  socialLinkedin?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
   infraRedis?: boolean;
 
   @IsOptional()

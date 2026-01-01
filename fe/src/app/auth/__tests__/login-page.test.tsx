@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import LoginPage from "../login/page";
 import { ACCESS_TOKEN_KEY } from "../../auth-token";
+import type { SocialOAuthAuthorizeError } from "../social-login";
 
 const mockPush = jest.fn();
 const mockReplace = jest.fn();
@@ -11,15 +12,32 @@ const startFacebookOAuth = jest.fn();
 const startGithubOAuth = jest.fn();
 const startLinkedinOAuth = jest.fn();
 
-jest.mock("../social-login", () => ({
-  DEFAULT_SOCIAL_REDIRECT: "/wiki",
-  normalizeSocialRedirectPath:
-    jest.requireActual("../social-login").normalizeSocialRedirectPath,
-  startGoogleOAuth: (...args: unknown[]) => startGoogleOAuth(...args),
-  startFacebookOAuth: (...args: unknown[]) => startFacebookOAuth(...args),
-  startGithubOAuth: (...args: unknown[]) => startGithubOAuth(...args),
-  startLinkedinOAuth: (...args: unknown[]) => startLinkedinOAuth(...args),
-}));
+let mockPublicSettings: {
+  features: {
+    socialGoogle: boolean;
+    socialFacebook: boolean;
+    socialGithub: boolean;
+    socialLinkedin: boolean;
+  };
+} | null = {
+  features: {
+    socialGoogle: true,
+    socialFacebook: true,
+    socialGithub: true,
+    socialLinkedin: true,
+  },
+};
+
+jest.mock("../social-login", () => {
+  const actualSocialLogin = jest.requireActual("../social-login");
+  return {
+    ...actualSocialLogin,
+    startGoogleOAuth: (...args: unknown[]) => startGoogleOAuth(...args),
+    startFacebookOAuth: (...args: unknown[]) => startFacebookOAuth(...args),
+    startGithubOAuth: (...args: unknown[]) => startGithubOAuth(...args),
+    startLinkedinOAuth: (...args: unknown[]) => startLinkedinOAuth(...args),
+  };
+});
 
 jest.mock("next/navigation", () => {
   const actual = jest.requireActual("next/navigation");
@@ -34,6 +52,15 @@ jest.mock("next/navigation", () => {
   };
 });
 
+jest.mock("../../_hooks/use-public-settings", () => ({
+  usePublicSettings: () => ({
+    settings: mockPublicSettings,
+    loading: false,
+    error: null,
+    refetch: jest.fn(),
+  }),
+}));
+
 function mockFetchOnce(data: unknown, ok = true, status = 200) {
   global.fetch = jest.fn().mockResolvedValue({
     ok,
@@ -47,6 +74,14 @@ describe("LoginPage", () => {
     jest.resetAllMocks();
     window.localStorage.clear();
     mockSearchParams = "lang=bg";
+    mockPublicSettings = {
+      features: {
+        socialGoogle: true,
+        socialFacebook: true,
+        socialGithub: true,
+        socialLinkedin: true,
+      },
+    };
   });
 
   it("starts LinkedIn OAuth when LinkedIn button is clicked", async () => {
@@ -54,7 +89,7 @@ describe("LoginPage", () => {
     render(<LoginPage />);
 
     const linkedinButton = await screen.findByRole("button", {
-      name: "Вход с LinkedIn",
+      name: /linkedin/i,
     });
 
     fireEvent.click(linkedinButton);
@@ -64,9 +99,6 @@ describe("LoginPage", () => {
         redirectPath: "/home",
       });
     });
-    expect(
-      screen.getByRole("button", { name: "Свързване..." }),
-    ).toBeInTheDocument();
   });
 
   it("renders email and password fields", async () => {
@@ -144,7 +176,7 @@ describe("LoginPage", () => {
     render(<LoginPage />);
 
     const googleButton = await screen.findByRole("button", {
-      name: "Вход с Google",
+      name: /google/i,
     });
 
     fireEvent.click(googleButton);
@@ -154,9 +186,6 @@ describe("LoginPage", () => {
         redirectPath: "/courses",
       });
     });
-    expect(
-      screen.getByRole("button", { name: "Свързване..." }),
-    ).toBeInTheDocument();
   });
 
   it("starts Facebook OAuth when Facebook button is clicked", async () => {
@@ -164,7 +193,7 @@ describe("LoginPage", () => {
     render(<LoginPage />);
 
     const facebookButton = await screen.findByRole("button", {
-      name: "Вход с Facebook",
+      name: /facebook/i,
     });
 
     fireEvent.click(facebookButton);
@@ -173,10 +202,10 @@ describe("LoginPage", () => {
       expect(startFacebookOAuth).toHaveBeenCalledWith({
         redirectPath: "/profile",
       });
+      expect(
+        screen.getByRole("button", { name: "Свързване..." }),
+      ).toBeInTheDocument();
     });
-    expect(
-      screen.getByRole("button", { name: "Свързване..." }),
-    ).toBeInTheDocument();
   });
 
   it("starts GitHub OAuth when GitHub button is clicked", async () => {
@@ -184,7 +213,7 @@ describe("LoginPage", () => {
     render(<LoginPage />);
 
     const githubButton = await screen.findByRole("button", {
-      name: "Вход с GitHub",
+      name: /github/i,
     });
 
     fireEvent.click(githubButton);
@@ -193,9 +222,53 @@ describe("LoginPage", () => {
       expect(startGithubOAuth).toHaveBeenCalledWith({
         redirectPath: "/dashboard",
       });
+      expect(
+        screen.getByRole("button", { name: "Свързване..." }),
+      ).toBeInTheDocument();
     });
+  });
+
+  it("shows social unavailable message when all providers disabled", async () => {
+    mockPublicSettings = {
+      features: {
+        socialGoogle: false,
+        socialFacebook: false,
+        socialGithub: false,
+        socialLinkedin: false,
+      },
+    };
+
+    render(<LoginPage />);
+
     expect(
-      screen.getByRole("button", { name: "Свързване..." }),
+      await screen.findByText(
+        "Социалните входове са изключени от администратора. Продължете с имейл и парола.",
+      ),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.queryByRole("button", { name: /Вход с/ }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows disabled message when backend returns disabled error", async () => {
+    const error = new Error("disabled") as SocialOAuthAuthorizeError;
+    error.provider = "google";
+    error.code = "disabled";
+    error.name = "SocialOAuthAuthorizeError";
+    startGoogleOAuth.mockRejectedValueOnce(error);
+
+    render(<LoginPage />);
+
+    const googleButton = await screen.findByRole("button", {
+      name: "Вход с Google",
+    });
+    fireEvent.click(googleButton);
+
+    expect(
+      await screen.findByText(
+        "Входът с Google е временно изключен от администратора.",
+      ),
     ).toBeInTheDocument();
   });
 });

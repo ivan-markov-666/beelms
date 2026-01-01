@@ -9,6 +9,7 @@ import { FacebookOAuthService } from './facebook-oauth.service';
 import { GithubOAuthService } from './github-oauth.service';
 import { LinkedinOAuthService } from './linkedin-oauth.service';
 import { SocialOAuthStateService } from './social-oauth-state.service';
+import { SocialLoginAvailabilityService } from './social-login-availability.service';
 import { WikiArticle } from '../wiki/wiki-article.entity';
 import { WikiArticleVersion } from '../wiki/wiki-article-version.entity';
 import { WikiArticleFeedback } from '../wiki/wiki-article-feedback.entity';
@@ -69,6 +70,7 @@ import { SettingsModule } from '../settings/settings.module';
     GithubOAuthService,
     LinkedinOAuthService,
     SocialOAuthStateService,
+    SocialLoginAvailabilityService,
   ],
   controllers: [
     AuthController,
@@ -85,6 +87,7 @@ import { SettingsModule } from '../settings/settings.module';
     AdminGuard,
     JwtModule,
     TypeOrmModule,
+    SocialLoginAvailabilityService,
   ],
 })
 export class AuthModule {}

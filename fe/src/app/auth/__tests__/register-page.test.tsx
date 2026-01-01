@@ -7,6 +7,7 @@ import {
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import RegisterPage from "../register/page";
+import type { SocialOAuthAuthorizeError } from "../social-login";
 
 const mockPush = jest.fn();
 const mockReplace = jest.fn();
@@ -19,15 +20,32 @@ const startFacebookOAuth = jest.fn();
 const startGithubOAuth = jest.fn();
 const startLinkedinOAuth = jest.fn();
 
-jest.mock("../social-login", () => ({
-  DEFAULT_SOCIAL_REDIRECT: "/wiki",
-  normalizeSocialRedirectPath:
-    jest.requireActual("../social-login").normalizeSocialRedirectPath,
-  startGoogleOAuth: (...args: unknown[]) => startGoogleOAuth(...args),
-  startFacebookOAuth: (...args: unknown[]) => startFacebookOAuth(...args),
-  startGithubOAuth: (...args: unknown[]) => startGithubOAuth(...args),
-  startLinkedinOAuth: (...args: unknown[]) => startLinkedinOAuth(...args),
-}));
+let mockPublicSettings: {
+  features: {
+    socialGoogle: boolean;
+    socialFacebook: boolean;
+    socialGithub: boolean;
+    socialLinkedin: boolean;
+  };
+} | null = {
+  features: {
+    socialGoogle: true,
+    socialFacebook: true,
+    socialGithub: true,
+    socialLinkedin: true,
+  },
+};
+
+jest.mock("../social-login", () => {
+  const actualSocialLogin = jest.requireActual("../social-login");
+  return {
+    ...actualSocialLogin,
+    startGoogleOAuth: (...args: unknown[]) => startGoogleOAuth(...args),
+    startFacebookOAuth: (...args: unknown[]) => startFacebookOAuth(...args),
+    startGithubOAuth: (...args: unknown[]) => startGithubOAuth(...args),
+    startLinkedinOAuth: (...args: unknown[]) => startLinkedinOAuth(...args),
+  };
+});
 
 jest.mock("next/navigation", () => {
   const actual = jest.requireActual("next/navigation");
@@ -41,6 +59,15 @@ jest.mock("next/navigation", () => {
     useSearchParams: () => new URLSearchParams(mockSearchParams),
   };
 });
+
+jest.mock("../../_hooks/use-public-settings", () => ({
+  usePublicSettings: () => ({
+    settings: mockPublicSettings,
+    loading: false,
+    error: null,
+    refetch: jest.fn(),
+  }),
+}));
 
 function mockFetchOnce(data: unknown, ok = true, status = 201) {
   global.fetch = jest.fn().mockResolvedValue({
@@ -60,6 +87,14 @@ describe("RegisterPage", () => {
     // because validation prevents submission.
     delete process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
     mockSearchParams = "lang=bg";
+    mockPublicSettings = {
+      features: {
+        socialGoogle: true,
+        socialFacebook: true,
+        socialGithub: true,
+        socialLinkedin: true,
+      },
+    };
   });
 
   afterAll(() => {
@@ -555,11 +590,10 @@ describe("RegisterPage", () => {
         expect(startGoogleOAuth).toHaveBeenCalledWith({
           redirectPath: "/wiki/article",
         });
+        expect(
+          screen.getByRole("button", { name: "Свързване..." }),
+        ).toBeInTheDocument();
       });
-
-      expect(
-        screen.getByRole("button", { name: "Свързване..." }),
-      ).toBeInTheDocument();
     });
 
     it("starts GitHub OAuth when GitHub button is clicked", async () => {
@@ -576,11 +610,10 @@ describe("RegisterPage", () => {
         expect(startGithubOAuth).toHaveBeenCalledWith({
           redirectPath: "/courses/list",
         });
+        expect(
+          screen.getByRole("button", { name: "Свързване..." }),
+        ).toBeInTheDocument();
       });
-
-      expect(
-        screen.getByRole("button", { name: "Свързване..." }),
-      ).toBeInTheDocument();
     });
 
     it("starts Facebook OAuth when Facebook button is clicked", async () => {
@@ -597,11 +630,10 @@ describe("RegisterPage", () => {
         expect(startFacebookOAuth).toHaveBeenCalledWith({
           redirectPath: "/profile/settings",
         });
+        expect(
+          screen.getByRole("button", { name: "Свързване..." }),
+        ).toBeInTheDocument();
       });
-
-      expect(
-        screen.getByRole("button", { name: "Свързване..." }),
-      ).toBeInTheDocument();
     });
 
     it("starts LinkedIn OAuth when LinkedIn button is clicked", async () => {
@@ -618,12 +650,55 @@ describe("RegisterPage", () => {
         expect(startLinkedinOAuth).toHaveBeenCalledWith({
           redirectPath: "/courses/list",
         });
+        expect(
+          screen.getByRole("button", { name: "Свързване..." }),
+        ).toBeInTheDocument();
       });
-
-      expect(
-        screen.getByRole("button", { name: "Свързване..." }),
-      ).toBeInTheDocument();
     });
+  });
+
+  it("shows social unavailable message when all providers disabled", async () => {
+    mockPublicSettings = {
+      features: {
+        socialGoogle: false,
+        socialFacebook: false,
+        socialGithub: false,
+        socialLinkedin: false,
+      },
+    };
+
+    render(<RegisterPage />);
+
+    expect(
+      await screen.findByText(
+        "Социалните регистрации са изключени от администратора. Продължете с формата по-долу.",
+      ),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.queryByRole("button", { name: /Регистрация с/ }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows disabled message when backend returns disabled error", async () => {
+    const error = new Error("disabled") as SocialOAuthAuthorizeError;
+    error.provider = "google";
+    error.code = "disabled";
+    error.name = "SocialOAuthAuthorizeError";
+    startGoogleOAuth.mockRejectedValueOnce(error);
+
+    render(<RegisterPage />);
+
+    const googleButton = await screen.findByRole("button", {
+      name: "Регистрация с Google",
+    });
+    fireEvent.click(googleButton);
+
+    expect(
+      await screen.findByText(
+        "Регистрацията с Google е временно изключена от администратора.",
+      ),
+    ).toBeInTheDocument();
   });
 
   it("supports keyboard navigation with Tab", async () => {

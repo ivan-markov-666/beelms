@@ -48,10 +48,28 @@ export const messages: Messages = {
       loginLinkedinCta: "Вход с LinkedIn",
       loginLinkedinLoading: "Свързване...",
       loginSocialDivider: "или продължете с имейл",
-      loginGoogleError: "Google входът неуспя. Моля, опитайте отново.",
-      loginFacebookError: "Facebook входът неуспя. Моля, опитайте отново.",
-      loginGithubError: "Входът с GitHub неуспя. Моля, опитайте отново.",
-      loginLinkedinError: "Входът с LinkedIn неуспя. Моля, опитайте отново.",
+      loginSocialUnavailable:
+        "Социалните входове са изключени от администратора. Продължете с имейл и парола.",
+      loginGoogleDisabled:
+        "Входът с Google е временно изключен от администратора.",
+      loginGoogleUnavailable:
+        "Входът с Google не е конфигуриран. Моля, използвайте имейл и парола.",
+      loginFacebookDisabled:
+        "Входът с Facebook е временно изключен от администратора.",
+      loginFacebookUnavailable:
+        "Входът с Facebook не е конфигуриран. Моля, използвайте имейл и парола.",
+      loginGithubDisabled:
+        "Входът с GitHub е временно изключен от администратора.",
+      loginGithubUnavailable:
+        "Входът с GitHub не е конфигуриран. Моля, използвайте имейл и парола.",
+      loginLinkedinDisabled:
+        "Входът с LinkedIn е временно изключен от администратора.",
+      loginLinkedinUnavailable:
+        "Входът с LinkedIn не е конфигуриран. Моля, използвайте имейл и парола.",
+      loginGoogleError: "Google sign-in failed. Please try again.",
+      loginFacebookError: "Facebook sign-in failed. Please try again.",
+      loginGithubError: "GitHub sign-in failed. Please try again.",
+      loginLinkedinError: "LinkedIn sign-in failed. Please try again.",
       loginForgotLink: "Забравена парола?",
       loginRegisterLink: "Нямате акаунт?",
       loginRememberMeLabel: "Remember me",
@@ -92,14 +110,28 @@ export const messages: Messages = {
       registerLinkedinCta: "Регистрация с LinkedIn",
       registerLinkedinLoading: "Свързване...",
       registerSocialDivider: "или попълнете формата",
-      registerGoogleError:
-        "Регистрацията с Google неуспя. Моля, опитайте отново.",
-      registerFacebookError:
-        "Регистрацията с Facebook неуспя. Моля, опитайте отново.",
-      registerGithubError:
-        "Регистрацията с GitHub неуспя. Моля, опитайте отново.",
-      registerLinkedinError:
-        "Регистрацията с LinkedIn неуспя. Моля, опитайте отново.",
+      registerSocialUnavailable:
+        "Социалните регистрации са изключени от администратора. Продължете с формата по-долу.",
+      registerGoogleDisabled:
+        "Регистрацията с Google е временно изключена от администратора.",
+      registerGoogleUnavailable:
+        "Регистрацията с Google не е конфигурирана. Моля, използвайте формата по-долу.",
+      registerFacebookDisabled:
+        "Регистрацията с Facebook е временно изключена от администратора.",
+      registerFacebookUnavailable:
+        "Регистрацията с Facebook не е конфигурирана. Моля, използвайте формата по-долу.",
+      registerGithubDisabled:
+        "Регистрацията с GitHub е временно изключена от администратора.",
+      registerGithubUnavailable:
+        "Регистрацията с GitHub не е конфигурирана. Моля, използвайте формата по-долу.",
+      registerLinkedinDisabled:
+        "Регистрацията с LinkedIn е временно изключена от администратора.",
+      registerLinkedinUnavailable:
+        "Регистрацията с LinkedIn не е конфигурирана. Моля, използвайте формата по-долу.",
+      registerGoogleError: "Google registration failed. Please try again.",
+      registerFacebookError: "Facebook registration failed. Please try again.",
+      registerGithubError: "GitHub registration failed. Please try again.",
+      registerLinkedinError: "LinkedIn registration failed. Please try again.",
       registerHasAccount: "Вече имате акаунт?",
       registerLoginLink: "Вход",
       registerErrorEmailRequired: "Моля, въведете имейл.",
@@ -251,7 +283,6 @@ export const messages: Messages = {
       adminDashboardTabUsers: "Потребители",
       adminDashboardTabMetrics: "Метрики",
       adminDashboardTabActivity: "Активност",
-      adminDashboardTabPayments: "Плащания",
       adminDashboardCardUsersTitle: "Регистрирани потребители",
       adminDashboardCardUsersTrend: "+12% спрямо миналия месец",
       adminDashboardCardUsersTrendSuffix: "спрямо миналия месец",
