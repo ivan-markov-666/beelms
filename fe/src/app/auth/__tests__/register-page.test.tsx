@@ -16,6 +16,7 @@ let mockSearchParams = "lang=bg";
 
 const startGoogleOAuth = jest.fn();
 const startFacebookOAuth = jest.fn();
+const startGithubOAuth = jest.fn();
 
 jest.mock("../social-login", () => ({
   DEFAULT_SOCIAL_REDIRECT: "/wiki",
@@ -23,6 +24,7 @@ jest.mock("../social-login", () => ({
     jest.requireActual("../social-login").normalizeSocialRedirectPath,
   startGoogleOAuth: (...args: unknown[]) => startGoogleOAuth(...args),
   startFacebookOAuth: (...args: unknown[]) => startFacebookOAuth(...args),
+  startGithubOAuth: (...args: unknown[]) => startGithubOAuth(...args),
 }));
 
 jest.mock("next/navigation", () => {
@@ -536,6 +538,69 @@ describe("RegisterPage", () => {
     ).toBeInTheDocument();
   });
 
+  it("starts Google OAuth when Google button is clicked", async () => {
+    mockSearchParams = "lang=bg&redirect=/wiki/article";
+    render(<RegisterPage />);
+
+    const googleButton = await screen.findByRole("button", {
+      name: "Регистрация с Google",
+    });
+
+    fireEvent.click(googleButton);
+
+    await waitFor(() => {
+      expect(startGoogleOAuth).toHaveBeenCalledWith({
+        redirectPath: "/wiki/article",
+      });
+    });
+
+    expect(
+      screen.getByRole("button", { name: "Свързване..." }),
+    ).toBeInTheDocument();
+  });
+
+  it("starts GitHub OAuth when GitHub button is clicked", async () => {
+    mockSearchParams = "lang=bg&redirect=/courses/list";
+    render(<RegisterPage />);
+
+    const githubButton = await screen.findByRole("button", {
+      name: "Регистрация с GitHub",
+    });
+
+    fireEvent.click(githubButton);
+
+    await waitFor(() => {
+      expect(startGithubOAuth).toHaveBeenCalledWith({
+        redirectPath: "/courses/list",
+      });
+    });
+
+    expect(
+      screen.getByRole("button", { name: "Свързване..." }),
+    ).toBeInTheDocument();
+  });
+
+  it("starts Facebook OAuth when Facebook button is clicked", async () => {
+    mockSearchParams = "lang=bg&redirect=/profile/settings";
+    render(<RegisterPage />);
+
+    const facebookButton = await screen.findByRole("button", {
+      name: "Регистрация с Facebook",
+    });
+
+    fireEvent.click(facebookButton);
+
+    await waitFor(() => {
+      expect(startFacebookOAuth).toHaveBeenCalledWith({
+        redirectPath: "/profile/settings",
+      });
+    });
+
+    expect(
+      screen.getByRole("button", { name: "Свързване..." }),
+    ).toBeInTheDocument();
+  });
+
   it("supports keyboard navigation with Tab", async () => {
     const user = userEvent.setup();
     render(<RegisterPage />);
@@ -882,14 +947,20 @@ describe("RegisterPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("validates fields when losing focus", async () => {
+  it("defers validation errors until submit", async () => {
     render(<RegisterPage />);
 
     const emailInput = await screen.findByLabelText(/Имейл/);
+    const submitButton = screen.getByRole("button", { name: "Регистрация" });
 
     fireEvent.change(emailInput, { target: { value: "invalid-email" } });
-
     fireEvent.blur(emailInput);
+
+    expect(
+      screen.queryByText("Моля, въведете валиден имейл адрес."),
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(submitButton);
 
     expect(
       await screen.findByText("Моля, въведете валиден имейл адрес."),

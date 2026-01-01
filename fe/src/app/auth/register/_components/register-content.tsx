@@ -1,13 +1,17 @@
 "use client";
 
-import { FormEvent, useEffect, useState, useMemo } from "react";
+import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCurrentLang } from "../../../../i18n/useCurrentLang";
 import { t } from "../../../../i18n/t";
 import { clearAccessToken, getAccessToken } from "../../../auth-token";
 import { buildApiUrl } from "../../../api-url";
 import { RecaptchaWidget } from "../../../_components/recaptcha-widget";
-import { startFacebookOAuth, startGoogleOAuth } from "../../social-login";
+import {
+  startFacebookOAuth,
+  startGoogleOAuth,
+  startGithubOAuth,
+} from "../../social-login";
 
 type FieldErrors = {
   email?: string;
@@ -39,6 +43,7 @@ export function RegisterContent() {
   const [checkingSession, setCheckingSession] = useState(true);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [facebookLoading, setFacebookLoading] = useState(false);
+  const [githubLoading, setGithubLoading] = useState(false);
   const [socialError, setSocialError] = useState<string | null>(null);
 
   const passwordStrength = useMemo(() => {
@@ -65,21 +70,39 @@ export function RegisterContent() {
     return "weak";
   }, [password]);
 
-  const handleSocialRegister = async (provider: "google" | "facebook") => {
+  const handleCaptchaTokenChange = useCallback((token: string | null) => {
+    setCaptchaToken(token);
+    setFieldErrors((prev) => ({ ...prev, captcha: undefined }));
+  }, []);
+
+  const handleSocialRegister = async (
+    provider: "google" | "facebook" | "github",
+  ) => {
     const isGoogle = provider === "google";
-    if ((isGoogle && googleLoading) || (!isGoogle && facebookLoading)) {
+    const isFacebook = provider === "facebook";
+    if (
+      (isGoogle && googleLoading) ||
+      (isFacebook && facebookLoading) ||
+      (!isGoogle && !isFacebook && githubLoading)
+    ) {
       return;
     }
 
     setSocialError(null);
     if (isGoogle) {
       setGoogleLoading(true);
-    } else {
+    } else if (isFacebook) {
       setFacebookLoading(true);
+    } else {
+      setGithubLoading(true);
     }
 
     try {
-      const startFn = isGoogle ? startGoogleOAuth : startFacebookOAuth;
+      const startFn = isGoogle
+        ? startGoogleOAuth
+        : isFacebook
+          ? startFacebookOAuth
+          : startGithubOAuth;
       await startFn({
         redirectPath: searchParams.get("redirect"),
       });
@@ -89,14 +112,16 @@ export function RegisterContent() {
         t(
           lang,
           "auth",
-          isGoogle ? "registerGoogleError" : "registerFacebookError",
+          isGoogle
+            ? "registerGoogleError"
+            : isFacebook
+              ? "registerFacebookError"
+              : "registerGithubError",
         ),
       );
-      if (isGoogle) {
-        setGoogleLoading(false);
-      } else {
-        setFacebookLoading(false);
-      }
+      setGoogleLoading((prev) => (isGoogle ? false : prev));
+      setFacebookLoading((prev) => (isFacebook ? false : prev));
+      setGithubLoading((prev) => (!isGoogle && !isFacebook ? false : prev));
     }
   };
 
@@ -329,7 +354,9 @@ export function RegisterContent() {
             <button
               type="button"
               onClick={() => handleSocialRegister("google")}
-              disabled={submitting || googleLoading || facebookLoading}
+              disabled={
+                submitting || googleLoading || facebookLoading || githubLoading
+              }
               className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-70"
             >
               <svg
@@ -362,8 +389,33 @@ export function RegisterContent() {
             </button>
             <button
               type="button"
+              onClick={() => handleSocialRegister("github")}
+              disabled={
+                submitting || githubLoading || googleLoading || facebookLoading
+              }
+              className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              <svg
+                className="h-5 w-5"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <path
+                  fill="#181717"
+                  d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.387.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.726-4.042-1.61-4.042-1.61-.546-1.387-1.333-1.757-1.333-1.757-1.089-.745.083-.73.083-.73 1.205.084 1.84 1.237 1.84 1.237 1.07 1.834 2.807 1.304 3.492.997.108-.775.418-1.305.762-1.605-2.665-.304-5.466-1.334-5.466-5.931 0-1.31.468-2.381 1.235-3.221-.124-.303-.535-1.523.117-3.176 0 0 1.008-.322 3.301 1.23a11.52 11.52 0 0 1 6.003 0c2.292-1.552 3.298-1.23 3.298-1.23.653 1.653.242 2.873.118 3.176.77.84 1.233 1.911 1.233 3.221 0 4.609-2.804 5.625-5.476 5.921.43.372.823 1.102.823 2.222 0 1.606-.015 2.898-.015 3.293 0 .321.218.694.825.576C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"
+                />
+              </svg>
+              {githubLoading
+                ? t(lang, "auth", "registerGithubLoading")
+                : t(lang, "auth", "registerGithubCta")}
+            </button>
+            <button
+              type="button"
               onClick={() => handleSocialRegister("facebook")}
-              disabled={submitting || facebookLoading || googleLoading}
+              disabled={
+                submitting || facebookLoading || googleLoading || githubLoading
+              }
               className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-70"
             >
               <svg
@@ -414,7 +466,6 @@ export function RegisterContent() {
                   setEmail(e.target.value);
                   setFieldErrors((prev) => ({ ...prev, email: undefined }));
                 }}
-                onBlur={validate}
                 aria-describedby={fieldErrors.email ? "email-error" : undefined}
                 disabled={submitting}
               />
@@ -448,7 +499,6 @@ export function RegisterContent() {
                       password: undefined,
                     }));
                   }}
-                  onBlur={validate}
                   onCopy={(e) => e.preventDefault()}
                   maxLength={100}
                   aria-describedby={
@@ -579,7 +629,6 @@ export function RegisterContent() {
                       new Event("submit", { bubbles: true, cancelable: true }),
                     );
                   }}
-                  onBlur={validate}
                   onCopy={(e) => e.preventDefault()}
                   maxLength={100}
                   disabled={submitting}
@@ -699,10 +748,7 @@ export function RegisterContent() {
                   siteKey={recaptchaSiteKey}
                   lang={lang}
                   disabled={submitting}
-                  onTokenChange={(token) => {
-                    setCaptchaToken(token);
-                    setFieldErrors((prev) => ({ ...prev, captcha: undefined }));
-                  }}
+                  onTokenChange={handleCaptchaTokenChange}
                 />
                 {fieldErrors.captcha && (
                   <p className="text-xs text-red-600">{fieldErrors.captcha}</p>

@@ -8,6 +8,7 @@ let mockSearchParams = "lang=bg";
 
 const startGoogleOAuth = jest.fn();
 const startFacebookOAuth = jest.fn();
+const startGithubOAuth = jest.fn();
 
 jest.mock("../social-login", () => ({
   DEFAULT_SOCIAL_REDIRECT: "/wiki",
@@ -15,6 +16,7 @@ jest.mock("../social-login", () => ({
     jest.requireActual("../social-login").normalizeSocialRedirectPath,
   startGoogleOAuth: (...args: unknown[]) => startGoogleOAuth(...args),
   startFacebookOAuth: (...args: unknown[]) => startFacebookOAuth(...args),
+  startGithubOAuth: (...args: unknown[]) => startGithubOAuth(...args),
 }));
 
 jest.mock("next/navigation", () => {
@@ -148,6 +150,26 @@ describe("LoginPage", () => {
     await waitFor(() => {
       expect(startFacebookOAuth).toHaveBeenCalledWith({
         redirectPath: "/profile",
+      });
+    });
+    expect(
+      screen.getByRole("button", { name: "Свързване..." }),
+    ).toBeInTheDocument();
+  });
+
+  it("starts GitHub OAuth when GitHub button is clicked", async () => {
+    mockSearchParams = "lang=bg&redirect=/dashboard";
+    render(<LoginPage />);
+
+    const githubButton = await screen.findByRole("button", {
+      name: "Вход с GitHub",
+    });
+
+    fireEvent.click(githubButton);
+
+    await waitFor(() => {
+      expect(startGithubOAuth).toHaveBeenCalledWith({
+        redirectPath: "/dashboard",
       });
     });
     expect(

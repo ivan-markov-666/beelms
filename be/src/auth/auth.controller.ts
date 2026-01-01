@@ -17,6 +17,7 @@ import type { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { GoogleOAuthService } from './google-oauth.service';
 import { FacebookOAuthService } from './facebook-oauth.service';
+import { GithubOAuthService } from './github-oauth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { UserProfileDto } from './dto/user-profile.dto';
@@ -36,6 +37,7 @@ export class AuthController {
     private readonly authService: AuthService,
     private readonly googleOAuthService: GoogleOAuthService,
     private readonly facebookOAuthService: FacebookOAuthService,
+    private readonly githubOAuthService: GithubOAuthService,
   ) {}
 
   @Get('register')
@@ -211,6 +213,71 @@ export class AuthController {
           provider: 'google',
           redirectPath: fallbackRedirect,
           error: 'google_oauth_failed',
+        }),
+      );
+    }
+  }
+
+  @Get('github/authorize')
+  githubAuthorize(@Query('redirectPath') redirectPath?: string): {
+    url: string;
+    state: string;
+  } {
+    if (!this.githubOAuthService.isConfigured()) {
+      throw new ServiceUnavailableException('GitHub login is not available');
+    }
+
+    return this.githubOAuthService.createAuthorizationUrl(redirectPath);
+  }
+
+  @Get('github/callback')
+  async githubCallback(
+    @Query('code') code: string | undefined,
+    @Query('state') state: string | undefined,
+    @Query('error') error: string | undefined,
+    @Res() res: Response,
+  ): Promise<void> {
+    const fallbackRedirect =
+      this.githubOAuthService.extractRedirectPathFromState(state);
+
+    if (!this.githubOAuthService.isConfigured()) {
+      res.redirect(
+        this.githubOAuthService.buildFrontendRedirectUrl({
+          redirectPath: fallbackRedirect,
+          error: 'github_unavailable',
+        }),
+      );
+      return;
+    }
+
+    if (error || !code) {
+      res.redirect(
+        this.githubOAuthService.buildFrontendRedirectUrl({
+          redirectPath: fallbackRedirect,
+          error: error ?? 'missing_code',
+        }),
+      );
+      return;
+    }
+
+    try {
+      const profile = await this.githubOAuthService.exchangeCodeForProfile(
+        code,
+        state ?? '',
+      );
+      const token = await this.authService.loginWithGithub(profile);
+
+      res.redirect(
+        this.githubOAuthService.buildFrontendRedirectUrl({
+          redirectPath: profile.redirectPath,
+          token: token.accessToken,
+        }),
+      );
+    } catch {
+      res.redirect(
+        this.githubOAuthService.buildFrontendRedirectUrl({
+          redirectPath: fallbackRedirect,
+          error: 'github_oauth_failed',
         }),
       );
     }

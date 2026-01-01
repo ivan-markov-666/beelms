@@ -43,9 +43,12 @@ export const messages: Messages = {
       loginGoogleLoading: "Свързване...",
       loginFacebookCta: "Вход с Facebook",
       loginFacebookLoading: "Свързване...",
+      loginGithubCta: "Вход с GitHub",
+      loginGithubLoading: "Свързване...",
       loginSocialDivider: "или продължете с имейл",
       loginGoogleError: "Google входът неуспя. Моля, опитайте отново.",
       loginFacebookError: "Facebook входът неуспя. Моля, опитайте отново.",
+      loginGithubError: "GitHub входът неуспя. Моля, опитайте отново.",
       loginForgotLink: "Забравена парола?",
       loginRegisterLink: "Нямате акаунт?",
       loginRememberMeLabel: "Remember me",
@@ -81,11 +84,15 @@ export const messages: Messages = {
       registerGoogleLoading: "Свързване...",
       registerFacebookCta: "Регистрация с Facebook",
       registerFacebookLoading: "Свързване...",
+      registerGithubCta: "Регистрация с GitHub",
+      registerGithubLoading: "Свързване...",
       registerSocialDivider: "или попълнете формата",
       registerGoogleError:
         "Регистрацията с Google неуспя. Моля, опитайте отново.",
       registerFacebookError:
         "Регистрацията с Facebook неуспя. Моля, опитайте отново.",
+      registerGithubError:
+        "Регистрацията с GitHub неуспя. Моля, опитайте отново.",
       registerHasAccount: "Вече имате акаунт?",
       registerLoginLink: "Вход",
       registerErrorEmailRequired: "Моля, въведете имейл.",
@@ -160,7 +167,7 @@ export const messages: Messages = {
         "Паролата беше сменена успешно. Ще ви пренасочим към страницата за вход...",
       socialCallbackTitle: "Обработка на социален вход",
       socialCallbackProcessing:
-        "Моля, изчакайте. Завършваме входа ви чрез Google/Facebook.",
+        "Моля, изчакайте. Завършваме входа ви чрез социална мрежа.",
       socialCallbackRedirectNotice:
         "Ще ви пренасочим автоматично в рамките на няколко секунди.",
       socialCallbackErrorTitle: "Неуспешен социален вход",
