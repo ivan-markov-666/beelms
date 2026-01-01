@@ -22,6 +22,7 @@ import { VerifyEmailDto } from './dto/verify-email.dto';
 import type { GoogleProfile } from './google-oauth.service';
 import type { FacebookProfile } from './facebook-oauth.service';
 import type { GithubProfile } from './github-oauth.service';
+import type { LinkedinProfile } from './linkedin-oauth.service';
 import { CaptchaService } from '../security/captcha/captcha.service';
 import { InMemoryLoginAttemptStore } from '../security/account-protection/login-attempts.store';
 import {
@@ -232,6 +233,11 @@ export class AuthService {
   }
 
   async loginWithGithub(profile: GithubProfile): Promise<AuthTokenDto> {
+    const user = await this.upsertSocialUser(profile.email);
+    return this.issueAuthToken(user);
+  }
+
+  async loginWithLinkedin(profile: LinkedinProfile): Promise<AuthTokenDto> {
     const user = await this.upsertSocialUser(profile.email);
     return this.issueAuthToken(user);
   }

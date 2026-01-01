@@ -18,6 +18,7 @@ import { AuthService } from './auth.service';
 import { GoogleOAuthService } from './google-oauth.service';
 import { FacebookOAuthService } from './facebook-oauth.service';
 import { GithubOAuthService } from './github-oauth.service';
+import { LinkedinOAuthService } from './linkedin-oauth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { UserProfileDto } from './dto/user-profile.dto';
@@ -38,6 +39,7 @@ export class AuthController {
     private readonly googleOAuthService: GoogleOAuthService,
     private readonly facebookOAuthService: FacebookOAuthService,
     private readonly githubOAuthService: GithubOAuthService,
+    private readonly linkedinOAuthService: LinkedinOAuthService,
   ) {}
 
   @Get('register')
@@ -278,6 +280,71 @@ export class AuthController {
         this.githubOAuthService.buildFrontendRedirectUrl({
           redirectPath: fallbackRedirect,
           error: 'github_oauth_failed',
+        }),
+      );
+    }
+  }
+
+  @Get('linkedin/authorize')
+  linkedinAuthorize(@Query('redirectPath') redirectPath?: string): {
+    url: string;
+    state: string;
+  } {
+    if (!this.linkedinOAuthService.isConfigured()) {
+      throw new ServiceUnavailableException('LinkedIn login is not available');
+    }
+
+    return this.linkedinOAuthService.createAuthorizationUrl(redirectPath);
+  }
+
+  @Get('linkedin/callback')
+  async linkedinCallback(
+    @Query('code') code: string | undefined,
+    @Query('state') state: string | undefined,
+    @Query('error') error: string | undefined,
+    @Res() res: Response,
+  ): Promise<void> {
+    const fallbackRedirect =
+      this.linkedinOAuthService.extractRedirectPathFromState(state);
+
+    if (!this.linkedinOAuthService.isConfigured()) {
+      res.redirect(
+        this.linkedinOAuthService.buildFrontendRedirectUrl({
+          redirectPath: fallbackRedirect,
+          error: 'linkedin_unavailable',
+        }),
+      );
+      return;
+    }
+
+    if (error || !code) {
+      res.redirect(
+        this.linkedinOAuthService.buildFrontendRedirectUrl({
+          redirectPath: fallbackRedirect,
+          error: error ?? 'missing_code',
+        }),
+      );
+      return;
+    }
+
+    try {
+      const profile = await this.linkedinOAuthService.exchangeCodeForProfile(
+        code,
+        state ?? '',
+      );
+      const token = await this.authService.loginWithLinkedin(profile);
+
+      res.redirect(
+        this.linkedinOAuthService.buildFrontendRedirectUrl({
+          redirectPath: profile.redirectPath,
+          token: token.accessToken,
+        }),
+      );
+    } catch {
+      res.redirect(
+        this.linkedinOAuthService.buildFrontendRedirectUrl({
+          redirectPath: fallbackRedirect,
+          error: 'linkedin_oauth_failed',
         }),
       );
     }

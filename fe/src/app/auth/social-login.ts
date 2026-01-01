@@ -4,12 +4,13 @@ import { buildApiUrl } from "../api-url";
 
 export const DEFAULT_SOCIAL_REDIRECT = "/wiki";
 
-type SocialProvider = "google" | "facebook" | "github";
+type SocialProvider = "google" | "facebook" | "github" | "linkedin";
 
 const AUTHORIZE_ENDPOINT: Record<SocialProvider, string> = {
   google: "/auth/google/authorize",
   facebook: "/auth/facebook/authorize",
   github: "/auth/github/authorize",
+  linkedin: "/auth/linkedin/authorize",
 };
 
 type SocialAuthorizeResponse = {
@@ -93,6 +94,15 @@ export function startGithubOAuth(options?: {
 }): Promise<void> {
   return startSocialOAuth({
     provider: "github",
+    redirectPath: options?.redirectPath,
+  });
+}
+
+export function startLinkedinOAuth(options?: {
+  redirectPath?: string | null;
+}): Promise<void> {
+  return startSocialOAuth({
+    provider: "linkedin",
     redirectPath: options?.redirectPath,
   });
 }

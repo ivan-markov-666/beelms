@@ -17,6 +17,7 @@ let mockSearchParams = "lang=bg";
 const startGoogleOAuth = jest.fn();
 const startFacebookOAuth = jest.fn();
 const startGithubOAuth = jest.fn();
+const startLinkedinOAuth = jest.fn();
 
 jest.mock("../social-login", () => ({
   DEFAULT_SOCIAL_REDIRECT: "/wiki",
@@ -25,6 +26,7 @@ jest.mock("../social-login", () => ({
   startGoogleOAuth: (...args: unknown[]) => startGoogleOAuth(...args),
   startFacebookOAuth: (...args: unknown[]) => startFacebookOAuth(...args),
   startGithubOAuth: (...args: unknown[]) => startGithubOAuth(...args),
+  startLinkedinOAuth: (...args: unknown[]) => startLinkedinOAuth(...args),
 }));
 
 jest.mock("next/navigation", () => {
@@ -538,67 +540,90 @@ describe("RegisterPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("starts Google OAuth when Google button is clicked", async () => {
-    mockSearchParams = "lang=bg&redirect=/wiki/article";
-    render(<RegisterPage />);
+  describe("social registration buttons", () => {
+    it("starts Google OAuth when Google button is clicked", async () => {
+      mockSearchParams = "lang=bg&redirect=/wiki/article";
+      render(<RegisterPage />);
 
-    const googleButton = await screen.findByRole("button", {
-      name: "Регистрация с Google",
-    });
-
-    fireEvent.click(googleButton);
-
-    await waitFor(() => {
-      expect(startGoogleOAuth).toHaveBeenCalledWith({
-        redirectPath: "/wiki/article",
+      const googleButton = await screen.findByRole("button", {
+        name: "Регистрация с Google",
       });
-    });
 
-    expect(
-      screen.getByRole("button", { name: "Свързване..." }),
-    ).toBeInTheDocument();
-  });
+      fireEvent.click(googleButton);
 
-  it("starts GitHub OAuth when GitHub button is clicked", async () => {
-    mockSearchParams = "lang=bg&redirect=/courses/list";
-    render(<RegisterPage />);
-
-    const githubButton = await screen.findByRole("button", {
-      name: "Регистрация с GitHub",
-    });
-
-    fireEvent.click(githubButton);
-
-    await waitFor(() => {
-      expect(startGithubOAuth).toHaveBeenCalledWith({
-        redirectPath: "/courses/list",
+      await waitFor(() => {
+        expect(startGoogleOAuth).toHaveBeenCalledWith({
+          redirectPath: "/wiki/article",
+        });
       });
+
+      expect(
+        screen.getByRole("button", { name: "Свързване..." }),
+      ).toBeInTheDocument();
     });
 
-    expect(
-      screen.getByRole("button", { name: "Свързване..." }),
-    ).toBeInTheDocument();
-  });
+    it("starts GitHub OAuth when GitHub button is clicked", async () => {
+      mockSearchParams = "lang=bg&redirect=/courses/list";
+      render(<RegisterPage />);
 
-  it("starts Facebook OAuth when Facebook button is clicked", async () => {
-    mockSearchParams = "lang=bg&redirect=/profile/settings";
-    render(<RegisterPage />);
-
-    const facebookButton = await screen.findByRole("button", {
-      name: "Регистрация с Facebook",
-    });
-
-    fireEvent.click(facebookButton);
-
-    await waitFor(() => {
-      expect(startFacebookOAuth).toHaveBeenCalledWith({
-        redirectPath: "/profile/settings",
+      const githubButton = await screen.findByRole("button", {
+        name: "Регистрация с GitHub",
       });
+
+      fireEvent.click(githubButton);
+
+      await waitFor(() => {
+        expect(startGithubOAuth).toHaveBeenCalledWith({
+          redirectPath: "/courses/list",
+        });
+      });
+
+      expect(
+        screen.getByRole("button", { name: "Свързване..." }),
+      ).toBeInTheDocument();
     });
 
-    expect(
-      screen.getByRole("button", { name: "Свързване..." }),
-    ).toBeInTheDocument();
+    it("starts Facebook OAuth when Facebook button is clicked", async () => {
+      mockSearchParams = "lang=bg&redirect=/profile/settings";
+      render(<RegisterPage />);
+
+      const facebookButton = await screen.findByRole("button", {
+        name: "Регистрация с Facebook",
+      });
+
+      fireEvent.click(facebookButton);
+
+      await waitFor(() => {
+        expect(startFacebookOAuth).toHaveBeenCalledWith({
+          redirectPath: "/profile/settings",
+        });
+      });
+
+      expect(
+        screen.getByRole("button", { name: "Свързване..." }),
+      ).toBeInTheDocument();
+    });
+
+    it("starts LinkedIn OAuth when LinkedIn button is clicked", async () => {
+      mockSearchParams = "lang=bg&redirect=/courses/list";
+      render(<RegisterPage />);
+
+      const linkedinButton = await screen.findByRole("button", {
+        name: "Регистрация с LinkedIn",
+      });
+
+      fireEvent.click(linkedinButton);
+
+      await waitFor(() => {
+        expect(startLinkedinOAuth).toHaveBeenCalledWith({
+          redirectPath: "/courses/list",
+        });
+      });
+
+      expect(
+        screen.getByRole("button", { name: "Свързване..." }),
+      ).toBeInTheDocument();
+    });
   });
 
   it("supports keyboard navigation with Tab", async () => {
