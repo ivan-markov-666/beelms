@@ -18,6 +18,10 @@ export type InstanceFeatures = {
   auth: boolean;
   paidCourses: boolean;
   gdprLegal: boolean;
+  socialGoogle: boolean;
+  socialFacebook: boolean;
+  socialGithub: boolean;
+  socialLinkedin: boolean;
   infraRedis: boolean;
   infraRabbitmq: boolean;
   infraMonitoring: boolean;

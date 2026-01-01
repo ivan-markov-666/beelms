@@ -1,3 +1,6 @@
+- **Social login shutdown policy**
+  - Административното изключване на даден доставчик блокира бъдещи authorize/callback заявки (AuthModule връща `503 Service Unavailable`), но **не** изтрива съществуващите акаунти.
+  - При опит за вход със спрян доставчик UI-то показва „методът е временно деактивиран“ и предлага fallback (set password / email login). Това поведение предотвратява silent lockout и е описано в FR-AUTH-9.
 # beelms core – System Architecture
 
 > Документ тип: BMAD Solutioning / Architecture. Описва **референтната архитектура** на рамката **beelms core** – не на конкретна инстанция, а на самия продукт/рамка.
@@ -87,6 +90,7 @@
 
 - `OrgModule` / `InstanceConfigModule`
   - Настройки, branding (име, лого, цветове), активирани модули (feature toggles).
+  - Съхранява и сервира статуса на всяка социална интеграция (Google/Facebook/GitHub/LinkedIn). Тези флагове се четат от AuthModule и от frontend-ACL слоя, за да се скриват/деактивират бутоните в реално време.
 
 - `WikiModule`
   - Статии, версии, категории, многоезичност.
@@ -99,6 +103,7 @@
 
 - `AdminModule`
   - Admin API за управление на съдържание, потребители, настройки и метрики.
+  - Включва Social Login Settings UI/API – отделни toggle-и за всеки доставчик + audit log за промените. Отключването/заключването се извършва транзакционно (DB + cache bust), за да няма race условие между старо и ново състояние.
 
 - `MetricsModule`
   - API за агрегирани метрики, интеграция с Prometheus exporter.

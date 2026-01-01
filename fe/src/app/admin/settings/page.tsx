@@ -14,12 +14,18 @@ type InstanceBranding = {
   primaryColor?: string | null;
 };
 
+type SocialProvider = "google" | "facebook" | "github" | "linkedin";
+
 type InstanceFeatures = {
   wikiPublic: boolean;
   courses: boolean;
   auth: boolean;
   paidCourses: boolean;
   gdprLegal: boolean;
+  socialGoogle: boolean;
+  socialFacebook: boolean;
+  socialGithub: boolean;
+  socialLinkedin: boolean;
   infraRedis: boolean;
   infraRabbitmq: boolean;
   infraMonitoring: boolean;
@@ -31,10 +37,16 @@ type InstanceLanguages = {
   default: string;
 };
 
+type SocialProviderStatus = {
+  enabled: boolean;
+  configured: boolean;
+};
+
 type AdminSettingsResponse = {
   branding: InstanceBranding;
   features: InstanceFeatures;
   languages: InstanceLanguages;
+  socialProviders: Record<SocialProvider, SocialProviderStatus>;
 };
 
 function parseSupportedLangs(raw: string): string[] {
@@ -68,10 +80,18 @@ export default function AdminSettingsPage() {
   const [auth, setAuth] = useState<boolean>(true);
   const [paidCourses, setPaidCourses] = useState<boolean>(true);
   const [gdprLegal, setGdprLegal] = useState<boolean>(true);
+  const [socialGoogle, setSocialGoogle] = useState<boolean>(true);
+  const [socialFacebook, setSocialFacebook] = useState<boolean>(true);
+  const [socialGithub, setSocialGithub] = useState<boolean>(true);
+  const [socialLinkedin, setSocialLinkedin] = useState<boolean>(true);
   const [infraRedis, setInfraRedis] = useState<boolean>(false);
   const [infraRabbitmq, setInfraRabbitmq] = useState<boolean>(false);
   const [infraMonitoring, setInfraMonitoring] = useState<boolean>(true);
   const [infraErrorTracking, setInfraErrorTracking] = useState<boolean>(false);
+  const [socialStatuses, setSocialStatuses] = useState<Record<
+    SocialProvider,
+    SocialProviderStatus
+  > | null>(null);
 
   const [supportedLangsRaw, setSupportedLangsRaw] =
     useState<string>("bg, en, de");
@@ -129,12 +149,17 @@ export default function AdminSettingsPage() {
         setAuth(f?.auth !== false);
         setPaidCourses(f?.paidCourses !== false);
         setGdprLegal(f?.gdprLegal !== false);
+        setSocialGoogle(f?.socialGoogle !== false);
+        setSocialFacebook(f?.socialFacebook !== false);
+        setSocialGithub(f?.socialGithub !== false);
+        setSocialLinkedin(f?.socialLinkedin !== false);
         setInfraRedis(Boolean(f?.infraRedis));
         setInfraRabbitmq(Boolean(f?.infraRabbitmq));
         setInfraMonitoring(f?.infraMonitoring !== false);
         setInfraErrorTracking(Boolean(f?.infraErrorTracking));
 
         setInitialFeatures(f ?? null);
+        setSocialStatuses(data.socialProviders ?? null);
 
         const l = data.languages;
         setSupportedLangsRaw((l?.supported ?? ["bg"]).join(", "));
@@ -188,6 +213,19 @@ export default function AdminSettingsPage() {
 
     const wasAuthEnabled = initialFeatures?.auth !== false;
     const wasGdprEnabled = initialFeatures?.gdprLegal !== false;
+    const socialDisables: string[] = [];
+    if (initialFeatures?.socialGoogle !== false && socialGoogle === false) {
+      socialDisables.push("Google");
+    }
+    if (initialFeatures?.socialFacebook !== false && socialFacebook === false) {
+      socialDisables.push("Facebook");
+    }
+    if (initialFeatures?.socialGithub !== false && socialGithub === false) {
+      socialDisables.push("GitHub");
+    }
+    if (initialFeatures?.socialLinkedin !== false && socialLinkedin === false) {
+      socialDisables.push("LinkedIn");
+    }
 
     if (wasAuthEnabled && auth === false) {
       const ok = window.confirm(
@@ -222,6 +260,10 @@ export default function AdminSettingsPage() {
             auth,
             paidCourses,
             gdprLegal,
+            socialGoogle,
+            socialFacebook,
+            socialGithub,
+            socialLinkedin,
             infraRedis,
             infraRabbitmq,
             infraMonitoring,
@@ -246,6 +288,7 @@ export default function AdminSettingsPage() {
 
       const updated = (await res.json()) as AdminSettingsResponse;
       setInitialFeatures(updated.features);
+      setSocialStatuses(updated.socialProviders ?? null);
 
       setSuccess("Настройките са запазени.");
     } catch {
@@ -407,6 +450,78 @@ export default function AdminSettingsPage() {
                   Infra: Error tracking
                 </span>
               </label>
+            </div>
+          </section>
+
+          <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+            <h2 className="text-lg font-semibold text-gray-900">
+              Social login settings
+            </h2>
+            <p className="mt-1 text-sm text-gray-600">
+              Управлявай кои доставчици са достъпни за крайни потребители.
+            </p>
+
+            <div className="mt-4 space-y-3">
+              {(
+                [
+                  {
+                    key: "socialGoogle",
+                    label: "Google",
+                    state: socialGoogle,
+                    setter: setSocialGoogle,
+                    configured: socialStatuses?.google?.configured ?? false,
+                  },
+                  {
+                    key: "socialFacebook",
+                    label: "Facebook",
+                    state: socialFacebook,
+                    setter: setSocialFacebook,
+                    configured: socialStatuses?.facebook?.configured ?? false,
+                  },
+                  {
+                    key: "socialGithub",
+                    label: "GitHub",
+                    state: socialGithub,
+                    setter: setSocialGithub,
+                    configured: socialStatuses?.github?.configured ?? false,
+                  },
+                  {
+                    key: "socialLinkedin",
+                    label: "LinkedIn",
+                    state: socialLinkedin,
+                    setter: setSocialLinkedin,
+                    configured: socialStatuses?.linkedin?.configured ?? false,
+                  },
+                ] as {
+                  key: string;
+                  label: string;
+                  state: boolean;
+                  setter: (v: boolean) => void;
+                  configured: boolean;
+                }[]
+              ).map((provider) => (
+                <label
+                  key={provider.key}
+                  className="flex items-center justify-between rounded-lg border border-gray-200 px-3 py-2"
+                >
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">
+                      {provider.label}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {provider.configured
+                        ? "Configured"
+                        : "⚠ Не е конфигуриран на backend-а"}
+                    </p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={provider.state}
+                    onChange={(e) => provider.setter(e.target.checked)}
+                    disabled={saving}
+                  />
+                </label>
+              ))}
             </div>
           </section>
 

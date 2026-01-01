@@ -1,7 +1,13 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
-type SocialProvider = 'google' | 'facebook' | 'github' | 'linkedin';
+export const SOCIAL_PROVIDERS = [
+  'google',
+  'facebook',
+  'github',
+  'linkedin',
+] as const;
+export type SocialProvider = (typeof SOCIAL_PROVIDERS)[number];
 
 export interface SocialStatePayload {
   provider: SocialProvider;

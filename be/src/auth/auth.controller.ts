@@ -30,6 +30,7 @@ import { RateLimit } from '../security/rate-limit/rate-limit.decorator';
 import { LoginProtectionInterceptor } from '../security/account-protection/login-protection.interceptor';
 import { getClientIp } from '../security/account-protection/login-protection.utils';
 import { FeatureEnabledGuard } from '../settings/feature-enabled.guard';
+import { SocialLoginAvailabilityService } from './social-login-availability.service';
 
 @Controller('auth')
 @UseGuards(FeatureEnabledGuard('auth'))
@@ -40,6 +41,7 @@ export class AuthController {
     private readonly facebookOAuthService: FacebookOAuthService,
     private readonly githubOAuthService: GithubOAuthService,
     private readonly linkedinOAuthService: LinkedinOAuthService,
+    private readonly socialLoginAvailability: SocialLoginAvailabilityService,
   ) {}
 
   @Get('register')
@@ -51,10 +53,13 @@ export class AuthController {
   }
 
   @Get('facebook/authorize')
-  facebookAuthorize(@Query('redirectPath') redirectPath?: string): {
+  async facebookAuthorize(
+    @Query('redirectPath') redirectPath?: string,
+  ): Promise<{
     url: string;
     state: string;
-  } {
+  }> {
+    await this.socialLoginAvailability.ensureEnabled('facebook');
     if (!this.facebookOAuthService.isConfigured()) {
       throw new ServiceUnavailableException('Facebook login is not available');
     }
@@ -71,6 +76,17 @@ export class AuthController {
   ): Promise<void> {
     const fallbackRedirect =
       this.facebookOAuthService.extractRedirectPathFromState(state);
+
+    const enabled = await this.socialLoginAvailability.isEnabled('facebook');
+    if (!enabled) {
+      res.redirect(
+        this.facebookOAuthService.buildFrontendRedirectUrl({
+          redirectPath: fallbackRedirect,
+          error: 'facebook_disabled',
+        }),
+      );
+      return;
+    }
 
     if (!this.facebookOAuthService.isConfigured()) {
       res.redirect(
@@ -152,10 +168,11 @@ export class AuthController {
   }
 
   @Get('google/authorize')
-  googleAuthorize(@Query('redirectPath') redirectPath?: string): {
+  async googleAuthorize(@Query('redirectPath') redirectPath?: string): Promise<{
     url: string;
     state: string;
-  } {
+  }> {
+    await this.socialLoginAvailability.ensureEnabled('google');
     if (!this.googleOAuthService.isConfigured()) {
       throw new ServiceUnavailableException('Google login is not available');
     }
@@ -172,6 +189,18 @@ export class AuthController {
   ): Promise<void> {
     const fallbackRedirect =
       this.googleOAuthService.extractRedirectPathFromState(state);
+
+    const enabled = await this.socialLoginAvailability.isEnabled('google');
+    if (!enabled) {
+      res.redirect(
+        this.googleOAuthService.buildFrontendRedirectUrl({
+          provider: 'google',
+          redirectPath: fallbackRedirect,
+          error: 'google_disabled',
+        }),
+      );
+      return;
+    }
 
     if (!this.googleOAuthService.isConfigured()) {
       res.redirect(
@@ -221,10 +250,11 @@ export class AuthController {
   }
 
   @Get('github/authorize')
-  githubAuthorize(@Query('redirectPath') redirectPath?: string): {
+  async githubAuthorize(@Query('redirectPath') redirectPath?: string): Promise<{
     url: string;
     state: string;
-  } {
+  }> {
+    await this.socialLoginAvailability.ensureEnabled('github');
     if (!this.githubOAuthService.isConfigured()) {
       throw new ServiceUnavailableException('GitHub login is not available');
     }
@@ -241,6 +271,17 @@ export class AuthController {
   ): Promise<void> {
     const fallbackRedirect =
       this.githubOAuthService.extractRedirectPathFromState(state);
+
+    const enabled = await this.socialLoginAvailability.isEnabled('github');
+    if (!enabled) {
+      res.redirect(
+        this.githubOAuthService.buildFrontendRedirectUrl({
+          redirectPath: fallbackRedirect,
+          error: 'github_disabled',
+        }),
+      );
+      return;
+    }
 
     if (!this.githubOAuthService.isConfigured()) {
       res.redirect(
@@ -286,10 +327,13 @@ export class AuthController {
   }
 
   @Get('linkedin/authorize')
-  linkedinAuthorize(@Query('redirectPath') redirectPath?: string): {
+  async linkedinAuthorize(
+    @Query('redirectPath') redirectPath?: string,
+  ): Promise<{
     url: string;
     state: string;
-  } {
+  }> {
+    await this.socialLoginAvailability.ensureEnabled('linkedin');
     if (!this.linkedinOAuthService.isConfigured()) {
       throw new ServiceUnavailableException('LinkedIn login is not available');
     }
@@ -306,6 +350,17 @@ export class AuthController {
   ): Promise<void> {
     const fallbackRedirect =
       this.linkedinOAuthService.extractRedirectPathFromState(state);
+
+    const enabled = await this.socialLoginAvailability.isEnabled('linkedin');
+    if (!enabled) {
+      res.redirect(
+        this.linkedinOAuthService.buildFrontendRedirectUrl({
+          redirectPath: fallbackRedirect,
+          error: 'linkedin_disabled',
+        }),
+      );
+      return;
+    }
 
     if (!this.linkedinOAuthService.isConfigured()) {
       res.redirect(

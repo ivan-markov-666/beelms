@@ -12,6 +12,10 @@ export type PublicSettings = {
     auth: boolean;
     paidCourses: boolean;
     gdprLegal: boolean;
+    socialGoogle: boolean;
+    socialFacebook: boolean;
+    socialGithub: boolean;
+    socialLinkedin: boolean;
     infraRedis: boolean;
     infraRabbitmq: boolean;
     infraMonitoring: boolean;
@@ -23,9 +27,12 @@ export type PublicSettings = {
   };
 };
 
-export async function getPublicSettings(): Promise<PublicSettings> {
+export async function getPublicSettings(
+  init?: RequestInit,
+): Promise<PublicSettings> {
   const res = await fetch(buildApiUrl("/public/settings"), {
     cache: "no-store",
+    ...init,
   });
 
   if (!res.ok) {

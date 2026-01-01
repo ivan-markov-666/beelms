@@ -31,6 +31,15 @@ _Роля: PM / Tech Lead. Фаза: BMAD Solutioning → Create-epics-and-stori
   - STORY-AUTH-3 Profile + change email/password (ако е в scope)
   - STORY-AUTH-4 GDPR delete/export
 
+### EPIC-CORE-AUTH-SOCIAL-TOGGLES (FR-AUTH + FR-ADMIN)
+
+- **Goal:** Администраторът управлява социалните login-и (Google, Facebook, GitHub, LinkedIn) централизирано и системата осигурява fallback за потребителите.
+- **Stories (high level):**
+  - STORY-AUTH-SOC-1 Admin UI (Social Login Settings) – отделни toggle-и, конфигурационен статус и audit trail.
+  - STORY-AUTH-SOC-2 Backend feature flags – настройки в InstanceConfig, authorize endpoints връщат `503` при OFF, frontend скрива бутоните.
+  - STORY-AUTH-SOC-3 Fallback flow за съществуващи акаунти – показване на съобщение „методът е временно деактивиран“ и shortcut към set-password / email login.
+  - STORY-AUTH-SOC-4 Self-serve unlink/convert (optional) – потребителят може да зададе парола и да продължи без социалния доставчик, когато той е OFF.
+
 ### EPIC-CORE-COURSES-PROGRESS (FR-COURSES)
 
 - **Goal:** Course catalog + enrollment + My Courses + базов прогрес.
