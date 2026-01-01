@@ -1,7 +1,10 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
+  HttpException,
+  HttpStatus,
   Post,
   Req,
   UseGuards,
@@ -26,6 +29,14 @@ import { FeatureEnabledGuard } from '../settings/feature-enabled.guard';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Get('register')
+  getRegister() {
+    throw new HttpException(
+      'Method Not Allowed',
+      HttpStatus.METHOD_NOT_ALLOWED,
+    );
+  }
+
   @Post('register')
   @RateLimit({ limit: 5, windowSeconds: 3600, key: 'ip' })
   register(@Body() dto: RegisterDto): Promise<UserProfileDto> {
@@ -34,7 +45,7 @@ export class AuthController {
 
   @HttpCode(200)
   @Post('login')
-  @RateLimit({ limit: 10, windowSeconds: 60, key: 'ip+email' })
+  @RateLimit({ limit: 5, windowSeconds: 60, key: 'ip+email' })
   @UseInterceptors(LoginProtectionInterceptor)
   login(@Req() req: Request, @Body() dto: LoginDto): Promise<AuthTokenDto> {
     return this.authService.login(dto, {

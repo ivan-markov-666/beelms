@@ -93,7 +93,7 @@ export class AccountController {
 
   @UseGuards(FeatureEnabledGuard('gdprLegal'), JwtAuthGuard)
   @Post('me/export')
-  @RateLimit({ limit: 3, windowSeconds: 86400, key: 'userId' })
+  @RateLimit({ limit: 5, windowSeconds: 86400, key: 'userId' })
   @HttpCode(200)
   async exportMe(
     @Req() req: AuthenticatedRequest,

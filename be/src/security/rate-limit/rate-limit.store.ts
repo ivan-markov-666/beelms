@@ -43,6 +43,10 @@ export class InMemoryRateLimitStore {
     return { allowed, remaining, resetAtMs: existing.resetAtMs };
   }
 
+  clear(): void {
+    this.entries.clear();
+  }
+
   private pruneIfNeeded(nowMs: number): void {
     if (this.entries.size < 10_000) {
       return;

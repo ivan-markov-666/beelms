@@ -57,7 +57,8 @@ export const messages: Messages = {
       registerSubtitle: "Създайте нов акаунт.",
       registerEmailLabel: "Имейл",
       registerPasswordLabel: "Парола",
-      registerPasswordHint: "Минимум 8 символа",
+      registerPasswordHint:
+        "Минимум 8 символа: поне една главна буква, една малка буква, една цифра и един специален символ",
       registerConfirmPasswordLabel: "Потвърди паролата",
       registerTermsPrefix: "Съгласен съм с ",
       registerTermsAnd: " и ",
@@ -74,7 +75,16 @@ export const messages: Messages = {
       registerErrorEmailRequired: "Моля, въведете имейл.",
       registerErrorEmailInvalid: "Моля, въведете валиден имейл адрес.",
       registerErrorPasswordRequired: "Моля, въведете парола.",
-      registerErrorPasswordTooShort: "Паролата трябва да е поне 8 символа.",
+      registerErrorPasswordTooShort:
+        "Паролата трябва да е поне 8 символа дълга и да съдържа поне една главна буква, една малка буква, една цифра и един специален символ.",
+      registerErrorPasswordMissingUppercase:
+        "Паролата трябва да съдържа поне една главна буква.",
+      registerErrorPasswordMissingLowercase:
+        "Паролата трябва да съдържа поне една малка буква.",
+      registerErrorPasswordMissingDigit:
+        "Паролата трябва да съдържа поне една цифра.",
+      registerErrorPasswordMissingSpecialChar:
+        "Паролата трябва да съдържа поне един специален символ.",
       registerErrorConfirmPasswordRequired: "Моля, потвърдете паролата.",
       registerErrorPasswordsMismatch: "Паролите не съвпадат.",
       registerErrorTermsRequired: "Необходимо е да приемете условията.",
@@ -344,6 +354,8 @@ export const messages: Messages = {
       analyticsConsentPrivacyLink: "Вижте Политиката за поверителност",
       analyticsConsentDecline: "Откажи",
       analyticsConsentAccept: "Приеми",
+      showPassword: "Покажи паролата",
+      hidePassword: "Скрий паролата",
       adminAdvancedMetricsTitle: "Advanced metrics",
       adminAdvancedMetricsSubtitle:
         "Сесии и посещения (без лични данни) за избрания период.",
@@ -420,7 +432,8 @@ export const messages: Messages = {
       registerSubtitle: "Create your free BeeLMS account to get started.",
       registerEmailLabel: "Email",
       registerPasswordLabel: "Password",
-      registerPasswordHint: "Minimum 8 characters",
+      registerPasswordHint:
+        "Minimum 8 characters: at least one uppercase letter, one lowercase letter, one digit, and one special character",
       registerConfirmPasswordLabel: "Confirm password",
       registerTermsPrefix: "I agree to the ",
       registerTermsAnd: " and the ",
@@ -438,7 +451,15 @@ export const messages: Messages = {
       registerErrorEmailInvalid: "Please enter a valid email address.",
       registerErrorPasswordRequired: "Please enter a password.",
       registerErrorPasswordTooShort:
-        "Password must be at least 8 characters long.",
+        "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one digit, and one special character.",
+      registerErrorPasswordMissingUppercase:
+        "Password must contain at least one uppercase letter.",
+      registerErrorPasswordMissingLowercase:
+        "Password must contain at least one lowercase letter.",
+      registerErrorPasswordMissingDigit:
+        "Password must contain at least one digit.",
+      registerErrorPasswordMissingSpecialChar:
+        "Password must contain at least one special character.",
       registerErrorConfirmPasswordRequired: "Please confirm your password.",
       registerErrorPasswordsMismatch: "Passwords do not match.",
       registerErrorTermsRequired: "You must accept the terms.",
@@ -702,6 +723,8 @@ export const messages: Messages = {
       analyticsConsentPrivacyLink: "See the Privacy Policy",
       analyticsConsentDecline: "Decline",
       analyticsConsentAccept: "Accept",
+      showPassword: "Show password",
+      hidePassword: "Hide password",
       adminAdvancedMetricsTitle: "Advanced metrics",
       adminAdvancedMetricsSubtitle:
         "Sessions and page views (no personal data) for the selected period.",

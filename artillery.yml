@@ -1,0 +1,21 @@
+config:
+  target: 'http://localhost:3000'
+  plugins:
+    faker: {}
+  phases:
+    - duration: 30
+      arrivalRate: 5  # 5 requests per second for 30 seconds = 150 requests total
+  defaults:
+    headers:
+      Content-Type: 'application/json'
+
+scenarios:
+  - name: 'Register user load test'
+    weight: 100
+    flow:
+      - post:
+          url: '/api/auth/register'
+          json:
+            email: '{{ faker.internet.email() }}'
+            password: 'Password123!'
+            acceptTerms: true

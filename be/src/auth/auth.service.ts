@@ -43,6 +43,13 @@ export class AuthService {
   ) {}
 
   async register(dto: RegisterDto): Promise<UserProfileDto> {
+    if (process.env.MAINTENANCE_MODE === 'true') {
+      throw new HttpException(
+        'Service temporarily unavailable due to maintenance',
+        HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
+
     const requireCaptcha = process.env.AUTH_REQUIRE_CAPTCHA === 'true';
     if (requireCaptcha) {
       await this.captchaService.verifyCaptchaToken({
@@ -54,8 +61,12 @@ export class AuthService {
       throw new BadRequestException('terms acceptance required');
     }
 
+    if (dto.honeypot && dto.honeypot.trim() !== '') {
+      throw new BadRequestException('bot detected');
+    }
+
     const existing = await this.usersRepo.findOne({
-      where: { email: dto.email },
+      where: { email: dto.email, active: true },
     });
     if (existing) {
       throw new ConflictException('Email already in use');

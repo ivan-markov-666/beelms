@@ -1,6 +1,6 @@
 # STORY-DOCS-1: OpenAPI Sync (API Contract as Source of Truth)
 
-_BMAD Story Spec | EPIC: EPIC-CORE-API-CONTRACT | Status: 🟡 In Progress_
+_BMAD Story Spec | EPIC: EPIC-CORE-API-CONTRACT | Status: ✅ Implemented_
 
 ---
 

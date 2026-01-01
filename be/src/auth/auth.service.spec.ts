@@ -98,7 +98,7 @@ describe('AuthService', () => {
     const result = await service.register(dto);
 
     expect(usersRepo.findOne).toHaveBeenCalledWith({
-      where: { email: dto.email },
+      where: { email: dto.email, active: true },
     });
     expect(usersRepo.create).toHaveBeenCalled();
     expect(usersRepo.save).toHaveBeenCalled();

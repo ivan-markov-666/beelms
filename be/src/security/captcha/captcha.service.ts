@@ -17,14 +17,18 @@ export class CaptchaService {
     token: string;
     remoteIp?: string;
   }): Promise<void> {
+    if (
+      process.env.NODE_ENV === 'test' &&
+      args.token === 'test-captcha-token'
+    ) {
+      return;
+    }
+
     if (!args.token || args.token.trim().length === 0) {
       throw new BadRequestException('captcha verification required');
     }
 
-    if (
-      process.env.NODE_ENV !== 'production' ||
-      process.env.CAPTCHA_VERIFY_DISABLED === 'true'
-    ) {
+    if (process.env.CAPTCHA_VERIFY_DISABLED === 'true') {
       return;
     }
 
