@@ -16,6 +16,7 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { CaptchaService } from '../security/captcha/captcha.service';
 import { InMemoryLoginAttemptStore } from '../security/account-protection/login-attempts.store';
+import type { GoogleProfile } from './google-oauth.service';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -397,6 +398,77 @@ describe('AuthService', () => {
       BadRequestException,
     );
     expect(usersRepo.save).not.toHaveBeenCalled();
+  });
+
+  describe('loginWithGoogle', () => {
+    const baseProfile: GoogleProfile = {
+      email: 'google.user@example.com',
+      emailVerified: true,
+      redirectPath: '/wiki',
+    };
+
+    it('creates and logs in a new Google user', async () => {
+      (usersRepo.findOne as jest.Mock).mockResolvedValue(undefined);
+      (usersRepo.create as jest.Mock).mockImplementation((payload) => payload);
+      (usersRepo.save as jest.Mock)
+        .mockImplementationOnce(async (user) => ({
+          ...user,
+          id: 'google-user-id',
+          tokenVersion: 0,
+        }))
+        .mockImplementationOnce(async (user) => user);
+
+      const token = await service.loginWithGoogle(baseProfile);
+
+      const [[createdUserPayload]] = (
+        usersRepo.create as jest.MockedFunction<typeof usersRepo.create>
+      ).mock.calls;
+      expect(createdUserPayload?.email).toBe(baseProfile.email);
+      expect(createdUserPayload?.emailVerified).toBe(true);
+      expect(createdUserPayload?.termsAcceptedAt).toBeInstanceOf(Date);
+      expect(createdUserPayload?.privacyAcceptedAt).toBeInstanceOf(Date);
+      expect(usersRepo.save).toHaveBeenCalledTimes(1);
+
+      const payload = await jwtService.verifyAsync<{
+        sub: string;
+        email: string;
+        tokenVersion: number;
+      }>(token.accessToken);
+      expect(payload.sub).toBe('google-user-id');
+      expect(payload.email).toBe(baseProfile.email);
+      expect(payload.tokenVersion).toBe(0);
+    });
+
+    it('verifies existing user and issues token', async () => {
+      const existingUser: Partial<User> = {
+        id: 'existing-google-user',
+        email: baseProfile.email,
+        emailVerified: false,
+        tokenVersion: 2,
+        active: true,
+        passwordHash: 'hash',
+      };
+
+      (usersRepo.findOne as jest.Mock).mockResolvedValue(existingUser);
+      (usersRepo.save as jest.Mock).mockImplementation(async (user) => user);
+
+      const token = await service.loginWithGoogle(baseProfile);
+
+      expect(usersRepo.save).toHaveBeenCalledWith(
+        expect.objectContaining({
+          emailVerified: true,
+        }),
+      );
+
+      const payload = await jwtService.verifyAsync<{
+        sub: string;
+        email: string;
+        tokenVersion: number;
+      }>(token.accessToken);
+      expect(payload.sub).toBe(existingUser.id);
+      expect(payload.email).toBe(existingUser.email);
+      expect(payload.tokenVersion).toBe(existingUser.tokenVersion);
+    });
   });
 
   it('throws BadRequestException when reset token is expired', async () => {

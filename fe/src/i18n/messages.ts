@@ -39,6 +39,10 @@ export const messages: Messages = {
       loginPasswordLabel: "Парола",
       loginSubmit: "Вход",
       loginSubmitLoading: "Вписване...",
+      loginGoogleCta: "Вход с Google",
+      loginGoogleLoading: "Свързване...",
+      loginSocialDivider: "или продължете с имейл",
+      loginGoogleError: "Google входът неуспя. Моля, опитайте отново.",
       loginForgotLink: "Забравена парола?",
       loginRegisterLink: "Нямате акаунт?",
       loginRememberMeLabel: "Remember me",
@@ -70,6 +74,11 @@ export const messages: Messages = {
         "CAPTCHA / reCAPTCHA (placeholder за защита от ботове при регистрация)",
       registerSubmit: "Регистрация",
       registerSubmitLoading: "Изпращане...",
+      registerGoogleCta: "Регистрация с Google",
+      registerGoogleLoading: "Свързване...",
+      registerSocialDivider: "или попълнете формата",
+      registerGoogleError:
+        "Регистрацията с Google неуспя. Моля, опитайте отново.",
       registerHasAccount: "Вече имате акаунт?",
       registerLoginLink: "Вход",
       registerErrorEmailRequired: "Моля, въведете имейл.",
@@ -142,6 +151,15 @@ export const messages: Messages = {
       resetErrorNetwork: "Възникна грешка при връзката със сървъра.",
       resetSuccess:
         "Паролата беше сменена успешно. Ще ви пренасочим към страницата за вход...",
+      socialCallbackTitle: "Обработка на социален вход",
+      socialCallbackProcessing:
+        "Моля, изчакайте. Завършваме входа ви чрез Google.",
+      socialCallbackRedirectNotice:
+        "Ще ви пренасочим автоматично в рамките на няколко секунди.",
+      socialCallbackErrorTitle: "Неуспешен социален вход",
+      socialCallbackError:
+        "Не успяхме да ви впишем чрез Google. Моля, опитайте отново.",
+      socialCallbackErrorCta: "Обратно към страницата за вход",
       resetPasswordRequirementsTitle: "Изисквания за парола:",
       resetPasswordRequirementsItemMinLength: "Минимум 8 символа",
       resetPasswordRequirementsItemRecommendation:

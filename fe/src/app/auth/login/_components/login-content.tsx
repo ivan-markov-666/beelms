@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useCurrentLang } from "../../../../i18n/useCurrentLang";
 import { t } from "../../../../i18n/t";
 import {
@@ -11,6 +11,7 @@ import {
 } from "../../../auth-token";
 import { buildApiUrl } from "../../../api-url";
 import { RecaptchaWidget } from "../../../_components/recaptcha-widget";
+import { startGoogleOAuth } from "../../social-login";
 
 const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
 
@@ -22,6 +23,7 @@ type FieldErrors = {
 
 export function LoginContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const lang = useCurrentLang();
 
   const [email, setEmail] = useState("");
@@ -32,8 +34,27 @@ export function LoginContent() {
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
+  const [socialError, setSocialError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [checkingSession, setCheckingSession] = useState(true);
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  const handleGoogleLogin = async () => {
+    if (googleLoading) return;
+
+    setSocialError(null);
+    setGoogleLoading(true);
+
+    try {
+      await startGoogleOAuth({
+        redirectPath: searchParams.get("redirect"),
+      });
+    } catch (error) {
+      console.error("Google OAuth authorize failed", error);
+      setSocialError(t(lang, "auth", "loginGoogleError"));
+      setGoogleLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -203,6 +224,54 @@ export function LoginContent() {
         </p>
 
         <div className="rounded-lg border border-gray-200 bg-white p-8 shadow-sm">
+          <div className="space-y-3">
+            <button
+              type="button"
+              onClick={handleGoogleLogin}
+              disabled={submitting || googleLoading}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              <svg
+                className="h-5 w-5"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <path
+                  fill="#EA4335"
+                  d="M12 5.09c1.26 0 2.39.43 3.29 1.28l2.45-2.45C16.25 2.36 14.31 1.64 12 1.64 7.9 1.64 4.34 4.06 2.68 7.64l2.85 2.21C6.37 7.41 8.98 5.09 12 5.09z"
+                />
+                <path
+                  fill="#FBBC05"
+                  d="M21.81 12.19c0-.74-.07-1.45-.19-2.14H12v4.05h5.54c-.24 1.3-.96 2.4-2.06 3.15l3.22 2.5c1.88-1.73 3.11-4.28 3.11-7.56z"
+                />
+                <path
+                  fill="#4285F4"
+                  d="M12 22.36c2.85 0 5.24-.94 6.99-2.61l-3.22-2.5c-.89.6-2.02.95-3.77.95-2.94 0-5.44-1.98-6.33-4.64l-2.9 2.24C4.4 20.17 7.92 22.36 12 22.36z"
+                />
+                <path
+                  fill="#34A853"
+                  d="M5.67 13.56c-.2-.6-.31-1.25-.31-1.92s.11-1.32.3-1.92L2.81 7.5C2.3 8.67 2 9.94 2 11.36s.3 2.69.81 3.86l2.86-1.66z"
+                />
+                <path fill="none" d="M2 2h20v20H2z" />
+              </svg>
+              {googleLoading
+                ? t(lang, "auth", "loginGoogleLoading")
+                : t(lang, "auth", "loginGoogleCta")}
+            </button>
+            {socialError && (
+              <p className="text-xs text-red-600" role="alert">
+                {socialError}
+              </p>
+            )}
+          </div>
+
+          <div className="my-6 flex items-center gap-3 text-xs text-gray-500">
+            <div className="h-px flex-1 bg-gray-200" aria-hidden="true" />
+            <span>{t(lang, "auth", "loginSocialDivider")}</span>
+            <div className="h-px flex-1 bg-gray-200" aria-hidden="true" />
+          </div>
+
           <form className="space-y-6" onSubmit={handleSubmit} noValidate>
             <div className="space-y-1">
               <label

@@ -4,6 +4,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { User } from './user.entity';
+import { GoogleOAuthService } from './google-oauth.service';
+import { SocialOAuthStateService } from './social-oauth-state.service';
 import { WikiArticle } from '../wiki/wiki-article.entity';
 import { WikiArticleVersion } from '../wiki/wiki-article-version.entity';
 import { WikiArticleFeedback } from '../wiki/wiki-article-feedback.entity';
@@ -59,6 +61,8 @@ import { SettingsModule } from '../settings/settings.module';
     AdminActivityService,
     InMemoryLoginAttemptStore,
     LoginProtectionInterceptor,
+    GoogleOAuthService,
+    SocialOAuthStateService,
   ],
   controllers: [
     AuthController,

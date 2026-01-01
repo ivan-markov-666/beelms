@@ -6,11 +6,14 @@ import {
   HttpException,
   HttpStatus,
   Post,
+  Query,
   Req,
+  Res,
+  ServiceUnavailableException,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import type { Request } from 'express';
+import type { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -23,11 +26,15 @@ import { RateLimit } from '../security/rate-limit/rate-limit.decorator';
 import { LoginProtectionInterceptor } from '../security/account-protection/login-protection.interceptor';
 import { getClientIp } from '../security/account-protection/login-protection.utils';
 import { FeatureEnabledGuard } from '../settings/feature-enabled.guard';
+import { GoogleOAuthService } from './google-oauth.service';
 
 @Controller('auth')
 @UseGuards(FeatureEnabledGuard('auth'))
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly googleOAuthService: GoogleOAuthService,
+  ) {}
 
   @Get('register')
   getRegister() {
@@ -71,5 +78,74 @@ export class AuthController {
   @Post('verify-email')
   verifyEmail(@Body() dto: VerifyEmailDto): Promise<void> {
     return this.authService.verifyEmail(dto);
+  }
+
+  @Get('google/authorize')
+  googleAuthorize(@Query('redirectPath') redirectPath?: string): {
+    url: string;
+    state: string;
+  } {
+    if (!this.googleOAuthService.isConfigured()) {
+      throw new ServiceUnavailableException('Google login is not available');
+    }
+
+    return this.googleOAuthService.createAuthorizationUrl(redirectPath);
+  }
+
+  @Get('google/callback')
+  async googleCallback(
+    @Query('code') code: string | undefined,
+    @Query('state') state: string | undefined,
+    @Query('error') error: string | undefined,
+    @Res() res: Response,
+  ): Promise<void> {
+    const fallbackRedirect =
+      this.googleOAuthService.extractRedirectPathFromState(state);
+
+    if (!this.googleOAuthService.isConfigured()) {
+      res.redirect(
+        this.googleOAuthService.buildFrontendRedirectUrl({
+          provider: 'google',
+          redirectPath: fallbackRedirect,
+          error: 'google_unavailable',
+        }),
+      );
+      return;
+    }
+
+    if (error || !code) {
+      res.redirect(
+        this.googleOAuthService.buildFrontendRedirectUrl({
+          provider: 'google',
+          redirectPath: fallbackRedirect,
+          error: error ?? 'missing_code',
+        }),
+      );
+      return;
+    }
+
+    try {
+      const profile = await this.googleOAuthService.exchangeCodeForProfile(
+        code,
+        state ?? '',
+      );
+      const token = await this.authService.loginWithGoogle(profile);
+
+      res.redirect(
+        this.googleOAuthService.buildFrontendRedirectUrl({
+          provider: 'google',
+          redirectPath: profile.redirectPath,
+          token: token.accessToken,
+        }),
+      );
+    } catch {
+      res.redirect(
+        this.googleOAuthService.buildFrontendRedirectUrl({
+          provider: 'google',
+          redirectPath: fallbackRedirect,
+          error: 'google_oauth_failed',
+        }),
+      );
+    }
   }
 }

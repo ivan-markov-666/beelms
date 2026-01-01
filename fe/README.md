@@ -35,13 +35,15 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 
-## WS-1 Wiki integration
+## WS-1 Wiki
 
-For the WS-1 walking skeleton, the `/wiki` page in this Next.js app depends on the backend Wiki API:
+### reCAPTCHA setup
+
+The WS-1 walking skeleton, the `/wiki` page in this Next.js app depends on the backend Wiki API:
 
 - `GET http://localhost:3000/api/wiki/articles`
 
-For the MVP Wiki search and language filter (`STORY-MVP-WIKI-SEARCH-FILTER`), the `/wiki` page also:
+For the MVP Wiki search and language filter (`STORY-MVP-WIKI-SEARCH-FILTER`), the `/wiki` page:
 
 - exposes a search input and language dropdown (BG/EN);
 - forwards the selected filters to the backend as `q` (search query) and `lang` (language) query parameters.
