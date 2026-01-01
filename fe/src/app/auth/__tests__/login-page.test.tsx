@@ -9,6 +9,7 @@ let mockSearchParams = "lang=bg";
 const startGoogleOAuth = jest.fn();
 const startFacebookOAuth = jest.fn();
 const startGithubOAuth = jest.fn();
+const startLinkedinOAuth = jest.fn();
 
 jest.mock("../social-login", () => ({
   DEFAULT_SOCIAL_REDIRECT: "/wiki",
@@ -17,6 +18,7 @@ jest.mock("../social-login", () => ({
   startGoogleOAuth: (...args: unknown[]) => startGoogleOAuth(...args),
   startFacebookOAuth: (...args: unknown[]) => startFacebookOAuth(...args),
   startGithubOAuth: (...args: unknown[]) => startGithubOAuth(...args),
+  startLinkedinOAuth: (...args: unknown[]) => startLinkedinOAuth(...args),
 }));
 
 jest.mock("next/navigation", () => {
@@ -45,6 +47,26 @@ describe("LoginPage", () => {
     jest.resetAllMocks();
     window.localStorage.clear();
     mockSearchParams = "lang=bg";
+  });
+
+  it("starts LinkedIn OAuth when LinkedIn button is clicked", async () => {
+    mockSearchParams = "lang=bg&redirect=/home";
+    render(<LoginPage />);
+
+    const linkedinButton = await screen.findByRole("button", {
+      name: "Вход с LinkedIn",
+    });
+
+    fireEvent.click(linkedinButton);
+
+    await waitFor(() => {
+      expect(startLinkedinOAuth).toHaveBeenCalledWith({
+        redirectPath: "/home",
+      });
+    });
+    expect(
+      screen.getByRole("button", { name: "Свързване..." }),
+    ).toBeInTheDocument();
   });
 
   it("renders email and password fields", async () => {

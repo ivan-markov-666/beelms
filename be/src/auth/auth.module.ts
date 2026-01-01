@@ -7,6 +7,7 @@ import { User } from './user.entity';
 import { GoogleOAuthService } from './google-oauth.service';
 import { FacebookOAuthService } from './facebook-oauth.service';
 import { GithubOAuthService } from './github-oauth.service';
+import { LinkedinOAuthService } from './linkedin-oauth.service';
 import { SocialOAuthStateService } from './social-oauth-state.service';
 import { WikiArticle } from '../wiki/wiki-article.entity';
 import { WikiArticleVersion } from '../wiki/wiki-article-version.entity';
@@ -66,6 +67,7 @@ import { SettingsModule } from '../settings/settings.module';
     GoogleOAuthService,
     FacebookOAuthService,
     GithubOAuthService,
+    LinkedinOAuthService,
     SocialOAuthStateService,
   ],
   controllers: [

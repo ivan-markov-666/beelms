@@ -280,6 +280,33 @@ curl -I "http://localhost:3000/api/auth/github/authorize?redirect=/wiki/article"
 
 Очаквайте `302 Found` с `Location` заглавие, сочещо към `https://github.com/login/oauth/authorize?...state=<STATE>`. Отворете върнатия URL в браузър, за да завършите OAuth потока. След успешен вход GitHub ще върне потребителя към `http://localhost:3000/api/auth/github/callback`, откъдето backend-ът ще изгради крайната препратка към фронтенда (`/auth/social-callback`).
 
+### LinkedIn OAuth конфигурация
+
+LinkedIn използва OpenID Connect flow. За локална разработка:
+
+1. Отидете в [LinkedIn Developer Portal](https://www.linkedin.com/developers/apps/) и създайте нова **Client Application**.
+   - **App type**: Web.
+   - **Authorized redirect URL**: `http://localhost:3000/api/auth/linkedin/callback`.
+   - Активирайте **Sign In with LinkedIn using OpenID Connect** и добавете `email` и `profile` permissions.
+2. Копирайте `Client ID` и `Client Secret`.
+3. В `be/.env` добавете:
+
+   ```env
+   LINKEDIN_CLIENT_ID=<LinkedIn OAuth Client ID>
+   LINKEDIN_CLIENT_SECRET=<LinkedIn OAuth Client Secret>
+   LINKEDIN_OAUTH_REDIRECT_URL=http://localhost:3000/api/auth/linkedin/callback
+   ```
+
+4. Рестартирайте backend-а.
+
+#### Проверка с curl
+
+```bash
+curl -I "http://localhost:3000/api/auth/linkedin/authorize?redirect=/wiki/article"
+```
+
+Трябва да получите `302 Found` към `https://www.linkedin.com/oauth/v2/authorization?...state=<STATE>`. След успешен OAuth LinkedIn ще върне потребителя към `/api/auth/linkedin/callback`, а backend-ът ще го пренасочи към `/auth/social-callback`.
+
 ### Account / Profile API (WS-2)
 
 All account endpoints are protected with JWT and are available under the `/api/users` prefix (the global Nest prefix is `api`). A valid access token from `POST /api/auth/login` must be sent as:

@@ -15,6 +15,7 @@ import {
   startFacebookOAuth,
   startGoogleOAuth,
   startGithubOAuth,
+  startLinkedinOAuth,
 } from "../../social-login";
 
 const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
@@ -44,16 +45,19 @@ export function LoginContent() {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [facebookLoading, setFacebookLoading] = useState(false);
   const [githubLoading, setGithubLoading] = useState(false);
+  const [linkedinLoading, setLinkedinLoading] = useState(false);
 
   const handleSocialLogin = async (
-    provider: "google" | "facebook" | "github",
+    provider: "google" | "facebook" | "github" | "linkedin",
   ) => {
     const isGoogle = provider === "google";
     const isFacebook = provider === "facebook";
+    const isLinkedin = provider === "linkedin";
     if (
       (isGoogle && googleLoading) ||
       (isFacebook && facebookLoading) ||
-      (!isGoogle && !isFacebook && githubLoading)
+      (provider === "github" && githubLoading) ||
+      (isLinkedin && linkedinLoading)
     ) {
       return;
     }
@@ -63,6 +67,8 @@ export function LoginContent() {
       setGoogleLoading(true);
     } else if (isFacebook) {
       setFacebookLoading(true);
+    } else if (isLinkedin) {
+      setLinkedinLoading(true);
     } else {
       setGithubLoading(true);
     }
@@ -72,7 +78,9 @@ export function LoginContent() {
         ? startGoogleOAuth
         : isFacebook
           ? startFacebookOAuth
-          : startGithubOAuth;
+          : provider === "github"
+            ? startGithubOAuth
+            : startLinkedinOAuth;
       await startFn({
         redirectPath: searchParams.get("redirect"),
       });
@@ -86,12 +94,15 @@ export function LoginContent() {
             ? "loginGoogleError"
             : isFacebook
               ? "loginFacebookError"
-              : "loginGithubError",
+              : provider === "github"
+                ? "loginGithubError"
+                : "loginLinkedinError",
         ),
       );
       setGoogleLoading((prev) => (isGoogle ? false : prev));
       setFacebookLoading((prev) => (isFacebook ? false : prev));
-      setGithubLoading((prev) => (!isGoogle && !isFacebook ? false : prev));
+      setGithubLoading((prev) => (provider === "github" ? false : prev));
+      setLinkedinLoading((prev) => (isLinkedin ? false : prev));
     }
   };
 
@@ -268,7 +279,11 @@ export function LoginContent() {
               type="button"
               onClick={() => handleSocialLogin("google")}
               disabled={
-                submitting || googleLoading || facebookLoading || githubLoading
+                submitting ||
+                googleLoading ||
+                facebookLoading ||
+                githubLoading ||
+                linkedinLoading
               }
               className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-70"
             >
@@ -304,7 +319,11 @@ export function LoginContent() {
               type="button"
               onClick={() => handleSocialLogin("facebook")}
               disabled={
-                submitting || facebookLoading || googleLoading || githubLoading
+                submitting ||
+                facebookLoading ||
+                googleLoading ||
+                githubLoading ||
+                linkedinLoading
               }
               className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-70"
             >
@@ -327,7 +346,11 @@ export function LoginContent() {
               type="button"
               onClick={() => handleSocialLogin("github")}
               disabled={
-                submitting || githubLoading || googleLoading || facebookLoading
+                submitting ||
+                githubLoading ||
+                googleLoading ||
+                facebookLoading ||
+                linkedinLoading
               }
               className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-70"
             >
@@ -345,6 +368,33 @@ export function LoginContent() {
               {githubLoading
                 ? t(lang, "auth", "loginGithubLoading")
                 : t(lang, "auth", "loginGithubCta")}
+            </button>
+            <button
+              type="button"
+              onClick={() => handleSocialLogin("linkedin")}
+              disabled={
+                submitting ||
+                linkedinLoading ||
+                googleLoading ||
+                facebookLoading ||
+                githubLoading
+              }
+              className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              <svg
+                className="h-5 w-5"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <path
+                  fill="#0A66C2"
+                  d="M20.447 20.452H17.21v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.086V9h3.104v1.561h.044c.433-.82 1.494-1.688 3.072-1.688 3.287 0 3.894 2.164 3.894 4.977v6.602zM5.337 7.433a1.8 1.8 0 1 1 0-3.6 1.8 1.8 0 0 1 0 3.6zM6.907 20.452H3.672V9h3.235v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729V22.27C0 23.226.792 24 1.771 24h20.451C23.2 24 24 23.226 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"
+                />
+              </svg>
+              {linkedinLoading
+                ? t(lang, "auth", "loginLinkedinLoading")
+                : t(lang, "auth", "loginLinkedinCta")}
             </button>
             {socialError && (
               <p className="text-xs text-red-600" role="alert">

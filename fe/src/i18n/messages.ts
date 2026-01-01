@@ -45,10 +45,13 @@ export const messages: Messages = {
       loginFacebookLoading: "Свързване...",
       loginGithubCta: "Вход с GitHub",
       loginGithubLoading: "Свързване...",
+      loginLinkedinCta: "Вход с LinkedIn",
+      loginLinkedinLoading: "Свързване...",
       loginSocialDivider: "или продължете с имейл",
       loginGoogleError: "Google входът неуспя. Моля, опитайте отново.",
       loginFacebookError: "Facebook входът неуспя. Моля, опитайте отново.",
-      loginGithubError: "GitHub входът неуспя. Моля, опитайте отново.",
+      loginGithubError: "Входът с GitHub неуспя. Моля, опитайте отново.",
+      loginLinkedinError: "Входът с LinkedIn неуспя. Моля, опитайте отново.",
       loginForgotLink: "Забравена парола?",
       loginRegisterLink: "Нямате акаунт?",
       loginRememberMeLabel: "Remember me",
@@ -86,6 +89,8 @@ export const messages: Messages = {
       registerFacebookLoading: "Свързване...",
       registerGithubCta: "Регистрация с GitHub",
       registerGithubLoading: "Свързване...",
+      registerLinkedinCta: "Регистрация с LinkedIn",
+      registerLinkedinLoading: "Свързване...",
       registerSocialDivider: "или попълнете формата",
       registerGoogleError:
         "Регистрацията с Google неуспя. Моля, опитайте отново.",
@@ -93,6 +98,8 @@ export const messages: Messages = {
         "Регистрацията с Facebook неуспя. Моля, опитайте отново.",
       registerGithubError:
         "Регистрацията с GitHub неуспя. Моля, опитайте отново.",
+      registerLinkedinError:
+        "Регистрацията с LinkedIn неуспя. Моля, опитайте отново.",
       registerHasAccount: "Вече имате акаунт?",
       registerLoginLink: "Вход",
       registerErrorEmailRequired: "Моля, въведете имейл.",
