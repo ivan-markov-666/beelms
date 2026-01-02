@@ -60,7 +60,7 @@ export class AuthController {
     state: string;
   }> {
     await this.socialLoginAvailability.ensureEnabled('facebook');
-    if (!this.facebookOAuthService.isConfigured()) {
+    if (!(await this.facebookOAuthService.isConfigured())) {
       throw new ServiceUnavailableException('Facebook login is not available');
     }
 
@@ -88,7 +88,8 @@ export class AuthController {
       return;
     }
 
-    if (!this.facebookOAuthService.isConfigured()) {
+    const facebookConfigured = await this.facebookOAuthService.isConfigured();
+    if (!facebookConfigured) {
       res.redirect(
         this.facebookOAuthService.buildFrontendRedirectUrl({
           redirectPath: fallbackRedirect,
@@ -173,7 +174,7 @@ export class AuthController {
     state: string;
   }> {
     await this.socialLoginAvailability.ensureEnabled('google');
-    if (!this.googleOAuthService.isConfigured()) {
+    if (!(await this.googleOAuthService.isConfigured())) {
       throw new ServiceUnavailableException('Google login is not available');
     }
 
@@ -202,7 +203,8 @@ export class AuthController {
       return;
     }
 
-    if (!this.googleOAuthService.isConfigured()) {
+    const googleConfigured = await this.googleOAuthService.isConfigured();
+    if (!googleConfigured) {
       res.redirect(
         this.googleOAuthService.buildFrontendRedirectUrl({
           provider: 'google',
@@ -255,7 +257,7 @@ export class AuthController {
     state: string;
   }> {
     await this.socialLoginAvailability.ensureEnabled('github');
-    if (!this.githubOAuthService.isConfigured()) {
+    if (!(await this.githubOAuthService.isConfigured())) {
       throw new ServiceUnavailableException('GitHub login is not available');
     }
 
@@ -283,7 +285,8 @@ export class AuthController {
       return;
     }
 
-    if (!this.githubOAuthService.isConfigured()) {
+    const githubConfigured = await this.githubOAuthService.isConfigured();
+    if (!githubConfigured) {
       res.redirect(
         this.githubOAuthService.buildFrontendRedirectUrl({
           redirectPath: fallbackRedirect,
@@ -334,7 +337,7 @@ export class AuthController {
     state: string;
   }> {
     await this.socialLoginAvailability.ensureEnabled('linkedin');
-    if (!this.linkedinOAuthService.isConfigured()) {
+    if (!(await this.linkedinOAuthService.isConfigured())) {
       throw new ServiceUnavailableException('LinkedIn login is not available');
     }
 
@@ -362,7 +365,8 @@ export class AuthController {
       return;
     }
 
-    if (!this.linkedinOAuthService.isConfigured()) {
+    const linkedinConfigured = await this.linkedinOAuthService.isConfigured();
+    if (!linkedinConfigured) {
       res.redirect(
         this.linkedinOAuthService.buildFrontendRedirectUrl({
           redirectPath: fallbackRedirect,

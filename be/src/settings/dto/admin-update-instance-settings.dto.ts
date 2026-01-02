@@ -88,6 +88,46 @@ export class AdminUpdateLanguagesDto {
   default?: string;
 }
 
+export class AdminUpdateSocialProviderCredentialsDto {
+  @IsOptional()
+  @IsString()
+  clientId?: string | null;
+
+  @IsOptional()
+  @IsString()
+  clientSecret?: string | null;
+
+  @IsOptional()
+  @IsString()
+  redirectUri?: string | null;
+
+  @IsOptional()
+  @IsString()
+  notes?: string | null;
+}
+
+export class AdminUpdateSocialCredentialsDto {
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => AdminUpdateSocialProviderCredentialsDto)
+  google?: AdminUpdateSocialProviderCredentialsDto;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => AdminUpdateSocialProviderCredentialsDto)
+  facebook?: AdminUpdateSocialProviderCredentialsDto;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => AdminUpdateSocialProviderCredentialsDto)
+  github?: AdminUpdateSocialProviderCredentialsDto;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => AdminUpdateSocialProviderCredentialsDto)
+  linkedin?: AdminUpdateSocialProviderCredentialsDto;
+}
+
 export class AdminUpdateInstanceSettingsDto {
   @IsOptional()
   @ValidateNested()
@@ -103,4 +143,9 @@ export class AdminUpdateInstanceSettingsDto {
   @ValidateNested()
   @Type(() => AdminUpdateLanguagesDto)
   languages?: AdminUpdateLanguagesDto;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => AdminUpdateSocialCredentialsDto)
+  socialCredentials?: AdminUpdateSocialCredentialsDto;
 }

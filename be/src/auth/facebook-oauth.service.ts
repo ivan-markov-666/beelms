@@ -4,6 +4,7 @@ import {
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { SocialOAuthStateService } from './social-oauth-state.service';
+import { SettingsService } from '../settings/settings.service';
 
 export interface FacebookProfile {
   email: string;
@@ -35,30 +36,29 @@ type FacebookGraphUser = {
 
 @Injectable()
 export class FacebookOAuthService {
-  private readonly appId: string;
-  private readonly appSecret: string;
-  private readonly redirectUri: string;
   private readonly frontendOrigin: string;
-  private readonly configured: boolean;
 
-  constructor(private readonly stateService: SocialOAuthStateService) {
-    this.appId = process.env.FACEBOOK_APP_ID ?? '';
-    this.appSecret = process.env.FACEBOOK_APP_SECRET ?? '';
-    this.redirectUri = process.env.FACEBOOK_OAUTH_REDIRECT_URL ?? '';
+  constructor(
+    private readonly stateService: SocialOAuthStateService,
+    private readonly settingsService: SettingsService,
+  ) {
     this.frontendOrigin =
       process.env.FRONTEND_ORIGIN ?? 'http://localhost:3001';
-
-    this.configured = Boolean(this.appId && this.appSecret && this.redirectUri);
   }
 
-  isConfigured(): boolean {
-    return this.configured;
+  async isConfigured(): Promise<boolean> {
+    const creds =
+      await this.settingsService.getEffectiveSocialProviderCredentials(
+        'facebook',
+      );
+    return Boolean(creds?.clientId && creds.clientSecret && creds.redirectUri);
   }
 
-  createAuthorizationUrl(redirectPath?: string): {
+  async createAuthorizationUrl(redirectPath?: string): Promise<{
     url: string;
     state: string;
-  } {
+  }> {
+    const creds = await this.getCredentialsOrThrow();
     const normalizedRedirectPath = this.normalizeRedirectPath(redirectPath);
     const state = this.stateService.createState({
       provider: 'facebook',
@@ -66,8 +66,8 @@ export class FacebookOAuthService {
     });
 
     const url = new URL('https://www.facebook.com/v19.0/dialog/oauth');
-    url.searchParams.set('client_id', this.appId);
-    url.searchParams.set('redirect_uri', this.redirectUri);
+    url.searchParams.set('client_id', creds.clientId);
+    url.searchParams.set('redirect_uri', creds.redirectUri);
     url.searchParams.set('response_type', 'code');
     url.searchParams.set('scope', 'email,public_profile');
     url.searchParams.set('state', state);
@@ -136,16 +136,13 @@ export class FacebookOAuthService {
   }
 
   private async exchangeCodeForToken(code: string): Promise<string> {
-    if (!this.configured) {
-      throw new ServiceUnavailableException('Facebook OAuth not configured');
-    }
-
+    const creds = await this.getCredentialsOrThrow();
     const tokenUrl = new URL(
       'https://graph.facebook.com/v19.0/oauth/access_token',
     );
-    tokenUrl.searchParams.set('client_id', this.appId);
-    tokenUrl.searchParams.set('redirect_uri', this.redirectUri);
-    tokenUrl.searchParams.set('client_secret', this.appSecret);
+    tokenUrl.searchParams.set('client_id', creds.clientId);
+    tokenUrl.searchParams.set('redirect_uri', creds.redirectUri);
+    tokenUrl.searchParams.set('client_secret', creds.clientSecret);
     tokenUrl.searchParams.set('code', code);
 
     const res = await fetch(tokenUrl);
@@ -182,5 +179,24 @@ export class FacebookOAuthService {
       return '/wiki';
     }
     return path;
+  }
+
+  private async getCredentialsOrThrow(): Promise<{
+    clientId: string;
+    clientSecret: string;
+    redirectUri: string;
+  }> {
+    const creds =
+      await this.settingsService.getEffectiveSocialProviderCredentials(
+        'facebook',
+      );
+    if (!creds?.clientId || !creds.clientSecret || !creds.redirectUri) {
+      throw new ServiceUnavailableException('Facebook OAuth not configured');
+    }
+    return {
+      clientId: creds.clientId,
+      clientSecret: creds.clientSecret,
+      redirectUri: creds.redirectUri,
+    };
   }
 }

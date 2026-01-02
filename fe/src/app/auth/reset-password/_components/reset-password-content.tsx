@@ -112,6 +112,10 @@ export function ResetPasswordContent() {
           {t(lang, "auth", "resetInfoMessage")}
         </div>
 
+        <div className="mb-6 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800">
+          {t(lang, "auth", "socialResetPasswordHint")}
+        </div>
+
         <section className="rounded-lg border border-gray-200 bg-white p-8 shadow-sm">
           <form className="space-y-6" onSubmit={handleSubmit} noValidate>
             <div className="space-y-1">

@@ -12,6 +12,21 @@ export type InstanceBranding = {
   primaryColor?: string | null;
 };
 
+export type SocialProviderName = 'google' | 'facebook' | 'github' | 'linkedin';
+
+export type SocialProviderCredentials = {
+  clientId?: string | null;
+  clientSecret?: string | null;
+  redirectUri?: string | null;
+  notes?: string | null;
+  updatedBy?: string | null;
+  updatedAt?: string | null;
+};
+
+export type InstanceSocialCredentials = Partial<
+  Record<SocialProviderName, SocialProviderCredentials>
+>;
+
 export type InstanceFeatures = {
   wikiPublic: boolean;
   courses: boolean;
@@ -46,6 +61,9 @@ export class InstanceConfig {
 
   @Column({ type: 'jsonb' })
   languages: InstanceLanguages;
+
+  @Column({ type: 'jsonb', name: 'social_credentials', nullable: true })
+  socialCredentials: InstanceSocialCredentials | null;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

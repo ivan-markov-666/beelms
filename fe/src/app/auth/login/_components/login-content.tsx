@@ -110,6 +110,10 @@ export function LoginContent() {
   );
 
   const hasAnySocial = enabledSocialProviders.length > 0;
+  const showSocialResetHint = useMemo(
+    () => !hasAnySocial || Boolean(socialError),
+    [hasAnySocial, socialError],
+  );
   const anySocialLoading =
     googleLoading || facebookLoading || githubLoading || linkedinLoading;
 
@@ -483,6 +487,20 @@ export function LoginContent() {
           ) : (
             <div className="mb-6 rounded-lg border border-yellow-200 bg-yellow-50 px-4 py-3 text-xs text-yellow-900">
               {t(lang, "auth", "loginSocialUnavailable")}
+            </div>
+          )}
+          {showSocialResetHint && (
+            <div className="mb-6 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-xs text-blue-900">
+              <p>{t(lang, "auth", "socialResetPasswordHint")}</p>
+              <button
+                type="button"
+                className="mt-2 inline-flex cursor-pointer items-center gap-1 font-semibold text-blue-700 hover:text-blue-800"
+                onClick={() => router.push("/auth/forgot-password")}
+                disabled={submitting}
+              >
+                <span aria-hidden="true">↗</span>
+                <span>{t(lang, "auth", "loginForgotLink")}</span>
+              </button>
             </div>
           )}
 

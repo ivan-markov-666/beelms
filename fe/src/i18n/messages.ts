@@ -50,6 +50,10 @@ export const messages: Messages = {
       loginSocialDivider: "или продължете с имейл",
       loginSocialUnavailable:
         "Социалните входове са изключени от администратора. Продължете с имейл и парола.",
+      loginSocialResetHint:
+        "Социалните входове са ограничени. Ако сте използвали Google/Facebook/GitHub/LinkedIn, сменете паролата си чрез 'Забравена парола' и после влезте с имейл + новата парола.",
+      socialResetPasswordHint:
+        "Ако социалният вход (Google/Facebook/GitHub/LinkedIn) е изключен или липсва, можете да използвате 'Забравена парола', за да си зададете парола и да влезете с имейл + парола.",
       loginGoogleDisabled:
         "Входът с Google е временно изключен от администратора.",
       loginGoogleUnavailable:
@@ -492,6 +496,8 @@ export const messages: Messages = {
       loginErrorEmailRequired: "Please enter your email.",
       loginErrorEmailInvalid: "Please enter a valid email address.",
       loginErrorPasswordRequired: "Please enter your password.",
+      socialResetPasswordHint:
+        "If social sign-in (Google/Facebook/GitHub/LinkedIn) is unavailable, you can use 'Forgot password' to set a password and then sign in with email + password.",
       loginErrorInvalidCredentials: "Invalid login details.",
       loginErrorCaptchaRequired: "Please confirm that you are not a robot.",
       loginErrorGeneric: "Sign in failed. Please try again later.",
@@ -862,6 +868,8 @@ export const messages: Messages = {
       loginErrorEmailRequired: "Bitte gib deine E-Mail-Adresse ein.",
       loginErrorEmailInvalid: "Bitte gib eine gültige E-Mail-Adresse ein.",
       loginErrorPasswordRequired: "Bitte gib dein Passwort ein.",
+      socialResetPasswordHint:
+        "Wenn Social Sign-in (Google/Facebook/GitHub/LinkedIn) nicht verfügbar ist, kannst du über 'Passwort vergessen' ein Passwort setzen und dich danach mit E-Mail + Passwort anmelden.",
       loginErrorInvalidCredentials: "Ungültige Anmeldedaten.",
       loginErrorCaptchaRequired: "Bitte bestätige, dass du kein Roboter bist.",
       loginErrorGeneric:

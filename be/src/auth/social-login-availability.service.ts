@@ -57,14 +57,16 @@ export class SocialLoginAvailabilityService {
       const featureKey = PROVIDER_FEATURE_MAP[provider];
       statuses[provider] = {
         enabled: featureState?.[featureKey] !== false,
-        configured: this.isProviderConfigured(provider),
+        configured: await this.isProviderConfigured(provider),
       };
     }
 
     return statuses;
   }
 
-  private isProviderConfigured(provider: SocialProvider): boolean {
+  private async isProviderConfigured(
+    provider: SocialProvider,
+  ): Promise<boolean> {
     switch (provider) {
       case 'google':
         return this.googleOAuthService.isConfigured();
