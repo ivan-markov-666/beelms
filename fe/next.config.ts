@@ -7,6 +7,10 @@ const nextConfig: NextConfig = {
         source: "/wiki/media/:path*",
         destination: "http://localhost:3000/wiki/media/:path*",
       },
+      {
+        source: "/branding/media/:path*",
+        destination: "http://localhost:3000/branding/media/:path*",
+      },
     ];
   },
 };

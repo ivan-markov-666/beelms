@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { OAuth2Client } from 'google-auth-library';
 import { SocialOAuthStateService } from './social-oauth-state.service';
+import { SettingsService } from '../settings/settings.service';
 
 export interface GoogleProfile {
   email: string;
@@ -17,37 +18,29 @@ export interface GoogleProfile {
 
 @Injectable()
 export class GoogleOAuthService {
-  private readonly client: OAuth2Client | null;
-  private readonly clientId: string;
   private readonly frontendOrigin: string;
-  private readonly configured: boolean;
 
-  constructor(private readonly stateService: SocialOAuthStateService) {
-    this.clientId = process.env.GOOGLE_CLIENT_ID ?? '';
-    const clientSecret = process.env.GOOGLE_CLIENT_SECRET ?? '';
-    const redirectUri = process.env.GOOGLE_OAUTH_REDIRECT_URL ?? '';
+  constructor(
+    private readonly stateService: SocialOAuthStateService,
+    private readonly settingsService: SettingsService,
+  ) {
     this.frontendOrigin =
       process.env.FRONTEND_ORIGIN ?? 'http://localhost:3001';
-
-    this.configured = Boolean(this.clientId && clientSecret && redirectUri);
-    this.client = this.configured
-      ? new OAuth2Client({
-          clientId: this.clientId,
-          clientSecret,
-          redirectUri,
-        })
-      : null;
   }
 
-  isConfigured(): boolean {
-    return this.configured;
+  async isConfigured(): Promise<boolean> {
+    const creds =
+      await this.settingsService.getEffectiveSocialProviderCredentials(
+        'google',
+      );
+    return Boolean(creds?.clientId && creds.clientSecret && creds.redirectUri);
   }
 
-  createAuthorizationUrl(redirectPath?: string): {
+  async createAuthorizationUrl(redirectPath?: string): Promise<{
     url: string;
     state: string;
-  } {
-    const client = this.getClientOrThrow();
+  }> {
+    const { client } = await this.getClientOrThrow();
     const normalizedRedirectPath = this.normalizeRedirectPath(redirectPath);
     const state = this.stateService.createState({
       provider: 'google',
@@ -68,7 +61,7 @@ export class GoogleOAuthService {
     code: string,
     state: string,
   ): Promise<GoogleProfile> {
-    const client = this.getClientOrThrow();
+    const { client, clientId } = await this.getClientOrThrow();
     const statePayload = this.stateService.verifyState(state);
     if (statePayload.provider !== 'google') {
       throw new BadRequestException('invalid oauth provider');
@@ -81,7 +74,7 @@ export class GoogleOAuthService {
 
     const ticket = await client.verifyIdToken({
       idToken: tokens.id_token,
-      audience: this.clientId,
+      audience: clientId,
     });
     const payload = ticket.getPayload();
 
@@ -134,11 +127,25 @@ export class GoogleOAuthService {
     return '/auth/login';
   }
 
-  private getClientOrThrow(): OAuth2Client {
-    if (!this.client || !this.configured) {
+  private async getClientOrThrow(): Promise<{
+    client: OAuth2Client;
+    clientId: string;
+  }> {
+    const creds =
+      await this.settingsService.getEffectiveSocialProviderCredentials(
+        'google',
+      );
+    if (!creds?.clientId || !creds.clientSecret || !creds.redirectUri) {
       throw new ServiceUnavailableException('Google OAuth not configured');
     }
-    return this.client;
+    return {
+      client: new OAuth2Client({
+        clientId: creds.clientId,
+        clientSecret: creds.clientSecret,
+        redirectUri: creds.redirectUri,
+      }),
+      clientId: creds.clientId,
+    };
   }
 
   private normalizeRedirectPath(path?: string): string {

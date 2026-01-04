@@ -31,6 +31,7 @@ export class CoursesController {
   constructor(private readonly coursesService: CoursesService) {}
 
   @Get()
+  @UseGuards(FeatureEnabledGuard('coursesPublic'))
   async listPublicCatalog(
     @Query('category') category?: string,
   ): Promise<CourseSummaryDto[]> {
@@ -38,6 +39,7 @@ export class CoursesController {
   }
 
   @Get(':courseId')
+  @UseGuards(FeatureEnabledGuard('coursesPublic'))
   async getPublicDetail(
     @Param('courseId') courseId: string,
   ): Promise<CourseDetailDto> {
@@ -45,7 +47,7 @@ export class CoursesController {
   }
 
   @Post(':courseId/enroll')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(FeatureEnabledGuard('myCourses'), JwtAuthGuard)
   @HttpCode(204)
   async enroll(
     @Param('courseId') courseId: string,
@@ -61,7 +63,7 @@ export class CoursesController {
   }
 
   @Get(':courseId/certificate')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(FeatureEnabledGuard('myCourses'), JwtAuthGuard)
   async getCertificate(
     @Param('courseId') courseId: string,
     @Req() req: AuthenticatedRequest,
@@ -81,7 +83,7 @@ export class CoursesController {
   }
 
   @Get(':courseId/wiki/:slug')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(FeatureEnabledGuard('myCourses'), JwtAuthGuard)
   async getCourseWikiArticle(
     @Param('courseId') courseId: string,
     @Param('slug') slug: string,
@@ -103,7 +105,7 @@ export class CoursesController {
   }
 
   @Get(':courseId/tasks/:taskId')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(FeatureEnabledGuard('myCourses'), JwtAuthGuard)
   async getCourseTask(
     @Param('courseId') courseId: string,
     @Param('taskId') taskId: string,

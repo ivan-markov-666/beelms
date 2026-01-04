@@ -105,6 +105,18 @@ export function RegisterContent() {
     };
   }, [publicSettings?.features]);
 
+  const registerEnabled = useMemo(() => {
+    const features = publicSettings?.features;
+    if (!features) return true;
+    return features.auth !== false && features.authRegister !== false;
+  }, [publicSettings?.features]);
+
+  const registerCaptchaEnabled = useMemo(() => {
+    const features = publicSettings?.features;
+    if (!features) return false;
+    return features.captcha !== false && features.captchaRegister !== false;
+  }, [publicSettings?.features]);
+
   const enabledSocialProviders = useMemo(
     () => SOCIAL_PROVIDERS.filter((provider) => socialFlags[provider]),
     [socialFlags],
@@ -357,7 +369,7 @@ export function RegisterContent() {
       errors.terms = t(lang, "auth", "registerErrorTermsRequired");
     }
 
-    if (recaptchaSiteKey && !captchaToken) {
+    if (recaptchaSiteKey && registerCaptchaEnabled && !captchaToken) {
       errors.captcha = t(lang, "auth", "registerErrorCaptchaRequired");
     }
 
@@ -385,10 +397,11 @@ export function RegisterContent() {
         body: JSON.stringify({
           email,
           password,
+          captchaToken:
+            recaptchaSiteKey && registerCaptchaEnabled
+              ? (captchaToken ?? undefined)
+              : undefined,
           acceptTerms,
-          captchaToken: recaptchaSiteKey
-            ? (captchaToken ?? undefined)
-            : undefined,
         }),
       });
 
@@ -426,6 +439,31 @@ export function RegisterContent() {
           <p className="text-sm text-zinc-600">
             {t(lang, "auth", "registerLoading")}
           </p>
+        </main>
+      </div>
+    );
+  }
+
+  if (!registerEnabled) {
+    return (
+      <div className="flex min-h-[calc(100vh-5rem)] items-start justify-center px-4 py-12">
+        <main className="w-full max-w-md">
+          <h1 className="mb-2 text-3xl font-bold text-gray-900">
+            {t(lang, "auth", "registerDisabledTitle")}
+          </h1>
+          <p className="mb-6 text-sm text-gray-600">
+            {t(lang, "auth", "registerDisabledMessage")}
+          </p>
+
+          <section className="rounded-lg border border-gray-200 bg-white p-8 shadow-sm">
+            <button
+              type="button"
+              className="w-full rounded-lg bg-green-600 py-3 text-sm font-semibold text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1"
+              onClick={() => router.push("/auth/login")}
+            >
+              {t(lang, "auth", "registerDisabledLoginCta")}
+            </button>
+          </section>
         </main>
       </div>
     );
@@ -861,7 +899,7 @@ export function RegisterContent() {
               <p className="text-xs text-red-600">{fieldErrors.terms}</p>
             )}
 
-            {recaptchaSiteKey ? (
+            {recaptchaSiteKey && registerCaptchaEnabled ? (
               <div className="space-y-2">
                 <p className="text-xs text-gray-600">
                   {t(lang, "auth", "registerCaptchaLabel")}

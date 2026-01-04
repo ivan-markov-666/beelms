@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { clearAccessToken, getAccessToken } from "../auth-token";
 import { getApiBaseUrl } from "../api-url";
 import { RecaptchaWidget } from "../_components/recaptcha-widget";
+import { usePublicSettings } from "../_hooks/use-public-settings";
 
 const API_BASE_URL = getApiBaseUrl();
 const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
@@ -56,6 +57,16 @@ function formatDateTime(dateIso: string): string {
 
 export default function ProfilePage() {
   const router = useRouter();
+  const { settings: publicSettings } = usePublicSettings();
+
+  const profileEnabled = publicSettings?.features
+    ? publicSettings.features.profile !== false
+    : true;
+
+  const changePasswordCaptchaEnabled = publicSettings?.features
+    ? publicSettings.features.captcha !== false &&
+      publicSettings.features.captchaChangePassword !== false
+    : false;
 
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -84,6 +95,9 @@ export default function ProfilePage() {
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [passwordSuccess, setPasswordSuccess] = useState<string | null>(null);
   const [passwordSubmitting, setPasswordSubmitting] = useState(false);
+  const [passwordCaptchaToken, setPasswordCaptchaToken] = useState<
+    string | null
+  >(null);
 
   const [exportSubmitting, setExportSubmitting] = useState(false);
   const [exportSuccess, setExportSuccess] = useState<string | null>(null);
@@ -100,6 +114,11 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+
+    if (!profileEnabled) {
+      router.replace("/");
+      return;
+    }
 
     let cancelled = false;
 
@@ -157,7 +176,7 @@ export default function ProfilePage() {
     return () => {
       cancelled = true;
     };
-  }, [router]);
+  }, [profileEnabled, router]);
 
   useEffect(() => {
     if (!profile) return;
@@ -279,6 +298,15 @@ export default function ProfilePage() {
       return;
     }
 
+    if (
+      changePasswordCaptchaEnabled &&
+      RECAPTCHA_SITE_KEY &&
+      !passwordCaptchaToken
+    ) {
+      setPasswordError("Моля, потвърдете, че не сте робот.");
+      return;
+    }
+
     setPasswordSubmitting(true);
 
     try {
@@ -291,6 +319,10 @@ export default function ProfilePage() {
         body: JSON.stringify({
           currentPassword,
           newPassword,
+          captchaToken:
+            changePasswordCaptchaEnabled && RECAPTCHA_SITE_KEY
+              ? (passwordCaptchaToken ?? undefined)
+              : undefined,
         }),
       });
 
@@ -306,6 +338,7 @@ export default function ProfilePage() {
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
+      setPasswordCaptchaToken(null);
     } catch {
       setPasswordError("Възникна грешка при връзката със сървъра.");
     } finally {

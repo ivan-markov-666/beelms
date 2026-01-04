@@ -7,9 +7,9 @@ import {
   useMemo,
   useState,
 } from "react";
-import Link from "next/link";
 import { getAccessToken } from "../../../auth-token";
 import { getApiBaseUrl } from "../../../api-url";
+import { AdminBreadcrumbs } from "../../_components/admin-breadcrumbs";
 
 const API_BASE_URL = getApiBaseUrl();
 
@@ -311,21 +311,13 @@ export default function AdminCourseCategoriesPage() {
   return (
     <div className="space-y-6">
       <section className="space-y-3">
-        <Link
-          href="/admin/courses"
-          className="text-sm font-medium text-green-700 hover:text-green-900 hover:underline"
-        >
-          ← Back to courses
-        </Link>
-
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 md:text-4xl">
-            Course categories
-          </h1>
-          <p className="mt-1 text-sm text-gray-600">
-            Управление на категориите за курсове.
-          </p>
-        </div>
+        <AdminBreadcrumbs
+          items={[
+            { label: "Админ табло", href: "/admin" },
+            { label: "Courses", href: "/admin/courses" },
+            { label: "Categories" },
+          ]}
+        />
       </section>
 
       <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">

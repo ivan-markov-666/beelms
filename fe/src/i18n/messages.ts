@@ -50,6 +50,10 @@ export const messages: Messages = {
       loginSocialDivider: "или продължете с имейл",
       loginSocialUnavailable:
         "Социалните входове са изключени от администратора. Продължете с имейл и парола.",
+      loginSocialResetHint:
+        "Социалните входове са ограничени. Ако сте използвали Google/Facebook/GitHub/LinkedIn, сменете паролата си чрез 'Забравена парола' и после влезте с имейл + новата парола.",
+      socialResetPasswordHint:
+        "Ако социалният вход (Google/Facebook/GitHub/LinkedIn) е изключен или липсва, можете да използвате 'Забравена парола', за да си зададете парола и да влезете с имейл + парола.",
       loginGoogleDisabled:
         "Входът с Google е временно изключен от администратора.",
       loginGoogleUnavailable:
@@ -83,6 +87,8 @@ export const messages: Messages = {
       loginErrorCaptchaRequired: "Моля, потвърдете, че не сте робот.",
       loginErrorGeneric: "Входът не успя. Моля, опитайте отново по-късно.",
       loginErrorNetwork: "Възникна грешка при връзката със сървъра.",
+      loginErrorDisabled:
+        "Входът за стандартни потребители е изключен от администратора.",
       loginLoading: "Зареждане...",
       registerTitle: "Регистрация",
       registerSubtitle: "Създайте нов акаунт.",
@@ -134,6 +140,10 @@ export const messages: Messages = {
       registerLinkedinError: "LinkedIn registration failed. Please try again.",
       registerHasAccount: "Вече имате акаунт?",
       registerLoginLink: "Вход",
+      registerDisabledTitle: "Регистрацията е изключена",
+      registerDisabledMessage:
+        "Администраторът е изключил регистрацията и reset на парола.",
+      registerDisabledLoginCta: "Към вход",
       registerErrorEmailRequired: "Моля, въведете имейл.",
       registerErrorEmailInvalid: "Моля, въведете валиден имейл адрес.",
       registerErrorPasswordRequired: "Моля, въведете парола.",
@@ -182,6 +192,10 @@ export const messages: Messages = {
       forgotResetLinkInfo: "Линкът за смяна на паролата е валиден 24 часа",
       forgotCaptchaPlaceholder:
         "CAPTCHA / reCAPTCHA (placeholder за защита от ботове при заявка за смяна на парола)",
+      forgotDisabledTitle: "Reset на парола е изключен",
+      forgotDisabledMessage:
+        "Администраторът е изключил регистрацията и reset на парола.",
+      forgotDisabledLoginCta: "Към вход",
       resetTitle: "Смяна на парола",
       resetSubtitle: "Въведете вашата нова парола.",
       resetInfoMessage:
@@ -218,6 +232,10 @@ export const messages: Messages = {
       resetPasswordRequirementsItemRecommendation:
         "Препоръчва се използване на букви, цифри и символи",
       resetGoToForgotCta: "Към екрана „Забравена парола“",
+      resetDisabledTitle: "Reset на парола е изключен",
+      resetDisabledMessage:
+        "Администраторът е изключил регистрацията и reset на парола.",
+      resetDisabledLoginCta: "Към вход",
       accountDeletedTitle: "Акаунтът ви беше закрит и изтрит",
       accountDeletedDescription:
         "Вашият акаунт е закрит и личните ви данни са маркирани за изтриване в съответствие с нашите правила за защита на данните и GDPR.",
@@ -492,11 +510,14 @@ export const messages: Messages = {
       loginErrorEmailRequired: "Please enter your email.",
       loginErrorEmailInvalid: "Please enter a valid email address.",
       loginErrorPasswordRequired: "Please enter your password.",
+      socialResetPasswordHint:
+        "If social sign-in (Google/Facebook/GitHub/LinkedIn) is unavailable, you can use 'Forgot password' to set a password and then sign in with email + password.",
       loginErrorInvalidCredentials: "Invalid login details.",
       loginErrorCaptchaRequired: "Please confirm that you are not a robot.",
       loginErrorGeneric: "Sign in failed. Please try again later.",
       loginErrorNetwork:
         "A network error occurred while contacting the server.",
+      loginErrorDisabled: "Sign in is disabled for standard users.",
       loginLoading: "Loading...",
       registerTitle: "Create account",
       registerSubtitle: "Create your free BeeLMS account to get started.",
@@ -543,6 +564,10 @@ export const messages: Messages = {
       registerSuccess:
         "Registration was successful. Please check your email and confirm your address using the link we sent you. After that you can sign in from the login page.",
       registerLoading: "Loading...",
+      registerDisabledTitle: "Registration is disabled",
+      registerDisabledMessage:
+        "The administrator has disabled registration and password reset.",
+      registerDisabledLoginCta: "Go to sign in",
       forgotTitle: "Forgot password",
       forgotSubtitle: "Enter your email address to request a password reset.",
       forgotEmailLabel: "Email",
@@ -566,6 +591,10 @@ export const messages: Messages = {
       forgotResetLinkInfo: "The password reset link is valid for 24 hours.",
       forgotCaptchaPlaceholder:
         "CAPTCHA / reCAPTCHA (placeholder for bot protection when requesting a password reset)",
+      forgotDisabledTitle: "Password reset is disabled",
+      forgotDisabledMessage:
+        "The administrator has disabled registration and password reset.",
+      forgotDisabledLoginCta: "Go to sign in",
       resetTitle: "Change password",
       resetSubtitle: "Enter your new password.",
       resetInfoMessage:
@@ -594,6 +623,10 @@ export const messages: Messages = {
       resetPasswordRequirementsItemRecommendation:
         "We recommend using letters, numbers and symbols.",
       resetGoToForgotCta: 'Go to the "Forgot password" screen',
+      resetDisabledTitle: "Password reset is disabled",
+      resetDisabledMessage:
+        "The administrator has disabled registration and password reset.",
+      resetDisabledLoginCta: "Go to sign in",
       accountDeletedTitle: "Your account has been closed and deleted",
       accountDeletedDescription:
         "Your account has been closed and your personal data has been marked for deletion in accordance with our data protection rules and GDPR.",
@@ -862,11 +895,14 @@ export const messages: Messages = {
       loginErrorEmailRequired: "Bitte gib deine E-Mail-Adresse ein.",
       loginErrorEmailInvalid: "Bitte gib eine gültige E-Mail-Adresse ein.",
       loginErrorPasswordRequired: "Bitte gib dein Passwort ein.",
+      socialResetPasswordHint:
+        "Wenn Social Sign-in (Google/Facebook/GitHub/LinkedIn) nicht verfügbar ist, kannst du über 'Passwort vergessen' ein Passwort setzen und dich danach mit E-Mail + Passwort anmelden.",
       loginErrorInvalidCredentials: "Ungültige Anmeldedaten.",
       loginErrorCaptchaRequired: "Bitte bestätige, dass du kein Roboter bist.",
       loginErrorGeneric:
         "Anmeldung fehlgeschlagen. Bitte versuche es später erneut.",
       loginErrorNetwork: "Es ist ein Netzwerkfehler aufgetreten.",
+      loginErrorDisabled: "Die Anmeldung ist für Standardbenutzer deaktiviert.",
       loginLoading: "Laden...",
       registerTitle: "Konto erstellen",
       registerSubtitle:
@@ -909,6 +945,10 @@ export const messages: Messages = {
       registerSuccess:
         "Die Registrierung war erfolgreich. Bitte überprüfe deine E-Mail und bestätige deine Adresse über den Link, den wir dir geschickt haben. Danach kannst du dich über die Login-Seite anmelden.",
       registerLoading: "Laden...",
+      registerDisabledTitle: "Registrierung ist deaktiviert",
+      registerDisabledMessage:
+        "Der Administrator hat die Registrierung und das Zurücksetzen des Passworts deaktiviert.",
+      registerDisabledLoginCta: "Zur Anmeldung",
       forgotTitle: "Passwort vergessen",
       forgotSubtitle:
         "Gib deine E-Mail-Adresse ein, um eine Zurücksetzung des Passworts anzufordern.",
@@ -934,6 +974,10 @@ export const messages: Messages = {
         "Der Link zum Zurücksetzen des Passworts ist 24 Stunden lang gültig.",
       forgotCaptchaPlaceholder:
         "CAPTCHA / reCAPTCHA (Platzhalter zum Schutz vor Bots bei der Anfrage zum Zurücksetzen des Passworts)",
+      forgotDisabledTitle: "Passwort zurücksetzen ist deaktiviert",
+      forgotDisabledMessage:
+        "Der Administrator hat die Registrierung und das Zurücksetzen des Passworts deaktiviert.",
+      forgotDisabledLoginCta: "Zur Anmeldung",
       resetTitle: "Passwort ändern",
       resetSubtitle: "Gib dein neues Passwort ein.",
       resetInfoMessage:
@@ -963,6 +1007,10 @@ export const messages: Messages = {
       resetPasswordRequirementsItemRecommendation:
         "Es wird empfohlen, Buchstaben, Zahlen und Sonderzeichen zu verwenden.",
       resetGoToForgotCta: 'Zum Bildschirm "Passwort vergessen"',
+      resetDisabledTitle: "Passwort zurücksetzen ist deaktiviert",
+      resetDisabledMessage:
+        "Der Administrator hat die Registrierung und das Zurücksetzen des Passworts deaktiviert.",
+      resetDisabledLoginCta: "Zur Anmeldung",
       accountDeletedTitle: "Dein Konto wurde geschlossen und gelöscht",
       accountDeletedDescription:
         "Dein Konto wurde geschlossen und deine personenbezogenen Daten wurden entsprechend unseren Datenschutzregeln und der DSGVO zur Löschung markiert.",

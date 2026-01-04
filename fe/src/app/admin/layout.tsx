@@ -1,15 +1,117 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { clearAccessToken, getAccessToken } from "../auth-token";
 import { getApiBaseUrl } from "../api-url";
+import { useCurrentLang } from "../../i18n/useCurrentLang";
+import { t } from "../../i18n/t";
 
 const API_BASE_URL = getApiBaseUrl();
 
 type AdminStatus = "loading" | "forbidden" | "ready";
 
 type UserRole = "user" | "admin" | "monitoring" | "teacher" | "author";
+
+function AdminNavigationTabs({
+  pathname,
+  role,
+}: {
+  pathname: string;
+  role: UserRole | null;
+}) {
+  const lang = useCurrentLang();
+
+  const tabs: Array<{
+    href: string;
+    label: string;
+    active: boolean;
+    visible: boolean;
+  }> = [
+    {
+      href: "/admin",
+      label: t(lang, "common", "adminDashboardTabDashboard"),
+      active: pathname === "/admin",
+      visible: role === "admin",
+    },
+    {
+      href: "/admin/wiki",
+      label: t(lang, "common", "adminDashboardTabWiki"),
+      active: pathname.startsWith("/admin/wiki"),
+      visible: role === "admin" || role === "author",
+    },
+    {
+      href: "/admin/courses",
+      label: t(lang, "common", "adminDashboardTabCourses"),
+      active: pathname.startsWith("/admin/courses"),
+      visible: role === "admin" || role === "teacher",
+    },
+    {
+      href: "/admin/users",
+      label: t(lang, "common", "adminDashboardTabUsers"),
+      active: pathname.startsWith("/admin/users"),
+      visible: role === "admin",
+    },
+    {
+      href: "/admin/metrics",
+      label: t(lang, "common", "adminDashboardTabMetrics"),
+      active: pathname.startsWith("/admin/metrics"),
+      visible: role === "admin" || role === "monitoring",
+    },
+    {
+      href: "/admin/activity",
+      label: t(lang, "common", "adminDashboardTabActivity"),
+      active: pathname.startsWith("/admin/activity"),
+      visible: role === "admin",
+    },
+    {
+      href: "/admin/payments",
+      label: t(lang, "common", "adminDashboardTabPayments"),
+      active: pathname.startsWith("/admin/payments"),
+      visible: role === "admin",
+    },
+    {
+      href: "/admin/legal",
+      label: "Legal",
+      active: pathname.startsWith("/admin/legal"),
+      visible: role === "admin",
+    },
+    {
+      href: "/admin/settings",
+      label: "Settings",
+      active: pathname.startsWith("/admin/settings"),
+      visible: role === "admin",
+    },
+  ].filter((tab) => tab.visible);
+
+  if (tabs.length === 0) {
+    return null;
+  }
+
+  return (
+    <nav className="border-b border-gray-200">
+      <ul className="flex flex-wrap gap-x-6 gap-y-3 text-sm">
+        {tabs.map((tab) => (
+          <li key={tab.href}>
+            {tab.active ? (
+              <span className="inline-block border-b-2 border-green-600 pb-3 text-green-700 font-medium">
+                {tab.label}
+              </span>
+            ) : (
+              <Link
+                href={tab.href}
+                className="inline-block border-b-2 border-transparent pb-3 text-gray-600 transition hover:border-green-400 hover:text-green-700"
+              >
+                {tab.label}
+              </Link>
+            )}
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
+}
 
 export default function AdminLayout({
   children,
@@ -19,6 +121,7 @@ export default function AdminLayout({
   const router = useRouter();
   const pathname = usePathname();
   const [status, setStatus] = useState<AdminStatus>("loading");
+  const [role, setRole] = useState<UserRole | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -63,6 +166,7 @@ export default function AdminLayout({
         const role = data.role;
 
         if (role === "admin") {
+          setRole(role);
           setStatus("ready");
           return;
         }
@@ -74,6 +178,7 @@ export default function AdminLayout({
             return;
           }
 
+          setRole(role);
           setStatus("ready");
           return;
         }
@@ -85,6 +190,7 @@ export default function AdminLayout({
             return;
           }
 
+          setRole(role);
           setStatus("ready");
           return;
         }
@@ -96,6 +202,7 @@ export default function AdminLayout({
             return;
           }
 
+          setRole(role);
           setStatus("ready");
           return;
         }
@@ -142,7 +249,10 @@ export default function AdminLayout({
 
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-gray-50 py-8">
-      <main className="mx-auto max-w-7xl px-4">{children}</main>
+      <main className="mx-auto max-w-7xl space-y-6 px-4">
+        <AdminNavigationTabs pathname={pathname ?? ""} role={role} />
+        {children}
+      </main>
     </div>
   );
 }

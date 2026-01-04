@@ -5,6 +5,7 @@ import { QueryFailedError, Repository } from 'typeorm';
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   UnauthorizedException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
@@ -19,6 +20,7 @@ import { InMemoryLoginAttemptStore } from '../security/account-protection/login-
 import type { GoogleProfile } from './google-oauth.service';
 import type { FacebookProfile } from './facebook-oauth.service';
 import type { GithubProfile } from './github-oauth.service';
+import { SettingsService } from '../settings/settings.service';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -26,6 +28,7 @@ describe('AuthService', () => {
   let jwtService: JwtService;
   let captchaService: { verifyCaptchaToken: jest.Mock };
   let loginAttemptStore: { shouldRequireCaptcha: jest.Mock };
+  let settingsService: { getOrCreateInstanceConfig: jest.Mock };
 
   beforeEach(async () => {
     captchaService = {
@@ -42,6 +45,18 @@ describe('AuthService', () => {
       shouldRequireCaptcha: jest.fn().mockReturnValue(false),
     };
 
+    settingsService = {
+      getOrCreateInstanceConfig: jest.fn().mockResolvedValue({
+        features: {
+          authLogin: true,
+          captcha: false,
+          captchaLogin: false,
+          captchaRegister: false,
+          captchaForgotPassword: false,
+        },
+      }),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       imports: [
         JwtModule.register({
@@ -51,6 +66,10 @@ describe('AuthService', () => {
       ],
       providers: [
         AuthService,
+        {
+          provide: SettingsService,
+          useValue: settingsService,
+        },
         {
           provide: CaptchaService,
           useValue: captchaService,
@@ -73,6 +92,30 @@ describe('AuthService', () => {
     service = module.get<AuthService>(AuthService);
     usersRepo = module.get(getRepositoryToken(User));
     jwtService = module.get<JwtService>(JwtService);
+  });
+
+  it('blocks issuing token for role=user when authLogin is disabled', async () => {
+    settingsService.getOrCreateInstanceConfig.mockResolvedValue({
+      features: { authLogin: false },
+    });
+
+    const dto: LoginDto = {
+      email: 'user@example.com',
+      password: 'Password123!',
+    };
+
+    const existingUser: Partial<User> = {
+      id: 'user-id',
+      email: dto.email,
+      passwordHash: await bcrypt.hash(dto.password, 10),
+      active: true,
+      role: 'user',
+      tokenVersion: 0,
+    };
+
+    (usersRepo.findOne as jest.Mock).mockResolvedValue(existingUser);
+
+    await expect(service.login(dto)).rejects.toBeInstanceOf(ForbiddenException);
   });
 
   describe('loginWithGithub', () => {
@@ -257,6 +300,15 @@ describe('AuthService', () => {
   it('requires captcha when AUTH_REQUIRE_CAPTCHA is true', async () => {
     process.env.AUTH_REQUIRE_CAPTCHA = 'true';
 
+    settingsService.getOrCreateInstanceConfig.mockResolvedValue({
+      features: {
+        authLogin: true,
+        captcha: true,
+        captchaRegister: true,
+        captchaForgotPassword: false,
+      },
+    });
+
     const dto: RegisterDto = {
       email: 'test@example.com',
       password: 'Password1234',
@@ -377,6 +429,15 @@ describe('AuthService', () => {
     process.env.AUTH_LOGIN_CAPTCHA_TEST_MODE = 'true';
     process.env.AUTH_LOGIN_CAPTCHA_THRESHOLD = '1';
     loginAttemptStore.shouldRequireCaptcha.mockReturnValue(true);
+    settingsService.getOrCreateInstanceConfig.mockResolvedValue({
+      features: {
+        authLogin: true,
+        captcha: true,
+        captchaLogin: true,
+        captchaRegister: false,
+        captchaForgotPassword: false,
+      },
+    });
 
     const dto: LoginDto = {
       email: 'test@example.com',
@@ -393,6 +454,15 @@ describe('AuthService', () => {
     process.env.AUTH_LOGIN_CAPTCHA_TEST_MODE = 'true';
     process.env.AUTH_LOGIN_CAPTCHA_THRESHOLD = '1';
     loginAttemptStore.shouldRequireCaptcha.mockReturnValue(true);
+    settingsService.getOrCreateInstanceConfig.mockResolvedValue({
+      features: {
+        authLogin: true,
+        captcha: true,
+        captchaLogin: true,
+        captchaRegister: false,
+        captchaForgotPassword: false,
+      },
+    });
 
     const user: Partial<User> = {
       id: 'user-id',
@@ -441,6 +511,15 @@ describe('AuthService', () => {
 
   it('requires captcha when AUTH_REQUIRE_CAPTCHA is true for forgotPassword', async () => {
     process.env.AUTH_REQUIRE_CAPTCHA = 'true';
+
+    settingsService.getOrCreateInstanceConfig.mockResolvedValue({
+      features: {
+        authLogin: true,
+        captcha: true,
+        captchaRegister: false,
+        captchaForgotPassword: true,
+      },
+    });
 
     const dto: ForgotPasswordDto = {
       email: 'test@example.com',

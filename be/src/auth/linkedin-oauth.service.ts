@@ -4,6 +4,7 @@ import {
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { SocialOAuthStateService } from './social-oauth-state.service';
+import { SettingsService } from '../settings/settings.service';
 
 export interface LinkedinProfile {
   email: string;
@@ -33,36 +34,29 @@ type LinkedinUserInfoResponse = {
 
 @Injectable()
 export class LinkedinOAuthService {
-  private readonly clientId: string;
-  private readonly clientSecret: string;
-  private readonly redirectUri: string;
   private readonly frontendOrigin: string;
-  private readonly configured: boolean;
 
-  constructor(private readonly stateService: SocialOAuthStateService) {
-    this.clientId = process.env.LINKEDIN_CLIENT_ID ?? '';
-    this.clientSecret = process.env.LINKEDIN_CLIENT_SECRET ?? '';
-    this.redirectUri = process.env.LINKEDIN_OAUTH_REDIRECT_URL ?? '';
+  constructor(
+    private readonly stateService: SocialOAuthStateService,
+    private readonly settingsService: SettingsService,
+  ) {
     this.frontendOrigin =
       process.env.FRONTEND_ORIGIN ?? 'http://localhost:3001';
-
-    this.configured = Boolean(
-      this.clientId && this.clientSecret && this.redirectUri,
-    );
   }
 
-  isConfigured(): boolean {
-    return this.configured;
+  async isConfigured(): Promise<boolean> {
+    const creds =
+      await this.settingsService.getEffectiveSocialProviderCredentials(
+        'linkedin',
+      );
+    return Boolean(creds?.clientId && creds.clientSecret && creds.redirectUri);
   }
 
-  createAuthorizationUrl(redirectPath?: string): {
+  async createAuthorizationUrl(redirectPath?: string): Promise<{
     url: string;
     state: string;
-  } {
-    if (!this.configured) {
-      throw new ServiceUnavailableException('LinkedIn OAuth not configured');
-    }
-
+  }> {
+    const creds = await this.getCredentialsOrThrow();
     const normalizedRedirectPath = this.normalizeRedirectPath(redirectPath);
     const state = this.stateService.createState({
       provider: 'linkedin',
@@ -71,8 +65,8 @@ export class LinkedinOAuthService {
 
     const url = new URL('https://www.linkedin.com/oauth/v2/authorization');
     url.searchParams.set('response_type', 'code');
-    url.searchParams.set('client_id', this.clientId);
-    url.searchParams.set('redirect_uri', this.redirectUri);
+    url.searchParams.set('client_id', creds.clientId);
+    url.searchParams.set('redirect_uri', creds.redirectUri);
     url.searchParams.set('scope', 'openid profile email');
     url.searchParams.set('state', state);
 
@@ -140,16 +134,13 @@ export class LinkedinOAuthService {
   }
 
   private async exchangeCodeForToken(code: string): Promise<string> {
-    if (!this.configured) {
-      throw new ServiceUnavailableException('LinkedIn OAuth not configured');
-    }
-
+    const creds = await this.getCredentialsOrThrow();
     const body = new URLSearchParams({
       grant_type: 'authorization_code',
       code,
-      redirect_uri: this.redirectUri,
-      client_id: this.clientId,
-      client_secret: this.clientSecret,
+      redirect_uri: creds.redirectUri,
+      client_id: creds.clientId,
+      client_secret: creds.clientSecret,
     });
 
     const res = await fetch('https://www.linkedin.com/oauth/v2/accessToken', {
@@ -194,5 +185,24 @@ export class LinkedinOAuthService {
       return '/wiki';
     }
     return path;
+  }
+
+  private async getCredentialsOrThrow(): Promise<{
+    clientId: string;
+    clientSecret: string;
+    redirectUri: string;
+  }> {
+    const creds =
+      await this.settingsService.getEffectiveSocialProviderCredentials(
+        'linkedin',
+      );
+    if (!creds?.clientId || !creds.clientSecret || !creds.redirectUri) {
+      throw new ServiceUnavailableException('LinkedIn OAuth not configured');
+    }
+    return {
+      clientId: creds.clientId,
+      clientSecret: creds.clientSecret,
+      redirectUri: creds.redirectUri,
+    };
   }
 }

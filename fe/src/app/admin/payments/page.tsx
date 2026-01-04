@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getAccessToken } from "../../auth-token";
 import { getApiBaseUrl } from "../../api-url";
+import { AdminBreadcrumbs } from "../_components/admin-breadcrumbs";
+import Link from "next/link";
 
 const API_BASE_URL = getApiBaseUrl();
 
@@ -153,11 +154,12 @@ export default function AdminPaymentsPage() {
   return (
     <div className="space-y-6">
       <header className="space-y-2">
-        <p className="text-sm text-zinc-500">
-          <Link href="/admin" className="hover:underline">
-            ← Админ табло
-          </Link>
-        </p>
+        <AdminBreadcrumbs
+          items={[
+            { label: "Админ табло", href: "/admin" },
+            { label: "Payments" },
+          ]}
+        />
         <h1 className="text-3xl font-semibold text-zinc-900">Плащания</h1>
         <p className="text-sm text-zinc-600">
           Настройки за Stripe Checkout (test mode).

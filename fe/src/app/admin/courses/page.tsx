@@ -1,11 +1,12 @@
 "use client";
 
 import { type FormEvent, useCallback, useEffect, useState } from "react";
-import Link from "next/link";
 import { useCurrentLang } from "../../../i18n/useCurrentLang";
 import { t } from "../../../i18n/t";
 import { getAccessToken } from "../../auth-token";
 import { getApiBaseUrl } from "../../api-url";
+import { AdminBreadcrumbs } from "../_components/admin-breadcrumbs";
+import Link from "next/link";
 
 const API_BASE_URL = getApiBaseUrl();
 
@@ -189,26 +190,12 @@ export default function AdminCoursesPage() {
   return (
     <div className="space-y-6">
       <section className="space-y-4">
-        <div className="flex items-center text-sm text-gray-500">
-          <Link href="/admin" className="hover:text-green-600">
-            Admin
-          </Link>
-          <svg
-            className="mx-2 h-4 w-4 text-gray-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 5l7 7-7 7"
-            />
-          </svg>
-          <span className="text-gray-900">Courses</span>
-        </div>
+        <AdminBreadcrumbs
+          items={[
+            { label: "Админ табло", href: "/admin" },
+            { label: "Courses" },
+          ]}
+        />
 
         <div>
           <h1 className="mb-2 text-3xl font-bold text-gray-900 md:text-4xl">

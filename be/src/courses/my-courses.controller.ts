@@ -19,7 +19,11 @@ interface AuthenticatedRequest extends Request {
 }
 
 @Controller('users/me/courses')
-@UseGuards(FeatureEnabledGuard('courses'), JwtAuthGuard)
+@UseGuards(
+  FeatureEnabledGuard('courses'),
+  FeatureEnabledGuard('myCourses'),
+  JwtAuthGuard,
+)
 export class MyCoursesController {
   constructor(private readonly coursesService: CoursesService) {}
 

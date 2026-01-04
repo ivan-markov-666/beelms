@@ -21,7 +21,11 @@ interface AuthRequest {
 }
 
 @Controller('courses/:courseId/curriculum')
-@UseGuards(FeatureEnabledGuard('courses'), JwtAuthGuard)
+@UseGuards(
+  FeatureEnabledGuard('courses'),
+  FeatureEnabledGuard('myCourses'),
+  JwtAuthGuard,
+)
 export class CurriculumProgressController {
   constructor(private readonly coursesService: CoursesService) {}
 

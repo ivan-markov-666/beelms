@@ -21,6 +21,7 @@ import { UserExportDto } from './dto/user-export.dto';
 import { RateLimit } from '../security/rate-limit/rate-limit.decorator';
 import { CaptchaService } from '../security/captcha/captcha.service';
 import { FeatureEnabledGuard } from '../settings/feature-enabled.guard';
+import { SettingsService } from '../settings/settings.service';
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -34,6 +35,7 @@ export class AccountController {
   constructor(
     private readonly accountService: AccountService,
     private readonly captchaService: CaptchaService,
+    private readonly settingsService: SettingsService,
   ) {}
 
   @UseGuards(JwtAuthGuard)
@@ -47,7 +49,7 @@ export class AccountController {
     return this.accountService.getCurrentProfile(req.user.userId);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(FeatureEnabledGuard('profile'), JwtAuthGuard)
   @Patch('me')
   updateMe(
     @Req() req: AuthenticatedRequest,
@@ -60,7 +62,7 @@ export class AccountController {
     return this.accountService.updateEmail(req.user.userId, dto);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(FeatureEnabledGuard('profile'), JwtAuthGuard)
   @Post('me/change-password')
   @RateLimit({ limit: 10, windowSeconds: 3600, key: 'userId' })
   @HttpCode(204)
@@ -70,6 +72,17 @@ export class AccountController {
   ): Promise<void> {
     if (!req.user) {
       throw new Error('Authenticated user not found in request context');
+    }
+
+    const cfg = await this.settingsService.getOrCreateInstanceConfig();
+    const features = cfg.features;
+    const requireCaptcha =
+      features?.captcha === true && features?.captchaChangePassword === true;
+    if (requireCaptcha) {
+      await this.captchaService.verifyCaptchaToken({
+        token: dto.captchaToken ?? '',
+        remoteIp: req.ip,
+      });
     }
 
     await this.accountService.changePassword(

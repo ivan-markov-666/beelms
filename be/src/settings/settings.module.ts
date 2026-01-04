@@ -5,6 +5,7 @@ import { InstanceConfig } from './instance-config.entity';
 import { AdminSettingsController } from './admin-settings.controller';
 import { PublicSettingsController } from './public-settings.controller';
 import { SettingsService } from './settings.service';
+import { SocialProviderDiagnosticsService } from './social-provider-diagnostics.service';
 
 @Module({
   imports: [
@@ -12,7 +13,7 @@ import { SettingsService } from './settings.service';
     forwardRef(() => AuthModule),
   ],
   controllers: [PublicSettingsController, AdminSettingsController],
-  providers: [SettingsService],
-  exports: [SettingsService],
+  providers: [SettingsService, SocialProviderDiagnosticsService],
+  exports: [SettingsService, SocialProviderDiagnosticsService],
 })
 export class SettingsModule {}

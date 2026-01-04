@@ -4,7 +4,7 @@ import { CoursesService } from './courses.service';
 import { CourseCategoryDto } from './dto/course-category.dto';
 
 @Controller('course-categories')
-@UseGuards(FeatureEnabledGuard('courses'))
+@UseGuards(FeatureEnabledGuard('courses'), FeatureEnabledGuard('coursesPublic'))
 export class CourseCategoriesController {
   constructor(private readonly coursesService: CoursesService) {}
 

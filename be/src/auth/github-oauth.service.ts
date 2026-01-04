@@ -4,6 +4,7 @@ import {
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { SocialOAuthStateService } from './social-oauth-state.service';
+import { SettingsService } from '../settings/settings.service';
 
 export interface GithubProfile {
   email: string;
@@ -39,36 +40,29 @@ type GithubEmailRecord = {
 
 @Injectable()
 export class GithubOAuthService {
-  private readonly clientId: string;
-  private readonly clientSecret: string;
-  private readonly redirectUri: string;
   private readonly frontendOrigin: string;
-  private readonly configured: boolean;
 
-  constructor(private readonly stateService: SocialOAuthStateService) {
-    this.clientId = process.env.GITHUB_CLIENT_ID ?? '';
-    this.clientSecret = process.env.GITHUB_CLIENT_SECRET ?? '';
-    this.redirectUri = process.env.GITHUB_OAUTH_REDIRECT_URL ?? '';
+  constructor(
+    private readonly stateService: SocialOAuthStateService,
+    private readonly settingsService: SettingsService,
+  ) {
     this.frontendOrigin =
       process.env.FRONTEND_ORIGIN ?? 'http://localhost:3001';
-
-    this.configured = Boolean(
-      this.clientId && this.clientSecret && this.redirectUri,
-    );
   }
 
-  isConfigured(): boolean {
-    return this.configured;
+  async isConfigured(): Promise<boolean> {
+    const creds =
+      await this.settingsService.getEffectiveSocialProviderCredentials(
+        'github',
+      );
+    return Boolean(creds?.clientId && creds.clientSecret && creds.redirectUri);
   }
 
-  createAuthorizationUrl(redirectPath?: string): {
+  async createAuthorizationUrl(redirectPath?: string): Promise<{
     url: string;
     state: string;
-  } {
-    if (!this.configured) {
-      throw new ServiceUnavailableException('GitHub OAuth not configured');
-    }
-
+  }> {
+    const creds = await this.getCredentialsOrThrow();
     const normalizedRedirectPath = this.normalizeRedirectPath(redirectPath);
     const state = this.stateService.createState({
       provider: 'github',
@@ -76,8 +70,8 @@ export class GithubOAuthService {
     });
 
     const url = new URL('https://github.com/login/oauth/authorize');
-    url.searchParams.set('client_id', this.clientId);
-    url.searchParams.set('redirect_uri', this.redirectUri);
+    url.searchParams.set('client_id', creds.clientId);
+    url.searchParams.set('redirect_uri', creds.redirectUri);
     url.searchParams.set('scope', 'read:user user:email');
     url.searchParams.set('allow_signup', 'true');
     url.searchParams.set('state', state);
@@ -152,14 +146,11 @@ export class GithubOAuthService {
   }
 
   private async exchangeCodeForToken(code: string): Promise<string> {
-    if (!this.configured) {
-      throw new ServiceUnavailableException('GitHub OAuth not configured');
-    }
-
+    const creds = await this.getCredentialsOrThrow();
     const body = new URLSearchParams({
-      client_id: this.clientId,
-      client_secret: this.clientSecret,
-      redirect_uri: this.redirectUri,
+      client_id: creds.clientId,
+      client_secret: creds.clientSecret,
+      redirect_uri: creds.redirectUri,
       code,
     });
 
@@ -231,5 +222,24 @@ export class GithubOAuthService {
       return '/wiki';
     }
     return path;
+  }
+
+  private async getCredentialsOrThrow(): Promise<{
+    clientId: string;
+    clientSecret: string;
+    redirectUri: string;
+  }> {
+    const creds =
+      await this.settingsService.getEffectiveSocialProviderCredentials(
+        'github',
+      );
+    if (!creds?.clientId || !creds.clientSecret || !creds.redirectUri) {
+      throw new ServiceUnavailableException('GitHub OAuth not configured');
+    }
+    return {
+      clientId: creds.clientId,
+      clientSecret: creds.clientSecret,
+      redirectUri: creds.redirectUri,
+    };
   }
 }

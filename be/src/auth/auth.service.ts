@@ -1,8 +1,11 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
+  forwardRef,
   HttpException,
   HttpStatus,
+  Inject,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -30,6 +33,7 @@ import {
   LOGIN_PROTECTION_WINDOW_MS,
   normalizeLoginEmailValue,
 } from '../security/account-protection/login-protection.utils';
+import { SettingsService } from '../settings/settings.service';
 
 const RESET_PASSWORD_TOKEN_TTL_MS = 24 * 60 * 60 * 1000;
 const EMAIL_VERIFICATION_TOKEN_TTL_MS = 24 * 60 * 60 * 1000;
@@ -44,6 +48,8 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly captchaService: CaptchaService,
     private readonly loginAttemptStore: InMemoryLoginAttemptStore,
+    @Inject(forwardRef(() => SettingsService))
+    private readonly settingsService: SettingsService,
   ) {}
 
   async register(dto: RegisterDto): Promise<UserProfileDto> {
@@ -54,7 +60,11 @@ export class AuthService {
       );
     }
 
-    const requireCaptcha = process.env.AUTH_REQUIRE_CAPTCHA === 'true';
+    const cfg = await this.settingsService.getOrCreateInstanceConfig();
+    const requireCaptcha =
+      process.env.AUTH_REQUIRE_CAPTCHA === 'true' ||
+      (cfg.features?.captcha === true &&
+        cfg.features?.captchaRegister === true);
     if (requireCaptcha) {
       await this.captchaService.verifyCaptchaToken({
         token: dto.captchaToken ?? '',
@@ -123,9 +133,14 @@ export class AuthService {
   ): Promise<AuthTokenDto> {
     const ip = (requestContext?.ip ?? '').trim() || 'unknown';
 
+    const cfg = await this.settingsService.getOrCreateInstanceConfig();
+    const captchaLoginEnabled =
+      cfg.features?.captcha === true && cfg.features?.captchaLogin === true;
+
     const shouldEnforceLoginCaptcha =
-      process.env.NODE_ENV !== 'test' ||
-      process.env.AUTH_LOGIN_CAPTCHA_TEST_MODE === 'true';
+      captchaLoginEnabled &&
+      (process.env.NODE_ENV !== 'test' ||
+        process.env.AUTH_LOGIN_CAPTCHA_TEST_MODE === 'true');
 
     if (shouldEnforceLoginCaptcha) {
       const thresholdRaw = process.env.AUTH_LOGIN_CAPTCHA_THRESHOLD;
@@ -166,7 +181,10 @@ export class AuthService {
   }
 
   async forgotPassword(dto: ForgotPasswordDto): Promise<void> {
-    const requireCaptcha = process.env.AUTH_REQUIRE_CAPTCHA === 'true';
+    const cfg = await this.settingsService.getOrCreateInstanceConfig();
+    const requireCaptcha =
+      cfg.features?.captcha === true &&
+      cfg.features?.captchaForgotPassword === true;
     if (requireCaptcha) {
       await this.captchaService.verifyCaptchaToken({
         token: dto.captchaToken ?? '',
@@ -272,6 +290,12 @@ export class AuthService {
   }
 
   private async issueAuthToken(user: User): Promise<AuthTokenDto> {
+    const cfg = await this.settingsService.getOrCreateInstanceConfig();
+    const loginEnabled = cfg.features?.authLogin !== false;
+    if (!loginEnabled && user.role === 'user') {
+      throw new ForbiddenException('Login disabled');
+    }
+
     const payload = {
       sub: user.id,
       email: user.email,

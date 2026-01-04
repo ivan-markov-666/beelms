@@ -1,10 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import { useParams } from "next/navigation";
 import { getAccessToken } from "../../../auth-token";
 import { getApiBaseUrl } from "../../../api-url";
+import { AdminBreadcrumbs } from "../../_components/admin-breadcrumbs";
+import Link from "next/link";
 
 const API_BASE_URL = getApiBaseUrl();
 
@@ -130,6 +131,15 @@ export default function AdminCourseDetailPage() {
     quizId: string;
     order: string;
   } | null>(null);
+
+  const breadcrumbItems = useMemo(
+    () => [
+      { label: "Админ табло", href: "/admin" },
+      { label: "Courses", href: "/admin/courses" },
+      { label: course?.title ?? "Course details" },
+    ],
+    [course?.title],
+  );
 
   const isCourseDirty = useMemo(() => {
     if (!course || !courseForm) return false;
@@ -818,15 +828,17 @@ export default function AdminCourseDetailPage() {
 
   if (loading) {
     return (
-      <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-        <p className="text-sm text-gray-600">Loading course...</p>
+      <div className="space-y-4">
+        <AdminBreadcrumbs items={breadcrumbItems} />
+        <p className="text-sm text-gray-500">Loading course...</p>
       </div>
     );
   }
 
   if (error || !course) {
     return (
-      <div className="rounded-lg border border-red-200 bg-white p-6 shadow-sm">
+      <div className="space-y-4">
+        <AdminBreadcrumbs items={breadcrumbItems} />
         <p className="text-sm text-red-700">{error ?? "Course not found"}</p>
         <Link
           href="/admin/courses"
@@ -840,6 +852,8 @@ export default function AdminCourseDetailPage() {
 
   return (
     <div className="space-y-6">
+      <AdminBreadcrumbs items={breadcrumbItems} />
+
       <section className="space-y-3">
         <Link
           href="/admin/courses"

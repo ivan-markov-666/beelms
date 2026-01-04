@@ -23,6 +23,35 @@ export function HeaderNav() {
   const [publicSettings, setPublicSettings] = useState<PublicSettings | null>(
     null,
   );
+  const themeStorageKey = "beelms.themeMode";
+
+  const [systemPrefersDark, setSystemPrefersDark] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    if (typeof window.matchMedia !== "function") return false;
+    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  });
+
+  const [themeMode, setThemeMode] = useState<"light" | "dark" | "system">(
+    () => {
+      if (typeof window === "undefined") return "system";
+
+      const attr = document.documentElement.getAttribute("data-theme");
+      if (attr === "light" || attr === "dark" || attr === "system") {
+        return attr;
+      }
+
+      try {
+        const v = localStorage.getItem(themeStorageKey);
+        if (v === "light" || v === "dark" || v === "system") {
+          return v;
+        }
+      } catch {
+        // ignore
+      }
+
+      return "system";
+    },
+  );
 
   const handleLogout = () => {
     if (typeof window !== "undefined") {
@@ -123,17 +152,87 @@ export function HeaderNav() {
     };
   }, []);
 
+  const handleThemeChange = (value: "light" | "dark" | "system") => {
+    setThemeMode(value);
+    if (typeof window === "undefined") return;
+
+    try {
+      localStorage.setItem(themeStorageKey, value);
+    } catch {
+      // ignore
+    }
+    document.documentElement.setAttribute("data-theme", value);
+  };
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    if (typeof window.matchMedia !== "function") {
+      return;
+    }
+
+    const mql = window.matchMedia("(prefers-color-scheme: dark)");
+    const handler = () => {
+      setSystemPrefersDark(mql.matches);
+    };
+
+    handler();
+
+    if (typeof mql.addEventListener === "function") {
+      mql.addEventListener("change", handler);
+      return () => {
+        mql.removeEventListener("change", handler);
+      };
+    }
+
+    mql.addListener(handler);
+    return () => {
+      mql.removeListener(handler);
+    };
+  }, []);
+
   const features = publicSettings?.features;
-  const showWiki = features?.wikiPublic !== false;
-  const showCourses = features?.courses !== false;
+  const showWiki = features?.wiki !== false && features?.wikiPublic !== false;
+  const showCourses =
+    features?.courses !== false && features?.coursesPublic !== false;
+  const showMyCourses =
+    hasToken === true &&
+    features?.courses !== false &&
+    features?.myCourses !== false;
+  const showProfile = hasToken === true && features?.profile !== false;
   const showAuth = features?.auth !== false;
+  const showAuthLogin = showAuth && features?.authLogin !== false;
+  const showAuthRegister = showAuth && features?.authRegister !== false;
+
+  const logoUrl = (publicSettings?.branding?.logoUrl ?? "").trim();
+  const logoLightUrl = (publicSettings?.branding?.logoLightUrl ?? "").trim();
+  const logoDarkUrl = (publicSettings?.branding?.logoDarkUrl ?? "").trim();
+
+  const effectiveTheme =
+    themeMode === "system" ? (systemPrefersDark ? "dark" : "light") : themeMode;
+  const resolvedLogoUrl =
+    effectiveTheme === "dark"
+      ? logoDarkUrl || logoUrl
+      : logoLightUrl || logoUrl;
+  const appName = publicSettings?.branding?.appName ?? "BeeLMS";
 
   return (
     <header className="bg-white border-b border-gray-200">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4">
         <div className="flex items-center">
-          <Link href="/" className="text-2xl font-bold text-green-600">
-            {publicSettings?.branding?.appName ?? "BeeLMS"}
+          <Link href="/" className="flex items-center">
+            {resolvedLogoUrl ? (
+              <img
+                src={resolvedLogoUrl}
+                alt={appName}
+                className="h-10 w-auto"
+                loading="lazy"
+              />
+            ) : (
+              <span className="text-2xl font-bold text-green-600">
+                {appName}
+              </span>
+            )}
           </Link>
         </div>
 
@@ -148,7 +247,7 @@ export function HeaderNav() {
               {t(lang, "nav", "courses")}
             </Link>
           )}
-          {hasToken === true && (
+          {showMyCourses && (
             <Link href="/my-courses" className="hover:text-green-600">
               {t(lang, "nav", "myCourses")}
             </Link>
@@ -161,21 +260,39 @@ export function HeaderNav() {
         </nav>
 
         <div className="flex items-center gap-4 text-sm text-gray-700">
+          <select
+            value={themeMode}
+            onChange={(e) =>
+              handleThemeChange(e.target.value as "light" | "dark" | "system")
+            }
+            className="rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+            aria-label="Theme"
+          >
+            <option value="system">System</option>
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+          </select>
           {hasToken === false && showAuth && (
             <>
-              <Link href="/auth/login" className="hover:text-green-600">
-                {t(lang, "nav", "login")}
-              </Link>
-              <Link href="/auth/register" className="hover:text-green-600">
-                {t(lang, "nav", "register")}
-              </Link>
+              {showAuthLogin ? (
+                <Link href="/auth/login" className="hover:text-green-600">
+                  {t(lang, "nav", "login")}
+                </Link>
+              ) : null}
+              {showAuthRegister ? (
+                <Link href="/auth/register" className="hover:text-green-600">
+                  {t(lang, "nav", "register")}
+                </Link>
+              ) : null}
             </>
           )}
           {hasToken === true && (
             <>
-              <Link href="/profile" className="hover:text-green-600">
-                {t(lang, "nav", "profile")}
-              </Link>
+              {showProfile ? (
+                <Link href="/profile" className="hover:text-green-600">
+                  {t(lang, "nav", "profile")}
+                </Link>
+              ) : null}
               <button
                 type="button"
                 className="hover:text-green-600"

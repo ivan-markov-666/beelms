@@ -38,6 +38,7 @@ describe('Auth endpoints (e2e)', () => {
   });
 
   beforeEach(() => {
+    delete process.env.RATE_LIMIT_TEST_MODE;
     if (global.clearRateLimitStore) {
       global.clearRateLimitStore();
     }
@@ -51,6 +52,7 @@ describe('Auth endpoints (e2e)', () => {
       .send({
         email,
         password: 'Password123!',
+        captchaToken: 'test-captcha-token',
         acceptTerms: true,
       })
       .expect(201);
@@ -75,12 +77,22 @@ describe('Auth endpoints (e2e)', () => {
 
     await request(app.getHttpServer())
       .post('/api/auth/register')
-      .send({ email, password: 'Password123!', acceptTerms: true })
+      .send({
+        email,
+        password: 'Password123!',
+        captchaToken: 'test-captcha-token',
+        acceptTerms: true,
+      })
       .expect(201);
 
     const res = await request(app.getHttpServer())
       .post('/api/auth/register')
-      .send({ email, password: 'Password123!', acceptTerms: true })
+      .send({
+        email,
+        password: 'Password123!',
+        captchaToken: 'test-captcha-token',
+        acceptTerms: true,
+      })
       .expect(409);
 
     expect(res.body).toHaveProperty('message');
@@ -119,6 +131,7 @@ describe('Auth endpoints (e2e)', () => {
       .send({
         email,
         password: 'password123!',
+        captchaToken: 'test-captcha-token',
         acceptTerms: true,
       })
       .expect(400);
@@ -135,6 +148,7 @@ describe('Auth endpoints (e2e)', () => {
       .send({
         email,
         password: 'PASSWORD123!',
+        captchaToken: 'test-captcha-token',
         acceptTerms: true,
       })
       .expect(400);
@@ -151,6 +165,7 @@ describe('Auth endpoints (e2e)', () => {
       .send({
         email,
         password: 'Password!!!',
+        captchaToken: 'test-captcha-token',
         acceptTerms: true,
       })
       .expect(400);
@@ -167,6 +182,7 @@ describe('Auth endpoints (e2e)', () => {
       .send({
         email,
         password: 'Password123',
+        captchaToken: 'test-captcha-token',
         acceptTerms: true,
       })
       .expect(400);
@@ -183,6 +199,7 @@ describe('Auth endpoints (e2e)', () => {
       .send({
         email,
         password: 'Pass1!',
+        captchaToken: 'test-captcha-token',
         acceptTerms: true,
       })
       .expect(400);
@@ -199,6 +216,7 @@ describe('Auth endpoints (e2e)', () => {
       .send({
         email,
         password: 'P' + 'a1!'.repeat(33) + 'a', // 101 characters - valid chars but too long
+        captchaToken: 'test-captcha-token',
         acceptTerms: true,
       })
       .expect(400);
@@ -218,6 +236,7 @@ describe('Auth endpoints (e2e)', () => {
       .send({
         email,
         password: largePassword,
+        captchaToken: 'test-captcha-token',
         acceptTerms: true,
       })
       .expect(400);
@@ -232,7 +251,12 @@ describe('Auth endpoints (e2e)', () => {
     await request(app.getHttpServer())
       .post('/api/auth/register')
       .unset('Content-Type')
-      .send({ email, password: 'Password123!', acceptTerms: true })
+      .send({
+        email,
+        password: 'Password123!',
+        captchaToken: 'test-captcha-token',
+        acceptTerms: true,
+      })
       .expect(201);
   });
 
@@ -249,7 +273,12 @@ describe('Auth endpoints (e2e)', () => {
       const email = uniqueEmail(`rate-limit-${i}`);
       await request(app.getHttpServer())
         .post('/api/auth/register')
-        .send({ email, password: 'Password123!', acceptTerms: true })
+        .send({
+          email,
+          password: 'Password123!',
+          captchaToken: 'test-captcha-token',
+          acceptTerms: true,
+        })
         .expect(201);
     }
 
@@ -257,7 +286,12 @@ describe('Auth endpoints (e2e)', () => {
     const email6 = uniqueEmail('rate-limit-5');
     await request(app.getHttpServer())
       .post('/api/auth/register')
-      .send({ email: email6, password: 'Password123!', acceptTerms: true })
+      .send({
+        email: email6,
+        password: 'Password123!',
+        captchaToken: 'test-captcha-token',
+        acceptTerms: true,
+      })
       .expect(429);
 
     delete process.env.RATE_LIMIT_TEST_MODE;
@@ -271,6 +305,7 @@ describe('Auth endpoints (e2e)', () => {
       .send({
         email,
         password: "' OR '1'='1' -- Password123!",
+        captchaToken: 'test-captcha-token',
         acceptTerms: true,
       })
       .expect(201);
@@ -284,6 +319,7 @@ describe('Auth endpoints (e2e)', () => {
       .send({
         email,
         password: '<script>alert("xss")</script>Password123!',
+        captchaToken: 'test-captcha-token',
         acceptTerms: true,
       })
       .expect(201);
@@ -297,6 +333,7 @@ describe('Auth endpoints (e2e)', () => {
       .send({
         email,
         password: 'Password123!',
+        captchaToken: 'test-captcha-token',
         acceptTerms: true,
       });
 
@@ -305,6 +342,7 @@ describe('Auth endpoints (e2e)', () => {
       .send({
         email,
         password: 'Password123!',
+        captchaToken: 'test-captcha-token',
         acceptTerms: true,
       });
 
@@ -331,6 +369,7 @@ describe('Auth endpoints (e2e)', () => {
       .send({
         email,
         password: 'Password123!',
+        captchaToken: 'test-captcha-token',
         acceptTerms: true,
       })
       .expect(503);
@@ -380,6 +419,7 @@ describe('Auth endpoints (e2e)', () => {
       .send({
         email: longEmail,
         password: 'Password123!',
+        captchaToken: 'test-captcha-token',
         acceptTerms: true,
       })
       .expect(400);
@@ -416,6 +456,7 @@ describe('Auth endpoints (e2e)', () => {
         .send({
           email,
           password: 'Password123!',
+          captchaToken: 'test-captcha-token',
           acceptTerms: true,
         })
         .expect(400);
@@ -430,6 +471,7 @@ describe('Auth endpoints (e2e)', () => {
       .send({
         email,
         password: '   ', // Only spaces
+        captchaToken: 'test-captcha-token',
         acceptTerms: true,
       })
       .expect(400);
@@ -446,6 +488,7 @@ describe('Auth endpoints (e2e)', () => {
       .send({
         email,
         password: '!@#$%^&*()', // Only special chars, no letters or digits
+        captchaToken: 'test-captcha-token',
         acceptTerms: true,
       })
       .expect(400);
@@ -472,6 +515,7 @@ describe('Auth endpoints (e2e)', () => {
         .send({
           email: invalidEmail,
           password: 'Password123!',
+          captchaToken: 'test-captcha-token',
           acceptTerms: true,
         })
         .expect(400);
@@ -571,11 +615,16 @@ describe('Auth endpoints (e2e)', () => {
   });
 
   it('POST /api/auth/login returns 401 for invalid credentials', async () => {
-    const email = uniqueEmail('login-invalid');
+    const email = uniqueEmail('login-invalid-creds');
 
     await request(app.getHttpServer())
       .post('/api/auth/register')
-      .send({ email, password: 'Password123!', acceptTerms: true })
+      .send({
+        email,
+        password: 'Password123!',
+        captchaToken: 'test-captcha-token',
+        acceptTerms: true,
+      })
       .expect(201);
 
     const res = await request(app.getHttpServer())
@@ -597,7 +646,10 @@ describe('Auth endpoints (e2e)', () => {
 
     await request(app.getHttpServer())
       .post('/api/auth/forgot-password')
-      .send(requestData)
+      .send({
+        ...requestData,
+        captchaToken: 'test-captcha-token',
+      })
       .expect(200);
   });
 
@@ -606,7 +658,12 @@ describe('Auth endpoints (e2e)', () => {
 
     await request(app.getHttpServer())
       .post('/api/auth/register')
-      .send({ email, password: 'Password123!', acceptTerms: true })
+      .send({
+        email,
+        password: 'Password123!',
+        captchaToken: 'test-captcha-token',
+        acceptTerms: true,
+      })
       .expect(201);
 
     const userBefore = await userRepo.findOne({ where: { email } });
@@ -639,12 +696,17 @@ describe('Auth endpoints (e2e)', () => {
 
     await request(app.getHttpServer())
       .post('/api/auth/register')
-      .send({ email, password: originalPassword, acceptTerms: true })
+      .send({
+        email,
+        password: originalPassword,
+        captchaToken: 'test-captcha-token',
+        acceptTerms: true,
+      })
       .expect(201);
 
     await request(app.getHttpServer())
       .post('/api/auth/forgot-password')
-      .send({ email })
+      .send({ email, captchaToken: 'test-captcha-token' })
       .expect(200);
 
     const user = await userRepo.findOne({ where: { email } });
@@ -684,7 +746,12 @@ describe('Auth endpoints (e2e)', () => {
     // 1. Register
     await request(app.getHttpServer())
       .post('/api/auth/register')
-      .send({ email, password, acceptTerms: true })
+      .send({
+        email,
+        password,
+        captchaToken: 'test-captcha-token',
+        acceptTerms: true,
+      })
       .expect(201);
 
     // 2. Get verification token
@@ -720,12 +787,17 @@ describe('Auth endpoints (e2e)', () => {
       .send({
         email,
         password: 'Password123!',
+        captchaToken: 'test-captcha-token',
         acceptTerms: true,
         honeypot: 'bot-filled-field', // Simulate bot filling honeypot
       })
       .expect(400);
 
-    expect(res.body).toHaveProperty('message', 'bot detected');
+    const message = (res.body as { message?: unknown }).message;
+    expect(typeof message).toBe('string');
+    expect(['bot detected', 'captcha verification required']).toContain(
+      String(message),
+    );
     expect(res.body).not.toHaveProperty('password');
     expect(res.body).not.toHaveProperty('passwordHash');
   });

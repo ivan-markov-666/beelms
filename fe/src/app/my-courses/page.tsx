@@ -70,6 +70,11 @@ export default function MyCoursesPage() {
           return;
         }
 
+        if (res.status === 404) {
+          router.replace("/courses");
+          return;
+        }
+
         if (!res.ok) {
           setError("Неуспешно зареждане на My Courses.");
           return;
