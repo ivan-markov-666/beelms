@@ -1,12 +1,12 @@
 "use client";
 
 import { type FormEvent, useCallback, useEffect, useState } from "react";
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCurrentLang } from "../../../i18n/useCurrentLang";
 import { t } from "../../../i18n/t";
 import { getAccessToken } from "../../auth-token";
 import { getApiBaseUrl } from "../../api-url";
+import { AdminBreadcrumbs } from "../_components/admin-breadcrumbs";
 
 const API_BASE_URL = getApiBaseUrl();
 
@@ -380,26 +380,12 @@ export default function AdminUsersPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center text-xs text-zinc-500">
-        <Link href="/admin" className="hover:text-green-600">
-          Admin
-        </Link>
-        <svg
-          className="mx-2 h-3.5 w-3.5 text-zinc-400"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          aria-hidden="true"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M9 5l7 7-7 7"
-          />
-        </svg>
-        <span className="text-zinc-900">Users Management</span>
-      </div>
+      <AdminBreadcrumbs
+        items={[
+          { label: "Админ табло", href: "/admin" },
+          { label: "Users Management" },
+        ]}
+      />
 
       <div className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
         <div className="mb-6 flex flex-col gap-1">

@@ -22,6 +22,9 @@ const startLinkedinOAuth = jest.fn();
 
 let mockPublicSettings: {
   features: {
+    auth: boolean;
+    authLogin: boolean;
+    authRegister: boolean;
     socialGoogle: boolean;
     socialFacebook: boolean;
     socialGithub: boolean;
@@ -29,6 +32,9 @@ let mockPublicSettings: {
   };
 } | null = {
   features: {
+    auth: true,
+    authLogin: true,
+    authRegister: true,
     socialGoogle: true,
     socialFacebook: true,
     socialGithub: true,
@@ -89,6 +95,9 @@ describe("RegisterPage", () => {
     mockSearchParams = "lang=bg";
     mockPublicSettings = {
       features: {
+        auth: true,
+        authLogin: true,
+        authRegister: true,
         socialGoogle: true,
         socialFacebook: true,
         socialGithub: true,
@@ -660,6 +669,9 @@ describe("RegisterPage", () => {
   it("shows social unavailable message when all providers disabled", async () => {
     mockPublicSettings = {
       features: {
+        auth: true,
+        authLogin: true,
+        authRegister: true,
         socialGoogle: false,
         socialFacebook: false,
         socialGithub: false,

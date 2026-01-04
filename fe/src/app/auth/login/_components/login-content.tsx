@@ -104,6 +104,12 @@ export function LoginContent() {
     };
   }, [publicSettings?.features]);
 
+  const authRegisterEnabled = useMemo(() => {
+    const features = publicSettings?.features;
+    if (!features) return true;
+    return features.auth !== false && features.authRegister !== false;
+  }, [publicSettings?.features]);
+
   const enabledSocialProviders = useMemo(
     () => SOCIAL_PROVIDERS.filter((provider) => socialFlags[provider]),
     [socialFlags],
@@ -315,6 +321,8 @@ export function LoginContent() {
           setFormError(t(lang, "auth", "loginErrorGeneric"));
         } else if (res.status === 401) {
           setFormError(t(lang, "auth", "loginErrorInvalidCredentials"));
+        } else if (res.status === 403) {
+          setFormError(t(lang, "auth", "loginErrorDisabled"));
         } else {
           setFormError(t(lang, "auth", "loginErrorGeneric"));
         }
@@ -612,26 +620,33 @@ export function LoginContent() {
           </form>
         </div>
 
-        <div className="mt-6 space-y-3 text-center text-xs text-gray-600">
-          <button
-            type="button"
-            className="cursor-pointer text-green-700 hover:text-green-800"
-            onClick={() => router.push("/auth/forgot-password")}
-            disabled={submitting}
-          >
-            {t(lang, "auth", "loginForgotLink")}
-          </button>
-          <p>
-            {t(lang, "auth", "loginRegisterLink")}{" "}
+        <div className="mt-6 flex items-center justify-between text-xs text-green-700">
+          {authRegisterEnabled ? (
             <button
               type="button"
-              className="cursor-pointer font-semibold text-green-700 hover:text-green-800"
-              onClick={() => router.push("/auth/register")}
+              className="cursor-pointer hover:text-green-800"
+              onClick={() => router.push("/auth/forgot-password")}
               disabled={submitting}
             >
-              {t(lang, "auth", "registerSubmit")}
+              {t(lang, "auth", "loginForgotLink")}
             </button>
-          </p>
+          ) : (
+            <span />
+          )}
+
+          {authRegisterEnabled ? (
+            <p>
+              {t(lang, "auth", "loginRegisterLink")}{" "}
+              <button
+                type="button"
+                className="cursor-pointer font-semibold text-green-700 hover:text-green-800"
+                onClick={() => router.push("/auth/register")}
+                disabled={submitting}
+              >
+                {t(lang, "auth", "registerSubmit")}
+              </button>
+            </p>
+          ) : null}
         </div>
       </div>
     </div>

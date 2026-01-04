@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { getAccessToken } from "../../../auth-token";
 import { getApiBaseUrl } from "../../../api-url";
+import { AdminBreadcrumbs } from "../../_components/admin-breadcrumbs";
 
 const API_BASE_URL = getApiBaseUrl();
 
@@ -52,6 +53,15 @@ export default function AdminTaskDetailPage() {
 
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  const breadcrumbItems = useMemo(
+    () => [
+      { label: "Админ табло", href: "/admin" },
+      { label: "Tasks", href: "/admin/tasks" },
+      { label: task?.title ?? "Task details" },
+    ],
+    [task?.title],
+  );
 
   const load = useCallback(async () => {
     if (typeof window === "undefined") return;
@@ -226,15 +236,17 @@ export default function AdminTaskDetailPage() {
 
   if (loading) {
     return (
-      <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-        <p className="text-sm text-gray-600">Loading task...</p>
+      <div className="space-y-4">
+        <AdminBreadcrumbs items={breadcrumbItems} />
+        <p className="text-sm text-gray-500">Loading task...</p>
       </div>
     );
   }
 
-  if (error || !task || !form) {
+  if (error || !task) {
     return (
-      <div className="rounded-lg border border-red-200 bg-white p-6 shadow-sm">
+      <div className="space-y-4">
+        <AdminBreadcrumbs items={breadcrumbItems} />
         <p className="text-sm text-red-700">{error ?? "Task not found"}</p>
         <Link
           href="/admin/tasks"
@@ -248,7 +260,9 @@ export default function AdminTaskDetailPage() {
 
   return (
     <div className="space-y-6">
-      <section className="space-y-3">
+      <AdminBreadcrumbs items={breadcrumbItems} />
+
+      <section className="space-y-4">
         <Link
           href="/admin/tasks"
           className="text-sm font-medium text-green-700 hover:text-green-900 hover:underline"
@@ -324,7 +338,7 @@ export default function AdminTaskDetailPage() {
             <span className="text-xs font-medium text-gray-600">Title</span>
             <input
               className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400"
-              value={form.title}
+              value={form?.title ?? ""}
               onChange={(e) =>
                 setForm((p) => (p ? { ...p, title: e.target.value } : p))
               }
@@ -335,7 +349,7 @@ export default function AdminTaskDetailPage() {
             <span className="text-xs font-medium text-gray-600">Language</span>
             <select
               className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900"
-              value={form.language}
+              value={form?.language ?? "bg"}
               onChange={(e) =>
                 setForm((p) => (p ? { ...p, language: e.target.value } : p))
               }
@@ -349,7 +363,7 @@ export default function AdminTaskDetailPage() {
             <span className="text-xs font-medium text-gray-600">Status</span>
             <select
               className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900"
-              value={form.status}
+              value={form?.status ?? "draft"}
               onChange={(e) =>
                 setForm((p) => (p ? { ...p, status: e.target.value } : p))
               }
@@ -366,7 +380,7 @@ export default function AdminTaskDetailPage() {
           <textarea
             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400"
             rows={6}
-            value={form.description}
+            value={form?.description ?? ""}
             onChange={(e) =>
               setForm((p) => (p ? { ...p, description: e.target.value } : p))
             }

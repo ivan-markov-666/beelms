@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { getAccessToken } from "../../../auth-token";
 import { getApiBaseUrl } from "../../../api-url";
+import { AdminBreadcrumbs } from "../../_components/admin-breadcrumbs";
 
 const API_BASE_URL = getApiBaseUrl();
 
@@ -75,6 +76,16 @@ export default function AdminQuizDetailPage() {
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
 
   const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  const breadcrumbItems = useMemo(
+    () => [
+      { label: "Админ табло", href: "/admin" },
+      { label: "Quizzes", href: "/admin/quizzes" },
+      { label: quiz?.title ?? "Quiz details" },
+    ],
+    [quiz?.title],
+  );
+
   const [deleting, setDeleting] = useState(false);
 
   const [questionForm, setQuestionForm] = useState<QuestionCreateForm>({
@@ -559,15 +570,17 @@ export default function AdminQuizDetailPage() {
 
   if (loading) {
     return (
-      <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-        <p className="text-sm text-gray-600">Loading quiz...</p>
+      <div className="space-y-4">
+        <AdminBreadcrumbs items={breadcrumbItems} />
+        <p className="text-sm text-gray-500">Loading quiz...</p>
       </div>
     );
   }
 
-  if (error || !quiz || !form) {
+  if (!quiz || error) {
     return (
-      <div className="rounded-lg border border-red-200 bg-white p-6 shadow-sm">
+      <div className="space-y-4">
+        <AdminBreadcrumbs items={breadcrumbItems} />
         <p className="text-sm text-red-700">{error ?? "Quiz not found"}</p>
         <Link
           href="/admin/quizzes"
@@ -581,6 +594,8 @@ export default function AdminQuizDetailPage() {
 
   return (
     <div className="space-y-6">
+      <AdminBreadcrumbs items={breadcrumbItems} />
+
       <section className="space-y-3">
         <Link
           href="/admin/quizzes"

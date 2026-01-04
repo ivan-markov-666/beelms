@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { buildApiUrl } from "../api-url";
 
 export const dynamic = "force-dynamic";
@@ -50,6 +51,10 @@ async function fetchCourses(category?: string): Promise<CourseSummary[]> {
     cache: "no-store",
   });
 
+  if (res.status === 404) {
+    notFound();
+  }
+
   if (!res.ok) {
     throw new Error("Failed to load courses");
   }
@@ -61,6 +66,10 @@ async function fetchCategories(): Promise<CourseCategory[]> {
   const res = await fetch(buildApiUrl("/course-categories"), {
     cache: "no-store",
   });
+
+  if (res.status === 404) {
+    notFound();
+  }
 
   if (!res.ok) {
     return [];

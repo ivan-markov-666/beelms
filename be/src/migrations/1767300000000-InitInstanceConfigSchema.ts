@@ -23,7 +23,7 @@ export class InitInstanceConfigSchema1767300000000
     await queryRunner.query(`
       INSERT INTO "instance_config" ("branding", "features", "languages")
       VALUES (
-        '{"appName":"BeeLMS","logoUrl":null,"primaryColor":null}',
+        '{"appName":"BeeLMS","cursorUrl":null,"cursorLightUrl":null,"cursorDarkUrl":null,"logoUrl":null,"logoLightUrl":null,"logoDarkUrl":null,"primaryColor":null}',
         '{"wikiPublic":true,"courses":true,"auth":true,"paidCourses":true,"gdprLegal":true,"infraRedis":false,"infraRabbitmq":false,"infraMonitoring":true,"infraErrorTracking":false}',
         '{"supported":["bg","en","de"],"default":"bg"}'
       )

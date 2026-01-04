@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getAccessToken } from "../../../auth-token";
 import { getApiBaseUrl } from "../../../api-url";
+import { AdminBreadcrumbs } from "../../_components/admin-breadcrumbs";
+import Link from "next/link";
 
 const API_BASE_URL = getApiBaseUrl();
 
@@ -121,44 +122,13 @@ export default function AdminWikiCreatePage() {
 
   return (
     <div className="space-y-6">
-      {/* Breadcrumbs */}
-      <section className="flex items-center text-sm text-gray-500">
-        <Link href="/admin" className="hover:text-green-600">
-          Admin
-        </Link>
-        <svg
-          className="mx-2 h-4 w-4 text-gray-400"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          aria-hidden="true"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M9 5l7 7-7 7"
-          />
-        </svg>
-        <Link href="/admin/wiki" className="hover:text-green-600">
-          Wiki Management
-        </Link>
-        <svg
-          className="mx-2 h-4 w-4 text-gray-400"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          aria-hidden="true"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M9 5l7 7-7 7"
-          />
-        </svg>
-        <span className="text-gray-900">Create New Article</span>
-      </section>
+      <AdminBreadcrumbs
+        items={[
+          { label: "Админ табло", href: "/admin" },
+          { label: "Wiki Management", href: "/admin/wiki" },
+          { label: "Create New Article" },
+        ]}
+      />
 
       {/* Page header */}
       <section className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">

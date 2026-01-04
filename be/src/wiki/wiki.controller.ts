@@ -26,7 +26,7 @@ interface AuthenticatedRequest extends Request {
 }
 
 @Controller('wiki')
-@UseGuards(FeatureEnabledGuard('wikiPublic'))
+@UseGuards(FeatureEnabledGuard('wiki'), FeatureEnabledGuard('wikiPublic'))
 export class WikiController {
   constructor(private readonly wikiService: WikiService) {}
 

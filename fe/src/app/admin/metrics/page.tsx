@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import { useCurrentLang } from "../../../i18n/useCurrentLang";
 import { t } from "../../../i18n/t";
 import { getAccessToken } from "../../auth-token";
 import { getApiBaseUrl } from "../../api-url";
+import { AdminBreadcrumbs } from "../_components/admin-breadcrumbs";
+import Link from "next/link";
 
 const API_BASE_URL = getApiBaseUrl();
 
@@ -733,34 +734,12 @@ export default function AdminMetricsPage() {
   return (
     <div className="space-y-8">
       {/* Breadcrumbs */}
-      <nav className="text-sm text-gray-500">
-        <ol className="flex items-center space-x-2">
-          <li>
-            <Link href="/admin" className="hover:text-green-600">
-              Admin
-            </Link>
-          </li>
-          <li>
-            <svg
-              className="h-4 w-4 text-gray-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 5l7 7-7 7"
-              />
-            </svg>
-          </li>
-          <li className="text-gray-900">
-            {t(lang, "common", "adminMetricsTitle")}
-          </li>
-        </ol>
-      </nav>
+      <AdminBreadcrumbs
+        items={[
+          { label: "Админ табло", href: "/admin" },
+          { label: t(lang, "common", "adminMetricsTitle") },
+        ]}
+      />
 
       {/* Page header */}
       <header className="space-y-2">

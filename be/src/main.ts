@@ -82,6 +82,9 @@ export async function createApp(): Promise<NestExpressApplication> {
   app.useStaticAssets(path.join(mediaRoot, 'wiki'), {
     prefix: '/wiki/media',
   });
+  app.useStaticAssets(path.join(mediaRoot, 'branding'), {
+    prefix: '/branding/media',
+  });
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

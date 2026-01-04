@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useCurrentLang } from "../../../../i18n/useCurrentLang";
 import { t } from "../../../../i18n/t";
 import { buildApiUrl } from "../../../api-url";
+import { usePublicSettings } from "../../../_hooks/use-public-settings";
 
 type FieldErrors = {
   newPassword?: string;
@@ -15,6 +16,12 @@ export function ResetPasswordContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const lang = useCurrentLang();
+  const { settings: publicSettings } = usePublicSettings();
+
+  const registerEnabled = publicSettings?.features
+    ? publicSettings.features.auth !== false &&
+      publicSettings.features.authRegister !== false
+    : true;
 
   const token = searchParams.get("token") ?? "";
 
@@ -97,6 +104,31 @@ export function ResetPasswordContent() {
       setSubmitting(false);
     }
   };
+
+  if (!registerEnabled) {
+    return (
+      <div className="flex min-h-[calc(100vh-5rem)] items-start justify-center px-4 py-12">
+        <main className="w-full max-w-md">
+          <h1 className="mb-2 text-3xl font-bold text-gray-900">
+            {t(lang, "auth", "resetDisabledTitle")}
+          </h1>
+          <p className="mb-6 text-sm text-gray-600">
+            {t(lang, "auth", "resetDisabledMessage")}
+          </p>
+
+          <section className="rounded-lg border border-gray-200 bg-white p-8 shadow-sm">
+            <button
+              type="button"
+              className="w-full rounded-lg bg-green-600 py-3 text-sm font-semibold text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1"
+              onClick={() => router.push("/auth/login")}
+            >
+              {t(lang, "auth", "resetDisabledLoginCta")}
+            </button>
+          </section>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-[calc(100vh-5rem)] items-start justify-center px-4 py-12">

@@ -133,6 +133,7 @@ export class AuthController {
   }
 
   @Post('register')
+  @UseGuards(FeatureEnabledGuard('authRegister'))
   @RateLimit({ limit: 5, windowSeconds: 3600, key: 'ip' })
   register(@Body() dto: RegisterDto): Promise<UserProfileDto> {
     return this.authService.register(dto);
@@ -150,6 +151,7 @@ export class AuthController {
 
   @HttpCode(200)
   @Post('forgot-password')
+  @UseGuards(FeatureEnabledGuard('authRegister'))
   @RateLimit({ limit: 5, windowSeconds: 3600, key: 'ip' })
   forgotPassword(@Body() dto: ForgotPasswordDto): Promise<void> {
     return this.authService.forgotPassword(dto);
@@ -157,6 +159,7 @@ export class AuthController {
 
   @HttpCode(200)
   @Post('reset-password')
+  @UseGuards(FeatureEnabledGuard('authRegister'))
   @RateLimit({ limit: 10, windowSeconds: 3600, key: 'ip' })
   resetPassword(@Body() dto: ResetPasswordDto): Promise<void> {
     return this.authService.resetPassword(dto);

@@ -29,6 +29,48 @@ describe("HeaderNav i18n", () => {
     useSearchParamsMock.mockReturnValue(makeSearchParams("lang=bg"));
     usePathnameMock.mockReturnValue("/wiki");
 
+    // stub fetch for public settings
+    global.fetch = jest.fn().mockImplementation(async (input: RequestInfo) => {
+      const url = String(input);
+
+      if (url.includes("/public/settings")) {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            branding: { appName: "BeeLMS" },
+            features: {
+              wiki: true,
+              wikiPublic: true,
+              courses: true,
+              coursesPublic: true,
+              myCourses: true,
+              auth: true,
+              authLogin: true,
+              authRegister: true,
+              paidCourses: true,
+              gdprLegal: true,
+              socialGoogle: true,
+              socialFacebook: true,
+              socialGithub: true,
+              socialLinkedin: true,
+              infraRedis: false,
+              infraRabbitmq: false,
+              infraMonitoring: true,
+              infraErrorTracking: false,
+            },
+            languages: { supported: ["bg"], default: "bg" },
+          }),
+        } as unknown as Response;
+      }
+
+      return {
+        ok: false,
+        status: 404,
+        json: async () => ({}),
+      } as unknown as Response;
+    });
+
     render(<HeaderNav />);
 
     expect(screen.getByRole("link", { name: "Wiki" })).toBeInTheDocument();
@@ -44,6 +86,47 @@ describe("HeaderNav i18n", () => {
   it("renders EN labels when lang=en", async () => {
     useSearchParamsMock.mockReturnValue(makeSearchParams("lang=en"));
     usePathnameMock.mockReturnValue("/wiki");
+
+    global.fetch = jest.fn().mockImplementation(async (input: RequestInfo) => {
+      const url = String(input);
+
+      if (url.includes("/public/settings")) {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            branding: { appName: "BeeLMS" },
+            features: {
+              wiki: true,
+              wikiPublic: true,
+              courses: true,
+              coursesPublic: true,
+              myCourses: true,
+              auth: true,
+              authLogin: true,
+              authRegister: true,
+              paidCourses: true,
+              gdprLegal: true,
+              socialGoogle: true,
+              socialFacebook: true,
+              socialGithub: true,
+              socialLinkedin: true,
+              infraRedis: false,
+              infraRabbitmq: false,
+              infraMonitoring: true,
+              infraErrorTracking: false,
+            },
+            languages: { supported: ["en"], default: "en" },
+          }),
+        } as unknown as Response;
+      }
+
+      return {
+        ok: false,
+        status: 404,
+        json: async () => ({}),
+      } as unknown as Response;
+    });
 
     render(<HeaderNav />);
 
@@ -63,17 +146,60 @@ describe("HeaderNav i18n", () => {
 
     window.localStorage.setItem(ACCESS_TOKEN_KEY, "test-token");
 
-    // stub fetch for profile check
-    global.fetch = jest.fn().mockResolvedValue({
-      ok: true,
-      status: 200,
-      json: async () => ({
-        id: "user-id",
-        email: "user@example.com",
-        createdAt: "2024-01-01T00:00:00.000Z",
-        role: "user",
-      }),
-    } as unknown as Response);
+    // stub fetch for public settings + profile check
+    global.fetch = jest.fn().mockImplementation(async (input: RequestInfo) => {
+      const url = String(input);
+
+      if (url.includes("/public/settings")) {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            branding: { appName: "BeeLMS" },
+            features: {
+              wiki: true,
+              wikiPublic: true,
+              courses: true,
+              coursesPublic: true,
+              myCourses: true,
+              auth: true,
+              authLogin: true,
+              authRegister: true,
+              paidCourses: true,
+              gdprLegal: true,
+              socialGoogle: true,
+              socialFacebook: true,
+              socialGithub: true,
+              socialLinkedin: true,
+              infraRedis: false,
+              infraRabbitmq: false,
+              infraMonitoring: true,
+              infraErrorTracking: false,
+            },
+            languages: { supported: ["bg"], default: "bg" },
+          }),
+        } as unknown as Response;
+      }
+
+      if (url.includes("/users/me")) {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            id: "user-id",
+            email: "user@example.com",
+            createdAt: "2024-01-01T00:00:00.000Z",
+            role: "user",
+          }),
+        } as unknown as Response;
+      }
+
+      return {
+        ok: false,
+        status: 404,
+        json: async () => ({}),
+      } as unknown as Response;
+    });
 
     render(<HeaderNav />);
 
@@ -100,16 +226,59 @@ describe("HeaderNav i18n", () => {
 
     window.localStorage.setItem(ACCESS_TOKEN_KEY, "test-token");
 
-    global.fetch = jest.fn().mockResolvedValue({
-      ok: true,
-      status: 200,
-      json: async () => ({
-        id: "admin-id",
-        email: "admin@example.com",
-        createdAt: "2024-01-01T00:00:00.000Z",
-        role: "admin",
-      }),
-    } as unknown as Response);
+    global.fetch = jest.fn().mockImplementation(async (input: RequestInfo) => {
+      const url = String(input);
+
+      if (url.includes("/public/settings")) {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            branding: { appName: "BeeLMS" },
+            features: {
+              wiki: true,
+              wikiPublic: true,
+              courses: true,
+              coursesPublic: true,
+              myCourses: true,
+              auth: true,
+              authLogin: true,
+              authRegister: true,
+              paidCourses: true,
+              gdprLegal: true,
+              socialGoogle: true,
+              socialFacebook: true,
+              socialGithub: true,
+              socialLinkedin: true,
+              infraRedis: false,
+              infraRabbitmq: false,
+              infraMonitoring: true,
+              infraErrorTracking: false,
+            },
+            languages: { supported: ["en"], default: "en" },
+          }),
+        } as unknown as Response;
+      }
+
+      if (url.includes("/users/me")) {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            id: "admin-id",
+            email: "admin@example.com",
+            createdAt: "2024-01-01T00:00:00.000Z",
+            role: "admin",
+          }),
+        } as unknown as Response;
+      }
+
+      return {
+        ok: false,
+        status: 404,
+        json: async () => ({}),
+      } as unknown as Response;
+    });
 
     render(<HeaderNav />);
 
@@ -126,16 +295,59 @@ describe("HeaderNav i18n", () => {
 
     window.localStorage.setItem(ACCESS_TOKEN_KEY, "test-token");
 
-    global.fetch = jest.fn().mockResolvedValue({
-      ok: true,
-      status: 200,
-      json: async () => ({
-        id: "user-id",
-        email: "user@example.com",
-        createdAt: "2024-01-01T00:00:00.000Z",
-        role: "user",
-      }),
-    } as unknown as Response);
+    global.fetch = jest.fn().mockImplementation(async (input: RequestInfo) => {
+      const url = String(input);
+
+      if (url.includes("/public/settings")) {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            branding: { appName: "BeeLMS" },
+            features: {
+              wiki: true,
+              wikiPublic: true,
+              courses: true,
+              coursesPublic: true,
+              myCourses: true,
+              auth: true,
+              authLogin: true,
+              authRegister: true,
+              paidCourses: true,
+              gdprLegal: true,
+              socialGoogle: true,
+              socialFacebook: true,
+              socialGithub: true,
+              socialLinkedin: true,
+              infraRedis: false,
+              infraRabbitmq: false,
+              infraMonitoring: true,
+              infraErrorTracking: false,
+            },
+            languages: { supported: ["en"], default: "en" },
+          }),
+        } as unknown as Response;
+      }
+
+      if (url.includes("/users/me")) {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            id: "user-id",
+            email: "user@example.com",
+            createdAt: "2024-01-01T00:00:00.000Z",
+            role: "user",
+          }),
+        } as unknown as Response;
+      }
+
+      return {
+        ok: false,
+        status: 404,
+        json: async () => ({}),
+      } as unknown as Response;
+    });
 
     render(<HeaderNav />);
 
@@ -152,7 +364,45 @@ describe("HeaderNav i18n", () => {
     useSearchParamsMock.mockReturnValue(makeSearchParams("lang=en"));
     usePathnameMock.mockReturnValue("/wiki");
 
-    global.fetch = jest.fn();
+    global.fetch = jest.fn().mockImplementation(async (input: RequestInfo) => {
+      const url = String(input);
+      if (url.includes("/public/settings")) {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            branding: { appName: "BeeLMS" },
+            features: {
+              wiki: true,
+              wikiPublic: true,
+              courses: true,
+              coursesPublic: true,
+              myCourses: true,
+              auth: true,
+              authLogin: true,
+              authRegister: true,
+              paidCourses: true,
+              gdprLegal: true,
+              socialGoogle: true,
+              socialFacebook: true,
+              socialGithub: true,
+              socialLinkedin: true,
+              infraRedis: false,
+              infraRabbitmq: false,
+              infraMonitoring: true,
+              infraErrorTracking: false,
+            },
+            languages: { supported: ["en"], default: "en" },
+          }),
+        } as unknown as Response;
+      }
+
+      return {
+        ok: false,
+        status: 404,
+        json: async () => ({}),
+      } as unknown as Response;
+    });
 
     render(<HeaderNav />);
 

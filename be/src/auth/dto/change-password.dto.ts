@@ -1,4 +1,4 @@
-import { IsString, MinLength, MaxLength } from 'class-validator';
+import { IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
 
 export class ChangePasswordDto {
   @IsString()
@@ -8,4 +8,8 @@ export class ChangePasswordDto {
   @MinLength(8)
   @MaxLength(100)
   newPassword: string;
+
+  @IsOptional()
+  @IsString()
+  captchaToken?: string;
 }

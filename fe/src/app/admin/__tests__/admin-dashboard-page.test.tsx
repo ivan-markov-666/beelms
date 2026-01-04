@@ -138,8 +138,10 @@ describe("AdminHomePage (Dashboard)", () => {
 
     await screen.findByText("Регистрирани потребители");
 
-    const wikiLink = screen.getByRole("link", { name: "Wiki" });
-    const usersLink = screen.getByRole("link", { name: "Потребители" });
+    const wikiLink = screen.getByRole("link", { name: "Управление на Wiki" });
+    const usersLink = screen.getByRole("link", {
+      name: "Управление на потребители",
+    });
 
     expect(wikiLink).toHaveAttribute("href", "/admin/wiki");
     expect(usersLink).toHaveAttribute("href", "/admin/users");
