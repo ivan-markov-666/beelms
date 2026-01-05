@@ -57,7 +57,10 @@ export class SettingsService {
       cursorDarkUrl: null,
       cursorHotspot: null,
       faviconUrl: null,
+      googleFont: null,
+      googleFontByLang: null,
       fontUrl: null,
+      fontUrlByLang: null,
       theme: {
         mode: 'system',
         light: {
@@ -173,10 +176,6 @@ export class SettingsService {
     const cfg = await this.getOrCreateInstanceConfig();
     const updatedBy = options?.updatedBy ?? null;
 
-    const branding = dto.branding
-      ? this.normalizeBranding(this.mergeBranding(cfg.branding, dto.branding))
-      : cfg.branding;
-
     const features = dto.features
       ? {
           ...cfg.features,
@@ -226,6 +225,12 @@ export class SettingsService {
         'languages.default must be included in languages.supported',
       );
     }
+
+    const branding = dto.branding
+      ? this.normalizeBranding(this.mergeBranding(cfg.branding, dto.branding), {
+          supportedLangs: languages.supported,
+        })
+      : cfg.branding;
 
     cfg.branding = branding;
     cfg.features = features;
@@ -290,6 +295,36 @@ export class SettingsService {
         next.cursorHotspot = {
           ...(current.cursorHotspot ?? {}),
           ...(update.cursorHotspot ?? {}),
+        };
+      }
+    }
+
+    if (Object.prototype.hasOwnProperty.call(update, 'googleFontByLang')) {
+      if (update.googleFontByLang === null) {
+        next.googleFontByLang = null;
+      } else if (
+        typeof update.googleFontByLang !== 'undefined' &&
+        update.googleFontByLang &&
+        typeof update.googleFontByLang === 'object'
+      ) {
+        next.googleFontByLang = {
+          ...(current.googleFontByLang ?? {}),
+          ...(update.googleFontByLang ?? {}),
+        };
+      }
+    }
+
+    if (Object.prototype.hasOwnProperty.call(update, 'fontUrlByLang')) {
+      if (update.fontUrlByLang === null) {
+        next.fontUrlByLang = null;
+      } else if (
+        typeof update.fontUrlByLang !== 'undefined' &&
+        update.fontUrlByLang &&
+        typeof update.fontUrlByLang === 'object'
+      ) {
+        next.fontUrlByLang = {
+          ...(current.fontUrlByLang ?? {}),
+          ...(update.fontUrlByLang ?? {}),
         };
       }
     }
@@ -407,7 +442,10 @@ export class SettingsService {
     return options?.lower ? trimmed.toLowerCase() : trimmed;
   }
 
-  private normalizeBranding(branding: InstanceBranding): InstanceBranding {
+  private normalizeBranding(
+    branding: InstanceBranding,
+    options?: { supportedLangs?: string[] },
+  ): InstanceBranding {
     const next: InstanceBranding = { ...branding };
 
     type Twitter = NonNullable<InstanceBranding['twitter']>;
@@ -432,8 +470,47 @@ export class SettingsService {
     if (typeof next.faviconUrl !== 'undefined') {
       next.faviconUrl = this.normalizeNullableString(next.faviconUrl) ?? null;
     }
+    if (typeof next.googleFont !== 'undefined') {
+      next.googleFont = this.normalizeNullableString(next.googleFont) ?? null;
+    }
+
+    const normalizeLangStringMap = (
+      incoming: Record<string, string | null> | null | undefined,
+    ): Record<string, string> | null => {
+      if (typeof incoming === 'undefined') {
+        return null;
+      }
+      if (incoming === null) {
+        return null;
+      }
+
+      const supported = Array.isArray(options?.supportedLangs)
+        ? new Set(options?.supportedLangs)
+        : null;
+
+      const out: Record<string, string> = {};
+      for (const [rawKey, rawValue] of Object.entries(incoming)) {
+        const key = (rawKey ?? '').trim().toLowerCase();
+        if (!key) continue;
+        if (supported && !supported.has(key)) continue;
+
+        const v = this.normalizeNullableString(rawValue);
+        if (typeof v === 'string') {
+          out[key] = v;
+        }
+      }
+
+      return Object.keys(out).length > 0 ? out : null;
+    };
+
+    if (typeof next.googleFontByLang !== 'undefined') {
+      next.googleFontByLang = normalizeLangStringMap(next.googleFontByLang);
+    }
     if (typeof next.fontUrl !== 'undefined') {
       next.fontUrl = this.normalizeNullableString(next.fontUrl) ?? null;
+    }
+    if (typeof next.fontUrlByLang !== 'undefined') {
+      next.fontUrlByLang = normalizeLangStringMap(next.fontUrlByLang);
     }
     if (typeof next.theme !== 'undefined') {
       if (next.theme === null) {

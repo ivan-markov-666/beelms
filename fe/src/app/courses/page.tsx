@@ -79,11 +79,26 @@ async function fetchCategories(): Promise<CourseCategory[]> {
   return Array.isArray(data) ? data : [];
 }
 
+type CoursesPageSearchParams = { category?: string | string[] };
+
+function isPromiseLike<T>(value: unknown): value is Promise<T> {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "then" in value &&
+    typeof (value as { then?: unknown }).then === "function"
+  );
+}
+
 export default async function CoursesPage({
-  searchParams,
+  searchParams: rawSearchParams,
 }: {
-  searchParams?: { category?: string | string[] };
+  searchParams?: CoursesPageSearchParams | Promise<CoursesPageSearchParams>;
 }) {
+  const searchParams = isPromiseLike(rawSearchParams)
+    ? await rawSearchParams
+    : rawSearchParams;
+
   const selectedCategory =
     typeof searchParams?.category === "string" ? searchParams.category : "";
 

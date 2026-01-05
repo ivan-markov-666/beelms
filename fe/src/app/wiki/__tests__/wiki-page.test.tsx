@@ -1,20 +1,85 @@
 import { render, screen } from "@testing-library/react";
+import type { PublicSettings } from "../../_data/public-settings";
+import { getPublicSettings } from "../../_data/public-settings";
 import WikiPage from "../page";
 
-function mockFetchOnce(data: unknown, ok = true) {
+jest.mock("../../_data/public-settings", () => ({
+  getPublicSettings: jest.fn(),
+}));
+
+function createPublicSettings(
+  partial?: Partial<PublicSettings>,
+): PublicSettings {
+  return {
+    branding: {
+      appName: "BeeLMS",
+    },
+    features: {
+      wiki: true,
+      wikiPublic: true,
+      courses: true,
+      coursesPublic: true,
+      myCourses: true,
+      profile: true,
+      auth: true,
+      authLogin: true,
+      authRegister: true,
+      captcha: false,
+      captchaLogin: false,
+      captchaRegister: false,
+      captchaForgotPassword: false,
+      captchaChangePassword: false,
+      paidCourses: false,
+      gdprLegal: false,
+      socialGoogle: false,
+      socialFacebook: false,
+      socialGithub: false,
+      socialLinkedin: false,
+      infraRedis: false,
+      infraRabbitmq: false,
+      infraMonitoring: false,
+      infraErrorTracking: false,
+    },
+    languages: {
+      supported: ["bg", "en"],
+      default: "bg",
+    },
+    ...partial,
+  };
+}
+
+const mockGetPublicSettings = getPublicSettings as jest.MockedFunction<
+  typeof getPublicSettings
+>;
+
+function mockArticlesFetchOnce(
+  data: unknown,
+  {
+    ok = true,
+    status = ok ? 200 : 500,
+  }: {
+    ok?: boolean;
+    status?: number;
+  } = {},
+) {
   global.fetch = jest.fn().mockResolvedValue({
     ok,
+    status,
     json: async () => data,
   } as unknown as Response);
 }
 
 describe("WikiPage", () => {
+  beforeEach(() => {
+    mockGetPublicSettings.mockResolvedValue(createPublicSettings());
+  });
+
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   it("renders list of wiki articles from API", async () => {
-    mockFetchOnce([
+    mockArticlesFetchOnce([
       {
         id: "1",
         slug: "getting-started",
@@ -33,7 +98,7 @@ describe("WikiPage", () => {
   });
 
   it("renders empty state when there are no articles", async () => {
-    mockFetchOnce([]);
+    mockArticlesFetchOnce([]);
 
     const ui = await WikiPage();
     render(ui);
@@ -44,7 +109,7 @@ describe("WikiPage", () => {
   });
 
   it("renders error state when API call fails", async () => {
-    mockFetchOnce([], false);
+    mockArticlesFetchOnce([], { ok: false, status: 503 });
 
     const ui = await WikiPage();
     render(ui);
@@ -57,7 +122,7 @@ describe("WikiPage", () => {
   });
 
   it("passes search and language filters to the API URL", async () => {
-    mockFetchOnce([]);
+    mockArticlesFetchOnce([]);
 
     const ui = await WikiPage({
       searchParams: { q: "начало", lang: "bg" },
@@ -72,7 +137,7 @@ describe("WikiPage", () => {
   });
 
   it("renders no-results state when filters are applied and there are no articles", async () => {
-    mockFetchOnce([]);
+    mockArticlesFetchOnce([]);
 
     const ui = await WikiPage({
       searchParams: { q: "няма-резултати" },
@@ -85,7 +150,7 @@ describe("WikiPage", () => {
   });
 
   it("passes page and pageSize to the API URL", async () => {
-    mockFetchOnce([]);
+    mockArticlesFetchOnce([]);
 
     const ui = await WikiPage({
       searchParams: { page: "2" },
@@ -100,7 +165,7 @@ describe("WikiPage", () => {
   });
 
   it("builds pagination links that preserve search and language filters", async () => {
-    mockFetchOnce([
+    mockArticlesFetchOnce([
       {
         id: "1",
         slug: "getting-started",

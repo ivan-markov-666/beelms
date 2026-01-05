@@ -20,7 +20,7 @@ describe("i18n config", () => {
     expect(normalizeLang("de")).toBe("de");
   });
 
-  it("falls back to DEFAULT_LANG for unknown values", () => {
-    expect(normalizeLang("fr" as string)).toBe(DEFAULT_LANG);
+  it("falls back to DEFAULT_LANG for unknown values when supported list is provided", () => {
+    expect(normalizeLang("fr", ["bg", "en"], DEFAULT_LANG)).toBe(DEFAULT_LANG);
   });
 });

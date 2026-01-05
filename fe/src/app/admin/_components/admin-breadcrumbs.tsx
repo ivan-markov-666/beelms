@@ -19,6 +19,10 @@ export function AdminBreadcrumbs({ items, className }: AdminBreadcrumbsProps) {
     return null;
   }
 
+  const brandingFontStyle = {
+    fontFamily: "var(--font-sans), Arial, Helvetica, sans-serif",
+  } as const;
+
   const homeItem: BreadcrumbItem = {
     label: "Начало",
     href: "/",
@@ -30,13 +34,13 @@ export function AdminBreadcrumbs({ items, className }: AdminBreadcrumbsProps) {
 
   const normalizedItems = hasHome ? items : [homeItem, ...items];
 
-  const baseClassName = "flex items-center text-sm text-gray-500";
+  const baseClassName = "flex items-center text-sm text-gray-500 nav-font";
   const composedClassName = className
     ? `${baseClassName} ${className}`
     : baseClassName;
 
   return (
-    <nav className={composedClassName}>
+    <nav className={composedClassName} style={brandingFontStyle}>
       {normalizedItems.map((item, index) => (
         <Fragment
           key={`${typeof item.label === "string" ? item.label : index}-${index}`}
