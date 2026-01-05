@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -222,11 +223,14 @@ export function HeaderNav() {
         <div className="flex items-center">
           <Link href="/" className="flex items-center">
             {resolvedLogoUrl ? (
-              <img
+              <Image
                 src={resolvedLogoUrl}
                 alt={appName}
+                width={160}
+                height={40}
                 className="h-10 w-auto"
-                loading="lazy"
+                unoptimized
+                priority
               />
             ) : (
               <span className="text-2xl font-bold text-green-600">

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ChangeEventHandler, MouseEvent, ReactNode } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getAccessToken } from "../../auth-token";
@@ -3998,10 +3999,13 @@ export default function AdminSettingsPage() {
                     aria-label="Favicon preview"
                     title="Open favicon"
                   >
-                    <img
+                    <Image
                       src={faviconUrl}
                       alt="Favicon"
+                      width={24}
+                      height={24}
                       className="h-6 w-6"
+                      unoptimized
                       loading="lazy"
                     />
                   </a>
@@ -4055,10 +4059,13 @@ export default function AdminSettingsPage() {
                     aria-label="Logo preview"
                     title="Open logo"
                   >
-                    <img
+                    <Image
                       src={logoUrl}
                       alt="Logo"
+                      width={160}
+                      height={40}
                       className="h-10 w-auto"
+                      unoptimized
                       loading="lazy"
                     />
                   </a>
@@ -4114,10 +4121,13 @@ export default function AdminSettingsPage() {
                     aria-label="Logo light preview"
                     title="Open logo (light)"
                   >
-                    <img
+                    <Image
                       src={logoLightUrl}
                       alt="Logo light"
+                      width={160}
+                      height={40}
                       className="h-10 w-auto"
+                      unoptimized
                       loading="lazy"
                     />
                   </a>
@@ -4171,10 +4181,13 @@ export default function AdminSettingsPage() {
                     aria-label="Logo dark preview"
                     title="Open logo (dark)"
                   >
-                    <img
+                    <Image
                       src={logoDarkUrl}
                       alt="Logo dark"
+                      width={160}
+                      height={40}
                       className="h-10 w-auto"
+                      unoptimized
                       loading="lazy"
                     />
                   </a>
@@ -4277,10 +4290,13 @@ export default function AdminSettingsPage() {
                     aria-label="Cursor image preview"
                     title="Open cursor image"
                   >
-                    <img
+                    <Image
                       src={cursorUrl}
                       alt="Cursor"
+                      width={28}
+                      height={28}
                       className="h-7 w-7"
+                      unoptimized
                       loading="lazy"
                     />
                   </a>
@@ -4335,10 +4351,13 @@ export default function AdminSettingsPage() {
                       aria-label="Cursor light image preview"
                       title="Open cursor (light) image"
                     >
-                      <img
+                      <Image
                         src={cursorLightUrl}
                         alt="Cursor light"
+                        width={28}
+                        height={28}
                         className="h-7 w-7"
+                        unoptimized
                         loading="lazy"
                       />
                     </a>
@@ -4390,10 +4409,13 @@ export default function AdminSettingsPage() {
                       aria-label="Cursor dark image preview"
                       title="Open cursor (dark) image"
                     >
-                      <img
+                      <Image
                         src={cursorDarkUrl}
                         alt="Cursor dark"
+                        width={28}
+                        height={28}
                         className="h-7 w-7"
+                        unoptimized
                         loading="lazy"
                       />
                     </a>
@@ -4527,16 +4549,17 @@ export default function AdminSettingsPage() {
                               transform: "translate(-50%, -50%)",
                             }}
                           />
-                          <img
+                          <Image
                             src={resolvedCursorUrl}
                             alt="Cursor test"
+                            width={32}
+                            height={32}
                             className="pointer-events-none absolute"
                             style={{
                               left: cursorHotspotTestPos.x - hotspotX,
                               top: cursorHotspotTestPos.y - hotspotY,
-                              width: 32,
-                              height: 32,
                             }}
+                            unoptimized
                           />
                         </>
                       );
