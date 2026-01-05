@@ -3,11 +3,13 @@ import {
   IsBoolean,
   IsInt,
   IsIn,
+  IsObject,
   IsOptional,
   IsString,
   Matches,
   ArrayMinSize,
   Validate,
+  ValidateIf,
   ValidateNested,
   ValidationArguments,
   ValidatorConstraint,
@@ -301,7 +303,21 @@ export class AdminUpdateBrandingDto {
 
   @IsOptional()
   @IsString()
+  googleFont?: string | null;
+
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @IsObject()
+  googleFontByLang?: Record<string, string | null> | null;
+
+  @IsOptional()
+  @IsString()
   fontUrl?: string | null;
+
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @IsObject()
+  fontUrlByLang?: Record<string, string | null> | null;
 
   @IsOptional()
   @ValidateNested()

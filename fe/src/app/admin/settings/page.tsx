@@ -22,7 +22,10 @@ type InstanceBranding = {
     y?: number | null;
   } | null;
   faviconUrl?: string | null;
+  googleFont?: string | null;
+  googleFontByLang?: Record<string, string | null> | null;
   fontUrl?: string | null;
+  fontUrlByLang?: Record<string, string | null> | null;
   theme?: {
     mode?: "light" | "dark" | "system" | null;
     light?: {
@@ -197,6 +200,8 @@ type SocialProviderStatus = {
   configured: boolean;
 };
 
+type SocialProviderStatuses = Record<SocialProvider, SocialProviderStatus>;
+
 type SocialImagePurpose = "shared" | "open-graph" | "twitter";
 
 type SocialProviderTestResultResponse = {
@@ -219,11 +224,87 @@ type AdminSettingsResponse = {
   branding: InstanceBranding;
   features: InstanceFeatures;
   languages: InstanceLanguages;
-  socialProviders: Record<SocialProvider, SocialProviderStatus>;
+  socialProviders?: SocialProviderStatuses | null;
   socialCredentials: Partial<
     Record<SocialProvider, SocialProviderCredentialResponse>
   >;
 };
+
+const GOOGLE_FONTS: {
+  value: string;
+  label: string;
+  sampleStyle: React.CSSProperties;
+  supportsCyrillic: boolean;
+}[] = [
+  {
+    value: "inter",
+    label: "Inter (sans)",
+    sampleStyle: { fontFamily: "Inter, sans-serif" },
+    supportsCyrillic: true,
+  },
+  {
+    value: "roboto",
+    label: "Roboto (sans)",
+    sampleStyle: { fontFamily: "Roboto, sans-serif" },
+    supportsCyrillic: true,
+  },
+  {
+    value: "open-sans",
+    label: "Open Sans (sans)",
+    sampleStyle: { fontFamily: '"Open Sans", sans-serif' },
+    supportsCyrillic: true,
+  },
+  {
+    value: "lato",
+    label: "Lato (sans)",
+    sampleStyle: { fontFamily: "Lato, sans-serif" },
+    supportsCyrillic: false,
+  },
+  {
+    value: "montserrat",
+    label: "Montserrat (sans)",
+    sampleStyle: { fontFamily: "Montserrat, sans-serif" },
+    supportsCyrillic: true,
+  },
+  {
+    value: "poppins",
+    label: "Poppins (sans)",
+    sampleStyle: { fontFamily: "Poppins, sans-serif" },
+    supportsCyrillic: false,
+  },
+  {
+    value: "nunito",
+    label: "Nunito (sans)",
+    sampleStyle: { fontFamily: "Nunito, sans-serif" },
+    supportsCyrillic: false,
+  },
+  {
+    value: "merriweather",
+    label: "Merriweather (serif)",
+    sampleStyle: { fontFamily: "Merriweather, serif" },
+    supportsCyrillic: false,
+  },
+  {
+    value: "playfair-display",
+    label: "Playfair Display (serif)",
+    sampleStyle: { fontFamily: '"Playfair Display", serif' },
+    supportsCyrillic: false,
+  },
+  {
+    value: "noto-sans",
+    label: "Noto Sans (global sans)",
+    sampleStyle: { fontFamily: '"Noto Sans", sans-serif' },
+    supportsCyrillic: true,
+  },
+  {
+    value: "noto-serif",
+    label: "Noto Serif (global serif)",
+    sampleStyle: { fontFamily: '"Noto Serif", serif' },
+    supportsCyrillic: true,
+  },
+];
+
+const CYRILLIC_LANGS = new Set(["bg", "ru", "uk", "sr", "mk"]);
 
 const SOCIAL_PROVIDERS: SocialProvider[] = [
   "google",
@@ -231,6 +312,22 @@ const SOCIAL_PROVIDERS: SocialProvider[] = [
   "github",
   "linkedin",
 ];
+
+const buildSocialStatuses = (
+  incoming: Partial<Record<SocialProvider, SocialProviderStatus>> | null,
+): SocialProviderStatuses => {
+  const fallback: SocialProviderStatus = { enabled: false, configured: false };
+  return SOCIAL_PROVIDERS.reduce((acc, provider) => {
+    const value = incoming?.[provider];
+    acc[provider] =
+      value &&
+      typeof value.enabled === "boolean" &&
+      typeof value.configured === "boolean"
+        ? value
+        : fallback;
+    return acc;
+  }, {} as SocialProviderStatuses);
+};
 
 const SOCIAL_PROVIDER_LABELS: Record<SocialProvider, string> = {
   facebook: "Facebook",
@@ -971,8 +1068,17 @@ export default function AdminSettingsPage() {
   const logoLightFileInputRef = useRef<HTMLInputElement | null>(null);
   const [logoDarkUrl, setLogoDarkUrl] = useState<string>("");
   const logoDarkFileInputRef = useRef<HTMLInputElement | null>(null);
+  const [googleFont, setGoogleFont] = useState<string>("");
+  const [googleFontByLang, setGoogleFontByLang] = useState<
+    Record<string, string>
+  >({});
   const [fontUrl, setFontUrl] = useState<string>("");
+  const [fontUrlByLang, setFontUrlByLang] = useState<Record<string, string>>(
+    {},
+  );
   const fontFileInputRef = useRef<HTMLInputElement | null>(null);
+  const perLangFontFileInputRef = useRef<HTMLInputElement | null>(null);
+  const [pendingFontLang, setPendingFontLang] = useState<string>("");
   const [themeMode, setThemeMode] = useState<"light" | "dark" | "system">(
     "system",
   );
@@ -1645,6 +1751,81 @@ export default function AdminSettingsPage() {
     }
   };
 
+  const handleBrandingFontFileSelectedForLang: ChangeEventHandler<
+    HTMLInputElement
+  > = async (event) => {
+    const langCode = (pendingFontLang ?? "").trim().toLowerCase();
+    if (!langCode) {
+      return;
+    }
+
+    const files = event.target.files;
+    if (!files || files.length === 0) {
+      return;
+    }
+
+    const token = getAccessToken();
+    if (!token) {
+      router.replace("/auth/login");
+      return;
+    }
+
+    setError(null);
+    setSuccess(null);
+
+    const previousUrl = (fontUrlByLang?.[langCode] ?? "").trim();
+    const formData = new FormData();
+    formData.append("file", files[0]);
+    if (previousUrl.length > 0) {
+      formData.append("previousUrl", previousUrl);
+    }
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/admin/settings/branding/font`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (res.status === 401) {
+        router.replace("/auth/login");
+        return;
+      }
+
+      if (!res.ok) {
+        let message = "Неуспешно качване на font файла.";
+        try {
+          const payload = (await res.json()) as { message?: string };
+          if (payload?.message) message = payload.message;
+        } catch {
+          // ignore
+        }
+        setError(message);
+        return;
+      }
+
+      const data = (await res.json()) as { url?: string };
+      if (typeof data.url !== "string") {
+        setError("Неуспешно качване на font файла.");
+        return;
+      }
+
+      setFontUrlByLang((prev) => ({ ...prev, [langCode]: data.url }));
+      await persistBrandingField(
+        { fontUrlByLang: { [langCode]: data.url } },
+        `Font (${langCode}) файлът е качен и запазен. Refesh-ни страницата за да се приложи навсякъде.`,
+      );
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Неуспешно качване на font файла.",
+      );
+    } finally {
+      setPendingFontLang("");
+    }
+  };
+
   const handleCursorLightFileSelected: ChangeEventHandler<
     HTMLInputElement
   > = async (event) => {
@@ -1814,6 +1995,14 @@ export default function AdminSettingsPage() {
     }
   };
 
+  const handleBrandingFontUploadClickForLang = (langCode: string) => {
+    if (perLangFontFileInputRef.current) {
+      perLangFontFileInputRef.current.value = "";
+      setPendingFontLang(langCode);
+      perLangFontFileInputRef.current.click();
+    }
+  };
+
   const persistBrandingField = async (
     patch: Record<string, unknown>,
     successMessage: string,
@@ -1852,7 +2041,14 @@ export default function AdminSettingsPage() {
 
       const updated = (await res.json()) as AdminSettingsResponse;
       setFaviconUrl(updated.branding?.faviconUrl ?? "");
+      setGoogleFont(updated.branding?.googleFont ?? "");
+      setGoogleFontByLang(
+        (updated.branding?.googleFontByLang as Record<string, string>) ?? {},
+      );
       setFontUrl(updated.branding?.fontUrl ?? "");
+      setFontUrlByLang(
+        (updated.branding?.fontUrlByLang as Record<string, string>) ?? {},
+      );
       setLogoUrl(updated.branding?.logoUrl ?? "");
       setLogoLightUrl(updated.branding?.logoLightUrl ?? "");
       setLogoDarkUrl(updated.branding?.logoDarkUrl ?? "");
@@ -2282,10 +2478,9 @@ export default function AdminSettingsPage() {
   const [infraRabbitmq, setInfraRabbitmq] = useState<boolean>(false);
   const [infraMonitoring, setInfraMonitoring] = useState<boolean>(true);
   const [infraErrorTracking, setInfraErrorTracking] = useState<boolean>(false);
-  const [socialStatuses, setSocialStatuses] = useState<Record<
-    SocialProvider,
-    SocialProviderStatus
-  > | null>(null);
+  const [socialStatuses, setSocialStatuses] = useState<SocialProviderStatuses>(
+    buildSocialStatuses(null),
+  );
 
   const handleUseCurrentOrigin = () => {
     if (typeof window === "undefined") {
@@ -2719,30 +2914,36 @@ export default function AdminSettingsPage() {
         setBrowserTitle(data.branding?.browserTitle ?? "");
         setSocialDescription(data.branding?.socialDescription ?? "");
         setFaviconUrl(data.branding?.faviconUrl ?? "");
+        setGoogleFont(data.branding?.googleFont ?? "");
+        setGoogleFontByLang(
+          (data.branding?.googleFontByLang as Record<string, string>) ?? {},
+        );
         setFontUrl(data.branding?.fontUrl ?? "");
+        setFontUrlByLang(
+          (data.branding?.fontUrlByLang as Record<string, string>) ?? {},
+        );
         setLogoUrl(data.branding?.logoUrl ?? "");
         setLogoLightUrl(data.branding?.logoLightUrl ?? "");
         setLogoDarkUrl(data.branding?.logoDarkUrl ?? "");
-        {
-          const modeRaw = data.branding?.theme?.mode ?? "system";
-          const mode =
-            modeRaw === "light" || modeRaw === "dark" || modeRaw === "system"
-              ? modeRaw
-              : "system";
-          setThemeMode(mode);
-          setThemeLight((prev) => {
-            const next = mergeThemePalette(prev, data.branding?.theme?.light);
-            setSavedThemeLight(next);
-            setThemeLightRedo({});
-            return next;
-          });
-          setThemeDark((prev) => {
-            const next = mergeThemePalette(prev, data.branding?.theme?.dark);
-            setSavedThemeDark(next);
-            setThemeDarkRedo({});
-            return next;
-          });
-        }
+        setCursorUrl(data.branding?.cursorUrl ?? "");
+        const modeRaw = data.branding?.theme?.mode ?? "system";
+        const mode =
+          modeRaw === "light" || modeRaw === "dark" || modeRaw === "system"
+            ? modeRaw
+            : "system";
+        setThemeMode(mode);
+        setThemeLight((prev) => {
+          const next = mergeThemePalette(prev, data.branding?.theme?.light);
+          setSavedThemeLight(next);
+          setThemeLightRedo({});
+          return next;
+        });
+        setThemeDark((prev) => {
+          const next = mergeThemePalette(prev, data.branding?.theme?.dark);
+          setSavedThemeDark(next);
+          setThemeDarkRedo({});
+          return next;
+        });
         setCursorUrl(data.branding?.cursorUrl ?? "");
         setCursorLightUrl(data.branding?.cursorLightUrl ?? "");
         setCursorDarkUrl(data.branding?.cursorDarkUrl ?? "");
@@ -2863,7 +3064,7 @@ export default function AdminSettingsPage() {
         setInfraErrorTracking(Boolean(f?.infraErrorTracking));
 
         setInitialFeatures(f ?? null);
-        setSocialStatuses(data.socialProviders ?? null);
+        setSocialStatuses(buildSocialStatuses(data.socialProviders ?? null));
         setSocialCredentialForms(
           buildSocialCredentialState(data.socialCredentials),
         );
@@ -3308,11 +3509,12 @@ export default function AdminSettingsPage() {
 
       const updated = (await res.json()) as AdminSettingsResponse;
       setInitialFeatures(updated.features);
-      setSocialStatuses(updated.socialProviders ?? null);
+      setSocialStatuses(buildSocialStatuses(updated.socialProviders ?? null));
       setSocialCredentialForms(
         buildSocialCredentialState(updated.socialCredentials),
       );
       setFaviconUrl(updated.branding?.faviconUrl ?? "");
+      setGoogleFont(updated.branding?.googleFont ?? "");
       setFontUrl(updated.branding?.fontUrl ?? "");
       setLogoUrl(updated.branding?.logoUrl ?? "");
       setLogoLightUrl(updated.branding?.logoLightUrl ?? "");
@@ -3691,12 +3893,6 @@ export default function AdminSettingsPage() {
       {!loading && error && (
         <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}
-        </div>
-      )}
-
-      {!loading && success && (
-        <div className="rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
-          {success}
         </div>
       )}
 
@@ -4248,6 +4444,211 @@ export default function AdminSettingsPage() {
               <p className="mt-1 text-xs text-gray-500">
                 Препоръка: WOFF2 (най-добре), иначе WOFF/TTF/OTF. До ~2MB.
               </p>
+
+              <div className="mt-4 grid gap-2">
+                <label className="text-sm font-medium text-gray-900">
+                  Google font (self-host, без външни заявки)
+                </label>
+                {(() => {
+                  const selected = GOOGLE_FONTS.find(
+                    (f) => f.value === googleFont,
+                  );
+
+                  return (
+                    <div className="flex flex-wrap items-center gap-2">
+                      <select
+                        value={googleFont}
+                        disabled={saving}
+                        onChange={(e) => {
+                          const next = e.target.value;
+                          setGoogleFont(next);
+                          void persistBrandingField(
+                            { googleFont: next || null },
+                            "Google font изборът е запазен.",
+                          );
+                        }}
+                        className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                      >
+                        <option value="">(custom upload или системен)</option>
+                        {GOOGLE_FONTS.map((f) => (
+                          <option
+                            key={f.value}
+                            value={f.value}
+                            style={f.sampleStyle}
+                            disabled={!f.supportsCyrillic}
+                          >
+                            {f.label}
+                            {f.supportsCyrillic ? " (BG)" : " (Latin-only)"}
+                          </option>
+                        ))}
+                      </select>
+
+                      {googleFont ? (
+                        <StatusBadge
+                          variant={
+                            selected?.supportsCyrillic ? "ok" : "fallback"
+                          }
+                          label={
+                            selected?.supportsCyrillic ? "BG OK" : "BG fallback"
+                          }
+                        />
+                      ) : (
+                        <StatusBadge variant="missing" label="System/custom" />
+                      )}
+                    </div>
+                  );
+                })()}
+                <p className="text-xs text-gray-500">
+                  Статичен списък с популярни Google Fonts, self-host през
+                  @fontsource.
+                </p>
+
+                <div className="rounded-md border border-gray-200 bg-white p-3 shadow-sm">
+                  <p className="text-xs font-semibold text-gray-700">
+                    Преглед:
+                  </p>
+                  <p
+                    className="mt-2 text-base text-gray-900"
+                    style={
+                      GOOGLE_FONTS.find((f) => f.value === googleFont)
+                        ?.sampleStyle
+                    }
+                  >
+                    Пример: Табло, Курсове, Потребители, Метрики, Активност.
+                    Бърза проверка на кирилица: „Жълтият щъркел“.
+                  </p>
+                </div>
+
+                <div className="mt-4 rounded-md border border-gray-200 bg-white p-4 shadow-sm">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <p className="text-sm font-semibold text-gray-900">
+                      Per-language overrides
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Празно = използвай глобалните настройки.
+                    </p>
+                  </div>
+
+                  <div className="mt-3 space-y-3">
+                    {supportedLangs.map((code) => {
+                      const langCode = (code ?? "").trim().toLowerCase();
+                      const langUsesCyrillic = CYRILLIC_LANGS.has(langCode);
+                      const perLangGoogle = googleFontByLang?.[langCode] ?? "";
+                      const perLangFontUrl = fontUrlByLang?.[langCode] ?? "";
+
+                      return (
+                        <div
+                          key={langCode}
+                          className="rounded-md border border-gray-200 bg-gray-50 p-3"
+                        >
+                          <div className="flex flex-wrap items-center gap-3">
+                            <span className="text-sm font-semibold text-gray-900">
+                              {langCode}
+                            </span>
+
+                            <div className="min-w-[240px] flex-1">
+                              <select
+                                value={perLangGoogle}
+                                disabled={saving}
+                                onChange={(e) => {
+                                  const next = e.target.value;
+                                  setGoogleFontByLang((prev) => {
+                                    const out = { ...prev };
+                                    if (next) {
+                                      out[langCode] = next;
+                                    } else {
+                                      delete out[langCode];
+                                    }
+                                    return out;
+                                  });
+                                  void persistBrandingField(
+                                    {
+                                      googleFontByLang: {
+                                        [langCode]: next || null,
+                                      },
+                                    },
+                                    `Google font (${langCode}) изборът е запазен.`,
+                                  );
+                                }}
+                                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                              >
+                                <option value="">(use global)</option>
+                                {GOOGLE_FONTS.map((f) => (
+                                  <option
+                                    key={`${langCode}-${f.value}`}
+                                    value={f.value}
+                                    style={f.sampleStyle}
+                                    disabled={
+                                      langUsesCyrillic && !f.supportsCyrillic
+                                    }
+                                  >
+                                    {f.label}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleBrandingFontUploadClickForLang(langCode)
+                              }
+                              disabled={saving}
+                              className="inline-flex items-center rounded-md border border-green-600 px-3 py-1.5 text-xs font-semibold text-green-700 hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                              Upload font
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setFontUrlByLang((prev) => {
+                                  const out = { ...prev };
+                                  delete out[langCode];
+                                  return out;
+                                });
+                                void persistBrandingField(
+                                  { fontUrlByLang: { [langCode]: null } },
+                                  `Font (${langCode}) е премахнат.`,
+                                );
+                              }}
+                              disabled={
+                                saving || perLangFontUrl.trim().length === 0
+                              }
+                              className="inline-flex items-center rounded-md border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                              Remove
+                            </button>
+
+                            {perLangFontUrl ? (
+                              <a
+                                href={perLangFontUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-xs font-semibold text-green-700 hover:underline"
+                              >
+                                Font file
+                              </a>
+                            ) : (
+                              <span className="text-xs text-gray-500">
+                                (global)
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <input
+                    ref={perLangFontFileInputRef}
+                    type="file"
+                    accept=".woff2,.woff,.ttf,.otf"
+                    className="hidden"
+                    onChange={handleBrandingFontFileSelectedForLang}
+                  />
+                </div>
+              </div>
             </div>
 
             <div className="mt-4">
@@ -6464,6 +6865,12 @@ export default function AdminSettingsPage() {
               </div>
             </div>
           </AccordionSection>
+
+          {success && (
+            <div className="rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+              {success}
+            </div>
+          )}
 
           <div className="flex items-center gap-3">
             <button

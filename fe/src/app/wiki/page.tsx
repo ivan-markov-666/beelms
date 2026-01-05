@@ -2,6 +2,8 @@ import Link from "next/link";
 import { WikiMain } from "./_components/wiki-main";
 import { WikiArticleMeta } from "./_components/wiki-article-meta";
 import { buildApiUrl } from "../api-url";
+import { getPublicSettings } from "../_data/public-settings";
+import { SUPPORTED_LANGS } from "../../i18n/config";
 
 export const dynamic = "force-dynamic";
 const PAGE_SIZE = 20;
@@ -58,9 +60,11 @@ async function fetchWikiArticles(
 function WikiFiltersForm({
   initialQ,
   initialLang,
+  supportedLangs,
 }: {
   initialQ: string;
   initialLang: string;
+  supportedLangs: readonly string[];
 }) {
   return (
     <form
@@ -108,9 +112,11 @@ function WikiFiltersForm({
           className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
         >
           <option value="">Всички езици</option>
-          <option value="bg">Български</option>
-          <option value="en">English</option>
-          <option value="de">Deutsch</option>
+          {supportedLangs.map((lang) => (
+            <option key={lang} value={lang}>
+              {lang.toUpperCase()}
+            </option>
+          ))}
         </select>
       </div>
       <div className="w-full md:w-auto">
@@ -136,6 +142,19 @@ export default async function WikiPage({
 }: {
   searchParams?: WikiPageSearchParams | Promise<WikiPageSearchParams>;
 } = {}) {
+  const publicSettings = await getPublicSettings();
+  const normalizedSupported = Array.from(
+    new Set(
+      (publicSettings?.languages?.supported ?? [])
+        .map((code) => (code ?? "").trim().toLowerCase())
+        .filter(Boolean),
+    ),
+  );
+  const supportedLangs =
+    normalizedSupported.length > 0
+      ? normalizedSupported
+      : Array.from(SUPPORTED_LANGS);
+
   const resolvedSearchParams = ((await searchParams) ??
     {}) as WikiPageSearchParams;
 
@@ -143,7 +162,12 @@ export default async function WikiPage({
   const rawLang = resolvedSearchParams.lang ?? "";
   const rawPage = resolvedSearchParams.page ?? "1";
   const trimmedQ = rawQ.trim();
-  const lang = rawLang || undefined;
+  const normalizedLang = (() => {
+    const trimmed = rawLang.trim().toLowerCase();
+    if (!trimmed) return "";
+    return supportedLangs.includes(trimmed) ? trimmed : "";
+  })();
+  const lang = normalizedLang || undefined;
   const parsedPage = Number.parseInt(rawPage, 10);
   const page = Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1;
   const pageSize = PAGE_SIZE;
@@ -205,7 +229,11 @@ export default async function WikiPage({
         </header>
 
         <section className="mb-8 rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-          <WikiFiltersForm initialQ={rawQ} initialLang={rawLang} />
+          <WikiFiltersForm
+            initialQ={rawQ}
+            initialLang={normalizedLang}
+            supportedLangs={supportedLangs}
+          />
         </section>
 
         <section className="mb-8">
@@ -305,7 +333,11 @@ export default async function WikiPage({
       </header>
 
       <section className="mb-8 rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-        <WikiFiltersForm initialQ={rawQ} initialLang={rawLang} />
+        <WikiFiltersForm
+          initialQ={rawQ}
+          initialLang={normalizedLang}
+          supportedLangs={supportedLangs}
+        />
       </section>
 
       <section className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">

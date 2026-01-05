@@ -23,6 +23,10 @@ function AdminNavigationTabs({
 }) {
   const lang = useCurrentLang();
 
+  const brandingFontStyle = {
+    fontFamily: "var(--font-sans), Arial, Helvetica, sans-serif",
+  } as const;
+
   const tabs: Array<{
     href: string;
     label: string;
@@ -90,7 +94,10 @@ function AdminNavigationTabs({
   }
 
   return (
-    <nav className="border-b border-gray-200">
+    <nav
+      className="border-b border-gray-200 nav-font"
+      style={brandingFontStyle}
+    >
       <ul className="flex flex-wrap gap-x-6 gap-y-3 text-sm">
         {tabs.map((tab) => (
           <li key={tab.href}>
@@ -226,7 +233,9 @@ export default function AdminLayout({
     return (
       <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-8">
         <main className="w-full max-w-md rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
-          <p className="text-sm text-zinc-600">Зареждане на Admin зоната...</p>
+          <p className="text-sm text-zinc-600 nav-font">
+            Зареждане на Admin зоната...
+          </p>
         </main>
       </div>
     );
@@ -239,7 +248,7 @@ export default function AdminLayout({
           <h1 className="mb-2 text-xl font-semibold text-zinc-900">
             Нямате достъп до Admin зоната
           </h1>
-          <p className="text-sm text-zinc-700">
+          <p className="text-sm text-zinc-700 nav-font">
             Този раздел е достъпен само за администратори.
           </p>
         </main>

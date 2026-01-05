@@ -1,17 +1,43 @@
 export const SUPPORTED_LANGS = ["bg", "en", "de"] as const;
 
-export type SupportedLang = (typeof SUPPORTED_LANGS)[number];
+export type SupportedLang = string;
 
-export const DEFAULT_LANG: SupportedLang = "bg";
+export const DEFAULT_LANG = "bg";
 
-export function normalizeLang(raw: string | null | undefined): SupportedLang {
-  if (!raw) {
-    return DEFAULT_LANG;
+const LANG_CODE_REGEX = /^[a-z]{2,5}$/i;
+
+export function normalizeLang(
+  raw: string | null | undefined,
+  supportedLangs?: readonly string[],
+  fallbackLang?: string,
+): SupportedLang {
+  const fallbackCandidates =
+    supportedLangs && supportedLangs.length > 0
+      ? supportedLangs
+      : (SUPPORTED_LANGS as readonly string[]);
+
+  const fallback =
+    (fallbackLang && fallbackLang.trim()) ||
+    (fallbackCandidates[0] ?? DEFAULT_LANG) ||
+    DEFAULT_LANG;
+
+  const normalizedRaw = (raw ?? "").trim();
+  if (!normalizedRaw) {
+    return fallback;
   }
 
-  if ((SUPPORTED_LANGS as readonly string[]).includes(raw)) {
-    return raw as SupportedLang;
+  const normalizedLower = normalizedRaw.toLowerCase();
+  if (!LANG_CODE_REGEX.test(normalizedLower)) {
+    return fallback;
   }
 
-  return DEFAULT_LANG;
+  if (!supportedLangs || supportedLangs.length === 0) {
+    return normalizedLower;
+  }
+
+  if (supportedLangs.some((lang) => lang.toLowerCase() === normalizedLower)) {
+    return normalizedLower;
+  }
+
+  return fallback;
 }

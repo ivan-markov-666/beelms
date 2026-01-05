@@ -3,6 +3,36 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { headers } from "next/headers";
 import { Suspense } from "react";
 import "./globals.css";
+import "@fontsource/inter/latin.css";
+import "@fontsource/inter/latin-ext.css";
+import "@fontsource/inter/cyrillic.css";
+import "@fontsource/inter/cyrillic-ext.css";
+import "@fontsource/roboto/latin.css";
+import "@fontsource/roboto/latin-ext.css";
+import "@fontsource/roboto/cyrillic.css";
+import "@fontsource/roboto/cyrillic-ext.css";
+import "@fontsource/open-sans/latin.css";
+import "@fontsource/open-sans/latin-ext.css";
+import "@fontsource/open-sans/cyrillic.css";
+import "@fontsource/open-sans/cyrillic-ext.css";
+import "@fontsource/lato/400.css";
+import "@fontsource/lato/700.css";
+import "@fontsource/montserrat/latin.css";
+import "@fontsource/montserrat/latin-ext.css";
+import "@fontsource/montserrat/cyrillic.css";
+import "@fontsource/montserrat/cyrillic-ext.css";
+import "@fontsource/poppins/400.css";
+import "@fontsource/poppins/700.css";
+import "@fontsource/nunito/400.css";
+import "@fontsource/nunito/700.css";
+import "@fontsource/merriweather/400.css";
+import "@fontsource/merriweather/700.css";
+import "@fontsource/playfair-display/400.css";
+import "@fontsource/playfair-display/700.css";
+import "@fontsource/noto-sans/400.css";
+import "@fontsource/noto-sans/700.css";
+import "@fontsource/noto-serif/400.css";
+import "@fontsource/noto-serif/700.css";
 import { HeaderNav } from "./_components/header-nav";
 import { SiteFooter } from "./_components/site-footer";
 import { AnalyticsConsentBanner } from "./_components/analytics-consent-banner";
@@ -20,17 +50,39 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const GOOGLE_FONT_MAP: Record<
+  string,
+  { cssName: string; fallback: "sans-serif" | "serif" }
+> = {
+  inter: { cssName: "Inter", fallback: "sans-serif" },
+  roboto: { cssName: "Roboto", fallback: "sans-serif" },
+  "open-sans": { cssName: "Open Sans", fallback: "sans-serif" },
+  lato: { cssName: "Lato", fallback: "sans-serif" },
+  montserrat: { cssName: "Montserrat", fallback: "sans-serif" },
+  poppins: { cssName: "Poppins", fallback: "sans-serif" },
+  nunito: { cssName: "Nunito", fallback: "sans-serif" },
+  merriweather: { cssName: "Merriweather", fallback: "serif" },
+  "playfair-display": { cssName: "Playfair Display", fallback: "serif" },
+  "noto-sans": { cssName: "Noto Sans", fallback: "sans-serif" },
+  "noto-serif": { cssName: "Noto Serif", fallback: "serif" },
+};
+
 async function fetchPublicSettingsForMetadata(): Promise<{
   branding?: {
     appName?: string;
     browserTitle?: string | null;
     cursorUrl?: string | null;
+    cursorLightUrl?: string | null;
+    cursorDarkUrl?: string | null;
     cursorHotspot?: {
       x?: number | null;
       y?: number | null;
     } | null;
     faviconUrl?: string | null;
+    googleFont?: string | null;
+    googleFontByLang?: Record<string, string> | null;
     fontUrl?: string | null;
+    fontUrlByLang?: Record<string, string> | null;
     theme?: {
       mode?: "light" | "dark" | "system" | null;
       light?: {
@@ -115,7 +167,10 @@ async function fetchPublicSettingsForMetadata(): Promise<{
         browserTitle?: string | null;
         cursorUrl?: string | null;
         faviconUrl?: string | null;
+        googleFont?: string | null;
+        googleFontByLang?: Record<string, string> | null;
         fontUrl?: string | null;
+        fontUrlByLang?: Record<string, string> | null;
         theme?: {
           mode?: "light" | "dark" | "system" | null;
           light?: {
@@ -506,7 +561,23 @@ export default async function RootLayout({
   const cursorDarkUrl = publicSettings.branding?.cursorDarkUrl ?? null;
   const cursorHotspotX = publicSettings.branding?.cursorHotspot?.x ?? null;
   const cursorHotspotY = publicSettings.branding?.cursorHotspot?.y ?? null;
-  const fontUrl = publicSettings.branding?.fontUrl ?? null;
+  const globalFontUrl = publicSettings.branding?.fontUrl ?? null;
+  const globalGoogleFontKey = publicSettings.branding?.googleFont ?? null;
+  const fontUrlByLang = publicSettings.branding?.fontUrlByLang ?? null;
+  const googleFontByLang = publicSettings.branding?.googleFontByLang ?? null;
+
+  const langFontUrl = fontUrlByLang?.[lang] ?? null;
+  const langGoogleFontKey = googleFontByLang?.[lang] ?? null;
+
+  const effectiveFontUrl = langFontUrl || globalFontUrl;
+  const effectiveGoogleFontKey = !effectiveFontUrl
+    ? langGoogleFontKey || globalGoogleFontKey
+    : null;
+
+  const googleFontEntry =
+    effectiveGoogleFontKey && GOOGLE_FONT_MAP[effectiveGoogleFontKey]
+      ? GOOGLE_FONT_MAP[effectiveGoogleFontKey]
+      : null;
 
   const resolvedLightCursor = cursorLightUrl ?? cursorUrl;
   const resolvedDarkCursor = cursorDarkUrl ?? cursorUrl;
@@ -521,8 +592,10 @@ export default async function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <style>{themeCss}</style>
-        {fontUrl ? (
-          <style>{`@font-face { font-family: "BrandingFont"; src: url("${fontUrl}"); font-display: swap; } :root { --font-sans: "BrandingFont"; --font-geist-sans: "BrandingFont"; } body { font-family: var(--font-sans), Arial, Helvetica, sans-serif !important; }`}</style>
+        {effectiveFontUrl ? (
+          <style>{`@font-face { font-family: "BrandingFont"; src: url("${effectiveFontUrl}"); font-display: swap; } :root { --font-sans: "BrandingFont"; --font-geist-sans: "BrandingFont"; } body { font-family: var(--font-sans), Arial, Helvetica, sans-serif !important; }`}</style>
+        ) : googleFontEntry ? (
+          <style>{`:root { --font-sans: "${googleFontEntry.cssName}"; --font-geist-sans: "${googleFontEntry.cssName}"; } body { font-family: var(--font-sans), ${googleFontEntry.fallback}, system-ui, -apple-system, "Segoe UI", sans-serif !important; }`}</style>
         ) : null}
         {hasCursor ? (
           <style>{`

@@ -12,7 +12,10 @@ export type PublicSettings = {
       y?: number | null;
     } | null;
     faviconUrl?: string | null;
+    googleFont?: string | null;
+    googleFontByLang?: Record<string, string | null> | null;
     fontUrl?: string | null;
+    fontUrlByLang?: Record<string, string | null> | null;
     theme?: {
       mode?: "light" | "dark" | "system" | null;
       light?: {

@@ -217,6 +217,13 @@ export function HeaderNav() {
       : logoLightUrl || logoUrl;
   const appName = publicSettings?.branding?.appName ?? "BeeLMS";
 
+  const brandingFontStyle = {
+    fontFamily: "var(--font-sans), Arial, Helvetica, sans-serif",
+  } as const;
+
+  const languageSupported = publicSettings?.languages?.supported ?? null;
+  const languageDefault = publicSettings?.languages?.default ?? null;
+
   return (
     <header className="bg-white border-b border-gray-200">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4">
@@ -240,7 +247,10 @@ export function HeaderNav() {
           </Link>
         </div>
 
-        <nav className="hidden items-center space-x-6 text-sm text-gray-700 md:flex">
+        <nav
+          className="hidden items-center space-x-6 text-sm text-gray-700 nav-font md:flex"
+          style={brandingFontStyle}
+        >
           {showWiki && (
             <Link href="/wiki" className="hover:text-green-600">
               {t(lang, "nav", "wiki")}
@@ -263,7 +273,10 @@ export function HeaderNav() {
           )}
         </nav>
 
-        <div className="flex items-center gap-4 text-sm text-gray-700">
+        <div
+          className="flex items-center gap-4 text-sm text-gray-700 nav-font"
+          style={brandingFontStyle}
+        >
           <select
             value={themeMode}
             onChange={(e) =>
@@ -306,7 +319,10 @@ export function HeaderNav() {
               </button>
             </>
           )}
-          <LanguageSwitcher />
+          <LanguageSwitcher
+            supportedLangs={languageSupported}
+            defaultLang={languageDefault}
+          />
         </div>
       </div>
     </header>
