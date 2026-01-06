@@ -3323,9 +3323,8 @@ export default function AdminSettingsPage() {
     useState<string>("");
 
   const [seoBaseUrl, setSeoBaseUrl] = useState<string>("");
-  const [seoTitleTemplate, setSeoTitleTemplate] = useState<string>(
-    "{page} | {site}",
-  );
+  const [seoTitleTemplate, setSeoTitleTemplate] =
+    useState<string>("{page} | {site}");
   const [seoDefaultTitle, setSeoDefaultTitle] = useState<string>("");
   const [seoDefaultDescription, setSeoDefaultDescription] =
     useState<string>("");
@@ -3340,8 +3339,7 @@ export default function AdminSettingsPage() {
   const [seoOpenGraphTitle, setSeoOpenGraphTitle] = useState<string>("");
   const [seoOpenGraphDescription, setSeoOpenGraphDescription] =
     useState<string>("");
-  const [seoOpenGraphImageUrl, setSeoOpenGraphImageUrl] =
-    useState<string>("");
+  const [seoOpenGraphImageUrl, setSeoOpenGraphImageUrl] = useState<string>("");
   const [seoTwitterCard, setSeoTwitterCard] = useState<string>(
     "summary_large_image",
   );
@@ -6495,7 +6493,9 @@ export default function AdminSettingsPage() {
             twitter: {
               card: seoTwitterCard,
               defaultTitle: normalizeNullableString(seoTwitterTitle),
-              defaultDescription: normalizeNullableString(seoTwitterDescription),
+              defaultDescription: normalizeNullableString(
+                seoTwitterDescription,
+              ),
               imageUrl: normalizeNullableString(seoTwitterImageUrl),
             },
           },
@@ -8760,7 +8760,9 @@ export default function AdminSettingsPage() {
                       </label>
                       <input
                         value={seoOpenGraphDescription}
-                        onChange={(e) => setSeoOpenGraphDescription(e.target.value)}
+                        onChange={(e) =>
+                          setSeoOpenGraphDescription(e.target.value)
+                        }
                         disabled={saving}
                         className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2"
                       />
@@ -8776,7 +8778,9 @@ export default function AdminSettingsPage() {
                       Upload image
                     </button>
                     <span className="text-xs text-gray-500">
-                      {seoOpenGraphImageUrl ? seoOpenGraphImageUrl : "(no image)"}
+                      {seoOpenGraphImageUrl
+                        ? seoOpenGraphImageUrl
+                        : "(no image)"}
                     </span>
                   </div>
                 </div>
@@ -8818,7 +8822,9 @@ export default function AdminSettingsPage() {
                       </label>
                       <input
                         value={seoTwitterDescription}
-                        onChange={(e) => setSeoTwitterDescription(e.target.value)}
+                        onChange={(e) =>
+                          setSeoTwitterDescription(e.target.value)
+                        }
                         disabled={saving}
                         className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2"
                       />
@@ -8844,7 +8850,9 @@ export default function AdminSettingsPage() {
                     ref={seoOpenGraphFileInputRef}
                     type="file"
                     accept="image/png,image/jpeg,image/webp"
-                    onChange={(e) => void handleSeoImageSelected("open-graph", e)}
+                    onChange={(e) =>
+                      void handleSeoImageSelected("open-graph", e)
+                    }
                   />
                   <input
                     ref={seoTwitterFileInputRef}
