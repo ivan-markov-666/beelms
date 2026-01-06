@@ -58,6 +58,7 @@ export class PublicSettingsController {
       branding,
       features: cfg.features,
       languages: cfg.languages,
+      seo: cfg.features?.seo !== false ? (cfg.seo ?? null) : null,
     };
   }
 }

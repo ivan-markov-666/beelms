@@ -4,6 +4,10 @@ export type PublicSettings = {
   branding: {
     appName: string;
     browserTitle?: string | null;
+    notFoundTitle?: string | null;
+    notFoundMarkdown?: string | null;
+    notFoundTitleByLang?: Record<string, string | null> | null;
+    notFoundMarkdownByLang?: Record<string, string | null> | null;
     cursorUrl?: string | null;
     cursorLightUrl?: string | null;
     cursorDarkUrl?: string | null;
@@ -16,6 +20,8 @@ export type PublicSettings = {
     googleFontByLang?: Record<string, string | null> | null;
     fontUrl?: string | null;
     fontUrlByLang?: Record<string, string | null> | null;
+    fontLicenseUrl?: string | null;
+    fontLicenseUrlByLang?: Record<string, string | null> | null;
     theme?: {
       mode?: "light" | "dark" | "system" | null;
       light?: {
@@ -75,6 +81,11 @@ export type PublicSettings = {
     coursesPublic: boolean;
     myCourses: boolean;
     profile: boolean;
+    accessibilityWidget: boolean;
+    seo: boolean;
+    themeLight: boolean;
+    themeDark: boolean;
+    themeModeSelector: boolean;
     auth: boolean;
     authLogin: boolean;
     authRegister: boolean;
@@ -98,6 +109,32 @@ export type PublicSettings = {
     supported: string[];
     default: string;
   };
+  seo?: {
+    baseUrl?: string | null;
+    titleTemplate?: string | null;
+    defaultTitle?: string | null;
+    defaultDescription?: string | null;
+    robots?: {
+      index?: boolean;
+    } | null;
+    sitemap?: {
+      enabled?: boolean;
+      includeWiki?: boolean;
+      includeCourses?: boolean;
+      includeLegal?: boolean;
+    } | null;
+    openGraph?: {
+      defaultTitle?: string | null;
+      defaultDescription?: string | null;
+      imageUrl?: string | null;
+    } | null;
+    twitter?: {
+      card?: "summary" | "summary_large_image" | null;
+      defaultTitle?: string | null;
+      defaultDescription?: string | null;
+      imageUrl?: string | null;
+    } | null;
+  } | null;
 };
 
 export async function getPublicSettings(

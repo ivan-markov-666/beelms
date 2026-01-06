@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   DEFAULT_LANG,
@@ -43,17 +43,21 @@ export function LanguageSwitcher({
     fallbackDefaultLang,
   );
 
-  useEffect(() => {
+  const persistLangCookie = useCallback((lang: SupportedLang) => {
     if (typeof document === "undefined") {
       return;
     }
 
     try {
-      document.cookie = `ui_lang=${currentLang}; Path=/; Max-Age=31536000; SameSite=Lax`;
+      document.cookie = `ui_lang=${lang}; Path=/; Max-Age=31536000; SameSite=Lax`;
     } catch {
       // ignore
     }
-  }, [currentLang]);
+  }, []);
+
+  useEffect(() => {
+    persistLangCookie(currentLang);
+  }, [currentLang, persistLangCookie]);
 
   const handleChange = (target: SupportedLang) => {
     if (!pathname) return;
@@ -76,6 +80,7 @@ export function LanguageSwitcher({
     const query = params.toString();
     const nextUrl = query ? `${pathname}?${query}` : pathname;
 
+    persistLangCookie(nextLang);
     router.push(nextUrl);
   };
 

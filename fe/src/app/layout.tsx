@@ -153,6 +153,12 @@ async function fetchPublicSettingsForMetadata(): Promise<{
       } | null;
     } | null;
   };
+  features?: {
+    accessibilityWidget?: boolean;
+    themeLight?: boolean;
+    themeDark?: boolean;
+    themeModeSelector?: boolean;
+  };
 }> {
   try {
     const res = await fetch(buildApiUrl("/public/settings"), {
@@ -240,6 +246,12 @@ async function fetchPublicSettingsForMetadata(): Promise<{
             streamContentType?: string | null;
           } | null;
         } | null;
+      };
+      features?: {
+        accessibilityWidget?: boolean;
+        themeLight?: boolean;
+        themeDark?: boolean;
+        themeModeSelector?: boolean;
       };
     };
   } catch {
@@ -398,22 +410,93 @@ export default async function RootLayout({
   const lang = normalizeLang(h.get("x-ui-lang"));
   const publicSettings = await fetchPublicSettingsForMetadata();
   const themeModeRaw = publicSettings.branding?.theme?.mode ?? "system";
-  const themeMode =
+  const themeAllowLight = publicSettings.features?.themeLight !== false;
+  const themeAllowDark = publicSettings.features?.themeDark !== false;
+  const allowSystem = themeAllowDark && themeAllowLight;
+  const themeModeSelectorEnabled =
+    publicSettings.features?.themeModeSelector !== false;
+
+  const themeModeNormalized =
     themeModeRaw === "light" ||
     themeModeRaw === "dark" ||
     themeModeRaw === "system"
       ? themeModeRaw
       : "system";
 
+  const defaultThemeMode = (() => {
+    if (themeModeNormalized === "system") {
+      return allowSystem ? "system" : themeAllowLight ? "light" : "dark";
+    }
+    if (themeModeNormalized === "light") {
+      return themeAllowLight ? "light" : "dark";
+    }
+    return themeAllowDark ? "dark" : "light";
+  })();
+
   const userThemeStorageKey = "beelms.themeMode";
   const themeInitScript = `(() => {
     try {
-      const v = localStorage.getItem(${JSON.stringify(userThemeStorageKey)});
-      if (v === "light" || v === "dark" || v === "system") {
-        document.documentElement.setAttribute("data-theme", v);
+      const allowLight = ${JSON.stringify(themeAllowLight)};
+      const allowDark = ${JSON.stringify(themeAllowDark)};
+      const allowSystem = allowLight && allowDark;
+      const fallback = ${JSON.stringify(defaultThemeMode)};
+      const selectorEnabled = ${JSON.stringify(themeModeSelectorEnabled)};
+
+      if (!selectorEnabled) {
+        document.documentElement.setAttribute("data-theme", fallback);
+        try {
+          localStorage.removeItem(${JSON.stringify(userThemeStorageKey)});
+        } catch {}
+        return;
+      }
+
+      const raw = localStorage.getItem(${JSON.stringify(userThemeStorageKey)});
+      let next = (raw === "light" || raw === "dark" || raw === "system") ? raw : fallback;
+
+      if (next === "system" && !allowSystem) {
+        next = allowLight ? "light" : "dark";
+      }
+      if (next === "light" && !allowLight) {
+        next = "dark";
+      }
+      if (next === "dark" && !allowDark) {
+        next = "light";
+      }
+
+      document.documentElement.setAttribute("data-theme", next);
+      if (raw !== next) {
+        try {
+          localStorage.setItem(${JSON.stringify(userThemeStorageKey)}, next);
+        } catch {}
       }
     } catch {}
   })();`;
+
+  const a11yInitScriptDisabled = `(() => {
+    try {
+      document.documentElement.setAttribute("data-a11y-scale", "100");
+      document.documentElement.setAttribute("data-a11y-contrast", "normal");
+    } catch {}
+  })();`;
+
+  const a11yScaleKey = "beelms.a11yScale";
+  const a11yContrastKey = "beelms.a11yContrast";
+  const a11yInitScript = `(() => {
+    try {
+      const rawScale = localStorage.getItem(${JSON.stringify(a11yScaleKey)});
+      const scaleNum = Number(rawScale);
+      const scale = (scaleNum === 110 || scaleNum === 120 || scaleNum === 130 || scaleNum === 140) ? String(scaleNum) : "100";
+      const contrast = localStorage.getItem(${JSON.stringify(a11yContrastKey)}) === "high" ? "high" : "normal";
+      document.documentElement.setAttribute("data-a11y-scale", scale);
+      document.documentElement.setAttribute("data-a11y-contrast", contrast);
+    } catch {
+      document.documentElement.setAttribute("data-a11y-scale", "100");
+      document.documentElement.setAttribute("data-a11y-contrast", "normal");
+    }
+  })();`;
+
+  const accessibilityWidgetEnabled =
+    publicSettings.features?.accessibilityWidget !== false;
 
   const lightPalette = publicSettings.branding?.theme?.light ?? null;
   const darkPalette = publicSettings.branding?.theme?.dark ?? null;
@@ -584,9 +667,16 @@ export default async function RootLayout({
   const hasCursor = Boolean(resolvedLightCursor || resolvedDarkCursor);
 
   return (
-    <html lang={lang} data-theme={themeMode} suppressHydrationWarning>
+    <html lang={lang} data-theme={defaultThemeMode} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: accessibilityWidgetEnabled
+              ? a11yInitScript
+              : a11yInitScriptDisabled,
+          }}
+        />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}

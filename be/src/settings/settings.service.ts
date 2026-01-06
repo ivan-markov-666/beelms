@@ -6,6 +6,7 @@ import {
   InstanceConfig,
   InstanceFeatures,
   InstanceLanguages,
+  InstanceSeo,
   InstanceSocialCredentials,
   SocialProviderCredentials,
   type SocialProviderName,
@@ -61,6 +62,9 @@ export class SettingsService {
       googleFontByLang: null,
       fontUrl: null,
       fontUrlByLang: null,
+      fontLicenseUrl: null,
+      fontLicenseUrlByLang: null,
+      customThemePresets: null,
       theme: {
         mode: 'system',
         light: {
@@ -105,6 +109,35 @@ export class SettingsService {
     };
   }
 
+  private buildDefaultSeo(): InstanceSeo {
+    return {
+      baseUrl: null,
+      titleTemplate: '{page} | {site}',
+      defaultTitle: null,
+      defaultDescription: null,
+      robots: {
+        index: true,
+      },
+      sitemap: {
+        enabled: true,
+        includeWiki: true,
+        includeCourses: true,
+        includeLegal: true,
+      },
+      openGraph: {
+        defaultTitle: null,
+        defaultDescription: null,
+        imageUrl: null,
+      },
+      twitter: {
+        card: 'summary_large_image',
+        defaultTitle: null,
+        defaultDescription: null,
+        imageUrl: null,
+      },
+    };
+  }
+
   private buildDefaultFeatures(): InstanceFeatures {
     return {
       wiki: true,
@@ -113,6 +146,11 @@ export class SettingsService {
       coursesPublic: true,
       myCourses: true,
       profile: true,
+      accessibilityWidget: true,
+      seo: true,
+      themeLight: true,
+      themeDark: true,
+      themeModeSelector: true,
       auth: true,
       authLogin: true,
       authRegister: true,
@@ -156,13 +194,35 @@ export class SettingsService {
     });
 
     if (existing) {
-      return existing;
+      let changed = false;
+
+      const mergedFeatures = {
+        ...this.buildDefaultFeatures(),
+        ...(existing.features ?? {}),
+      };
+      for (const [k, v] of Object.entries(mergedFeatures)) {
+        if ((existing.features as Record<string, unknown>)[k] !== v) {
+          changed = true;
+          break;
+        }
+      }
+      if (changed) {
+        existing.features = mergedFeatures;
+      }
+
+      if (!existing.seo) {
+        existing.seo = this.buildDefaultSeo();
+        changed = true;
+      }
+
+      return changed ? this.instanceConfigRepo.save(existing) : existing;
     }
 
     const created = this.instanceConfigRepo.create({
       branding: this.buildDefaultBranding(),
       features: this.buildDefaultFeatures(),
       languages: this.buildDefaultLanguages(),
+      seo: this.buildDefaultSeo(),
       socialCredentials: this.buildDefaultSocialCredentials(),
     });
 
@@ -176,12 +236,17 @@ export class SettingsService {
     const cfg = await this.getOrCreateInstanceConfig();
     const updatedBy = options?.updatedBy ?? null;
 
-    const features = dto.features
-      ? {
-          ...cfg.features,
-          ...dto.features,
-        }
-      : cfg.features;
+    const features = {
+      ...this.buildDefaultFeatures(),
+      ...(cfg.features ?? {}),
+      ...(dto.features ?? {}),
+    };
+
+    if (features.themeLight === false && features.themeDark === false) {
+      throw new BadRequestException(
+        'At least one of features.themeLight or features.themeDark must be enabled',
+      );
+    }
 
     if (features.courses === false) {
       features.coursesPublic = false;
@@ -232,12 +297,169 @@ export class SettingsService {
         })
       : cfg.branding;
 
+    const seo = dto.seo
+      ? this.normalizeSeo(
+          this.mergeSeo(
+            cfg.seo ?? this.buildDefaultSeo(),
+            dto.seo as unknown as Partial<InstanceSeo>,
+          ),
+        )
+      : (cfg.seo ?? this.buildDefaultSeo());
+
     cfg.branding = branding;
     cfg.features = features;
     cfg.languages = languages;
+    cfg.seo = seo;
     cfg.socialCredentials = socialCredentials;
 
     return this.instanceConfigRepo.save(cfg);
+  }
+
+  private mergeSeo(
+    current: InstanceSeo | null,
+    update: Partial<InstanceSeo>,
+  ): InstanceSeo {
+    const base: InstanceSeo = { ...(current ?? {}) };
+    const next: InstanceSeo = { ...base, ...(update ?? {}) };
+
+    if (Object.prototype.hasOwnProperty.call(update, 'robots')) {
+      if (update.robots === null) {
+        next.robots = null;
+      } else if (typeof update.robots !== 'undefined') {
+        next.robots = {
+          ...(base.robots ?? {}),
+          ...(update.robots ?? {}),
+        };
+      }
+    }
+
+    if (Object.prototype.hasOwnProperty.call(update, 'sitemap')) {
+      if (update.sitemap === null) {
+        next.sitemap = null;
+      } else if (typeof update.sitemap !== 'undefined') {
+        next.sitemap = {
+          ...(base.sitemap ?? {}),
+          ...(update.sitemap ?? {}),
+        };
+      }
+    }
+
+    if (Object.prototype.hasOwnProperty.call(update, 'openGraph')) {
+      if (update.openGraph === null) {
+        next.openGraph = null;
+      } else if (typeof update.openGraph !== 'undefined') {
+        next.openGraph = {
+          ...(base.openGraph ?? {}),
+          ...(update.openGraph ?? {}),
+        };
+      }
+    }
+
+    if (Object.prototype.hasOwnProperty.call(update, 'twitter')) {
+      if (update.twitter === null) {
+        next.twitter = null;
+      } else if (typeof update.twitter !== 'undefined') {
+        next.twitter = {
+          ...(base.twitter ?? {}),
+          ...(update.twitter ?? {}),
+        };
+      }
+    }
+
+    return next;
+  }
+
+  private normalizeSeo(seo: InstanceSeo): InstanceSeo {
+    const next: InstanceSeo = { ...seo };
+
+    const normalizeUrl = (value: string | null | undefined): string | null => {
+      const v = this.normalizeNullableString(value);
+      if (typeof v !== 'string') return null;
+      const trimmed = v.trim();
+      if (!trimmed) return null;
+      return trimmed.endsWith('/') ? trimmed.slice(0, -1) : trimmed;
+    };
+
+    const normalizeTemplate = (
+      value: string | null | undefined,
+    ): string | null => {
+      const v = this.normalizeNullableString(value);
+      if (typeof v !== 'string') return null;
+      const trimmed = v.trim();
+      if (!trimmed) return null;
+      // Keep it safe: only allow placeholders {site} and {page}
+      const allowedChars = /^[\w\s\-|_{}.:]+$/;
+      if (!allowedChars.test(trimmed)) return '{page} | {site}';
+      if (!trimmed.includes('{site}') && !trimmed.includes('{page}')) {
+        return '{page} | {site}';
+      }
+      return trimmed;
+    };
+
+    next.baseUrl = normalizeUrl(next.baseUrl);
+    next.titleTemplate =
+      normalizeTemplate(next.titleTemplate) ?? '{page} | {site}';
+    next.defaultTitle = this.normalizeNullableString(next.defaultTitle) ?? null;
+    next.defaultDescription =
+      this.normalizeNullableString(next.defaultDescription) ?? null;
+
+    if (next.robots) {
+      next.robots = {
+        index:
+          typeof next.robots.index === 'boolean' ? next.robots.index : true,
+      };
+    }
+
+    if (next.sitemap) {
+      next.sitemap = {
+        enabled:
+          typeof next.sitemap.enabled === 'boolean'
+            ? next.sitemap.enabled
+            : true,
+        includeWiki:
+          typeof next.sitemap.includeWiki === 'boolean'
+            ? next.sitemap.includeWiki
+            : true,
+        includeCourses:
+          typeof next.sitemap.includeCourses === 'boolean'
+            ? next.sitemap.includeCourses
+            : true,
+        includeLegal:
+          typeof next.sitemap.includeLegal === 'boolean'
+            ? next.sitemap.includeLegal
+            : true,
+      };
+    }
+
+    if (next.openGraph) {
+      next.openGraph = {
+        defaultTitle:
+          this.normalizeNullableString(next.openGraph.defaultTitle) ?? null,
+        defaultDescription:
+          this.normalizeNullableString(next.openGraph.defaultDescription) ??
+          null,
+        imageUrl: normalizeUrl(next.openGraph.imageUrl),
+      };
+    }
+
+    if (next.twitter) {
+      const rawCard = next.twitter.card ?? null;
+      const card =
+        rawCard === 'summary' || rawCard === 'summary_large_image'
+          ? rawCard
+          : 'summary_large_image';
+
+      next.twitter = {
+        card,
+        defaultTitle:
+          this.normalizeNullableString(next.twitter.defaultTitle) ?? null,
+        defaultDescription:
+          this.normalizeNullableString(next.twitter.defaultDescription) ?? null,
+        imageUrl: normalizeUrl(next.twitter.imageUrl),
+      };
+    }
+
+    return next;
   }
 
   private mergeBranding(
@@ -325,6 +547,21 @@ export class SettingsService {
         next.fontUrlByLang = {
           ...(current.fontUrlByLang ?? {}),
           ...(update.fontUrlByLang ?? {}),
+        };
+      }
+    }
+
+    if (Object.prototype.hasOwnProperty.call(update, 'fontLicenseUrlByLang')) {
+      if (update.fontLicenseUrlByLang === null) {
+        next.fontLicenseUrlByLang = null;
+      } else if (
+        typeof update.fontLicenseUrlByLang !== 'undefined' &&
+        update.fontLicenseUrlByLang &&
+        typeof update.fontLicenseUrlByLang === 'object'
+      ) {
+        next.fontLicenseUrlByLang = {
+          ...(current.fontLicenseUrlByLang ?? {}),
+          ...(update.fontLicenseUrlByLang ?? {}),
         };
       }
     }
@@ -456,6 +693,14 @@ export class SettingsService {
       next.browserTitle =
         this.normalizeNullableString(next.browserTitle) ?? null;
     }
+    if (typeof next.notFoundTitle !== 'undefined') {
+      next.notFoundTitle =
+        this.normalizeNullableString(next.notFoundTitle) ?? null;
+    }
+    if (typeof next.notFoundMarkdown !== 'undefined') {
+      next.notFoundMarkdown =
+        this.normalizeNullableString(next.notFoundMarkdown) ?? null;
+    }
     if (typeof next.cursorUrl !== 'undefined') {
       next.cursorUrl = this.normalizeNullableString(next.cursorUrl) ?? null;
     }
@@ -506,11 +751,132 @@ export class SettingsService {
     if (typeof next.googleFontByLang !== 'undefined') {
       next.googleFontByLang = normalizeLangStringMap(next.googleFontByLang);
     }
+    if (typeof next.notFoundTitleByLang !== 'undefined') {
+      next.notFoundTitleByLang = normalizeLangStringMap(
+        next.notFoundTitleByLang,
+      );
+    }
+    if (typeof next.notFoundMarkdownByLang !== 'undefined') {
+      next.notFoundMarkdownByLang = normalizeLangStringMap(
+        next.notFoundMarkdownByLang,
+      );
+    }
     if (typeof next.fontUrl !== 'undefined') {
       next.fontUrl = this.normalizeNullableString(next.fontUrl) ?? null;
     }
     if (typeof next.fontUrlByLang !== 'undefined') {
       next.fontUrlByLang = normalizeLangStringMap(next.fontUrlByLang);
+    }
+    if (typeof next.fontLicenseUrl !== 'undefined') {
+      next.fontLicenseUrl =
+        this.normalizeNullableString(next.fontLicenseUrl) ?? null;
+    }
+    if (typeof next.fontLicenseUrlByLang !== 'undefined') {
+      next.fontLicenseUrlByLang = normalizeLangStringMap(
+        next.fontLicenseUrlByLang,
+      );
+    }
+    if (typeof next.customThemePresets !== 'undefined') {
+      if (next.customThemePresets === null) {
+        next.customThemePresets = null;
+      } else if (Array.isArray(next.customThemePresets)) {
+        type CustomThemePreset = NonNullable<
+          NonNullable<InstanceBranding['customThemePresets']>[number]
+        >;
+
+        const asRecord = (value: unknown): Record<string, unknown> | null => {
+          if (!value || typeof value !== 'object') {
+            return null;
+          }
+          return value as Record<string, unknown>;
+        };
+
+        const asString = (value: unknown): string | null => {
+          return typeof value === 'string' ? value : null;
+        };
+
+        const normalizeColor = (value: string | null | undefined) => {
+          const trimmed = (value ?? '').trim();
+          return trimmed.length > 0 ? trimmed : null;
+        };
+
+        const normalizePresetPalette = (
+          palette: Record<string, unknown> | null,
+        ) => {
+          const obj = palette ?? {};
+          const out = {
+            background: normalizeColor(asString(obj.background) ?? undefined),
+            foreground: normalizeColor(asString(obj.foreground) ?? undefined),
+            primary: normalizeColor(asString(obj.primary) ?? undefined),
+            secondary: normalizeColor(asString(obj.secondary) ?? undefined),
+            error: normalizeColor(asString(obj.error) ?? undefined),
+            card: normalizeColor(asString(obj.card) ?? undefined),
+            border: normalizeColor(asString(obj.border) ?? undefined),
+            scrollThumb: normalizeColor(asString(obj.scrollThumb) ?? undefined),
+            scrollTrack: normalizeColor(asString(obj.scrollTrack) ?? undefined),
+            fieldOkBg: normalizeColor(asString(obj.fieldOkBg) ?? undefined),
+            fieldOkBorder: normalizeColor(
+              asString(obj.fieldOkBorder) ?? undefined,
+            ),
+            fieldErrorBg: normalizeColor(
+              asString(obj.fieldErrorBg) ?? undefined,
+            ),
+            fieldErrorBorder: normalizeColor(
+              asString(obj.fieldErrorBorder) ?? undefined,
+            ),
+          };
+
+          const hasAny = Object.values(out).some((v) => typeof v === 'string');
+          return hasAny ? out : null;
+        };
+
+        const normalized = next.customThemePresets
+          .map((raw) => {
+            const obj = asRecord(raw);
+            if (!obj) return null;
+
+            const id = this.normalizeNullableString(asString(obj.id)) ?? null;
+            const name =
+              this.normalizeNullableString(asString(obj.name)) ?? null;
+            const description =
+              this.normalizeNullableString(asString(obj.description)) ?? null;
+
+            if (!id || !name) return null;
+
+            const light = normalizePresetPalette(asRecord(obj.light));
+            const dark = normalizePresetPalette(asRecord(obj.dark));
+            if (!light || !dark) return null;
+
+            const createdAt =
+              this.normalizeNullableString(asString(obj.createdAt)) ?? null;
+            const updatedAt =
+              this.normalizeNullableString(asString(obj.updatedAt)) ?? null;
+            const createdBy =
+              this.normalizeNullableString(asString(obj.createdBy)) ?? null;
+            const updatedBy =
+              this.normalizeNullableString(asString(obj.updatedBy)) ?? null;
+
+            const preset: CustomThemePreset = {
+              id,
+              name,
+              ...(description ? { description } : {}),
+              light,
+              dark,
+              ...(createdAt ? { createdAt } : {}),
+              ...(updatedAt ? { updatedAt } : {}),
+              ...(createdBy ? { createdBy } : {}),
+              ...(updatedBy ? { updatedBy } : {}),
+            };
+
+            return preset;
+          })
+          .filter((preset): preset is CustomThemePreset => Boolean(preset))
+          .slice(0, 50);
+
+        next.customThemePresets = normalized.length > 0 ? normalized : null;
+      } else {
+        next.customThemePresets = null;
+      }
     }
     if (typeof next.theme !== 'undefined') {
       if (next.theme === null) {

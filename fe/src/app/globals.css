@@ -29,6 +29,53 @@ body {
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
 
+html[data-a11y-scale="110"] {
+  font-size: 110%;
+}
+
+html[data-a11y-scale="120"] {
+  font-size: 120%;
+}
+
+html[data-a11y-scale="130"] {
+  font-size: 130%;
+}
+
+html[data-a11y-scale="140"] {
+  font-size: 140%;
+}
+
+html[data-a11y-contrast="high"] {
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: auto;
+}
+
+html[data-a11y-contrast="high"] :focus-visible {
+  outline: 3px solid var(--primary) !important;
+  outline-offset: 2px;
+}
+
+html[data-a11y-contrast="high"] input::placeholder,
+html[data-a11y-contrast="high"] textarea::placeholder {
+  opacity: 0.85;
+}
+
+html[data-a11y-contrast="high"] a {
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+html[data-a11y-contrast="high"] .border-gray-200,
+html[data-a11y-contrast="high"] .border-gray-300,
+html[data-a11y-contrast="high"] .border-zinc-200,
+html[data-a11y-contrast="high"] .border-zinc-300 {
+  border-color: color-mix(
+    in srgb,
+    var(--foreground) 55%,
+    var(--border)
+  ) !important;
+}
+
 .nav-font {
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
@@ -57,108 +104,208 @@ body {
   background: var(--primary);
 }
 
-html[data-theme="dark"] .bg-white {
+html[data-theme] .bg-white {
   background-color: var(--card) !important;
 }
 
-html[data-theme="dark"] .bg-gray-50 {
+html[data-theme] .bg-gray-50,
+html[data-theme] .bg-zinc-50,
+html[data-theme] .bg-slate-50,
+html[data-theme] .bg-neutral-50,
+html[data-theme] .bg-stone-50 {
   background-color: var(--background) !important;
 }
 
-html[data-theme="dark"] .text-gray-900,
-html[data-theme="dark"] .text-zinc-900 {
+html[data-theme] .text-gray-900,
+html[data-theme] .text-zinc-900,
+html[data-theme] .text-gray-800,
+html[data-theme] .text-zinc-800,
+html[data-theme] .text-gray-700,
+html[data-theme] .text-gray-600,
+html[data-theme] .text-gray-500,
+html[data-theme] .text-zinc-700,
+html[data-theme] .text-zinc-600,
+html[data-theme] .text-zinc-500 {
   color: var(--foreground) !important;
 }
 
-html[data-theme="dark"] .text-gray-700,
-html[data-theme="dark"] .text-gray-600,
-html[data-theme="dark"] .text-gray-500 {
-  color: var(--foreground) !important;
-}
-
-html[data-theme="dark"] .border-gray-200,
-html[data-theme="dark"] .border-gray-300 {
+html[data-theme] .border-gray-200,
+html[data-theme] .border-gray-300,
+html[data-theme] .border-zinc-200,
+html[data-theme] .border-zinc-300 {
   border-color: var(--border) !important;
 }
 
-html[data-theme="dark"] .bg-green-50 {
+html[data-theme] .bg-green-50,
+html[data-theme] .bg-emerald-50 {
   background-color: var(--field-ok-bg) !important;
 }
 
-html[data-theme="dark"] .border-green-100,
-html[data-theme="dark"] .border-green-200 {
+html[data-theme] .border-green-100,
+html[data-theme] .border-green-200,
+html[data-theme] .border-emerald-100,
+html[data-theme] .border-emerald-200 {
   border-color: var(--field-ok-border) !important;
 }
 
-html[data-theme="dark"] .bg-red-50 {
+html[data-theme] .bg-red-50,
+html[data-theme] .bg-rose-50 {
   background-color: var(--field-error-bg) !important;
 }
 
-html[data-theme="dark"] .border-red-200,
-html[data-theme="dark"] .border-red-300 {
+html[data-theme] .border-red-200,
+html[data-theme] .border-red-300,
+html[data-theme] .border-rose-200,
+html[data-theme] .border-rose-300 {
   border-color: var(--field-error-border) !important;
 }
 
-html[data-theme="dark"] .text-green-600,
-html[data-theme="dark"] .text-green-700 {
+html[data-theme] .text-green-600,
+html[data-theme] .text-green-700,
+html[data-theme] .text-emerald-600 {
   color: var(--primary) !important;
 }
 
-html[data-theme="dark"] .border-green-600 {
+html[data-theme] .hover\:text-green-600:hover,
+html[data-theme] .hover\:text-green-700:hover,
+html[data-theme] .hover\:text-emerald-600:hover {
+  color: var(--primary) !important;
+}
+
+html[data-theme] .border-green-600,
+html[data-theme] .border-emerald-600 {
   border-color: var(--primary) !important;
 }
 
-@media (prefers-color-scheme: dark) {
-  html[data-theme="system"] .bg-white {
-    background-color: var(--card) !important;
-  }
+html[data-theme] input,
+html[data-theme] textarea,
+html[data-theme] select {
+  color: var(--foreground) !important;
+  background-color: var(--card) !important;
+  border-color: var(--border) !important;
+}
 
-  html[data-theme="system"] .bg-gray-50 {
-    background-color: var(--background) !important;
-  }
+html[data-theme] input.bg-white,
+html[data-theme] textarea.bg-white,
+html[data-theme] select.bg-white {
+  background-color: var(--card) !important;
+}
 
-  html[data-theme="system"] .text-gray-900,
-  html[data-theme="system"] .text-zinc-900 {
-    color: var(--foreground) !important;
-  }
+html[data-theme] input.text-gray-900,
+html[data-theme] textarea.text-gray-900,
+html[data-theme] select.text-gray-900 {
+  color: var(--foreground) !important;
+}
 
-  html[data-theme="system"] .text-gray-700,
-  html[data-theme="system"] .text-gray-600,
-  html[data-theme="system"] .text-gray-500 {
-    color: var(--foreground) !important;
-  }
+html[data-theme] input.border-gray-300,
+html[data-theme] textarea.border-gray-300,
+html[data-theme] select.border-gray-300 {
+  border-color: var(--border) !important;
+}
 
-  html[data-theme="system"] .border-gray-200,
-  html[data-theme="system"] .border-gray-300 {
-    border-color: var(--border) !important;
-  }
+html[data-theme] input::placeholder,
+html[data-theme] textarea::placeholder {
+  color: var(--foreground);
+  opacity: 0.6;
+}
 
-  html[data-theme="system"] .bg-green-50 {
-    background-color: var(--field-ok-bg) !important;
-  }
+html[data-theme] .placeholder\:text-gray-400::placeholder,
+html[data-theme] .placeholder\:text-gray-500::placeholder,
+html[data-theme] .placeholder\:text-zinc-400::placeholder,
+html[data-theme] .placeholder\:text-zinc-500::placeholder {
+  color: var(--foreground) !important;
+  opacity: 0.6;
+}
 
-  html[data-theme="system"] .border-green-100,
-  html[data-theme="system"] .border-green-200 {
-    border-color: var(--field-ok-border) !important;
-  }
+html[data-theme] select option {
+  background-color: var(--card);
+  color: var(--foreground);
+}
 
-  html[data-theme="system"] .bg-red-50 {
-    background-color: var(--field-error-bg) !important;
-  }
+html[data-theme] .ring-green-500,
+html[data-theme] .ring-green-600,
+html[data-theme] .ring-emerald-500,
+html[data-theme] .ring-emerald-600,
+html[data-theme] .focus\:ring-green-500:focus,
+html[data-theme] .focus\:ring-green-600:focus,
+html[data-theme] .focus\:ring-emerald-500:focus,
+html[data-theme] .focus\:ring-emerald-600:focus {
+  --tw-ring-color: var(--primary) !important;
+}
 
-  html[data-theme="system"] .border-red-200,
-  html[data-theme="system"] .border-red-300 {
-    border-color: var(--field-error-border) !important;
-  }
+html[data-theme] .bg-green-600,
+html[data-theme] .bg-green-700,
+html[data-theme] .bg-emerald-600,
+html[data-theme] .bg-emerald-700 {
+  background-color: var(--primary) !important;
+}
 
-  html[data-theme="system"] .text-green-600,
-  html[data-theme="system"] .text-green-700 {
-    color: var(--primary) !important;
-  }
+html[data-theme] .hover\:bg-green-50:hover,
+html[data-theme] .hover\:bg-emerald-50:hover {
+  background-color: var(--field-ok-bg) !important;
+}
 
-  html[data-theme="system"] .border-green-600 {
-    border-color: var(--primary) !important;
-  }
+html[data-theme] .hover\:bg-green-700:hover,
+html[data-theme] .hover\:bg-emerald-700:hover {
+  background-color: color-mix(in srgb, var(--primary) 85%, black) !important;
+}
+
+html[data-theme] .focus\:border-green-500:focus,
+html[data-theme] .focus\:border-emerald-500:focus {
+  border-color: var(--primary) !important;
+}
+
+html[data-theme] .focus\:ring-green-500:focus,
+html[data-theme] .focus\:ring-emerald-500:focus {
+  --tw-ring-color: var(--primary) !important;
+}
+
+html[data-theme] .text-red-600,
+html[data-theme] .text-red-700,
+html[data-theme] .text-rose-600,
+html[data-theme] .text-rose-700 {
+  color: var(--error) !important;
+}
+
+html[data-theme] .hover\:text-red-600:hover,
+html[data-theme] .hover\:text-red-700:hover,
+html[data-theme] .hover\:text-rose-600:hover,
+html[data-theme] .hover\:text-rose-700:hover {
+  color: var(--error) !important;
+}
+
+html[data-theme] .border-red-600,
+html[data-theme] .border-red-700,
+html[data-theme] .border-rose-600,
+html[data-theme] .border-rose-700 {
+  border-color: var(--error) !important;
+}
+
+html[data-theme] .bg-red-600,
+html[data-theme] .bg-red-700,
+html[data-theme] .bg-rose-600,
+html[data-theme] .bg-rose-700 {
+  background-color: var(--error) !important;
+}
+
+html[data-theme] .hover\:bg-red-50:hover,
+html[data-theme] .hover\:bg-rose-50:hover {
+  background-color: var(--field-error-bg) !important;
+}
+
+html[data-theme] .hover\:bg-red-700:hover,
+html[data-theme] .hover\:bg-rose-700:hover {
+  background-color: color-mix(in srgb, var(--error) 85%, black) !important;
+}
+
+html[data-theme] .focus\:border-red-500:focus,
+html[data-theme] .focus\:border-rose-500:focus {
+  border-color: var(--error) !important;
+}
+
+html[data-theme] .focus\:ring-red-500:focus,
+html[data-theme] .focus\:ring-rose-500:focus {
+  --tw-ring-color: var(--error) !important;
 }
 
 .wiki-markdown {

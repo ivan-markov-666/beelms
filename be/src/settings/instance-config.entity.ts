@@ -9,6 +9,10 @@ import {
 export type InstanceBranding = {
   appName: string;
   browserTitle?: string | null;
+  notFoundTitle?: string | null;
+  notFoundMarkdown?: string | null;
+  notFoundTitleByLang?: Record<string, string | null> | null;
+  notFoundMarkdownByLang?: Record<string, string | null> | null;
   cursorUrl?: string | null;
   cursorLightUrl?: string | null;
   cursorDarkUrl?: string | null;
@@ -21,6 +25,47 @@ export type InstanceBranding = {
   googleFontByLang?: Record<string, string | null> | null;
   fontUrl?: string | null;
   fontUrlByLang?: Record<string, string | null> | null;
+  fontLicenseUrl?: string | null;
+  fontLicenseUrlByLang?: Record<string, string | null> | null;
+  customThemePresets?: Array<{
+    id: string;
+    name: string;
+    description?: string | null;
+    light: {
+      background?: string | null;
+      foreground?: string | null;
+      primary?: string | null;
+      secondary?: string | null;
+      error?: string | null;
+      card?: string | null;
+      border?: string | null;
+      scrollThumb?: string | null;
+      scrollTrack?: string | null;
+      fieldOkBg?: string | null;
+      fieldOkBorder?: string | null;
+      fieldErrorBg?: string | null;
+      fieldErrorBorder?: string | null;
+    };
+    dark: {
+      background?: string | null;
+      foreground?: string | null;
+      primary?: string | null;
+      secondary?: string | null;
+      error?: string | null;
+      card?: string | null;
+      border?: string | null;
+      scrollThumb?: string | null;
+      scrollTrack?: string | null;
+      fieldOkBg?: string | null;
+      fieldOkBorder?: string | null;
+      fieldErrorBg?: string | null;
+      fieldErrorBorder?: string | null;
+    };
+    createdAt?: string | null;
+    updatedAt?: string | null;
+    createdBy?: string | null;
+    updatedBy?: string | null;
+  }> | null;
   theme?: {
     mode?: 'light' | 'dark' | 'system' | null;
     light?: {
@@ -110,6 +155,33 @@ export type InstanceSocialCredentials = Partial<
   Record<SocialProviderName, SocialProviderCredentials>
 >;
 
+export type InstanceSeo = {
+  baseUrl?: string | null;
+  titleTemplate?: string | null;
+  defaultTitle?: string | null;
+  defaultDescription?: string | null;
+  robots?: {
+    index?: boolean;
+  } | null;
+  sitemap?: {
+    enabled?: boolean;
+    includeWiki?: boolean;
+    includeCourses?: boolean;
+    includeLegal?: boolean;
+  } | null;
+  openGraph?: {
+    defaultTitle?: string | null;
+    defaultDescription?: string | null;
+    imageUrl?: string | null;
+  } | null;
+  twitter?: {
+    card?: 'summary' | 'summary_large_image' | null;
+    defaultTitle?: string | null;
+    defaultDescription?: string | null;
+    imageUrl?: string | null;
+  } | null;
+};
+
 export type InstanceFeatures = {
   wiki: boolean;
   wikiPublic: boolean;
@@ -117,6 +189,11 @@ export type InstanceFeatures = {
   coursesPublic: boolean;
   myCourses: boolean;
   profile: boolean;
+  accessibilityWidget: boolean;
+  seo: boolean;
+  themeLight: boolean;
+  themeDark: boolean;
+  themeModeSelector: boolean;
   auth: boolean;
   authLogin: boolean;
   authRegister: boolean;
@@ -155,6 +232,9 @@ export class InstanceConfig {
 
   @Column({ type: 'jsonb' })
   languages: InstanceLanguages;
+
+  @Column({ type: 'jsonb', nullable: true })
+  seo: InstanceSeo | null;
 
   @Column({ type: 'jsonb', name: 'social_credentials', nullable: true })
   socialCredentials: InstanceSocialCredentials | null;

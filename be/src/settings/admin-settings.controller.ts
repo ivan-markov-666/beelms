@@ -25,6 +25,7 @@ import type {
   InstanceBranding,
   InstanceFeatures,
   InstanceLanguages,
+  InstanceSeo,
   SocialProviderName,
 } from './instance-config.entity';
 import {
@@ -54,6 +55,7 @@ type AdminSettingsResponse = {
   branding: InstanceBranding;
   features: InstanceFeatures;
   languages: InstanceLanguages;
+  seo: InstanceSeo | null;
   socialProviders: Record<SocialProviderName, SocialProviderStatus>;
   socialCredentials: Partial<
     Record<
@@ -100,6 +102,7 @@ export class AdminSettingsController {
       branding: cfg.branding,
       features: cfg.features,
       languages: cfg.languages,
+      seo: cfg.seo ?? null,
       socialProviders,
       socialCredentials,
     };
@@ -124,9 +127,39 @@ export class AdminSettingsController {
       branding: updated.branding,
       features: updated.features,
       languages: updated.languages,
+      seo: updated.seo ?? null,
       socialProviders,
       socialCredentials,
     };
+  }
+
+  @Post('seo/image')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadSeoImage(
+    @UploadedFile() file: BrandingUploadedFile | undefined,
+    @Body('purpose') purpose?: string,
+    @Body('previousUrl') previousUrl?: string,
+  ): Promise<{ url: string }> {
+    const allowedMimeTypes = ['image/png', 'image/jpeg', 'image/webp'];
+    if (file?.mimetype && !allowedMimeTypes.includes(file.mimetype)) {
+      throw new BadRequestException(
+        'Unsupported image type. Use PNG, JPG/JPEG or WEBP.',
+      );
+    }
+
+    const normalizedPurposeRaw = (purpose ?? '').trim().toLowerCase();
+    const normalizedPurpose =
+      normalizedPurposeRaw === 'twitter' ? 'twitter' : 'open-graph';
+
+    const url = await this.handleBrandingImageUpload(file, {
+      prefix:
+        normalizedPurpose === 'twitter' ? 'seo-twitter' : 'seo-open-graph',
+      maxBytes: 1024 * 1024,
+    });
+
+    this.deletePreviousBrandingFile(previousUrl);
+
+    return { url };
   }
 
   @Post('social/:provider/test')
@@ -221,6 +254,62 @@ export class AdminSettingsController {
         : defaultMediaRoot;
 
     const prefix = options?.prefix ?? 'font';
+    const filename = `${prefix}-${Date.now()}${ext}`;
+    const dir = path.join(mediaRoot, 'branding');
+    await fs.promises.mkdir(dir, { recursive: true });
+    await fs.promises.writeFile(path.join(dir, filename), file.buffer);
+
+    return `${BRANDING_MEDIA_PREFIX}${filename}`;
+  }
+
+  private async handleBrandingLicenseUpload(
+    file: BrandingUploadedFile | undefined,
+    options?: { prefix?: string; maxBytes?: number },
+  ): Promise<string> {
+    if (!file) {
+      throw new BadRequestException('File is required');
+    }
+
+    if (!file.buffer) {
+      throw new BadRequestException('File buffer is missing');
+    }
+
+    const ext = path.extname(file.originalname || '').toLowerCase();
+    const allowedExts = new Set([
+      '.pdf',
+      '.txt',
+      '.md',
+      '.rtf',
+      '.doc',
+      '.docx',
+      '.odt',
+      '.png',
+      '.jpg',
+      '.jpeg',
+      '.webp',
+      '.zip',
+    ]);
+    if (!allowedExts.has(ext)) {
+      throw new BadRequestException(
+        'Unsupported license type. Use PDF/TXT/DOC/DOCX/ODT/PNG/JPG/WEBP/ZIP.',
+      );
+    }
+
+    const maxBytes = options?.maxBytes ?? 5 * 1024 * 1024;
+    const size =
+      typeof file.size === 'number' ? file.size : file.buffer?.length;
+    if (typeof size === 'number' && size > maxBytes) {
+      throw new BadRequestException('File is too large');
+    }
+
+    const defaultMediaRoot = path.join(process.cwd(), 'media');
+    const mediaRootEnv = process.env.MEDIA_ROOT;
+    const mediaRoot =
+      mediaRootEnv && mediaRootEnv.trim().length > 0
+        ? mediaRootEnv
+        : defaultMediaRoot;
+
+    const prefix = options?.prefix ?? 'font-license';
     const filename = `${prefix}-${Date.now()}${ext}`;
     const dir = path.join(mediaRoot, 'branding');
     await fs.promises.mkdir(dir, { recursive: true });
@@ -414,6 +503,20 @@ export class AdminSettingsController {
     const url = await this.handleBrandingFontUpload(file, {
       prefix: 'font',
       maxBytes: 2 * 1024 * 1024,
+    });
+    this.deletePreviousBrandingFile(previousUrl);
+    return { url };
+  }
+
+  @Post('branding/font-license')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadFontLicense(
+    @UploadedFile() file: BrandingUploadedFile | undefined,
+    @Body('previousUrl') previousUrl?: string,
+  ): Promise<{ url: string }> {
+    const url = await this.handleBrandingLicenseUpload(file, {
+      prefix: 'font-license',
+      maxBytes: 5 * 1024 * 1024,
     });
     this.deletePreviousBrandingFile(previousUrl);
     return { url };
