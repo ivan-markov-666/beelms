@@ -1,19 +1,1757 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { ChangeEventHandler, MouseEvent, ReactNode } from "react";
+import type {
+  ChangeEventHandler,
+  CSSProperties,
+  Dispatch,
+  MouseEvent,
+  ReactNode,
+  SetStateAction,
+} from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getAccessToken } from "../../auth-token";
 import { getApiBaseUrl } from "../../api-url";
 import { AdminBreadcrumbs } from "../_components/admin-breadcrumbs";
+import { WikiMarkdown } from "../../wiki/_components/wiki-markdown";
 
 const API_BASE_URL = getApiBaseUrl();
 
+const THEME_FIELD_KEYS = [
+  "background",
+  "foreground",
+  "primary",
+  "secondary",
+  "error",
+  "card",
+  "border",
+  "scrollThumb",
+  "scrollTrack",
+  "fieldOkBg",
+  "fieldOkBorder",
+  "fieldErrorBg",
+  "fieldErrorBorder",
+] as const;
+
+type ThemeFieldKey = (typeof THEME_FIELD_KEYS)[number];
+
+const THEME_FIELD_ORDER: ThemeFieldKey[] = [
+  "background",
+  "foreground",
+  "primary",
+  "secondary",
+  "error",
+  "card",
+  "border",
+  "scrollThumb",
+  "scrollTrack",
+  "fieldOkBg",
+  "fieldOkBorder",
+  "fieldErrorBg",
+  "fieldErrorBorder",
+];
+
+const THEME_FIELD_DEFS: Record<
+  ThemeFieldKey,
+  { label: string; description: string; token: string; example: string }
+> = {
+  background: {
+    label: "Background",
+    description: "Основен фон на страницата (body/background).",
+    token: "--background / --theme-*-background",
+    example: "Главен layout фон",
+  },
+  foreground: {
+    label: "Foreground",
+    description:
+      "Основен цвят за текст и икони (вкл. текст в input/textarea/select и dropdown списъци).",
+    token: "--foreground / --theme-*-foreground",
+    example: "Текст в UI + стойности в form полета",
+  },
+  primary: {
+    label: "Primary",
+    description: "Главен акцентен цвят (бутони, линкове, highlights).",
+    token: "--primary / --theme-*-primary",
+    example: "CTA бутони, активни състояния",
+  },
+  secondary: {
+    label: "Secondary",
+    description: "Вторичен акцент за линкове/информационни елементи.",
+    token: "--secondary / --theme-*-secondary",
+    example: "Информационни банери, вторични бутони",
+  },
+  error: {
+    label: "Error",
+    description: "Критични съобщения и destructive бутони.",
+    token: "--error / --theme-*-error",
+    example: "Field errors, danger бутони",
+  },
+  card: {
+    label: "Card",
+    description:
+      "Контейнери/панели върху background (вкл. фон на input/textarea/select и dropdown списъци).",
+    token: "--card / --theme-*-card",
+    example: "Card background + form field background",
+  },
+  border: {
+    label: "Border",
+    description: "Граници на панели, form полета и делители.",
+    token: "--border / --theme-*-border",
+    example: "Card border + input/select рамки",
+  },
+  scrollThumb: {
+    label: "Scroll thumb",
+    description: "Цвят на скрол бара (движещата се част).",
+    token: "--scroll-thumb / --theme-*-scroll-thumb",
+    example: "Scrollbar thumb",
+  },
+  scrollTrack: {
+    label: "Scroll track",
+    description: "Фонът на скрол бара.",
+    token: "--scroll-track / --theme-*-scroll-track",
+    example: "Scrollbar track",
+  },
+  fieldOkBg: {
+    label: "Selected/OK bg",
+    description: "Фон за успех/потвърждение (напр. success toast).",
+    token: "--field-ok-bg / --theme-*-field-ok-bg",
+    example: "Success банери, подсветка на валидни полета",
+  },
+  fieldOkBorder: {
+    label: "Selected/OK border",
+    description: "Рамка за успех/потвърждение.",
+    token: "--field-ok-border / --theme-*-field-ok-border",
+    example: "Success банери, подсветка на валидни полета",
+  },
+  fieldErrorBg: {
+    label: "Missing/Error bg",
+    description: "Фон за грешки и липсващи данни.",
+    token: "--field-error-bg / --theme-*-field-error-bg",
+    example: "Validation грешки, предупреждения",
+  },
+  fieldErrorBorder: {
+    label: "Missing/Error border",
+    description: "Рамки/делители при грешки.",
+    token: "--field-error-border / --theme-*-field-error-border",
+    example: "Validation грешки, предупреждения",
+  },
+};
+
+const THEME_PREVIEW_LEGEND_KEYS: ThemeFieldKey[] = [
+  "background",
+  "foreground",
+  "card",
+  "border",
+  "primary",
+  "secondary",
+];
+
+type ThemePalette = Record<ThemeFieldKey, string>;
+type ThemePaletteDraft = Partial<Record<ThemeFieldKey, string>>;
+type ThemeVariant = "light" | "dark";
+type ThemePreset = {
+  id: string;
+  name: string;
+  description: string;
+  light: ThemePalette;
+  dark: ThemePalette;
+};
+type CustomThemePreset = {
+  id: string;
+  name: string;
+  description?: string | null;
+  light: ThemePalette;
+  dark: ThemePalette;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+  createdBy?: string | null;
+  updatedBy?: string | null;
+};
+type ThemeHexDraftState = Record<ThemeVariant, ThemePaletteDraft>;
+type ThemePresetTarget = "both" | "light" | "dark";
+type StringDictionary = Record<string, string>;
+
+const DEFAULT_THEME_LIGHT: Record<ThemeFieldKey, string> = {
+  background: "#ffffff",
+  foreground: "#171717",
+  primary: "#16a34a",
+  secondary: "#2563eb",
+  error: "#dc2626",
+  card: "#ffffff",
+  border: "#e5e7eb",
+  scrollThumb: "#86efac",
+  scrollTrack: "#f0fdf4",
+  fieldOkBg: "#f0fdf4",
+  fieldOkBorder: "#dcfce7",
+  fieldErrorBg: "#fef2f2",
+  fieldErrorBorder: "#fee2e2",
+};
+
+const DEFAULT_THEME_DARK: Record<ThemeFieldKey, string> = {
+  background: "#0a0a0a",
+  foreground: "#ededed",
+  primary: "#22c55e",
+  secondary: "#60a5fa",
+  error: "#f87171",
+  card: "#111827",
+  border: "#374151",
+  scrollThumb: "#16a34a",
+  scrollTrack: "#0b2a16",
+  fieldOkBg: "#052e16",
+  fieldOkBorder: "#14532d",
+  fieldErrorBg: "#450a0a",
+  fieldErrorBorder: "#7f1d1d",
+};
+
+const THEME_PRESETS: ThemePreset[] = [
+  {
+    id: "mocha-elegance",
+    name: "Mocha Elegance",
+    description: "Pantone 2025 вдъхновение – топли, уютни кафеникави тонове.",
+    light: {
+      background: "#faf7f5",
+      foreground: "#2c2319",
+      primary: "#8b6f47",
+      secondary: "#b8956a",
+      error: "#c84b31",
+      card: "#ffffff",
+      border: "#e5ddd5",
+      scrollThumb: "#c9b5a0",
+      scrollTrack: "#f0ebe6",
+      fieldOkBg: "#e8f5e9",
+      fieldOkBorder: "#81c784",
+      fieldErrorBg: "#ffebee",
+      fieldErrorBorder: "#e57373",
+    },
+    dark: {
+      background: "#1a1410",
+      foreground: "#e8dfd6",
+      primary: "#c9a875",
+      secondary: "#9d8566",
+      error: "#e76f51",
+      card: "#2a2018",
+      border: "#3d3228",
+      scrollThumb: "#5a4a3a",
+      scrollTrack: "#231c15",
+      fieldOkBg: "#1b3a1f",
+      fieldOkBorder: "#66bb6a",
+      fieldErrorBg: "#3a1f1f",
+      fieldErrorBorder: "#ef5350",
+    },
+  },
+  {
+    id: "ocean-breeze",
+    name: "Ocean Breeze",
+    description: "Спокойни сини и аква тонове за професионални приложения.",
+    light: {
+      background: "#f5f9fc",
+      foreground: "#1a2c3d",
+      primary: "#2e86ab",
+      secondary: "#5dade2",
+      error: "#d32f2f",
+      card: "#ffffff",
+      border: "#d6e9f5",
+      scrollThumb: "#85c1e9",
+      scrollTrack: "#ebf5fb",
+      fieldOkBg: "#e8f5e9",
+      fieldOkBorder: "#66bb6a",
+      fieldErrorBg: "#ffebee",
+      fieldErrorBorder: "#e57373",
+    },
+    dark: {
+      background: "#0f1c26",
+      foreground: "#e0ebf5",
+      primary: "#5dade2",
+      secondary: "#3498db",
+      error: "#ef5350",
+      card: "#1a2938",
+      border: "#2c4558",
+      scrollThumb: "#4a7ba7",
+      scrollTrack: "#141f2b",
+      fieldOkBg: "#1b3a2f",
+      fieldOkBorder: "#66bb6a",
+      fieldErrorBg: "#3a1f1f",
+      fieldErrorBorder: "#ef5350",
+    },
+  },
+  {
+    id: "forest-sanctuary",
+    name: "Forest Sanctuary",
+    description: "Природни зелени тонове, вдъхновени от 2025 трендовете.",
+    light: {
+      background: "#f7faf7",
+      foreground: "#1f3a28",
+      primary: "#4a7c59",
+      secondary: "#6b9e78",
+      error: "#d84315",
+      card: "#ffffff",
+      border: "#d9e8dd",
+      scrollThumb: "#8fbc8f",
+      scrollTrack: "#edf5ee",
+      fieldOkBg: "#e8f5e9",
+      fieldOkBorder: "#81c784",
+      fieldErrorBg: "#ffebee",
+      fieldErrorBorder: "#ff7043",
+    },
+    dark: {
+      background: "#141a16",
+      foreground: "#dfe8e1",
+      primary: "#7fb685",
+      secondary: "#5a8d66",
+      error: "#ff6f43",
+      card: "#1f2a22",
+      border: "#2f4032",
+      scrollThumb: "#4a6b51",
+      scrollTrack: "#191f1b",
+      fieldOkBg: "#1f3a27",
+      fieldOkBorder: "#81c784",
+      fieldErrorBg: "#3a2520",
+      fieldErrorBorder: "#ff7043",
+    },
+  },
+  {
+    id: "ruby-passion",
+    name: "Ruby Passion",
+    description: "Смели рубинено червени акценти – Behr 2025 вдъхновение.",
+    light: {
+      background: "#faf5f6",
+      foreground: "#2d1b1f",
+      primary: "#a8324e",
+      secondary: "#d4727e",
+      error: "#c62828",
+      card: "#ffffff",
+      border: "#ecd7dc",
+      scrollThumb: "#c97b8a",
+      scrollTrack: "#f5eaed",
+      fieldOkBg: "#e8f5e9",
+      fieldOkBorder: "#66bb6a",
+      fieldErrorBg: "#ffebee",
+      fieldErrorBorder: "#e57373",
+    },
+    dark: {
+      background: "#1a1214",
+      foreground: "#ebd9dd",
+      primary: "#d97b8f",
+      secondary: "#b5536a",
+      error: "#ef5350",
+      card: "#2a1d20",
+      border: "#3d2e31",
+      scrollThumb: "#704249",
+      scrollTrack: "#1f1517",
+      fieldOkBg: "#1b3a2f",
+      fieldOkBorder: "#66bb6a",
+      fieldErrorBg: "#3a1f1f",
+      fieldErrorBorder: "#ef5350",
+    },
+  },
+  {
+    id: "lavender-dreams",
+    name: "Lavender Dreams",
+    description: "Меки лавандулови и лилави тонове – Digital Lavender trend.",
+    light: {
+      background: "#f9f7fb",
+      foreground: "#2e2638",
+      primary: "#8b7ab8",
+      secondary: "#b8a8d8",
+      error: "#d32f2f",
+      card: "#ffffff",
+      border: "#e4dcf0",
+      scrollThumb: "#b8a8d8",
+      scrollTrack: "#f2edf7",
+      fieldOkBg: "#e8f5e9",
+      fieldOkBorder: "#66bb6a",
+      fieldErrorBg: "#ffebee",
+      fieldErrorBorder: "#e57373",
+    },
+    dark: {
+      background: "#16141a",
+      foreground: "#e5dff0",
+      primary: "#b8a8d8",
+      secondary: "#9687be",
+      error: "#ef5350",
+      card: "#211e28",
+      border: "#342f3d",
+      scrollThumb: "#5a4f78",
+      scrollTrack: "#1a1720",
+      fieldOkBg: "#1b3a2f",
+      fieldOkBorder: "#66bb6a",
+      fieldErrorBg: "#3a1f1f",
+      fieldErrorBorder: "#ef5350",
+    },
+  },
+  {
+    id: "sunset-glow",
+    name: "Sunset Glow",
+    description: "Топли портокалови и златисти тонове.",
+    light: {
+      background: "#fbf7f3",
+      foreground: "#2e1f15",
+      primary: "#e07a5f",
+      secondary: "#f4a261",
+      error: "#d32f2f",
+      card: "#ffffff",
+      border: "#f0e2d7",
+      scrollThumb: "#e9b896",
+      scrollTrack: "#f7f0e9",
+      fieldOkBg: "#e8f5e9",
+      fieldOkBorder: "#66bb6a",
+      fieldErrorBg: "#ffebee",
+      fieldErrorBorder: "#e57373",
+    },
+    dark: {
+      background: "#1a1410",
+      foreground: "#ebe0d4",
+      primary: "#f4a261",
+      secondary: "#d88654",
+      error: "#ef5350",
+      card: "#2a1f17",
+      border: "#3d2f23",
+      scrollThumb: "#6b4e3d",
+      scrollTrack: "#1f1712",
+      fieldOkBg: "#1b3a2f",
+      fieldOkBorder: "#66bb6a",
+      fieldErrorBg: "#3a1f1f",
+      fieldErrorBorder: "#ef5350",
+    },
+  },
+  {
+    id: "midnight-blue",
+    name: "Midnight Blue",
+    description: "Дълбоки професионални сини за корпоративни приложения.",
+    light: {
+      background: "#f6f8fa",
+      foreground: "#1b2838",
+      primary: "#1a4d7c",
+      secondary: "#3d6b98",
+      error: "#c62828",
+      card: "#ffffff",
+      border: "#d9e2ec",
+      scrollThumb: "#6594c8",
+      scrollTrack: "#ecf1f7",
+      fieldOkBg: "#e8f5e9",
+      fieldOkBorder: "#66bb6a",
+      fieldErrorBg: "#ffebee",
+      fieldErrorBorder: "#e57373",
+    },
+    dark: {
+      background: "#0c141d",
+      foreground: "#e0e8f0",
+      primary: "#4a8dcf",
+      secondary: "#3670b0",
+      error: "#ef5350",
+      card: "#15202b",
+      border: "#243447",
+      scrollThumb: "#355273",
+      scrollTrack: "#101821",
+      fieldOkBg: "#1b3a2f",
+      fieldOkBorder: "#66bb6a",
+      fieldErrorBg: "#3a1f1f",
+      fieldErrorBorder: "#ef5350",
+    },
+  },
+  {
+    id: "sage-serenity",
+    name: "Sage Serenity",
+    description:
+      "Sherwin-Williams Quietude вдъхновение – успокояващо sage green.",
+    light: {
+      background: "#f7faf8",
+      foreground: "#2b3732",
+      primary: "#7a9b8b",
+      secondary: "#9db7a9",
+      error: "#d84315",
+      card: "#ffffff",
+      border: "#dce8e1",
+      scrollThumb: "#a5bcaf",
+      scrollTrack: "#edf4f0",
+      fieldOkBg: "#e8f5e9",
+      fieldOkBorder: "#81c784",
+      fieldErrorBg: "#ffebee",
+      fieldErrorBorder: "#ff7043",
+    },
+    dark: {
+      background: "#141916",
+      foreground: "#e1ebe5",
+      primary: "#9db7a9",
+      secondary: "#7a9b8b",
+      error: "#ff6f43",
+      card: "#1e2722",
+      border: "#303d35",
+      scrollThumb: "#4d6156",
+      scrollTrack: "#181d1a",
+      fieldOkBg: "#1f3a27",
+      fieldOkBorder: "#81c784",
+      fieldErrorBg: "#3a2520",
+      fieldErrorBorder: "#ff7043",
+    },
+  },
+  {
+    id: "cherry-blossom",
+    name: "Cherry Blossom",
+    description: "Нежни розови пастелни тонове.",
+    light: {
+      background: "#fbf7f9",
+      foreground: "#3a2530",
+      primary: "#d88aa3",
+      secondary: "#e9b3c5",
+      error: "#d32f2f",
+      card: "#ffffff",
+      border: "#f0dbe5",
+      scrollThumb: "#e5c4d3",
+      scrollTrack: "#f7edf2",
+      fieldOkBg: "#e8f5e9",
+      fieldOkBorder: "#66bb6a",
+      fieldErrorBg: "#ffebee",
+      fieldErrorBorder: "#e57373",
+    },
+    dark: {
+      background: "#1a1315",
+      foreground: "#ebdbe3",
+      primary: "#e9b3c5",
+      secondary: "#c28b9f",
+      error: "#ef5350",
+      card: "#281d23",
+      border: "#3a2e34",
+      scrollThumb: "#604852",
+      scrollTrack: "#1f1619",
+      fieldOkBg: "#1b3a2f",
+      fieldOkBorder: "#66bb6a",
+      fieldErrorBg: "#3a1f1f",
+      fieldErrorBorder: "#ef5350",
+    },
+  },
+  {
+    id: "nordic-minimal",
+    name: "Nordic Minimal",
+    description: "Чисти скандинавски тонове.",
+    light: {
+      background: "#f9fafb",
+      foreground: "#1f2937",
+      primary: "#6b7280",
+      secondary: "#9ca3af",
+      error: "#dc2626",
+      card: "#ffffff",
+      border: "#e5e7eb",
+      scrollThumb: "#9ca3af",
+      scrollTrack: "#f3f4f6",
+      fieldOkBg: "#ecfdf5",
+      fieldOkBorder: "#6ee7b7",
+      fieldErrorBg: "#fef2f2",
+      fieldErrorBorder: "#f87171",
+    },
+    dark: {
+      background: "#111827",
+      foreground: "#f3f4f6",
+      primary: "#9ca3af",
+      secondary: "#6b7280",
+      error: "#ef4444",
+      card: "#1f2937",
+      border: "#374151",
+      scrollThumb: "#4b5563",
+      scrollTrack: "#0f1419",
+      fieldOkBg: "#064e3b",
+      fieldOkBorder: "#6ee7b7",
+      fieldErrorBg: "#450a0a",
+      fieldErrorBorder: "#f87171",
+    },
+  },
+  {
+    id: "emerald-forest",
+    name: "Emerald Forest",
+    description: "Богати изумрудени зелени.",
+    light: {
+      background: "#f5faf7",
+      foreground: "#1a3729",
+      primary: "#059669",
+      secondary: "#34d399",
+      error: "#dc2626",
+      card: "#ffffff",
+      border: "#d1fae5",
+      scrollThumb: "#6ee7b7",
+      scrollTrack: "#ecfdf5",
+      fieldOkBg: "#e8f5e9",
+      fieldOkBorder: "#66bb6a",
+      fieldErrorBg: "#ffebee",
+      fieldErrorBorder: "#e57373",
+    },
+    dark: {
+      background: "#0f1a15",
+      foreground: "#e0f2e8",
+      primary: "#34d399",
+      secondary: "#10b981",
+      error: "#ef4444",
+      card: "#1a2920",
+      border: "#2d4037",
+      scrollThumb: "#276749",
+      scrollTrack: "#131d18",
+      fieldOkBg: "#064e3b",
+      fieldOkBorder: "#6ee7b7",
+      fieldErrorBg: "#450a0a",
+      fieldErrorBorder: "#f87171",
+    },
+  },
+  {
+    id: "coral-reef",
+    name: "Coral Reef",
+    description: "Живи коралови и топли тонове.",
+    light: {
+      background: "#fbf8f7",
+      foreground: "#3a2220",
+      primary: "#ff6b6b",
+      secondary: "#ffa07a",
+      error: "#d32f2f",
+      card: "#ffffff",
+      border: "#ffe4db",
+      scrollThumb: "#ffb399",
+      scrollTrack: "#fff0eb",
+      fieldOkBg: "#e8f5e9",
+      fieldOkBorder: "#66bb6a",
+      fieldErrorBg: "#ffebee",
+      fieldErrorBorder: "#e57373",
+    },
+    dark: {
+      background: "#1a1312",
+      foreground: "#efddd9",
+      primary: "#ffa07a",
+      secondary: "#ff826b",
+      error: "#ef5350",
+      card: "#2a1d1b",
+      border: "#3d2e2c",
+      scrollThumb: "#704843",
+      scrollTrack: "#1f1615",
+      fieldOkBg: "#1b3a2f",
+      fieldOkBorder: "#66bb6a",
+      fieldErrorBg: "#3a1f1f",
+      fieldErrorBorder: "#ef5350",
+    },
+  },
+  {
+    id: "purple-haze",
+    name: "Purple Haze",
+    description: "Богати пурпурни палитри – 2025 trend.",
+    light: {
+      background: "#faf7fb",
+      foreground: "#2e1f3a",
+      primary: "#9d4edd",
+      secondary: "#c77dff",
+      error: "#d32f2f",
+      card: "#ffffff",
+      border: "#e8daef",
+      scrollThumb: "#c8a4e3",
+      scrollTrack: "#f4eff7",
+      fieldOkBg: "#e8f5e9",
+      fieldOkBorder: "#66bb6a",
+      fieldErrorBg: "#ffebee",
+      fieldErrorBorder: "#e57373",
+    },
+    dark: {
+      background: "#16111c",
+      foreground: "#ede1f5",
+      primary: "#c77dff",
+      secondary: "#a260d8",
+      error: "#ef5350",
+      card: "#221b2a",
+      border: "#352d3f",
+      scrollThumb: "#5a4270",
+      scrollTrack: "#1a1521",
+      fieldOkBg: "#1b3a2f",
+      fieldOkBorder: "#66bb6a",
+      fieldErrorBg: "#3a1f1f",
+      fieldErrorBorder: "#ef5350",
+    },
+  },
+  {
+    id: "golden-hour",
+    name: "Golden Hour",
+    description: "Златисти бежови тонове – Wheatfield Beige trend.",
+    light: {
+      background: "#faf8f3",
+      foreground: "#3a3228",
+      primary: "#c19a6b",
+      secondary: "#d4b896",
+      error: "#d84315",
+      card: "#ffffff",
+      border: "#e8e0d5",
+      scrollThumb: "#d9c4a4",
+      scrollTrack: "#f3efe8",
+      fieldOkBg: "#e8f5e9",
+      fieldOkBorder: "#81c784",
+      fieldErrorBg: "#ffebee",
+      fieldErrorBorder: "#ff7043",
+    },
+    dark: {
+      background: "#1a1712",
+      foreground: "#e8e0d5",
+      primary: "#d9c4a4",
+      secondary: "#b39e7a",
+      error: "#ff6f43",
+      card: "#2a241c",
+      border: "#3d362b",
+      scrollThumb: "#5a4f3f",
+      scrollTrack: "#1f1b15",
+      fieldOkBg: "#1b3a2f",
+      fieldOkBorder: "#81c784",
+      fieldErrorBg: "#3a2520",
+      fieldErrorBorder: "#ff7043",
+    },
+  },
+  {
+    id: "arctic-blue",
+    name: "Arctic Blue",
+    description: "Студени чисти сини за tech приложения.",
+    light: {
+      background: "#f7fafc",
+      foreground: "#1a365d",
+      primary: "#4299e1",
+      secondary: "#63b3ed",
+      error: "#c53030",
+      card: "#ffffff",
+      border: "#cbd5e0",
+      scrollThumb: "#90cdf4",
+      scrollTrack: "#edf2f7",
+      fieldOkBg: "#e8f5e9",
+      fieldOkBorder: "#66bb6a",
+      fieldErrorBg: "#ffebee",
+      fieldErrorBorder: "#fc8181",
+    },
+    dark: {
+      background: "#0d1721",
+      foreground: "#e6f2ff",
+      primary: "#63b3ed",
+      secondary: "#4299e1",
+      error: "#fc8181",
+      card: "#1a2332",
+      border: "#2d3748",
+      scrollThumb: "#2c5282",
+      scrollTrack: "#111b27",
+      fieldOkBg: "#1b3a2f",
+      fieldOkBorder: "#66bb6a",
+      fieldErrorBg: "#3a1f1f",
+      fieldErrorBorder: "#fc8181",
+    },
+  },
+  {
+    id: "terracotta",
+    name: "Terracotta",
+    description: "Земни терракота тонове – природни и автентични.",
+    light: {
+      background: "#faf6f4",
+      foreground: "#3d2617",
+      primary: "#c1694f",
+      secondary: "#d49479",
+      error: "#c62828",
+      card: "#ffffff",
+      border: "#e8d9d0",
+      scrollThumb: "#ceaa95",
+      scrollTrack: "#f3eae4",
+      fieldOkBg: "#e8f5e9",
+      fieldOkBorder: "#81c784",
+      fieldErrorBg: "#ffebee",
+      fieldErrorBorder: "#e57373",
+    },
+    dark: {
+      background: "#1a110e",
+      foreground: "#e8d9d0",
+      primary: "#d49479",
+      secondary: "#b17a61",
+      error: "#ef5350",
+      card: "#2a1d17",
+      border: "#3d2e25",
+      scrollThumb: "#5a4137",
+      scrollTrack: "#1f1512",
+      fieldOkBg: "#1b3a2f",
+      fieldOkBorder: "#81c784",
+      fieldErrorBg: "#3a1f1f",
+      fieldErrorBorder: "#ef5350",
+    },
+  },
+  {
+    id: "mint-fresh",
+    name: "Mint Fresh",
+    description: "Свежи ментови тонове.",
+    light: {
+      background: "#f7fbfa",
+      foreground: "#1f3d39",
+      primary: "#5cb8aa",
+      secondary: "#7dd3c0",
+      error: "#d84315",
+      card: "#ffffff",
+      border: "#d4ede8",
+      scrollThumb: "#8fd5ca",
+      scrollTrack: "#edf8f5",
+      fieldOkBg: "#e8f5e9",
+      fieldOkBorder: "#81c784",
+      fieldErrorBg: "#ffebee",
+      fieldErrorBorder: "#ff7043",
+    },
+    dark: {
+      background: "#0f1918",
+      foreground: "#dff2ee",
+      primary: "#7dd3c0",
+      secondary: "#5cb8aa",
+      error: "#ff6f43",
+      card: "#1a2927",
+      border: "#2e403c",
+      scrollThumb: "#3a5b55",
+      scrollTrack: "#131d1c",
+      fieldOkBg: "#1f3a27",
+      fieldOkBorder: "#81c784",
+      fieldErrorBg: "#3a2520",
+      fieldErrorBorder: "#ff7043",
+    },
+  },
+  {
+    id: "crimson-bold",
+    name: "Crimson Bold",
+    description: "Смели наситени червени – high energy.",
+    light: {
+      background: "#fbf7f8",
+      foreground: "#3d1f26",
+      primary: "#dc143c",
+      secondary: "#e74c6c",
+      error: "#b71c1c",
+      card: "#ffffff",
+      border: "#f0d8dd",
+      scrollThumb: "#e88ba0",
+      scrollTrack: "#f7edf0",
+      fieldOkBg: "#e8f5e9",
+      fieldOkBorder: "#66bb6a",
+      fieldErrorBg: "#ffebee",
+      fieldErrorBorder: "#e57373",
+    },
+    dark: {
+      background: "#1a1012",
+      foreground: "#edd9df",
+      primary: "#e74c6c",
+      secondary: "#c73a54",
+      error: "#ef5350",
+      card: "#2a1a1e",
+      border: "#3d2b30",
+      scrollThumb: "#703a45",
+      scrollTrack: "#1f1315",
+      fieldOkBg: "#1b3a2f",
+      fieldOkBorder: "#66bb6a",
+      fieldErrorBg: "#3a1f1f",
+      fieldErrorBorder: "#ef5350",
+    },
+  },
+  {
+    id: "slate-modern",
+    name: "Slate Modern",
+    description: "Съвременни slate сиви – професионални и елегантни.",
+    light: {
+      background: "#f8f9fa",
+      foreground: "#212529",
+      primary: "#495057",
+      secondary: "#6c757d",
+      error: "#dc3545",
+      card: "#ffffff",
+      border: "#dee2e6",
+      scrollThumb: "#adb5bd",
+      scrollTrack: "#f1f3f5",
+      fieldOkBg: "#d1e7dd",
+      fieldOkBorder: "#75b798",
+      fieldErrorBg: "#f8d7da",
+      fieldErrorBorder: "#ea868f",
+    },
+    dark: {
+      background: "#121416",
+      foreground: "#e9ecef",
+      primary: "#adb5bd",
+      secondary: "#6c757d",
+      error: "#ea868f",
+      card: "#1e2226",
+      border: "#343a40",
+      scrollThumb: "#495057",
+      scrollTrack: "#0f1113",
+      fieldOkBg: "#1b4332",
+      fieldOkBorder: "#75b798",
+      fieldErrorBg: "#3a1e1f",
+      fieldErrorBorder: "#ea868f",
+    },
+  },
+  {
+    id: "peachy-keen",
+    name: "Peachy Keen",
+    description: "Clementine и Off-White – 2025 fresh trend.",
+    light: {
+      background: "#fbf9f7",
+      foreground: "#3a2f27",
+      primary: "#ff9f66",
+      secondary: "#ffb88c",
+      error: "#d84315",
+      card: "#ffffff",
+      border: "#f0e5db",
+      scrollThumb: "#ffcba4",
+      scrollTrack: "#f7f2ed",
+      fieldOkBg: "#e8f5e9",
+      fieldOkBorder: "#81c784",
+      fieldErrorBg: "#ffebee",
+      fieldErrorBorder: "#ff7043",
+    },
+    dark: {
+      background: "#1a1512",
+      foreground: "#ebe2d9",
+      primary: "#ffb88c",
+      secondary: "#e89466",
+      error: "#ff6f43",
+      card: "#2a221c",
+      border: "#3d332b",
+      scrollThumb: "#5a4a3f",
+      scrollTrack: "#1f1915",
+      fieldOkBg: "#1b3a2f",
+      fieldOkBorder: "#81c784",
+      fieldErrorBg: "#3a2520",
+      fieldErrorBorder: "#ff7043",
+    },
+  },
+  {
+    id: "electric-teal",
+    name: "Electric Teal",
+    description: "Енергични teal тонове за модерни tech приложения.",
+    light: {
+      background: "#f5fafb",
+      foreground: "#1a3d42",
+      primary: "#14b8a6",
+      secondary: "#5eead4",
+      error: "#dc2626",
+      card: "#ffffff",
+      border: "#ccfbf1",
+      scrollThumb: "#99f6e4",
+      scrollTrack: "#f0fdfa",
+      fieldOkBg: "#d1fae5",
+      fieldOkBorder: "#6ee7b7",
+      fieldErrorBg: "#fee2e2",
+      fieldErrorBorder: "#f87171",
+    },
+    dark: {
+      background: "#0f1c1e",
+      foreground: "#e0f2f1",
+      primary: "#5eead4",
+      secondary: "#2dd4bf",
+      error: "#f87171",
+      card: "#1a2b2e",
+      border: "#2d4347",
+      scrollThumb: "#0f766e",
+      scrollTrack: "#131f21",
+      fieldOkBg: "#064e3b",
+      fieldOkBorder: "#6ee7b7",
+      fieldErrorBg: "#450a0a",
+      fieldErrorBorder: "#f87171",
+    },
+  },
+  {
+    id: "burgundy-luxury",
+    name: "Burgundy Luxury",
+    description: "Богати бургундски тонове за премиум брандове.",
+    light: {
+      background: "#faf6f7",
+      foreground: "#3d1a22",
+      primary: "#8e3b46",
+      secondary: "#b85c6d",
+      error: "#c62828",
+      card: "#ffffff",
+      border: "#ecd8dc",
+      scrollThumb: "#c88996",
+      scrollTrack: "#f5edf0",
+      fieldOkBg: "#e8f5e9",
+      fieldOkBorder: "#81c784",
+      fieldErrorBg: "#ffebee",
+      fieldErrorBorder: "#e57373",
+    },
+    dark: {
+      background: "#1a0f12",
+      foreground: "#ebd8dc",
+      primary: "#c88996",
+      secondary: "#a6616f",
+      error: "#ef5350",
+      card: "#2a1a1e",
+      border: "#3d2b30",
+      scrollThumb: "#5a3a42",
+      scrollTrack: "#1f1316",
+      fieldOkBg: "#1b3a2f",
+      fieldOkBorder: "#81c784",
+      fieldErrorBg: "#3a1f1f",
+      fieldErrorBorder: "#ef5350",
+    },
+  },
+  {
+    id: "honey-gold",
+    name: "Honey Gold",
+    description: "Медени златисти тонове – топли и приветливи.",
+    light: {
+      background: "#fbf9f4",
+      foreground: "#3a3020",
+      primary: "#daa520",
+      secondary: "#f0c050",
+      error: "#d84315",
+      card: "#ffffff",
+      border: "#f0e8d6",
+      scrollThumb: "#e8d4a0",
+      scrollTrack: "#f7f3e9",
+      fieldOkBg: "#e8f5e9",
+      fieldOkBorder: "#81c784",
+      fieldErrorBg: "#ffebee",
+      fieldErrorBorder: "#ff7043",
+    },
+    dark: {
+      background: "#1a1710",
+      foreground: "#ebe4d2",
+      primary: "#f0c050",
+      secondary: "#c9a23a",
+      error: "#ff6f43",
+      card: "#2a2418",
+      border: "#3d362b",
+      scrollThumb: "#5a4d35",
+      scrollTrack: "#1f1c14",
+      fieldOkBg: "#1b3a2f",
+      fieldOkBorder: "#81c784",
+      fieldErrorBg: "#3a2520",
+      fieldErrorBorder: "#ff7043",
+    },
+  },
+  {
+    id: "fuchsia-pop",
+    name: "Fuchsia Pop",
+    description: "Смели фуксия тонове – креативни и експресивни.",
+    light: {
+      background: "#fbf7fa",
+      foreground: "#3d1f3a",
+      primary: "#d946ef",
+      secondary: "#e879f9",
+      error: "#dc2626",
+      card: "#ffffff",
+      border: "#f5d0fe",
+      scrollThumb: "#f0abfc",
+      scrollTrack: "#faf5ff",
+      fieldOkBg: "#e8f5e9",
+      fieldOkBorder: "#66bb6a",
+      fieldErrorBg: "#fee2e2",
+      fieldErrorBorder: "#f87171",
+    },
+    dark: {
+      background: "#1a1018",
+      foreground: "#f5e1f7",
+      primary: "#e879f9",
+      secondary: "#c026d3",
+      error: "#f87171",
+      card: "#2a1a28",
+      border: "#3d2b3d",
+      scrollThumb: "#701a75",
+      scrollTrack: "#1f1420",
+      fieldOkBg: "#1b3a2f",
+      fieldOkBorder: "#66bb6a",
+      fieldErrorBg: "#450a0a",
+      fieldErrorBorder: "#f87171",
+    },
+  },
+  {
+    id: "sky-blue",
+    name: "Sky Blue",
+    description: "Светли небесносини – оптимистични и отворени.",
+    light: {
+      background: "#f7fbff",
+      foreground: "#1e3a5f",
+      primary: "#38bdf8",
+      secondary: "#7dd3fc",
+      error: "#dc2626",
+      card: "#ffffff",
+      border: "#e0f2fe",
+      scrollThumb: "#bae6fd",
+      scrollTrack: "#f0f9ff",
+      fieldOkBg: "#d1fae5",
+      fieldOkBorder: "#6ee7b7",
+      fieldErrorBg: "#fee2e2",
+      fieldErrorBorder: "#f87171",
+    },
+    dark: {
+      background: "#0c1821",
+      foreground: "#e0f2fe",
+      primary: "#7dd3fc",
+      secondary: "#38bdf8",
+      error: "#f87171",
+      card: "#172532",
+      border: "#1e3a5f",
+      scrollThumb: "#075985",
+      scrollTrack: "#0f1d2b",
+      fieldOkBg: "#064e3b",
+      fieldOkBorder: "#6ee7b7",
+      fieldErrorBg: "#450a0a",
+      fieldErrorBorder: "#f87171",
+    },
+  },
+  {
+    id: "olive-earth",
+    name: "Olive Earth",
+    description: "Маслиненозелени земни тонове.",
+    light: {
+      background: "#f9faf7",
+      foreground: "#2d3319",
+      primary: "#6b7f3a",
+      secondary: "#8fa35c",
+      error: "#d84315",
+      card: "#ffffff",
+      border: "#e0e7d3",
+      scrollThumb: "#a8bf7a",
+      scrollTrack: "#f0f4e8",
+      fieldOkBg: "#e8f5e9",
+      fieldOkBorder: "#81c784",
+      fieldErrorBg: "#ffebee",
+      fieldErrorBorder: "#ff7043",
+    },
+    dark: {
+      background: "#14170f",
+      foreground: "#e5e9dc",
+      primary: "#a8bf7a",
+      secondary: "#7d9451",
+      error: "#ff6f43",
+      card: "#1f2518",
+      border: "#30382a",
+      scrollThumb: "#4a5538",
+      scrollTrack: "#181b13",
+      fieldOkBg: "#1b3a2f",
+      fieldOkBorder: "#81c784",
+      fieldErrorBg: "#3a2520",
+      fieldErrorBorder: "#ff7043",
+    },
+  },
+  {
+    id: "rose-gold",
+    name: "Rose Gold",
+    description: "Елегантни rose gold тонове – луксозни и нежни.",
+    light: {
+      background: "#fbf8f7",
+      foreground: "#3a2828",
+      primary: "#d4a5a5",
+      secondary: "#e9c5c5",
+      error: "#c62828",
+      card: "#ffffff",
+      border: "#f0e0e0",
+      scrollThumb: "#e5cece",
+      scrollTrack: "#f7f0f0",
+      fieldOkBg: "#e8f5e9",
+      fieldOkBorder: "#81c784",
+      fieldErrorBg: "#ffebee",
+      fieldErrorBorder: "#e57373",
+    },
+    dark: {
+      background: "#1a1414",
+      foreground: "#ebe0e0",
+      primary: "#e9c5c5",
+      secondary: "#c49898",
+      error: "#ef5350",
+      card: "#2a1f1f",
+      border: "#3d3030",
+      scrollThumb: "#5a4848",
+      scrollTrack: "#1f1717",
+      fieldOkBg: "#1b3a2f",
+      fieldOkBorder: "#81c784",
+      fieldErrorBg: "#3a1f1f",
+      fieldErrorBorder: "#ef5350",
+    },
+  },
+  {
+    id: "indigo-night",
+    name: "Indigo Night",
+    description: "Дълбоки индиго тонове – мистериозни и професионални.",
+    light: {
+      background: "#f7f8fb",
+      foreground: "#1e2447",
+      primary: "#4f46e5",
+      secondary: "#6366f1",
+      error: "#dc2626",
+      card: "#ffffff",
+      border: "#e0e7ff",
+      scrollThumb: "#a5b4fc",
+      scrollTrack: "#eef2ff",
+      fieldOkBg: "#d1fae5",
+      fieldOkBorder: "#6ee7b7",
+      fieldErrorBg: "#fee2e2",
+      fieldErrorBorder: "#f87171",
+    },
+    dark: {
+      background: "#0f1121",
+      foreground: "#e0e7ff",
+      primary: "#818cf8",
+      secondary: "#6366f1",
+      error: "#f87171",
+      card: "#1a1e38",
+      border: "#2d3250",
+      scrollThumb: "#3730a3",
+      scrollTrack: "#131625",
+      fieldOkBg: "#064e3b",
+      fieldOkBorder: "#6ee7b7",
+      fieldErrorBg: "#450a0a",
+      fieldErrorBorder: "#f87171",
+    },
+  },
+  {
+    id: "lime-burst",
+    name: "Lime Burst",
+    description: "Енергични lime зелени – младежки и свежи.",
+    light: {
+      background: "#f9fcf7",
+      foreground: "#2d3d1a",
+      primary: "#84cc16",
+      secondary: "#a3e635",
+      error: "#dc2626",
+      card: "#ffffff",
+      border: "#e7f5d1",
+      scrollThumb: "#bef264",
+      scrollTrack: "#f7fee7",
+      fieldOkBg: "#e8f5e9",
+      fieldOkBorder: "#81c784",
+      fieldErrorBg: "#fee2e2",
+      fieldErrorBorder: "#f87171",
+    },
+    dark: {
+      background: "#0f140c",
+      foreground: "#e7f5d1",
+      primary: "#a3e635",
+      secondary: "#84cc16",
+      error: "#f87171",
+      card: "#1a2215",
+      border: "#2d3d25",
+      scrollThumb: "#4d7c0f",
+      scrollTrack: "#131810",
+      fieldOkBg: "#1b3a2f",
+      fieldOkBorder: "#81c784",
+      fieldErrorBg: "#450a0a",
+      fieldErrorBorder: "#f87171",
+    },
+  },
+  {
+    id: "chocolate-delight",
+    name: "Chocolate Delight",
+    description: "Богати шоколадови кафяви.",
+    light: {
+      background: "#faf7f5",
+      foreground: "#3d2817",
+      primary: "#8b4513",
+      secondary: "#a0522d",
+      error: "#d84315",
+      card: "#ffffff",
+      border: "#e8ddd5",
+      scrollThumb: "#c9a588",
+      scrollTrack: "#f3ebe6",
+      fieldOkBg: "#e8f5e9",
+      fieldOkBorder: "#81c784",
+      fieldErrorBg: "#ffebee",
+      fieldErrorBorder: "#ff7043",
+    },
+    dark: {
+      background: "#1a1210",
+      foreground: "#e8ddd5",
+      primary: "#c9a588",
+      secondary: "#9d7a5c",
+      error: "#ff6f43",
+      card: "#2a1e18",
+      border: "#3d2f25",
+      scrollThumb: "#5a3e2f",
+      scrollTrack: "#1f1614",
+      fieldOkBg: "#1b3a2f",
+      fieldOkBorder: "#81c784",
+      fieldErrorBg: "#3a2520",
+      fieldErrorBorder: "#ff7043",
+    },
+  },
+  {
+    id: "aqua-marine",
+    name: "Aqua Marine",
+    description: "Кристално чисти аквамаринови тонове.",
+    light: {
+      background: "#f5fbfb",
+      foreground: "#1a3d3d",
+      primary: "#20b2aa",
+      secondary: "#48d1cc",
+      error: "#dc2626",
+      card: "#ffffff",
+      border: "#ccfaf5",
+      scrollThumb: "#7fe5e0",
+      scrollTrack: "#edfafa",
+      fieldOkBg: "#d1fae5",
+      fieldOkBorder: "#6ee7b7",
+      fieldErrorBg: "#fee2e2",
+      fieldErrorBorder: "#f87171",
+    },
+    dark: {
+      background: "#0f1a1a",
+      foreground: "#dffaf5",
+      primary: "#66d9d4",
+      secondary: "#3fbfba",
+      error: "#f87171",
+      card: "#1a2828",
+      border: "#2d4242",
+      scrollThumb: "#0f5e5e",
+      scrollTrack: "#131e1e",
+      fieldOkBg: "#064e3b",
+      fieldOkBorder: "#6ee7b7",
+      fieldErrorBg: "#450a0a",
+      fieldErrorBorder: "#f87171",
+    },
+  },
+  {
+    id: "amber-glow",
+    name: "Amber Glow",
+    description: "Топли кехлибарени тонове.",
+    light: {
+      background: "#fbf9f5",
+      foreground: "#3d3020",
+      primary: "#f59e0b",
+      secondary: "#fbbf24",
+      error: "#dc2626",
+      card: "#ffffff",
+      border: "#fef3c7",
+      scrollThumb: "#fcd34d",
+      scrollTrack: "#fffbeb",
+      fieldOkBg: "#d1fae5",
+      fieldOkBorder: "#6ee7b7",
+      fieldErrorBg: "#fee2e2",
+      fieldErrorBorder: "#f87171",
+    },
+    dark: {
+      background: "#1a1610",
+      foreground: "#fef3c7",
+      primary: "#fbbf24",
+      secondary: "#f59e0b",
+      error: "#f87171",
+      card: "#2a2218",
+      border: "#3d3428",
+      scrollThumb: "#92400e",
+      scrollTrack: "#1f1b14",
+      fieldOkBg: "#064e3b",
+      fieldOkBorder: "#6ee7b7",
+      fieldErrorBg: "#450a0a",
+      fieldErrorBorder: "#f87171",
+    },
+  },
+  {
+    id: "plum-perfect",
+    name: "Plum Perfect",
+    description: "Елегантни сливови пурпурни тонове.",
+    light: {
+      background: "#faf7fa",
+      foreground: "#3d2238",
+      primary: "#8b5a8f",
+      secondary: "#a87bad",
+      error: "#c62828",
+      card: "#ffffff",
+      border: "#e8d8ea",
+      scrollThumb: "#c5a3c9",
+      scrollTrack: "#f5edf6",
+      fieldOkBg: "#e8f5e9",
+      fieldOkBorder: "#81c784",
+      fieldErrorBg: "#ffebee",
+      fieldErrorBorder: "#e57373",
+    },
+    dark: {
+      background: "#1a1218",
+      foreground: "#e8d8ea",
+      primary: "#c5a3c9",
+      secondary: "#9e7aa3",
+      error: "#ef5350",
+      card: "#2a1e28",
+      border: "#3d2f3a",
+      scrollThumb: "#5a4060",
+      scrollTrack: "#1f1620",
+      fieldOkBg: "#1b3a2f",
+      fieldOkBorder: "#81c784",
+      fieldErrorBg: "#3a1f1f",
+      fieldErrorBorder: "#ef5350",
+    },
+  },
+  {
+    id: "steel-gray",
+    name: "Steel Gray",
+    description: "Индустриални стоманеносиви тонове.",
+    light: {
+      background: "#f8f9fa",
+      foreground: "#2c3439",
+      primary: "#607d8b",
+      secondary: "#90a4ae",
+      error: "#dc2626",
+      card: "#ffffff",
+      border: "#cfd8dc",
+      scrollThumb: "#b0bec5",
+      scrollTrack: "#eceff1",
+      fieldOkBg: "#e8f5e9",
+      fieldOkBorder: "#81c784",
+      fieldErrorBg: "#fee2e2",
+      fieldErrorBorder: "#f87171",
+    },
+    dark: {
+      background: "#121517",
+      foreground: "#eceff1",
+      primary: "#90a4ae",
+      secondary: "#78909c",
+      error: "#f87171",
+      card: "#1e2326",
+      border: "#37474f",
+      scrollThumb: "#455a64",
+      scrollTrack: "#0f1315",
+      fieldOkBg: "#1b3a2f",
+      fieldOkBorder: "#81c784",
+      fieldErrorBg: "#450a0a",
+      fieldErrorBorder: "#f87171",
+    },
+  },
+  {
+    id: "tangerine-dream",
+    name: "Tangerine Dream",
+    description: "Живи мандаринови портокалови тонове.",
+    light: {
+      background: "#fbf8f6",
+      foreground: "#3d2517",
+      primary: "#ff8c42",
+      secondary: "#ffb380",
+      error: "#d32f2f",
+      card: "#ffffff",
+      border: "#ffe4d1",
+      scrollThumb: "#ffc9a3",
+      scrollTrack: "#fff4eb",
+      fieldOkBg: "#e8f5e9",
+      fieldOkBorder: "#81c784",
+      fieldErrorBg: "#ffebee",
+      fieldErrorBorder: "#e57373",
+    },
+    dark: {
+      background: "#1a1310",
+      foreground: "#ffe4d1",
+      primary: "#ffb380",
+      secondary: "#e68855",
+      error: "#ef5350",
+      card: "#2a1e17",
+      border: "#3d2f24",
+      scrollThumb: "#5a4030",
+      scrollTrack: "#1f1714",
+      fieldOkBg: "#1b3a2f",
+      fieldOkBorder: "#81c784",
+      fieldErrorBg: "#3a1f1f",
+      fieldErrorBorder: "#ef5350",
+    },
+  },
+  {
+    id: "periwinkle-blue",
+    name: "Periwinkle Blue",
+    description: "Меки periwinkle сини – успокояващи и приятни.",
+    light: {
+      background: "#f8f9fc",
+      foreground: "#2a2d47",
+      primary: "#8b9dc3",
+      secondary: "#a8b8d8",
+      error: "#dc2626",
+      card: "#ffffff",
+      border: "#dde4f0",
+      scrollThumb: "#c4cfe5",
+      scrollTrack: "#f0f3f9",
+      fieldOkBg: "#e8f5e9",
+      fieldOkBorder: "#81c784",
+      fieldErrorBg: "#fee2e2",
+      fieldErrorBorder: "#f87171",
+    },
+    dark: {
+      background: "#13151c",
+      foreground: "#e5e9f5",
+      primary: "#a8b8d8",
+      secondary: "#8b9dc3",
+      error: "#f87171",
+      card: "#1e2130",
+      border: "#2f3547",
+      scrollThumb: "#4a5273",
+      scrollTrack: "#161820",
+      fieldOkBg: "#1b3a2f",
+      fieldOkBorder: "#81c784",
+      fieldErrorBg: "#450a0a",
+      fieldErrorBorder: "#f87171",
+    },
+  },
+  {
+    id: "cypress-green",
+    name: "Cypress Green",
+    description: "Тъмнозелени кипарисови тонове.",
+    light: {
+      background: "#f7faf8",
+      foreground: "#1f3d2a",
+      primary: "#2d5f4e",
+      secondary: "#4a8070",
+      error: "#d84315",
+      card: "#ffffff",
+      border: "#d5e8df",
+      scrollThumb: "#7aaa96",
+      scrollTrack: "#edf5f1",
+      fieldOkBg: "#e8f5e9",
+      fieldOkBorder: "#81c784",
+      fieldErrorBg: "#ffebee",
+      fieldErrorBorder: "#ff7043",
+    },
+    dark: {
+      background: "#0f1915",
+      foreground: "#d5e8df",
+      primary: "#6b9b89",
+      secondary: "#4d7a68",
+      error: "#ff6f43",
+      card: "#1a2822",
+      border: "#2d4238",
+      scrollThumb: "#3a5f4f",
+      scrollTrack: "#131d19",
+      fieldOkBg: "#1b3a2f",
+      fieldOkBorder: "#81c784",
+      fieldErrorBg: "#3a2520",
+      fieldErrorBorder: "#ff7043",
+    },
+  },
+  {
+    id: "marigold-yellow",
+    name: "Marigold Yellow",
+    description: "Слънчеви невенови жълти тонове.",
+    light: {
+      background: "#fcfaf6",
+      foreground: "#3d3420",
+      primary: "#eab308",
+      secondary: "#facc15",
+      error: "#dc2626",
+      card: "#ffffff",
+      border: "#fef9c3",
+      scrollThumb: "#fde047",
+      scrollTrack: "#fefce8",
+      fieldOkBg: "#d1fae5",
+      fieldOkBorder: "#6ee7b7",
+      fieldErrorBg: "#fee2e2",
+      fieldErrorBorder: "#f87171",
+    },
+    dark: {
+      background: "#1a1810",
+      foreground: "#fef9c3",
+      primary: "#facc15",
+      secondary: "#eab308",
+      error: "#f87171",
+      card: "#2a2418",
+      border: "#3d3728",
+      scrollThumb: "#854d0e",
+      scrollTrack: "#1f1c14",
+      fieldOkBg: "#064e3b",
+      fieldOkBorder: "#6ee7b7",
+      fieldErrorBg: "#450a0a",
+      fieldErrorBorder: "#f87171",
+    },
+  },
+  {
+    id: "magenta-pulse",
+    name: "Magenta Pulse",
+    description: "Интензивни магента тонове – дръзки и съвременни.",
+    light: {
+      background: "#fbf7fa",
+      foreground: "#3d1f3d",
+      primary: "#c026d3",
+      secondary: "#d946ef",
+      error: "#dc2626",
+      card: "#ffffff",
+      border: "#f5d0fe",
+      scrollThumb: "#e879f9",
+      scrollTrack: "#fdf4ff",
+      fieldOkBg: "#e8f5e9",
+      fieldOkBorder: "#81c784",
+      fieldErrorBg: "#fee2e2",
+      fieldErrorBorder: "#f87171",
+    },
+    dark: {
+      background: "#1a1018",
+      foreground: "#f5d0fe",
+      primary: "#e879f9",
+      secondary: "#c026d3",
+      error: "#f87171",
+      card: "#2a1a28",
+      border: "#3d2b3d",
+      scrollThumb: "#86198f",
+      scrollTrack: "#1f1420",
+      fieldOkBg: "#1b3a2f",
+      fieldOkBorder: "#81c784",
+      fieldErrorBg: "#450a0a",
+      fieldErrorBorder: "#f87171",
+    },
+  },
+  {
+    id: "caramel-cream",
+    name: "Caramel Cream",
+    description: "Кремави карамелени нюанси.",
+    light: {
+      background: "#fbf9f6",
+      foreground: "#3a2f27",
+      primary: "#b8956a",
+      secondary: "#d4b896",
+      error: "#d84315",
+      card: "#ffffff",
+      border: "#ede5d8",
+      scrollThumb: "#d9c8af",
+      scrollTrack: "#f5f0e8",
+      fieldOkBg: "#e8f5e9",
+      fieldOkBorder: "#81c784",
+      fieldErrorBg: "#ffebee",
+      fieldErrorBorder: "#ff7043",
+    },
+    dark: {
+      background: "#1a1612",
+      foreground: "#ede5d8",
+      primary: "#d9c8af",
+      secondary: "#b8a080",
+      error: "#ff6f43",
+      card: "#2a221d",
+      border: "#3d3529",
+      scrollThumb: "#5a4d3d",
+      scrollTrack: "#1f1b16",
+      fieldOkBg: "#1b3a2f",
+      fieldOkBorder: "#81c784",
+      fieldErrorBg: "#3a2520",
+      fieldErrorBorder: "#ff7043",
+    },
+  },
+];
+const THEME_PRESET_TARGETS: ThemePresetTarget[] = ["light", "dark", "both"];
+const THEME_PRESET_TARGET_LABEL: Record<ThemePresetTarget, string> = {
+  light: "Light",
+  dark: "Dark",
+  both: "Light + Dark",
+};
+const THEME_PRESET_SWATCH_KEYS: ThemeFieldKey[] = [
+  "background",
+  "foreground",
+  "primary",
+  "secondary",
+];
+
+const HEX_COLOR_FULL_PATTERN = /^#[0-9a-fA-F]{6}$/;
+const HEX_COLOR_SHORT_PATTERN = /^#[0-9a-fA-F]{3}$/;
+
+const sanitizeHexDraft = (value: string): string => {
+  const trimmed = value.trim().toLowerCase();
+  if (!trimmed) {
+    return "";
+  }
+  const withoutHash = trimmed.startsWith("#") ? trimmed.slice(1) : trimmed;
+  const filtered = withoutHash.replace(/[^0-9a-f]/g, "").slice(0, 6);
+  if (!filtered) {
+    return "";
+  }
+  return `#${filtered}`;
+};
+
+const expandToSixHex = (value: string): string | null => {
+  if (HEX_COLOR_FULL_PATTERN.test(value)) {
+    return value.toLowerCase();
+  }
+  if (HEX_COLOR_SHORT_PATTERN.test(value)) {
+    const r = value[1];
+    const g = value[2];
+    const b = value[3];
+    return `#${r}${r}${g}${g}${b}${b}`.toLowerCase();
+  }
+  return null;
+};
+
+const cloneThemePalette = (palette: ThemePalette): ThemePalette => {
+  return THEME_FIELD_KEYS.reduce((acc, key) => {
+    acc[key] = palette[key];
+    return acc;
+  }, {} as ThemePalette);
+};
+
+const sanitizeCustomThemePresets = (value: unknown): CustomThemePreset[] => {
+  const list = Array.isArray(value) ? value : [];
+
+  const normalizeString = (raw: unknown): string => {
+    return typeof raw === "string" ? raw.trim() : "";
+  };
+
+  const normalizePalette = (
+    raw: unknown,
+    fallback: ThemePalette,
+  ): ThemePalette => {
+    const record =
+      raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {};
+    return THEME_FIELD_KEYS.reduce((acc, key) => {
+      const v = record[key];
+      acc[key] =
+        typeof v === "string" && v.trim().length > 0 ? v.trim() : fallback[key];
+      return acc;
+    }, {} as ThemePalette);
+  };
+
+  const out: CustomThemePreset[] = [];
+  for (const raw of list) {
+    if (!raw || typeof raw !== "object") continue;
+    const obj = raw as Record<string, unknown>;
+
+    const id = normalizeString(obj.id);
+    const name = normalizeString(obj.name);
+    if (!id || !name) continue;
+
+    const descriptionRaw = normalizeString(obj.description);
+    const description = descriptionRaw.length > 0 ? descriptionRaw : null;
+
+    const light = normalizePalette(
+      obj.light,
+      DEFAULT_THEME_LIGHT as ThemePalette,
+    );
+    const dark = normalizePalette(obj.dark, DEFAULT_THEME_DARK as ThemePalette);
+
+    const createdAtRaw = normalizeString(obj.createdAt);
+    const updatedAtRaw = normalizeString(obj.updatedAt);
+    const createdByRaw = normalizeString(obj.createdBy);
+    const updatedByRaw = normalizeString(obj.updatedBy);
+
+    const preset: CustomThemePreset = {
+      id,
+      name,
+      ...(description ? { description } : {}),
+      light,
+      dark,
+      ...(createdAtRaw ? { createdAt: createdAtRaw } : {}),
+      ...(updatedAtRaw ? { updatedAt: updatedAtRaw } : {}),
+      ...(createdByRaw ? { createdBy: createdByRaw } : {}),
+      ...(updatedByRaw ? { updatedBy: updatedByRaw } : {}),
+    };
+    out.push(preset);
+  }
+
+  return out;
+};
+
+const sanitizeStringDictionary = (
+  value?: Record<string, string | null | undefined> | null,
+): StringDictionary => {
+  if (!value) {
+    return {};
+  }
+  return Object.entries(value).reduce<StringDictionary>((acc, [key, val]) => {
+    if (typeof val === "string") {
+      acc[key] = val;
+    }
+    return acc;
+  }, {});
+};
+
+const upsertStringDictionary = (
+  prev: StringDictionary,
+  key: string,
+  value?: string | null,
+): StringDictionary => {
+  const next: StringDictionary = { ...prev };
+  if (typeof value === "string" && value.length > 0) {
+    next[key] = value;
+  } else {
+    delete next[key];
+  }
+  return next;
+};
 type InstanceBranding = {
   appName: string;
   browserTitle?: string | null;
+  notFoundTitle?: string | null;
+  notFoundMarkdown?: string | null;
+  notFoundTitleByLang?: Record<string, string | null> | null;
+  notFoundMarkdownByLang?: Record<string, string | null> | null;
   cursorUrl?: string | null;
   cursorLightUrl?: string | null;
   cursorDarkUrl?: string | null;
@@ -26,6 +1764,9 @@ type InstanceBranding = {
   googleFontByLang?: Record<string, string | null> | null;
   fontUrl?: string | null;
   fontUrlByLang?: Record<string, string | null> | null;
+  fontLicenseUrl?: string | null;
+  fontLicenseUrlByLang?: Record<string, string | null> | null;
+  customThemePresets?: CustomThemePreset[] | null;
   theme?: {
     mode?: "light" | "dark" | "system" | null;
     light?: {
@@ -107,6 +1848,11 @@ type InstanceFeatures = {
   coursesPublic: boolean;
   myCourses: boolean;
   profile: boolean;
+  accessibilityWidget: boolean;
+  seo: boolean;
+  themeLight: boolean;
+  themeDark: boolean;
+  themeModeSelector: boolean;
   auth: boolean;
   authLogin: boolean;
   authRegister: boolean;
@@ -130,6 +1876,33 @@ type InstanceFeatures = {
 type InstanceLanguages = {
   supported: string[];
   default: string;
+};
+
+type InstanceSeo = {
+  baseUrl?: string | null;
+  titleTemplate?: string | null;
+  defaultTitle?: string | null;
+  defaultDescription?: string | null;
+  robots?: {
+    index?: boolean;
+  } | null;
+  sitemap?: {
+    enabled?: boolean;
+    includeWiki?: boolean;
+    includeCourses?: boolean;
+    includeLegal?: boolean;
+  } | null;
+  openGraph?: {
+    defaultTitle?: string | null;
+    defaultDescription?: string | null;
+    imageUrl?: string | null;
+  } | null;
+  twitter?: {
+    card?: "summary" | "summary_large_image" | null;
+    defaultTitle?: string | null;
+    defaultDescription?: string | null;
+    imageUrl?: string | null;
+  } | null;
 };
 
 type SocialProvider = "google" | "facebook" | "github" | "linkedin";
@@ -224,6 +1997,7 @@ type AdminSettingsResponse = {
   branding: InstanceBranding;
   features: InstanceFeatures;
   languages: InstanceLanguages;
+  seo: InstanceSeo | null;
   socialProviders?: SocialProviderStatuses | null;
   socialCredentials: Partial<
     Record<SocialProvider, SocialProviderCredentialResponse>
@@ -340,6 +2114,32 @@ const FEATURE_TOGGLE_INFO: Record<
   string,
   { title: string; description: string; impact: string; risk?: string }
 > = {
+  accessibilityWidget: {
+    title: "Accessibility tool",
+    description:
+      "Показва бутон в header-а за локални accessibility настройки (увеличение на текста и high-contrast).",
+    impact:
+      "OFF скрива бутона от UI и форсира default (100% и normal contrast) за всички потребители.",
+  },
+  themeLight: {
+    title: "Theme: Light",
+    description: "Позволява Light theme (и UI избор на Light).",
+    impact:
+      "OFF скрива Light като опция и форсира fallback към Dark (или System, ако е позволено).",
+  },
+  themeDark: {
+    title: "Theme: Dark",
+    description: "Позволява Dark theme (и UI избор на Dark).",
+    impact:
+      "OFF скрива Dark като опция и форсира fallback към Light (или System, ако е позволено).",
+  },
+  themeModeSelector: {
+    title: "Theme selector",
+    description:
+      "Показва dropdown в header-а, за да може потребителят да избере Light/Dark/System (локално чрез localStorage).",
+    impact:
+      "OFF скрива dropdown-а и системата използва само Branding -> Mode като админски default за всички.",
+  },
   wiki: {
     title: "Wiki",
     description:
@@ -530,14 +2330,439 @@ function FeatureToggleLabel({
             <span className="font-semibold text-gray-900">Влияние:</span>{" "}
             {info.impact}
           </p>
-          {info.risk && (
+          {info.risk ? (
             <p className="mt-2 text-sm leading-relaxed text-red-700">
               <span className="font-semibold text-red-800">Риск:</span>{" "}
               {info.risk}
             </p>
-          )}
+          ) : null}
         </div>
       </button>
+    </div>
+  );
+}
+
+type ThemeFieldControlsProps = {
+  title: string;
+  palette: ThemePalette;
+  savedPalette: ThemePalette;
+  redoMap: ThemePaletteDraft;
+  setPalette: Dispatch<SetStateAction<ThemePalette>>;
+  setRedo: Dispatch<SetStateAction<ThemePaletteDraft>>;
+  variant: ThemeVariant;
+  hexDraft: ThemePaletteDraft;
+  setHexDraft: Dispatch<SetStateAction<ThemeHexDraftState>>;
+  disabled: boolean;
+};
+
+function ThemeFieldControls({
+  title,
+  palette,
+  savedPalette,
+  redoMap,
+  setPalette,
+  setRedo,
+  variant,
+  hexDraft,
+  setHexDraft,
+  disabled,
+}: ThemeFieldControlsProps) {
+  const handleReset = (key: ThemeFieldKey) => {
+    setRedo((prev) => ({
+      ...prev,
+      [key]: palette[key],
+    }));
+    setPalette((prev) => ({
+      ...prev,
+      [key]: savedPalette[key],
+    }));
+  };
+
+  const handleRedo = (key: ThemeFieldKey) => {
+    if (typeof redoMap[key] !== "string") return;
+    const lastValue = redoMap[key] ?? palette[key];
+    setPalette((prev) => ({
+      ...prev,
+      [key]: lastValue,
+    }));
+    setRedo((prev) => {
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
+  };
+
+  const handleColorChange = (key: ThemeFieldKey, value: string) => {
+    setRedo((prev) => {
+      if (typeof prev[key] === "undefined") {
+        return prev;
+      }
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
+    setPalette((prev) => {
+      const next = {
+        ...prev,
+        [key]: value,
+      };
+      return next;
+    });
+    setHexDraft((prev) => ({
+      ...prev,
+      [variant]: {
+        ...prev[variant],
+        [key]: value,
+      },
+    }));
+  };
+
+  const handleHexInputChange = (key: ThemeFieldKey, value: string) => {
+    const draft = sanitizeHexDraft(value);
+    setHexDraft((prev) => ({
+      ...prev,
+      [variant]: {
+        ...prev[variant],
+        [key]: draft,
+      },
+    }));
+    const expanded = expandToSixHex(draft);
+    if (expanded) {
+      handleColorChange(key, expanded);
+    }
+  };
+
+  const handleHexInputBlur = (key: ThemeFieldKey) => {
+    setHexDraft((prev) => ({
+      ...prev,
+      [variant]: {
+        ...prev[variant],
+        [key]: palette[key],
+      },
+    }));
+  };
+
+  return (
+    <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+      <p className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+        <span>{title}</span>
+        <InfoTooltip
+          label={`${title} info`}
+          title={title}
+          description={
+            variant === "light"
+              ? "Редактираш Light палитрата. Това са стойностите за CSS variables (tokens) при светъл режим."
+              : "Редактираш Dark палитрата. Това са стойностите за CSS variables (tokens) при тъмен режим."
+          }
+        />
+      </p>
+      <div className="mt-3 space-y-4">
+        {THEME_FIELD_ORDER.map((key) => {
+          const def = THEME_FIELD_DEFS[key];
+          const isDirty = palette[key] !== savedPalette[key];
+          const hasRedo = typeof redoMap[key] === "string";
+          return (
+            <div
+              key={key}
+              className="rounded-lg border border-gray-100 bg-gray-50 p-3"
+            >
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-gray-800">
+                    {def.label}
+                  </p>
+                  <p className="text-xs text-gray-500">{def.description}</p>
+                  <p className="mt-1 text-[11px] font-mono text-gray-400">
+                    {def.token}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  {isDirty ? (
+                    <button
+                      type="button"
+                      onClick={() => handleReset(key)}
+                      disabled={disabled}
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-gray-300 bg-white text-sm text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
+                      aria-label={`${def.label} reset`}
+                      title="↩ Reset to saved"
+                    >
+                      ↩
+                    </button>
+                  ) : null}
+                  {hasRedo ? (
+                    <button
+                      type="button"
+                      onClick={() => handleRedo(key)}
+                      disabled={disabled}
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-gray-300 bg-white text-sm text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
+                      aria-label={`${def.label} redo`}
+                      title="↪ Redo"
+                    >
+                      ↪
+                    </button>
+                  ) : null}
+                  <input
+                    type="color"
+                    value={palette[key] ?? "#000000"}
+                    onChange={(e) => handleColorChange(key, e.target.value)}
+                    disabled={disabled}
+                    className="h-9 w-14 rounded border border-gray-300 bg-white"
+                  />
+                  <input
+                    type="text"
+                    inputMode="text"
+                    spellCheck={false}
+                    value={hexDraft[key] ?? palette[key]}
+                    onChange={(e) => handleHexInputChange(key, e.target.value)}
+                    onBlur={() => handleHexInputBlur(key)}
+                    disabled={disabled}
+                    className="h-9 w-28 rounded border border-gray-300 bg-white px-2 font-mono text-sm uppercase text-gray-900"
+                    aria-label={`${def.label} hex value`}
+                  />
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function ThemePreviewCard({
+  palette,
+  variant,
+}: {
+  palette: ThemePalette;
+  variant: ThemeVariant;
+}) {
+  const baseCard: CSSProperties = {
+    backgroundColor: palette.card,
+    color: palette.foreground,
+    borderColor: palette.border,
+  };
+  const primaryButton: CSSProperties = {
+    backgroundColor: palette.primary,
+    color: palette.foreground,
+    borderColor: palette.primary,
+  };
+  const secondaryButton: CSSProperties = {
+    backgroundColor: palette.secondary,
+    color: palette.foreground,
+    borderColor: palette.secondary,
+  };
+  const okChip: CSSProperties = {
+    backgroundColor: palette.fieldOkBg,
+    borderColor: palette.fieldOkBorder,
+    color: palette.foreground,
+  };
+  const errorChip: CSSProperties = {
+    backgroundColor: palette.fieldErrorBg,
+    borderColor: palette.fieldErrorBorder,
+    color: palette.error,
+  };
+
+  const inputBase: CSSProperties = {
+    backgroundColor: palette.card,
+    color: palette.foreground,
+    borderColor: palette.border,
+  };
+  const inputOk: CSSProperties = {
+    backgroundColor: palette.fieldOkBg,
+    color: palette.foreground,
+    borderColor: palette.fieldOkBorder,
+  };
+  const inputError: CSSProperties = {
+    backgroundColor: palette.fieldErrorBg,
+    color: palette.foreground,
+    borderColor: palette.fieldErrorBorder,
+  };
+
+  return (
+    <div
+      className="rounded-2xl border p-4 shadow-sm"
+      style={{
+        backgroundColor: palette.background,
+        color: palette.foreground,
+        borderColor: palette.border,
+      }}
+    >
+      <div className="rounded-xl border p-4 shadow-sm" style={baseCard}>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-xs uppercase tracking-wide text-gray-500">
+              {variant === "light" ? "Light preview" : "Dark preview"}
+            </p>
+            <h3 className="text-lg font-semibold">UI sample headline</h3>
+            <p className="mt-1 text-sm text-gray-600">
+              Примерен текст за основния body цвят и контрасти.
+            </p>
+          </div>
+          <div className="flex flex-col items-center gap-2">
+            <div
+              className="h-12 w-2 rounded-full border border-gray-200"
+              style={{
+                borderColor: palette.border,
+                backgroundColor: palette.scrollTrack,
+              }}
+            >
+              <div
+                className="mx-auto mt-1 h-4 w-1 rounded-full"
+                style={{ backgroundColor: palette.scrollThumb }}
+              />
+            </div>
+            <span className="text-[10px] font-medium text-gray-500">
+              Scroll
+            </span>
+          </div>
+        </div>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <button
+            type="button"
+            className="rounded-full border px-3 py-1 text-xs font-semibold shadow-sm"
+            style={primaryButton}
+          >
+            Primary CTA
+          </button>
+          <button
+            type="button"
+            className="rounded-full border px-3 py-1 text-xs font-semibold shadow-sm"
+            style={secondaryButton}
+          >
+            Secondary
+          </button>
+        </div>
+      </div>
+      <div className="mt-3 flex flex-wrap items-center gap-3 text-xs font-medium">
+        <span
+          className="inline-flex items-center rounded-full border px-2 py-0.5"
+          style={okChip}
+        >
+          ✓ Success state
+        </span>
+        <span
+          className="inline-flex items-center rounded-full border px-2 py-0.5"
+          style={errorChip}
+        >
+          ⚠ Error state
+        </span>
+      </div>
+
+      <div className="mt-4 grid gap-3 md:grid-cols-3">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+            Field (normal)
+          </p>
+          <div
+            className="mt-2 rounded-md border px-3 py-2 text-sm shadow-sm"
+            style={inputBase}
+          >
+            Example input
+          </div>
+        </div>
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+            Field (ok)
+          </p>
+          <div
+            className="mt-2 rounded-md border px-3 py-2 text-sm shadow-sm"
+            style={inputOk}
+          >
+            Valid value
+          </div>
+        </div>
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+            Field (error)
+          </p>
+          <div
+            className="mt-2 rounded-md border px-3 py-2 text-sm shadow-sm"
+            style={inputError}
+          >
+            Invalid value
+          </div>
+          <p className="mt-1 text-xs" style={{ color: palette.error }}>
+            Example error message
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ThemePreviewLegend({
+  lightPalette,
+  darkPalette,
+}: {
+  lightPalette: ThemePalette;
+  darkPalette: ThemePalette;
+}) {
+  return (
+    <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:overflow-auto">
+      <p className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+        <span>Legend</span>
+        <InfoTooltip
+          label="Legend info"
+          title="Legend"
+          description="Списък с основните theme tokens и как изглеждат като цветове при Light и Dark."
+        />
+      </p>
+      <div className="mt-3 grid gap-4">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+            Light
+          </p>
+          <dl className="mt-2 space-y-3">
+            {THEME_PREVIEW_LEGEND_KEYS.map((key) => {
+              const def = THEME_FIELD_DEFS[key];
+              return (
+                <div
+                  key={`legend-light-${key}`}
+                  className="flex items-center gap-3"
+                >
+                  <span
+                    className="h-4 w-4 rounded-full border border-gray-200"
+                    style={{ backgroundColor: lightPalette[key] }}
+                  />
+                  <div>
+                    <dt className="text-sm font-medium text-gray-800">
+                      {def.label}
+                    </dt>
+                    <dd className="text-[11px] text-gray-500">{def.token}</dd>
+                  </div>
+                </div>
+              );
+            })}
+          </dl>
+        </div>
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+            Dark
+          </p>
+          <dl className="mt-2 space-y-3">
+            {THEME_PREVIEW_LEGEND_KEYS.map((key) => {
+              const def = THEME_FIELD_DEFS[key];
+              return (
+                <div
+                  key={`legend-dark-${key}`}
+                  className="flex items-center gap-3"
+                >
+                  <span
+                    className="h-4 w-4 rounded-full border border-gray-200"
+                    style={{ backgroundColor: darkPalette[key] }}
+                  />
+                  <div>
+                    <dt className="text-sm font-medium text-gray-800">
+                      {def.label}
+                    </dt>
+                    <dd className="text-[11px] text-gray-500">{def.token}</dd>
+                  </div>
+                </div>
+              );
+            })}
+          </dl>
+        </div>
+      </div>
     </div>
   );
 }
@@ -972,6 +3197,10 @@ export default function AdminSettingsPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [themeNotice, setThemeNotice] = useState<{
+    type: "error" | "success";
+    message: string;
+  } | null>(null);
 
   const themeStorageKey = "beelms.themeMode";
   const [systemPrefersDark, setSystemPrefersDark] = useState<boolean>(() => {
@@ -1060,6 +3289,14 @@ export default function AdminSettingsPage() {
 
   const [appName, setAppName] = useState<string>("BeeLMS");
   const [browserTitle, setBrowserTitle] = useState<string>("");
+  const [notFoundTitle, setNotFoundTitle] = useState<string>("");
+  const [notFoundMarkdown, setNotFoundMarkdown] = useState<string>("");
+  const [notFoundTitleByLang, setNotFoundTitleByLang] =
+    useState<StringDictionary>({});
+  const [notFoundMarkdownByLang, setNotFoundMarkdownByLang] =
+    useState<StringDictionary>({});
+  const [notFoundEditingLang, setNotFoundEditingLang] =
+    useState<string>("__global");
   const [faviconUrl, setFaviconUrl] = useState<string>("");
   const faviconFileInputRef = useRef<HTMLInputElement | null>(null);
   const [logoUrl, setLogoUrl] = useState<string>("");
@@ -1069,96 +3306,420 @@ export default function AdminSettingsPage() {
   const [logoDarkUrl, setLogoDarkUrl] = useState<string>("");
   const logoDarkFileInputRef = useRef<HTMLInputElement | null>(null);
   const [googleFont, setGoogleFont] = useState<string>("");
-  const [googleFontByLang, setGoogleFontByLang] = useState<
-    Record<string, string>
-  >({});
-  const [fontUrl, setFontUrl] = useState<string>("");
-  const [fontUrlByLang, setFontUrlByLang] = useState<Record<string, string>>(
+  const [googleFontByLang, setGoogleFontByLang] = useState<StringDictionary>(
     {},
   );
+  const [fontUrl, setFontUrl] = useState<string>("");
+  const [fontUrlByLang, setFontUrlByLang] = useState<StringDictionary>({});
+  const [fontLicenseUrl, setFontLicenseUrl] = useState<string>("");
+  const [fontLicenseUrlByLang, setFontLicenseUrlByLang] =
+    useState<StringDictionary>({});
   const fontFileInputRef = useRef<HTMLInputElement | null>(null);
   const perLangFontFileInputRef = useRef<HTMLInputElement | null>(null);
   const [pendingFontLang, setPendingFontLang] = useState<string>("");
+  const fontLicenseFileInputRef = useRef<HTMLInputElement | null>(null);
+  const perLangFontLicenseFileInputRef = useRef<HTMLInputElement | null>(null);
+  const [pendingFontLicenseLang, setPendingFontLicenseLang] =
+    useState<string>("");
+
+  const [seoBaseUrl, setSeoBaseUrl] = useState<string>("");
+  const [seoTitleTemplate, setSeoTitleTemplate] = useState<string>(
+    "{page} | {site}",
+  );
+  const [seoDefaultTitle, setSeoDefaultTitle] = useState<string>("");
+  const [seoDefaultDescription, setSeoDefaultDescription] =
+    useState<string>("");
+  const [seoRobotsIndex, setSeoRobotsIndex] = useState<boolean>(true);
+  const [seoSitemapEnabled, setSeoSitemapEnabled] = useState<boolean>(true);
+  const [seoSitemapIncludeWiki, setSeoSitemapIncludeWiki] =
+    useState<boolean>(true);
+  const [seoSitemapIncludeCourses, setSeoSitemapIncludeCourses] =
+    useState<boolean>(true);
+  const [seoSitemapIncludeLegal, setSeoSitemapIncludeLegal] =
+    useState<boolean>(true);
+  const [seoOpenGraphTitle, setSeoOpenGraphTitle] = useState<string>("");
+  const [seoOpenGraphDescription, setSeoOpenGraphDescription] =
+    useState<string>("");
+  const [seoOpenGraphImageUrl, setSeoOpenGraphImageUrl] =
+    useState<string>("");
+  const [seoTwitterCard, setSeoTwitterCard] = useState<string>(
+    "summary_large_image",
+  );
+  const [seoTwitterTitle, setSeoTwitterTitle] = useState<string>("");
+  const [seoTwitterDescription, setSeoTwitterDescription] =
+    useState<string>("");
+  const [seoTwitterImageUrl, setSeoTwitterImageUrl] = useState<string>("");
+  const seoOpenGraphFileInputRef = useRef<HTMLInputElement | null>(null);
+  const seoTwitterFileInputRef = useRef<HTMLInputElement | null>(null);
   const [themeMode, setThemeMode] = useState<"light" | "dark" | "system">(
     "system",
   );
-  const [themeLight, setThemeLight] = useState<Record<string, string>>({
-    background: "#ffffff",
-    foreground: "#171717",
-    primary: "#16a34a",
-    secondary: "#2563eb",
-    error: "#dc2626",
-    card: "#ffffff",
-    border: "#e5e7eb",
-    scrollThumb: "#86efac",
-    scrollTrack: "#f0fdf4",
-    fieldOkBg: "#f0fdf4",
-    fieldOkBorder: "#dcfce7",
-    fieldErrorBg: "#fef2f2",
-    fieldErrorBorder: "#fee2e2",
+  const [themeLight, setThemeLight] = useState<ThemePalette>({
+    ...DEFAULT_THEME_LIGHT,
   });
-  const [themeDark, setThemeDark] = useState<Record<string, string>>({
-    background: "#0a0a0a",
-    foreground: "#ededed",
-    primary: "#22c55e",
-    secondary: "#60a5fa",
-    error: "#f87171",
-    card: "#111827",
-    border: "#374151",
-    scrollThumb: "#16a34a",
-    scrollTrack: "#0b2a16",
-    fieldOkBg: "#052e16",
-    fieldOkBorder: "#14532d",
-    fieldErrorBg: "#450a0a",
-    fieldErrorBorder: "#7f1d1d",
+  const [savedThemeLight, setSavedThemeLight] = useState<ThemePalette>({
+    ...DEFAULT_THEME_LIGHT,
   });
-  const [savedThemeLight, setSavedThemeLight] = useState<
-    Record<string, string>
-  >({
-    background: "#ffffff",
-    foreground: "#171717",
-    primary: "#16a34a",
-    secondary: "#2563eb",
-    error: "#dc2626",
-    card: "#ffffff",
-    border: "#e5e7eb",
-    scrollThumb: "#86efac",
-    scrollTrack: "#f0fdf4",
-    fieldOkBg: "#f0fdf4",
-    fieldOkBorder: "#dcfce7",
-    fieldErrorBg: "#fef2f2",
-    fieldErrorBorder: "#fee2e2",
+  const [themeDark, setThemeDark] = useState<ThemePalette>({
+    ...DEFAULT_THEME_DARK,
   });
-  const [savedThemeDark, setSavedThemeDark] = useState<Record<string, string>>({
-    background: "#0a0a0a",
-    foreground: "#ededed",
-    primary: "#22c55e",
-    secondary: "#60a5fa",
-    error: "#f87171",
-    card: "#111827",
-    border: "#374151",
-    scrollThumb: "#16a34a",
-    scrollTrack: "#0b2a16",
-    fieldOkBg: "#052e16",
-    fieldOkBorder: "#14532d",
-    fieldErrorBg: "#450a0a",
-    fieldErrorBorder: "#7f1d1d",
+  const [savedThemeDark, setSavedThemeDark] = useState<ThemePalette>({
+    ...DEFAULT_THEME_DARK,
   });
-  const [themeLightRedo, setThemeLightRedo] = useState<
-    Partial<Record<string, string>>
-  >({});
-  const [themeDarkRedo, setThemeDarkRedo] = useState<
-    Partial<Record<string, string>>
-  >({});
+  const [themeLightRedo, setThemeLightRedo] = useState<ThemePaletteDraft>({});
+  const [themeDarkRedo, setThemeDarkRedo] = useState<ThemePaletteDraft>({});
+  const [themePreviewVariant, setThemePreviewVariant] =
+    useState<ThemeVariant>("light");
+  const [themePresetTarget, setThemePresetTarget] =
+    useState<ThemePresetTarget>("both");
+  const themePresetTargetRef = useRef<ThemePresetTarget>("both");
+  const [builtInThemePresetsExpanded, setBuiltInThemePresetsExpanded] =
+    useState<boolean>(false);
+  const [editingBuiltInThemePresetId, setEditingBuiltInThemePresetId] =
+    useState<string | null>(null);
+  const [customThemePresetsLoaded, setCustomThemePresetsLoaded] =
+    useState<boolean>(false);
+  const [customThemePresets, setCustomThemePresets] = useState<
+    CustomThemePreset[]
+  >([]);
+  const [customThemePresetName, setCustomThemePresetName] =
+    useState<string>("");
+  const [customThemePresetDescription, setCustomThemePresetDescription] =
+    useState<string>("");
+  const [editingCustomThemePresetId, setEditingCustomThemePresetId] = useState<
+    string | null
+  >(null);
+  const [themeHexInputs, setThemeHexInputs] = useState<ThemeHexDraftState>(
+    () => ({
+      light: { ...DEFAULT_THEME_LIGHT },
+      dark: { ...DEFAULT_THEME_DARK },
+    }),
+  );
+
+  const previousThemeCssVarsRef = useRef<Record<string, string | null> | null>(
+    null,
+  );
+
+  const effectiveUiTheme: ThemeVariant =
+    uiThemeMode === "system"
+      ? systemPrefersDark
+        ? "dark"
+        : "light"
+      : uiThemeMode;
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+
+    const root = document.documentElement;
+    const palette = effectiveUiTheme === "dark" ? themeDark : themeLight;
+    const vars: Record<string, string> = {
+      "--background": palette.background,
+      "--foreground": palette.foreground,
+      "--primary": palette.primary,
+      "--secondary": palette.secondary,
+      "--error": palette.error,
+      "--card": palette.card,
+      "--border": palette.border,
+      "--scroll-thumb": palette.scrollThumb,
+      "--scroll-track": palette.scrollTrack,
+      "--field-ok-bg": palette.fieldOkBg,
+      "--field-ok-border": palette.fieldOkBorder,
+      "--field-error-bg": palette.fieldErrorBg,
+      "--field-error-border": palette.fieldErrorBorder,
+    };
+
+    if (!previousThemeCssVarsRef.current) {
+      const previous: Record<string, string | null> = {};
+      for (const key of Object.keys(vars)) {
+        const prevInline = root.style.getPropertyValue(key);
+        previous[key] = prevInline.length > 0 ? prevInline : null;
+      }
+      previousThemeCssVarsRef.current = previous;
+    }
+
+    for (const [key, value] of Object.entries(vars)) {
+      root.style.setProperty(key, value);
+    }
+
+    return () => {
+      const previous = previousThemeCssVarsRef.current;
+      if (!previous) return;
+
+      for (const [key, value] of Object.entries(previous)) {
+        if (value === null) {
+          root.style.removeProperty(key);
+        } else {
+          root.style.setProperty(key, value);
+        }
+      }
+    };
+  }, [effectiveUiTheme, systemPrefersDark, themeDark, themeLight, uiThemeMode]);
+
+  useEffect(() => {
+    themePresetTargetRef.current = themePresetTarget;
+  }, [themePresetTarget]);
+
+  useEffect(() => {
+    if (!editingBuiltInThemePresetId || builtInThemePresetsExpanded) {
+      return;
+    }
+    const visibleIds = new Set(THEME_PRESETS.slice(0, 2).map((p) => p.id));
+    if (!visibleIds.has(editingBuiltInThemePresetId)) {
+      setBuiltInThemePresetsExpanded(true);
+    }
+  }, [builtInThemePresetsExpanded, editingBuiltInThemePresetId]);
+
+  const applyThemePreset = (preset: ThemePreset) => {
+    setEditingBuiltInThemePresetId(null);
+    const target = themePresetTargetRef.current;
+    if (target === "light" || target === "both") {
+      setThemeLight(cloneThemePalette(preset.light));
+      setThemeLightRedo({});
+      setThemeHexInputs((prev) => ({
+        ...prev,
+        light: { ...preset.light },
+      }));
+    }
+    if (target === "dark" || target === "both") {
+      setThemeDark(cloneThemePalette(preset.dark));
+      setThemeDarkRedo({});
+      setThemeHexInputs((prev) => ({
+        ...prev,
+        dark: { ...preset.dark },
+      }));
+    }
+    if (target === "light") {
+      setThemePreviewVariant("light");
+    }
+    if (target === "dark") {
+      setThemePreviewVariant("dark");
+    }
+    setThemeNotice({
+      type: "success",
+      message: `Приложих пресет "${preset.name}" (${THEME_PRESET_TARGET_LABEL[target]}). Натисни Запази за да го запазиш.`,
+    });
+  };
+
+  const applyCustomThemePreset = (preset: CustomThemePreset) => {
+    setEditingBuiltInThemePresetId(null);
+    const target = themePresetTargetRef.current;
+    if (target === "light" || target === "both") {
+      setThemeLight(cloneThemePalette(preset.light));
+      setThemeLightRedo({});
+      setThemeHexInputs((prev) => ({
+        ...prev,
+        light: { ...preset.light },
+      }));
+    }
+    if (target === "dark" || target === "both") {
+      setThemeDark(cloneThemePalette(preset.dark));
+      setThemeDarkRedo({});
+      setThemeHexInputs((prev) => ({
+        ...prev,
+        dark: { ...preset.dark },
+      }));
+    }
+    if (target === "light") {
+      setThemePreviewVariant("light");
+    }
+    if (target === "dark") {
+      setThemePreviewVariant("dark");
+    }
+    setThemeNotice({
+      type: "success",
+      message: `Приложих custom пресет "${preset.name}" (${THEME_PRESET_TARGET_LABEL[target]}). Натисни Запази за да го запазиш.`,
+    });
+  };
+
+  const handleEditBuiltInThemePreset = (preset: ThemePreset) => {
+    setThemePresetTarget("both");
+    themePresetTargetRef.current = "both";
+    setThemePreviewVariant("light");
+    setThemeLight(cloneThemePalette(preset.light));
+    setThemeDark(cloneThemePalette(preset.dark));
+    setThemeLightRedo({});
+    setThemeDarkRedo({});
+    setEditingBuiltInThemePresetId(preset.id);
+    setThemeHexInputs((prev) => ({
+      ...prev,
+      light: { ...preset.light },
+      dark: { ...preset.dark },
+    }));
+    setEditingCustomThemePresetId(null);
+    setCustomThemePresetName(preset.name);
+    setCustomThemePresetDescription(preset.description);
+    setThemeNotice({
+      type: "success",
+      message: `Заредих preset "${preset.name}" за редакция. Промени цветовете и натисни Save preset (ще се запази като custom).`,
+    });
+  };
+
+  const handleEditCustomThemePreset = (preset: CustomThemePreset) => {
+    setThemePresetTarget("both");
+    themePresetTargetRef.current = "both";
+    setThemePreviewVariant("light");
+    setThemeLight(cloneThemePalette(preset.light));
+    setThemeDark(cloneThemePalette(preset.dark));
+    setThemeLightRedo({});
+    setThemeDarkRedo({});
+    setEditingBuiltInThemePresetId(null);
+    setThemeHexInputs((prev) => ({
+      ...prev,
+      light: { ...preset.light },
+      dark: { ...preset.dark },
+    }));
+    setEditingCustomThemePresetId(preset.id);
+    setCustomThemePresetName(preset.name);
+    setCustomThemePresetDescription(preset.description ?? "");
+    setThemeNotice({
+      type: "success",
+      message: `Редактираш custom preset "${preset.name}". Промени цветовете и натисни Save preset.`,
+    });
+  };
+
+  const persistCustomThemePresets = async (
+    next: CustomThemePreset[],
+    successMessage: string,
+  ) => {
+    await persistBrandingField(
+      {
+        customThemePresets: next.length > 0 ? next : null,
+      },
+      successMessage,
+      "theme",
+    );
+  };
+
+  const handleCreateCustomThemePreset = async () => {
+    const name = (customThemePresetName ?? "").trim();
+    if (name.length < 2) {
+      setThemeNotice({
+        type: "error",
+        message: "Име на пресета трябва да е поне 2 символа.",
+      });
+      return;
+    }
+
+    const description = (customThemePresetDescription ?? "").trim();
+    const normalizedName = name.toLowerCase();
+    const builtInNameClash = THEME_PRESETS.some(
+      (p) => p.name.trim().toLowerCase() === normalizedName,
+    );
+    if (builtInNameClash) {
+      setThemeNotice({
+        type: "error",
+        message: `Име "${name}" вече съществува като предефиниран preset. Избери различно име.`,
+      });
+      return;
+    }
+    const editingIndex = editingCustomThemePresetId
+      ? customThemePresets.findIndex((p) => p.id === editingCustomThemePresetId)
+      : -1;
+    const existingIndexByName = customThemePresets.findIndex(
+      (p) => p.name.trim().toLowerCase() === normalizedName,
+    );
+
+    if (editingIndex < 0 && existingIndexByName >= 0) {
+      setThemeNotice({
+        type: "error",
+        message: `Име "${name}" вече е заето от custom preset. Избери различно име.`,
+      });
+      return;
+    }
+
+    if (
+      editingIndex >= 0 &&
+      existingIndexByName >= 0 &&
+      existingIndexByName !== editingIndex
+    ) {
+      setThemeNotice({
+        type: "error",
+        message: `Име "${name}" вече е заето от друг custom preset. Избери различно име.`,
+      });
+      return;
+    }
+
+    const existingIndex = editingIndex;
+    const existing =
+      existingIndex >= 0 ? customThemePresets[existingIndex] : null;
+
+    const id =
+      editingCustomThemePresetId ??
+      existing?.id ??
+      (typeof crypto !== "undefined" &&
+      typeof (crypto as unknown as { randomUUID?: () => string }).randomUUID ===
+        "function"
+        ? (crypto as unknown as { randomUUID: () => string }).randomUUID()
+        : `custom-${Date.now()}-${Math.random().toString(16).slice(2)}`);
+
+    const nextPreset: CustomThemePreset = {
+      id,
+      name,
+      ...(description ? { description } : {}),
+      light: cloneThemePalette(themeLight),
+      dark: cloneThemePalette(themeDark),
+    };
+
+    const nextList = [...customThemePresets];
+    if (existingIndex >= 0) {
+      nextList[existingIndex] = nextPreset;
+    } else {
+      nextList.unshift(nextPreset);
+    }
+
+    setThemeNotice(null);
+    await persistCustomThemePresets(
+      nextList,
+      `Custom пресет "${name}" е запазен.`,
+    );
+
+    setEditingCustomThemePresetId(null);
+  };
+
+  const handleDeleteCustomThemePreset = async (preset: CustomThemePreset) => {
+    const ok = window.confirm(
+      `Сигурен ли си, че искаш да изтриеш custom пресет "${preset.name}"?`,
+    );
+    if (!ok) return;
+
+    const nextList = customThemePresets.filter((p) => p.id !== preset.id);
+    setThemeNotice(null);
+    await persistCustomThemePresets(
+      nextList,
+      `Custom пресет "${preset.name}" е изтрит.`,
+    );
+
+    if (editingCustomThemePresetId === preset.id) {
+      setEditingCustomThemePresetId(null);
+    }
+  };
+
+  useEffect(() => {
+    setThemeHexInputs((prev) => ({
+      ...prev,
+      light: { ...themeLight },
+    }));
+  }, [themeLight]);
+
+  useEffect(() => {
+    setThemeHexInputs((prev) => ({
+      ...prev,
+      dark: { ...themeDark },
+    }));
+  }, [themeDark]);
 
   const mergeThemePalette = (
-    prev: Record<string, string>,
-    incoming: Record<string, string | null | undefined> | null | undefined,
-  ): Record<string, string> => {
+    prev: Record<ThemeFieldKey, string>,
+    incoming:
+      | Partial<Record<ThemeFieldKey, string | null | undefined>>
+      | null
+      | undefined,
+  ): Record<ThemeFieldKey, string> => {
     const next = { ...prev };
     for (const [key, value] of Object.entries(incoming ?? {})) {
-      if (typeof value === "string") {
-        next[key] = value;
+      const typedKey = key as ThemeFieldKey;
+      if (typeof value === "string" && THEME_FIELD_KEYS.includes(typedKey)) {
+        next[typedKey] = value;
       }
     }
     return next;
@@ -1812,7 +4373,9 @@ export default function AdminSettingsPage() {
         return;
       }
 
-      setFontUrlByLang((prev) => ({ ...prev, [langCode]: data.url }));
+      setFontUrlByLang((prev) =>
+        upsertStringDictionary(prev, langCode, data.url),
+      );
       await persistBrandingField(
         { fontUrlByLang: { [langCode]: data.url } },
         `Font (${langCode}) файлът е качен и запазен. Refesh-ни страницата за да се приложи навсякъде.`,
@@ -1823,6 +4386,88 @@ export default function AdminSettingsPage() {
       );
     } finally {
       setPendingFontLang("");
+    }
+  };
+
+  const handleBrandingFontLicenseFileSelectedForLang: ChangeEventHandler<
+    HTMLInputElement
+  > = async (event) => {
+    const langCode = (pendingFontLicenseLang ?? "").trim().toLowerCase();
+    if (!langCode) {
+      return;
+    }
+
+    const files = event.target.files;
+    if (!files || files.length === 0) {
+      return;
+    }
+
+    const token = getAccessToken();
+    if (!token) {
+      router.replace("/auth/login");
+      return;
+    }
+
+    setError(null);
+    setSuccess(null);
+
+    const previousUrl = (fontLicenseUrlByLang?.[langCode] ?? "").trim();
+    const formData = new FormData();
+    formData.append("file", files[0]);
+    if (previousUrl.length > 0) {
+      formData.append("previousUrl", previousUrl);
+    }
+
+    try {
+      const res = await fetch(
+        `${API_BASE_URL}/admin/settings/branding/font-license`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        },
+      );
+
+      if (res.status === 401) {
+        router.replace("/auth/login");
+        return;
+      }
+
+      if (!res.ok) {
+        let message = "Неуспешно качване на license файла.";
+        try {
+          const payload = (await res.json()) as { message?: string };
+          if (payload?.message) message = payload.message;
+        } catch {
+          // ignore
+        }
+        setError(message);
+        return;
+      }
+
+      const data = (await res.json()) as { url?: string };
+      if (typeof data.url !== "string") {
+        setError("Неуспешно качване на license файла.");
+        return;
+      }
+
+      setFontLicenseUrlByLang((prev) =>
+        upsertStringDictionary(prev, langCode, data.url),
+      );
+      await persistBrandingField(
+        { fontLicenseUrlByLang: { [langCode]: data.url } },
+        `License (${langCode}) файлът е качен и запазен.`,
+      );
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Неуспешно качване на license файла.",
+      );
+    } finally {
+      setPendingFontLicenseLang("");
     }
   };
 
@@ -1995,6 +4640,13 @@ export default function AdminSettingsPage() {
     }
   };
 
+  const handleBrandingFontLicenseUploadClick = () => {
+    if (fontLicenseFileInputRef.current) {
+      fontLicenseFileInputRef.current.value = "";
+      fontLicenseFileInputRef.current.click();
+    }
+  };
+
   const handleBrandingFontUploadClickForLang = (langCode: string) => {
     if (perLangFontFileInputRef.current) {
       perLangFontFileInputRef.current.value = "";
@@ -2003,7 +4655,15 @@ export default function AdminSettingsPage() {
     }
   };
 
-  const persistBrandingField = async (
+  const handleBrandingFontLicenseUploadClickForLang = (langCode: string) => {
+    if (perLangFontLicenseFileInputRef.current) {
+      perLangFontLicenseFileInputRef.current.value = "";
+      setPendingFontLicenseLang(langCode);
+      perLangFontLicenseFileInputRef.current.click();
+    }
+  };
+
+  const persistSeoField = async (
     patch: Record<string, unknown>,
     successMessage: string,
   ) => {
@@ -2025,6 +4685,165 @@ export default function AdminSettingsPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          seo: patch,
+        }),
+      });
+
+      if (res.status === 401) {
+        router.replace("/auth/login");
+        return;
+      }
+
+      if (!res.ok) {
+        setError("Неуспешно запазване на SEO настройките.");
+        return;
+      }
+
+      const updated = (await res.json()) as AdminSettingsResponse;
+      const s = updated.seo;
+      setSeoBaseUrl(s?.baseUrl ?? "");
+      setSeoTitleTemplate(s?.titleTemplate ?? "{page} | {site}");
+      setSeoDefaultTitle(s?.defaultTitle ?? "");
+      setSeoDefaultDescription(s?.defaultDescription ?? "");
+      setSeoRobotsIndex(s?.robots?.index !== false);
+      setSeoSitemapEnabled(s?.sitemap?.enabled !== false);
+      setSeoSitemapIncludeWiki(s?.sitemap?.includeWiki !== false);
+      setSeoSitemapIncludeCourses(s?.sitemap?.includeCourses !== false);
+      setSeoSitemapIncludeLegal(s?.sitemap?.includeLegal !== false);
+      setSeoOpenGraphTitle(s?.openGraph?.defaultTitle ?? "");
+      setSeoOpenGraphDescription(s?.openGraph?.defaultDescription ?? "");
+      setSeoOpenGraphImageUrl(s?.openGraph?.imageUrl ?? "");
+      setSeoTwitterTitle(s?.twitter?.defaultTitle ?? "");
+      setSeoTwitterDescription(s?.twitter?.defaultDescription ?? "");
+      setSeoTwitterImageUrl(s?.twitter?.imageUrl ?? "");
+      setSeoTwitterCard(s?.twitter?.card ?? "summary_large_image");
+
+      setSuccess(successMessage);
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Неуспешно запазване на SEO настройките.",
+      );
+    }
+  };
+
+  const handleSeoOpenGraphUploadClick = () => {
+    if (seoOpenGraphFileInputRef.current) {
+      seoOpenGraphFileInputRef.current.value = "";
+      seoOpenGraphFileInputRef.current.click();
+    }
+  };
+
+  const handleSeoTwitterUploadClick = () => {
+    if (seoTwitterFileInputRef.current) {
+      seoTwitterFileInputRef.current.value = "";
+      seoTwitterFileInputRef.current.click();
+    }
+  };
+
+  const handleSeoImageSelected = async (
+    purpose: "open-graph" | "twitter",
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) {
+      return;
+    }
+
+    const token = getAccessToken();
+    if (!token) {
+      router.replace("/auth/login");
+      return;
+    }
+
+    setError(null);
+    setSuccess(null);
+
+    const previousUrl =
+      purpose === "twitter"
+        ? (seoTwitterImageUrl ?? "").trim()
+        : (seoOpenGraphImageUrl ?? "").trim();
+
+    const formData = new FormData();
+    formData.append("file", files[0]);
+    formData.append("purpose", purpose);
+    if (previousUrl.length > 0) {
+      formData.append("previousUrl", previousUrl);
+    }
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/admin/settings/seo/image`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (res.status === 401) {
+        router.replace("/auth/login");
+        return;
+      }
+
+      if (!res.ok) {
+        setError("Неуспешно качване на SEO image.");
+        return;
+      }
+
+      const data = (await res.json()) as { url?: string };
+      if (typeof data.url !== "string") {
+        setError("Неуспешно качване на SEO image.");
+        return;
+      }
+
+      if (purpose === "twitter") {
+        setSeoTwitterImageUrl(data.url);
+        await persistSeoField(
+          { twitter: { imageUrl: data.url } },
+          "Twitter image е качен и запазен.",
+        );
+      } else {
+        setSeoOpenGraphImageUrl(data.url);
+        await persistSeoField(
+          { openGraph: { imageUrl: data.url } },
+          "Open Graph image е качен и запазен.",
+        );
+      }
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Неуспешно качване на SEO image.",
+      );
+    }
+  };
+
+  const persistBrandingField = async (
+    patch: Record<string, unknown>,
+    successMessage: string,
+    noticeScope: "global" | "theme" = "global",
+  ) => {
+    const token = getAccessToken();
+    if (!token) {
+      router.replace("/auth/login");
+      return;
+    }
+
+    if (noticeScope === "theme") {
+      setThemeNotice(null);
+    } else {
+      setError(null);
+      setSuccess(null);
+    }
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/admin/settings`, {
+        method: "PATCH",
+        cache: "no-store",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
           branding: patch,
         }),
       });
@@ -2035,7 +4854,14 @@ export default function AdminSettingsPage() {
       }
 
       if (!res.ok) {
-        setError("Неуспешно запазване на branding настройките.");
+        if (noticeScope === "theme") {
+          setThemeNotice({
+            type: "error",
+            message: "Неуспешно запазване на branding настройките.",
+          });
+        } else {
+          setError("Неуспешно запазване на branding настройките.");
+        }
         return;
       }
 
@@ -2043,12 +4869,16 @@ export default function AdminSettingsPage() {
       setFaviconUrl(updated.branding?.faviconUrl ?? "");
       setGoogleFont(updated.branding?.googleFont ?? "");
       setGoogleFontByLang(
-        (updated.branding?.googleFontByLang as Record<string, string>) ?? {},
+        sanitizeStringDictionary(updated.branding?.googleFontByLang),
       );
       setFontUrl(updated.branding?.fontUrl ?? "");
       setFontUrlByLang(
-        (updated.branding?.fontUrlByLang as Record<string, string>) ?? {},
+        sanitizeStringDictionary(updated.branding?.fontUrlByLang),
       );
+      setCustomThemePresets(
+        sanitizeCustomThemePresets(updated.branding?.customThemePresets),
+      );
+      setCustomThemePresetsLoaded(true);
       setLogoUrl(updated.branding?.logoUrl ?? "");
       setLogoLightUrl(updated.branding?.logoLightUrl ?? "");
       setLogoDarkUrl(updated.branding?.logoDarkUrl ?? "");
@@ -2059,12 +4889,26 @@ export default function AdminSettingsPage() {
             ? modeRaw
             : "system";
         setThemeMode(mode);
-        setThemeLight((prev) =>
-          mergeThemePalette(prev, updated.branding?.theme?.light),
-        );
-        setThemeDark((prev) =>
-          mergeThemePalette(prev, updated.branding?.theme?.dark),
-        );
+        setThemeLight((prev) => {
+          const next = mergeThemePalette(prev, updated.branding?.theme?.light);
+          setSavedThemeLight(next);
+          setThemeLightRedo({});
+          setThemeHexInputs((draftPrev) => ({
+            ...draftPrev,
+            light: { ...next },
+          }));
+          return next;
+        });
+        setThemeDark((prev) => {
+          const next = mergeThemePalette(prev, updated.branding?.theme?.dark);
+          setSavedThemeDark(next);
+          setThemeDarkRedo({});
+          setThemeHexInputs((draftPrev) => ({
+            ...draftPrev,
+            dark: { ...next },
+          }));
+          return next;
+        });
       }
       setCursorUrl(updated.branding?.cursorUrl ?? "");
       setCursorLightUrl(updated.branding?.cursorLightUrl ?? "");
@@ -2089,11 +4933,19 @@ export default function AdminSettingsPage() {
             ? String(updated.branding.cursorHotspot.y)
             : "",
       };
-      setSuccess(successMessage);
+      if (noticeScope === "theme") {
+        setThemeNotice({ type: "success", message: successMessage });
+      } else {
+        setSuccess(successMessage);
+      }
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Неуспешно запазване на branding.",
-      );
+      const message =
+        err instanceof Error ? err.message : "Неуспешно запазване на branding.";
+      if (noticeScope === "theme") {
+        setThemeNotice({ type: "error", message });
+      } else {
+        setError(message);
+      }
     }
   };
 
@@ -2449,19 +5301,98 @@ export default function AdminSettingsPage() {
       );
     }
   };
+
+  const handleBrandingFontLicenseFileSelected: ChangeEventHandler<
+    HTMLInputElement
+  > = async (event) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) {
+      return;
+    }
+
+    const token = getAccessToken();
+    if (!token) {
+      router.replace("/auth/login");
+      return;
+    }
+
+    setError(null);
+    setSuccess(null);
+
+    const previousUrl = (fontLicenseUrl ?? "").trim();
+    const formData = new FormData();
+    formData.append("file", files[0]);
+    if (previousUrl.length > 0) {
+      formData.append("previousUrl", previousUrl);
+    }
+
+    try {
+      const res = await fetch(
+        `${API_BASE_URL}/admin/settings/branding/font-license`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        },
+      );
+
+      if (res.status === 401) {
+        router.replace("/auth/login");
+        return;
+      }
+
+      if (!res.ok) {
+        let message = "Неуспешно качване на license файла.";
+        try {
+          const payload = (await res.json()) as { message?: string };
+          if (payload?.message) message = payload.message;
+        } catch {
+          // ignore
+        }
+        setError(message);
+        return;
+      }
+
+      const data = (await res.json()) as { url?: string };
+      if (typeof data.url !== "string") {
+        setError("Неуспешно качване на license файла.");
+        return;
+      }
+
+      setFontLicenseUrl(data.url);
+      await persistBrandingField(
+        { fontLicenseUrl: data.url },
+        "License файлът е качен и запазен.",
+      );
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Неуспешно качване на license файла.",
+      );
+    }
+  };
   const metadataSectionAccent = (filled: boolean) =>
     filled ? "border-green-100 bg-green-50" : "border-red-100 bg-red-50";
 
   const [wiki, setWiki] = useState<boolean>(true);
   const [wikiPublic, setWikiPublic] = useState<boolean>(true);
   const [courses, setCourses] = useState<boolean>(true);
-  const [coursesPublic, setCoursesPublic] = useState<boolean>(true);
-  const [myCourses, setMyCourses] = useState<boolean>(true);
-  const [profile, setProfile] = useState<boolean>(true);
-  const [auth, setAuth] = useState<boolean>(true);
-  const [authLogin, setAuthLogin] = useState<boolean>(true);
-  const [authRegister, setAuthRegister] = useState<boolean>(true);
-  const [captcha, setCaptcha] = useState<boolean>(false);
+  const [coursesPublic, setCoursesPublic] = useState(true);
+  const [myCourses, setMyCourses] = useState(true);
+  const [profile, setProfile] = useState(true);
+  const [accessibilityWidget, setAccessibilityWidget] = useState(true);
+  const [seoEnabled, setSeoEnabled] = useState(true);
+  const [themeLightEnabled, setThemeLightEnabled] = useState(true);
+  const [themeDarkEnabled, setThemeDarkEnabled] = useState(true);
+  const [themeModeSelectorEnabled, setThemeModeSelectorEnabled] =
+    useState(true);
+  const [auth, setAuth] = useState(true);
+  const [authLogin, setAuthLogin] = useState(true);
+  const [authRegister, setAuthRegister] = useState(true);
+  const [captcha, setCaptcha] = useState(false);
   const [captchaLogin, setCaptchaLogin] = useState<boolean>(false);
   const [captchaRegister, setCaptchaRegister] = useState<boolean>(false);
   const [captchaForgotPassword, setCaptchaForgotPassword] =
@@ -2912,16 +5843,28 @@ export default function AdminSettingsPage() {
 
         setAppName(data.branding?.appName ?? "BeeLMS");
         setBrowserTitle(data.branding?.browserTitle ?? "");
+        setNotFoundTitle(data.branding?.notFoundTitle ?? "");
+        setNotFoundMarkdown(data.branding?.notFoundMarkdown ?? "");
+        setNotFoundTitleByLang(
+          sanitizeStringDictionary(data.branding?.notFoundTitleByLang),
+        );
+        setNotFoundMarkdownByLang(
+          sanitizeStringDictionary(data.branding?.notFoundMarkdownByLang),
+        );
         setSocialDescription(data.branding?.socialDescription ?? "");
         setFaviconUrl(data.branding?.faviconUrl ?? "");
         setGoogleFont(data.branding?.googleFont ?? "");
         setGoogleFontByLang(
-          (data.branding?.googleFontByLang as Record<string, string>) ?? {},
+          sanitizeStringDictionary(data.branding?.googleFontByLang),
         );
         setFontUrl(data.branding?.fontUrl ?? "");
         setFontUrlByLang(
-          (data.branding?.fontUrlByLang as Record<string, string>) ?? {},
+          sanitizeStringDictionary(data.branding?.fontUrlByLang),
         );
+        setCustomThemePresets(
+          sanitizeCustomThemePresets(data.branding?.customThemePresets),
+        );
+        setCustomThemePresetsLoaded(true);
         setLogoUrl(data.branding?.logoUrl ?? "");
         setLogoLightUrl(data.branding?.logoLightUrl ?? "");
         setLogoDarkUrl(data.branding?.logoDarkUrl ?? "");
@@ -3044,6 +5987,11 @@ export default function AdminSettingsPage() {
         setCoursesPublic(f?.coursesPublic !== false);
         setMyCourses(f?.myCourses !== false);
         setProfile(f?.profile !== false);
+        setAccessibilityWidget(f?.accessibilityWidget !== false);
+        setSeoEnabled(f?.seo !== false);
+        setThemeLightEnabled(f?.themeLight !== false);
+        setThemeDarkEnabled(f?.themeDark !== false);
+        setThemeModeSelectorEnabled(f?.themeModeSelector !== false);
         setAuth(f?.auth !== false);
         setAuthLogin(f?.authLogin !== false);
         setAuthRegister(f?.authRegister !== false);
@@ -3069,6 +6017,26 @@ export default function AdminSettingsPage() {
           buildSocialCredentialState(data.socialCredentials),
         );
         setSocialTestStates(buildSocialTestStates());
+
+        {
+          const s = data.seo;
+          setSeoBaseUrl(s?.baseUrl ?? "");
+          setSeoTitleTemplate(s?.titleTemplate ?? "{page} | {site}");
+          setSeoDefaultTitle(s?.defaultTitle ?? "");
+          setSeoDefaultDescription(s?.defaultDescription ?? "");
+          setSeoRobotsIndex(s?.robots?.index !== false);
+          setSeoSitemapEnabled(s?.sitemap?.enabled !== false);
+          setSeoSitemapIncludeWiki(s?.sitemap?.includeWiki !== false);
+          setSeoSitemapIncludeCourses(s?.sitemap?.includeCourses !== false);
+          setSeoSitemapIncludeLegal(s?.sitemap?.includeLegal !== false);
+          setSeoOpenGraphTitle(s?.openGraph?.defaultTitle ?? "");
+          setSeoOpenGraphDescription(s?.openGraph?.defaultDescription ?? "");
+          setSeoOpenGraphImageUrl(s?.openGraph?.imageUrl ?? "");
+          setSeoTwitterTitle(s?.twitter?.defaultTitle ?? "");
+          setSeoTwitterDescription(s?.twitter?.defaultDescription ?? "");
+          setSeoTwitterImageUrl(s?.twitter?.imageUrl ?? "");
+          setSeoTwitterCard(s?.twitter?.card ?? "summary_large_image");
+        }
 
         const l = data.languages;
         setSupportedLangs(Array.isArray(l?.supported) ? l.supported : ["bg"]);
@@ -3128,6 +6096,14 @@ export default function AdminSettingsPage() {
     };
 
     const nextBrowserTitle = normalizeNullableString(browserTitle);
+    const nextNotFoundTitle = normalizeNullableString(notFoundTitle);
+    const nextNotFoundMarkdown = normalizeNullableString(notFoundMarkdown);
+    const nextNotFoundTitleByLang =
+      Object.keys(notFoundTitleByLang).length > 0 ? notFoundTitleByLang : null;
+    const nextNotFoundMarkdownByLang =
+      Object.keys(notFoundMarkdownByLang).length > 0
+        ? notFoundMarkdownByLang
+        : null;
     const nextFaviconUrl = normalizeNullableString(faviconUrl);
     const nextFontUrl = normalizeNullableString(fontUrl);
     const nextLogoUrl = normalizeNullableString(logoUrl);
@@ -3389,9 +6365,9 @@ export default function AdminSettingsPage() {
 
     setSocialFieldErrors(nextFieldErrors);
 
-    if (hasFieldErrors) {
-      return;
-    }
+    // Social OAuth конфигурацията не трябва да блокира запазването на останалите настройки
+    // (напр. Theme). Ако има грешки, НЕ пращаме socialCredentials, но продължаваме със Save.
+    const shouldPersistSocialCredentials = !hasFieldErrors;
 
     setSaving(true);
 
@@ -3441,6 +6417,10 @@ export default function AdminSettingsPage() {
           branding: {
             appName: nextAppName,
             browserTitle: nextBrowserTitle,
+            notFoundTitle: nextNotFoundTitle,
+            notFoundMarkdown: nextNotFoundMarkdown,
+            notFoundTitleByLang: nextNotFoundTitleByLang,
+            notFoundMarkdownByLang: nextNotFoundMarkdownByLang,
             faviconUrl: nextFaviconUrl,
             fontUrl: nextFontUrl,
             theme: {
@@ -3467,6 +6447,11 @@ export default function AdminSettingsPage() {
             coursesPublic,
             myCourses,
             profile,
+            accessibilityWidget,
+            seo: seoEnabled,
+            themeLight: themeLightEnabled,
+            themeDark: themeDarkEnabled,
+            themeModeSelector: themeModeSelectorEnabled,
             auth,
             authLogin,
             authRegister,
@@ -3486,11 +6471,40 @@ export default function AdminSettingsPage() {
             infraMonitoring,
             infraErrorTracking,
           },
+          seo: {
+            baseUrl: normalizeNullableString(seoBaseUrl),
+            titleTemplate: normalizeNullableString(seoTitleTemplate),
+            defaultTitle: normalizeNullableString(seoDefaultTitle),
+            defaultDescription: normalizeNullableString(seoDefaultDescription),
+            robots: {
+              index: seoRobotsIndex,
+            },
+            sitemap: {
+              enabled: seoSitemapEnabled,
+              includeWiki: seoSitemapIncludeWiki,
+              includeCourses: seoSitemapIncludeCourses,
+              includeLegal: seoSitemapIncludeLegal,
+            },
+            openGraph: {
+              defaultTitle: normalizeNullableString(seoOpenGraphTitle),
+              defaultDescription: normalizeNullableString(
+                seoOpenGraphDescription,
+              ),
+              imageUrl: normalizeNullableString(seoOpenGraphImageUrl),
+            },
+            twitter: {
+              card: seoTwitterCard,
+              defaultTitle: normalizeNullableString(seoTwitterTitle),
+              defaultDescription: normalizeNullableString(seoTwitterDescription),
+              imageUrl: normalizeNullableString(seoTwitterImageUrl),
+            },
+          },
           languages: {
             supported: supportedLangs,
             default: nextDefaultLang,
           },
           socialCredentials:
+            shouldPersistSocialCredentials &&
             Object.keys(socialCredentialPayload).length > 0
               ? socialCredentialPayload
               : undefined,
@@ -3513,9 +6527,22 @@ export default function AdminSettingsPage() {
       setSocialCredentialForms(
         buildSocialCredentialState(updated.socialCredentials),
       );
+      setCustomThemePresets(
+        sanitizeCustomThemePresets(updated.branding?.customThemePresets),
+      );
+      setCustomThemePresetsLoaded(true);
       setFaviconUrl(updated.branding?.faviconUrl ?? "");
       setGoogleFont(updated.branding?.googleFont ?? "");
       setFontUrl(updated.branding?.fontUrl ?? "");
+      setFontLicenseUrl(updated.branding?.fontLicenseUrl ?? "");
+      setNotFoundTitle(updated.branding?.notFoundTitle ?? "");
+      setNotFoundMarkdown(updated.branding?.notFoundMarkdown ?? "");
+      setNotFoundTitleByLang(
+        sanitizeStringDictionary(updated.branding?.notFoundTitleByLang),
+      );
+      setNotFoundMarkdownByLang(
+        sanitizeStringDictionary(updated.branding?.notFoundMarkdownByLang),
+      );
       setLogoUrl(updated.branding?.logoUrl ?? "");
       setLogoLightUrl(updated.branding?.logoLightUrl ?? "");
       setLogoDarkUrl(updated.branding?.logoDarkUrl ?? "");
@@ -3535,11 +6562,40 @@ export default function AdminSettingsPage() {
 
       setSocialMetadataLastSaved(socialMetadataSnapshotFromState());
 
-      setSuccess("Настройките са запазени.");
-      setSavedThemeLight(themeLight);
-      setSavedThemeDark(themeDark);
-      setThemeLightRedo({});
-      setThemeDarkRedo({});
+      {
+        const modeRaw = updated.branding?.theme?.mode ?? "system";
+        const mode =
+          modeRaw === "light" || modeRaw === "dark" || modeRaw === "system"
+            ? modeRaw
+            : "system";
+        setThemeMode(mode);
+
+        const nextLight = mergeThemePalette(
+          themeLight,
+          updated.branding?.theme?.light,
+        );
+        const nextDark = mergeThemePalette(
+          themeDark,
+          updated.branding?.theme?.dark,
+        );
+        setThemeLight(nextLight);
+        setThemeDark(nextDark);
+        setSavedThemeLight(nextLight);
+        setSavedThemeDark(nextDark);
+        setThemeLightRedo({});
+        setThemeDarkRedo({});
+        setThemeHexInputs((draftPrev) => ({
+          ...draftPrev,
+          light: { ...nextLight },
+          dark: { ...nextDark },
+        }));
+      }
+
+      setSuccess(
+        hasFieldErrors
+          ? "Настройките са запазени (без Social OAuth credentials – има липсващи полета)."
+          : "Настройките са запазени.",
+      );
     } catch {
       setError("Възникна грешка при връзката със сървъра.");
     } finally {
@@ -3862,12 +6918,6 @@ export default function AdminSettingsPage() {
       }
     };
 
-  const effectiveUiTheme =
-    uiThemeMode === "system"
-      ? systemPrefersDark
-        ? "dark"
-        : "light"
-      : uiThemeMode;
   const resolvedCursorUrl =
     effectiveUiTheme === "dark"
       ? (cursorDarkUrl ?? "").trim() || (cursorUrl ?? "").trim()
@@ -3901,6 +6951,23 @@ export default function AdminSettingsPage() {
           <AccordionSection
             title="Branding"
             description="Настройки за идентичност."
+            headerAdornment={
+              <InfoTooltip
+                label="Какво включва Branding"
+                title="Branding"
+                description={
+                  <div className="space-y-2">
+                    <p>
+                      Настройки за визуалната идентичност на системата – име,
+                      404 страница, theme, favicon/logo, шрифтове и курсор.
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Промените влизат в сила след &quot;Запази&quot;.
+                    </p>
+                  </div>
+                }
+              />
+            }
             open={Boolean(openSections.branding)}
             onToggle={() => toggleSection("branding")}
           >
@@ -3924,6 +6991,143 @@ export default function AdminSettingsPage() {
               />
             </div>
 
+            <div className="mt-6 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-gray-500">
+                    404 Page
+                  </p>
+                  <p className="text-sm text-gray-700">
+                    Редактирай глобалната 404 страница (title + Markdown
+                    съдържание).
+                  </p>
+                </div>
+                <InfoTooltip
+                  label="404 page info"
+                  title="404 Page"
+                  description="Това съдържание се показва при несъществуващ URL. Промените влизат в сила след Save."
+                />
+              </div>
+
+              <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div>
+                  <label className="flex items-center justify-between gap-2 text-sm font-medium text-gray-700">
+                    <span className="flex items-center gap-2">
+                      <span>Language override</span>
+                      <InfoTooltip
+                        label="404 language override info"
+                        title="Language override"
+                        description="Избери за кой език редактираш 404 текста. Ако за даден език липсва override, ще се ползва Global (default)."
+                      />
+                    </span>
+                  </label>
+                  <select
+                    value={notFoundEditingLang}
+                    onChange={(e) => setNotFoundEditingLang(e.target.value)}
+                    disabled={saving}
+                    className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                  >
+                    <option value="__global">Global (default)</option>
+                    {supportedLangs.map((lang) => (
+                      <option key={lang} value={lang}>
+                        {lang}
+                      </option>
+                    ))}
+                  </select>
+
+                  <label className="flex items-center justify-between gap-2 text-sm font-medium text-gray-700">
+                    <span className="flex items-center gap-2">
+                      <span>404 title</span>
+                      <InfoTooltip
+                        label="404 title info"
+                        title="404 title"
+                        description="Заглавието на 404 страницата. Може да е различно по езици чрез Language override."
+                      />
+                    </span>
+                  </label>
+                  <input
+                    value={
+                      notFoundEditingLang === "__global"
+                        ? notFoundTitle
+                        : (notFoundTitleByLang[notFoundEditingLang] ?? "")
+                    }
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      if (notFoundEditingLang === "__global") {
+                        setNotFoundTitle(v);
+                        return;
+                      }
+                      setNotFoundTitleByLang((prev) =>
+                        upsertStringDictionary(prev, notFoundEditingLang, v),
+                      );
+                    }}
+                    className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                    placeholder="Страницата не е намерена"
+                    disabled={saving}
+                  />
+
+                  <label className="mt-4 flex items-center justify-between gap-2 text-sm font-medium text-gray-700">
+                    <span className="flex items-center gap-2">
+                      <span>404 markdown</span>
+                      <InfoTooltip
+                        label="404 markdown info"
+                        title="404 markdown"
+                        description="Markdown съдържание за 404 страницата. Поддържа линкове, списъци и др. Ако override е празен, се използва Global."
+                      />
+                    </span>
+                  </label>
+                  <textarea
+                    value={
+                      notFoundEditingLang === "__global"
+                        ? notFoundMarkdown
+                        : (notFoundMarkdownByLang[notFoundEditingLang] ?? "")
+                    }
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      if (notFoundEditingLang === "__global") {
+                        setNotFoundMarkdown(v);
+                        return;
+                      }
+                      setNotFoundMarkdownByLang((prev) =>
+                        upsertStringDictionary(prev, notFoundEditingLang, v),
+                      );
+                    }}
+                    rows={10}
+                    className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                    placeholder="Можеш да ползваш Markdown – линкове, списъци и т.н."
+                    disabled={saving}
+                  />
+                  <p className="mt-1 text-xs text-gray-500">
+                    Ако override е празно за избрания език, ще се ползва Global.
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-sm font-medium text-gray-700">Preview</p>
+                  <div className="mt-2 rounded-lg border border-gray-200 bg-white p-3">
+                    {(() => {
+                      const effectiveMarkdown =
+                        notFoundEditingLang === "__global"
+                          ? notFoundMarkdown
+                          : (notFoundMarkdownByLang[notFoundEditingLang] ??
+                              "") ||
+                            notFoundMarkdown;
+                      return effectiveMarkdown.trim().length > 0 ? (
+                        <div className="prose prose-zinc max-w-none">
+                          <WikiMarkdown content={effectiveMarkdown} />
+                        </div>
+                      ) : (
+                        <p className="text-sm text-gray-600">
+                          (Няма зададен Markdown. Ще се използва default 404
+                          текст.)
+                        </p>
+                      );
+                    })()}
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="mt-6">
               <p className="flex items-center gap-2 text-sm font-semibold text-gray-900">
                 <span>Theme</span>
@@ -3940,7 +7144,7 @@ export default function AdminSettingsPage() {
                     <InfoTooltip
                       label="Theme mode info"
                       title="Theme mode"
-                      description="system следва OS/browser настройката. light/dark форсират конкретен режим."
+                      description="system следва OS/browser настройката. light/dark форсират конкретен режим. Тази настройка задава default за системата. Ако Feature toggle 'Theme selector' е включен, потребителите могат да override-ват режима локално (localStorage). Ако е изключен, dropdown-ът изчезва и режимът е админски forced за всички."
                     />
                   </span>
                 </label>
@@ -3958,196 +7162,464 @@ export default function AdminSettingsPage() {
                 </select>
               </div>
 
-              <div className="mt-4 grid max-w-3xl grid-cols-1 gap-4 md:grid-cols-2">
-                <div className="rounded-md border border-gray-200 bg-white p-3">
-                  <p className="text-sm font-semibold text-gray-900">Light</p>
-                  <div className="mt-3 space-y-3">
-                    {(
-                      [
-                        ["background", "Background"],
-                        ["foreground", "Foreground"],
-                        ["primary", "Primary"],
-                        ["secondary", "Secondary"],
-                        ["error", "Error"],
-                        ["card", "Card"],
-                        ["border", "Border"],
-                        ["scrollThumb", "Scroll thumb"],
-                        ["scrollTrack", "Scroll track"],
-                        ["fieldOkBg", "Selected/OK bg"],
-                        ["fieldOkBorder", "Selected/OK border"],
-                        ["fieldErrorBg", "Missing/Error bg"],
-                        ["fieldErrorBorder", "Missing/Error border"],
-                      ] as Array<[string, string]>
-                    ).map(([key, label]) => (
-                      <label
-                        key={key}
-                        className="flex items-center justify-between gap-3 text-sm text-gray-700"
-                      >
-                        <span>{label}</span>
-                        <div className="flex items-center gap-2">
-                          {themeLight[key] !== savedThemeLight[key] ? (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setThemeLightRedo((prev) => ({
-                                  ...prev,
-                                  [key]: themeLight[key] ?? "",
-                                }));
-                                setThemeLight((prev) => ({
-                                  ...prev,
-                                  [key]: savedThemeLight[key] ?? prev[key],
-                                }));
-                              }}
-                              disabled={saving}
-                              className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-gray-300 bg-white text-sm text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
-                              aria-label={`${label} reset`}
-                              title="↩ Reset to saved"
-                            >
-                              ↩
-                            </button>
-                          ) : null}
-                          {typeof themeLightRedo[key] === "string" ? (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setThemeLight((prev) => ({
-                                  ...prev,
-                                  [key]: themeLightRedo[key] ?? prev[key],
-                                }));
-                                setThemeLightRedo((prev) => {
-                                  const next = { ...prev };
-                                  delete next[key];
-                                  return next;
-                                });
-                              }}
-                              disabled={saving}
-                              className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-gray-300 bg-white text-sm text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
-                              aria-label={`${label} redo`}
-                              title="↪ Redo"
-                            >
-                              ↪
-                            </button>
-                          ) : null}
-                          <input
-                            type="color"
-                            value={themeLight[key] ?? "#000000"}
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              setThemeLightRedo((prev) => {
-                                if (typeof prev[key] === "undefined")
-                                  return prev;
-                                const next = { ...prev };
-                                delete next[key];
-                                return next;
-                              });
-                              setThemeLight((prev) => ({
-                                ...prev,
-                                [key]: value,
-                              }));
-                            }}
-                            disabled={saving}
-                            className="h-9 w-14 rounded border border-gray-300 bg-white"
-                          />
-                        </div>
-                      </label>
-                    ))}
+              <div className="mt-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                      <span>Presets</span>
+                      <InfoTooltip
+                        label="Presets info"
+                        title="Presets"
+                        description="Готови палитри, които можеш да приложиш към Light/Dark. Полезно за бърз старт или reset към добра комбинация."
+                      />
+                    </p>
+                    <p className="text-sm text-gray-700">
+                      Избери готова цветова палитра и я приложи към Light/Dark.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold text-gray-600">
+                      Apply to
+                    </span>
+                    <InfoTooltip
+                      label="Apply to info"
+                      title="Apply to"
+                      description="Избираш дали preset-ът да се приложи към Light, Dark или и към двете палитри."
+                    />
+                    <select
+                      value={themePresetTarget}
+                      onChange={(e) => {
+                        const next = e.target.value as ThemePresetTarget;
+                        themePresetTargetRef.current = next;
+                        setThemePresetTarget(next);
+                        if (next === "light" || next === "dark") {
+                          setThemePreviewVariant(next);
+                        }
+                      }}
+                      disabled={saving}
+                      className="h-9 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                    >
+                      {THEME_PRESET_TARGETS.map((target) => (
+                        <option key={target} value={target}>
+                          {THEME_PRESET_TARGET_LABEL[target]}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 
-                <div className="rounded-md border border-gray-200 bg-white p-3">
-                  <p className="text-sm font-semibold text-gray-900">Dark</p>
-                  <div className="mt-3 space-y-3">
-                    {(
-                      [
-                        ["background", "Background"],
-                        ["foreground", "Foreground"],
-                        ["primary", "Primary"],
-                        ["secondary", "Secondary"],
-                        ["error", "Error"],
-                        ["card", "Card"],
-                        ["border", "Border"],
-                        ["scrollThumb", "Scroll thumb"],
-                        ["scrollTrack", "Scroll track"],
-                        ["fieldOkBg", "Selected/OK bg"],
-                        ["fieldOkBorder", "Selected/OK border"],
-                        ["fieldErrorBg", "Missing/Error bg"],
-                        ["fieldErrorBorder", "Missing/Error border"],
-                      ] as Array<[string, string]>
-                    ).map(([key, label]) => (
-                      <label
-                        key={key}
-                        className="flex items-center justify-between gap-3 text-sm text-gray-700"
+                <div className="mt-4 grid gap-3 md:grid-cols-2">
+                  {(builtInThemePresetsExpanded
+                    ? THEME_PRESETS
+                    : THEME_PRESETS.slice(0, 2)
+                  ).map((preset) => {
+                    const isEditing = editingBuiltInThemePresetId === preset.id;
+                    const lightForSwatches = isEditing
+                      ? themeLight
+                      : preset.light;
+                    const darkForSwatches = isEditing ? themeDark : preset.dark;
+                    const activePalette =
+                      themePreviewVariant === "light" ? themeLight : themeDark;
+
+                    return (
+                      <div
+                        key={preset.id}
+                        className="rounded-lg border border-gray-200 bg-gray-50 p-3"
                       >
-                        <span>{label}</span>
-                        <div className="flex items-center gap-2">
-                          {themeDark[key] !== savedThemeDark[key] ? (
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <p className="text-sm font-semibold text-gray-900">
+                              {preset.name}
+                            </p>
+                            <p className="mt-1 text-xs text-gray-600">
+                              {preset.description}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2">
                             <button
                               type="button"
-                              onClick={() => {
-                                setThemeDarkRedo((prev) => ({
-                                  ...prev,
-                                  [key]: themeDark[key] ?? "",
-                                }));
-                                setThemeDark((prev) => ({
-                                  ...prev,
-                                  [key]: savedThemeDark[key] ?? prev[key],
-                                }));
-                              }}
+                              onClick={() =>
+                                handleEditBuiltInThemePreset(preset)
+                              }
                               disabled={saving}
-                              className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-gray-300 bg-white text-sm text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
-                              aria-label={`${label} reset`}
-                              title="↩ Reset to saved"
+                              className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
                             >
-                              ↩
+                              Edit
                             </button>
-                          ) : null}
-                          {typeof themeDarkRedo[key] === "string" ? (
                             <button
                               type="button"
-                              onClick={() => {
-                                setThemeDark((prev) => ({
-                                  ...prev,
-                                  [key]: themeDarkRedo[key] ?? prev[key],
-                                }));
-                                setThemeDarkRedo((prev) => {
-                                  const next = { ...prev };
-                                  delete next[key];
-                                  return next;
-                                });
-                              }}
+                              onClick={() => applyThemePreset(preset)}
                               disabled={saving}
-                              className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-gray-300 bg-white text-sm text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
-                              aria-label={`${label} redo`}
-                              title="↪ Redo"
+                              className="inline-flex items-center justify-center rounded-md border bg-white px-3 py-1.5 text-xs font-semibold hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+                              style={{
+                                borderColor: activePalette.primary,
+                                color: activePalette.primary,
+                              }}
                             >
-                              ↪
+                              Apply
                             </button>
-                          ) : null}
-                          <input
-                            type="color"
-                            value={themeDark[key] ?? "#000000"}
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              setThemeDarkRedo((prev) => {
-                                if (typeof prev[key] === "undefined")
-                                  return prev;
-                                const next = { ...prev };
-                                delete next[key];
-                                return next;
-                              });
-                              setThemeDark((prev) => ({
-                                ...prev,
-                                [key]: value,
-                              }));
-                            }}
-                            disabled={saving}
-                            className="h-9 w-14 rounded border border-gray-300 bg-white"
-                          />
+                          </div>
                         </div>
-                      </label>
-                    ))}
+
+                        <div className="mt-3 space-y-2">
+                          <div className="flex items-center gap-2">
+                            <span className="w-10 text-[10px] font-semibold uppercase tracking-wide text-gray-500">
+                              Light
+                            </span>
+                            <div className="flex items-center gap-1">
+                              {THEME_PRESET_SWATCH_KEYS.map((key) => (
+                                <span
+                                  key={`light-${preset.id}-${key}`}
+                                  className="h-4 w-4 rounded-full border border-gray-200"
+                                  style={{
+                                    backgroundColor: lightForSwatches[key],
+                                  }}
+                                  title={`Light ${key}: ${lightForSwatches[key]}`}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="w-10 text-[10px] font-semibold uppercase tracking-wide text-gray-500">
+                              Dark
+                            </span>
+                            <div className="flex items-center gap-1">
+                              {THEME_PRESET_SWATCH_KEYS.map((key) => (
+                                <span
+                                  key={`dark-${preset.id}-${key}`}
+                                  className="h-4 w-4 rounded-full border border-gray-200"
+                                  style={{
+                                    backgroundColor: darkForSwatches[key],
+                                  }}
+                                  title={`Dark ${key}: ${darkForSwatches[key]}`}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {THEME_PRESETS.length > 2 ? (
+                  <div className="mt-4 flex items-center justify-center">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setBuiltInThemePresetsExpanded((prev) => !prev)
+                      }
+                      disabled={saving}
+                      className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {builtInThemePresetsExpanded
+                        ? "Скрий"
+                        : `Покажи още (${THEME_PRESETS.length - 2})`}
+                    </button>
+                  </div>
+                ) : null}
+              </div>
+
+              <div className="mt-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                      <span>Custom presets</span>
+                      <InfoTooltip
+                        label="Custom presets info"
+                        title="Custom presets"
+                        description="Запази текущата Light+Dark конфигурация като preset (видим за всички админи). Можеш да Edit/Delete и да Apply върху текущите цветове."
+                      />
+                    </p>
+                    <p className="text-sm text-gray-700">
+                      Запази текущите Light+Dark цветове като споделен preset за
+                      всички админи.
+                    </p>
                   </div>
                 </div>
+
+                {themeNotice ? (
+                  <div
+                    className={`mt-3 rounded-md border px-4 py-3 text-sm ${
+                      themeNotice.type === "error"
+                        ? "border-red-200 bg-red-50 text-red-700"
+                        : "border-green-200 bg-green-50 text-green-700"
+                    }`}
+                  >
+                    {themeNotice.message}
+                  </div>
+                ) : null}
+
+                <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-xs text-gray-500">
+                    {editingCustomThemePresetId
+                      ? `Editing preset: ${editingCustomThemePresetId}`
+                      : ""}
+                  </p>
+                  {editingCustomThemePresetId ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingCustomThemePresetId(null);
+                        setCustomThemePresetName("");
+                        setCustomThemePresetDescription("");
+                        setThemeNotice(null);
+                      }}
+                      disabled={saving}
+                      className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      Cancel edit
+                    </button>
+                  ) : null}
+                </div>
+
+                <div className="mt-4 grid gap-3 md:grid-cols-[minmax(0,1fr)_160px]">
+                  <div className="grid gap-2">
+                    <input
+                      value={customThemePresetName}
+                      onChange={(e) => setCustomThemePresetName(e.target.value)}
+                      disabled={saving}
+                      className="h-10 w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                      placeholder="Име (напр. light-bee + dark-bee)"
+                    />
+                    <input
+                      value={customThemePresetDescription}
+                      onChange={(e) =>
+                        setCustomThemePresetDescription(e.target.value)
+                      }
+                      disabled={saving}
+                      className="h-10 w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                      placeholder="Описание (по желание)"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => void handleCreateCustomThemePreset()}
+                    disabled={saving}
+                    className="inline-flex h-10 items-center justify-center rounded-md px-4 text-sm font-semibold shadow-sm hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
+                    style={{
+                      backgroundColor: (themePreviewVariant === "light"
+                        ? themeLight
+                        : themeDark
+                      ).primary,
+                      color: (themePreviewVariant === "light"
+                        ? themeLight
+                        : themeDark
+                      ).foreground,
+                    }}
+                  >
+                    {editingCustomThemePresetId
+                      ? "Update preset"
+                      : "Save preset"}
+                  </button>
+                </div>
+
+                <div className="mt-4">
+                  {!customThemePresetsLoaded ? (
+                    <p className="text-sm text-gray-500">Зареждане...</p>
+                  ) : customThemePresets.length < 1 ? (
+                    <p className="text-sm text-gray-500">
+                      Нямаш записани custom presets.
+                    </p>
+                  ) : (
+                    <div className="grid gap-3 md:grid-cols-2">
+                      {customThemePresets.map((preset) => {
+                        const isEditing =
+                          editingCustomThemePresetId === preset.id;
+                        const lightForSwatches = isEditing
+                          ? themeLight
+                          : preset.light;
+                        const darkForSwatches = isEditing
+                          ? themeDark
+                          : preset.dark;
+                        const activePalette =
+                          themePreviewVariant === "light"
+                            ? themeLight
+                            : themeDark;
+
+                        return (
+                          <div
+                            key={preset.id}
+                            className="rounded-lg border border-gray-200 bg-gray-50 p-3"
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <div>
+                                <p className="text-sm font-semibold text-gray-900">
+                                  {preset.name}
+                                </p>
+                                {preset.description ? (
+                                  <p className="mt-1 text-xs text-gray-600">
+                                    {preset.description}
+                                  </p>
+                                ) : null}
+                                {(preset.createdBy || preset.updatedBy) && (
+                                  <p className="mt-1 text-[11px] text-gray-500">
+                                    {preset.updatedBy
+                                      ? `Updated by: ${preset.updatedBy}`
+                                      : preset.createdBy
+                                        ? `Created by: ${preset.createdBy}`
+                                        : ""}
+                                  </p>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    handleEditCustomThemePreset(preset)
+                                  }
+                                  disabled={saving}
+                                  className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                                >
+                                  Edit
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => applyCustomThemePreset(preset)}
+                                  disabled={saving}
+                                  className="inline-flex items-center justify-center rounded-md border bg-white px-3 py-1.5 text-xs font-semibold hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+                                  style={{
+                                    borderColor: activePalette.primary,
+                                    color: activePalette.primary,
+                                  }}
+                                >
+                                  Apply
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    void handleDeleteCustomThemePreset(preset)
+                                  }
+                                  disabled={saving}
+                                  className="inline-flex items-center justify-center rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                                >
+                                  Delete
+                                </button>
+                              </div>
+                            </div>
+
+                            <div className="mt-3 space-y-2">
+                              <div className="flex items-center gap-2">
+                                <span className="w-10 text-[10px] font-semibold uppercase tracking-wide text-gray-500">
+                                  Light
+                                </span>
+                                <div className="flex items-center gap-1">
+                                  {THEME_PRESET_SWATCH_KEYS.map((key) => (
+                                    <span
+                                      key={`custom-light-${preset.id}-${key}`}
+                                      className="h-4 w-4 rounded-full border border-gray-200"
+                                      style={{
+                                        backgroundColor: lightForSwatches[key],
+                                      }}
+                                      title={`Light ${key}: ${lightForSwatches[key]}`}
+                                    />
+                                  ))}
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="w-10 text-[10px] font-semibold uppercase tracking-wide text-gray-500">
+                                  Dark
+                                </span>
+                                <div className="flex items-center gap-1">
+                                  {THEME_PRESET_SWATCH_KEYS.map((key) => (
+                                    <span
+                                      key={`custom-dark-${preset.id}-${key}`}
+                                      className="h-4 w-4 rounded-full border border-gray-200"
+                                      style={{
+                                        backgroundColor: darkForSwatches[key],
+                                      }}
+                                      title={`Dark ${key}: ${darkForSwatches[key]}`}
+                                    />
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
+                <div className="space-y-4">
+                  <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm lg:sticky lg:top-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-xs uppercase tracking-wide text-gray-500">
+                          Live preview
+                        </p>
+                        <p className="text-sm text-gray-700">
+                          Виж как ще изглеждат цветовете в UI.
+                        </p>
+                      </div>
+                      <InfoTooltip
+                        label="Live preview info"
+                        title="Live preview"
+                        description="Примерна UI визуализация на избраната палитра. Тук се виждат и рамките/фонът за OK/Error полета."
+                      />
+                      <div className="inline-flex rounded-md border border-gray-200">
+                        {(["light", "dark"] as ThemeVariant[]).map(
+                          (variant) => (
+                            <button
+                              key={variant}
+                              type="button"
+                              onClick={() => setThemePreviewVariant(variant)}
+                              className={`px-3 py-1 text-sm font-medium ${
+                                themePreviewVariant === variant
+                                  ? "bg-gray-900 text-white"
+                                  : "text-gray-700"
+                              }`}
+                            >
+                              {variant}
+                            </button>
+                          ),
+                        )}
+                      </div>
+                    </div>
+                    <div className="mt-4">
+                      <ThemePreviewCard
+                        palette={
+                          themePreviewVariant === "light"
+                            ? themeLight
+                            : themeDark
+                        }
+                        variant={themePreviewVariant}
+                      />
+                    </div>
+                  </div>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <ThemeFieldControls
+                      title="Light palette"
+                      palette={themeLight}
+                      savedPalette={savedThemeLight}
+                      redoMap={themeLightRedo}
+                      setPalette={setThemeLight}
+                      setRedo={setThemeLightRedo}
+                      variant="light"
+                      hexDraft={themeHexInputs.light}
+                      setHexDraft={setThemeHexInputs}
+                      disabled={saving}
+                    />
+                    <ThemeFieldControls
+                      title="Dark palette"
+                      palette={themeDark}
+                      savedPalette={savedThemeDark}
+                      redoMap={themeDarkRedo}
+                      setPalette={setThemeDark}
+                      setRedo={setThemeDarkRedo}
+                      variant="dark"
+                      hexDraft={themeHexInputs.dark}
+                      setHexDraft={setThemeHexInputs}
+                      disabled={saving}
+                    />
+                  </div>
+                </div>
+                <ThemePreviewLegend
+                  lightPalette={themeLight}
+                  darkPalette={themeDark}
+                />
               </div>
               <p className="mt-2 text-xs text-gray-500">
                 Промяната важи за целия сайт (вкл. admin). За system режим се
@@ -4156,7 +7628,14 @@ export default function AdminSettingsPage() {
             </div>
 
             <div className="mt-6">
-              <p className="text-sm font-semibold text-gray-900">Favicon</p>
+              <p className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                <span>Favicon</span>
+                <InfoTooltip
+                  label="Favicon info"
+                  title="Favicon"
+                  description="Иконка в browser таба. След промяна: refresh-ни страницата за да се приложи навсякъде."
+                />
+              </p>
               <div className="mt-2 flex flex-wrap items-center gap-3">
                 <button
                   type="button"
@@ -4175,7 +7654,7 @@ export default function AdminSettingsPage() {
                     );
                   }}
                   disabled={saving || faviconUrl.trim().length === 0}
-                  className="inline-flex items-center rounded-md border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex items-center rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   Remove
                 </button>
@@ -4216,7 +7695,14 @@ export default function AdminSettingsPage() {
             </div>
 
             <div className="mt-6">
-              <p className="text-sm font-semibold text-gray-900">Logo</p>
+              <p className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                <span>Logo</span>
+                <InfoTooltip
+                  label="Logo info"
+                  title="Logo"
+                  description="Основното logo (fallback). Ако light/dark варианти липсват, използваме този файл."
+                />
+              </p>
               <div className="mt-2 flex flex-wrap items-center gap-3">
                 <button
                   type="button"
@@ -4235,7 +7721,7 @@ export default function AdminSettingsPage() {
                     );
                   }}
                   disabled={saving || logoUrl.trim().length === 0}
-                  className="inline-flex items-center rounded-md border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex items-center rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   Remove
                 </button>
@@ -4276,8 +7762,13 @@ export default function AdminSettingsPage() {
             </div>
 
             <div className="mt-6">
-              <p className="text-sm font-semibold text-gray-900">
-                Logo (Light)
+              <p className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                <span>Logo (Light)</span>
+                <InfoTooltip
+                  label="Logo light info"
+                  title="Logo (Light)"
+                  description="Специфично logo за Light тема. Ако липсва, използваме fallback logo."
+                />
               </p>
               <div className="mt-2 flex flex-wrap items-center gap-3">
                 <button
@@ -4297,7 +7788,7 @@ export default function AdminSettingsPage() {
                     );
                   }}
                   disabled={saving || logoLightUrl.trim().length === 0}
-                  className="inline-flex items-center rounded-md border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex items-center rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   Remove
                 </button>
@@ -4338,7 +7829,14 @@ export default function AdminSettingsPage() {
             </div>
 
             <div className="mt-6">
-              <p className="text-sm font-semibold text-gray-900">Logo (Dark)</p>
+              <p className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                <span>Logo (Dark)</span>
+                <InfoTooltip
+                  label="Logo dark info"
+                  title="Logo (Dark)"
+                  description="Специфично logo за Dark тема. Ако липсва, използваме fallback logo."
+                />
+              </p>
               <div className="mt-2 flex flex-wrap items-center gap-3">
                 <button
                   type="button"
@@ -4357,7 +7855,7 @@ export default function AdminSettingsPage() {
                     );
                   }}
                   disabled={saving || logoDarkUrl.trim().length === 0}
-                  className="inline-flex items-center rounded-md border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex items-center rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   Remove
                 </button>
@@ -4398,7 +7896,14 @@ export default function AdminSettingsPage() {
             </div>
 
             <div className="mt-6">
-              <p className="text-sm font-semibold text-gray-900">Font</p>
+              <p className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                <span>Font</span>
+                <InfoTooltip
+                  label="Font info"
+                  title="Font"
+                  description="Качи собствен font файл (WOFF2/WOFF/TTF/OTF). Ако има качен font, той има приоритет над Google font."
+                />
+              </p>
               <div className="mt-2 flex flex-wrap items-center gap-3">
                 <button
                   type="button"
@@ -4417,7 +7922,7 @@ export default function AdminSettingsPage() {
                     );
                   }}
                   disabled={saving || fontUrl.trim().length === 0}
-                  className="inline-flex items-center rounded-md border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex items-center rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   Remove
                 </button>
@@ -4444,16 +7949,74 @@ export default function AdminSettingsPage() {
               <p className="mt-1 text-xs text-gray-500">
                 Препоръка: WOFF2 (най-добре), иначе WOFF/TTF/OTF. До ~2MB.
               </p>
+              <p className="mt-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+                Качените custom font-ове трябва да са със закупен лиценз.
+              </p>
+
+              <div className="mt-3">
+                <p className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                  <span>Font license (optional)</span>
+                  <InfoTooltip
+                    label="Font license info"
+                    title="Font license"
+                    description="По желание: качи license файл (PDF/TXT/DOCX/IMG и т.н.), за да има доказателство за закупен лиценз. Не е задължително."
+                  />
+                </p>
+                <div className="mt-2 flex flex-wrap items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={handleBrandingFontLicenseUploadClick}
+                    disabled={saving}
+                    className="inline-flex items-center rounded-md border border-green-600 px-3 py-1.5 text-xs font-semibold text-green-700 hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    Upload license
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      void persistBrandingField(
+                        { fontLicenseUrl: null },
+                        "License файлът е премахнат.",
+                      );
+                      setFontLicenseUrl("");
+                    }}
+                    disabled={saving || fontLicenseUrl.trim().length === 0}
+                    className="inline-flex items-center rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    Remove
+                  </button>
+                  <input
+                    ref={fontLicenseFileInputRef}
+                    type="file"
+                    accept=".pdf,.txt,.md,.rtf,.doc,.docx,.odt,image/*,.zip"
+                    className="hidden"
+                    onChange={handleBrandingFontLicenseFileSelected}
+                  />
+                  {fontLicenseUrl ? (
+                    <a
+                      href={fontLicenseUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-xs font-semibold text-green-700 hover:underline"
+                    >
+                      License file
+                    </a>
+                  ) : (
+                    <span className="text-xs text-gray-500">(optional)</span>
+                  )}
+                </div>
+              </div>
 
               <div className="mt-4 grid gap-2">
-                <label className="text-sm font-medium text-gray-900">
-                  Google font (self-host, без външни заявки)
+                <label className="flex items-center gap-2 text-sm font-medium text-gray-900">
+                  <span>Google font (self-host, без външни заявки)</span>
+                  <InfoTooltip
+                    label="Google font info"
+                    title="Google font (self-host)"
+                    description="Избор от предварително включени @fontsource font-ове (без външни заявки). Ако има качен custom font файл, той има приоритет."
+                  />
                 </label>
                 {(() => {
-                  const selected = GOOGLE_FONTS.find(
-                    (f) => f.value === googleFont,
-                  );
-
                   return (
                     <div className="flex flex-wrap items-center gap-2">
                       <select
@@ -4478,23 +8041,10 @@ export default function AdminSettingsPage() {
                             disabled={!f.supportsCyrillic}
                           >
                             {f.label}
-                            {f.supportsCyrillic ? " (BG)" : " (Latin-only)"}
+                            {!f.supportsCyrillic ? " (Latin-only)" : ""}
                           </option>
                         ))}
                       </select>
-
-                      {googleFont ? (
-                        <StatusBadge
-                          variant={
-                            selected?.supportsCyrillic ? "ok" : "fallback"
-                          }
-                          label={
-                            selected?.supportsCyrillic ? "BG OK" : "BG fallback"
-                          }
-                        />
-                      ) : (
-                        <StatusBadge variant="missing" label="System/custom" />
-                      )}
                     </div>
                   );
                 })()}
@@ -4524,10 +8074,15 @@ export default function AdminSettingsPage() {
                     <p className="text-sm font-semibold text-gray-900">
                       Per-language overrides
                     </p>
-                    <p className="text-xs text-gray-500">
-                      Празно = използвай глобалните настройки.
-                    </p>
+                    <InfoTooltip
+                      label="Per-language overrides info"
+                      title="Per-language overrides"
+                      description="Override на font настройки по език. Празно означава, че ще се използват глобалните настройки за Font/Google font."
+                    />
                   </div>
+                  <p className="text-xs text-gray-500">
+                    Празно = използвай глобалните настройки.
+                  </p>
 
                   <div className="mt-3 space-y-3">
                     {supportedLangs.map((code) => {
@@ -4535,6 +8090,8 @@ export default function AdminSettingsPage() {
                       const langUsesCyrillic = CYRILLIC_LANGS.has(langCode);
                       const perLangGoogle = googleFontByLang?.[langCode] ?? "";
                       const perLangFontUrl = fontUrlByLang?.[langCode] ?? "";
+                      const perLangLicenseUrl =
+                        fontLicenseUrlByLang?.[langCode] ?? "";
 
                       return (
                         <div
@@ -4552,15 +8109,13 @@ export default function AdminSettingsPage() {
                                 disabled={saving}
                                 onChange={(e) => {
                                   const next = e.target.value;
-                                  setGoogleFontByLang((prev) => {
-                                    const out = { ...prev };
-                                    if (next) {
-                                      out[langCode] = next;
-                                    } else {
-                                      delete out[langCode];
-                                    }
-                                    return out;
-                                  });
+                                  setGoogleFontByLang((prev) =>
+                                    upsertStringDictionary(
+                                      prev,
+                                      langCode,
+                                      next,
+                                    ),
+                                  );
                                   void persistBrandingField(
                                     {
                                       googleFontByLang: {
@@ -4602,11 +8157,9 @@ export default function AdminSettingsPage() {
                             <button
                               type="button"
                               onClick={() => {
-                                setFontUrlByLang((prev) => {
-                                  const out = { ...prev };
-                                  delete out[langCode];
-                                  return out;
-                                });
+                                setFontUrlByLang((prev) =>
+                                  upsertStringDictionary(prev, langCode, null),
+                                );
                                 void persistBrandingField(
                                   { fontUrlByLang: { [langCode]: null } },
                                   `Font (${langCode}) е премахнат.`,
@@ -4615,7 +8168,7 @@ export default function AdminSettingsPage() {
                               disabled={
                                 saving || perLangFontUrl.trim().length === 0
                               }
-                              className="inline-flex items-center rounded-md border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                              className="inline-flex items-center rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
                             >
                               Remove
                             </button>
@@ -4634,6 +8187,55 @@ export default function AdminSettingsPage() {
                                 (global)
                               </span>
                             )}
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleBrandingFontLicenseUploadClickForLang(
+                                  langCode,
+                                )
+                              }
+                              disabled={saving}
+                              className="inline-flex items-center rounded-md border border-green-600 px-3 py-1.5 text-xs font-semibold text-green-700 hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                              Upload license
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setFontLicenseUrlByLang((prev) =>
+                                  upsertStringDictionary(prev, langCode, null),
+                                );
+                                void persistBrandingField(
+                                  {
+                                    fontLicenseUrlByLang: { [langCode]: null },
+                                  },
+                                  `License (${langCode}) е премахнат.`,
+                                );
+                              }}
+                              disabled={
+                                saving || perLangLicenseUrl.trim().length === 0
+                              }
+                              className="inline-flex items-center rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                              Remove
+                            </button>
+
+                            {perLangLicenseUrl ? (
+                              <a
+                                href={perLangLicenseUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-xs font-semibold text-green-700 hover:underline"
+                              >
+                                License file
+                              </a>
+                            ) : (
+                              <span className="text-xs text-gray-500">
+                                (optional)
+                              </span>
+                            )}
                           </div>
                         </div>
                       );
@@ -4647,12 +8249,26 @@ export default function AdminSettingsPage() {
                     className="hidden"
                     onChange={handleBrandingFontFileSelectedForLang}
                   />
+                  <input
+                    ref={perLangFontLicenseFileInputRef}
+                    type="file"
+                    accept=".pdf,.txt,.md,.rtf,.doc,.docx,.odt,image/*,.zip"
+                    className="hidden"
+                    onChange={handleBrandingFontLicenseFileSelectedForLang}
+                  />
                 </div>
               </div>
             </div>
 
             <div className="mt-4">
-              <p className="text-sm font-semibold text-gray-900">Cursor</p>
+              <p className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                <span>Cursor</span>
+                <InfoTooltip
+                  label="Cursor info"
+                  title="Cursor"
+                  description="Качи иконка за custom cursor. Може да има общ cursor или отделни light/dark. След промяна: refresh-ни страницата."
+                />
+              </p>
               <div className="mt-2 flex flex-wrap items-center gap-3">
                 <button
                   type="button"
@@ -4671,7 +8287,7 @@ export default function AdminSettingsPage() {
                     );
                   }}
                   disabled={saving || cursorUrl.trim().length === 0}
-                  className="inline-flex items-center rounded-md border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex items-center rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   Remove
                 </button>
@@ -4711,8 +8327,13 @@ export default function AdminSettingsPage() {
               </p>
 
               <div className="mt-6">
-                <p className="text-sm font-semibold text-gray-900">
-                  Cursor (Light)
+                <p className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                  <span>Cursor (Light)</span>
+                  <InfoTooltip
+                    label="Cursor light info"
+                    title="Cursor (Light)"
+                    description="Cursor само за Light тема. Ако липсва, използваме общия cursor."
+                  />
                 </p>
                 <div className="mt-2 flex flex-wrap items-center gap-3">
                   <button
@@ -4732,7 +8353,7 @@ export default function AdminSettingsPage() {
                       );
                     }}
                     disabled={saving || cursorLightUrl.trim().length === 0}
-                    className="inline-flex items-center rounded-md border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="inline-flex items-center rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     Remove
                   </button>
@@ -4769,8 +8390,13 @@ export default function AdminSettingsPage() {
               </div>
 
               <div className="mt-6">
-                <p className="text-sm font-semibold text-gray-900">
-                  Cursor (Dark)
+                <p className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                  <span>Cursor (Dark)</span>
+                  <InfoTooltip
+                    label="Cursor dark info"
+                    title="Cursor (Dark)"
+                    description="Cursor само за Dark тема. Ако липсва, използваме общия cursor."
+                  />
                 </p>
                 <div className="mt-2 flex flex-wrap items-center gap-3">
                   <button
@@ -4790,7 +8416,7 @@ export default function AdminSettingsPage() {
                       );
                     }}
                     disabled={saving || cursorDarkUrl.trim().length === 0}
-                    className="inline-flex items-center rounded-md border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="inline-flex items-center rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     Remove
                   </button>
@@ -4932,8 +8558,6 @@ export default function AdminSettingsPage() {
                     }
                   }}
                 >
-                  <div className="pointer-events-none absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gray-400" />
-
                   {resolvedCursorUrl && cursorHotspotTestPos ? (
                     (() => {
                       const xRaw = Number((cursorHotspotX ?? "").trim());
@@ -4943,7 +8567,7 @@ export default function AdminSettingsPage() {
                       return (
                         <>
                           <div
-                            className="pointer-events-none absolute h-2 w-2 rounded-full bg-red-600"
+                            className="pointer-events-none absolute z-20 h-2 w-2 rounded-full bg-red-600"
                             style={{
                               left: cursorHotspotTestPos.x,
                               top: cursorHotspotTestPos.y,
@@ -4955,7 +8579,7 @@ export default function AdminSettingsPage() {
                             alt="Cursor test"
                             width={32}
                             height={32}
-                            className="pointer-events-none absolute"
+                            className="pointer-events-none absolute z-10"
                             style={{
                               left: cursorHotspotTestPos.x - hotspotX,
                               top: cursorHotspotTestPos.y - hotspotY,
@@ -4983,6 +8607,255 @@ export default function AdminSettingsPage() {
               </div>
             </div>
           </AccordionSection>
+
+          {seoEnabled ? (
+            <AccordionSection
+              title="SEO"
+              description="Safe SEO настройки за публичните страници: base URL, title template, robots, sitemap, Open Graph и Twitter."
+              headerAdornment={
+                <InfoTooltip
+                  label="SEO settings info"
+                  title="SEO"
+                  description="Тези настройки контролират метаданни за публичните страници (без HTML). Полетата са ограничени до безопасни стойности."
+                />
+              }
+              open={Boolean(openSections.seo)}
+              onToggle={() => toggleSection("seo")}
+            >
+              <div className="mt-4 max-w-2xl space-y-4">
+                <div className="space-y-1">
+                  <label className="block text-sm font-medium text-gray-900">
+                    Base URL (canonical)
+                  </label>
+                  <input
+                    value={seoBaseUrl}
+                    onChange={(e) => setSeoBaseUrl(e.target.value)}
+                    disabled={saving}
+                    placeholder="https://example.com"
+                    className="w-full rounded-md border border-gray-300 px-3 py-2"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="block text-sm font-medium text-gray-900">
+                    Title template
+                  </label>
+                  <input
+                    value={seoTitleTemplate}
+                    onChange={(e) => setSeoTitleTemplate(e.target.value)}
+                    disabled={saving}
+                    placeholder="{page} | {site}"
+                    className="w-full rounded-md border border-gray-300 px-3 py-2"
+                  />
+                  <p className="text-xs text-gray-500">
+                    Разрешени placeholders: {"{page}"} и {"{site}"}.
+                  </p>
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-1">
+                    <label className="block text-sm font-medium text-gray-900">
+                      Default title
+                    </label>
+                    <input
+                      value={seoDefaultTitle}
+                      onChange={(e) => setSeoDefaultTitle(e.target.value)}
+                      disabled={saving}
+                      className="w-full rounded-md border border-gray-300 px-3 py-2"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="block text-sm font-medium text-gray-900">
+                      Default description
+                    </label>
+                    <input
+                      value={seoDefaultDescription}
+                      onChange={(e) => setSeoDefaultDescription(e.target.value)}
+                      disabled={saving}
+                      className="w-full rounded-md border border-gray-300 px-3 py-2"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="rounded-md border border-gray-200 bg-white p-3">
+                    <p className="text-sm font-semibold text-gray-900">
+                      Robots
+                    </p>
+                    <div className="mt-2 flex items-center justify-between gap-3">
+                      <span className="text-sm text-gray-700">Index</span>
+                      <ToggleSwitch
+                        checked={seoRobotsIndex}
+                        disabled={saving}
+                        label="Robots index"
+                        onChange={(next) => setSeoRobotsIndex(next)}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="rounded-md border border-gray-200 bg-white p-3">
+                    <p className="text-sm font-semibold text-gray-900">
+                      Sitemap
+                    </p>
+                    <div className="mt-2 space-y-2">
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-sm text-gray-700">Enabled</span>
+                        <ToggleSwitch
+                          checked={seoSitemapEnabled}
+                          disabled={saving}
+                          label="Sitemap enabled"
+                          onChange={(next) => setSeoSitemapEnabled(next)}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-sm text-gray-700">Wiki</span>
+                        <ToggleSwitch
+                          checked={seoSitemapIncludeWiki}
+                          disabled={saving}
+                          label="Sitemap wiki"
+                          onChange={(next) => setSeoSitemapIncludeWiki(next)}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-sm text-gray-700">Courses</span>
+                        <ToggleSwitch
+                          checked={seoSitemapIncludeCourses}
+                          disabled={saving}
+                          label="Sitemap courses"
+                          onChange={(next) => setSeoSitemapIncludeCourses(next)}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-sm text-gray-700">Legal</span>
+                        <ToggleSwitch
+                          checked={seoSitemapIncludeLegal}
+                          disabled={saving}
+                          label="Sitemap legal"
+                          onChange={(next) => setSeoSitemapIncludeLegal(next)}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="rounded-md border border-gray-200 bg-white p-3">
+                  <p className="text-sm font-semibold text-gray-900">
+                    Open Graph
+                  </p>
+                  <div className="mt-3 grid gap-3 md:grid-cols-2">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-900">
+                        Default title
+                      </label>
+                      <input
+                        value={seoOpenGraphTitle}
+                        onChange={(e) => setSeoOpenGraphTitle(e.target.value)}
+                        disabled={saving}
+                        className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-900">
+                        Default description
+                      </label>
+                      <input
+                        value={seoOpenGraphDescription}
+                        onChange={(e) => setSeoOpenGraphDescription(e.target.value)}
+                        disabled={saving}
+                        className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2"
+                      />
+                    </div>
+                  </div>
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={handleSeoOpenGraphUploadClick}
+                      disabled={saving}
+                      className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold hover:bg-gray-50 disabled:opacity-60"
+                    >
+                      Upload image
+                    </button>
+                    <span className="text-xs text-gray-500">
+                      {seoOpenGraphImageUrl ? seoOpenGraphImageUrl : "(no image)"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="rounded-md border border-gray-200 bg-white p-3">
+                  <p className="text-sm font-semibold text-gray-900">Twitter</p>
+                  <div className="mt-3 grid gap-3 md:grid-cols-2">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-900">
+                        Card type
+                      </label>
+                      <select
+                        value={seoTwitterCard}
+                        onChange={(e) => setSeoTwitterCard(e.target.value)}
+                        disabled={saving}
+                        className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2"
+                      >
+                        <option value="summary">summary</option>
+                        <option value="summary_large_image">
+                          summary_large_image
+                        </option>
+                      </select>
+                    </div>
+                    <div />
+                    <div>
+                      <label className="block text-sm font-medium text-gray-900">
+                        Default title
+                      </label>
+                      <input
+                        value={seoTwitterTitle}
+                        onChange={(e) => setSeoTwitterTitle(e.target.value)}
+                        disabled={saving}
+                        className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-900">
+                        Default description
+                      </label>
+                      <input
+                        value={seoTwitterDescription}
+                        onChange={(e) => setSeoTwitterDescription(e.target.value)}
+                        disabled={saving}
+                        className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2"
+                      />
+                    </div>
+                  </div>
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={handleSeoTwitterUploadClick}
+                      disabled={saving}
+                      className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold hover:bg-gray-50 disabled:opacity-60"
+                    >
+                      Upload image
+                    </button>
+                    <span className="text-xs text-gray-500">
+                      {seoTwitterImageUrl ? seoTwitterImageUrl : "(no image)"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="hidden">
+                  <input
+                    ref={seoOpenGraphFileInputRef}
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp"
+                    onChange={(e) => void handleSeoImageSelected("open-graph", e)}
+                  />
+                  <input
+                    ref={seoTwitterFileInputRef}
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp"
+                    onChange={(e) => void handleSeoImageSelected("twitter", e)}
+                  />
+                </div>
+              </div>
+            </AccordionSection>
+          ) : null}
 
           <AccordionSection
             title="Browser & Social metadata"
@@ -5175,7 +9048,7 @@ export default function AdminSettingsPage() {
                         type="button"
                         onClick={() => setSocialImageUrl("")}
                         disabled={saving || socialImageUrl.length === 0}
-                        className="inline-flex items-center rounded-md border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="inline-flex items-center rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         Remove
                       </button>
@@ -5319,7 +9192,7 @@ export default function AdminSettingsPage() {
                           type="button"
                           onClick={() => setOpenGraphImageUrl("")}
                           disabled={saving || openGraphImageUrl.length === 0}
-                          className="inline-flex items-center rounded-md border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                          className="inline-flex items-center rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           Remove
                         </button>
@@ -5475,7 +9348,7 @@ export default function AdminSettingsPage() {
                           type="button"
                           onClick={() => setTwitterImageUrl("")}
                           disabled={saving || twitterImageUrl.length === 0}
-                          className="inline-flex items-center rounded-md border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                          className="inline-flex items-center rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           Remove
                         </button>
@@ -5853,8 +9726,13 @@ export default function AdminSettingsPage() {
 
               <div className="rounded-lg border border-gray-200 bg-white px-4 py-4">
                 <div className="flex flex-col gap-1">
-                  <p className="text-sm font-semibold text-gray-900">
-                    Validator helpers
+                  <p className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                    <span>Validator helpers</span>
+                    <InfoTooltip
+                      label="Validator helpers info"
+                      title="Validator helpers"
+                      description="Помощни инструменти за бързо тестване на OG/Twitter meta tags във външни валидатори."
+                    />
                   </p>
                   <p className="text-xs text-gray-500">
                     Бърз достъп до Facebook / LinkedIn / Twitter проверките.
@@ -5862,50 +9740,94 @@ export default function AdminSettingsPage() {
                 </div>
                 <div className="mt-4 space-y-3">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Preview URL за тестове
+                    <label className="flex items-center justify-between gap-2 text-sm font-medium text-gray-700">
+                      <span className="flex items-center gap-2">
+                        <span>Preview URL за тестове</span>
+                        <InfoTooltip
+                          label="Preview URL info"
+                          title="Preview URL"
+                          description="URL на страницата, която искаш да тестваш във валидаторите. Използва се за генерираните линкове и за Fetch from URL."
+                        />
+                      </span>
                     </label>
                     <div className="mt-2 flex flex-wrap gap-2">
-                      <button
-                        type="button"
-                        onClick={handleUseCurrentOrigin}
-                        className="inline-flex items-center rounded border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50"
-                      >
-                        Use current origin
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleUseLocalhostPreview}
-                        className="inline-flex items-center rounded border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50"
-                      >
-                        Use localhost:3001
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleCopyMetaTags}
-                        className="inline-flex items-center rounded border border-green-600 px-3 py-1.5 text-xs font-semibold text-green-700 hover:bg-green-50"
-                      >
-                        Copy meta tags
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleFetchMetadataFromUrl}
-                        disabled={metaFetchStatus === "loading"}
-                        className="inline-flex items-center rounded border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
-                      >
-                        {metaFetchStatus === "loading"
-                          ? "Fetching..."
-                          : "Fetch from URL"}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setShowMetaTagsSnippet((prev) => !prev)}
-                        className="inline-flex items-center rounded border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50"
-                      >
-                        {showMetaTagsSnippet
-                          ? "Hide meta tags"
-                          : "View meta tags"}
-                      </button>
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={handleUseCurrentOrigin}
+                          className="inline-flex items-center rounded border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+                        >
+                          Use current origin
+                        </button>
+                        <InfoTooltip
+                          label="Use current origin info"
+                          title="Use current origin"
+                          description="Попълва Preview URL с текущия домейн (origin) на отворената страница."
+                        />
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={handleUseLocalhostPreview}
+                          className="inline-flex items-center rounded border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+                        >
+                          Use localhost:3001
+                        </button>
+                        <InfoTooltip
+                          label="Use localhost info"
+                          title="Use localhost:3001"
+                          description="Попълва Preview URL с localhost адрес (подходящо за локално тестване)."
+                        />
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={handleCopyMetaTags}
+                          className="inline-flex items-center rounded border border-green-600 px-3 py-1.5 text-xs font-semibold text-green-700 hover:bg-green-50"
+                        >
+                          Copy meta tags
+                        </button>
+                        <InfoTooltip
+                          label="Copy meta tags info"
+                          title="Copy meta tags"
+                          description="Копира генерирания meta tags snippet в clipboard (за paste в validator-и или за debug)."
+                        />
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={handleFetchMetadataFromUrl}
+                          disabled={metaFetchStatus === "loading"}
+                          className="inline-flex items-center rounded border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          {metaFetchStatus === "loading"
+                            ? "Fetching..."
+                            : "Fetch from URL"}
+                        </button>
+                        <InfoTooltip
+                          label="Fetch from URL info"
+                          title="Fetch from URL"
+                          description="Прави заявка към Preview URL и извлича meta информация за сравнение/диагностика."
+                        />
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setShowMetaTagsSnippet((prev) => !prev)
+                          }
+                          className="inline-flex items-center rounded border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+                        >
+                          {showMetaTagsSnippet
+                            ? "Hide meta tags"
+                            : "View meta tags"}
+                        </button>
+                        <InfoTooltip
+                          label="View meta tags info"
+                          title="View meta tags"
+                          description="Показва/скрива ориентировъчен snippet на генерираните meta tags (read-only)."
+                        />
+                      </div>
                     </div>
                     <input
                       value={previewOrigin}
@@ -5984,30 +9906,51 @@ export default function AdminSettingsPage() {
                     </p>
                   </div>
                   <div className="flex flex-wrap gap-2 text-xs text-gray-600">
-                    <a
-                      href={validatorLinks.facebook}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center rounded border border-gray-300 px-3 py-1.5 font-medium hover:bg-gray-50"
-                    >
-                      Facebook Debugger
-                    </a>
-                    <a
-                      href={validatorLinks.linkedin}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center rounded border border-gray-300 px-3 py-1.5 font-medium hover:bg-gray-50"
-                    >
-                      LinkedIn Inspector
-                    </a>
-                    <a
-                      href={validatorLinks.twitter}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center rounded border border-gray-300 px-3 py-1.5 font-medium hover:bg-gray-50"
-                    >
-                      Twitter Card Validator
-                    </a>
+                    <div className="flex items-center gap-1">
+                      <a
+                        href={validatorLinks.facebook}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center rounded border border-gray-300 px-3 py-1.5 font-medium hover:bg-gray-50"
+                      >
+                        Facebook Debugger
+                      </a>
+                      <InfoTooltip
+                        label="Facebook debugger info"
+                        title="Facebook Debugger"
+                        description="Отваря Facebook Sharing Debugger за да видиш как Facebook прочита OG meta tags и да trigger-неш re-scrape."
+                      />
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <a
+                        href={validatorLinks.linkedin}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center rounded border border-gray-300 px-3 py-1.5 font-medium hover:bg-gray-50"
+                      >
+                        LinkedIn Inspector
+                      </a>
+                      <InfoTooltip
+                        label="LinkedIn inspector info"
+                        title="LinkedIn Inspector"
+                        description="Отваря LinkedIn Post Inspector за да провериш Open Graph preview и cache."
+                      />
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <a
+                        href={validatorLinks.twitter}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center rounded border border-gray-300 px-3 py-1.5 font-medium hover:bg-gray-50"
+                      >
+                        Twitter Card Validator
+                      </a>
+                      <InfoTooltip
+                        label="Twitter validator info"
+                        title="Twitter Card Validator"
+                        description="Отваря Twitter/X card валидатор за да провериш как се визуализира preview-то (title/description/image/card type)."
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -6017,10 +9960,112 @@ export default function AdminSettingsPage() {
           <AccordionSection
             title="Feature toggles"
             description="Изключването на feature връща 404 за публичните endpoint-и."
+            headerAdornment={
+              <InfoTooltip
+                label="Какво включва Feature toggles"
+                title="Feature toggles"
+                description={
+                  <div className="space-y-2">
+                    <p>
+                      Управлява кои функционалности са активни за потребителите.
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Когато feature е OFF, UI елементите се скриват и
+                      публичните маршрути за него връщат 404.
+                    </p>
+                  </div>
+                }
+              />
+            }
             open={Boolean(openSections.features)}
             onToggle={() => toggleSection("features")}
           >
             <div className="mt-4 space-y-3">
+              <div
+                className={`flex items-center gap-3 rounded-md border px-3 py-2 ${
+                  accessibilityWidget
+                    ? "border-green-100 bg-green-50"
+                    : "border-red-100 bg-red-50"
+                }`}
+              >
+                <FeatureToggleLabel
+                  label="Accessibility tool"
+                  featureKey="accessibilityWidget"
+                />
+                <ToggleSwitch
+                  checked={accessibilityWidget}
+                  disabled={saving}
+                  label="Accessibility tool"
+                  onChange={(next) => setAccessibilityWidget(next)}
+                />
+              </div>
+
+              <div
+                className={`flex items-center gap-3 rounded-md border px-3 py-2 ${
+                  themeLightEnabled
+                    ? "border-green-100 bg-green-50"
+                    : "border-red-100 bg-red-50"
+                }`}
+              >
+                <FeatureToggleLabel
+                  label="Theme: Light"
+                  featureKey="themeLight"
+                />
+                <ToggleSwitch
+                  checked={themeLightEnabled}
+                  disabled={saving}
+                  label="Theme Light"
+                  onChange={(next) => {
+                    setThemeLightEnabled(next);
+                    if (!next) {
+                      setThemeDarkEnabled(true);
+                    }
+                  }}
+                />
+              </div>
+
+              <div
+                className={`flex items-center gap-3 rounded-md border px-3 py-2 ${
+                  themeDarkEnabled
+                    ? "border-green-100 bg-green-50"
+                    : "border-red-100 bg-red-50"
+                }`}
+              >
+                <FeatureToggleLabel
+                  label="Theme: Dark"
+                  featureKey="themeDark"
+                />
+                <ToggleSwitch
+                  checked={themeDarkEnabled}
+                  disabled={saving}
+                  label="Theme Dark"
+                  onChange={(next) => {
+                    setThemeDarkEnabled(next);
+                    if (!next) {
+                      setThemeLightEnabled(true);
+                    }
+                  }}
+                />
+              </div>
+
+              <div
+                className={`flex items-center gap-3 rounded-md border px-3 py-2 ${
+                  themeModeSelectorEnabled
+                    ? "border-green-100 bg-green-50"
+                    : "border-red-100 bg-red-50"
+                }`}
+              >
+                <FeatureToggleLabel
+                  label="Theme selector"
+                  featureKey="themeModeSelector"
+                />
+                <ToggleSwitch
+                  checked={themeModeSelectorEnabled}
+                  disabled={saving}
+                  label="Theme selector"
+                  onChange={(next) => setThemeModeSelectorEnabled(next)}
+                />
+              </div>
               <div
                 className={`flex items-center gap-3 rounded-md border px-3 py-2 ${
                   wiki
@@ -6417,6 +10462,24 @@ export default function AdminSettingsPage() {
           <AccordionSection
             title="Social login & OAuth креденшъли"
             description="Тук администрираш кои социални доставчици (Google, Facebook, GitHub, LinkedIn) са достъпни за потребителите и задаваш техните OAuth креденшъли."
+            headerAdornment={
+              <InfoTooltip
+                label="Какво включва Social login"
+                title="Social login & OAuth"
+                description={
+                  <div className="space-y-2">
+                    <p>
+                      Активирай/деактивирай социални доставчици и запази OAuth
+                      креденшъли (Client ID/Secret + Redirect URL).
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Secret се показва само като статус; нови стойности се
+                      изпращат еднократно при Save.
+                    </p>
+                  </div>
+                }
+              />
+            }
             open={Boolean(openSections.social)}
             onToggle={() => toggleSection("social")}
           >
@@ -6568,8 +10631,15 @@ export default function AdminSettingsPage() {
                     {enabled ? (
                       <>
                         <div className="mt-3">
-                          <label className="block text-sm font-medium text-gray-700">
-                            Бележки / инструкции (само за админи)
+                          <label className="flex items-center justify-between gap-2 text-sm font-medium text-gray-700">
+                            <span className="flex items-center gap-2">
+                              <span>Бележки / инструкции (само за админи)</span>
+                              <InfoTooltip
+                                label="Social notes info"
+                                title="Бележки / инструкции"
+                                description="Вътрешни бележки за админи – не се виждат от потребители. Полезно за контакти, инструкции и къде се съхраняват ключове."
+                              />
+                            </span>
                           </label>
                           <textarea
                             value={form.notes}
@@ -6599,8 +10669,15 @@ export default function AdminSettingsPage() {
                         </div>
                         <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
                           <div>
-                            <label className="block text-sm font-medium text-gray-700">
-                              Client ID
+                            <label className="flex items-center justify-between gap-2 text-sm font-medium text-gray-700">
+                              <span className="flex items-center gap-2">
+                                <span>Client ID</span>
+                                <InfoTooltip
+                                  label="OAuth client id info"
+                                  title="Client ID"
+                                  description="OAuth Client ID от доставчика (Google/Facebook/GitHub/LinkedIn)."
+                                />
+                              </span>
                             </label>
                             <input
                               value={form.clientId}
@@ -6632,8 +10709,15 @@ export default function AdminSettingsPage() {
                           </div>
 
                           <div>
-                            <label className="block text-sm font-medium text-gray-700">
-                              Redirect URL
+                            <label className="flex items-center justify-between gap-2 text-sm font-medium text-gray-700">
+                              <span className="flex items-center gap-2">
+                                <span>Redirect URL</span>
+                                <InfoTooltip
+                                  label="OAuth redirect url info"
+                                  title="Redirect URL"
+                                  description="Callback/Redirect URL, която трябва да е whitelisted при доставчика. Трябва да съвпада 1:1."
+                                />
+                              </span>
                             </label>
                             <input
                               value={form.redirectUri}
@@ -6674,8 +10758,17 @@ export default function AdminSettingsPage() {
                         </div>
 
                         <div className="mt-4">
-                          <label className="block text-sm font-medium text-gray-700">
-                            Client secret (въвеждане на нова стойност)
+                          <label className="flex items-center justify-between gap-2 text-sm font-medium text-gray-700">
+                            <span className="flex items-center gap-2">
+                              <span>
+                                Client secret (въвеждане на нова стойност)
+                              </span>
+                              <InfoTooltip
+                                label="OAuth client secret info"
+                                title="Client secret"
+                                description="Secret ключът от доставчика. За сигурност не се показва. Можеш да зададеш нов secret, или да изтриеш стария."
+                              />
+                            </span>
                           </label>
                           <input
                             type="password"
@@ -6764,14 +10857,40 @@ export default function AdminSettingsPage() {
           <AccordionSection
             title="Languages"
             description="Поддържани езици (custom). Трябва да има поне 1 език, а default трябва да е сред избраните."
+            headerAdornment={
+              <InfoTooltip
+                label="Какво включва Languages"
+                title="Languages"
+                description={
+                  <div className="space-y-2">
+                    <p>
+                      Управлява списъка с поддържани езикови кодове и кой е
+                      default за системата.
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Default трябва да е сред поддържаните езици.
+                    </p>
+                  </div>
+                }
+              />
+            }
             open={Boolean(openSections.languages)}
             onToggle={() => toggleSection("languages")}
           >
             <div className="mt-4 space-y-4">
               <div className="flex flex-wrap items-end gap-3">
                 <div className="min-w-[240px] flex-1">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Добави language code (можеш и няколко: bg, en, de)
+                  <label className="flex items-center justify-between gap-2 text-sm font-medium text-gray-700">
+                    <span className="flex items-center gap-2">
+                      <span>
+                        Добави language code (можеш и няколко: bg, en, de)
+                      </span>
+                      <InfoTooltip
+                        label="Supported languages info"
+                        title="Supported languages"
+                        description="Добави езикови кодове (ISO 639-1) разделени със запетая. Пример: bg, en, de."
+                      />
+                    </span>
                   </label>
                   <input
                     value={languageDraft}
@@ -6843,8 +10962,15 @@ export default function AdminSettingsPage() {
               </div>
 
               <div className="max-w-md">
-                <label className="block text-sm font-medium text-gray-700">
-                  Default
+                <label className="flex items-center justify-between gap-2 text-sm font-medium text-gray-700">
+                  <span className="flex items-center gap-2">
+                    <span>Default</span>
+                    <InfoTooltip
+                      label="Default language info"
+                      title="Default language"
+                      description="Езикът по подразбиране за системата. Използва се за fallback-и, когато липсва езикова настройка."
+                    />
+                  </span>
                 </label>
                 <select
                   value={defaultLang}
@@ -6872,21 +10998,27 @@ export default function AdminSettingsPage() {
             </div>
           )}
 
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={handleSave}
-              disabled={saving}
-              className="inline-flex items-center justify-center rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-700 disabled:opacity-70"
-            >
-              {saving ? "Запазване..." : "Запази"}
-            </button>
-            <Link
-              href="/admin"
-              className="text-sm text-green-700 hover:text-green-800"
-            >
-              Назад към админ таблото →
-            </Link>
+          <div className="space-y-2">
+            <p className="text-xs text-gray-500">
+              Някои промени (напр. favicon, meta preview/cache) може да се видят
+              коректно след refresh.
+            </p>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={handleSave}
+                disabled={saving}
+                className="inline-flex items-center justify-center rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-700 disabled:opacity-70"
+              >
+                {saving ? "Запазване..." : "Запази"}
+              </button>
+              <Link
+                href="/admin"
+                className="text-sm text-green-700 hover:text-green-800"
+              >
+                Назад към админ таблото →
+              </Link>
+            </div>
           </div>
         </div>
       )}

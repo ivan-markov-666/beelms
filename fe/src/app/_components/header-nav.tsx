@@ -9,6 +9,7 @@ import { t } from "../../i18n/t";
 import { LanguageSwitcher } from "../wiki/_components/language-switcher";
 import { clearAccessToken, getAccessToken } from "../auth-token";
 import { getApiBaseUrl } from "../api-url";
+import { AccessibilityWidget } from "./accessibility-widget";
 import {
   getPublicSettings,
   type PublicSettings,
@@ -24,8 +25,6 @@ export function HeaderNav() {
   const [publicSettings, setPublicSettings] = useState<PublicSettings | null>(
     null,
   );
-  const themeStorageKey = "beelms.themeMode";
-
   const [systemPrefersDark, setSystemPrefersDark] = useState<boolean>(() => {
     if (typeof window === "undefined") return false;
     if (typeof window.matchMedia !== "function") return false;
@@ -39,15 +38,6 @@ export function HeaderNav() {
       const attr = document.documentElement.getAttribute("data-theme");
       if (attr === "light" || attr === "dark" || attr === "system") {
         return attr;
-      }
-
-      try {
-        const v = localStorage.getItem(themeStorageKey);
-        if (v === "light" || v === "dark" || v === "system") {
-          return v;
-        }
-      } catch {
-        // ignore
       }
 
       return "system";
@@ -153,17 +143,59 @@ export function HeaderNav() {
     };
   }, []);
 
-  const handleThemeChange = (value: "light" | "dark" | "system") => {
+  const applyThemeMode = (value: "light" | "dark" | "system") => {
     setThemeMode(value);
     if (typeof window === "undefined") return;
+    document.documentElement.setAttribute("data-theme", value);
+  };
 
+  const themeStorageKey = "beelms.themeMode";
+
+  const handleThemeChange = (value: "light" | "dark" | "system") => {
+    applyThemeMode(value);
+    if (typeof window === "undefined") return;
     try {
       localStorage.setItem(themeStorageKey, value);
     } catch {
       // ignore
     }
-    document.documentElement.setAttribute("data-theme", value);
   };
+
+  const allowThemeLight = publicSettings?.features?.themeLight !== false;
+  const allowThemeDark = publicSettings?.features?.themeDark !== false;
+  const allowThemeSystem = allowThemeLight && allowThemeDark;
+  const themeModeSelectorEnabled =
+    publicSettings?.features?.themeModeSelector !== false;
+  const showThemeSelector = themeModeSelectorEnabled && allowThemeSystem;
+
+  const fallbackThemeMode = allowThemeSystem
+    ? "system"
+    : allowThemeLight
+      ? "light"
+      : "dark";
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const next = (() => {
+      if (themeMode === "system") {
+        return allowThemeSystem ? "system" : fallbackThemeMode;
+      }
+      if (themeMode === "light") {
+        return allowThemeLight ? "light" : fallbackThemeMode;
+      }
+      return allowThemeDark ? "dark" : fallbackThemeMode;
+    })();
+
+    if (next !== themeMode) {
+      if (showThemeSelector) {
+        handleThemeChange(next);
+      } else {
+        applyThemeMode(next);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allowThemeDark, allowThemeLight, allowThemeSystem, showThemeSelector]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -204,6 +236,7 @@ export function HeaderNav() {
   const showAuth = features?.auth !== false;
   const showAuthLogin = showAuth && features?.authLogin !== false;
   const showAuthRegister = showAuth && features?.authRegister !== false;
+  const showAccessibilityWidget = features?.accessibilityWidget !== false;
 
   const logoUrl = (publicSettings?.branding?.logoUrl ?? "").trim();
   const logoLightUrl = (publicSettings?.branding?.logoLightUrl ?? "").trim();
@@ -277,18 +310,23 @@ export function HeaderNav() {
           className="flex items-center gap-4 text-sm text-gray-700 nav-font"
           style={brandingFontStyle}
         >
-          <select
-            value={themeMode}
-            onChange={(e) =>
-              handleThemeChange(e.target.value as "light" | "dark" | "system")
-            }
-            className="rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
-            aria-label="Theme"
-          >
-            <option value="system">System</option>
-            <option value="light">Light</option>
-            <option value="dark">Dark</option>
-          </select>
+          {showAccessibilityWidget ? (
+            <AccessibilityWidget variant="header" />
+          ) : null}
+          {showThemeSelector ? (
+            <select
+              value={themeMode}
+              onChange={(e) =>
+                handleThemeChange(e.target.value as "light" | "dark" | "system")
+              }
+              className="rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+              aria-label="Theme"
+            >
+              {allowThemeSystem ? <option value="system">System</option> : null}
+              {allowThemeLight ? <option value="light">Light</option> : null}
+              {allowThemeDark ? <option value="dark">Dark</option> : null}
+            </select>
+          ) : null}
           {hasToken === false && showAuth && (
             <>
               {showAuthLogin ? (

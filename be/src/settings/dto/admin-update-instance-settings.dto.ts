@@ -115,6 +115,93 @@ export class AdminUpdateThemeDto {
   dark?: AdminUpdateThemePaletteDto | null;
 }
 
+export class AdminUpdateThemePresetPaletteDto {
+  @IsOptional()
+  @IsString()
+  @Matches(ThemeHexColorConstraint.REGEX)
+  background?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @Matches(ThemeHexColorConstraint.REGEX)
+  foreground?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @Matches(ThemeHexColorConstraint.REGEX)
+  primary?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @Matches(ThemeHexColorConstraint.REGEX)
+  secondary?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @Matches(ThemeHexColorConstraint.REGEX)
+  error?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @Matches(ThemeHexColorConstraint.REGEX)
+  card?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @Matches(ThemeHexColorConstraint.REGEX)
+  border?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @Matches(ThemeHexColorConstraint.REGEX)
+  scrollThumb?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @Matches(ThemeHexColorConstraint.REGEX)
+  scrollTrack?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @Matches(ThemeHexColorConstraint.REGEX)
+  fieldOkBg?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @Matches(ThemeHexColorConstraint.REGEX)
+  fieldOkBorder?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @Matches(ThemeHexColorConstraint.REGEX)
+  fieldErrorBg?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @Matches(ThemeHexColorConstraint.REGEX)
+  fieldErrorBorder?: string | null;
+}
+
+export class AdminUpdateThemePresetDto {
+  @IsString()
+  id: string;
+
+  @IsString()
+  name: string;
+
+  @IsOptional()
+  @IsString()
+  description?: string | null;
+
+  @ValidateNested()
+  @Type(() => AdminUpdateThemePresetPaletteDto)
+  light: AdminUpdateThemePresetPaletteDto;
+
+  @ValidateNested()
+  @Type(() => AdminUpdateThemePresetPaletteDto)
+  dark: AdminUpdateThemePresetPaletteDto;
+}
+
 @ValidatorConstraint({ name: 'twitterCardConsistency', async: false })
 class TwitterCardConsistencyConstraint implements ValidatorConstraintInterface {
   validate(card: unknown, args: ValidationArguments): boolean {
@@ -282,6 +369,24 @@ export class AdminUpdateBrandingDto {
 
   @IsOptional()
   @IsString()
+  notFoundTitle?: string | null;
+
+  @IsOptional()
+  @IsString()
+  notFoundMarkdown?: string | null;
+
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @IsObject()
+  notFoundTitleByLang?: Record<string, string | null> | null;
+
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @IsObject()
+  notFoundMarkdownByLang?: Record<string, string | null> | null;
+
+  @IsOptional()
+  @IsString()
   cursorUrl?: string | null;
 
   @IsOptional()
@@ -320,9 +425,25 @@ export class AdminUpdateBrandingDto {
   fontUrlByLang?: Record<string, string | null> | null;
 
   @IsOptional()
+  @IsString()
+  fontLicenseUrl?: string | null;
+
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @IsObject()
+  fontLicenseUrlByLang?: Record<string, string | null> | null;
+
+  @IsOptional()
   @ValidateNested()
   @Type(() => AdminUpdateThemeDto)
   theme?: AdminUpdateThemeDto | null;
+
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => AdminUpdateThemePresetDto)
+  customThemePresets?: AdminUpdateThemePresetDto[] | null;
 
   @IsOptional()
   @IsString()
@@ -384,6 +505,26 @@ export class AdminUpdateFeaturesDto {
   @IsOptional()
   @IsBoolean()
   profile?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  accessibilityWidget?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  seo?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  themeLight?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  themeDark?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  themeModeSelector?: boolean;
 
   @IsOptional()
   @IsBoolean()
@@ -458,6 +599,115 @@ export class AdminUpdateFeaturesDto {
   infraErrorTracking?: boolean;
 }
 
+export class AdminUpdateSeoRobotsDto {
+  @IsOptional()
+  @IsBoolean()
+  index?: boolean;
+}
+
+export class AdminUpdateSeoSitemapDto {
+  @IsOptional()
+  @IsBoolean()
+  enabled?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  includeWiki?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  includeCourses?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  includeLegal?: boolean;
+}
+
+export class AdminUpdateSeoOpenGraphDto {
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @IsString()
+  defaultTitle?: string | null;
+
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @IsString()
+  defaultDescription?: string | null;
+
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @IsString()
+  imageUrl?: string | null;
+}
+
+export class AdminUpdateSeoTwitterDto {
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @IsIn(['summary', 'summary_large_image'])
+  card?: 'summary' | 'summary_large_image' | null;
+
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @IsString()
+  defaultTitle?: string | null;
+
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @IsString()
+  defaultDescription?: string | null;
+
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @IsString()
+  imageUrl?: string | null;
+}
+
+export class AdminUpdateSeoDto {
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @IsString()
+  baseUrl?: string | null;
+
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @IsString()
+  titleTemplate?: string | null;
+
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @IsString()
+  defaultTitle?: string | null;
+
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @IsString()
+  defaultDescription?: string | null;
+
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @ValidateNested()
+  @Type(() => AdminUpdateSeoRobotsDto)
+  robots?: AdminUpdateSeoRobotsDto | null;
+
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @ValidateNested()
+  @Type(() => AdminUpdateSeoSitemapDto)
+  sitemap?: AdminUpdateSeoSitemapDto | null;
+
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @ValidateNested()
+  @Type(() => AdminUpdateSeoOpenGraphDto)
+  openGraph?: AdminUpdateSeoOpenGraphDto | null;
+
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @ValidateNested()
+  @Type(() => AdminUpdateSeoTwitterDto)
+  twitter?: AdminUpdateSeoTwitterDto | null;
+}
+
 export class AdminUpdateLanguagesDto {
   @IsOptional()
   @IsArray()
@@ -525,6 +775,11 @@ export class AdminUpdateInstanceSettingsDto {
   @ValidateNested()
   @Type(() => AdminUpdateLanguagesDto)
   languages?: AdminUpdateLanguagesDto;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => AdminUpdateSeoDto)
+  seo?: AdminUpdateSeoDto;
 
   @IsOptional()
   @ValidateNested()

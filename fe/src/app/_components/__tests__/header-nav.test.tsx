@@ -45,6 +45,12 @@ describe("HeaderNav i18n", () => {
               courses: true,
               coursesPublic: true,
               myCourses: true,
+              profile: true,
+              accessibilityWidget: true,
+              seo: true,
+              themeLight: true,
+              themeDark: true,
+              themeModeSelector: true,
               auth: true,
               authLogin: true,
               authRegister: true,
@@ -102,6 +108,12 @@ describe("HeaderNav i18n", () => {
               courses: true,
               coursesPublic: true,
               myCourses: true,
+              profile: true,
+              accessibilityWidget: true,
+              seo: true,
+              themeLight: true,
+              themeDark: true,
+              themeModeSelector: true,
               auth: true,
               authLogin: true,
               authRegister: true,
@@ -162,6 +174,12 @@ describe("HeaderNav i18n", () => {
               courses: true,
               coursesPublic: true,
               myCourses: true,
+              profile: true,
+              accessibilityWidget: true,
+              seo: true,
+              themeLight: true,
+              themeDark: true,
+              themeModeSelector: true,
               auth: true,
               authLogin: true,
               authRegister: true,
@@ -241,6 +259,12 @@ describe("HeaderNav i18n", () => {
               courses: true,
               coursesPublic: true,
               myCourses: true,
+              profile: true,
+              accessibilityWidget: true,
+              seo: true,
+              themeLight: true,
+              themeDark: true,
+              themeModeSelector: true,
               auth: true,
               authLogin: true,
               authRegister: true,
@@ -310,6 +334,12 @@ describe("HeaderNav i18n", () => {
               courses: true,
               coursesPublic: true,
               myCourses: true,
+              profile: true,
+              accessibilityWidget: true,
+              seo: true,
+              themeLight: true,
+              themeDark: true,
+              themeModeSelector: true,
               auth: true,
               authLogin: true,
               authRegister: true,
@@ -378,6 +408,12 @@ describe("HeaderNav i18n", () => {
               courses: true,
               coursesPublic: true,
               myCourses: true,
+              profile: true,
+              accessibilityWidget: true,
+              seo: true,
+              themeLight: true,
+              themeDark: true,
+              themeModeSelector: true,
               auth: true,
               authLogin: true,
               authRegister: true,
@@ -410,6 +446,64 @@ describe("HeaderNav i18n", () => {
       expect(
         screen.queryByRole("link", { name: "Admin" }),
       ).not.toBeInTheDocument();
+    });
+  });
+
+  it("hides theme dropdown when only one theme mode is enabled", async () => {
+    useSearchParamsMock.mockReturnValue(makeSearchParams("lang=en"));
+    usePathnameMock.mockReturnValue("/wiki");
+
+    global.fetch = jest.fn().mockImplementation(async (input: RequestInfo) => {
+      const url = String(input);
+
+      if (url.includes("/public/settings")) {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            branding: { appName: "BeeLMS" },
+            features: {
+              wiki: true,
+              wikiPublic: true,
+              courses: true,
+              coursesPublic: true,
+              myCourses: true,
+              profile: true,
+              accessibilityWidget: true,
+              seo: true,
+              themeLight: true,
+              themeDark: false,
+              themeModeSelector: true,
+              auth: true,
+              authLogin: true,
+              authRegister: true,
+              paidCourses: true,
+              gdprLegal: true,
+              socialGoogle: true,
+              socialFacebook: true,
+              socialGithub: true,
+              socialLinkedin: true,
+              infraRedis: false,
+              infraRabbitmq: false,
+              infraMonitoring: true,
+              infraErrorTracking: false,
+            },
+            languages: { supported: ["en"], default: "en" },
+          }),
+        } as unknown as Response;
+      }
+
+      return {
+        ok: false,
+        status: 404,
+        json: async () => ({}),
+      } as unknown as Response;
+    });
+
+    render(<HeaderNav />);
+
+    await waitFor(() => {
+      expect(screen.queryByLabelText("Theme")).not.toBeInTheDocument();
     });
   });
 });
