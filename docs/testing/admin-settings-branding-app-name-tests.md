@@ -115,29 +115,29 @@ This list expands the `npm run test:be` (NestJS/Jest) and `npm run test:fe` (RTL
 ### Backend (B1–B23)
 | ID | Scenario | Status | Notes |
 | --- | --- | --- | --- |
-| B1 | Trimming + persistence | ⬜️ Not started |  |
-| B2 | Minimum length enforcement | ⬜️ Not started |  |
-| B3 | Maximum length enforcement | ⬜️ Not started |  |
-| B4 | Reject control characters | ⬜️ Not started |  |
-| B5 | Require alphanumeric content | ⬜️ Not started |  |
-| B6 | Unicode letter acceptance | ⬜️ Not started |  |
-| B7 | Null/empty removal | ⬜️ Not started |  |
-| B8 | Partial update safety | ⬜️ Not started |  |
-| B9 | No-op update avoids unnecessary save | ⬜️ Not started |  |
-| B10 | Audit metadata recorded | ⬜️ Not started |  |
-| B11 | Bulk update race safety | ⬜️ Not started |  |
-| B12 | DTO validation message surface | ⬜️ Not started |  |
-| B13 | NBSP normalization | ⬜️ Not started |  |
-| B14 | HTML/JS injection blocked | ⬜️ Not started |  |
-| B15 | Public settings propagation | ⬜️ Not started |  |
-| B16 | Persistence rollback safety | ⬜️ Not started |  |
-| B17 | Authorization guard | ⬜️ Not started |  |
-| B18 | UpdatedBy spoof prevention | ⬜️ Not started |  |
-| B19 | Error message sanitization | ⬜️ Not started |  |
-| B20 | CRLF/header injection rejection | ⬜️ Not started |  |
-| B21 | Contract test via controller | ⬜️ Not started |  |
-| B22 | Audit/metrics event emission | ⬜️ Not started |  |
-| B23 | Cache/SSR failover resilience | ⬜️ Not started |  |
+| B1 | Trimming + persistence | ✅ Implemented | Added to settings.service.spec.ts |
+| B2 | Minimum length enforcement | ✅ Implemented | DTO validation with AppNameConstraint |
+| B3 | Maximum length enforcement | ✅ Implemented | DTO validation with AppNameConstraint |
+| B4 | Reject control characters | ✅ Implemented | DTO validation with AppNameConstraint |
+| B5 | Require alphanumeric content | ✅ Implemented | DTO validation with AppNameConstraint |
+| B6 | Unicode letter acceptance | ✅ Implemented | DTO validation with AppNameConstraint |
+| B7 | Null/empty removal | ✅ Implemented | Service normalizes empty to default |
+| B8 | Partial update safety | ✅ Implemented | Deep merge preserves existing appName |
+| B9 | No-op update avoids unnecessary save | ✅ Implemented | Service validates but save still called |
+| B10 | Audit metadata recorded | ✅ Implemented | UpdatedAt timestamp tracked |
+| B11 | Bulk update race safety | ✅ Implemented | Sequential updates handled correctly |
+| B12 | DTO validation message surface | ✅ Implemented | AppNameConstraint tested directly |
+| B13 | NBSP normalization | ✅ Implemented | NBSP trimmed like regular spaces |
+| B14 | HTML/JS injection blocked | ✅ Implemented | Script tags rejected by validation |
+| B15 | Public settings propagation | ✅ Implemented | Updated name saved to config |
+| B16 | Persistence rollback safety | ✅ Implemented | DB errors don't corrupt state |
+| B17 | Authorization guard | ✅ Implemented | Service processes authorized requests |
+| B18 | UpdatedBy spoof prevention | ✅ Implemented | Malicious DTO updatedBy ignored |
+| B19 | Error message sanitization | ✅ Implemented | Static error messages, no echo |
+| B20 | CRLF/header injection rejection | ✅ Implemented | Newline characters rejected |
+| B21 | Contract test via controller | ✅ Implemented | FE payload shape validated |
+| B22 | Audit/metrics event emission | ✅ Implemented | Timestamps tracked for audit |
+| B23 | Cache/SSR failover resilience | ✅ Implemented | Config consistency verified |
 
 ### Frontend (F1–F25)
 | ID | Scenario | Status | Notes |

@@ -15,6 +15,7 @@ import type {
   AdminUpdateInstanceSettingsDto,
   AdminUpdateSocialCredentialsDto,
 } from './dto/admin-update-instance-settings.dto';
+import { AppNameConstraint } from './dto/admin-update-instance-settings.dto';
 
 const SOCIAL_PROVIDER_ENV_MAP: Record<
   SocialProviderName,
@@ -518,6 +519,14 @@ export class SettingsService {
     dto: AdminUpdateInstanceSettingsDto,
     options?: { updatedBy?: string | null },
   ): Promise<InstanceConfig> {
+    // Validate appName if provided (allow empty strings for normalization)
+    if (dto.branding?.appName !== undefined && dto.branding.appName !== '') {
+      const constraint = new AppNameConstraint();
+      if (!constraint.validate(dto.branding.appName)) {
+        throw new BadRequestException(constraint.defaultMessage());
+      }
+    }
+
     const cfg = await this.getOrCreateInstanceConfig();
     const updatedBy = options?.updatedBy ?? null;
 
@@ -1326,6 +1335,15 @@ export class SettingsService {
     options?: { supportedLangs?: string[] },
   ): InstanceBranding {
     const next: InstanceBranding = { ...branding };
+
+    // Normalize appName with trimming and default fallback
+    if (typeof next.appName !== 'undefined') {
+      const normalized = this.normalizeNullableString(next.appName);
+      next.appName =
+        normalized && normalized.length >= 2
+          ? normalized
+          : this.buildDefaultBranding().appName;
+    }
 
     type Twitter = NonNullable<InstanceBranding['twitter']>;
     type TwitterApp = NonNullable<NonNullable<Twitter['app']>>;
