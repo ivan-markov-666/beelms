@@ -3,12 +3,10 @@ import { LanguageSwitcher } from "../language-switcher";
 import * as nextNavigation from "next/navigation";
 
 jest.mock("next/navigation", () => ({
-  useRouter: jest.fn(),
   usePathname: jest.fn(),
   useSearchParams: jest.fn(),
 }));
 
-const useRouterMock = nextNavigation.useRouter as jest.Mock;
 const usePathnameMock = nextNavigation.usePathname as jest.Mock;
 const useSearchParamsMock = nextNavigation.useSearchParams as jest.Mock;
 
@@ -17,13 +15,14 @@ function makeSearchParams(query: string) {
 }
 
 describe("LanguageSwitcher", () => {
-  const pushMock = jest.fn();
-
   beforeEach(() => {
-    useRouterMock.mockReturnValue({ push: pushMock });
-    pushMock.mockReset();
     // reset cookie between tests
     document.cookie = "ui_lang=; Path=/; Max-Age=0; SameSite=Lax";
+    document.body.innerHTML = "";
+    Object.defineProperty(window, "location", {
+      value: { assign: jest.fn() },
+      writable: true,
+    });
   });
 
   afterEach(() => {
@@ -36,9 +35,18 @@ describe("LanguageSwitcher", () => {
 
     render(<LanguageSwitcher />);
 
-    const select = screen.getByLabelText("Език на съдържанието");
-    expect(select).toBeInTheDocument();
-    expect((select as HTMLSelectElement).value).toBe("en");
+    const trigger = screen.getByRole("button", {
+      name: "Език на съдържанието",
+    });
+    expect(trigger).toBeInTheDocument();
+    expect(trigger).toHaveTextContent("EN");
+
+    fireEvent.click(trigger);
+
+    const listbox = screen.getByRole("listbox", {
+      name: "Език на съдържанието",
+    });
+    expect(listbox).toBeInTheDocument();
 
     const options = screen.getAllByRole("option").map((opt) => opt.textContent);
     expect(options).toEqual(["BG", "EN", "DE"]);
@@ -52,18 +60,17 @@ describe("LanguageSwitcher", () => {
 
     render(<LanguageSwitcher />);
 
-    const select = screen.getByLabelText("Език на съдържанието");
-    fireEvent.change(select, { target: { value: "en" } });
+    const trigger = screen.getByRole("button", {
+      name: "Език на съдържанието",
+    });
+    expect(trigger).toHaveTextContent("BG");
+    fireEvent.click(trigger);
+    fireEvent.click(screen.getByRole("option", { name: "EN" }));
 
     expect(document.cookie).toContain("ui_lang=en");
 
-    expect(pushMock).toHaveBeenCalledTimes(1);
-    const [url] = pushMock.mock.calls[0] as [string];
-
-    expect(url.startsWith("/wiki")).toBe(true);
-    expect(url).toContain("lang=en");
-    expect(url).toContain("q=test");
-    expect(url).not.toContain("page=");
+    expect(window.location.assign).toHaveBeenCalledTimes(1);
+    expect(window.location.assign).toHaveBeenCalledWith("/wiki?lang=en&q=test");
   });
 
   it("updates lang and preserves other params on non-wiki pages", () => {
@@ -72,15 +79,17 @@ describe("LanguageSwitcher", () => {
 
     render(<LanguageSwitcher />);
 
-    const select = screen.getByLabelText("Език на съдържанието");
-    fireEvent.change(select, { target: { value: "en" } });
+    const trigger = screen.getByRole("button", {
+      name: "Език на съдържанието",
+    });
+    expect(trigger).toHaveTextContent("BG");
+    fireEvent.click(trigger);
+    fireEvent.click(screen.getByRole("option", { name: "EN" }));
 
-    expect(pushMock).toHaveBeenCalledTimes(1);
-    const [url] = pushMock.mock.calls[0] as [string];
-
-    expect(url.startsWith("/profile")).toBe(true);
-    expect(url).toContain("lang=en");
-    expect(url).toContain("foo=bar");
+    expect(window.location.assign).toHaveBeenCalledTimes(1);
+    expect(window.location.assign).toHaveBeenCalledWith(
+      "/profile?lang=en&foo=bar",
+    );
   });
 
   it("does not navigate when selecting the already active language", () => {
@@ -89,9 +98,31 @@ describe("LanguageSwitcher", () => {
 
     render(<LanguageSwitcher />);
 
-    const select = screen.getByLabelText("Език на съдържанието");
-    fireEvent.change(select, { target: { value: "bg" } });
+    const trigger = screen.getByRole("button", {
+      name: "Език на съдържанието",
+    });
+    expect(trigger).toHaveTextContent("BG");
+    fireEvent.click(trigger);
+    fireEvent.click(screen.getByRole("option", { name: "BG" }));
 
-    expect(pushMock).not.toHaveBeenCalled();
+    expect(window.location.assign).not.toHaveBeenCalled();
+  });
+
+  it("forces a full navigation when switching language on the not-found page", () => {
+    usePathnameMock.mockReturnValue("/test404");
+    useSearchParamsMock.mockReturnValue(makeSearchParams("lang=bg"));
+    document.body.innerHTML = '<main data-page="not-found"></main>';
+
+    render(<LanguageSwitcher />);
+
+    const trigger = screen.getByRole("button", {
+      name: "Език на съдържанието",
+    });
+    expect(trigger).toHaveTextContent("BG");
+    fireEvent.click(trigger);
+    fireEvent.click(screen.getByRole("option", { name: "EN" }));
+
+    expect(window.location.assign).toHaveBeenCalledTimes(1);
+    expect(window.location.assign).toHaveBeenCalledWith("/test404?lang=en");
   });
 });

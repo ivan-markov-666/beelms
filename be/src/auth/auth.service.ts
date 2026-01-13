@@ -17,6 +17,7 @@ import * as bcrypt from 'bcryptjs';
 import { User } from './user.entity';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { Login2faDto } from './dto/login-2fa.dto';
 import { UserProfileDto } from './dto/user-profile.dto';
 import { AuthTokenDto } from './dto/auth-token.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
@@ -34,9 +35,11 @@ import {
   normalizeLoginEmailValue,
 } from '../security/account-protection/login-protection.utils';
 import { SettingsService } from '../settings/settings.service';
+import { TwoFactorAuthService } from './two-factor-auth.service';
 
 const RESET_PASSWORD_TOKEN_TTL_MS = 24 * 60 * 60 * 1000;
 const EMAIL_VERIFICATION_TOKEN_TTL_MS = 24 * 60 * 60 * 1000;
+const TWO_FACTOR_CHALLENGE_TTL_SECONDS = 5 * 60;
 const SHOULD_LOG_AUTH_LINKS =
   process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test';
 
@@ -48,6 +51,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly captchaService: CaptchaService,
     private readonly loginAttemptStore: InMemoryLoginAttemptStore,
+    private readonly twoFactorAuth: TwoFactorAuthService,
     @Inject(forwardRef(() => SettingsService))
     private readonly settingsService: SettingsService,
   ) {}
@@ -177,7 +181,87 @@ export class AuthService {
       throw new UnauthorizedException('invalid credentials');
     }
 
+    const twoFactorGloballyEnabled = cfg.features?.auth2fa === true;
+    const twoFactorUserEnabled =
+      user.twoFactorEnabled === true && !!user.twoFactorSecret;
+
+    if (twoFactorGloballyEnabled && twoFactorUserEnabled) {
+      return {
+        twoFactorRequired: true,
+        challengeToken: await this.issueTwoFactorChallengeToken(user),
+      };
+    }
+
     return this.issueAuthToken(user);
+  }
+
+  async login2fa(dto: Login2faDto): Promise<AuthTokenDto> {
+    let payload:
+      | {
+          sub?: string;
+          email?: string;
+          tokenVersion?: number;
+          purpose?: string;
+        }
+      | undefined;
+
+    try {
+      payload = await this.jwtService.verifyAsync<{
+        sub?: string;
+        email?: string;
+        tokenVersion?: number;
+        purpose?: string;
+      }>(dto.challengeToken);
+    } catch {
+      throw new UnauthorizedException('invalid 2fa challenge');
+    }
+
+    if (!payload?.sub || payload.purpose !== '2fa_login') {
+      throw new UnauthorizedException('invalid 2fa challenge');
+    }
+
+    const user = await this.usersRepo.findOne({
+      where: { id: payload.sub, active: true },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('invalid 2fa challenge');
+    }
+
+    const cfg = await this.settingsService.getOrCreateInstanceConfig();
+    if (cfg.features?.auth2fa !== true) {
+      throw new UnauthorizedException('invalid 2fa challenge');
+    }
+
+    if (typeof payload.tokenVersion === 'number') {
+      if (payload.tokenVersion !== user.tokenVersion) {
+        throw new UnauthorizedException('invalid 2fa challenge');
+      }
+    }
+
+    if (!user.twoFactorEnabled || !user.twoFactorSecret) {
+      throw new UnauthorizedException('invalid 2fa challenge');
+    }
+
+    const secret = this.twoFactorAuth.decryptSecret(user.twoFactorSecret);
+    const ok = this.twoFactorAuth.verifyCode({ code: dto.code, secret });
+    if (!ok) {
+      throw new UnauthorizedException('invalid 2fa code');
+    }
+
+    return this.issueAuthToken(user);
+  }
+
+  private async issueTwoFactorChallengeToken(user: User): Promise<string> {
+    return this.jwtService.signAsync(
+      {
+        sub: user.id,
+        email: user.email,
+        tokenVersion: user.tokenVersion,
+        purpose: '2fa_login',
+      },
+      { expiresIn: `${TWO_FACTOR_CHALLENGE_TTL_SECONDS}s` },
+    );
   }
 
   async forgotPassword(dto: ForgotPasswordDto): Promise<void> {

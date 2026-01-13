@@ -48,6 +48,60 @@ export default function MyCoursesPage() {
   const [items, setItems] = useState<MyCourseListItem[]>([]);
   const [error, setError] = useState<string | null>(null);
 
+  const [removingCourseId, setRemovingCourseId] = useState<string | null>(null);
+
+  const handleRemove = async (course: MyCourseListItem) => {
+    if (typeof window === "undefined") return;
+    if (course.isPaid) return;
+
+    const ok = window.confirm(
+      `Сигурен ли си, че искаш да премахнеш курса "${course.title}" от My Courses? Това ще изтрие и прогреса ти.`,
+    );
+    if (!ok) return;
+
+    const token = getAccessToken();
+    if (!token) {
+      router.replace("/auth/login");
+      return;
+    }
+
+    setRemovingCourseId(course.id);
+    setError(null);
+
+    try {
+      const res = await fetch(
+        buildApiUrl(`/courses/${encodeURIComponent(course.id)}/unenroll`),
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      if (res.status === 401) {
+        router.replace("/auth/login");
+        return;
+      }
+
+      if (res.status === 403) {
+        setError("Платен курс не може да бъде премахнат.");
+        return;
+      }
+
+      if (!res.ok && res.status !== 204) {
+        setError("Неуспешно премахване на курса. Опитайте отново.");
+        return;
+      }
+
+      setItems((prev) => prev.filter((c) => c.id !== course.id));
+    } catch {
+      setError("Възникна грешка при връзката със сървъра.");
+    } finally {
+      setRemovingCourseId(null);
+    }
+  };
+
   useEffect(() => {
     let cancelled = false;
 
@@ -199,6 +253,17 @@ export default function MyCoursesPage() {
                   >
                     Certificate →
                   </Link>
+                )}
+
+                {!course.isPaid && (
+                  <button
+                    type="button"
+                    onClick={() => void handleRemove(course)}
+                    disabled={removingCourseId === course.id}
+                    className="ml-auto rounded-md border border-red-200 bg-white px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {removingCourseId === course.id ? "Removing..." : "Remove"}
+                  </button>
                 )}
               </div>
             </div>

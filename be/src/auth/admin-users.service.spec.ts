@@ -24,6 +24,7 @@ describe('AdminUsersService', () => {
       where: jest.fn().mockReturnThis(),
       andWhere: jest.fn().mockReturnThis(),
       getMany: jest.fn(),
+      getManyAndCount: jest.fn(),
     } as unknown as jest.Mocked<SelectQueryBuilder<User>>;
 
     const module: TestingModule = await Test.createTestingModule({
@@ -68,7 +69,7 @@ describe('AdminUsersService', () => {
       }),
     ];
 
-    (qb.getMany as jest.Mock).mockResolvedValue(users);
+    (qb.getManyAndCount as jest.Mock).mockResolvedValue([users, users.length]);
 
     const result = await service.getAdminUsersList(
       undefined,
@@ -90,7 +91,7 @@ describe('AdminUsersService', () => {
   });
 
   it('getAdminUsersList applies email filter when q is provided', async () => {
-    (qb.getMany as jest.Mock).mockResolvedValue([]);
+    (qb.getManyAndCount as jest.Mock).mockResolvedValue([[], 0]);
 
     await service.getAdminUsersList(2, 10, ' Test@Example.COM ');
 
@@ -103,7 +104,7 @@ describe('AdminUsersService', () => {
   });
 
   it('getAdminUsersList applies active status filter when status is active without q', async () => {
-    (qb.getMany as jest.Mock).mockResolvedValue([]);
+    (qb.getManyAndCount as jest.Mock).mockResolvedValue([[], 0]);
 
     await service.getAdminUsersList(1, 20, undefined, 'active');
 
@@ -114,7 +115,7 @@ describe('AdminUsersService', () => {
   });
 
   it('getAdminUsersList combines q, status and role filters', async () => {
-    (qb.getMany as jest.Mock).mockResolvedValue([]);
+    (qb.getManyAndCount as jest.Mock).mockResolvedValue([[], 0]);
 
     await service.getAdminUsersList(1, 20, ' ADMIN ', 'deactivated', 'admin');
 

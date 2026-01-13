@@ -6,10 +6,12 @@ import {
   Post,
   Query,
   Req,
+  Res,
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import type { Request } from 'express';
+import type { Response } from 'express';
 import { CoursesService } from './courses.service';
 import { CourseSummaryDto } from './dto/course-summary.dto';
 import { CourseDetailDto } from './dto/course-detail.dto';
@@ -33,9 +35,45 @@ export class CoursesController {
   @Get()
   @UseGuards(FeatureEnabledGuard('coursesPublic'))
   async listPublicCatalog(
+    @Res({ passthrough: true }) res: Response,
     @Query('category') category?: string,
+    @Query('page') page?: string,
+    @Query('pageSize') pageSize?: string,
+    @Query('q') q?: string,
+    @Query('language') language?: string,
+    @Query('paid') paid?: 'paid' | 'free',
+    @Query('sortKey') sortKey?: 'createdAt' | 'title',
+    @Query('sortDir') sortDir?: 'asc' | 'desc',
   ): Promise<CourseSummaryDto[]> {
-    return this.coursesService.getPublicCatalog(category);
+    const shouldUsePaging =
+      typeof page !== 'undefined' ||
+      typeof pageSize !== 'undefined' ||
+      typeof q !== 'undefined' ||
+      typeof language !== 'undefined' ||
+      typeof paid !== 'undefined' ||
+      typeof sortKey !== 'undefined' ||
+      typeof sortDir !== 'undefined';
+
+    if (!shouldUsePaging) {
+      return this.coursesService.getPublicCatalog(category);
+    }
+
+    const pageNum = page ? Number(page) : 1;
+    const pageSizeNum = pageSize ? Number(pageSize) : 20;
+
+    const result = await this.coursesService.getPublicCatalogPaged({
+      page: pageNum,
+      pageSize: pageSizeNum,
+      q,
+      language,
+      paid,
+      categorySlug: category,
+      sortKey,
+      sortDir,
+    });
+
+    res.setHeader('X-Total-Count', String(result.total));
+    return result.items;
   }
 
   @Get(':courseId')
@@ -60,6 +98,22 @@ export class CoursesController {
     }
 
     await this.coursesService.enrollInCourse(userId, courseId);
+  }
+
+  @Post(':courseId/unenroll')
+  @UseGuards(FeatureEnabledGuard('myCourses'), JwtAuthGuard)
+  @HttpCode(204)
+  async unenroll(
+    @Param('courseId') courseId: string,
+    @Req() req: AuthenticatedRequest,
+  ): Promise<void> {
+    const userId = req.user?.userId;
+
+    if (!userId) {
+      throw new UnauthorizedException('Authenticated user not found');
+    }
+
+    await this.coursesService.unenrollFromCourse(userId, courseId);
   }
 
   @Get(':courseId/certificate')

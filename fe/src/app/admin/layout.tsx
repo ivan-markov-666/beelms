@@ -76,9 +76,17 @@ function AdminNavigationTabs({
       visible: role === "admin",
     },
     {
-      href: "/admin/legal",
-      label: "Legal",
-      active: pathname.startsWith("/admin/legal"),
+      href: "/admin/pages",
+      label: "Pages",
+      active:
+        pathname.startsWith("/admin/pages") ||
+        pathname.startsWith("/admin/legal"),
+      visible: role === "admin",
+    },
+    {
+      href: "/admin/navigation",
+      label: "Navigation",
+      active: pathname.startsWith("/admin/navigation"),
       visible: role === "admin",
     },
     {
@@ -102,13 +110,13 @@ function AdminNavigationTabs({
         {tabs.map((tab) => (
           <li key={tab.href}>
             {tab.active ? (
-              <span className="inline-block border-b-2 border-green-600 pb-3 text-green-700 font-medium">
+              <span className="inline-block border-b-2 border-[color:var(--primary)] pb-3 text-[color:var(--primary)] font-medium">
                 {tab.label}
               </span>
             ) : (
               <Link
                 href={tab.href}
-                className="inline-block border-b-2 border-transparent pb-3 text-gray-600 transition hover:border-green-400 hover:text-green-700"
+                className="inline-block border-b-2 border-transparent pb-3 text-[color:var(--foreground)] opacity-70 transition hover:border-[color:var(--primary)] hover:text-[color:var(--primary)] hover:opacity-100"
               >
                 {tab.label}
               </Link>

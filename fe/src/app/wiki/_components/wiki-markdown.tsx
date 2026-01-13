@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
 import rehypeRaw from "rehype-raw";
 import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
 import Image from "next/image";
@@ -663,6 +665,8 @@ export function WikiMarkdown({ content }: { content: string }) {
     (defaultSchema.attributes as Record<string, unknown> | undefined) ?? {};
   const anchorAttributes = (baseAttributes.a as string[] | undefined) ?? [];
   const imgAttributes = (baseAttributes.img as string[] | undefined) ?? [];
+  const spanAttributes = (baseAttributes.span as string[] | undefined) ?? [];
+  const divAttributes = (baseAttributes.div as string[] | undefined) ?? [];
   const baseProtocols =
     (defaultSchema.protocols as Record<string, unknown> | undefined) ?? {};
   const hrefProtocols = (baseProtocols.href as string[] | undefined) ?? [];
@@ -674,6 +678,8 @@ export function WikiMarkdown({ content }: { content: string }) {
       ...((defaultSchema.tagNames as string[] | undefined) ?? []),
       "a",
       "img",
+      "span",
+      "div",
       "u",
       "sup",
       "sub",
@@ -698,6 +704,18 @@ export function WikiMarkdown({ content }: { content: string }) {
           "rel",
           "className",
         ]),
+      ),
+      span: Array.from(
+        new Set([
+          ...spanAttributes,
+          "className",
+          "style",
+          "aria-hidden",
+          "role",
+        ]),
+      ),
+      div: Array.from(
+        new Set([...divAttributes, "className", "style", "aria-hidden"]),
       ),
       img: Array.from(
         new Set([
@@ -801,8 +819,8 @@ export function WikiMarkdown({ content }: { content: string }) {
 
   return (
     <ReactMarkdown
-      remarkPlugins={[remarkGfm]}
-      rehypePlugins={[rehypeRaw, [rehypeSanitize, sanitizeSchema]]}
+      remarkPlugins={[remarkGfm, remarkMath]}
+      rehypePlugins={[rehypeRaw, rehypeKatex, [rehypeSanitize, sanitizeSchema]]}
       components={components}
     >
       {content}

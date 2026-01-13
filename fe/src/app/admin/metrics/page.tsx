@@ -7,8 +7,13 @@ import { getAccessToken } from "../../auth-token";
 import { getApiBaseUrl } from "../../api-url";
 import { AdminBreadcrumbs } from "../_components/admin-breadcrumbs";
 import Link from "next/link";
+import { Pagination } from "../../_components/pagination";
+import { InfoTooltip } from "../_components/info-tooltip";
+import { ListboxSelect } from "../../_components/listbox-select";
 
 const API_BASE_URL = getApiBaseUrl();
+
+const DEFAULT_PAGE_SIZE = 20;
 
 type MetricsOverview = {
   totalUsers: number;
@@ -157,6 +162,10 @@ export default function AdminMetricsPage() {
     useState<WikiAttentionSortKey>("score");
   const [wikiAttentionSortDir, setWikiAttentionSortDir] =
     useState<WikiAttentionSortDir>("desc");
+
+  const [wikiAttentionPage, setWikiAttentionPage] = useState(1);
+  const [wikiAttentionPageSize, setWikiAttentionPageSize] =
+    useState(DEFAULT_PAGE_SIZE);
   const [userTrend, setUserTrend] = useState<UsersTrendPoint[]>([]);
   const [activityStats, setActivityStats] =
     useState<ActivityPeriodStats | null>(null);
@@ -670,6 +679,37 @@ export default function AdminMetricsPage() {
     wikiAttentionSortDir,
   ]);
 
+  const wikiAttentionTotal = filteredSortedWikiAttentionRows.length;
+  const wikiAttentionTotalPages =
+    wikiAttentionTotal > 0
+      ? Math.max(1, Math.ceil(wikiAttentionTotal / wikiAttentionPageSize))
+      : 1;
+  const wikiAttentionSafePage = Math.min(
+    Math.max(wikiAttentionPage, 1),
+    wikiAttentionTotalPages,
+  );
+  const wikiAttentionStart =
+    (wikiAttentionSafePage - 1) * wikiAttentionPageSize;
+  const wikiAttentionEnd = wikiAttentionStart + wikiAttentionPageSize;
+  const wikiAttentionPageRows = filteredSortedWikiAttentionRows.slice(
+    wikiAttentionStart,
+    wikiAttentionEnd,
+  );
+  const wikiAttentionShowingFrom =
+    wikiAttentionTotal === 0 ? 0 : wikiAttentionStart + 1;
+  const wikiAttentionShowingTo = Math.min(wikiAttentionEnd, wikiAttentionTotal);
+
+  useEffect(() => {
+    setWikiAttentionPage(1);
+  }, [
+    wikiAttentionSearch,
+    wikiAttentionMinViews,
+    wikiAttentionMinVotes,
+    wikiAttentionMinNotHelpfulRate,
+    wikiAttentionSortKey,
+    wikiAttentionSortDir,
+  ]);
+
   const toggleWikiAttentionSort = (key: WikiAttentionSortKey) => {
     if (wikiAttentionSortKey === key) {
       setWikiAttentionSortDir((prev) => (prev === "asc" ? "desc" : "asc"));
@@ -743,9 +783,16 @@ export default function AdminMetricsPage() {
 
       {/* Page header */}
       <header className="space-y-2">
-        <h1 className="text-3xl font-bold text-gray-900 md:text-4xl">
-          {t(lang, "common", "adminMetricsTitle")}
-        </h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-3xl font-bold text-gray-900 md:text-4xl">
+            {t(lang, "common", "adminMetricsTitle")}
+          </h1>
+          <InfoTooltip
+            label="Admin metrics info"
+            title="Metrics"
+            description="Статистика за платформата: потребители, wiki, activity summary, wiki attention и advanced metrics export."
+          />
+        </div>
         <p className="text-gray-600">
           {t(lang, "common", "adminMetricsSubtitle")}
         </p>
@@ -937,58 +984,81 @@ export default function AdminMetricsPage() {
               {t(lang, "common", "adminMetricsUserActivityTitle")}
             </h2>
             <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-3">
-              <select
+              <ListboxSelect
+                ariaLabel="Wiki insights view"
                 value={wikiInsightsView}
-                onChange={(event) =>
-                  setWikiInsightsView(event.target.value as WikiInsightsView)
+                onChange={(next) =>
+                  setWikiInsightsView(next as WikiInsightsView)
                 }
-                className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
-              >
-                <option value="all">
-                  {t(lang, "common", "adminWikiInsightsViewAll")}
-                </option>
-                <option value="views">
-                  {t(lang, "common", "adminWikiInsightsViewViews")}
-                </option>
-                <option value="feedback">
-                  {t(lang, "common", "adminWikiInsightsViewFeedback")}
-                </option>
-                <option value="attention">
-                  {t(lang, "common", "adminWikiInsightsViewAttention")}
-                </option>
-              </select>
+                options={[
+                  {
+                    value: "all",
+                    label: t(lang, "common", "adminWikiInsightsViewAll"),
+                  },
+                  {
+                    value: "views",
+                    label: t(lang, "common", "adminWikiInsightsViewViews"),
+                  },
+                  {
+                    value: "feedback",
+                    label: t(lang, "common", "adminWikiInsightsViewFeedback"),
+                  },
+                  {
+                    value: "attention",
+                    label: t(lang, "common", "adminWikiInsightsViewAttention"),
+                  },
+                ]}
+              />
 
-              <select
+              <ListboxSelect
+                ariaLabel="Metrics period"
                 value={periodPreset}
-                onChange={(event) => {
-                  const value = event.target.value;
+                onChange={(value) => {
                   setPeriodPreset(value);
                   if (value !== "custom") {
                     setPeriodFrom("");
                     setPeriodTo("");
                   }
                 }}
-                className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
-              >
-                <option value="">
-                  {t(lang, "common", "adminActivityFilterRangeAll")}
-                </option>
-                <option value="last_1d">
-                  {t(lang, "common", "adminActivityFilterRangeLastDay")}
-                </option>
-                <option value="last_7d">
-                  {t(lang, "common", "adminActivityFilterRangeLastWeek")}
-                </option>
-                <option value="last_30d">
-                  {t(lang, "common", "adminActivityFilterRangeLastMonth")}
-                </option>
-                <option value="last_365d">
-                  {t(lang, "common", "adminActivityFilterRangeLastYear")}
-                </option>
-                <option value="custom">
-                  {t(lang, "common", "adminActivityFilterRangeCustom")}
-                </option>
-              </select>
+                options={[
+                  {
+                    value: "",
+                    label: t(lang, "common", "adminActivityFilterRangeAll"),
+                  },
+                  {
+                    value: "last_1d",
+                    label: t(lang, "common", "adminActivityFilterRangeLastDay"),
+                  },
+                  {
+                    value: "last_7d",
+                    label: t(
+                      lang,
+                      "common",
+                      "adminActivityFilterRangeLastWeek",
+                    ),
+                  },
+                  {
+                    value: "last_30d",
+                    label: t(
+                      lang,
+                      "common",
+                      "adminActivityFilterRangeLastMonth",
+                    ),
+                  },
+                  {
+                    value: "last_365d",
+                    label: t(
+                      lang,
+                      "common",
+                      "adminActivityFilterRangeLastYear",
+                    ),
+                  },
+                  {
+                    value: "custom",
+                    label: t(lang, "common", "adminActivityFilterRangeCustom"),
+                  },
+                ]}
+              />
 
               {periodPreset === "custom" && (
                 <div className="flex flex-col gap-2 md:flex-row md:items-center">
@@ -1947,7 +2017,7 @@ export default function AdminMetricsPage() {
                     </td>
                   </tr>
                 ) : (
-                  filteredSortedWikiAttentionRows.map((row) => (
+                  wikiAttentionPageRows.map((row) => (
                     <tr key={row.slug} className="hover:bg-gray-50">
                       <td className="px-4 py-3 text-sm">
                         <div className="flex flex-col gap-1">
@@ -1982,6 +2052,25 @@ export default function AdminMetricsPage() {
                 )}
               </tbody>
             </table>
+          </div>
+
+          <div className="mt-3 flex items-center justify-between border-t border-gray-200 px-3 py-3 text-xs text-gray-600 md:text-sm">
+            <p>
+              Showing{" "}
+              <span className="font-semibold">{wikiAttentionShowingFrom}</span>-
+              <span className="font-semibold">{wikiAttentionShowingTo}</span> of{" "}
+              <span className="font-semibold">{wikiAttentionTotal}</span>
+            </p>
+            <Pagination
+              currentPage={wikiAttentionSafePage}
+              totalPages={wikiAttentionTotalPages}
+              onPageChange={(page) => setWikiAttentionPage(page)}
+              pageSize={wikiAttentionPageSize}
+              onPageSizeChange={(next) => {
+                setWikiAttentionPage(1);
+                setWikiAttentionPageSize(next);
+              }}
+            />
           </div>
         </section>
       )}

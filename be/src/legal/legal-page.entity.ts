@@ -17,8 +17,14 @@ export class LegalPage {
   @Column({ type: 'varchar', length: 256 })
   title: string;
 
+  @Column({ name: 'title_by_lang', type: 'jsonb', nullable: true })
+  titleByLang: Record<string, string> | null;
+
   @Column({ name: 'content_markdown', type: 'text' })
   contentMarkdown: string;
+
+  @Column({ name: 'content_markdown_by_lang', type: 'jsonb', nullable: true })
+  contentMarkdownByLang: Record<string, string> | null;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

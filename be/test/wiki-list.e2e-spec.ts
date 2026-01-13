@@ -25,6 +25,8 @@ describe('Wiki list endpoint (e2e)', () => {
       .get('/api/wiki/articles')
       .expect(200);
 
+    expect(res.headers['x-total-count']).toBeDefined();
+
     expect(Array.isArray(res.body)).toBe(true);
 
     type WikiListItem = { slug: string };
@@ -38,6 +40,8 @@ describe('Wiki list endpoint (e2e)', () => {
     const resPage1 = await request(app.getHttpServer())
       .get('/api/wiki/articles?page=1&pageSize=1')
       .expect(200);
+
+    expect(resPage1.headers['x-total-count']).toBeDefined();
 
     const resPage2 = await request(app.getHttpServer())
       .get('/api/wiki/articles?page=2&pageSize=1')

@@ -21,6 +21,7 @@ import { GithubOAuthService } from './github-oauth.service';
 import { LinkedinOAuthService } from './linkedin-oauth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { Login2faDto } from './dto/login-2fa.dto';
 import { UserProfileDto } from './dto/user-profile.dto';
 import { AuthTokenDto } from './dto/auth-token.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
@@ -147,6 +148,13 @@ export class AuthController {
     return this.authService.login(dto, {
       ip: getClientIp(req),
     });
+  }
+
+  @HttpCode(200)
+  @Post('login/2fa')
+  @RateLimit({ limit: 10, windowSeconds: 60, key: 'ip' })
+  login2fa(@Body() dto: Login2faDto): Promise<AuthTokenDto> {
+    return this.authService.login2fa(dto);
   }
 
   @HttpCode(200)

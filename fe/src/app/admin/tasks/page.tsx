@@ -11,8 +11,12 @@ import { getAccessToken } from "../../auth-token";
 import { getApiBaseUrl } from "../../api-url";
 import { AdminBreadcrumbs } from "../_components/admin-breadcrumbs";
 import Link from "next/link";
+import { Pagination } from "../../_components/pagination";
+import { ListboxSelect } from "../../_components/listbox-select";
 
 const API_BASE_URL = getApiBaseUrl();
+
+const DEFAULT_PAGE_SIZE = 20;
 
 type AdminTask = {
   id: string;
@@ -56,6 +60,9 @@ export default function AdminTasksPage() {
   const [tasks, setTasks] = useState<AdminTask[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
 
   const [form, setForm] = useState<CreateTaskForm>(DEFAULT_FORM);
   const [creating, setCreating] = useState(false);
@@ -113,6 +120,63 @@ export default function AdminTasksPage() {
   const sortedTasks = useMemo(() => {
     return tasks.slice().sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
   }, [tasks]);
+
+  const totalCount = sortedTasks.length;
+  const totalPages =
+    totalCount > 0 ? Math.max(1, Math.ceil(totalCount / pageSize)) : 1;
+  const safeCurrentPage = Math.min(Math.max(currentPage, 1), totalPages);
+  const startIndex = (safeCurrentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const pageItems = sortedTasks.slice(startIndex, endIndex);
+  const showingFrom = totalCount === 0 ? 0 : startIndex + 1;
+  const showingTo = Math.min(endIndex, totalCount);
+
+  const exportCsv = () => {
+    if (totalCount === 0 || typeof window === "undefined") {
+      return;
+    }
+
+    const escapeCsv = (value: string | number): string => {
+      const str = String(value);
+      if (str.includes('"') || str.includes(",") || str.includes("\n")) {
+        return `"${str.replaceAll('"', '""')}"`;
+      }
+      return str;
+    };
+
+    const header = [
+      "id",
+      "title",
+      "description",
+      "language",
+      "status",
+      "createdAt",
+      "updatedAt",
+    ];
+    const rows = sortedTasks.map((task) => [
+      task.id,
+      task.title,
+      task.description,
+      task.language,
+      task.status,
+      task.createdAt,
+      task.updatedAt,
+    ]);
+
+    const csv = [header, ...rows]
+      .map((r) => r.map(escapeCsv).join(","))
+      .join("\n");
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `admin-tasks-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  };
 
   const handleCreate = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -218,31 +282,31 @@ export default function AdminTasksPage() {
               <span className="text-xs font-medium text-gray-600">
                 Language
               </span>
-              <select
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900"
+              <ListboxSelect
+                ariaLabel="Task language"
                 value={form.language}
-                onChange={(e) =>
-                  setForm((p) => ({ ...p, language: e.target.value }))
-                }
-              >
-                <option value="bg">bg</option>
-                <option value="en">en</option>
-              </select>
+                onChange={(next) => setForm((p) => ({ ...p, language: next }))}
+                buttonClassName="flex w-full items-center justify-between gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900"
+                options={[
+                  { value: "bg", label: "bg" },
+                  { value: "en", label: "en" },
+                ]}
+              />
             </label>
 
             <label className="space-y-1">
               <span className="text-xs font-medium text-gray-600">Status</span>
-              <select
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900"
+              <ListboxSelect
+                ariaLabel="Task status"
                 value={form.status}
-                onChange={(e) =>
-                  setForm((p) => ({ ...p, status: e.target.value }))
-                }
-              >
-                <option value="draft">draft</option>
-                <option value="active">active</option>
-                <option value="inactive">inactive</option>
-              </select>
+                onChange={(next) => setForm((p) => ({ ...p, status: next }))}
+                buttonClassName="flex w-full items-center justify-between gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900"
+                options={[
+                  { value: "draft", label: "draft" },
+                  { value: "active", label: "active" },
+                  { value: "inactive", label: "inactive" },
+                ]}
+              />
             </label>
           </div>
 
@@ -302,13 +366,23 @@ export default function AdminTasksPage() {
       <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold text-gray-900">Tasks list</h2>
-          <button
-            type="button"
-            className="text-sm font-medium text-green-700 hover:text-green-900"
-            onClick={() => void load()}
-          >
-            Reload
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+              onClick={exportCsv}
+              disabled={totalCount === 0}
+            >
+              Export CSV
+            </button>
+            <button
+              type="button"
+              className="text-sm font-medium text-green-700 hover:text-green-900"
+              onClick={() => void load()}
+            >
+              Reload
+            </button>
+          </div>
         </div>
 
         {loading && <p className="mt-3 text-sm text-gray-500">Loading...</p>}
@@ -338,7 +412,7 @@ export default function AdminTasksPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {sortedTasks.map((task) => (
+                {pageItems.map((task) => (
                   <tr key={task.id} className="hover:bg-gray-50">
                     <td className="px-2 py-2">
                       <Link
@@ -360,6 +434,24 @@ export default function AdminTasksPage() {
                 ))}
               </tbody>
             </table>
+
+            <div className="mt-4 flex items-center justify-between border-t border-gray-200 px-3 py-3 text-xs text-gray-600 md:text-sm">
+              <p>
+                Showing <span className="font-semibold">{showingFrom}</span>-
+                <span className="font-semibold">{showingTo}</span> of{" "}
+                <span className="font-semibold">{totalCount}</span> tasks
+              </p>
+              <Pagination
+                currentPage={safeCurrentPage}
+                totalPages={totalPages}
+                onPageChange={(page) => setCurrentPage(page)}
+                pageSize={pageSize}
+                onPageSizeChange={(next) => {
+                  setCurrentPage(1);
+                  setPageSize(next);
+                }}
+              />
+            </div>
           </div>
         )}
       </section>

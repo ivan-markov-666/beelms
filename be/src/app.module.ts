@@ -23,6 +23,7 @@ import { UserCurriculumProgress } from './courses/user-curriculum-progress.entit
 import { CoursePurchase } from './courses/course-purchase.entity';
 import { PaymentSettings } from './payments/payment-settings.entity';
 import { StripeWebhookEvent } from './payments/stripe-webhook-event.entity';
+import { PaymentCheckout } from './payments/payment-checkout.entity';
 import { AssessmentsModule } from './assessments/assessments.module';
 import { Quiz } from './assessments/quiz.entity';
 import { QuizQuestion } from './assessments/quiz-question.entity';
@@ -37,6 +38,8 @@ import { SettingsModule } from './settings/settings.module';
 import { InstanceConfig } from './settings/instance-config.entity';
 import { LegalModule } from './legal/legal.module';
 import { LegalPage } from './legal/legal-page.entity';
+import { CustomPagesModule } from './custom-pages/custom-pages.module';
+import { CustomPage } from './custom-pages/custom-page.entity';
 
 @Module({
   imports: [
@@ -62,6 +65,7 @@ import { LegalPage } from './legal/legal-page.entity';
         CoursePurchase,
         PaymentSettings,
         StripeWebhookEvent,
+        PaymentCheckout,
         CourseCurriculumItem,
         UserCurriculumProgress,
         Quiz,
@@ -71,6 +75,7 @@ import { LegalPage } from './legal/legal-page.entity';
         Task,
         InstanceConfig,
         LegalPage,
+        CustomPage,
       ],
       synchronize: false,
     }),
@@ -83,6 +88,7 @@ import { LegalPage } from './legal/legal-page.entity';
     TasksModule,
     SettingsModule,
     LegalModule,
+    CustomPagesModule,
   ],
   controllers: [AppController],
   providers: [

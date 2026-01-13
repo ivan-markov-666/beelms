@@ -21,6 +21,7 @@ import type { GoogleProfile } from './google-oauth.service';
 import type { FacebookProfile } from './facebook-oauth.service';
 import type { GithubProfile } from './github-oauth.service';
 import { SettingsService } from '../settings/settings.service';
+import { TwoFactorAuthService } from './two-factor-auth.service';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -66,6 +67,16 @@ describe('AuthService', () => {
       ],
       providers: [
         AuthService,
+        {
+          provide: TwoFactorAuthService,
+          useValue: {
+            generateSecret: jest.fn(),
+            buildOtpAuthUrl: jest.fn(),
+            encryptSecret: jest.fn(),
+            decryptSecret: jest.fn(),
+            verifyCode: jest.fn(),
+          },
+        },
         {
           provide: SettingsService,
           useValue: settingsService,
@@ -147,11 +158,13 @@ describe('AuthService', () => {
       expect(createdUserPayload?.privacyAcceptedAt).toBeInstanceOf(Date);
       expect(usersRepo.save).toHaveBeenCalledTimes(1);
 
+      const accessToken = token.accessToken;
+      expect(accessToken).toBeDefined();
       const payload = await jwtService.verifyAsync<{
         sub: string;
         email: string;
         tokenVersion: number;
-      }>(token.accessToken);
+      }>(accessToken as string);
       expect(payload.sub).toBe('github-user-id');
       expect(payload.email).toBe(baseProfile.email);
       expect(payload.tokenVersion).toBe(0);
@@ -177,11 +190,13 @@ describe('AuthService', () => {
         }),
       );
 
+      const accessToken = token.accessToken;
+      expect(accessToken).toBeDefined();
       const payload = await jwtService.verifyAsync<{
         sub: string;
         email: string;
         tokenVersion: number;
-      }>(token.accessToken);
+      }>(accessToken as string);
       expect(payload.sub).toBe(existingUser.id);
       expect(payload.email).toBe(existingUser.email);
       expect(payload.tokenVersion).toBe(existingUser.tokenVersion);
@@ -217,11 +232,13 @@ describe('AuthService', () => {
       expect(createdUserPayload?.privacyAcceptedAt).toBeInstanceOf(Date);
       expect(usersRepo.save).toHaveBeenCalledTimes(1);
 
+      const accessToken = token.accessToken;
+      expect(accessToken).toBeDefined();
       const payload = await jwtService.verifyAsync<{
         sub: string;
         email: string;
         tokenVersion: number;
-      }>(token.accessToken);
+      }>(accessToken as string);
       expect(payload.sub).toBe('facebook-user-id');
       expect(payload.email).toBe(baseProfile.email);
       expect(payload.tokenVersion).toBe(0);
@@ -247,11 +264,13 @@ describe('AuthService', () => {
         }),
       );
 
+      const accessToken = token.accessToken;
+      expect(accessToken).toBeDefined();
       const payload = await jwtService.verifyAsync<{
         sub: string;
         email: string;
         tokenVersion: number;
-      }>(token.accessToken);
+      }>(accessToken as string);
       expect(payload.sub).toBe(existingUser.id);
       expect(payload.email).toBe(existingUser.email);
       expect(payload.tokenVersion).toBe(existingUser.tokenVersion);
@@ -401,11 +420,14 @@ describe('AuthService', () => {
     expect(result.accessToken).toBeDefined();
     expect(result.tokenType).toBe('Bearer');
 
+    const accessToken = result.accessToken;
+    expect(accessToken).toBeDefined();
+
     const payload = await jwtService.verifyAsync<{
       sub: string;
       email: string;
       tokenVersion: number;
-    }>(result.accessToken);
+    }>(accessToken as string);
 
     expect(payload.sub).toBe(user.id);
     expect(payload.email).toBe(user.email);
@@ -650,11 +672,13 @@ describe('AuthService', () => {
       expect(createdUserPayload?.privacyAcceptedAt).toBeInstanceOf(Date);
       expect(usersRepo.save).toHaveBeenCalledTimes(1);
 
+      const accessToken = token.accessToken;
+      expect(accessToken).toBeDefined();
       const payload = await jwtService.verifyAsync<{
         sub: string;
         email: string;
         tokenVersion: number;
-      }>(token.accessToken);
+      }>(accessToken as string);
       expect(payload.sub).toBe('google-user-id');
       expect(payload.email).toBe(baseProfile.email);
       expect(payload.tokenVersion).toBe(0);
@@ -681,11 +705,13 @@ describe('AuthService', () => {
         }),
       );
 
+      const accessToken = token.accessToken;
+      expect(accessToken).toBeDefined();
       const payload = await jwtService.verifyAsync<{
         sub: string;
         email: string;
         tokenVersion: number;
-      }>(token.accessToken);
+      }>(accessToken as string);
       expect(payload.sub).toBe(existingUser.id);
       expect(payload.email).toBe(existingUser.email);
       expect(payload.tokenVersion).toBe(existingUser.tokenVersion);

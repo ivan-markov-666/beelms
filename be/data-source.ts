@@ -14,6 +14,7 @@ import { UserCurriculumProgress } from './src/courses/user-curriculum-progress.e
 import { CoursePurchase } from './src/courses/course-purchase.entity';
 import { PaymentSettings } from './src/payments/payment-settings.entity';
 import { StripeWebhookEvent } from './src/payments/stripe-webhook-event.entity';
+import { PaymentCheckout } from './src/payments/payment-checkout.entity';
 import { Quiz } from './src/assessments/quiz.entity';
 import { QuizQuestion } from './src/assessments/quiz-question.entity';
 import { QuizOption } from './src/assessments/quiz-option.entity';
@@ -23,6 +24,7 @@ import { AnalyticsSession } from './src/analytics/analytics-session.entity';
 import { AnalyticsPageViewDaily } from './src/analytics/analytics-page-view-daily.entity';
 import { InstanceConfig } from './src/settings/instance-config.entity';
 import { LegalPage } from './src/legal/legal-page.entity';
+import { CustomPage } from './src/custom-pages/custom-page.entity';
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -46,6 +48,7 @@ export const AppDataSource = new DataSource({
     CoursePurchase,
     PaymentSettings,
     StripeWebhookEvent,
+    PaymentCheckout,
     CourseCurriculumItem,
     UserCurriculumProgress,
     Quiz,
@@ -55,6 +58,7 @@ export const AppDataSource = new DataSource({
     Task,
     InstanceConfig,
     LegalPage,
+    CustomPage,
   ],
   migrations: ['src/migrations/*.ts'],
   synchronize: false,

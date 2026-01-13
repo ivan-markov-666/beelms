@@ -133,28 +133,127 @@ export class AdminSettingsController {
     };
   }
 
-  @Post('seo/image')
+  @Post('branding/footer-social-icon')
   @UseInterceptors(FileInterceptor('file'))
-  async uploadSeoImage(
+  async uploadFooterSocialIcon(
     @UploadedFile() file: BrandingUploadedFile | undefined,
-    @Body('purpose') purpose?: string,
+    @Body('variant') variant?: string,
+    @Body('id') id?: string,
     @Body('previousUrl') previousUrl?: string,
   ): Promise<{ url: string }> {
-    const allowedMimeTypes = ['image/png', 'image/jpeg', 'image/webp'];
-    if (file?.mimetype && !allowedMimeTypes.includes(file.mimetype)) {
-      throw new BadRequestException(
-        'Unsupported image type. Use PNG, JPG/JPEG or WEBP.',
-      );
+    const allowedMimeTypes = [
+      'image/png',
+      'image/jpeg',
+      'image/webp',
+      'image/svg+xml',
+    ];
+
+    const normalizedVariantRaw = (variant ?? '').trim().toLowerCase();
+    const normalizedVariant =
+      normalizedVariantRaw === 'dark' ? 'dark' : 'light';
+
+    const normalizedId = (id ?? '')
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9_-]/g, '-')
+      .slice(0, 64);
+
+    if (!normalizedId) {
+      throw new BadRequestException('id is required');
     }
 
-    const normalizedPurposeRaw = (purpose ?? '').trim().toLowerCase();
-    const normalizedPurpose =
-      normalizedPurposeRaw === 'twitter' ? 'twitter' : 'open-graph';
+    const url = await this.handleBrandingImageUpload(file, {
+      prefix: `footer-social-${normalizedVariant}-${normalizedId}`,
+      maxBytes: 256 * 1024,
+      allowedMimeTypes,
+    });
+
+    this.deletePreviousBrandingFile(previousUrl);
+
+    return { url };
+  }
+
+  @Post('languages/icon')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadLanguageIcon(
+    @UploadedFile() file: BrandingUploadedFile | undefined,
+    @Body('variant') variant?: string,
+    @Body('lang') lang?: string,
+    @Body('previousUrl') previousUrl?: string,
+  ): Promise<{ url: string }> {
+    const allowedMimeTypes = [
+      'image/png',
+      'image/jpeg',
+      'image/webp',
+      'image/svg+xml',
+    ];
+
+    const normalizedVariantRaw = (variant ?? '').trim().toLowerCase();
+    const normalizedVariant =
+      normalizedVariantRaw === 'dark' ? 'dark' : 'light';
+
+    const normalizedLang = (lang ?? '')
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9_-]/g, '-')
+      .slice(0, 16);
+
+    if (!normalizedLang) {
+      throw new BadRequestException('lang is required');
+    }
 
     const url = await this.handleBrandingImageUpload(file, {
-      prefix:
-        normalizedPurpose === 'twitter' ? 'seo-twitter' : 'seo-open-graph',
-      maxBytes: 1024 * 1024,
+      prefix: `lang-${normalizedLang}-${normalizedVariant}`,
+      maxBytes: 128 * 1024,
+      allowedMimeTypes,
+    });
+
+    this.deletePreviousBrandingFile(previousUrl);
+
+    return { url };
+  }
+
+  @Post('branding/social-login-icon')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadSocialLoginIcon(
+    @UploadedFile() file: BrandingUploadedFile | undefined,
+    @Body('variant') variant?: string,
+    @Body('provider') provider?: string,
+    @Body('previousUrl') previousUrl?: string,
+  ): Promise<{ url: string }> {
+    const allowedMimeTypes = [
+      'image/png',
+      'image/jpeg',
+      'image/webp',
+      'image/svg+xml',
+    ];
+
+    const normalizedVariantRaw = (variant ?? '').trim().toLowerCase();
+    const normalizedVariant =
+      normalizedVariantRaw === 'dark' ? 'dark' : 'light';
+
+    const normalizedProvider = (provider ?? '')
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9_-]/g, '-')
+      .slice(0, 32);
+
+    const safeProvider =
+      normalizedProvider === 'google' ||
+      normalizedProvider === 'facebook' ||
+      normalizedProvider === 'github' ||
+      normalizedProvider === 'linkedin'
+        ? normalizedProvider
+        : null;
+
+    if (!safeProvider) {
+      throw new BadRequestException('provider is required');
+    }
+
+    const url = await this.handleBrandingImageUpload(file, {
+      prefix: `social-login-${safeProvider}-${normalizedVariant}`,
+      maxBytes: 256 * 1024,
+      allowedMimeTypes,
     });
 
     this.deletePreviousBrandingFile(previousUrl);
@@ -371,6 +470,48 @@ export class AdminSettingsController {
   ): Promise<{ url: string }> {
     const url = await this.handleBrandingImageUpload(file, {
       prefix: 'cursor-dark',
+      maxBytes: 256 * 1024,
+    });
+    this.deletePreviousBrandingFile(previousUrl);
+    return { url };
+  }
+
+  @Post('branding/cursor-pointer')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadCursorPointer(
+    @UploadedFile() file: BrandingUploadedFile | undefined,
+    @Body('previousUrl') previousUrl?: string,
+  ): Promise<{ url: string }> {
+    const url = await this.handleBrandingImageUpload(file, {
+      prefix: 'cursor-pointer',
+      maxBytes: 256 * 1024,
+    });
+    this.deletePreviousBrandingFile(previousUrl);
+    return { url };
+  }
+
+  @Post('branding/cursor-pointer-light')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadCursorPointerLight(
+    @UploadedFile() file: BrandingUploadedFile | undefined,
+    @Body('previousUrl') previousUrl?: string,
+  ): Promise<{ url: string }> {
+    const url = await this.handleBrandingImageUpload(file, {
+      prefix: 'cursor-pointer-light',
+      maxBytes: 256 * 1024,
+    });
+    this.deletePreviousBrandingFile(previousUrl);
+    return { url };
+  }
+
+  @Post('branding/cursor-pointer-dark')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadCursorPointerDark(
+    @UploadedFile() file: BrandingUploadedFile | undefined,
+    @Body('previousUrl') previousUrl?: string,
+  ): Promise<{ url: string }> {
+    const url = await this.handleBrandingImageUpload(file, {
+      prefix: 'cursor-pointer-dark',
       maxBytes: 256 * 1024,
     });
     this.deletePreviousBrandingFile(previousUrl);

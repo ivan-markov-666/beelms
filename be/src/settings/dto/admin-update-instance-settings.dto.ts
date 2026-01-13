@@ -27,6 +27,145 @@ export class AdminUpdateCursorHotspotDto {
   y?: number | null;
 }
 
+export class AdminUpdatePageLinkBySlugDto {
+  @IsOptional()
+  @IsBoolean()
+  header?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  footer?: boolean;
+}
+
+export class AdminUpdatePageLinksDto {
+  @IsOptional()
+  @IsBoolean()
+  enabled?: boolean;
+
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @IsObject()
+  bySlug?: Record<string, AdminUpdatePageLinkBySlugDto> | null;
+}
+
+export class AdminUpdateHeaderMenuItemDto {
+  @IsString()
+  id: string;
+
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @IsString()
+  label?: string | null;
+
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @IsObject()
+  labelByLang?: Record<string, string | null> | null;
+
+  @IsString()
+  href: string;
+
+  @IsOptional()
+  @IsBoolean()
+  enabled?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  clickable?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  newTab?: boolean;
+
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => AdminUpdateHeaderMenuItemDto)
+  children?: AdminUpdateHeaderMenuItemDto[] | null;
+}
+
+export class AdminUpdateHeaderMenuDto {
+  @IsOptional()
+  @IsBoolean()
+  enabled?: boolean;
+
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => AdminUpdateHeaderMenuItemDto)
+  items?: AdminUpdateHeaderMenuItemDto[] | null;
+}
+
+export class AdminUpdatePoweredByBeeLmsDto {
+  @IsOptional()
+  @IsBoolean()
+  enabled?: boolean;
+
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @IsString()
+  url?: string | null;
+}
+
+@ValidatorConstraint({ name: 'footerSocialUrlMatch', async: false })
+class FooterSocialUrlMatchConstraint implements ValidatorConstraintInterface {
+  validate(url: unknown, args: ValidationArguments): boolean {
+    const obj = args.object as AdminUpdateFooterSocialLinkDto;
+    const raw = typeof url === 'string' ? url.trim() : '';
+    if (!raw) return true;
+    let parsed: URL;
+    try {
+      parsed = new URL(raw);
+    } catch {
+      return false;
+    }
+    const protocolOk =
+      parsed.protocol === 'http:' || parsed.protocol === 'https:';
+    if (!protocolOk) return false;
+
+    const host = parsed.hostname.toLowerCase();
+    if (obj.type === 'facebook') {
+      return (
+        host === 'facebook.com' ||
+        host === 'www.facebook.com' ||
+        host.endsWith('.facebook.com')
+      );
+    }
+    if (obj.type === 'youtube') {
+      return (
+        host === 'youtube.com' ||
+        host === 'www.youtube.com' ||
+        host.endsWith('.youtube.com') ||
+        host === 'youtu.be' ||
+        host.endsWith('.youtu.be')
+      );
+    }
+    if (obj.type === 'x') {
+      return (
+        host === 'x.com' ||
+        host === 'www.x.com' ||
+        host.endsWith('.x.com') ||
+        host === 'twitter.com' ||
+        host === 'www.twitter.com' ||
+        host.endsWith('.twitter.com')
+      );
+    }
+    return true;
+  }
+
+  defaultMessage(args: ValidationArguments): string {
+    const obj = args.object as AdminUpdateFooterSocialLinkDto;
+    if (obj.type === 'facebook') return 'URL must point to facebook.com';
+    if (obj.type === 'youtube') {
+      return 'URL must point to youtube.com or youtu.be';
+    }
+    if (obj.type === 'x') return 'URL must point to x.com or twitter.com';
+    return 'Invalid URL';
+  }
+}
+
 class ThemeHexColorConstraint {
   static readonly REGEX = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
 }
@@ -86,6 +225,16 @@ export class AdminUpdateThemePaletteDto {
   @IsString()
   @Matches(ThemeHexColorConstraint.REGEX)
   fieldOkBorder?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @Matches(ThemeHexColorConstraint.REGEX)
+  fieldAlertBg?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @Matches(ThemeHexColorConstraint.REGEX)
+  fieldAlertBorder?: string | null;
 
   @IsOptional()
   @IsString()
@@ -170,6 +319,16 @@ export class AdminUpdateThemePresetPaletteDto {
   @IsString()
   @Matches(ThemeHexColorConstraint.REGEX)
   fieldOkBorder?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @Matches(ThemeHexColorConstraint.REGEX)
+  fieldAlertBg?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @Matches(ThemeHexColorConstraint.REGEX)
+  fieldAlertBorder?: string | null;
 
   @IsOptional()
   @IsString()
@@ -358,6 +517,168 @@ export class AdminUpdateTwitterDto {
   player?: AdminUpdateTwitterPlayerDto | null;
 }
 
+export class AdminUpdateFooterSocialLinkDto {
+  @IsString()
+  id: string;
+
+  @IsString()
+  @IsIn(['facebook', 'x', 'youtube', 'custom'])
+  type: 'facebook' | 'x' | 'youtube' | 'custom';
+
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @IsString()
+  label?: string | null;
+
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @IsString()
+  @Validate(FooterSocialUrlMatchConstraint)
+  url?: string | null;
+
+  @IsOptional()
+  @IsBoolean()
+  enabled?: boolean;
+
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @IsString()
+  @IsIn([
+    'whatsapp',
+    'messenger',
+    'signal',
+    'skype',
+    'imessage',
+    'wechat',
+    'line',
+    'kakaotalk',
+    'threema',
+    'icq',
+    'instagram',
+    'tiktok',
+    'snapchat',
+    'pinterest',
+    'threads',
+    'bereal',
+    'tumblr',
+    'bluesky',
+    'mastodon',
+    'vk',
+    'zoom',
+    'teams',
+    'slack',
+    'google-meet',
+    'google-chat',
+    'reddit',
+    'twitch',
+    'quora',
+    'clubhouse',
+    'tinder',
+    'github',
+    'npm',
+    'maven',
+    'nuget',
+    'pypi',
+    'linkedin',
+    'discord',
+    'telegram',
+    'viber',
+    'phone',
+    'location',
+    'link',
+    'globe',
+  ])
+  iconKey?:
+    | 'whatsapp'
+    | 'messenger'
+    | 'signal'
+    | 'skype'
+    | 'imessage'
+    | 'wechat'
+    | 'line'
+    | 'kakaotalk'
+    | 'threema'
+    | 'icq'
+    | 'instagram'
+    | 'tiktok'
+    | 'snapchat'
+    | 'pinterest'
+    | 'threads'
+    | 'bereal'
+    | 'tumblr'
+    | 'bluesky'
+    | 'mastodon'
+    | 'vk'
+    | 'zoom'
+    | 'teams'
+    | 'slack'
+    | 'google-meet'
+    | 'google-chat'
+    | 'reddit'
+    | 'twitch'
+    | 'quora'
+    | 'clubhouse'
+    | 'tinder'
+    | 'github'
+    | 'npm'
+    | 'maven'
+    | 'nuget'
+    | 'pypi'
+    | 'linkedin'
+    | 'discord'
+    | 'telegram'
+    | 'viber'
+    | 'phone'
+    | 'location'
+    | 'link'
+    | 'globe'
+    | null;
+
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @IsString()
+  iconLightUrl?: string | null;
+
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @IsString()
+  iconDarkUrl?: string | null;
+}
+
+export class AdminUpdateSocialLoginIconDto {
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @IsString()
+  lightUrl?: string | null;
+
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @IsString()
+  darkUrl?: string | null;
+}
+
+export class AdminUpdateSocialLoginIconsDto {
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => AdminUpdateSocialLoginIconDto)
+  google?: AdminUpdateSocialLoginIconDto;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => AdminUpdateSocialLoginIconDto)
+  facebook?: AdminUpdateSocialLoginIconDto;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => AdminUpdateSocialLoginIconDto)
+  github?: AdminUpdateSocialLoginIconDto;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => AdminUpdateSocialLoginIconDto)
+  linkedin?: AdminUpdateSocialLoginIconDto;
+}
+
 export class AdminUpdateBrandingDto {
   @IsOptional()
   @IsString()
@@ -376,6 +697,21 @@ export class AdminUpdateBrandingDto {
   notFoundMarkdown?: string | null;
 
   @IsOptional()
+  @ValidateNested()
+  @Type(() => AdminUpdatePoweredByBeeLmsDto)
+  poweredByBeeLms?: AdminUpdatePoweredByBeeLmsDto | null;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => AdminUpdatePageLinksDto)
+  pageLinks?: AdminUpdatePageLinksDto | null;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => AdminUpdateHeaderMenuDto)
+  headerMenu?: AdminUpdateHeaderMenuDto | null;
+
+  @IsOptional()
   @ValidateIf((_, value) => value !== null)
   @IsObject()
   notFoundTitleByLang?: Record<string, string | null> | null;
@@ -384,6 +720,18 @@ export class AdminUpdateBrandingDto {
   @ValidateIf((_, value) => value !== null)
   @IsObject()
   notFoundMarkdownByLang?: Record<string, string | null> | null;
+
+  @IsOptional()
+  @IsBoolean()
+  loginSocialUnavailableMessageEnabled?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  loginSocialResetPasswordHintEnabled?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  registerSocialUnavailableMessageEnabled?: boolean;
 
   @IsOptional()
   @IsString()
@@ -396,6 +744,18 @@ export class AdminUpdateBrandingDto {
   @IsOptional()
   @IsString()
   cursorDarkUrl?: string | null;
+
+  @IsOptional()
+  @IsString()
+  cursorPointerUrl?: string | null;
+
+  @IsOptional()
+  @IsString()
+  cursorPointerLightUrl?: string | null;
+
+  @IsOptional()
+  @IsString()
+  cursorPointerDarkUrl?: string | null;
 
   @IsOptional()
   @ValidateNested()
@@ -479,6 +839,19 @@ export class AdminUpdateBrandingDto {
   @ValidateNested()
   @Type(() => AdminUpdateTwitterDto)
   twitter?: AdminUpdateTwitterDto | null;
+
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => AdminUpdateFooterSocialLinkDto)
+  footerSocialLinks?: AdminUpdateFooterSocialLinkDto[] | null;
+
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @ValidateNested()
+  @Type(() => AdminUpdateSocialLoginIconsDto)
+  socialLoginIcons?: AdminUpdateSocialLoginIconsDto | null;
 }
 
 export class AdminUpdateFeaturesDto {
@@ -540,6 +913,10 @@ export class AdminUpdateFeaturesDto {
 
   @IsOptional()
   @IsBoolean()
+  auth2fa?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
   captcha?: boolean;
 
   @IsOptional()
@@ -564,7 +941,59 @@ export class AdminUpdateFeaturesDto {
 
   @IsOptional()
   @IsBoolean()
+  paymentsStripe?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  paymentsPaypal?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  paymentsMypos?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  paymentsRevolut?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
   gdprLegal?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  pageTerms?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  pagePrivacy?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  pageCookiePolicy?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  pageImprint?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  pageAccessibility?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  pageContact?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  pageFaq?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  pageSupport?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  pageNotFound?: boolean;
 
   @IsOptional()
   @IsBoolean()
@@ -587,16 +1016,36 @@ export class AdminUpdateFeaturesDto {
   infraRedis?: boolean;
 
   @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @IsString()
+  infraRedisUrl?: string | null;
+
+  @IsOptional()
   @IsBoolean()
   infraRabbitmq?: boolean;
+
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @IsString()
+  infraRabbitmqUrl?: string | null;
 
   @IsOptional()
   @IsBoolean()
   infraMonitoring?: boolean;
 
   @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @IsString()
+  infraMonitoringUrl?: string | null;
+
+  @IsOptional()
   @IsBoolean()
   infraErrorTracking?: boolean;
+
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @IsString()
+  infraErrorTrackingUrl?: string | null;
 }
 
 export class AdminUpdateSeoRobotsDto {
@@ -621,45 +1070,6 @@ export class AdminUpdateSeoSitemapDto {
   @IsOptional()
   @IsBoolean()
   includeLegal?: boolean;
-}
-
-export class AdminUpdateSeoOpenGraphDto {
-  @IsOptional()
-  @ValidateIf((_, value) => value !== null)
-  @IsString()
-  defaultTitle?: string | null;
-
-  @IsOptional()
-  @ValidateIf((_, value) => value !== null)
-  @IsString()
-  defaultDescription?: string | null;
-
-  @IsOptional()
-  @ValidateIf((_, value) => value !== null)
-  @IsString()
-  imageUrl?: string | null;
-}
-
-export class AdminUpdateSeoTwitterDto {
-  @IsOptional()
-  @ValidateIf((_, value) => value !== null)
-  @IsIn(['summary', 'summary_large_image'])
-  card?: 'summary' | 'summary_large_image' | null;
-
-  @IsOptional()
-  @ValidateIf((_, value) => value !== null)
-  @IsString()
-  defaultTitle?: string | null;
-
-  @IsOptional()
-  @ValidateIf((_, value) => value !== null)
-  @IsString()
-  defaultDescription?: string | null;
-
-  @IsOptional()
-  @ValidateIf((_, value) => value !== null)
-  @IsString()
-  imageUrl?: string | null;
 }
 
 export class AdminUpdateSeoDto {
@@ -694,18 +1104,6 @@ export class AdminUpdateSeoDto {
   @ValidateNested()
   @Type(() => AdminUpdateSeoSitemapDto)
   sitemap?: AdminUpdateSeoSitemapDto | null;
-
-  @IsOptional()
-  @ValidateIf((_, value) => value !== null)
-  @ValidateNested()
-  @Type(() => AdminUpdateSeoOpenGraphDto)
-  openGraph?: AdminUpdateSeoOpenGraphDto | null;
-
-  @IsOptional()
-  @ValidateIf((_, value) => value !== null)
-  @ValidateNested()
-  @Type(() => AdminUpdateSeoTwitterDto)
-  twitter?: AdminUpdateSeoTwitterDto | null;
 }
 
 export class AdminUpdateLanguagesDto {
@@ -718,6 +1116,32 @@ export class AdminUpdateLanguagesDto {
   @IsOptional()
   @IsString()
   default?: string;
+
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @IsObject()
+  icons?: Record<
+    string,
+    { lightUrl?: string | null; darkUrl?: string | null } | null
+  > | null;
+
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @ValidateNested()
+  @Type(() => AdminUpdateLanguagesFlagPickerDto)
+  flagPicker?: AdminUpdateLanguagesFlagPickerDto | null;
+}
+
+export class AdminUpdateLanguagesFlagPickerDto {
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @IsString()
+  global?: string | null;
+
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @IsObject()
+  byLang?: Record<string, string | null> | null;
 }
 
 export class AdminUpdateSocialProviderCredentialsDto {

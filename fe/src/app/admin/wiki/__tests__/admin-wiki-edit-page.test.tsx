@@ -2,14 +2,23 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import AdminWikiEditPage from "../[slug]/edit/page";
 import { ACCESS_TOKEN_KEY } from "../../../auth-token";
+import * as nextNavigation from "next/navigation";
 
-jest.mock("next/navigation", () => {
-  const actual = jest.requireActual("next/navigation");
-  return {
-    ...actual,
-    useParams: () => ({ slug: "getting-started" }),
-  };
-});
+jest.mock("next/navigation", () => ({
+  useRouter: jest.fn(),
+  usePathname: jest.fn(),
+  useSearchParams: jest.fn(),
+  useParams: jest.fn(),
+}));
+
+const useRouterMock = nextNavigation.useRouter as jest.Mock;
+const usePathnameMock = nextNavigation.usePathname as jest.Mock;
+const useSearchParamsMock = nextNavigation.useSearchParams as jest.Mock;
+const useParamsMock = nextNavigation.useParams as jest.Mock;
+
+function makeSearchParams(query: string) {
+  return new URLSearchParams(query) as unknown as URLSearchParams;
+}
 
 function makeArticle(
   overrides?: Partial<{
@@ -67,6 +76,15 @@ describe("AdminWikiEditPage", () => {
   beforeEach(() => {
     jest.resetAllMocks();
     window.localStorage.clear();
+
+    useRouterMock.mockReturnValue({
+      push: jest.fn(),
+      replace: jest.fn(),
+      prefetch: jest.fn(),
+    });
+    usePathnameMock.mockReturnValue("/admin/wiki/getting-started/edit");
+    useSearchParamsMock.mockReturnValue(makeSearchParams("lang=bg"));
+    useParamsMock.mockReturnValue({ slug: "getting-started" });
   });
 
   it("renders edit form with loaded article data", async () => {

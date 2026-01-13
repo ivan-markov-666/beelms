@@ -11,6 +11,8 @@ import { WikiMarkdown } from "../../../../wiki/_components/wiki-markdown";
 import { getAccessToken } from "../../../../auth-token";
 import { getApiBaseUrl } from "../../../../api-url";
 import { AdminBreadcrumbs } from "../../../_components/admin-breadcrumbs";
+import { Pagination } from "../../../../_components/pagination";
+import { ListboxSelect } from "../../../../_components/listbox-select";
 
 const WikiRichEditor = dynamic(
   () =>
@@ -74,7 +76,7 @@ function deriveAltFromFilename(filename: string): string {
   return withoutExt || "image";
 }
 
-const VERSIONS_PAGE_SIZE = 10;
+const DEFAULT_VERSIONS_PAGE_SIZE = 10;
 
 function normalizeMarkdownContent(raw: string): string {
   if (!raw) {
@@ -198,6 +200,9 @@ export default function AdminWikiEditPage() {
   const [versionsLoading, setVersionsLoading] = useState(false);
   const [versionsError, setVersionsError] = useState<string | null>(null);
   const [versionsPage, setVersionsPage] = useState(1);
+  const [versionsPageSize, setVersionsPageSize] = useState(
+    DEFAULT_VERSIONS_PAGE_SIZE,
+  );
   const [rollbackVersionId, setRollbackVersionId] = useState<string | null>(
     null,
   );
@@ -470,10 +475,7 @@ export default function AdminWikiEditPage() {
     };
   }, [articleId, versionsReloadKey]);
 
-  const handleChangeLanguage = (
-    event: React.ChangeEvent<HTMLSelectElement>,
-  ) => {
-    const newLang = event.target.value;
+  const handleChangeLanguage = (newLang: string) => {
     setForm((current) =>
       current
         ? { ...current, language: newLang }
@@ -1066,7 +1068,7 @@ export default function AdminWikiEditPage() {
   const totalVersionsPages =
     totalVisibleVersions === 0
       ? 1
-      : Math.ceil(totalVisibleVersions / VERSIONS_PAGE_SIZE);
+      : Math.ceil(totalVisibleVersions / versionsPageSize);
 
   const currentVersionsPage =
     versionsPage < 1
@@ -1076,9 +1078,57 @@ export default function AdminWikiEditPage() {
         : versionsPage;
 
   const paginatedVersions = visibleVersions.slice(
-    (currentVersionsPage - 1) * VERSIONS_PAGE_SIZE,
-    currentVersionsPage * VERSIONS_PAGE_SIZE,
+    (currentVersionsPage - 1) * versionsPageSize,
+    currentVersionsPage * versionsPageSize,
   );
+
+  const exportVisibleVersionsCsv = () => {
+    if (visibleVersions.length === 0 || typeof window === "undefined") {
+      return;
+    }
+
+    const escapeCsv = (value: string | number): string => {
+      const str = String(value);
+      if (str.includes('"') || str.includes(",") || str.includes("\n")) {
+        return `"${str.replaceAll('"', '""')}"`;
+      }
+      return str;
+    };
+
+    const header = [
+      "id",
+      "language",
+      "version",
+      "title",
+      "status",
+      "createdAt",
+      "createdBy",
+    ];
+
+    const rows = visibleVersions.map((v) => [
+      v.id,
+      v.language,
+      v.version,
+      v.title,
+      v.status,
+      v.createdAt,
+      v.createdBy ?? "",
+    ]);
+
+    const csv = [header, ...rows]
+      .map((r) => r.map(escapeCsv).join(","))
+      .join("\n");
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `admin-wiki-versions-${slug ?? "article"}-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  };
 
   const deleteVersionTarget =
     deleteVersionStep2Id == null
@@ -1147,12 +1197,6 @@ export default function AdminWikiEditPage() {
                 Отвори публичната страница
               </Link>
             )}
-            <Link
-              href="/admin/wiki"
-              className="text-sm font-medium text-green-700 hover:text-green-900 hover:underline"
-            >
-              ← Назад към Admin Wiki
-            </Link>
           </div>
         </div>
 
@@ -1179,22 +1223,20 @@ export default function AdminWikiEditPage() {
             <form className="space-y-4" onSubmit={handleSubmit}>
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-1">
-                  <label
-                    htmlFor="language"
-                    className="block text-sm font-medium text-zinc-800"
-                  >
+                  <label className="block text-sm font-medium text-zinc-800">
                     Език
                   </label>
-                  <select
-                    id="language"
-                    className="block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                  <ListboxSelect
+                    ariaLabel="Wiki article language"
                     value={form.language}
-                    onChange={handleChangeLanguage}
-                  >
-                    <option value="bg">bg</option>
-                    <option value="en">en</option>
-                    <option value="de">de</option>
-                  </select>
+                    onChange={(next) => handleChangeLanguage(next)}
+                    buttonClassName="flex w-full items-center justify-between gap-2 rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                    options={[
+                      { value: "bg", label: "bg" },
+                      { value: "en", label: "en" },
+                      { value: "de", label: "de" },
+                    ]}
+                  />
                   <p className="text-xs text-zinc-500">
                     Смяната на езика зарежда или създава отделна версия на
                     съдържанието за избрания език.
@@ -1208,16 +1250,22 @@ export default function AdminWikiEditPage() {
                   >
                     Статус
                   </label>
-                  <select
+                  <ListboxSelect
                     id="status"
-                    className="block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                    ariaLabel="Wiki article status"
                     value={form.status}
-                    onChange={handleChange("status")}
-                  >
-                    <option value="draft">draft</option>
-                    <option value="active">active</option>
-                    <option value="inactive">inactive</option>
-                  </select>
+                    onChange={(next) =>
+                      setForm((prev) =>
+                        prev ? { ...prev, status: next } : prev,
+                      )
+                    }
+                    buttonClassName="flex w-full items-center justify-between gap-2 rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                    options={[
+                      { value: "draft", label: "draft" },
+                      { value: "active", label: "active" },
+                      { value: "inactive", label: "inactive" },
+                    ]}
+                  />
                 </div>
               </div>
 
@@ -1318,6 +1366,7 @@ export default function AdminWikiEditPage() {
                   <WikiRichEditor
                     markdown={form.content}
                     disabled={saving}
+                    exportFileName={`${slug || "wiki-article"}-${form.language}.md`}
                     onEditorReady={(editor) => {
                       richEditorRef.current = editor;
                     }}
@@ -1358,21 +1407,16 @@ export default function AdminWikiEditPage() {
                   </span>
                 </button>
                 {previewExpanded && (
-                  <div className="rounded-md bg-white px-4 py-3">
+                  <div className="rounded-md bg-zinc-50 px-4 py-3">
                     <header className="space-y-1 border-b border-zinc-100 pb-3">
-                      <h1 className="text-2xl font-bold text-zinc-900">
-                        {form.title.trim().length > 0
-                          ? form.title
-                          : "(без заглавие)"}
+                      <h1 className="text-2xl font-bold">
+                        {form.title.trim() || "(Без заглавие)"}
                       </h1>
                       {form.subtitle.trim().length > 0 && (
-                        <p className="text-sm text-zinc-600">{form.subtitle}</p>
+                        <p className="text-sm">{form.subtitle}</p>
                       )}
                     </header>
-                    <article
-                      className="wiki-markdown mt-3 text-sm leading-relaxed"
-                      style={{ color: "#111827" }}
-                    >
+                    <article className="wiki-markdown mt-3 text-sm leading-relaxed">
                       <WikiMarkdown
                         content={normalizeMarkdownContent(form.content)}
                       />
@@ -1750,57 +1794,24 @@ export default function AdminWikiEditPage() {
                           Страница {currentVersionsPage} от {totalVersionsPages}{" "}
                           ({totalVisibleVersions} версии)
                         </span>
-                        {totalVersionsPages > 1 && (
-                          <>
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setVersionsPage((page) => Math.max(1, page - 1))
-                              }
-                              disabled={currentVersionsPage <= 1}
-                              className="rounded-md border border-zinc-300 px-2 py-1 text-xs font-medium text-zinc-700 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60"
-                            >
-                              Предишна
-                            </button>
-                            <div className="flex items-center gap-1">
-                              {Array.from(
-                                { length: totalVersionsPages },
-                                (_, index) => index + 1,
-                              ).map((pageNumber) => {
-                                const isCurrent =
-                                  pageNumber === currentVersionsPage;
-                                return (
-                                  <button
-                                    key={pageNumber}
-                                    type="button"
-                                    onClick={() => setVersionsPage(pageNumber)}
-                                    className={`rounded-md border px-2 py-1 text-xs font-medium ${
-                                      isCurrent
-                                        ? "border-green-600 bg-green-600 text-white"
-                                        : "border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50"
-                                    }`}
-                                  >
-                                    {pageNumber}
-                                  </button>
-                                );
-                              })}
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setVersionsPage((page) =>
-                                  Math.min(totalVersionsPages, page + 1),
-                                )
-                              }
-                              disabled={
-                                currentVersionsPage >= totalVersionsPages
-                              }
-                              className="rounded-md border border-zinc-300 px-2 py-1 text-xs font-medium text-zinc-700 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60"
-                            >
-                              Следваща
-                            </button>
-                          </>
-                        )}
+                        <button
+                          type="button"
+                          onClick={exportVisibleVersionsCsv}
+                          disabled={visibleVersions.length === 0}
+                          className="rounded-md border border-zinc-300 bg-white px-2 py-1 text-xs font-medium text-zinc-700 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          Export CSV
+                        </button>
+                        <Pagination
+                          currentPage={currentVersionsPage}
+                          totalPages={totalVersionsPages}
+                          onPageChange={(page) => setVersionsPage(page)}
+                          pageSize={versionsPageSize}
+                          onPageSizeChange={(next) => {
+                            setVersionsPage(1);
+                            setVersionsPageSize(next);
+                          }}
+                        />
                         <button
                           type="button"
                           onClick={handleCompareSelected}
@@ -1981,10 +1992,7 @@ export default function AdminWikiEditPage() {
                           </p>
                         )}
                     </header>
-                    <article
-                      className="wiki-markdown mt-3 text-sm leading-relaxed"
-                      style={{ color: "#111827" }}
-                    >
+                    <article className="wiki-markdown mt-3 text-sm leading-relaxed">
                       <WikiMarkdown
                         content={normalizeMarkdownContent(
                           viewVersionTarget.content,

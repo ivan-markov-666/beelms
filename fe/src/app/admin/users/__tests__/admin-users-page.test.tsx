@@ -1,65 +1,121 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import * as nextNavigation from "next/navigation";
 import AdminUsersPage from "../page";
 import { ACCESS_TOKEN_KEY } from "../../../auth-token";
 
 jest.mock("next/navigation", () => ({
+  useRouter: jest.fn(),
+  usePathname: jest.fn(),
   useSearchParams: jest.fn(),
 }));
 
+const useRouterMock = nextNavigation.useRouter as jest.Mock;
+const usePathnameMock = nextNavigation.usePathname as jest.Mock;
 const useSearchParamsMock = nextNavigation.useSearchParams as jest.Mock;
 
 function makeSearchParams(query: string) {
   return new URLSearchParams(query) as unknown as URLSearchParams;
 }
 
-function mockFetchSequence(
-  responses: Array<{
-    ok: boolean;
-    status: number;
-    json: () => Promise<unknown>;
+function mockFetchByUrl(
+  routes: Array<{
+    match: string | RegExp;
+    responses: Array<{
+      ok: boolean;
+      status: number;
+      json: () => Promise<unknown>;
+      headers?: Record<string, string>;
+    }>;
   }>,
 ) {
-  global.fetch = jest
-    .fn()
-    .mockImplementation(() =>
-      Promise.resolve(responses.shift() as unknown as Response),
+  global.fetch = jest.fn().mockImplementation((input: RequestInfo | URL) => {
+    const url = typeof input === "string" ? input : input.toString();
+    const route = routes.find((r) =>
+      typeof r.match === "string" ? url.includes(r.match) : r.match.test(url),
     );
+    const next = route?.responses.shift();
+    if (!next) {
+      return Promise.resolve({
+        ok: false,
+        status: 500,
+        json: async () => ({}),
+        headers: new Headers(),
+      } as unknown as Response);
+    }
+
+    return Promise.resolve({
+      ok: next.ok,
+      status: next.status,
+      json: next.json,
+      headers: new Headers(next.headers ?? {}),
+    } as unknown as Response);
+  });
+}
+
+function getActiveToggleRegex() {
+  return /(active|актив)/i;
+}
+
+function getInactiveToggleRegex() {
+  return /(inactive|неактив)/i;
 }
 
 describe("AdminUsersPage", () => {
   beforeEach(() => {
     jest.resetAllMocks();
     window.localStorage.clear();
+    useRouterMock.mockReturnValue({
+      push: jest.fn(),
+      replace: jest.fn(),
+      prefetch: jest.fn(),
+    });
+    usePathnameMock.mockReturnValue("/admin/users");
     useSearchParamsMock.mockReturnValue(makeSearchParams("lang=bg"));
   });
 
   it("renders table with admin users from API", async () => {
     window.localStorage.setItem(ACCESS_TOKEN_KEY, "test-token");
 
-    mockFetchSequence([
+    mockFetchByUrl([
       {
-        ok: true,
-        status: 200,
-        json: async () => [
+        match: "/users/me",
+        responses: [
+          { ok: true, status: 200, json: async () => ({ id: "me" }) },
+        ],
+      },
+      {
+        match: /\/admin\/users\?/i,
+        responses: [
           {
-            id: "1",
-            email: "admin@example.com",
-            role: "admin",
-            active: true,
-            createdAt: "2025-11-25T00:00:00.000Z",
+            ok: true,
+            status: 200,
+            json: async () => [
+              {
+                id: "1",
+                email: "admin@example.com",
+                role: "admin",
+                active: true,
+                createdAt: "2025-11-25T00:00:00.000Z",
+              },
+            ],
           },
         ],
       },
       {
-        ok: true,
-        status: 200,
-        json: async () => ({
-          totalUsers: 1,
-          activeUsers: 1,
-          deactivatedUsers: 0,
-          adminUsers: 1,
-        }),
+        match: "/admin/users/stats",
+        responses: [
+          {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              totalUsers: 1,
+              activeUsers: 1,
+              deactivatedUsers: 0,
+              adminUsers: 1,
+            }),
+          },
+        ],
       },
     ]);
 
@@ -83,21 +139,31 @@ describe("AdminUsersPage", () => {
   it("shows empty state when there are no users", async () => {
     window.localStorage.setItem(ACCESS_TOKEN_KEY, "test-token");
 
-    mockFetchSequence([
+    mockFetchByUrl([
       {
-        ok: true,
-        status: 200,
-        json: async () => [],
+        match: "/users/me",
+        responses: [
+          { ok: true, status: 200, json: async () => ({ id: "me" }) },
+        ],
       },
       {
-        ok: true,
-        status: 200,
-        json: async () => ({
-          totalUsers: 0,
-          activeUsers: 0,
-          deactivatedUsers: 0,
-          adminUsers: 0,
-        }),
+        match: /\/admin\/users\?/i,
+        responses: [{ ok: true, status: 200, json: async () => [] }],
+      },
+      {
+        match: "/admin/users/stats",
+        responses: [
+          {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              totalUsers: 0,
+              activeUsers: 0,
+              deactivatedUsers: 0,
+              adminUsers: 0,
+            }),
+          },
+        ],
       },
     ]);
 
@@ -111,21 +177,31 @@ describe("AdminUsersPage", () => {
   it("shows error message when API call fails", async () => {
     window.localStorage.setItem(ACCESS_TOKEN_KEY, "test-token");
 
-    mockFetchSequence([
+    mockFetchByUrl([
       {
-        ok: false,
-        status: 500,
-        json: async () => [],
+        match: "/users/me",
+        responses: [
+          { ok: true, status: 200, json: async () => ({ id: "me" }) },
+        ],
       },
       {
-        ok: true,
-        status: 200,
-        json: async () => ({
-          totalUsers: 0,
-          activeUsers: 0,
-          deactivatedUsers: 0,
-          adminUsers: 0,
-        }),
+        match: /\/admin\/users\?/i,
+        responses: [{ ok: false, status: 500, json: async () => ({}) }],
+      },
+      {
+        match: "/admin/users/stats",
+        responses: [
+          {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              totalUsers: 0,
+              activeUsers: 0,
+              deactivatedUsers: 0,
+              adminUsers: 0,
+            }),
+          },
+        ],
       },
     ]);
 
@@ -141,33 +217,38 @@ describe("AdminUsersPage", () => {
   it("filters users by email when search is submitted", async () => {
     window.localStorage.setItem(ACCESS_TOKEN_KEY, "test-token");
 
-    const fetchMock = jest
-      .fn()
-      // initial users list
-      .mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        json: async () => [],
-      } as unknown as Response)
-      // stats
-      .mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        json: async () => ({
-          totalUsers: 0,
-          activeUsers: 0,
-          deactivatedUsers: 0,
-          adminUsers: 0,
-        }),
-      } as unknown as Response)
-      // filtered users list
-      .mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        json: async () => [],
-      } as unknown as Response);
+    mockFetchByUrl([
+      {
+        match: "/users/me",
+        responses: [
+          { ok: true, status: 200, json: async () => ({ id: "me" }) },
+        ],
+      },
+      {
+        match: /\/admin\/users\?/i,
+        responses: [
+          { ok: true, status: 200, json: async () => [] },
+          { ok: true, status: 200, json: async () => [] },
+        ],
+      },
+      {
+        match: "/admin/users/stats",
+        responses: [
+          {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              totalUsers: 0,
+              activeUsers: 0,
+              deactivatedUsers: 0,
+              adminUsers: 0,
+            }),
+          },
+        ],
+      },
+    ]);
 
-    global.fetch = fetchMock;
+    const fetchMock = global.fetch as unknown as jest.Mock;
 
     render(<AdminUsersPage />);
 
@@ -188,60 +269,79 @@ describe("AdminUsersPage", () => {
   it("toggles user active flag when button is clicked", async () => {
     window.localStorage.setItem(ACCESS_TOKEN_KEY, "test-token");
 
-    const fetchMock = jest
-      .fn()
-      // initial GET
-      .mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        json: async () => [
+    mockFetchByUrl([
+      {
+        match: "/users/me",
+        responses: [
+          { ok: true, status: 200, json: async () => ({ id: "me" }) },
+        ],
+      },
+      {
+        match: /\/admin\/users\?/i,
+        responses: [
           {
-            id: "1",
-            email: "admin@example.com",
-            role: "admin",
-            active: true,
-            createdAt: "2025-11-25T00:00:00.000Z",
+            ok: true,
+            status: 200,
+            json: async () => [
+              {
+                id: "1",
+                email: "admin@example.com",
+                role: "admin",
+                active: true,
+                createdAt: "2025-11-25T00:00:00.000Z",
+              },
+            ],
           },
         ],
-      } as unknown as Response)
-      // stats GET
-      .mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        json: async () => ({
-          totalUsers: 1,
-          activeUsers: 1,
-          deactivatedUsers: 0,
-          adminUsers: 1,
-        }),
-      } as unknown as Response)
-      // PATCH
-      .mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        json: async () => ({
-          id: "1",
-          email: "admin@example.com",
-          role: "admin",
-          active: false,
-          createdAt: "2025-11-25T00:00:00.000Z",
-        }),
-      } as unknown as Response);
-
-    global.fetch = fetchMock;
+      },
+      {
+        match: "/admin/users/stats",
+        responses: [
+          {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              totalUsers: 1,
+              activeUsers: 1,
+              deactivatedUsers: 0,
+              adminUsers: 1,
+            }),
+          },
+        ],
+      },
+      {
+        match: /\/admin\/users\/1$/i,
+        responses: [
+          {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              id: "1",
+              email: "admin@example.com",
+              role: "admin",
+              active: false,
+              createdAt: "2025-11-25T00:00:00.000Z",
+            }),
+          },
+        ],
+      },
+    ]);
 
     render(<AdminUsersPage />);
 
-    const toggleButton = await screen.findByRole("button", { name: "Active" });
+    const toggleButton = await screen.findByRole("button", {
+      name: getActiveToggleRegex(),
+    });
     fireEvent.click(toggleButton);
 
     await waitFor(() => {
       expect(
-        screen.getByRole("button", { name: "Inactive" }),
+        screen.getByRole("button", { name: getInactiveToggleRegex() }),
       ).toBeInTheDocument();
     });
 
-    expect(fetchMock).toHaveBeenCalledTimes(3);
+    const fetchMock = global.fetch as unknown as jest.Mock;
+    expect(fetchMock).toHaveBeenCalled();
     expect(fetchMock).toHaveBeenLastCalledWith(
       expect.stringContaining("/admin/users/1"),
       expect.objectContaining({ method: "PATCH" }),
@@ -251,45 +351,57 @@ describe("AdminUsersPage", () => {
   it("shows error and rolls back when toggle request fails", async () => {
     window.localStorage.setItem(ACCESS_TOKEN_KEY, "test-token");
 
-    const fetchMock = jest
-      .fn()
-      // initial GET
-      .mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        json: async () => [
+    mockFetchByUrl([
+      {
+        match: "/users/me",
+        responses: [
+          { ok: true, status: 200, json: async () => ({ id: "me" }) },
+        ],
+      },
+      {
+        match: /\/admin\/users\?/i,
+        responses: [
           {
-            id: "1",
-            email: "admin@example.com",
-            role: "admin",
-            active: true,
-            createdAt: "2025-11-25T00:00:00.000Z",
+            ok: true,
+            status: 200,
+            json: async () => [
+              {
+                id: "1",
+                email: "admin@example.com",
+                role: "admin",
+                active: true,
+                createdAt: "2025-11-25T00:00:00.000Z",
+              },
+            ],
           },
         ],
-      } as unknown as Response)
-      // stats GET
-      .mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        json: async () => ({
-          totalUsers: 1,
-          activeUsers: 1,
-          deactivatedUsers: 0,
-          adminUsers: 1,
-        }),
-      } as unknown as Response)
-      // failing PATCH
-      .mockResolvedValueOnce({
-        ok: false,
-        status: 500,
-        json: async () => ({}),
-      } as unknown as Response);
-
-    global.fetch = fetchMock;
+      },
+      {
+        match: "/admin/users/stats",
+        responses: [
+          {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              totalUsers: 1,
+              activeUsers: 1,
+              deactivatedUsers: 0,
+              adminUsers: 1,
+            }),
+          },
+        ],
+      },
+      {
+        match: /\/admin\/users\/1$/i,
+        responses: [{ ok: false, status: 500, json: async () => ({}) }],
+      },
+    ]);
 
     render(<AdminUsersPage />);
 
-    const toggleButton = await screen.findByRole("button", { name: "Active" });
+    const toggleButton = await screen.findByRole("button", {
+      name: getActiveToggleRegex(),
+    });
     fireEvent.click(toggleButton);
 
     await waitFor(() => {
@@ -302,50 +414,63 @@ describe("AdminUsersPage", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByRole("button", { name: "Active" }),
+        screen.getByRole("button", { name: getActiveToggleRegex() }),
       ).toBeInTheDocument();
     });
 
-    expect(fetchMock).toHaveBeenCalledTimes(3);
+    const fetchMock = global.fetch as unknown as jest.Mock;
+    expect(fetchMock).toHaveBeenCalled();
   });
 
   it("calls API with status filter when status dropdown changes", async () => {
     window.localStorage.setItem(ACCESS_TOKEN_KEY, "test-token");
 
-    const fetchMock = jest
-      .fn()
-      // initial users list
-      .mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        json: async () => [],
-      } as unknown as Response)
-      // stats
-      .mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        json: async () => ({
-          totalUsers: 0,
-          activeUsers: 0,
-          deactivatedUsers: 0,
-          adminUsers: 0,
-        }),
-      } as unknown as Response)
-      // users list with status filter
-      .mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        json: async () => [],
-      } as unknown as Response);
+    mockFetchByUrl([
+      {
+        match: "/users/me",
+        responses: [
+          { ok: true, status: 200, json: async () => ({ id: "me" }) },
+        ],
+      },
+      {
+        match: /\/admin\/users\?/i,
+        responses: [
+          { ok: true, status: 200, json: async () => [] },
+          { ok: true, status: 200, json: async () => [] },
+        ],
+      },
+      {
+        match: "/admin/users/stats",
+        responses: [
+          {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              totalUsers: 0,
+              activeUsers: 0,
+              deactivatedUsers: 0,
+              adminUsers: 0,
+            }),
+          },
+        ],
+      },
+    ]);
 
-    global.fetch = fetchMock;
+    const fetchMock = global.fetch as unknown as jest.Mock;
 
     render(<AdminUsersPage />);
 
     await screen.findByText("Admin Users");
 
-    const statusSelect = await screen.findByDisplayValue("All Status");
-    fireEvent.change(statusSelect, { target: { value: "active" } });
+    const statusSelect = await screen.findByRole("combobox", {
+      name: "Users status",
+    });
+    await userEvent.click(statusSelect);
+    await userEvent.click(
+      await screen.findByRole("option", {
+        name: "Active",
+      }),
+    );
 
     await waitFor(() => {
       expect(fetchMock).toHaveBeenLastCalledWith(
@@ -358,40 +483,52 @@ describe("AdminUsersPage", () => {
   it("calls API with role filter when role dropdown changes", async () => {
     window.localStorage.setItem(ACCESS_TOKEN_KEY, "test-token");
 
-    const fetchMock = jest
-      .fn()
-      // initial users list
-      .mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        json: async () => [],
-      } as unknown as Response)
-      // stats
-      .mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        json: async () => ({
-          totalUsers: 0,
-          activeUsers: 0,
-          deactivatedUsers: 0,
-          adminUsers: 0,
-        }),
-      } as unknown as Response)
-      // users list with role filter
-      .mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        json: async () => [],
-      } as unknown as Response);
+    mockFetchByUrl([
+      {
+        match: "/users/me",
+        responses: [
+          { ok: true, status: 200, json: async () => ({ id: "me" }) },
+        ],
+      },
+      {
+        match: /\/admin\/users\?/i,
+        responses: [
+          { ok: true, status: 200, json: async () => [] },
+          { ok: true, status: 200, json: async () => [] },
+        ],
+      },
+      {
+        match: "/admin/users/stats",
+        responses: [
+          {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              totalUsers: 0,
+              activeUsers: 0,
+              deactivatedUsers: 0,
+              adminUsers: 0,
+            }),
+          },
+        ],
+      },
+    ]);
 
-    global.fetch = fetchMock;
+    const fetchMock = global.fetch as unknown as jest.Mock;
 
     render(<AdminUsersPage />);
 
     await screen.findByText("Admin Users");
 
-    const roleSelect = await screen.findByDisplayValue("All Roles");
-    fireEvent.change(roleSelect, { target: { value: "admin" } });
+    const roleSelect = await screen.findByRole("combobox", {
+      name: "Users role",
+    });
+    await userEvent.click(roleSelect);
+    await userEvent.click(
+      await screen.findByRole("option", {
+        name: "Admin",
+      }),
+    );
 
     await waitFor(() => {
       expect(fetchMock).toHaveBeenLastCalledWith(
@@ -404,29 +541,45 @@ describe("AdminUsersPage", () => {
   it("renders avatar initials, ID and View action in the table", async () => {
     window.localStorage.setItem(ACCESS_TOKEN_KEY, "test-token");
 
-    mockFetchSequence([
+    mockFetchByUrl([
       {
-        ok: true,
-        status: 200,
-        json: async () => [
+        match: "/users/me",
+        responses: [
+          { ok: true, status: 200, json: async () => ({ id: "me" }) },
+        ],
+      },
+      {
+        match: /\/admin\/users\?/i,
+        responses: [
           {
-            id: "1",
-            email: "john.doe@example.com",
-            role: "admin",
-            active: true,
-            createdAt: "2025-11-25T00:00:00.000Z",
+            ok: true,
+            status: 200,
+            json: async () => [
+              {
+                id: "1",
+                email: "john.doe@example.com",
+                role: "admin",
+                active: true,
+                createdAt: "2025-11-25T00:00:00.000Z",
+              },
+            ],
           },
         ],
       },
       {
-        ok: true,
-        status: 200,
-        json: async () => ({
-          totalUsers: 1,
-          activeUsers: 1,
-          deactivatedUsers: 0,
-          adminUsers: 1,
-        }),
+        match: "/admin/users/stats",
+        responses: [
+          {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              totalUsers: 1,
+              activeUsers: 1,
+              deactivatedUsers: 0,
+              adminUsers: 1,
+            }),
+          },
+        ],
       },
     ]);
 

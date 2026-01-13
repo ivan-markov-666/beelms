@@ -1,4 +1,11 @@
-import { IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsObject,
+  IsOptional,
+  IsString,
+  MaxLength,
+  ValidateIf,
+} from 'class-validator';
 
 export class AdminUpdateLegalPageDto {
   @IsString()
@@ -6,7 +13,17 @@ export class AdminUpdateLegalPageDto {
   @MaxLength(256)
   title?: string;
 
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @IsObject()
+  titleByLang?: Record<string, string | null> | null;
+
   @IsString()
   @IsNotEmpty()
   contentMarkdown: string;
+
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @IsObject()
+  contentMarkdownByLang?: Record<string, string | null> | null;
 }

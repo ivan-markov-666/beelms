@@ -6,6 +6,7 @@ import { useCurrentLang } from "../../../i18n/useCurrentLang";
 import { t } from "../../../i18n/t";
 import { getAccessToken } from "../../auth-token";
 import { getApiBaseUrl } from "../../api-url";
+import { InfoTooltip } from "../_components/info-tooltip";
 
 const API_BASE_URL = getApiBaseUrl();
 
@@ -229,9 +230,16 @@ export function AdminHomeContent() {
             {t(lang, "common", "adminDashboardTitle")}
           </span>
         </div>
-        <h1 className="mb-2 text-3xl font-bold text-gray-900 md:text-4xl">
-          {t(lang, "common", "adminDashboardTitle")}
-        </h1>
+        <div className="flex items-center gap-2">
+          <h1 className="mb-2 text-3xl font-bold text-gray-900 md:text-4xl">
+            {t(lang, "common", "adminDashboardTitle")}
+          </h1>
+          <InfoTooltip
+            label="Admin dashboard info"
+            title="Admin dashboard"
+            description="Начално табло за администратори: бърз преглед на основни метрики и последни активности."
+          />
+        </div>
         <p className="text-gray-600">
           {t(lang, "common", "adminDashboardSubtitle")}
         </p>

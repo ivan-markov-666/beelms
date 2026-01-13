@@ -10,6 +10,7 @@ import * as bcrypt from 'bcryptjs';
 import { AccountService } from './account.service';
 import { User } from './user.entity';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { TwoFactorAuthService } from './two-factor-auth.service';
 
 describe('AccountService', () => {
   let service: AccountService;
@@ -21,6 +22,16 @@ describe('AccountService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AccountService,
+        {
+          provide: TwoFactorAuthService,
+          useValue: {
+            generateSecret: jest.fn(),
+            buildOtpAuthUrl: jest.fn(),
+            encryptSecret: jest.fn(),
+            decryptSecret: jest.fn(),
+            verifyCode: jest.fn(),
+          },
+        },
         {
           provide: getRepositoryToken(User),
           useValue: {

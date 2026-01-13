@@ -1721,7 +1721,7 @@ paths:
     post:
       operationId: createCourseCheckout
       tags: [Payments]
-      summary: Stripe Checkout (create session)
+      summary: Create checkout URL (Stripe/PayPal)
       security:
         - bearerAuth: []
       parameters:
@@ -1730,6 +1730,12 @@ paths:
           required: true
           schema:
             type: string
+        - in: query
+          name: provider
+          required: false
+          schema:
+            type: string
+            enum: [stripe, paypal]
       responses:
         "200":
           description: Checkout URL
@@ -1761,6 +1767,39 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/VerifyPurchaseInput'
+      responses:
+        "204":
+          description: Purchase verified
+        "400":
+          description: Невалидни данни
+        "401":
+          description: Неоторизиран достъп
+        "404":
+          description: Курсът не е намерен
+
+  /courses/{courseId}/paypal/verify:
+    post:
+      operationId: verifyPaypalCoursePurchase
+      tags: [Payments]
+      summary: Capture PayPal order and record purchase
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: courseId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [orderId]
+              properties:
+                orderId:
+                  type: string
       responses:
         "204":
           description: Purchase verified

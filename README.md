@@ -175,6 +175,19 @@ Notes:
 
 #### 2.4.1. Stripe payments (Paid courses) – env vars
 
+#### 2.4.1.0. Payments (Stripe / PayPal) – как работи (важно)
+
+В проекта има 2 различни неща:
+
+- **Payment provider конфигурация** (Stripe/PayPal ключове, sandbox/live режим) – това е **server-side** и в момента се контролира основно чрез **env променливи** в BE.
+- **Admin → Payments → Sandbox** – това е **UI tooling** за администратори (да генерират test checkout URL и да дебъгват), не е отделен “payment режим”.
+
+Тоест не е нужно да имаш отделна “не-sandbox” опция в Admin UI, за да работи production flow.
+Sandbox vs Live при Stripe/PayPal се определя от:
+
+- За Stripe: дали ползваш `sk_test_...`/`sk_live_...` + съответните webhook secrets.
+- За PayPal: `PAYPAL_MODE=sandbox|live` + съответните PayPal credentials.
+
 За да работи Stripe checkout flow за paid courses (STORY-PAYMENTS-1):
 
 - FE (`fe/.env.local`):
@@ -187,6 +200,7 @@ NEXT_PUBLIC_STRIPE_PAYMENTS=true
 
 ```bash
 STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
 FRONTEND_ORIGIN=http://localhost:3001
 STRIPE_COURSE_PRICE_CENTS=999
 ```
@@ -194,8 +208,86 @@ STRIPE_COURSE_PRICE_CENTS=999
 Notes:
 
 - `STRIPE_SECRET_KEY` трябва да е test mode secret key от Stripe.
+- `STRIPE_WEBHOOK_SECRET` е webhook signing secret за endpoint-а `/api/payments/webhook`.
 - `FRONTEND_ORIGIN` се ползва за success/cancel redirect URL-и.
 - `STRIPE_COURSE_PRICE_CENTS` е fallback цена (ако няма per-course pricing и няма `payment_settings`).
+
+##### Stripe webhook (задължително за автоматично “unlock”)
+
+Stripe purchase се записва в BE при обработка на webhook event-и.
+
+- **Webhook URL (dev):** `http://localhost:3000/api/payments/webhook`
+
+Опции за dev:
+
+- **Stripe CLI (препоръчително):**
+  - `stripe login`
+  - `stripe listen --forward-to http://localhost:3000/api/payments/webhook`
+  - Stripe CLI ще ти даде `whsec_...` → сложи го в `STRIPE_WEBHOOK_SECRET`.
+
+В production:
+
+- Настрой webhook endpoint в Stripe Dashboard към публичния URL на BE: `https://<your-api-host>/api/payments/webhook`
+- Копирай signing secret-а в `STRIPE_WEBHOOK_SECRET`.
+
+##### Stripe testing flow (dev)
+
+1. Увери се, че feature-ът `paidCourses` е включен.
+2. В Admin → Payments настрой currency/price (или остави defaults).
+3. Отвори платен курс като потребител и натисни “Enroll/Buy”.
+4. Stripe redirect към Checkout.
+5. След success ще се отвори `.../courses/:courseId/checkout/success?session_id=...` и FE ще изчака purchase да се запише + ще направи enroll.
+
+#### 2.4.1.1. PayPal payments (Paid courses) – env vars
+
+PayPal е интегриран чрез **PayPal Orders API** (create order → approve → capture).
+
+- FE (`fe/.env.local`):
+
+```bash
+# включва PayPal като възможен provider във frontend-а
+NEXT_PUBLIC_PAYPAL_PAYMENTS=true
+
+# избор на provider за paid checkout.
+# ако не е зададено: default е "stripe".
+NEXT_PUBLIC_PAYMENT_PROVIDER=paypal
+```
+
+- BE (`be/.env` / env на процеса):
+
+```bash
+PAYPAL_MODE=sandbox
+PAYPAL_CLIENT_ID=your_sandbox_client_id
+PAYPAL_CLIENT_SECRET=your_sandbox_client_secret
+
+FRONTEND_ORIGIN=http://localhost:3001
+```
+
+Notes:
+
+- `PAYPAL_MODE`:
+  - `sandbox` използва `https://api-m.sandbox.paypal.com`
+  - `live` използва `https://api-m.paypal.com`
+- `FRONTEND_ORIGIN` се ползва за return/cancel URL-и към FE:
+  - success: `/courses/:courseId/checkout/paypal/success?token=...`
+  - cancel: `/courses/:courseId/checkout/paypal/cancel`
+
+##### PayPal testing flow (dev)
+
+1. Увери се, че `PAYPAL_MODE=sandbox` и имаш sandbox REST app в PayPal Developer Dashboard.
+2. Увери се, че `NEXT_PUBLIC_PAYPAL_PAYMENTS=true` и `NEXT_PUBLIC_PAYMENT_PROVIDER=paypal`.
+3. Отвори платен курс като потребител и натисни “Enroll/Buy”.
+4. Ще бъдеш пренасочен към PayPal approval.
+5. След approve ще се върнеш на `.../checkout/paypal/success?token=...`.
+   - FE ще извика `POST /api/courses/:courseId/paypal/verify` (capture + запис на purchase)
+   - после ще изчака purchase status и ще извика enroll.
+
+##### Admin → Payments → PayPal → Sandbox (tooling)
+
+Това е удобен shortcut за админ:
+
+- Генерира approval URL чрез `POST /api/courses/:courseId/checkout?provider=paypal`.
+- Полезно е за debug/testing без да минаваш през course page UI.
 
 Така Admin UI (напр. `/admin/wiki`) ще вика реалните NestJS endpoint-и.
 

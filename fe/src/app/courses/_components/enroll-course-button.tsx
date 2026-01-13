@@ -4,9 +4,99 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { getAccessToken } from "../../auth-token";
 import { buildApiUrl } from "../../api-url";
+import { usePublicSettings } from "../../_hooks/use-public-settings";
 
 const STRIPE_PAYMENTS_ENABLED =
   process.env.NEXT_PUBLIC_STRIPE_PAYMENTS === "true";
+
+const PAYPAL_PAYMENTS_ENABLED =
+  process.env.NEXT_PUBLIC_PAYPAL_PAYMENTS === "true";
+
+const MYPOS_PAYMENTS_ENABLED =
+  process.env.NEXT_PUBLIC_MYPOS_PAYMENTS === "true";
+
+const REVOLUT_PAYMENTS_ENABLED =
+  process.env.NEXT_PUBLIC_REVOLUT_PAYMENTS === "true";
+
+const DEFAULT_PAYMENT_PROVIDER = (
+  process.env.NEXT_PUBLIC_PAYMENT_PROVIDER ?? "stripe"
+)
+  .trim()
+  .toLowerCase();
+
+type PaymentProvider = "stripe" | "paypal" | "mypos" | "revolut";
+
+function normalizeProvider(value: unknown): PaymentProvider {
+  if (typeof value !== "string") {
+    return "stripe";
+  }
+  const normalized = value.trim().toLowerCase();
+  if (
+    normalized === "paypal" ||
+    normalized === "mypos" ||
+    normalized === "revolut"
+  ) {
+    return normalized;
+  }
+  return "stripe";
+}
+
+function buildRuntimeProviderConfig(
+  settings:
+    | {
+        paymentsStripe?: boolean;
+        paymentsPaypal?: boolean;
+        paymentsMypos?: boolean;
+        paymentsRevolut?: boolean;
+        paymentsDefaultProvider?: string;
+      }
+    | null
+    | undefined,
+): {
+  enabled: Record<PaymentProvider, boolean>;
+  defaultProvider: PaymentProvider;
+} {
+  if (!settings) {
+    return {
+      enabled: {
+        stripe: STRIPE_PAYMENTS_ENABLED,
+        paypal: PAYPAL_PAYMENTS_ENABLED,
+        mypos: MYPOS_PAYMENTS_ENABLED,
+        revolut: REVOLUT_PAYMENTS_ENABLED,
+      },
+      defaultProvider: normalizeProvider(DEFAULT_PAYMENT_PROVIDER),
+    };
+  }
+
+  const stripeEnabled = settings.paymentsStripe !== false;
+  const paypalEnabled = settings.paymentsPaypal !== false;
+  const myposEnabled = settings.paymentsMypos === true;
+  const revolutEnabled = settings.paymentsRevolut === true;
+
+  const defaultProvider = normalizeProvider(settings.paymentsDefaultProvider);
+  const enabled: Record<PaymentProvider, boolean> = {
+    stripe: stripeEnabled,
+    paypal: paypalEnabled,
+    mypos: myposEnabled,
+    revolut: revolutEnabled,
+  };
+
+  const defaultEnabled = enabled[defaultProvider];
+  const fallback = stripeEnabled
+    ? "stripe"
+    : paypalEnabled
+      ? "paypal"
+      : myposEnabled
+        ? "mypos"
+        : revolutEnabled
+          ? "revolut"
+          : "stripe";
+
+  return {
+    enabled,
+    defaultProvider: defaultEnabled ? defaultProvider : fallback,
+  };
+}
 
 function formatPrice(currency: string, priceCents: number): string {
   const normalizedCurrency = currency.trim().toUpperCase();
@@ -33,6 +123,8 @@ export function EnrollCourseButton({
   currency?: string | null;
   priceCents?: number | null;
 }) {
+  const { settings: publicSettings } = usePublicSettings();
+  const runtime = buildRuntimeProviderConfig(publicSettings?.features);
   const [hasToken, setHasToken] = useState<boolean | null>(null);
   const [enrolled, setEnrolled] = useState(false);
   const [phase, setPhase] = useState<"idle" | "unlocking" | "enrolling">(
@@ -87,7 +179,10 @@ export function EnrollCourseButton({
       return true;
     }
 
-    if (!STRIPE_PAYMENTS_ENABLED) {
+    const provider = runtime.defaultProvider;
+    const paymentsEnabled = runtime.enabled[provider];
+
+    if (!paymentsEnabled) {
       setError("Плащането не е налично.");
       setPhase("idle");
       return false;
@@ -95,12 +190,16 @@ export function EnrollCourseButton({
 
     setPhase("unlocking");
 
-    const res = await fetch(buildApiUrl(`/courses/${courseId}/checkout`), {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
+    const query = provider === "stripe" ? "" : `?provider=${provider}`;
+    const res = await fetch(
+      buildApiUrl(`/courses/${courseId}/checkout${query}`),
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
       },
-    });
+    );
 
     if (res.status === 401) {
       setHasToken(false);
@@ -110,7 +209,15 @@ export function EnrollCourseButton({
     }
 
     if (!res.ok) {
-      setError("Плащането не е налично (Stripe не е конфигуриран). ");
+      setError(
+        provider === "paypal"
+          ? "Плащането не е налично (PayPal не е конфигуриран). "
+          : provider === "mypos"
+            ? "Плащането не е налично (myPOS не е конфигуриран). "
+            : provider === "revolut"
+              ? "Плащането не е налично (Revolut не е конфигуриран). "
+              : "Плащането не е налично (Stripe не е конфигуриран). ",
+      );
       setPhase("idle");
       return false;
     }
@@ -214,7 +321,7 @@ export function EnrollCourseButton({
             : enrolled
               ? "Enrolled"
               : isPaid
-                ? STRIPE_PAYMENTS_ENABLED
+                ? runtime.enabled[runtime.defaultProvider]
                   ? typeof priceCents === "number" && !!currency
                     ? `Pay ${formatPrice(currency, priceCents)} & Enroll`
                     : "Pay & Enroll"

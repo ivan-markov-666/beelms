@@ -1,8 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { buildApiUrl } from "../api-url";
+import { Pagination } from "../_components/pagination";
+import { CoursesCatalogClient } from "./_components/courses-catalog-client";
+import { CoursesFiltersFormClient } from "./_components/courses-filters-form-client";
 
 export const dynamic = "force-dynamic";
+
+const DEFAULT_PAGE_SIZE = 20;
 
 type CourseSummary = {
   id: string;
@@ -28,28 +33,48 @@ type CourseCategory = {
   active: boolean;
 };
 
-function formatPrice(currency: string, priceCents: number): string {
-  const normalizedCurrency = currency.trim().toUpperCase();
-  const amount = priceCents / 100;
+type CoursesPagedParams = {
+  q?: string;
+  language?: string;
+  paid?: string;
+  category?: string;
+  page?: number;
+  pageSize?: number;
+  sortKey?: string;
+  sortDir?: string;
+};
 
-  try {
-    return new Intl.NumberFormat(undefined, {
-      style: "currency",
-      currency: normalizedCurrency,
-    }).format(amount);
-  } catch {
-    return `${amount.toFixed(2)} ${normalizedCurrency}`;
+async function fetchCoursesPaged(
+  params?: CoursesPagedParams,
+): Promise<{ items: CourseSummary[]; total: number }> {
+  const url = new URL(buildApiUrl("/courses"));
+
+  if (params?.category && params.category.trim()) {
+    url.searchParams.set("category", params.category.trim());
   }
-}
+  if (params?.q && params.q.trim()) {
+    url.searchParams.set("q", params.q.trim());
+  }
+  if (params?.language && params.language.trim()) {
+    url.searchParams.set("language", params.language.trim());
+  }
+  if (params?.paid && params.paid.trim()) {
+    url.searchParams.set("paid", params.paid.trim());
+  }
+  if (typeof params?.page === "number") {
+    url.searchParams.set("page", String(params.page));
+  }
+  if (typeof params?.pageSize === "number") {
+    url.searchParams.set("pageSize", String(params.pageSize));
+  }
+  if (params?.sortKey && params.sortKey.trim()) {
+    url.searchParams.set("sortKey", params.sortKey.trim());
+  }
+  if (params?.sortDir && params.sortDir.trim()) {
+    url.searchParams.set("sortDir", params.sortDir.trim());
+  }
 
-async function fetchCourses(category?: string): Promise<CourseSummary[]> {
-  const url = category
-    ? buildApiUrl(`/courses?category=${encodeURIComponent(category)}`)
-    : buildApiUrl("/courses");
-
-  const res = await fetch(url, {
-    cache: "no-store",
-  });
+  const res = await fetch(url.toString(), { cache: "no-store" });
 
   if (res.status === 404) {
     notFound();
@@ -59,7 +84,17 @@ async function fetchCourses(category?: string): Promise<CourseSummary[]> {
     throw new Error("Failed to load courses");
   }
 
-  return res.json();
+  const data = (await res.json()) as CourseSummary[];
+  const rawTotal = res.headers.get("X-Total-Count") ?? "";
+  const parsedTotal = Number(rawTotal);
+  const total =
+    Number.isFinite(parsedTotal) && parsedTotal >= 0
+      ? parsedTotal
+      : Array.isArray(data)
+        ? data.length
+        : 0;
+
+  return { items: Array.isArray(data) ? data : [], total };
 }
 
 async function fetchCategories(): Promise<CourseCategory[]> {
@@ -93,7 +128,27 @@ function isPromiseLike<T>(value: unknown): value is Promise<T> {
 export default async function CoursesPage({
   searchParams: rawSearchParams,
 }: {
-  searchParams?: CoursesPageSearchParams | Promise<CoursesPageSearchParams>;
+  searchParams?:
+    | (CoursesPageSearchParams & {
+        q?: string;
+        language?: string;
+        paid?: string;
+        page?: string;
+        pageSize?: string;
+        sortKey?: string;
+        sortDir?: string;
+      })
+    | Promise<
+        CoursesPageSearchParams & {
+          q?: string;
+          language?: string;
+          paid?: string;
+          page?: string;
+          pageSize?: string;
+          sortKey?: string;
+          sortDir?: string;
+        }
+      >;
 }) {
   const searchParams = isPromiseLike(rawSearchParams)
     ? await rawSearchParams
@@ -102,14 +157,60 @@ export default async function CoursesPage({
   const selectedCategory =
     typeof searchParams?.category === "string" ? searchParams.category : "";
 
-  let courses: CourseSummary[] = [];
-  let categories: CourseCategory[] = [];
+  const rawQ = typeof searchParams?.q === "string" ? searchParams.q : "";
+  const rawLanguage =
+    typeof searchParams?.language === "string" ? searchParams.language : "";
+  const rawPaid =
+    typeof searchParams?.paid === "string" ? searchParams.paid : "";
+  const rawPage =
+    typeof searchParams?.page === "string" ? searchParams.page : "1";
+  const rawPageSize =
+    typeof searchParams?.pageSize === "string"
+      ? searchParams.pageSize
+      : String(DEFAULT_PAGE_SIZE);
+  const rawSortKey =
+    typeof searchParams?.sortKey === "string"
+      ? searchParams.sortKey
+      : "createdAt";
+  const rawSortDir =
+    typeof searchParams?.sortDir === "string" ? searchParams.sortDir : "desc";
 
+  const q = rawQ.trim();
+  const language = rawLanguage.trim().toLowerCase();
+  const paid = rawPaid.trim().toLowerCase();
+  const page = (() => {
+    const parsed = Number.parseInt(rawPage, 10);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
+  })();
+  const pageSize = (() => {
+    const parsed = Number.parseInt(rawPageSize, 10);
+    return Number.isFinite(parsed) && parsed > 0
+      ? Math.min(parsed, 100)
+      : DEFAULT_PAGE_SIZE;
+  })();
+  const sortKey = rawSortKey.trim() === "title" ? "title" : "createdAt";
+  const sortDir = rawSortDir.trim() === "asc" ? "asc" : "desc";
+
+  let courses: CourseSummary[] = [];
+  let totalCount = 0;
+  let categories: CourseCategory[] = [];
   try {
-    [courses, categories] = await Promise.all([
-      fetchCourses(selectedCategory || undefined),
+    const [catalog, cats] = await Promise.all([
+      fetchCoursesPaged({
+        category: selectedCategory || undefined,
+        q,
+        language: language || undefined,
+        paid: paid || undefined,
+        page,
+        pageSize,
+        sortKey,
+        sortDir,
+      }),
       fetchCategories(),
     ]);
+    courses = catalog.items;
+    totalCount = catalog.total;
+    categories = cats;
   } catch (error) {
     void error;
     return (
@@ -124,6 +225,9 @@ export default async function CoursesPage({
       </main>
     );
   }
+
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+  const safeCurrentPage = Math.min(Math.max(page, 1), totalPages);
 
   if (!courses.length) {
     return (
@@ -146,6 +250,17 @@ export default async function CoursesPage({
           Каталог от курсове (WS-3: public catalog + detail).
         </p>
       </header>
+
+      <section className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+        <CoursesFiltersFormClient
+          initialQ={rawQ}
+          initialLanguage={rawLanguage}
+          initialPaid={rawPaid}
+          selectedCategory={selectedCategory}
+          sortKey={sortKey}
+          sortDir={sortDir}
+        />
+      </section>
 
       {categories.length > 0 && (
         <section className="flex flex-wrap gap-2">
@@ -175,59 +290,30 @@ export default async function CoursesPage({
         </section>
       )}
 
-      <section className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {courses.map((course) => (
-          <Link
-            key={course.id}
-            href={`/courses/${course.id}`}
-            className="flex h-full flex-col rounded-lg border border-gray-200 bg-white p-5 text-left shadow-sm transition hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2"
-          >
-            <div className="mb-3 flex items-start justify-between gap-3">
-              <h2 className="text-lg font-semibold text-gray-900">
-                {course.title}
-              </h2>
-              <div className="flex shrink-0 flex-col items-end gap-1">
-                <span
-                  className={`rounded-full px-2 py-1 text-[11px] font-semibold ${
-                    course.isPaid
-                      ? "bg-amber-100 text-amber-800"
-                      : "bg-emerald-100 text-emerald-800"
-                  }`}
-                >
-                  {course.isPaid ? "Paid" : "Free"}
-                </span>
+      <CoursesCatalogClient courses={courses} />
 
-                {course.isPaid &&
-                  typeof course.priceCents === "number" &&
-                  !!course.currency && (
-                    <span className="text-[11px] font-semibold text-zinc-700">
-                      {formatPrice(course.currency, course.priceCents)}
-                    </span>
-                  )}
-              </div>
-            </div>
-            <p className="text-sm text-gray-600 line-clamp-4">
-              {course.description}
-            </p>
-
-            {course.category?.title && (
-              <div className="mt-3">
-                <span className="inline-flex rounded bg-gray-100 px-2 py-1 text-xs text-gray-700">
-                  {course.category.title}
-                </span>
-              </div>
-            )}
-            <div className="mt-4 flex items-center gap-2 text-xs text-gray-500">
-              <span className="rounded bg-gray-100 px-2 py-1">
-                {course.language}
-              </span>
-              <span className="rounded bg-gray-100 px-2 py-1">
-                {course.status}
-              </span>
-            </div>
-          </Link>
-        ))}
-      </section>
+      {totalCount > 0 && totalPages > 1 && (
+        <div className="mt-6 flex items-center justify-between border-t border-gray-200 pt-4 text-xs text-gray-600 md:text-sm">
+          <p>
+            Showing{" "}
+            <span className="font-semibold">
+              {(safeCurrentPage - 1) * pageSize + 1}
+            </span>
+            -
+            <span className="font-semibold">
+              {Math.min(safeCurrentPage * pageSize, totalCount)}
+            </span>{" "}
+            of <span className="font-semibold">{totalCount}</span> courses
+          </p>
+          <Pagination
+            currentPage={safeCurrentPage}
+            totalPages={totalPages}
+            pageSize={pageSize}
+            pageParam="page"
+            pageSizeParam="pageSize"
+          />
+        </div>
+      )}
     </main>
   );
 }

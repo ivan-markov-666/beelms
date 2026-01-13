@@ -168,6 +168,20 @@ export class AssessmentsService {
       }),
     );
 
+    if (passed) {
+      const itemId = await this.coursesService.getQuizCurriculumItemId(
+        courseId,
+        quizId,
+      );
+      if (itemId) {
+        await this.coursesService.markCurriculumItemCompleted(
+          userId,
+          courseId,
+          itemId,
+        );
+      }
+    }
+
     return { score, maxScore, passed };
   }
 }

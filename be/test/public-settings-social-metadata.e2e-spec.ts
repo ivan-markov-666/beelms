@@ -56,6 +56,17 @@ describe('Public Settings Endpoint - Social Metadata (e2e)', () => {
     }
     user.role = 'admin';
     await userRepository.save(user);
+
+    // Ensure infraMonitoring is disabled to avoid validation blocking
+    await request(app.getHttpServer())
+      .patch('/api/admin/settings')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({
+        features: {
+          infraMonitoring: false,
+        },
+      })
+      .expect(200);
   });
 
   afterAll(async () => {

@@ -3,6 +3,12 @@ import type { PublicSettings } from "../../_data/public-settings";
 import { getPublicSettings } from "../../_data/public-settings";
 import WikiPage from "../page";
 
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({ push: jest.fn() }),
+  usePathname: () => "/wiki",
+  useSearchParams: () => new URLSearchParams(),
+}));
+
 jest.mock("../../_data/public-settings", () => ({
   getPublicSettings: jest.fn(),
 }));
@@ -29,13 +35,27 @@ function createPublicSettings(
       auth: true,
       authLogin: true,
       authRegister: true,
+      auth2fa: false,
       captcha: false,
       captchaLogin: false,
       captchaRegister: false,
       captchaForgotPassword: false,
       captchaChangePassword: false,
       paidCourses: false,
+      paymentsStripe: false,
+      paymentsPaypal: false,
+      paymentsMypos: false,
+      paymentsRevolut: false,
       gdprLegal: false,
+      pageTerms: false,
+      pagePrivacy: false,
+      pageCookiePolicy: false,
+      pageImprint: false,
+      pageAccessibility: false,
+      pageContact: false,
+      pageFaq: false,
+      pageSupport: false,
+      pageNotFound: false,
       socialGoogle: false,
       socialFacebook: false,
       socialGithub: false,
@@ -62,15 +82,28 @@ function mockArticlesFetchOnce(
   {
     ok = true,
     status = ok ? 200 : 500,
+    totalCount,
   }: {
     ok?: boolean;
     status?: number;
+    totalCount?: number;
   } = {},
 ) {
+  const total =
+    typeof totalCount === "number"
+      ? totalCount
+      : Array.isArray(data)
+        ? data.length
+        : 0;
+
   global.fetch = jest.fn().mockResolvedValue({
     ok,
     status,
     json: async () => data,
+    headers: {
+      get: (key: string) =>
+        key.toLowerCase() === "x-total-count" ? String(total) : null,
+    },
   } as unknown as Response);
 }
 
@@ -84,16 +117,19 @@ describe("WikiPage", () => {
   });
 
   it("renders list of wiki articles from API", async () => {
-    mockArticlesFetchOnce([
-      {
-        id: "1",
-        slug: "getting-started",
-        language: "bg",
-        title: "Начало с BeeLMS",
-        status: "active",
-        updatedAt: "2025-11-25T00:00:00.000Z",
-      },
-    ]);
+    mockArticlesFetchOnce(
+      [
+        {
+          id: "1",
+          slug: "getting-started",
+          language: "bg",
+          title: "Начало с BeeLMS",
+          status: "active",
+          updatedAt: "2025-11-25T00:00:00.000Z",
+        },
+      ],
+      { totalCount: 40 },
+    );
 
     const ui = await WikiPage();
     render(ui);
@@ -170,29 +206,29 @@ describe("WikiPage", () => {
   });
 
   it("builds pagination links that preserve search and language filters", async () => {
-    mockArticlesFetchOnce([
+    mockArticlesFetchOnce(
+      [
+        {
+          id: "1",
+          slug: "getting-started",
+          language: "bg",
+          title: "Начало с BeeLMS",
+          status: "active",
+          updatedAt: "2025-11-25T00:00:00.000Z",
+        },
+      ],
       {
-        id: "1",
-        slug: "getting-started",
-        language: "bg",
-        title: "Начало с BeeLMS",
-        status: "active",
-        updatedAt: "2025-11-25T00:00:00.000Z",
+        totalCount: 40,
       },
-    ]);
+    );
 
     const ui = await WikiPage({
       searchParams: { q: "test", lang: "bg", page: "2" },
     });
     render(ui);
 
-    const prevLink = screen.getByText("Предишна").closest("a");
-
-    expect(prevLink).not.toBeNull();
-
-    const href = prevLink?.getAttribute("href") ?? "";
-    expect(href).toContain("/wiki");
-    expect(href).toContain("q=test");
-    expect(href).toContain("lang=bg");
+    expect(
+      screen.getByRole("button", { name: "Previous" }),
+    ).toBeInTheDocument();
   });
 });

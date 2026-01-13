@@ -99,7 +99,8 @@ describe("ProfilePage email change behaviour", () => {
     render(<ProfilePage />);
 
     // profile load
-    await screen.findByText("Моят профил");
+    const heading = await screen.findByRole("heading", { level: 1 });
+    expect(heading).toHaveTextContent("Моят профил");
 
     const [changeButton] = screen.getAllByRole("button", { name: "Промяна" });
     fireEvent.click(changeButton);
@@ -148,7 +149,8 @@ describe("ProfilePage email change behaviour", () => {
 
     render(<ProfilePage />);
 
-    await screen.findByText("Моят профил");
+    const heading = await screen.findByRole("heading", { level: 1 });
+    expect(heading).toHaveTextContent("Моят профил");
 
     const [changeButton] = screen.getAllByRole("button", { name: "Промяна" });
     fireEvent.click(changeButton);
@@ -221,7 +223,7 @@ describe("ProfilePage email change behaviour", () => {
         const url = typeof input === "string" ? input : input.toString();
 
         if (
-          url === usersMeUrl &&
+          /\/users\/me$/.test(url) &&
           (!init || !init.method || init.method === "GET")
         ) {
           return {
@@ -245,7 +247,8 @@ describe("ProfilePage email change behaviour", () => {
 
     render(<ProfilePage />);
 
-    await screen.findByText("Моят профил");
+    const heading = await screen.findByRole("heading", { level: 1 });
+    expect(heading).toHaveTextContent("Моят профил");
 
     const [changeButton] = screen.getAllByRole("button", { name: "Промяна" });
     fireEvent.click(changeButton);
@@ -298,7 +301,8 @@ describe("ProfilePage email change behaviour", () => {
 
     render(<ProfilePage />);
 
-    await screen.findByText("Моят профил");
+    const heading = await screen.findByRole("heading", { level: 1 });
+    expect(heading).toHaveTextContent("Моят профил");
 
     const [changeButton] = screen.getAllByRole("button", { name: "Промяна" });
     fireEvent.click(changeButton);
@@ -321,7 +325,8 @@ describe("ProfilePage email change behaviour", () => {
   it("shows an error when the new email equals the current email and does not send a PATCH request", async () => {
     render(<ProfilePage />);
 
-    await screen.findByText("Моят профил");
+    const heading = await screen.findByRole("heading", { level: 1 });
+    expect(heading).toHaveTextContent("Моят профил");
 
     const [changeButton] = screen.getAllByRole("button", { name: "Промяна" });
     fireEvent.click(changeButton);
@@ -354,13 +359,14 @@ describe("ProfilePage email change behaviour", () => {
   it("renders an email change limit tooltip in the profile header", async () => {
     render(<ProfilePage />);
 
-    await screen.findByText("Моят профил");
+    const heading = await screen.findByRole("heading", { level: 1 });
+    expect(heading).toHaveTextContent("Моят профил");
 
-    const tooltip = await screen.findByTitle(
-      /Можете да заявите до 3 успешни смени на имейл адрес за последните 24 часа/i,
-    );
-
-    expect(tooltip).toBeInTheDocument();
+    expect(
+      await screen.findByRole("button", {
+        name: "Информация за смяна на email",
+      }),
+    ).toBeInTheDocument();
   });
 });
 
@@ -464,21 +470,18 @@ describe("ProfilePage critical actions", () => {
     });
   });
 
-  it("logs out and redirects to home", async () => {
+  it("does not render a logout button on profile page", async () => {
     render(<ProfilePage />);
-    await screen.findByText("Моят профил");
+    const heading = await screen.findByRole("heading", { level: 1 });
+    expect(heading).toHaveTextContent("Моят профил");
 
-    fireEvent.click(screen.getByRole("button", { name: "Изход" }));
-
-    expect(window.localStorage.removeItem).toHaveBeenCalledWith(
-      ACCESS_TOKEN_KEY,
-    );
-    expect(mockReplace).toHaveBeenCalledWith("/");
+    expect(screen.queryByRole("button", { name: "Изход" })).toBeNull();
   });
 
   it("changes password successfully", async () => {
     render(<ProfilePage />);
-    await screen.findByText("Моят профил");
+    const heading = await screen.findByRole("heading", { level: 1 });
+    expect(heading).toHaveTextContent("Моят профил");
 
     const changeButtons = screen.getAllByRole("button", { name: "Промяна" });
     fireEvent.click(changeButtons[1]);
@@ -504,7 +507,8 @@ describe("ProfilePage critical actions", () => {
 
   it("exports user data", async () => {
     render(<ProfilePage />);
-    await screen.findByText("Моят профил");
+    const heading = await screen.findByRole("heading", { level: 1 });
+    expect(heading).toHaveTextContent("Моят профил");
 
     fireEvent.click(
       screen.getByRole("button", {
@@ -539,7 +543,8 @@ describe("ProfilePage critical actions", () => {
 
   it("deletes account with two-step confirmation and redirects", async () => {
     render(<ProfilePage />);
-    await screen.findByText("Моят профил");
+    const heading = await screen.findByRole("heading", { level: 1 });
+    expect(heading).toHaveTextContent("Моят профил");
 
     fireEvent.click(
       screen.getByRole("button", {
@@ -547,7 +552,7 @@ describe("ProfilePage critical actions", () => {
       }),
     );
 
-    await screen.findByText("Закриване на акаунта");
+    await screen.findByRole("heading", { name: "Закриване на акаунта" });
 
     fireEvent.click(screen.getByRole("button", { name: "OK" }));
 

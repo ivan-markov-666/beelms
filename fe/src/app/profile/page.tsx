@@ -1,11 +1,14 @@
 "use client";
 
 import { useEffect, useState, FormEvent } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
+import QRCode from "qrcode";
 import { clearAccessToken, getAccessToken } from "../auth-token";
 import { getApiBaseUrl } from "../api-url";
 import { RecaptchaWidget } from "../_components/recaptcha-widget";
 import { usePublicSettings } from "../_hooks/use-public-settings";
+import { InfoTooltip } from "../admin/_components/info-tooltip";
 
 const API_BASE_URL = getApiBaseUrl();
 const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
@@ -68,6 +71,14 @@ export default function ProfilePage() {
       publicSettings.features.captchaChangePassword !== false
     : false;
 
+  const exportCaptchaEnabled = publicSettings?.features
+    ? publicSettings.features.captcha !== false
+    : false;
+
+  const auth2faEnabled = publicSettings?.features
+    ? publicSettings.features.auth2fa === true
+    : false;
+
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [authToken, setAuthToken] = useState<string | null>(null);
@@ -98,6 +109,27 @@ export default function ProfilePage() {
   const [passwordCaptchaToken, setPasswordCaptchaToken] = useState<
     string | null
   >(null);
+
+  const [twoFactorLoading, setTwoFactorLoading] = useState(false);
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
+  const [twoFactorConfirmedAt, setTwoFactorConfirmedAt] = useState<
+    string | null
+  >(null);
+  const [twoFactorError, setTwoFactorError] = useState<string | null>(null);
+  const [twoFactorSuccess, setTwoFactorSuccess] = useState<string | null>(null);
+  const [twoFactorSetupOpen, setTwoFactorSetupOpen] = useState(false);
+  const [twoFactorDisableOpen, setTwoFactorDisableOpen] = useState(false);
+  const [twoFactorSetupSecret, setTwoFactorSetupSecret] = useState<
+    string | null
+  >(null);
+  const [twoFactorSetupOtpAuthUrl, setTwoFactorSetupOtpAuthUrl] = useState<
+    string | null
+  >(null);
+  const [twoFactorSetupQrDataUrl, setTwoFactorSetupQrDataUrl] = useState<
+    string | null
+  >(null);
+  const [twoFactorEnableCode, setTwoFactorEnableCode] = useState("");
+  const [twoFactorDisableCode, setTwoFactorDisableCode] = useState("");
 
   const [exportSubmitting, setExportSubmitting] = useState(false);
   const [exportSuccess, setExportSuccess] = useState<string | null>(null);
@@ -179,6 +211,221 @@ export default function ProfilePage() {
   }, [profileEnabled, router]);
 
   useEffect(() => {
+    if (!auth2faEnabled) {
+      setTwoFactorEnabled(false);
+      setTwoFactorConfirmedAt(null);
+      setTwoFactorSetupOpen(false);
+      setTwoFactorDisableOpen(false);
+      setTwoFactorSetupSecret(null);
+      setTwoFactorSetupOtpAuthUrl(null);
+      setTwoFactorSetupQrDataUrl(null);
+      setTwoFactorEnableCode("");
+      setTwoFactorDisableCode("");
+      setTwoFactorError(null);
+      setTwoFactorSuccess(null);
+      return;
+    }
+
+    if (!authToken) {
+      return;
+    }
+
+    let cancelled = false;
+
+    const fetchStatus = async () => {
+      setTwoFactorLoading(true);
+      setTwoFactorError(null);
+
+      try {
+        const res = await fetch(`${API_BASE_URL}/users/me/2fa/status`, {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        });
+
+        if (cancelled) return;
+
+        if (!res.ok) {
+          if (res.status === 404) {
+            setTwoFactorEnabled(false);
+            setTwoFactorConfirmedAt(null);
+            return;
+          }
+
+          setTwoFactorError(
+            "Не успяхме да заредим статуса на двуфакторната автентикация.",
+          );
+          return;
+        }
+
+        const data = (await res.json()) as {
+          enabled?: boolean;
+          confirmedAt?: string | null;
+        };
+
+        setTwoFactorEnabled(Boolean(data?.enabled));
+        setTwoFactorConfirmedAt(data?.confirmedAt ?? null);
+      } catch {
+        if (cancelled) return;
+        setTwoFactorError(
+          "Не успяхме да заредим статуса на двуфакторната автентикация.",
+        );
+      } finally {
+        if (!cancelled) {
+          setTwoFactorLoading(false);
+        }
+      }
+    };
+
+    void fetchStatus();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [auth2faEnabled, authToken]);
+
+  const handleTwoFactorSetup = async () => {
+    if (!authToken) return;
+
+    setTwoFactorError(null);
+    setTwoFactorSuccess(null);
+    setTwoFactorLoading(true);
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/users/me/2fa/setup`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
+
+      if (!res.ok) {
+        setTwoFactorError(
+          "Не успяхме да генерираме настройките за двуфакторна автентикация.",
+        );
+        return;
+      }
+
+      const data = (await res.json()) as {
+        secret?: string;
+        otpauthUrl?: string;
+      };
+
+      if (!data?.secret || !data?.otpauthUrl) {
+        setTwoFactorError(
+          "Не успяхме да генерираме настройките за двуфакторна автентикация.",
+        );
+        return;
+      }
+
+      setTwoFactorSetupSecret(data.secret);
+      setTwoFactorSetupOtpAuthUrl(data.otpauthUrl);
+      try {
+        const qr = await QRCode.toDataURL(data.otpauthUrl, {
+          margin: 1,
+          width: 200,
+        });
+        setTwoFactorSetupQrDataUrl(qr);
+      } catch {
+        setTwoFactorSetupQrDataUrl(null);
+      }
+      setTwoFactorSetupOpen(true);
+      setTwoFactorDisableOpen(false);
+      setTwoFactorEnableCode("");
+    } catch {
+      setTwoFactorError(
+        "Не успяхме да генерираме настройките за двуфакторна автентикация.",
+      );
+    } finally {
+      setTwoFactorLoading(false);
+    }
+  };
+
+  const handleTwoFactorEnable = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!authToken || !twoFactorSetupSecret) return;
+
+    setTwoFactorError(null);
+    setTwoFactorSuccess(null);
+    setTwoFactorLoading(true);
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/users/me/2fa/enable`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({
+          secret: twoFactorSetupSecret,
+          code: twoFactorEnableCode.trim(),
+        }),
+      });
+
+      if (!res.ok) {
+        setTwoFactorError("Кодът е невалиден. Моля, опитайте отново.");
+        return;
+      }
+
+      const data = (await res.json()) as {
+        enabled?: boolean;
+        confirmedAt?: string;
+      };
+
+      setTwoFactorEnabled(Boolean(data?.enabled));
+      setTwoFactorConfirmedAt(data?.confirmedAt ?? new Date().toISOString());
+      setTwoFactorSetupOpen(false);
+      setTwoFactorDisableOpen(false);
+      setTwoFactorSetupSecret(null);
+      setTwoFactorSetupOtpAuthUrl(null);
+      setTwoFactorSetupQrDataUrl(null);
+      setTwoFactorEnableCode("");
+      setTwoFactorSuccess("Двуфакторната автентикация е активирана.");
+    } catch {
+      setTwoFactorError("Не успяхме да активираме двуфакторната автентикация.");
+    } finally {
+      setTwoFactorLoading(false);
+    }
+  };
+
+  const handleTwoFactorDisable = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!authToken) return;
+
+    setTwoFactorError(null);
+    setTwoFactorSuccess(null);
+    setTwoFactorLoading(true);
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/users/me/2fa/disable`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({
+          code: twoFactorDisableCode.trim(),
+        }),
+      });
+
+      if (!res.ok) {
+        setTwoFactorError("Кодът е невалиден. Моля, опитайте отново.");
+        return;
+      }
+
+      setTwoFactorEnabled(false);
+      setTwoFactorConfirmedAt(null);
+      setTwoFactorDisableOpen(false);
+      setTwoFactorDisableCode("");
+      setTwoFactorSuccess("Двуфакторната автентикация е изключена.");
+    } catch {
+      setTwoFactorError("Не успяхме да изключим двуфакторната автентикация.");
+    } finally {
+      setTwoFactorLoading(false);
+    }
+  };
+
+  useEffect(() => {
     if (!profile) return;
 
     if (profile.emailChangeLimitReached) {
@@ -189,17 +436,6 @@ export default function ProfilePage() {
       setEmailChangeLimitWarning(null);
     }
   }, [profile]);
-
-  const handleLogout = () => {
-    if (typeof window !== "undefined") {
-      try {
-        clearAccessToken();
-      } catch {
-        // ignore
-      }
-    }
-    router.replace("/");
-  };
 
   const handleEmailSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -462,27 +698,25 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-gray-50 px-4 py-12">
+    <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-[color:var(--background)] px-4 py-12">
       <main className="w-full max-w-4xl space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="mb-2 text-4xl font-bold text-zinc-900">
-              Моят профил
+            <h1 className="mb-2 flex items-center gap-2 text-4xl font-bold text-[color:var(--foreground)]">
+              <span>Моят профил</span>
+              <InfoTooltip
+                label="Информация за профила"
+                title="Моят профил"
+                description="Тук управляваш данни за акаунта: email, парола, (ако е включено) 2FA, експорт на лични данни и закриване на акаунт."
+              />
             </h1>
-            <p className="text-sm text-zinc-600">
+            <p className="text-sm text-[color:var(--foreground)] opacity-70">
               Управлявайте вашия акаунт и данни
             </p>
           </div>
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-xs font-medium text-zinc-800 shadow-sm hover:bg-zinc-50"
-          >
-            Изход
-          </button>
         </div>{" "}
-        <section className="rounded-lg border border-gray-200 bg-white p-8 shadow-sm">
-          <h2 className="mb-6 flex items-center text-xl font-bold text-gray-900">
+        <section className="rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-8 shadow-sm">
+          <h2 className="mb-6 flex items-center gap-2 text-xl font-bold text-[color:var(--foreground)]">
             <span
               aria-hidden="true"
               className="mr-2 inline-flex h-6 w-6 items-center justify-center text-green-600"
@@ -502,6 +736,11 @@ export default function ProfilePage() {
               </svg>
             </span>
             <span>Профилна информация</span>
+            <InfoTooltip
+              label="Информация за профилна информация"
+              title="Профилна информация"
+              description="Промяна на email и парола. Ако е активирано, можеш да включиш и двуфакторна автентикация (2FA)."
+            />
           </h2>
 
           <div className="space-y-4">
@@ -512,12 +751,11 @@ export default function ProfilePage() {
                     <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
                       Email адрес
                     </p>
-                    <span
-                      className="cursor-help rounded-full border border-zinc-400 px-1 text-[10px] leading-none text-zinc-600"
-                      title="Можете да заявите до 3 успешни смени на имейл адрес за последните 24 часа. При достигане на лимита ще получавате съобщение при потвърждение на новия имейл и ще трябва да изчакате до 24 часа, преди да заявите нова промяна."
-                    >
-                      i
-                    </span>
+                    <InfoTooltip
+                      label="Информация за смяна на email"
+                      title="Email адрес"
+                      description="Можете да заявите до 3 успешни смени на имейл адрес за последните 24 часа. При достигане на лимита ще получавате съобщение при потвърждение на новия имейл и ще трябва да изчакате до 24 часа, преди да заявите нова промяна."
+                    />
                   </div>
                   <p className="mt-1 text-sm text-zinc-900">{profile.email}</p>
                   {emailChangeLimitWarning && !emailEditOpen && (
@@ -621,7 +859,14 @@ export default function ProfilePage() {
                   <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
                     Парола
                   </p>
-                  <p className="mt-1 text-sm text-zinc-500">••••••••</p>
+                  <div className="mt-1 flex items-center gap-2">
+                    <p className="text-sm text-zinc-500">••••••••</p>
+                    <InfoTooltip
+                      label="Информация за парола"
+                      title="Парола"
+                      description="Можеш да смениш паролата си като въведеш текущата и новата парола."
+                    />
+                  </div>
                 </div>
                 <button
                   type="button"
@@ -730,9 +975,216 @@ export default function ProfilePage() {
               )}
             </div>
 
+            {auth2faEnabled && (
+              <div className="border-b border-zinc-100 pb-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+                      Двуфакторна автентикация
+                    </p>
+                    <div className="mt-1 flex items-center gap-2">
+                      <p className="text-sm text-zinc-700">
+                        {twoFactorLoading
+                          ? "Зареждане..."
+                          : twoFactorEnabled
+                            ? "Включена"
+                            : "Изключена"}
+                      </p>
+                      <InfoTooltip
+                        label="Информация за 2FA"
+                        title="Двуфакторна автентикация"
+                        description="Допълнителна защита при вход. След активиране ще е необходим код от Authenticator app."
+                      />
+                    </div>
+                    {twoFactorConfirmedAt && (
+                      <p className="mt-1 text-xs text-zinc-500">
+                        Потвърдена на {formatDateTime(twoFactorConfirmedAt)}
+                      </p>
+                    )}
+                  </div>
+
+                  {!twoFactorEnabled ? (
+                    <button
+                      type="button"
+                      className="text-xs font-medium text-emerald-700 hover:text-emerald-800"
+                      onClick={handleTwoFactorSetup}
+                      disabled={twoFactorLoading}
+                    >
+                      Настрой
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      className="text-xs font-medium text-red-700 hover:text-red-800"
+                      onClick={() => {
+                        setTwoFactorDisableOpen((open) => !open);
+                        setTwoFactorSetupOpen(false);
+                        setTwoFactorError(null);
+                        setTwoFactorSuccess(null);
+                      }}
+                      disabled={twoFactorLoading}
+                    >
+                      Изключи
+                    </button>
+                  )}
+                </div>
+
+                {twoFactorError && (
+                  <p className="mt-2 text-xs text-red-600" role="alert">
+                    {twoFactorError}
+                  </p>
+                )}
+                {twoFactorSuccess && (
+                  <p className="mt-2 text-xs text-green-600" role="status">
+                    {twoFactorSuccess}
+                  </p>
+                )}
+
+                {!twoFactorEnabled && twoFactorSetupOpen && (
+                  <form
+                    onSubmit={handleTwoFactorEnable}
+                    className="mt-3 space-y-2"
+                  >
+                    <div className="rounded-md border border-zinc-200 bg-zinc-50 p-3">
+                      <p className="text-xs text-zinc-700">
+                        1) Добавете акаунта в Authenticator app.
+                      </p>
+                      {twoFactorSetupQrDataUrl && (
+                        <div className="mt-3 flex justify-center">
+                          <Image
+                            src={twoFactorSetupQrDataUrl}
+                            alt="QR code"
+                            width={200}
+                            height={200}
+                            unoptimized
+                            className="rounded-md border border-zinc-200 bg-white p-2"
+                          />
+                        </div>
+                      )}
+                      {twoFactorSetupOtpAuthUrl && (
+                        <p className="mt-2 break-all text-[11px] text-zinc-600">
+                          <span className="font-semibold">otpauth:</span>{" "}
+                          {twoFactorSetupOtpAuthUrl}
+                        </p>
+                      )}
+                      {twoFactorSetupSecret && (
+                        <p className="mt-2 break-all text-[11px] text-zinc-600">
+                          <span className="font-semibold">Secret:</span>{" "}
+                          {twoFactorSetupSecret}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label
+                        htmlFor="twofactor-enable-code"
+                        className="block text-xs font-medium text-zinc-700"
+                      >
+                        2) Въведете код за потвърждение
+                      </label>
+                      <input
+                        id="twofactor-enable-code"
+                        inputMode="numeric"
+                        autoComplete="one-time-code"
+                        className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-zinc-800 focus:outline-none focus:ring-1 focus:ring-zinc-800"
+                        value={twoFactorEnableCode}
+                        onChange={(e) => setTwoFactorEnableCode(e.target.value)}
+                        disabled={twoFactorLoading}
+                      />
+                    </div>
+
+                    <div className="flex items-center gap-2 pt-1">
+                      <button
+                        type="submit"
+                        className="rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-emerald-700 disabled:opacity-70"
+                        disabled={twoFactorLoading || !twoFactorSetupSecret}
+                      >
+                        Активирай
+                      </button>
+                      <button
+                        type="button"
+                        className="rounded-md bg-zinc-100 px-3 py-1.5 text-xs font-medium text-zinc-800 hover:bg-zinc-200"
+                        onClick={() => {
+                          setTwoFactorSetupOpen(false);
+                          setTwoFactorSetupSecret(null);
+                          setTwoFactorSetupOtpAuthUrl(null);
+                          setTwoFactorSetupQrDataUrl(null);
+                          setTwoFactorEnableCode("");
+                          setTwoFactorError(null);
+                          setTwoFactorSuccess(null);
+                        }}
+                        disabled={twoFactorLoading}
+                      >
+                        Отказ
+                      </button>
+                    </div>
+                  </form>
+                )}
+
+                {twoFactorEnabled && twoFactorDisableOpen && (
+                  <form
+                    onSubmit={handleTwoFactorDisable}
+                    className="mt-3 space-y-2"
+                  >
+                    <div>
+                      <label
+                        htmlFor="twofactor-disable-code"
+                        className="block text-xs font-medium text-zinc-700"
+                      >
+                        Въведете код за потвърждение
+                      </label>
+                      <input
+                        id="twofactor-disable-code"
+                        inputMode="numeric"
+                        autoComplete="one-time-code"
+                        className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-zinc-800 focus:outline-none focus:ring-1 focus:ring-zinc-800"
+                        value={twoFactorDisableCode}
+                        onChange={(e) =>
+                          setTwoFactorDisableCode(e.target.value)
+                        }
+                        disabled={twoFactorLoading}
+                      />
+                    </div>
+
+                    <div className="flex items-center gap-2 pt-1">
+                      <button
+                        type="submit"
+                        className="rounded-md px-3 py-1.5 text-xs font-medium shadow-sm hover:opacity-90 disabled:opacity-70"
+                        style={{
+                          backgroundColor: "var(--error)",
+                          color: "var(--foreground)",
+                        }}
+                        disabled={twoFactorLoading}
+                      >
+                        Изключи 2FA
+                      </button>
+                      <button
+                        type="button"
+                        className="rounded-md bg-zinc-100 px-3 py-1.5 text-xs font-medium text-zinc-800 hover:bg-zinc-200"
+                        onClick={() => {
+                          setTwoFactorDisableOpen(false);
+                          setTwoFactorDisableCode("");
+                          setTwoFactorError(null);
+                          setTwoFactorSuccess(null);
+                        }}
+                        disabled={twoFactorLoading}
+                      >
+                        Отказ
+                      </button>
+                    </div>
+                  </form>
+                )}
+              </div>
+            )}
+
             <div className="pt-4">
-              <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
-                Дата на регистрация
+              <p className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-zinc-500">
+                <span>Дата на регистрация</span>
+                <InfoTooltip
+                  label="Информация за дата на регистрация"
+                  title="Дата на регистрация"
+                  description="Датата, на която е създаден вашият акаунт."
+                />
               </p>
               <p className="mt-1 text-sm text-zinc-900">
                 {formatDate(profile.createdAt)}
@@ -740,8 +1192,8 @@ export default function ProfilePage() {
             </div>
           </div>
         </section>
-        <section className="rounded-lg border border-gray-200 bg-white p-8 shadow-sm">
-          <h2 className="mb-4 flex items-center text-xl font-bold text-gray-900">
+        <section className="rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-8 shadow-sm">
+          <h2 className="mb-4 flex items-center gap-2 text-xl font-bold text-[color:var(--foreground)]">
             <span
               aria-hidden="true"
               className="mr-2 inline-flex h-6 w-6 items-center justify-center text-blue-600"
@@ -761,15 +1213,20 @@ export default function ProfilePage() {
               </svg>
             </span>
             <span>Експорт на данни (GDPR)</span>
+            <InfoTooltip
+              label="Информация за експорт на данни"
+              title="Експорт на данни (GDPR)"
+              description="Подай заявка да изтеглиш твоите лични данни. Системата ще подготви export и ще върне статус/детайли."
+            />
           </h2>
-          <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-4">
-            <p className="text-sm text-blue-900">
+          <div className="mb-4 rounded-lg border border-[color:var(--field-ok-border)] bg-[color:var(--field-ok-bg)] p-4">
+            <p className="text-sm text-[color:var(--foreground)] opacity-90">
               Можете да изтеглите всички ваши данни, съхранявани в системата.
               Експортът включва профилна информация, история на действията и
               други свързани данни.
             </p>
           </div>
-          {RECAPTCHA_SITE_KEY ? (
+          {exportCaptchaEnabled && RECAPTCHA_SITE_KEY ? (
             <div className="mb-4 space-y-2">
               <p className="text-xs text-gray-600">CAPTCHA / reCAPTCHA</p>
               <RecaptchaWidget
@@ -778,16 +1235,20 @@ export default function ProfilePage() {
                 onTokenChange={setExportCaptchaToken}
               />
             </div>
-          ) : (
+          ) : exportCaptchaEnabled && process.env.NODE_ENV !== "production" ? (
             <div className="mb-4 rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-xs text-gray-600">
               CAPTCHA / reCAPTCHA (placeholder за защита от ботове при заявка за
               експорт на лични данни)
             </div>
-          )}
+          ) : null}
           <button
             type="button"
             onClick={handleExport}
-            className="flex items-center rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:opacity-70"
+            className="flex items-center rounded-lg px-6 py-3 text-sm font-semibold shadow-sm hover:opacity-90 disabled:opacity-70"
+            style={{
+              backgroundColor: "var(--secondary)",
+              color: "var(--foreground)",
+            }}
             disabled={exportSubmitting}
           >
             <svg
@@ -838,8 +1299,8 @@ export default function ProfilePage() {
             </div>
           )}
         </section>
-        <section className="rounded-lg border border-red-200 bg-white p-8 shadow-sm">
-          <h2 className="mb-4 flex items-center text-xl font-bold text-gray-900">
+        <section className="rounded-lg border border-[color:var(--field-error-border)] bg-[color:var(--card)] p-8 shadow-sm">
+          <h2 className="mb-4 flex items-center gap-2 text-xl font-bold text-[color:var(--foreground)]">
             <span
               aria-hidden="true"
               className="mr-2 inline-flex h-6 w-6 items-center justify-center text-red-600"
@@ -859,12 +1320,17 @@ export default function ProfilePage() {
               </svg>
             </span>
             <span>Закриване на акаунта (изтриване)</span>
+            <InfoTooltip
+              label="Информация за закриване на акаунта"
+              title="Закриване на акаунта"
+              description="Изтриването е необратимо. След потвърждение акаунтът и личните данни ще бъдат премахнати според GDPR."
+            />
           </h2>
-          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-4">
-            <p className="mb-2 text-sm font-medium text-red-900">
+          <div className="mb-4 rounded-lg border border-[color:var(--field-error-border)] bg-[color:var(--field-error-bg)] p-4">
+            <p className="mb-2 text-sm font-medium text-[color:var(--error)]">
               ⚠️ Внимание: Това действие е необратимо!
             </p>
-            <p className="text-sm text-red-800">
+            <p className="text-sm text-[color:var(--foreground)] opacity-90">
               При закриване/изтриване на акаунта личните ви данни ще бъдат
               премахнати от системата, съгласно нашите правила за защита на
               данните и GDPR. Това действие е окончателно и не може да бъде
@@ -877,7 +1343,11 @@ export default function ProfilePage() {
               setDeleteStep1Open(true);
               setDeleteError(null);
             }}
-            className="flex items-center rounded-lg bg-red-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-red-700"
+            className="flex items-center rounded-lg px-6 py-3 text-sm font-semibold shadow-sm hover:opacity-90"
+            style={{
+              backgroundColor: "var(--error)",
+              color: "var(--foreground)",
+            }}
           >
             <svg
               className="mr-2 h-5 w-5"
@@ -922,7 +1392,11 @@ export default function ProfilePage() {
                 </button>
                 <button
                   type="button"
-                  className="rounded-md bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700"
+                  className="rounded-md px-3 py-1.5 text-xs font-medium hover:opacity-90"
+                  style={{
+                    backgroundColor: "var(--error)",
+                    color: "var(--foreground)",
+                  }}
                   onClick={() => {
                     setDeleteStep1Open(false);
                     setDeleteStep2Open(true);
@@ -955,7 +1429,11 @@ export default function ProfilePage() {
                 </button>
                 <button
                   type="button"
-                  className="rounded-md bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700 disabled:opacity-70"
+                  className="rounded-md px-3 py-1.5 text-xs font-medium hover:opacity-90 disabled:opacity-70"
+                  style={{
+                    backgroundColor: "var(--error)",
+                    color: "var(--foreground)",
+                  }}
                   onClick={handleFinalDelete}
                   disabled={deleteSubmitting}
                 >

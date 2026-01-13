@@ -83,6 +83,102 @@ export class WikiService {
     private readonly usersRepo: Repository<User>,
   ) {}
 
+  async getAdminArticlesCount(actorUserId: string): Promise<number> {
+    const role = await this.getActiveUserRole(actorUserId);
+    if (role === 'author') {
+      return this.articleRepo.count({
+        where: { createdByUserId: actorUserId },
+      });
+    }
+    return this.articleRepo.count();
+  }
+
+  async adminBulkUpdateArticleStatus(
+    actorUserId: string,
+    ids: string[],
+    status: string,
+  ): Promise<number> {
+    const uniqueIds = Array.from(new Set(ids.map((id) => id.trim()))).filter(
+      (id) => id.length > 0,
+    );
+    if (uniqueIds.length === 0) {
+      return 0;
+    }
+
+    const role = await this.getActiveUserRole(actorUserId);
+
+    if (role === 'author') {
+      const allowed = await this.articleRepo.find({
+        where: { id: In(uniqueIds), createdByUserId: actorUserId },
+        select: { id: true },
+      });
+      const allowedIds = allowed.map((a) => a.id);
+      if (allowedIds.length !== uniqueIds.length) {
+        throw new NotFoundException('Article not found');
+      }
+
+      const result = await this.articleRepo.update(
+        { id: In(allowedIds), createdByUserId: actorUserId },
+        { status },
+      );
+      return result.affected ?? 0;
+    }
+
+    const result = await this.articleRepo.update(
+      { id: In(uniqueIds) },
+      { status },
+    );
+    return result.affected ?? 0;
+  }
+
+  async adminBulkDeleteArticles(
+    actorUserId: string,
+    ids: string[],
+  ): Promise<number> {
+    const uniqueIds = Array.from(new Set(ids.map((id) => id.trim()))).filter(
+      (id) => id.length > 0,
+    );
+    if (uniqueIds.length === 0) {
+      return 0;
+    }
+
+    const role = await this.getActiveUserRole(actorUserId);
+
+    if (role === 'author') {
+      const allowed = await this.articleRepo.find({
+        where: { id: In(uniqueIds), createdByUserId: actorUserId },
+        select: { id: true },
+      });
+      const allowedIds = allowed.map((a) => a.id);
+      if (allowedIds.length !== uniqueIds.length) {
+        throw new NotFoundException('Article not found');
+      }
+
+      const result = await this.articleRepo.delete({
+        id: In(allowedIds),
+        createdByUserId: actorUserId,
+      });
+      return result.affected ?? 0;
+    }
+
+    const result = await this.articleRepo.delete({ id: In(uniqueIds) });
+    return result.affected ?? 0;
+  }
+
+  async adminPurgeAllArticles(actorUserId: string): Promise<number> {
+    const role = await this.getActiveUserRole(actorUserId);
+    if (role !== 'admin') {
+      throw new ForbiddenException('Admin access required');
+    }
+
+    const result = await this.articleRepo
+      .createQueryBuilder()
+      .delete()
+      .from(WikiArticle)
+      .execute();
+    return result.affected ?? 0;
+  }
+
   private lastViewsRetentionRunDate: string | null = null;
   private lastIpViewsRetentionRunDate: string | null = null;
 
@@ -430,20 +526,35 @@ export class WikiService {
     q?: string,
     lang?: string,
   ): Promise<WikiListItemDto[]> {
+    const result = await this.getActiveArticlesListPaged(
+      page,
+      pageSize,
+      q,
+      lang,
+    );
+    return result.items;
+  }
+
+  async getActiveArticlesListPaged(
+    page?: number,
+    pageSize?: number,
+    q?: string,
+    lang?: string,
+  ): Promise<{ items: WikiListItemDto[]; total: number }> {
     const safePage = page && page > 0 ? page : 1;
     const safePageSize = pageSize && pageSize > 0 ? pageSize : 20;
-    const skip = (safePage - 1) * safePageSize;
-    const take = safePageSize;
 
     const articles = await this.articleRepo.find({
       where: { status: 'active', visibility: 'public' },
       relations: ['versions'],
       order: { updatedAt: 'DESC' },
-      skip,
-      take,
     });
 
-    const items: WikiListItemDto[] = [];
+    const trimmedQ = q?.trim();
+    const hasSearch = !!trimmedQ;
+    const hasLangFilter = !!lang;
+
+    const allItems: WikiListItemDto[] = [];
 
     for (const article of articles) {
       const published = (article.versions ?? []).filter((v) => v.isPublished);
@@ -452,10 +563,6 @@ export class WikiService {
       }
 
       let candidates = published;
-
-      const trimmedQ = q?.trim();
-      const hasSearch = !!trimmedQ;
-      const hasLangFilter = !!lang;
 
       if (hasLangFilter) {
         candidates = candidates.filter((v) => v.language === lang);
@@ -485,7 +592,7 @@ export class WikiService {
         article.createdAt ??
         new Date();
 
-      items.push({
+      allItems.push({
         id: article.id,
         slug: article.slug,
         language: latest.language,
@@ -494,7 +601,12 @@ export class WikiService {
       });
     }
 
-    return items;
+    const total = allItems.length;
+    const start = (safePage - 1) * safePageSize;
+    const end = start + safePageSize;
+    const items = total > 0 ? allItems.slice(start, end) : [];
+
+    return { items, total };
   }
 
   async getAdminArticlesList(

@@ -49,13 +49,54 @@ export class SettingsService {
     private readonly instanceConfigRepo: Repository<InstanceConfig>,
   ) {}
 
+  async isBrandingPageUrlEnabled(slug: string): Promise<boolean> {
+    const normalizedSlug = (slug ?? '').trim().toLowerCase();
+    if (!normalizedSlug) {
+      return true;
+    }
+
+    const cfg = await this.getOrCreateInstanceConfig();
+    const pageLinks = cfg.branding?.pageLinks ?? null;
+    if (!pageLinks || pageLinks.enabled === false) {
+      return true;
+    }
+
+    const rec = pageLinks.bySlug?.[normalizedSlug] ?? null;
+    return rec?.url !== false;
+  }
+
   private buildDefaultBranding(): InstanceBranding {
     return {
       appName: 'BeeLMS',
       browserTitle: 'BeeLMS',
+      loginSocialUnavailableMessageEnabled: true,
+      loginSocialResetPasswordHintEnabled: true,
+      registerSocialUnavailableMessageEnabled: true,
+      headerMenu: null,
+      pageLinks: {
+        enabled: true,
+        bySlug: {
+          about: { footer: true },
+          terms: { footer: true },
+          privacy: { footer: true },
+          'cookie-policy': { footer: true },
+          imprint: { footer: true },
+          accessibility: { footer: true },
+          contact: { footer: true },
+          faq: { footer: true },
+          support: { footer: true },
+        },
+      },
+      poweredByBeeLms: {
+        enabled: false,
+        url: null,
+      },
       cursorUrl: null,
       cursorLightUrl: null,
       cursorDarkUrl: null,
+      cursorPointerUrl: null,
+      cursorPointerLightUrl: null,
+      cursorPointerDarkUrl: null,
       cursorHotspot: null,
       faviconUrl: null,
       googleFont: null,
@@ -79,6 +120,8 @@ export class SettingsService {
           scrollTrack: '#f0fdf4',
           fieldOkBg: '#f0fdf4',
           fieldOkBorder: '#dcfce7',
+          fieldAlertBg: '#fff7ed',
+          fieldAlertBorder: '#fed7aa',
           fieldErrorBg: '#fef2f2',
           fieldErrorBorder: '#fee2e2',
         },
@@ -94,6 +137,8 @@ export class SettingsService {
           scrollTrack: '#0b2a16',
           fieldOkBg: '#052e16',
           fieldOkBorder: '#14532d',
+          fieldAlertBg: '#2a1607',
+          fieldAlertBorder: '#9a3412',
           fieldErrorBg: '#450a0a',
           fieldErrorBorder: '#7f1d1d',
         },
@@ -106,6 +151,36 @@ export class SettingsService {
       socialDescription: null,
       openGraph: null,
       twitter: null,
+      footerSocialLinks: [
+        {
+          id: 'facebook',
+          type: 'facebook',
+          label: 'Facebook',
+          url: null,
+          enabled: false,
+          iconLightUrl: null,
+          iconDarkUrl: null,
+        },
+        {
+          id: 'x',
+          type: 'x',
+          label: 'X',
+          url: null,
+          enabled: false,
+          iconLightUrl: null,
+          iconDarkUrl: null,
+        },
+        {
+          id: 'youtube',
+          type: 'youtube',
+          label: 'YouTube',
+          url: null,
+          enabled: false,
+          iconLightUrl: null,
+          iconDarkUrl: null,
+        },
+      ],
+      socialLoginIcons: null,
     };
   }
 
@@ -123,17 +198,6 @@ export class SettingsService {
         includeWiki: true,
         includeCourses: true,
         includeLegal: true,
-      },
-      openGraph: {
-        defaultTitle: null,
-        defaultDescription: null,
-        imageUrl: null,
-      },
-      twitter: {
-        card: 'summary_large_image',
-        defaultTitle: null,
-        defaultDescription: null,
-        imageUrl: null,
       },
     };
   }
@@ -154,21 +218,40 @@ export class SettingsService {
       auth: true,
       authLogin: true,
       authRegister: true,
+      auth2fa: false,
       captcha: false,
       captchaLogin: false,
       captchaRegister: false,
       captchaForgotPassword: false,
       captchaChangePassword: false,
       paidCourses: true,
+      paymentsStripe: true,
+      paymentsPaypal: true,
+      paymentsMypos: false,
+      paymentsRevolut: false,
+      paymentsDefaultProvider: 'stripe',
       gdprLegal: true,
+      pageTerms: true,
+      pagePrivacy: true,
+      pageCookiePolicy: true,
+      pageImprint: true,
+      pageAccessibility: true,
+      pageContact: true,
+      pageFaq: true,
+      pageSupport: true,
+      pageNotFound: true,
       socialGoogle: true,
       socialFacebook: true,
       socialGithub: true,
       socialLinkedin: true,
       infraRedis: false,
+      infraRedisUrl: null,
       infraRabbitmq: false,
+      infraRabbitmqUrl: null,
       infraMonitoring: true,
+      infraMonitoringUrl: null,
       infraErrorTracking: false,
+      infraErrorTrackingUrl: null,
     };
   }
 
@@ -176,6 +259,8 @@ export class SettingsService {
     return {
       supported: ['bg', 'en', 'de'],
       default: 'bg',
+      icons: null,
+      flagPicker: null,
     };
   }
 
@@ -196,10 +281,210 @@ export class SettingsService {
     if (existing) {
       let changed = false;
 
+      if (typeof existing.branding.footerSocialLinks === 'undefined') {
+        existing.branding = {
+          ...existing.branding,
+          footerSocialLinks:
+            this.buildDefaultBranding().footerSocialLinks ?? null,
+        };
+        changed = true;
+      }
+
+      if (typeof existing.branding.socialLoginIcons === 'undefined') {
+        existing.branding = {
+          ...existing.branding,
+          socialLoginIcons:
+            this.buildDefaultBranding().socialLoginIcons ?? null,
+        };
+        changed = true;
+      }
+
+      if (typeof existing.branding.poweredByBeeLms === 'undefined') {
+        existing.branding = {
+          ...existing.branding,
+          poweredByBeeLms: this.buildDefaultBranding().poweredByBeeLms ?? null,
+        };
+        changed = true;
+      }
+
+      if (typeof existing.branding.pageLinks === 'undefined') {
+        existing.branding = {
+          ...existing.branding,
+          pageLinks: this.buildDefaultBranding().pageLinks ?? null,
+        };
+        changed = true;
+      }
+
+      if (typeof existing.branding.headerMenu === 'undefined') {
+        existing.branding = {
+          ...existing.branding,
+          headerMenu: this.buildDefaultBranding().headerMenu ?? null,
+        };
+        changed = true;
+      }
+
+      if (typeof existing.branding.cursorPointerUrl === 'undefined') {
+        existing.branding = {
+          ...existing.branding,
+          cursorPointerUrl:
+            this.buildDefaultBranding().cursorPointerUrl ?? null,
+        };
+        changed = true;
+      }
+
+      if (typeof existing.branding.cursorPointerLightUrl === 'undefined') {
+        existing.branding = {
+          ...existing.branding,
+          cursorPointerLightUrl:
+            this.buildDefaultBranding().cursorPointerLightUrl ?? null,
+        };
+        changed = true;
+      }
+
+      if (typeof existing.branding.cursorPointerDarkUrl === 'undefined') {
+        existing.branding = {
+          ...existing.branding,
+          cursorPointerDarkUrl:
+            this.buildDefaultBranding().cursorPointerDarkUrl ?? null,
+        };
+        changed = true;
+      }
+
+      if (
+        typeof existing.branding.loginSocialUnavailableMessageEnabled ===
+        'undefined'
+      ) {
+        existing.branding = {
+          ...existing.branding,
+          loginSocialUnavailableMessageEnabled:
+            this.buildDefaultBranding().loginSocialUnavailableMessageEnabled ??
+            true,
+        };
+        changed = true;
+      }
+
+      if (
+        typeof existing.branding.loginSocialResetPasswordHintEnabled ===
+        'undefined'
+      ) {
+        existing.branding = {
+          ...existing.branding,
+          loginSocialResetPasswordHintEnabled:
+            this.buildDefaultBranding().loginSocialResetPasswordHintEnabled ??
+            true,
+        };
+        changed = true;
+      }
+
+      if (
+        typeof existing.branding.registerSocialUnavailableMessageEnabled ===
+        'undefined'
+      ) {
+        existing.branding = {
+          ...existing.branding,
+          registerSocialUnavailableMessageEnabled:
+            this.buildDefaultBranding()
+              .registerSocialUnavailableMessageEnabled ?? true,
+        };
+        changed = true;
+      }
+
+      if (typeof existing.languages.icons === 'undefined') {
+        existing.languages = {
+          ...existing.languages,
+          icons: null,
+        };
+        changed = true;
+      }
+
+      if (typeof existing.languages.flagPicker === 'undefined') {
+        existing.languages = {
+          ...existing.languages,
+          flagPicker: null,
+        };
+        changed = true;
+      }
+
       const mergedFeatures = {
         ...this.buildDefaultFeatures(),
         ...(existing.features ?? {}),
       };
+
+      const normalizeInfraUrl = (value: unknown): string | null => {
+        if (typeof value !== 'string') return null;
+        const trimmed = value.trim();
+        return trimmed.length > 0 ? trimmed : null;
+      };
+
+      mergedFeatures.infraRedisUrl = normalizeInfraUrl(
+        (mergedFeatures as Record<string, unknown>).infraRedisUrl,
+      );
+      mergedFeatures.infraRabbitmqUrl = normalizeInfraUrl(
+        (mergedFeatures as Record<string, unknown>).infraRabbitmqUrl,
+      );
+      mergedFeatures.infraMonitoringUrl = normalizeInfraUrl(
+        (mergedFeatures as Record<string, unknown>).infraMonitoringUrl,
+      );
+      mergedFeatures.infraErrorTrackingUrl = normalizeInfraUrl(
+        (mergedFeatures as Record<string, unknown>).infraErrorTrackingUrl,
+      );
+
+      const allowedPaymentProviders = ['stripe', 'paypal', 'mypos', 'revolut'];
+      const defaultProviderRaw = (mergedFeatures as Record<string, unknown>)[
+        'paymentsDefaultProvider'
+      ];
+      if (
+        typeof defaultProviderRaw !== 'undefined' &&
+        typeof defaultProviderRaw !== 'string'
+      ) {
+        mergedFeatures.paymentsDefaultProvider =
+          this.buildDefaultFeatures().paymentsDefaultProvider;
+        changed = true;
+      }
+      if (typeof defaultProviderRaw === 'string') {
+        const normalized = defaultProviderRaw.trim().toLowerCase();
+        if (!allowedPaymentProviders.includes(normalized)) {
+          mergedFeatures.paymentsDefaultProvider =
+            this.buildDefaultFeatures().paymentsDefaultProvider;
+          changed = true;
+        } else if (normalized !== defaultProviderRaw) {
+          mergedFeatures.paymentsDefaultProvider = normalized as NonNullable<
+            InstanceFeatures['paymentsDefaultProvider']
+          >;
+          changed = true;
+        }
+      }
+
+      const mergedStripeEnabled = mergedFeatures.paymentsStripe !== false;
+      const mergedPaypalEnabled = mergedFeatures.paymentsPaypal !== false;
+      const mergedMyposEnabled = mergedFeatures.paymentsMypos === true;
+      const mergedRevolutEnabled = mergedFeatures.paymentsRevolut === true;
+
+      const mergedDefaultProvider = (mergedFeatures.paymentsDefaultProvider ??
+        this.buildDefaultFeatures().paymentsDefaultProvider) as string;
+      const mergedDefaultProviderNormalized =
+        typeof mergedDefaultProvider === 'string'
+          ? mergedDefaultProvider.trim().toLowerCase()
+          : 'stripe';
+      const mergedDefaultProviderEnabled =
+        (mergedDefaultProviderNormalized === 'stripe' && mergedStripeEnabled) ||
+        (mergedDefaultProviderNormalized === 'paypal' && mergedPaypalEnabled) ||
+        (mergedDefaultProviderNormalized === 'mypos' && mergedMyposEnabled) ||
+        (mergedDefaultProviderNormalized === 'revolut' && mergedRevolutEnabled);
+
+      if (!mergedDefaultProviderEnabled) {
+        const fallback = mergedStripeEnabled
+          ? 'stripe'
+          : mergedPaypalEnabled
+            ? 'paypal'
+            : mergedMyposEnabled
+              ? 'mypos'
+              : mergedRevolutEnabled
+                ? 'revolut'
+                : 'stripe';
+        mergedFeatures.paymentsDefaultProvider = fallback;
+        changed = true;
+      }
       for (const [k, v] of Object.entries(mergedFeatures)) {
         if ((existing.features as Record<string, unknown>)[k] !== v) {
           changed = true;
@@ -236,11 +521,123 @@ export class SettingsService {
     const cfg = await this.getOrCreateInstanceConfig();
     const updatedBy = options?.updatedBy ?? null;
 
-    const features = {
+    const rawIncomingFeatures =
+      (dto.features as Record<string, unknown> | undefined) ?? undefined;
+    const incomingFeatures = rawIncomingFeatures
+      ? (Object.fromEntries(
+          Object.entries(rawIncomingFeatures).filter(
+            ([, v]) => typeof v !== 'undefined',
+          ),
+        ) as InstanceFeatures)
+      : undefined;
+
+    const features: InstanceFeatures = {
       ...this.buildDefaultFeatures(),
       ...(cfg.features ?? {}),
-      ...(dto.features ?? {}),
+      ...(incomingFeatures ?? {}),
     };
+
+    const normalizeInfraUrl = (value: unknown): string | null => {
+      if (typeof value !== 'string') return null;
+      const trimmed = value.trim();
+      return trimmed.length > 0 ? trimmed : null;
+    };
+
+    const setInfraUrlIfProvided = (
+      key:
+        | 'infraRedisUrl'
+        | 'infraRabbitmqUrl'
+        | 'infraMonitoringUrl'
+        | 'infraErrorTrackingUrl',
+    ) => {
+      if (!rawIncomingFeatures) return;
+      if (!(key in rawIncomingFeatures)) return;
+      (features as Record<string, unknown>)[key] = normalizeInfraUrl(
+        rawIncomingFeatures[key],
+      );
+    };
+
+    setInfraUrlIfProvided('infraRedisUrl');
+    setInfraUrlIfProvided('infraRabbitmqUrl');
+    setInfraUrlIfProvided('infraMonitoringUrl');
+    setInfraUrlIfProvided('infraErrorTrackingUrl');
+
+    const isValidHttpUrl = (value: string | null): boolean => {
+      const raw = (value ?? '').trim();
+      if (!raw) return false;
+      try {
+        const parsed = new URL(raw);
+        return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+      } catch {
+        return false;
+      }
+    };
+
+    const isValidInfraRedisUrl = (value: string | null): boolean => {
+      const raw = (value ?? '').trim();
+      if (!raw) return false;
+      try {
+        const parsed = new URL(raw);
+        if (parsed.protocol === 'redis:' || parsed.protocol === 'rediss:') {
+          return Boolean(parsed.hostname);
+        }
+      } catch {
+        // ignore
+      }
+      return /^[a-zA-Z0-9.-]+:\d{2,5}$/.test(raw);
+    };
+
+    const isValidInfraRabbitmqUrl = (value: string | null): boolean => {
+      const raw = (value ?? '').trim();
+      if (!raw) return false;
+      try {
+        const parsed = new URL(raw);
+        return parsed.protocol === 'amqp:' || parsed.protocol === 'amqps:';
+      } catch {
+        return false;
+      }
+    };
+
+    if (
+      features.infraMonitoring === true &&
+      !isValidHttpUrl(features.infraMonitoringUrl ?? null)
+    ) {
+      throw new BadRequestException(
+        'infraMonitoring е включен, но infraMonitoringUrl липсва или е невалиден (http/https)',
+      );
+    }
+
+    if (
+      features.infraErrorTracking === true &&
+      !isValidHttpUrl(features.infraErrorTrackingUrl ?? null)
+    ) {
+      throw new BadRequestException(
+        'infraErrorTracking е включен, но infraErrorTrackingUrl липсва или е невалиден (http/https)',
+      );
+    }
+
+    if (
+      features.infraRedis === true &&
+      !isValidInfraRedisUrl(features.infraRedisUrl ?? null)
+    ) {
+      throw new BadRequestException(
+        'infraRedis е включен, но infraRedisUrl липсва или е невалиден (redis://... или host:port)',
+      );
+    }
+
+    if (
+      features.infraRabbitmq === true &&
+      !isValidInfraRabbitmqUrl(features.infraRabbitmqUrl ?? null)
+    ) {
+      throw new BadRequestException(
+        'infraRabbitmq е включен, но infraRabbitmqUrl липсва или е невалиден (amqp/amqps URL)',
+      );
+    }
+
+    const stripeEnabled = features.paymentsStripe !== false;
+    const paypalEnabled = features.paymentsPaypal !== false;
+    const myposEnabled = features.paymentsMypos === true;
+    const revolutEnabled = features.paymentsRevolut === true;
 
     if (features.themeLight === false && features.themeDark === false) {
       throw new BadRequestException(
@@ -264,11 +661,158 @@ export class SettingsService {
       features.captchaChangePassword = false;
     }
 
+    const allowedPaymentProviders = ['stripe', 'paypal', 'mypos', 'revolut'];
+    const incomingDefaultProviderRaw = rawIncomingFeatures
+      ? rawIncomingFeatures['paymentsDefaultProvider']
+      : undefined;
+    const hasIncomingDefaultProvider =
+      typeof incomingDefaultProviderRaw !== 'undefined';
+
+    if (hasIncomingDefaultProvider) {
+      const defaultProviderRaw = incomingDefaultProviderRaw;
+      if (typeof defaultProviderRaw !== 'string') {
+        throw new BadRequestException('Invalid paymentsDefaultProvider');
+      }
+
+      const normalizedDefaultProvider = defaultProviderRaw.trim().toLowerCase();
+      if (!allowedPaymentProviders.includes(normalizedDefaultProvider)) {
+        throw new BadRequestException('Invalid paymentsDefaultProvider');
+      }
+
+      const defaultProviderEnabled =
+        (normalizedDefaultProvider === 'stripe' && stripeEnabled) ||
+        (normalizedDefaultProvider === 'paypal' && paypalEnabled) ||
+        (normalizedDefaultProvider === 'mypos' && myposEnabled) ||
+        (normalizedDefaultProvider === 'revolut' && revolutEnabled);
+      const anyProviderEnabled =
+        stripeEnabled || paypalEnabled || myposEnabled || revolutEnabled;
+      if (!defaultProviderEnabled && anyProviderEnabled) {
+        throw new BadRequestException('Default payment provider is disabled');
+      }
+
+      features.paymentsDefaultProvider =
+        normalizedDefaultProvider as NonNullable<
+          InstanceFeatures['paymentsDefaultProvider']
+        >;
+    }
+
+    const currentDefaultProviderRaw = (features.paymentsDefaultProvider ??
+      this.buildDefaultFeatures().paymentsDefaultProvider) as string;
+    const currentDefaultProvider =
+      typeof currentDefaultProviderRaw === 'string'
+        ? currentDefaultProviderRaw.trim().toLowerCase()
+        : 'stripe';
+    const currentDefaultEnabled =
+      (currentDefaultProvider === 'stripe' && stripeEnabled) ||
+      (currentDefaultProvider === 'paypal' && paypalEnabled) ||
+      (currentDefaultProvider === 'mypos' && myposEnabled) ||
+      (currentDefaultProvider === 'revolut' && revolutEnabled);
+
+    if (!currentDefaultEnabled) {
+      features.paymentsDefaultProvider = stripeEnabled
+        ? 'stripe'
+        : paypalEnabled
+          ? 'paypal'
+          : myposEnabled
+            ? 'mypos'
+            : revolutEnabled
+              ? 'revolut'
+              : 'stripe';
+    }
+
     const languages = dto.languages
-      ? {
-          ...cfg.languages,
-          ...dto.languages,
-        }
+      ? (() => {
+          const merged = {
+            ...cfg.languages,
+            ...dto.languages,
+          } as InstanceLanguages;
+
+          if (dto.languages && typeof dto.languages.icons !== 'undefined') {
+            const existingIcons = cfg.languages.icons ?? null;
+            const incomingIcons: InstanceLanguages['icons'] =
+              dto.languages.icons ?? null;
+            const existingIconsObj: NonNullable<InstanceLanguages['icons']> =
+              existingIcons ?? {};
+            const incomingIconsObj: NonNullable<InstanceLanguages['icons']> =
+              incomingIcons ?? {};
+            merged.icons =
+              existingIcons || incomingIcons
+                ? {
+                    ...existingIconsObj,
+                    ...incomingIconsObj,
+                  }
+                : null;
+          }
+
+          if (merged.icons && Array.isArray(merged.supported)) {
+            const nextIcons: NonNullable<InstanceLanguages['icons']> = {};
+            for (const code of merged.supported) {
+              const key = (code ?? '').trim().toLowerCase();
+              if (!key) continue;
+              const entry = merged.icons[key];
+              if (typeof entry !== 'undefined') {
+                nextIcons[key] = entry;
+              }
+            }
+            merged.icons = Object.keys(nextIcons).length > 0 ? nextIcons : null;
+          }
+
+          if (
+            dto.languages &&
+            typeof dto.languages.flagPicker !== 'undefined'
+          ) {
+            const existingPicker = cfg.languages.flagPicker ?? null;
+            const incomingPicker = dto.languages.flagPicker ?? null;
+            const existingByLang = existingPicker?.byLang ?? null;
+            const incomingByLang = incomingPicker?.byLang ?? null;
+            const mergedByLang =
+              existingByLang || incomingByLang
+                ? {
+                    ...(existingByLang ?? {}),
+                    ...(incomingByLang ?? {}),
+                  }
+                : null;
+
+            merged.flagPicker =
+              existingPicker || incomingPicker
+                ? {
+                    global:
+                      typeof incomingPicker?.global !== 'undefined'
+                        ? (incomingPicker?.global ?? null)
+                        : (existingPicker?.global ?? null),
+                    byLang: mergedByLang,
+                  }
+                : null;
+          }
+
+          if (merged.flagPicker?.byLang && Array.isArray(merged.supported)) {
+            const nextByLang: NonNullable<
+              NonNullable<InstanceLanguages['flagPicker']>['byLang']
+            > = {};
+            for (const code of merged.supported) {
+              const key = (code ?? '').trim().toLowerCase();
+              if (!key) continue;
+              const entry = merged.flagPicker.byLang[key];
+              if (typeof entry !== 'undefined') {
+                nextByLang[key] = entry;
+              }
+            }
+            merged.flagPicker = {
+              ...(merged.flagPicker ?? {}),
+              byLang: Object.keys(nextByLang).length > 0 ? nextByLang : null,
+            };
+          }
+
+          if (
+            merged.flagPicker &&
+            !merged.flagPicker.byLang &&
+            !merged.flagPicker.global
+          ) {
+            merged.flagPicker = null;
+          }
+
+          return merged;
+        })()
       : cfg.languages;
 
     const socialCredentials = dto.socialCredentials
@@ -278,6 +822,48 @@ export class SettingsService {
           updatedBy,
         )
       : (cfg.socialCredentials ?? null);
+
+    // Guardrail: не позволявай включване (OFF->ON) на social provider без
+    // пълна ефективна конфигурация (stored или env).
+    // Важно: не блокираме save ако provider вече е ON (за backward compatibility).
+    const ensureCanEnableProvider = (provider: SocialProviderName) => {
+      const featureKey = (
+        provider === 'google'
+          ? 'socialGoogle'
+          : provider === 'facebook'
+            ? 'socialFacebook'
+            : provider === 'github'
+              ? 'socialGithub'
+              : 'socialLinkedin'
+      ) as keyof InstanceFeatures;
+
+      const wasEnabled = (cfg.features?.[featureKey] ?? true) !== false;
+      const nextEnabled = (features?.[featureKey] ?? true) !== false;
+      if (wasEnabled || !nextEnabled) {
+        return;
+      }
+
+      const stored = socialCredentials?.[provider] ?? null;
+      const envCreds = this.getEnvSocialProviderCredentials(provider);
+      const effective =
+        stored && stored.clientId && stored.clientSecret && stored.redirectUri
+          ? stored
+          : envCreds;
+      if (
+        !effective?.clientId ||
+        !effective.clientSecret ||
+        !effective.redirectUri
+      ) {
+        throw new BadRequestException(
+          `${provider} social login cannot be enabled without Client ID, Client Secret and Redirect URL`,
+        );
+      }
+    };
+
+    ensureCanEnableProvider('google');
+    ensureCanEnableProvider('facebook');
+    ensureCanEnableProvider('github');
+    ensureCanEnableProvider('linkedin');
 
     if (!Array.isArray(languages.supported) || languages.supported.length < 1) {
       throw new BadRequestException(
@@ -344,33 +930,18 @@ export class SettingsService {
       }
     }
 
-    if (Object.prototype.hasOwnProperty.call(update, 'openGraph')) {
-      if (update.openGraph === null) {
-        next.openGraph = null;
-      } else if (typeof update.openGraph !== 'undefined') {
-        next.openGraph = {
-          ...(base.openGraph ?? {}),
-          ...(update.openGraph ?? {}),
-        };
-      }
-    }
-
-    if (Object.prototype.hasOwnProperty.call(update, 'twitter')) {
-      if (update.twitter === null) {
-        next.twitter = null;
-      } else if (typeof update.twitter !== 'undefined') {
-        next.twitter = {
-          ...(base.twitter ?? {}),
-          ...(update.twitter ?? {}),
-        };
-      }
-    }
-
     return next;
   }
 
   private normalizeSeo(seo: InstanceSeo): InstanceSeo {
-    const next: InstanceSeo = { ...seo };
+    const next: InstanceSeo = {
+      baseUrl: seo.baseUrl ?? null,
+      titleTemplate: seo.titleTemplate ?? '{page} | {site}',
+      defaultTitle: seo.defaultTitle ?? null,
+      defaultDescription: seo.defaultDescription ?? null,
+      robots: seo.robots ?? null,
+      sitemap: seo.sitemap ?? null,
+    };
 
     const normalizeUrl = (value: string | null | undefined): string | null => {
       const v = this.normalizeNullableString(value);
@@ -431,34 +1002,6 @@ export class SettingsService {
       };
     }
 
-    if (next.openGraph) {
-      next.openGraph = {
-        defaultTitle:
-          this.normalizeNullableString(next.openGraph.defaultTitle) ?? null,
-        defaultDescription:
-          this.normalizeNullableString(next.openGraph.defaultDescription) ??
-          null,
-        imageUrl: normalizeUrl(next.openGraph.imageUrl),
-      };
-    }
-
-    if (next.twitter) {
-      const rawCard = next.twitter.card ?? null;
-      const card =
-        rawCard === 'summary' || rawCard === 'summary_large_image'
-          ? rawCard
-          : 'summary_large_image';
-
-      next.twitter = {
-        card,
-        defaultTitle:
-          this.normalizeNullableString(next.twitter.defaultTitle) ?? null,
-        defaultDescription:
-          this.normalizeNullableString(next.twitter.defaultDescription) ?? null,
-        imageUrl: normalizeUrl(next.twitter.imageUrl),
-      };
-    }
-
     return next;
   }
 
@@ -472,6 +1015,17 @@ export class SettingsService {
       const value = update[key];
       if (typeof value !== 'undefined') {
         (next as Record<string, unknown>)[key as string] = value;
+      }
+    }
+
+    if (Object.prototype.hasOwnProperty.call(update, 'socialLoginIcons')) {
+      if (update.socialLoginIcons === null) {
+        next.socialLoginIcons = null;
+      } else if (typeof update.socialLoginIcons !== 'undefined') {
+        next.socialLoginIcons = {
+          ...(current.socialLoginIcons ?? {}),
+          ...(update.socialLoginIcons ?? {}),
+        };
       }
     }
 
@@ -517,6 +1071,94 @@ export class SettingsService {
         next.cursorHotspot = {
           ...(current.cursorHotspot ?? {}),
           ...(update.cursorHotspot ?? {}),
+        };
+      }
+    }
+
+    if (Object.prototype.hasOwnProperty.call(update, 'poweredByBeeLms')) {
+      if (update.poweredByBeeLms === null) {
+        next.poweredByBeeLms = null;
+      } else if (typeof update.poweredByBeeLms !== 'undefined') {
+        next.poweredByBeeLms = {
+          ...(current.poweredByBeeLms ?? {}),
+          ...(update.poweredByBeeLms ?? {}),
+        };
+      }
+    }
+
+    if (Object.prototype.hasOwnProperty.call(update, 'pageLinks')) {
+      if (update.pageLinks === null) {
+        next.pageLinks = null;
+      } else if (typeof update.pageLinks !== 'undefined') {
+        const currentBySlug = current.pageLinks?.bySlug ?? undefined;
+        const updateBySlug = update.pageLinks?.bySlug;
+
+        const mergedBySlug =
+          update.pageLinks &&
+          Object.prototype.hasOwnProperty.call(update.pageLinks, 'bySlug') &&
+          updateBySlug &&
+          typeof updateBySlug === 'object'
+            ? Object.entries(updateBySlug as Record<string, unknown>).reduce(
+                (acc, [slug, value]) => {
+                  const normalizedSlug = (slug ?? '').trim().toLowerCase();
+                  if (!normalizedSlug) {
+                    return acc;
+                  }
+
+                  const baseRec =
+                    (acc[normalizedSlug] as
+                      | Record<string, unknown>
+                      | undefined) ??
+                    ((currentBySlug as Record<string, unknown> | undefined)?.[
+                      normalizedSlug
+                    ] as Record<string, unknown> | undefined) ??
+                    {};
+
+                  if (value && typeof value === 'object') {
+                    acc[normalizedSlug] = {
+                      ...baseRec,
+                      ...(value as Record<string, unknown>),
+                    };
+                  } else {
+                    acc[normalizedSlug] = value;
+                  }
+
+                  return acc;
+                },
+                {
+                  ...((currentBySlug as Record<string, unknown> | undefined) ??
+                    {}),
+                } as Record<string, unknown>,
+              )
+            : null;
+
+        next.pageLinks = {
+          ...(current.pageLinks ?? {}),
+          ...(update.pageLinks ?? {}),
+          ...(update.pageLinks &&
+          Object.prototype.hasOwnProperty.call(update.pageLinks, 'bySlug')
+            ? {
+                bySlug:
+                  updateBySlug === null
+                    ? null
+                    : ((mergedBySlug ?? {}) as typeof currentBySlug),
+              }
+            : {}),
+        };
+      }
+    }
+
+    if (Object.prototype.hasOwnProperty.call(update, 'headerMenu')) {
+      if (update.headerMenu === null) {
+        next.headerMenu = null;
+      } else if (typeof update.headerMenu !== 'undefined') {
+        next.headerMenu = {
+          ...(current.headerMenu ?? {}),
+          ...(update.headerMenu ?? {}),
+          ...(update.headerMenu &&
+          Object.prototype.hasOwnProperty.call(update.headerMenu, 'items')
+            ? { items: update.headerMenu.items ?? null }
+            : {}),
         };
       }
     }
@@ -701,6 +1343,76 @@ export class SettingsService {
       next.notFoundMarkdown =
         this.normalizeNullableString(next.notFoundMarkdown) ?? null;
     }
+
+    if (typeof next.poweredByBeeLms !== 'undefined') {
+      if (next.poweredByBeeLms === null) {
+        next.poweredByBeeLms = null;
+      } else {
+        const enabledRaw = next.poweredByBeeLms?.enabled;
+        const enabled = typeof enabledRaw === 'boolean' ? enabledRaw : false;
+        const url =
+          this.normalizeNullableString(next.poweredByBeeLms?.url) ?? null;
+
+        next.poweredByBeeLms =
+          enabled || url ? { enabled, ...(url ? { url } : {}) } : null;
+      }
+    }
+
+    if (typeof next.pageLinks !== 'undefined') {
+      if (next.pageLinks === null) {
+        next.pageLinks = null;
+      } else {
+        const enabledRaw = next.pageLinks?.enabled;
+        const enabled = typeof enabledRaw === 'boolean' ? enabledRaw : true;
+
+        const rawBySlug = next.pageLinks?.bySlug;
+        const bySlugObj =
+          rawBySlug && typeof rawBySlug === 'object'
+            ? (rawBySlug as Record<string, unknown>)
+            : null;
+
+        const normalizedBySlug: Record<
+          string,
+          { url?: boolean; header?: boolean; footer?: boolean }
+        > = {};
+
+        if (bySlugObj) {
+          for (const [rawSlug, rawValue] of Object.entries(bySlugObj)) {
+            const slug = (rawSlug ?? '').trim().toLowerCase();
+            if (!slug) continue;
+            if (!rawValue || typeof rawValue !== 'object') continue;
+
+            const rec = rawValue as Record<string, unknown>;
+            const url = typeof rec.url === 'boolean' ? rec.url : undefined;
+            const header =
+              typeof rec.header === 'boolean' ? rec.header : undefined;
+            const footer =
+              typeof rec.footer === 'boolean' ? rec.footer : undefined;
+
+            if (
+              typeof url === 'undefined' &&
+              typeof header === 'undefined' &&
+              typeof footer === 'undefined'
+            ) {
+              continue;
+            }
+
+            normalizedBySlug[slug] = {
+              ...(typeof url === 'boolean' ? { url } : {}),
+              ...(typeof header === 'boolean' ? { header } : {}),
+              ...(typeof footer === 'boolean' ? { footer } : {}),
+            };
+          }
+        }
+
+        next.pageLinks = {
+          enabled,
+          ...(Object.keys(normalizedBySlug).length > 0
+            ? { bySlug: normalizedBySlug }
+            : {}),
+        };
+      }
+    }
     if (typeof next.cursorUrl !== 'undefined') {
       next.cursorUrl = this.normalizeNullableString(next.cursorUrl) ?? null;
     }
@@ -711,6 +1423,18 @@ export class SettingsService {
     if (typeof next.cursorDarkUrl !== 'undefined') {
       next.cursorDarkUrl =
         this.normalizeNullableString(next.cursorDarkUrl) ?? null;
+    }
+    if (typeof next.cursorPointerUrl !== 'undefined') {
+      next.cursorPointerUrl =
+        this.normalizeNullableString(next.cursorPointerUrl) ?? null;
+    }
+    if (typeof next.cursorPointerLightUrl !== 'undefined') {
+      next.cursorPointerLightUrl =
+        this.normalizeNullableString(next.cursorPointerLightUrl) ?? null;
+    }
+    if (typeof next.cursorPointerDarkUrl !== 'undefined') {
+      next.cursorPointerDarkUrl =
+        this.normalizeNullableString(next.cursorPointerDarkUrl) ?? null;
     }
     if (typeof next.faviconUrl !== 'undefined') {
       next.faviconUrl = this.normalizeNullableString(next.faviconUrl) ?? null;
@@ -747,6 +1471,92 @@ export class SettingsService {
 
       return Object.keys(out).length > 0 ? out : null;
     };
+
+    if (typeof next.headerMenu !== 'undefined') {
+      if (next.headerMenu === null) {
+        next.headerMenu = null;
+      } else {
+        const enabledRaw = next.headerMenu?.enabled;
+        const enabled = typeof enabledRaw === 'boolean' ? enabledRaw : false;
+
+        const rawItems = next.headerMenu?.items;
+        const items = Array.isArray(rawItems)
+          ? (rawItems as Array<Record<string, unknown>>)
+          : null;
+
+        type HeaderMenuItemNormalized = {
+          id: string;
+          href: string;
+          label?: string;
+          labelByLang?: Record<string, string> | null;
+          enabled?: boolean;
+          clickable?: boolean;
+          newTab?: boolean;
+          children?: HeaderMenuItemNormalized[];
+        };
+
+        const normalizeHeaderMenuNode = (
+          raw: Record<string, unknown>,
+          depth: number,
+        ): HeaderMenuItemNormalized | null => {
+          const id = this.normalizeNullableString(raw.id as string) ?? null;
+          const href = this.normalizeNullableString(raw.href as string) ?? null;
+          if (!id || !href) return null;
+
+          const label =
+            this.normalizeNullableString(raw.label as string) ?? null;
+          const enabledFlag =
+            typeof raw.enabled === 'boolean' ? raw.enabled : true;
+          const clickableFlag =
+            typeof raw.clickable === 'boolean' ? raw.clickable : true;
+          const newTabFlag =
+            typeof raw.newTab === 'boolean' ? raw.newTab : false;
+          const labelByLang = normalizeLangStringMap(
+            raw.labelByLang as Record<string, string | null> | null | undefined,
+          );
+
+          const allowChildren = depth < 4;
+          const childrenRaw = allowChildren ? raw.children : null;
+          const childrenArr = Array.isArray(childrenRaw)
+            ? (childrenRaw as Array<Record<string, unknown>>)
+            : null;
+          const children = childrenArr
+            ? childrenArr
+                .map((c) => normalizeHeaderMenuNode(c, depth + 1))
+                .filter((v): v is HeaderMenuItemNormalized => Boolean(v))
+                .slice(0, 50)
+            : [];
+
+          return {
+            id,
+            href,
+            ...(label ? { label } : {}),
+            ...(labelByLang ? { labelByLang } : {}),
+            ...(enabledFlag === false ? { enabled: false } : {}),
+            ...(clickableFlag === false ? { clickable: false } : {}),
+            ...(newTabFlag === true ? { newTab: true } : {}),
+            ...(children.length > 0 ? { children } : {}),
+          };
+        };
+
+        const normalizedItems: HeaderMenuItemNormalized[] = items
+          ? items
+              .map((raw) => normalizeHeaderMenuNode(raw, 0))
+              .filter((v): v is HeaderMenuItemNormalized => Boolean(v))
+              .slice(0, 50)
+          : [];
+
+        next.headerMenu =
+          enabled || normalizedItems.length > 0
+            ? {
+                enabled,
+                ...(normalizedItems.length > 0
+                  ? { items: normalizedItems }
+                  : {}),
+              }
+            : null;
+      }
+    }
 
     if (typeof next.googleFontByLang !== 'undefined') {
       next.googleFontByLang = normalizeLangStringMap(next.googleFontByLang);
@@ -817,6 +1627,12 @@ export class SettingsService {
             fieldOkBg: normalizeColor(asString(obj.fieldOkBg) ?? undefined),
             fieldOkBorder: normalizeColor(
               asString(obj.fieldOkBorder) ?? undefined,
+            ),
+            fieldAlertBg: normalizeColor(
+              asString(obj.fieldAlertBg) ?? undefined,
+            ),
+            fieldAlertBorder: normalizeColor(
+              asString(obj.fieldAlertBorder) ?? undefined,
             ),
             fieldErrorBg: normalizeColor(
               asString(obj.fieldErrorBg) ?? undefined,
@@ -913,6 +1729,8 @@ export class SettingsService {
             scrollTrack: normalizeColor(obj.scrollTrack),
             fieldOkBg: normalizeColor(obj.fieldOkBg),
             fieldOkBorder: normalizeColor(obj.fieldOkBorder),
+            fieldAlertBg: normalizeColor(obj.fieldAlertBg),
+            fieldAlertBorder: normalizeColor(obj.fieldAlertBorder),
             fieldErrorBg: normalizeColor(obj.fieldErrorBg),
             fieldErrorBorder: normalizeColor(obj.fieldErrorBorder),
           };
@@ -1125,6 +1943,182 @@ export class SettingsService {
       }
     }
 
+    if (typeof next.footerSocialLinks !== 'undefined') {
+      if (next.footerSocialLinks === null) {
+        next.footerSocialLinks = null;
+      } else if (Array.isArray(next.footerSocialLinks)) {
+        type FooterLink = NonNullable<
+          NonNullable<InstanceBranding['footerSocialLinks']>[number]
+        >;
+
+        const normalizeId = (value: unknown): string | null => {
+          if (typeof value !== 'string') return null;
+          const trimmed = value.trim();
+          if (!trimmed) return null;
+          const normalized = trimmed.toLowerCase();
+          const safe = normalized.replace(/[^a-z0-9_-]/g, '-');
+          return safe.length > 0 ? safe : null;
+        };
+
+        const normalizeType = (value: unknown): FooterLink['type'] | null => {
+          if (value === 'facebook' || value === 'x' || value === 'youtube') {
+            return value;
+          }
+          if (value === 'custom') {
+            return 'custom';
+          }
+          return null;
+        };
+
+        const normalizeIconKey = (value: unknown): FooterLink['iconKey'] => {
+          if (
+            value === 'whatsapp' ||
+            value === 'messenger' ||
+            value === 'signal' ||
+            value === 'skype' ||
+            value === 'imessage' ||
+            value === 'wechat' ||
+            value === 'line' ||
+            value === 'kakaotalk' ||
+            value === 'threema' ||
+            value === 'icq' ||
+            value === 'instagram' ||
+            value === 'tiktok' ||
+            value === 'snapchat' ||
+            value === 'pinterest' ||
+            value === 'threads' ||
+            value === 'bereal' ||
+            value === 'tumblr' ||
+            value === 'bluesky' ||
+            value === 'mastodon' ||
+            value === 'vk' ||
+            value === 'zoom' ||
+            value === 'teams' ||
+            value === 'slack' ||
+            value === 'google-meet' ||
+            value === 'google-chat' ||
+            value === 'reddit' ||
+            value === 'twitch' ||
+            value === 'quora' ||
+            value === 'clubhouse' ||
+            value === 'tinder' ||
+            value === 'github' ||
+            value === 'npm' ||
+            value === 'maven' ||
+            value === 'nuget' ||
+            value === 'pypi' ||
+            value === 'linkedin' ||
+            value === 'discord' ||
+            value === 'telegram' ||
+            value === 'viber' ||
+            value === 'phone' ||
+            value === 'location' ||
+            value === 'link' ||
+            value === 'globe'
+          ) {
+            return value;
+          }
+          return null;
+        };
+
+        const map = new Map<string, FooterLink>();
+        for (const raw of next.footerSocialLinks) {
+          if (!raw || typeof raw !== 'object') continue;
+          const rec = raw as Record<string, unknown>;
+          const id = normalizeId(rec.id);
+          if (!id) continue;
+          const type = normalizeType(rec.type);
+          if (!type) continue;
+
+          const label = this.normalizeNullableString(
+            typeof rec.label === 'string' ? rec.label : null,
+          );
+          const url = this.normalizeNullableString(
+            typeof rec.url === 'string' ? rec.url : null,
+          );
+          const iconKey =
+            type === 'custom' ? normalizeIconKey(rec.iconKey) : null;
+          const iconLightUrl = this.normalizeNullableString(
+            typeof rec.iconLightUrl === 'string' ? rec.iconLightUrl : null,
+          );
+          const iconDarkUrl = this.normalizeNullableString(
+            typeof rec.iconDarkUrl === 'string' ? rec.iconDarkUrl : null,
+          );
+
+          const enabledRaw = rec.enabled;
+          const enabled =
+            typeof enabledRaw === 'boolean' ? enabledRaw : Boolean(url);
+
+          map.set(id, {
+            id,
+            type,
+            ...(label ? { label } : {}),
+            ...(url ? { url } : {}),
+            ...(enabled ? { enabled } : {}),
+            ...(iconKey ? { iconKey } : {}),
+            ...(iconLightUrl ? { iconLightUrl } : {}),
+            ...(iconDarkUrl ? { iconDarkUrl } : {}),
+          });
+        }
+
+        next.footerSocialLinks = map.size > 0 ? Array.from(map.values()) : null;
+      } else {
+        next.footerSocialLinks = null;
+      }
+    }
+
+    if (typeof next.socialLoginIcons !== 'undefined') {
+      if (next.socialLoginIcons === null) {
+        next.socialLoginIcons = null;
+      } else if (
+        next.socialLoginIcons &&
+        typeof next.socialLoginIcons === 'object'
+      ) {
+        type SocialLoginIcon = NonNullable<
+          NonNullable<InstanceBranding['socialLoginIcons']>[SocialProviderName]
+        >;
+
+        const raw = next.socialLoginIcons as Record<string, unknown>;
+        const normalizeProvider = (
+          provider: SocialProviderName,
+        ): SocialLoginIcon | null => {
+          const entry = raw[provider];
+          if (!entry || typeof entry !== 'object') return null;
+          const rec = entry as Record<string, unknown>;
+          const lightUrl = this.normalizeNullableString(
+            typeof rec.lightUrl === 'string' ? rec.lightUrl : null,
+          );
+          const darkUrl = this.normalizeNullableString(
+            typeof rec.darkUrl === 'string' ? rec.darkUrl : null,
+          );
+
+          if (!lightUrl && !darkUrl) return null;
+          return {
+            ...(lightUrl ? { lightUrl } : {}),
+            ...(darkUrl ? { darkUrl } : {}),
+          };
+        };
+
+        const map: Partial<Record<SocialProviderName, SocialLoginIcon>> = {};
+        for (const provider of [
+          'google',
+          'facebook',
+          'github',
+          'linkedin',
+        ] as const satisfies SocialProviderName[]) {
+          const value = normalizeProvider(provider);
+          if (value) {
+            map[provider] = value;
+          }
+        }
+
+        next.socialLoginIcons =
+          Object.keys(map).length > 0 ? (map as never) : null;
+      } else {
+        next.socialLoginIcons = null;
+      }
+    }
+
     return next;
   }
 
@@ -1248,7 +2242,9 @@ export class SettingsService {
     const stored = await this.getSocialProviderCredentials(provider);
     if (
       stored &&
-      (stored.clientId || stored.clientSecret || stored.redirectUri)
+      stored.clientId &&
+      stored.clientSecret &&
+      stored.redirectUri
     ) {
       return stored;
     }
