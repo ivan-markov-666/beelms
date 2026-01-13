@@ -1,21 +1,21 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import type {
-  ChangeEventHandler,
-  CSSProperties,
-  Dispatch,
-  MouseEvent,
-  ReactNode,
-  SetStateAction,
+import React, {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type SetStateAction,
 } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
+import * as Fa6Icons from "react-icons/fa6";
+import * as SiIcons from "react-icons/si";
 import { getAccessToken } from "../../auth-token";
 import { getApiBaseUrl } from "../../api-url";
 import { AdminBreadcrumbs } from "../_components/admin-breadcrumbs";
-import { WikiMarkdown } from "../../wiki/_components/wiki-markdown";
+import { InfoTooltip } from "../_components/info-tooltip";
+import { ListboxSelect } from "../../_components/listbox-select";
 
 const API_BASE_URL = getApiBaseUrl();
 
@@ -31,6 +31,8 @@ const THEME_FIELD_KEYS = [
   "scrollTrack",
   "fieldOkBg",
   "fieldOkBorder",
+  "fieldAlertBg",
+  "fieldAlertBorder",
   "fieldErrorBg",
   "fieldErrorBorder",
 ] as const;
@@ -49,6 +51,8 @@ const THEME_FIELD_ORDER: ThemeFieldKey[] = [
   "scrollTrack",
   "fieldOkBg",
   "fieldOkBorder",
+  "fieldAlertBg",
+  "fieldAlertBorder",
   "fieldErrorBg",
   "fieldErrorBorder",
 ];
@@ -125,6 +129,18 @@ const THEME_FIELD_DEFS: Record<
     token: "--field-ok-border / --theme-*-field-ok-border",
     example: "Success банери, подсветка на валидни полета",
   },
+  fieldAlertBg: {
+    label: "Alert bg",
+    description: "Фон за alert/warning съобщения и стойности.",
+    token: "--field-alert-bg / --theme-*-field-alert-bg",
+    example: "Warning банери, подсветка на alert полета",
+  },
+  fieldAlertBorder: {
+    label: "Alert border",
+    description: "Рамка за alert/warning съобщения и стойности.",
+    token: "--field-alert-border / --theme-*-field-alert-border",
+    example: "Warning банери, подсветка на alert полета",
+  },
   fieldErrorBg: {
     label: "Missing/Error bg",
     description: "Фон за грешки и липсващи данни.",
@@ -158,6 +174,14 @@ type ThemePreset = {
   light: ThemePalette;
   dark: ThemePalette;
 };
+
+type ThemePresetDraft = {
+  id: string;
+  name: string;
+  description: string;
+  light: Partial<ThemePalette>;
+  dark: Partial<ThemePalette>;
+};
 type CustomThemePreset = {
   id: string;
   name: string;
@@ -173,6 +197,220 @@ type ThemeHexDraftState = Record<ThemeVariant, ThemePaletteDraft>;
 type ThemePresetTarget = "both" | "light" | "dark";
 type StringDictionary = Record<string, string>;
 
+const MIN_BUTTON_CONTRAST_RATIO = 3.2;
+
+type RgbTuple = { r: number; g: number; b: number };
+
+function hexToRgb(hex: string): RgbTuple | null {
+  const normalized = hex.trim().replace(/^#/, "");
+  if (normalized.length === 3) {
+    const r = parseInt(normalized[0] + normalized[0], 16);
+    const g = parseInt(normalized[1] + normalized[1], 16);
+    const b = parseInt(normalized[2] + normalized[2], 16);
+    return { r, g, b };
+  }
+  if (normalized.length === 6) {
+    const r = parseInt(normalized.slice(0, 2), 16);
+    const g = parseInt(normalized.slice(2, 4), 16);
+    const b = parseInt(normalized.slice(4, 6), 16);
+    if ([r, g, b].some((value) => Number.isNaN(value))) {
+      return null;
+    }
+    return { r, g, b };
+  }
+  return null;
+}
+
+function rgbToHex({ r, g, b }: RgbTuple): string {
+  const clamp = (value: number) =>
+    Math.min(255, Math.max(0, Math.round(value)));
+  return `#${[clamp(r), clamp(g), clamp(b)]
+    .map((value) => value.toString(16).padStart(2, "0"))
+    .join("")}`;
+}
+
+function hueFromHex(hex: string): number {
+  const rgb = hexToRgb(hex);
+  if (!rgb) return Number.NaN;
+  const r = rgb.r / 255;
+  const g = rgb.g / 255;
+  const b = rgb.b / 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const delta = max - min;
+  if (delta === 0) return 0;
+
+  let hue = 0;
+  if (max === r) hue = ((g - b) / delta) % 6;
+  else if (max === g) hue = (b - r) / delta + 2;
+  else hue = (r - g) / delta + 4;
+
+  hue *= 60;
+  if (hue < 0) hue += 360;
+  return hue;
+}
+
+function relativeLuminance({ r, g, b }: RgbTuple): number {
+  const channel = (value: number) => {
+    const srgb = value / 255;
+    return srgb <= 0.03928
+      ? srgb / 12.92
+      : Math.pow((srgb + 0.055) / 1.055, 2.4);
+  };
+  return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
+}
+
+function contrastRatio(hexA: string, hexB: string): number {
+  const rgbA = hexToRgb(hexA);
+  const rgbB = hexToRgb(hexB);
+  if (!rgbA || !rgbB) return Infinity;
+  const lumA = relativeLuminance(rgbA);
+  const lumB = relativeLuminance(rgbB);
+  const brightest = Math.max(lumA, lumB);
+  const darkest = Math.min(lumA, lumB);
+  return (brightest + 0.05) / (darkest + 0.05);
+}
+
+function mixHex(base: string, target: string, amount: number): string {
+  const baseRgb = hexToRgb(base);
+  const targetRgb = hexToRgb(target);
+  if (!baseRgb || !targetRgb) return base;
+  return rgbToHex({
+    r: baseRgb.r + (targetRgb.r - baseRgb.r) * amount,
+    g: baseRgb.g + (targetRgb.g - baseRgb.g) * amount,
+    b: baseRgb.b + (targetRgb.b - baseRgb.b) * amount,
+  });
+}
+
+function ensureButtonContrast(
+  color: string,
+  foreground: string,
+  variant: ThemeVariant,
+): string {
+  if (!color || !foreground) return color;
+  let adjusted = color;
+  let attempts = 0;
+  while (
+    contrastRatio(adjusted, foreground) < MIN_BUTTON_CONTRAST_RATIO &&
+    attempts < 12
+  ) {
+    adjusted = mixHex(
+      adjusted,
+      variant === "light" ? "#ffffff" : "#000000",
+      0.15,
+    );
+    attempts += 1;
+  }
+  return adjusted;
+}
+
+function ensureLinkContrast(
+  color: string,
+  background: string,
+  variant: ThemeVariant,
+  minContrast = 5,
+): string {
+  if (!color || !background) return color;
+
+  const baseContrast = contrastRatio(color, background);
+  if (baseContrast >= minContrast) {
+    return color;
+  }
+
+  const target = variant === "light" ? "#000000" : "#ffffff";
+  let best = color;
+  let bestContrast = baseContrast;
+
+  for (let i = 1; i <= 20; i += 1) {
+    const mixed = mixHex(color, target, i / 20);
+    const c = contrastRatio(mixed, background);
+    if (c > bestContrast) {
+      bestContrast = c;
+      best = mixed;
+    }
+    if (c >= minContrast) {
+      return mixed;
+    }
+  }
+
+  return best;
+}
+
+function normalizeButtonContrast(
+  palette: ThemePalette,
+  variant: ThemeVariant,
+): ThemePalette {
+  return {
+    ...palette,
+    primary: ensureButtonContrast(palette.primary, palette.foreground, variant),
+    secondary: ensureButtonContrast(
+      palette.secondary,
+      palette.foreground,
+      variant,
+    ),
+  };
+}
+
+function completeThemePalette(
+  partial: Partial<ThemePalette>,
+  fallback: ThemePalette,
+  variant: ThemeVariant,
+): ThemePalette {
+  const merged = THEME_FIELD_KEYS.reduce((acc, key) => {
+    const raw = partial[key];
+    acc[key] =
+      typeof raw === "string" && raw.trim().length > 0
+        ? raw.trim()
+        : fallback[key];
+    return acc;
+  }, {} as ThemePalette);
+
+  const alertAccent = "#f59e0b";
+  if (
+    typeof partial.fieldAlertBg !== "string" ||
+    partial.fieldAlertBg.trim().length === 0
+  ) {
+    merged.fieldAlertBg = mixHex(
+      merged.background,
+      alertAccent,
+      variant === "dark" ? 0.16 : 0.08,
+    );
+  }
+  if (
+    typeof partial.fieldAlertBorder !== "string" ||
+    partial.fieldAlertBorder.trim().length === 0
+  ) {
+    merged.fieldAlertBorder = mixHex(
+      merged.border,
+      alertAccent,
+      variant === "dark" ? 0.6 : 0.45,
+    );
+  }
+
+  return normalizeButtonContrast(merged, variant);
+}
+
+const SUCCESS_NOTICE_STYLE: CSSProperties = {
+  backgroundColor: "var(--field-ok-bg)",
+  borderColor: "var(--field-ok-border)",
+  color: "var(--foreground)",
+};
+
+const ERROR_NOTICE_STYLE: CSSProperties = {
+  backgroundColor: "var(--field-error-bg)",
+  borderColor: "var(--field-error-border)",
+  color: "var(--error)",
+};
+
+const ALERT_NOTICE_STYLE: CSSProperties = {
+  backgroundColor: "var(--field-alert-bg)",
+  borderColor: "var(--field-alert-border)",
+  color: "var(--foreground)",
+};
+
+const BUILT_IN_PRESET_EDIT_ALERT_MESSAGE =
+  "Промени цветовете, избери ново име в секцията Custom presets и натисни Save preset (ще създадеш нов custom вариант, оригиналът остава непроменен).";
+
 const DEFAULT_THEME_LIGHT: Record<ThemeFieldKey, string> = {
   background: "#ffffff",
   foreground: "#171717",
@@ -185,27 +423,101 @@ const DEFAULT_THEME_LIGHT: Record<ThemeFieldKey, string> = {
   scrollTrack: "#f0fdf4",
   fieldOkBg: "#f0fdf4",
   fieldOkBorder: "#dcfce7",
+  fieldAlertBg: "#fff7ed",
+  fieldAlertBorder: "#fed7aa",
   fieldErrorBg: "#fef2f2",
   fieldErrorBorder: "#fee2e2",
 };
 
 const DEFAULT_THEME_DARK: Record<ThemeFieldKey, string> = {
-  background: "#0a0a0a",
-  foreground: "#ededed",
+  background: "#0f172a",
+  foreground: "#e5e7eb",
   primary: "#22c55e",
   secondary: "#60a5fa",
-  error: "#f87171",
+  error: "#fb7185",
   card: "#111827",
   border: "#374151",
   scrollThumb: "#16a34a",
   scrollTrack: "#0b2a16",
   fieldOkBg: "#052e16",
   fieldOkBorder: "#14532d",
+  fieldAlertBg: "#2a1607",
+  fieldAlertBorder: "#9a3412",
   fieldErrorBg: "#450a0a",
   fieldErrorBorder: "#7f1d1d",
 };
 
-const THEME_PRESETS: ThemePreset[] = [
+const RAW_THEME_PRESETS: ThemePresetDraft[] = [
+  {
+    id: "beelms-golden-honey",
+    name: "Golden Honey",
+    description: "beeLMS – медено златисто + топли акценти.",
+    light: {
+      background: "#f5f3ef",
+      foreground: "#2b2419",
+      primary: "#f0b90b",
+      secondary: "#f59e42",
+      error: "#b91c1c",
+      card: "#faf7f0",
+      border: "#ddd5c7",
+      scrollThumb: "#f0b90b",
+      scrollTrack: "#fbf9f5",
+      fieldOkBg: "#f5fbe8",
+      fieldOkBorder: "#84cc16",
+      fieldErrorBg: "#fef2f2",
+      fieldErrorBorder: "#fca5a5",
+    },
+    dark: {
+      background: "#1a1613",
+      foreground: "#e8e6e1",
+      primary: "#f5c951",
+      secondary: "#f0ad6f",
+      error: "#f87171",
+      card: "#221f1a",
+      border: "#3d3830",
+      scrollThumb: "#f5c951",
+      scrollTrack: "#15120f",
+      fieldOkBg: "#1b2a16",
+      fieldOkBorder: "#84cc16",
+      fieldErrorBg: "#3a1a14",
+      fieldErrorBorder: "#f87171",
+    },
+  },
+  {
+    id: "beelms-pollination-garden",
+    name: "Pollination Garden",
+    description: "beeLMS – лавандула + жълти акценти, природна хармония.",
+    light: {
+      background: "#f7f7fb",
+      foreground: "#2d2640",
+      primary: "#ffd000",
+      secondary: "#967ed6",
+      error: "#e11d48",
+      card: "#f2f1f9",
+      border: "#d4d1e5",
+      scrollThumb: "#967ed6",
+      scrollTrack: "#efeff8",
+      fieldOkBg: "#ecfdf5",
+      fieldOkBorder: "#22c55e",
+      fieldErrorBg: "#fff1f2",
+      fieldErrorBorder: "#fb7185",
+    },
+    dark: {
+      background: "#17141f",
+      foreground: "#dddce3",
+      primary: "#ffe066",
+      secondary: "#b5a4e8",
+      error: "#fb7185",
+      card: "#1e1a28",
+      border: "#3a3548",
+      scrollThumb: "#b5a4e8",
+      scrollTrack: "#141f2b",
+      fieldOkBg: "#12261d",
+      fieldOkBorder: "#22c55e",
+      fieldErrorBg: "#33151c",
+      fieldErrorBorder: "#fb7185",
+    },
+  },
   {
     id: "mocha-elegance",
     name: "Mocha Elegance",
@@ -237,7 +549,7 @@ const THEME_PRESETS: ThemePreset[] = [
       scrollTrack: "#231c15",
       fieldOkBg: "#1b3a1f",
       fieldOkBorder: "#66bb6a",
-      fieldErrorBg: "#3a1f1f",
+      fieldErrorBg: "#3a1a14",
       fieldErrorBorder: "#ef5350",
     },
   },
@@ -266,10 +578,10 @@ const THEME_PRESETS: ThemePreset[] = [
       primary: "#5dade2",
       secondary: "#3498db",
       error: "#ef5350",
-      card: "#1a2938",
-      border: "#2c4558",
-      scrollThumb: "#4a7ba7",
-      scrollTrack: "#141f2b",
+      card: "#15202b",
+      border: "#243447",
+      scrollThumb: "#355273",
+      scrollTrack: "#101821",
       fieldOkBg: "#1b3a2f",
       fieldOkBorder: "#66bb6a",
       fieldErrorBg: "#3a1f1f",
@@ -318,13 +630,13 @@ const THEME_PRESETS: ThemePreset[] = [
     light: {
       background: "#faf5f6",
       foreground: "#2d1b1f",
-      primary: "#a8324e",
-      secondary: "#d4727e",
+      primary: "#d45872",
+      secondary: "#e88b9b",
       error: "#c62828",
       card: "#ffffff",
       border: "#ecd7dc",
-      scrollThumb: "#c97b8a",
-      scrollTrack: "#f5eaed",
+      scrollThumb: "#e4b6c1",
+      scrollTrack: "#fbf7f8",
       fieldOkBg: "#e8f5e9",
       fieldOkBorder: "#66bb6a",
       fieldErrorBg: "#ffebee",
@@ -344,6 +656,222 @@ const THEME_PRESETS: ThemePreset[] = [
       fieldOkBorder: "#66bb6a",
       fieldErrorBg: "#3a1f1f",
       fieldErrorBorder: "#ef5350",
+    },
+  },
+  {
+    id: "sunrise-nectar",
+    name: "Sunrise Nectar",
+    description:
+      "Изгрев върху кошера – огнено червени и златисти тонове, оптимистични и енергични.",
+    light: {
+      background: "#f9f6f5",
+      foreground: "#372820",
+      primary: "#ec5744",
+      secondary: "#f5a623",
+      error: "#c2410c",
+      card: "#f4ede8",
+      border: "#e3dad4",
+      scrollThumb: "#f2b5a8",
+      scrollTrack: "#fdf9f7",
+      fieldOkBg: "#f5fbe8",
+      fieldOkBorder: "#84cc16",
+      fieldErrorBg: "#fff1f2",
+      fieldErrorBorder: "#fb7185",
+    },
+    dark: {
+      background: "#1d1512",
+      foreground: "#e0dcda",
+      primary: "#ed8274",
+      secondary: "#f5bd6b",
+      error: "#fb7185",
+      card: "#26201b",
+      border: "#3f3630",
+      scrollThumb: "#f1a28f",
+      scrollTrack: "#130c0a",
+      fieldOkBg: "#132615",
+      fieldOkBorder: "#4ade80",
+      fieldErrorBg: "#3a1a14",
+      fieldErrorBorder: "#fb7185",
+    },
+  },
+  {
+    id: "queen-bee-burgundy",
+    name: "Queen Bee Burgundy",
+    description:
+      "Луксозно бордо с кралски златисти акценти – премиум усещане за курсове.",
+    light: {
+      background: "#f7f3f4",
+      foreground: "#3d2929",
+      primary: "#b32347",
+      secondary: "#ebb134",
+      error: "#b91c1c",
+      card: "#f3ecee",
+      border: "#dfd2d6",
+      scrollThumb: "#e4b6c1",
+      scrollTrack: "#fbf7f8",
+      fieldOkBg: "#f5fbf2",
+      fieldOkBorder: "#65a30d",
+      fieldErrorBg: "#fff1f3",
+      fieldErrorBorder: "#f87171",
+    },
+    dark: {
+      background: "#251a1a",
+      foreground: "#dadada",
+      primary: "#d5697f",
+      secondary: "#e4c26c",
+      error: "#fb7185",
+      card: "#2e2324",
+      border: "#463637",
+      scrollThumb: "#a25568",
+      scrollTrack: "#180f10",
+      fieldOkBg: "#142115",
+      fieldOkBorder: "#65a30d",
+      fieldErrorBg: "#3c161a",
+      fieldErrorBorder: "#fb7185",
+    },
+  },
+  {
+    id: "terracotta-hive",
+    name: "Terracotta Hive",
+    description:
+      "Глинена пчелна пита – земни теракотени тонове за практични обучения.",
+    light: {
+      background: "#f7f4f2",
+      foreground: "#403230",
+      primary: "#e07856",
+      secondary: "#d8941e",
+      error: "#c2410c",
+      card: "#f0ebe7",
+      border: "#dcd4cf",
+      scrollThumb: "#edb49e",
+      scrollTrack: "#fbf7f4",
+      fieldOkBg: "#f3faf0",
+      fieldOkBorder: "#65a30d",
+      fieldErrorBg: "#fff3f0",
+      fieldErrorBorder: "#f87171",
+    },
+    dark: {
+      background: "#201815",
+      foreground: "#dbd8d6",
+      primary: "#e39e7e",
+      secondary: "#d9ad60",
+      error: "#fb7185",
+      card: "#291f1b",
+      border: "#3e3531",
+      scrollThumb: "#c77f62",
+      scrollTrack: "#150f0c",
+      fieldOkBg: "#152219",
+      fieldOkBorder: "#65a30d",
+      fieldErrorBg: "#381915",
+      fieldErrorBorder: "#fb7185",
+    },
+  },
+  {
+    id: "ruby-honey",
+    name: "Ruby Honey",
+    description:
+      "Рубинен мед – наситени рубинени тонове с богато златисто усещане.",
+    light: {
+      background: "#f8f5f6",
+      foreground: "#3d2630",
+      primary: "#d11f49",
+      secondary: "#fac800",
+      error: "#be123c",
+      card: "#f5f0f2",
+      border: "#e2d8db",
+      scrollThumb: "#f3a9c0",
+      scrollTrack: "#fcf7f9",
+      fieldOkBg: "#f4fbf2",
+      fieldOkBorder: "#4ade80",
+      fieldErrorBg: "#fff1f5",
+      fieldErrorBorder: "#fb7185",
+    },
+    dark: {
+      background: "#201317",
+      foreground: "#e0dce0",
+      primary: "#e0677f",
+      secondary: "#f9d768",
+      error: "#fb7185",
+      card: "#291a1e",
+      border: "#3f3237",
+      scrollThumb: "#c65775",
+      scrollTrack: "#150a0d",
+      fieldOkBg: "#162215",
+      fieldOkBorder: "#4ade80",
+      fieldErrorBg: "#3a161c",
+      fieldErrorBorder: "#fb7185",
+    },
+  },
+  {
+    id: "crimson-pollen",
+    name: "Crimson Pollen",
+    description:
+      "Малинов прашец – модерни малинови тонове с прашецово жълти акценти.",
+    light: {
+      background: "#f8f4f5",
+      foreground: "#3d2933",
+      primary: "#db2862",
+      secondary: "#f4c534",
+      error: "#c2410c",
+      card: "#f3ecf0",
+      border: "#dfd3d9",
+      scrollThumb: "#f2a8c2",
+      scrollTrack: "#fcf6f8",
+      fieldOkBg: "#f5fbf2",
+      fieldOkBorder: "#4ade80",
+      fieldErrorBg: "#fff1f4",
+      fieldErrorBorder: "#fb7185",
+    },
+    dark: {
+      background: "#201418",
+      foreground: "#ddd8db",
+      primary: "#de6f93",
+      secondary: "#f1d474",
+      error: "#fb7185",
+      card: "#291b21",
+      border: "#423438",
+      scrollThumb: "#c45e83",
+      scrollTrack: "#140b0f",
+      fieldOkBg: "#162015",
+      fieldOkBorder: "#4ade80",
+      fieldErrorBg: "#3a141b",
+      fieldErrorBorder: "#fb7185",
+    },
+  },
+  {
+    id: "sunset-swarm",
+    name: "Sunset Swarm",
+    description:
+      "Рояк при залез – динамични оранжево-червени градиенти за социално учене.",
+    light: {
+      background: "#f8f5f3",
+      foreground: "#3e2f26",
+      primary: "#ea5234",
+      secondary: "#f2a91f",
+      error: "#c2410c",
+      card: "#f2ede9",
+      border: "#e0d7d0",
+      scrollThumb: "#f3b6a2",
+      scrollTrack: "#fdf8f4",
+      fieldOkBg: "#f4faf1",
+      fieldOkBorder: "#4ade80",
+      fieldErrorBg: "#fff2ee",
+      fieldErrorBorder: "#fb7185",
+    },
+    dark: {
+      background: "#201714",
+      foreground: "#ddd9d6",
+      primary: "#e87f66",
+      secondary: "#efbd65",
+      error: "#fb7185",
+      card: "#2a1f1a",
+      border: "#423832",
+      scrollThumb: "#c7644d",
+      scrollTrack: "#140c0a",
+      fieldOkBg: "#152116",
+      fieldOkBorder: "#4ade80",
+      fieldErrorBg: "#381812",
+      fieldErrorBorder: "#fb7185",
     },
   },
   {
@@ -423,8 +951,8 @@ const THEME_PRESETS: ThemePreset[] = [
     light: {
       background: "#f6f8fa",
       foreground: "#1b2838",
-      primary: "#1a4d7c",
-      secondary: "#3d6b98",
+      primary: "#2b6fc6",
+      secondary: "#5b8fd0",
       error: "#c62828",
       card: "#ffffff",
       border: "#d9e2ec",
@@ -509,8 +1037,8 @@ const THEME_PRESETS: ThemePreset[] = [
     dark: {
       background: "#1a1315",
       foreground: "#ebdbe3",
-      primary: "#e9b3c5",
-      secondary: "#c28b9f",
+      primary: "#c86a8d",
+      secondary: "#a35471",
       error: "#ef5350",
       card: "#281d23",
       border: "#3a2e34",
@@ -531,30 +1059,30 @@ const THEME_PRESETS: ThemePreset[] = [
       foreground: "#1f2937",
       primary: "#6b7280",
       secondary: "#9ca3af",
-      error: "#dc2626",
+      error: "#dc3545",
       card: "#ffffff",
-      border: "#e5e7eb",
-      scrollThumb: "#9ca3af",
-      scrollTrack: "#f3f4f6",
-      fieldOkBg: "#ecfdf5",
-      fieldOkBorder: "#6ee7b7",
-      fieldErrorBg: "#fef2f2",
-      fieldErrorBorder: "#f87171",
+      border: "#dee2e6",
+      scrollThumb: "#adb5bd",
+      scrollTrack: "#f1f3f5",
+      fieldOkBg: "#d1e7dd",
+      fieldOkBorder: "#75b798",
+      fieldErrorBg: "#f8d7da",
+      fieldErrorBorder: "#ea868f",
     },
     dark: {
-      background: "#111827",
-      foreground: "#f3f4f6",
-      primary: "#9ca3af",
+      background: "#121416",
+      foreground: "#e9ecef",
+      primary: "#adb5bd",
       secondary: "#6b7280",
-      error: "#ef4444",
-      card: "#1f2937",
-      border: "#374151",
-      scrollThumb: "#4b5563",
-      scrollTrack: "#0f1419",
-      fieldOkBg: "#064e3b",
-      fieldOkBorder: "#6ee7b7",
-      fieldErrorBg: "#450a0a",
-      fieldErrorBorder: "#f87171",
+      error: "#ea868f",
+      card: "#1e2226",
+      border: "#343a40",
+      scrollThumb: "#495057",
+      scrollTrack: "#0f1113",
+      fieldOkBg: "#1b4332",
+      fieldOkBorder: "#75b798",
+      fieldErrorBg: "#3a1e1f",
+      fieldErrorBorder: "#ea868f",
     },
   },
   {
@@ -1608,12 +2136,42 @@ const THEME_PRESETS: ThemePreset[] = [
     },
   },
 ];
+
+const THEME_PRESETS: ThemePreset[] = RAW_THEME_PRESETS.map((preset) => {
+  return {
+    id: preset.id,
+    name: preset.name,
+    description: preset.description,
+    light: completeThemePalette(
+      preset.light,
+      DEFAULT_THEME_LIGHT as ThemePalette,
+      "light",
+    ),
+    dark: completeThemePalette(
+      preset.dark,
+      DEFAULT_THEME_DARK as ThemePalette,
+      "dark",
+    ),
+  };
+});
 const THEME_PRESET_TARGETS: ThemePresetTarget[] = ["light", "dark", "both"];
 const THEME_PRESET_TARGET_LABEL: Record<ThemePresetTarget, string> = {
   light: "Light",
   dark: "Dark",
   both: "Light + Dark",
 };
+
+const APP_NAME_MIN_LENGTH = 2;
+const APP_NAME_MAX_LENGTH = 32;
+const APP_NAME_CONTROL_CHARS = /[\u0000-\u001f\u007f]/;
+const APP_NAME_HAS_ALPHANUMERIC = /[\p{L}\p{N}]/u;
+
+const BEE_LMS_PRESET_IDS = new Set<string>([
+  "beelms-golden-honey",
+  "beelms-pollination-garden",
+]);
+
+const OTHER_THEME_PRESETS_PREVIEW_COUNT = 4;
 const THEME_PRESET_SWATCH_KEYS: ThemeFieldKey[] = [
   "background",
   "foreground",
@@ -1745,6 +2303,498 @@ const upsertStringDictionary = (
   }
   return next;
 };
+
+type FooterSocialLink = {
+  id: string;
+  type: "facebook" | "x" | "youtube" | "custom";
+  label?: string | null;
+  url?: string | null;
+  enabled?: boolean;
+  iconKey?:
+    | "whatsapp"
+    | "messenger"
+    | "signal"
+    | "skype"
+    | "imessage"
+    | "wechat"
+    | "line"
+    | "kakaotalk"
+    | "threema"
+    | "icq"
+    | "instagram"
+    | "tiktok"
+    | "snapchat"
+    | "pinterest"
+    | "threads"
+    | "bereal"
+    | "tumblr"
+    | "bluesky"
+    | "mastodon"
+    | "vk"
+    | "zoom"
+    | "teams"
+    | "slack"
+    | "google-meet"
+    | "google-chat"
+    | "reddit"
+    | "twitch"
+    | "quora"
+    | "clubhouse"
+    | "tinder"
+    | "github"
+    | "npm"
+    | "maven"
+    | "nuget"
+    | "pypi"
+    | "linkedin"
+    | "discord"
+    | "telegram"
+    | "viber"
+    | "phone"
+    | "location"
+    | "link"
+    | "globe"
+    | null;
+  iconLightUrl?: string | null;
+  iconDarkUrl?: string | null;
+};
+
+const DEFAULT_FOOTER_SOCIAL_LINKS: FooterSocialLink[] = [
+  {
+    id: "facebook",
+    type: "facebook",
+    label: "Facebook",
+    url: null,
+    enabled: false,
+    iconLightUrl: null,
+    iconDarkUrl: null,
+  },
+  {
+    id: "x",
+    type: "x",
+    label: "X",
+    url: null,
+    enabled: false,
+    iconLightUrl: null,
+    iconDarkUrl: null,
+  },
+  {
+    id: "youtube",
+    type: "youtube",
+    label: "YouTube",
+    url: null,
+    enabled: false,
+    iconLightUrl: null,
+    iconDarkUrl: null,
+  },
+];
+
+const FOOTER_SOCIAL_ICON_KEYS = [
+  "whatsapp",
+  "messenger",
+  "signal",
+  "skype",
+  "imessage",
+  "wechat",
+  "line",
+  "kakaotalk",
+  "threema",
+  "icq",
+  "instagram",
+  "tiktok",
+  "snapchat",
+  "pinterest",
+  "threads",
+  "bereal",
+  "tumblr",
+  "bluesky",
+  "mastodon",
+  "vk",
+  "zoom",
+  "teams",
+  "slack",
+  "google-meet",
+  "google-chat",
+  "reddit",
+  "twitch",
+  "quora",
+  "clubhouse",
+  "tinder",
+  "github",
+  "npm",
+  "maven",
+  "nuget",
+  "pypi",
+  "linkedin",
+  "discord",
+  "telegram",
+  "viber",
+  "phone",
+  "location",
+  "link",
+  "globe",
+] as const;
+
+type FooterSocialIconKey = Exclude<FooterSocialLink["iconKey"], null>;
+
+type FooterSocialIconOption = {
+  key: FooterSocialIconKey;
+  label: string;
+  icon: { lib: "si" | "fa6"; name: string };
+};
+
+const FOOTER_SOCIAL_ICON_OPTIONS: FooterSocialIconOption[] = [
+  {
+    key: "whatsapp",
+    label: "WhatsApp",
+    icon: { lib: "si", name: "SiWhatsapp" },
+  },
+  {
+    key: "messenger",
+    label: "Messenger",
+    icon: { lib: "si", name: "SiMessenger" },
+  },
+  { key: "signal", label: "Signal", icon: { lib: "si", name: "SiSignal" } },
+  { key: "skype", label: "Skype", icon: { lib: "si", name: "SiSkype" } },
+  {
+    key: "imessage",
+    label: "iMessage",
+    icon: { lib: "si", name: "SiImessage" },
+  },
+  { key: "wechat", label: "WeChat", icon: { lib: "si", name: "SiWechat" } },
+  { key: "line", label: "LINE", icon: { lib: "si", name: "SiLine" } },
+  {
+    key: "kakaotalk",
+    label: "KakaoTalk",
+    icon: { lib: "si", name: "SiKakaotalk" },
+  },
+  { key: "threema", label: "Threema", icon: { lib: "si", name: "SiThreema" } },
+  { key: "icq", label: "ICQ", icon: { lib: "si", name: "SiIcq" } },
+  {
+    key: "instagram",
+    label: "Instagram",
+    icon: { lib: "si", name: "SiInstagram" },
+  },
+  { key: "tiktok", label: "TikTok", icon: { lib: "si", name: "SiTiktok" } },
+  {
+    key: "snapchat",
+    label: "Snapchat",
+    icon: { lib: "si", name: "SiSnapchat" },
+  },
+  {
+    key: "pinterest",
+    label: "Pinterest",
+    icon: { lib: "si", name: "SiPinterest" },
+  },
+  { key: "threads", label: "Threads", icon: { lib: "si", name: "SiThreads" } },
+  { key: "bereal", label: "BeReal", icon: { lib: "si", name: "SiBereal" } },
+  { key: "tumblr", label: "Tumblr", icon: { lib: "si", name: "SiTumblr" } },
+  { key: "bluesky", label: "Bluesky", icon: { lib: "si", name: "SiBluesky" } },
+  {
+    key: "mastodon",
+    label: "Mastodon",
+    icon: { lib: "si", name: "SiMastodon" },
+  },
+  { key: "vk", label: "VK", icon: { lib: "si", name: "SiVk" } },
+  { key: "zoom", label: "Zoom", icon: { lib: "si", name: "SiZoom" } },
+  {
+    key: "teams",
+    label: "Teams",
+    icon: { lib: "si", name: "SiMicrosoftteams" },
+  },
+  { key: "slack", label: "Slack", icon: { lib: "si", name: "SiSlack" } },
+  {
+    key: "google-meet",
+    label: "Google Meet",
+    icon: { lib: "si", name: "SiGooglemeet" },
+  },
+  {
+    key: "google-chat",
+    label: "Google Chat",
+    icon: { lib: "si", name: "SiGooglechat" },
+  },
+  { key: "reddit", label: "Reddit", icon: { lib: "si", name: "SiReddit" } },
+  { key: "twitch", label: "Twitch", icon: { lib: "si", name: "SiTwitch" } },
+  { key: "quora", label: "Quora", icon: { lib: "si", name: "SiQuora" } },
+  {
+    key: "clubhouse",
+    label: "Clubhouse",
+    icon: { lib: "si", name: "SiClubhouse" },
+  },
+  { key: "tinder", label: "Tinder", icon: { lib: "si", name: "SiTinder" } },
+  { key: "github", label: "GitHub", icon: { lib: "si", name: "SiGithub" } },
+  { key: "npm", label: "npm", icon: { lib: "si", name: "SiNpm" } },
+  { key: "maven", label: "Maven", icon: { lib: "si", name: "SiApachemaven" } },
+  { key: "nuget", label: "NuGet", icon: { lib: "si", name: "SiNuget" } },
+  { key: "pypi", label: "PyPI", icon: { lib: "si", name: "SiPypi" } },
+  {
+    key: "linkedin",
+    label: "LinkedIn",
+    icon: { lib: "si", name: "SiLinkedin" },
+  },
+  { key: "discord", label: "Discord", icon: { lib: "si", name: "SiDiscord" } },
+  {
+    key: "telegram",
+    label: "Telegram",
+    icon: { lib: "si", name: "SiTelegram" },
+  },
+  { key: "viber", label: "Viber", icon: { lib: "si", name: "SiViber" } },
+  { key: "phone", label: "Phone", icon: { lib: "fa6", name: "FaPhone" } },
+  {
+    key: "location",
+    label: "Location",
+    icon: { lib: "fa6", name: "FaLocationDot" },
+  },
+  { key: "globe", label: "Globe", icon: { lib: "fa6", name: "FaGlobe" } },
+  { key: "link", label: "Link", icon: { lib: "fa6", name: "FaLink" } },
+];
+
+const getFooterSocialIconComponent = (
+  opt: FooterSocialIconOption["icon"],
+): ((props: { className?: string }) => JSX.Element) | null => {
+  const lib =
+    opt.lib === "fa6"
+      ? (Fa6Icons as Record<string, unknown>)
+      : (SiIcons as Record<string, unknown>);
+  const comp = lib[opt.name];
+  return typeof comp === "function"
+    ? (comp as (props: { className?: string }) => JSX.Element)
+    : null;
+};
+
+const FOOTER_SOCIAL_ICON_COMPONENTS: Record<
+  FooterSocialIconKey,
+  ((props: { className?: string }) => JSX.Element) | null
+> = FOOTER_SOCIAL_ICON_OPTIONS.reduce(
+  (acc, opt) => {
+    acc[opt.key] = getFooterSocialIconComponent(opt.icon);
+    return acc;
+  },
+  {} as Record<
+    FooterSocialIconKey,
+    ((props: { className?: string }) => JSX.Element) | null
+  >,
+);
+
+function FooterSocialIconPicker({
+  value,
+  disabled,
+  onChange,
+}: {
+  value: FooterSocialLink["iconKey"];
+  disabled: boolean;
+  onChange: (value: FooterSocialLink["iconKey"]) => void;
+}) {
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const [open, setOpen] = useState(false);
+  const selected =
+    typeof value === "string"
+      ? (FOOTER_SOCIAL_ICON_OPTIONS.find((o) => o.key === value) ?? null)
+      : null;
+
+  useEffect(() => {
+    if (!open) return;
+    const onDocMouseDown = (e: globalThis.MouseEvent) => {
+      const el = rootRef.current;
+      if (!el) return;
+      if (e.target instanceof Node && el.contains(e.target)) return;
+      setOpen(false);
+    };
+    document.addEventListener("mousedown", onDocMouseDown);
+    return () => document.removeEventListener("mousedown", onDocMouseDown);
+  }, [open]);
+
+  const SelectedIcon = selected
+    ? FOOTER_SOCIAL_ICON_COMPONENTS[selected.key]
+    : null;
+
+  return (
+    <div ref={rootRef} className="relative mt-2">
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center justify-between rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 disabled:cursor-not-allowed disabled:bg-gray-50"
+      >
+        <span className="flex items-center gap-2">
+          {SelectedIcon ? (
+            <SelectedIcon className="h-4 w-4" />
+          ) : (
+            <Fa6Icons.FaLink className="h-4 w-4" />
+          )}
+          <span>{selected?.label ?? "(none)"}</span>
+        </span>
+        <span className="text-xs text-gray-500">▾</span>
+      </button>
+
+      {open ? (
+        <div className="absolute z-20 mt-1 max-h-72 w-full overflow-auto rounded-md border border-gray-200 bg-white shadow-lg">
+          <button
+            type="button"
+            className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-gray-50"
+            onClick={() => {
+              onChange(null);
+              setOpen(false);
+            }}
+          >
+            <Fa6Icons.FaLink className="h-4 w-4" />
+            <span>(none)</span>
+          </button>
+          {FOOTER_SOCIAL_ICON_OPTIONS.map((opt) => {
+            const Icon =
+              FOOTER_SOCIAL_ICON_COMPONENTS[opt.key] ?? Fa6Icons.FaLink;
+            return (
+              <button
+                key={opt.key}
+                type="button"
+                className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-gray-50"
+                onClick={() => {
+                  onChange(opt.key);
+                  setOpen(false);
+                }}
+              >
+                <Icon className="h-4 w-4" />
+                <span>{opt.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+const parseUrl = (value: string): URL | null => {
+  try {
+    return new URL(value);
+  } catch {
+    return null;
+  }
+};
+
+const isValidFooterSocialUrl = (
+  type: FooterSocialLink["type"],
+  value: string,
+): boolean => {
+  const trimmed = value.trim();
+  if (!trimmed) return true;
+  const parsed = parseUrl(trimmed);
+  if (!parsed) return false;
+  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return false;
+  const host = parsed.hostname.toLowerCase();
+  if (type === "facebook") {
+    return (
+      host === "facebook.com" ||
+      host === "www.facebook.com" ||
+      host.endsWith(".facebook.com")
+    );
+  }
+  if (type === "youtube") {
+    return (
+      host === "youtube.com" ||
+      host === "www.youtube.com" ||
+      host.endsWith(".youtube.com") ||
+      host === "youtu.be" ||
+      host.endsWith(".youtu.be")
+    );
+  }
+  if (type === "x") {
+    return (
+      host === "x.com" ||
+      host === "www.x.com" ||
+      host.endsWith(".x.com") ||
+      host === "twitter.com" ||
+      host === "www.twitter.com" ||
+      host.endsWith(".twitter.com")
+    );
+  }
+  return true;
+};
+
+const footerSocialUrlErrorMessage = (type: FooterSocialLink["type"]) => {
+  if (type === "facebook") return "URL трябва да е към facebook.com";
+  if (type === "youtube") return "URL трябва да е към youtube.com или youtu.be";
+  if (type === "x") return "URL трябва да е към x.com или twitter.com";
+  return "Невалиден URL";
+};
+
+const isValidFooterSocialId = (value: string) => /^[a-z0-9_-]+$/.test(value);
+
+const sanitizeFooterSocialLinks = (
+  value?: FooterSocialLink[] | null,
+): FooterSocialLink[] => {
+  const normalizedList = Array.isArray(value) ? value : [];
+  const map = new Map<string, FooterSocialLink>();
+
+  for (const link of normalizedList) {
+    if (!link) continue;
+    const id = (link.id ?? "").trim().toLowerCase();
+    if (!id || !isValidFooterSocialId(id)) continue;
+
+    const type = link.type;
+    if (
+      type !== "facebook" &&
+      type !== "x" &&
+      type !== "youtube" &&
+      type !== "custom"
+    ) {
+      continue;
+    }
+
+    map.set(id, {
+      id,
+      type,
+      label: typeof link.label === "string" ? link.label : (link.label ?? null),
+      url: typeof link.url === "string" ? link.url : (link.url ?? null),
+      enabled: link.enabled,
+      iconKey:
+        type === "custom" &&
+        typeof link.iconKey === "string" &&
+        (FOOTER_SOCIAL_ICON_KEYS as readonly string[]).includes(link.iconKey)
+          ? (link.iconKey as FooterSocialLink["iconKey"])
+          : null,
+      iconLightUrl:
+        typeof link.iconLightUrl === "string"
+          ? link.iconLightUrl
+          : (link.iconLightUrl ?? null),
+      iconDarkUrl:
+        typeof link.iconDarkUrl === "string"
+          ? link.iconDarkUrl
+          : (link.iconDarkUrl ?? null),
+    });
+  }
+
+  for (const base of DEFAULT_FOOTER_SOCIAL_LINKS) {
+    if (!map.has(base.id)) {
+      map.set(base.id, { ...base });
+    }
+  }
+
+  const next = Array.from(map.values());
+  next.sort((a, b) => {
+    const order = (id: string) =>
+      id === "facebook" ? 0 : id === "x" ? 1 : id === "youtube" ? 2 : 9;
+    const byOrder = order(a.id) - order(b.id);
+    if (byOrder !== 0) return byOrder;
+    return a.id.localeCompare(b.id);
+  });
+  return next;
+};
+
+const normalizeFooterSocialLinksForSave = (
+  list: FooterSocialLink[],
+): FooterSocialLink[] | null => {
+  const normalized = sanitizeFooterSocialLinks(list);
+  const nonEmpty = normalized.filter(
+    (l) =>
+      (l.url ?? "").trim().length > 0 ||
+      (l.iconKey ?? "").trim().length > 0 ||
+      (l.iconLightUrl ?? "").trim().length > 0 ||
+      (l.iconDarkUrl ?? "").trim().length > 0 ||
+      (l.enabled ?? false) === true,
+  );
+  return nonEmpty.length > 0 ? nonEmpty : null;
+};
 type InstanceBranding = {
   appName: string;
   browserTitle?: string | null;
@@ -1752,9 +2802,18 @@ type InstanceBranding = {
   notFoundMarkdown?: string | null;
   notFoundTitleByLang?: Record<string, string | null> | null;
   notFoundMarkdownByLang?: Record<string, string | null> | null;
+  loginSocialUnavailableMessageEnabled?: boolean;
+  loginSocialResetPasswordHintEnabled?: boolean;
+  poweredByBeeLms?: {
+    enabled?: boolean;
+    url?: string | null;
+  } | null;
   cursorUrl?: string | null;
   cursorLightUrl?: string | null;
   cursorDarkUrl?: string | null;
+  cursorPointerUrl?: string | null;
+  cursorPointerLightUrl?: string | null;
+  cursorPointerDarkUrl?: string | null;
   cursorHotspot?: {
     x?: number | null;
     y?: number | null;
@@ -1839,6 +2898,12 @@ type InstanceBranding = {
       streamContentType?: string | null;
     } | null;
   } | null;
+
+  footerSocialLinks?: FooterSocialLink[] | null;
+
+  socialLoginIcons?: Partial<
+    Record<SocialProvider, SocialLoginIconConfig>
+  > | null;
 };
 
 type InstanceFeatures = {
@@ -1856,27 +2921,406 @@ type InstanceFeatures = {
   auth: boolean;
   authLogin: boolean;
   authRegister: boolean;
+  auth2fa: boolean;
   captcha: boolean;
   captchaLogin: boolean;
   captchaRegister: boolean;
   captchaForgotPassword: boolean;
   captchaChangePassword: boolean;
   paidCourses: boolean;
-  gdprLegal: boolean;
   socialGoogle: boolean;
   socialFacebook: boolean;
   socialGithub: boolean;
   socialLinkedin: boolean;
   infraRedis: boolean;
+  infraRedisUrl?: string | null;
   infraRabbitmq: boolean;
+  infraRabbitmqUrl?: string | null;
   infraMonitoring: boolean;
+  infraMonitoringUrl?: string | null;
   infraErrorTracking: boolean;
+  infraErrorTrackingUrl?: string | null;
 };
 
 type InstanceLanguages = {
   supported: string[];
   default: string;
+  icons?: Record<
+    string,
+    { lightUrl?: string | null; darkUrl?: string | null } | null
+  > | null;
+  flagPicker?: {
+    global?: string | null;
+    byLang?: Record<string, string | null> | null;
+  } | null;
 };
+
+const COUNTRY_FLAG_CODES: readonly string[] = [
+  "ad",
+  "ae",
+  "af",
+  "ag",
+  "ai",
+  "al",
+  "am",
+  "ao",
+  "aq",
+  "ar",
+  "as",
+  "at",
+  "au",
+  "aw",
+  "ax",
+  "az",
+  "ba",
+  "bb",
+  "bd",
+  "be",
+  "bf",
+  "bg",
+  "bh",
+  "bi",
+  "bj",
+  "bl",
+  "bm",
+  "bn",
+  "bo",
+  "bq",
+  "br",
+  "bs",
+  "bt",
+  "bv",
+  "bw",
+  "by",
+  "bz",
+  "ca",
+  "cc",
+  "cd",
+  "cf",
+  "cg",
+  "ch",
+  "ci",
+  "ck",
+  "cl",
+  "cm",
+  "cn",
+  "co",
+  "cr",
+  "cu",
+  "cv",
+  "cw",
+  "cx",
+  "cy",
+  "cz",
+  "de",
+  "dj",
+  "dk",
+  "dm",
+  "do",
+  "dz",
+  "ec",
+  "ee",
+  "eg",
+  "eh",
+  "er",
+  "es",
+  "et",
+  "fi",
+  "fj",
+  "fk",
+  "fm",
+  "fo",
+  "fr",
+  "ga",
+  "gb",
+  "gd",
+  "ge",
+  "gf",
+  "gg",
+  "gh",
+  "gi",
+  "gl",
+  "gm",
+  "gn",
+  "gp",
+  "gq",
+  "gr",
+  "gs",
+  "gt",
+  "gu",
+  "gw",
+  "gy",
+  "hk",
+  "hm",
+  "hn",
+  "hr",
+  "ht",
+  "hu",
+  "id",
+  "ie",
+  "il",
+  "im",
+  "in",
+  "io",
+  "iq",
+  "ir",
+  "is",
+  "it",
+  "je",
+  "jm",
+  "jo",
+  "jp",
+  "ke",
+  "kg",
+  "kh",
+  "ki",
+  "km",
+  "kn",
+  "kp",
+  "kr",
+  "kw",
+  "ky",
+  "kz",
+  "la",
+  "lb",
+  "lc",
+  "li",
+  "lk",
+  "lr",
+  "ls",
+  "lt",
+  "lu",
+  "lv",
+  "ly",
+  "ma",
+  "mc",
+  "md",
+  "me",
+  "mf",
+  "mg",
+  "mh",
+  "mk",
+  "ml",
+  "mm",
+  "mn",
+  "mo",
+  "mp",
+  "mq",
+  "mr",
+  "ms",
+  "mt",
+  "mu",
+  "mv",
+  "mw",
+  "mx",
+  "my",
+  "mz",
+  "na",
+  "nc",
+  "ne",
+  "nf",
+  "ng",
+  "ni",
+  "nl",
+  "no",
+  "np",
+  "nr",
+  "nu",
+  "nz",
+  "om",
+  "pa",
+  "pe",
+  "pf",
+  "pg",
+  "ph",
+  "pk",
+  "pl",
+  "pm",
+  "pn",
+  "pr",
+  "ps",
+  "pt",
+  "pw",
+  "py",
+  "qa",
+  "re",
+  "ro",
+  "rs",
+  "ru",
+  "rw",
+  "sa",
+  "sb",
+  "sc",
+  "sd",
+  "se",
+  "sg",
+  "sh",
+  "si",
+  "sj",
+  "sk",
+  "sl",
+  "sm",
+  "sn",
+  "so",
+  "sr",
+  "ss",
+  "st",
+  "sv",
+  "sx",
+  "sy",
+  "sz",
+  "tc",
+  "td",
+  "tf",
+  "tg",
+  "th",
+  "tj",
+  "tk",
+  "tl",
+  "tm",
+  "tn",
+  "to",
+  "tr",
+  "tt",
+  "tv",
+  "tw",
+  "tz",
+  "ua",
+  "ug",
+  "um",
+  "us",
+  "uy",
+  "uz",
+  "va",
+  "vc",
+  "ve",
+  "vg",
+  "vi",
+  "vn",
+  "vu",
+  "wf",
+  "ws",
+  "ye",
+  "yt",
+  "za",
+  "zm",
+  "zw",
+];
+
+function FlagCodeAutocomplete(props: {
+  value: string;
+  disabled?: boolean;
+  ariaLabel: string;
+  onSelect: (next: string) => void;
+}) {
+  const { value, disabled, ariaLabel, onSelect } = props;
+  const [query, setQuery] = useState<string>(value ?? "");
+  const [open, setOpen] = useState(false);
+
+  const normalizedQuery = (query ?? "").trim().toLowerCase();
+
+  const options = useMemo(() => {
+    const all = Array.isArray(COUNTRY_FLAG_CODES) ? COUNTRY_FLAG_CODES : [];
+    if (!normalizedQuery) return all;
+
+    const starts = all.filter((cc) => cc.startsWith(normalizedQuery));
+    if (starts.length > 0) return starts;
+
+    return all.filter((cc) => cc.includes(normalizedQuery));
+  }, [normalizedQuery]);
+
+  const displayedQuery = open ? query : (value ?? "");
+
+  return (
+    <div className="relative">
+      <div className="flex items-center gap-2">
+        <input
+          value={displayedQuery}
+          disabled={disabled}
+          onFocus={() => {
+            setQuery(value ?? "");
+            setOpen(true);
+          }}
+          onBlur={() => {
+            window.setTimeout(() => {
+              setOpen(false);
+            }, 120);
+          }}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            setOpen(true);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") {
+              setOpen(false);
+              return;
+            }
+
+            if (e.key === "Enter") {
+              const exact = (query ?? "").trim().toLowerCase();
+              if (
+                /^[a-z]{2}$/.test(exact) &&
+                COUNTRY_FLAG_CODES.includes(exact)
+              ) {
+                onSelect(exact);
+                setOpen(false);
+              }
+            }
+          }}
+          placeholder="bg"
+          aria-label={ariaLabel}
+          className="w-[88px] rounded-md border border-gray-300 bg-white px-2 py-1 text-xs text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 disabled:cursor-not-allowed disabled:opacity-60"
+        />
+        {(value ?? "").trim().length ? (
+          <span
+            aria-hidden="true"
+            className={`fi fi-${value} h-4 w-4 rounded-sm`}
+          />
+        ) : null}
+      </div>
+
+      {open ? (
+        <div className="absolute left-0 z-20 mt-1 w-[160px] overflow-hidden rounded-md border border-gray-200 bg-white shadow-lg">
+          <div className="max-h-64 overflow-auto py-1">
+            <button
+              type="button"
+              disabled={disabled}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => {
+                onSelect("");
+                setOpen(false);
+              }}
+              className="flex w-full items-center justify-between gap-2 px-2 py-1 text-left text-xs text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <span>—</span>
+              <span className="text-[11px] text-gray-400">clear</span>
+            </button>
+
+            {options.map((cc) => (
+              <button
+                key={`flag-autocomplete-${cc}`}
+                type="button"
+                disabled={disabled}
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => {
+                  onSelect(cc);
+                  setOpen(false);
+                }}
+                className="flex w-full items-center justify-between gap-2 px-2 py-1 text-left text-xs text-gray-900 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <span className="font-medium">{cc.toUpperCase()}</span>
+                <span
+                  aria-hidden="true"
+                  className={`fi fi-${cc} h-4 w-4 rounded-sm`}
+                />
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+}
 
 type InstanceSeo = {
   baseUrl?: string | null;
@@ -1892,20 +3336,14 @@ type InstanceSeo = {
     includeCourses?: boolean;
     includeLegal?: boolean;
   } | null;
-  openGraph?: {
-    defaultTitle?: string | null;
-    defaultDescription?: string | null;
-    imageUrl?: string | null;
-  } | null;
-  twitter?: {
-    card?: "summary" | "summary_large_image" | null;
-    defaultTitle?: string | null;
-    defaultDescription?: string | null;
-    imageUrl?: string | null;
-  } | null;
 };
 
 type SocialProvider = "google" | "facebook" | "github" | "linkedin";
+
+type SocialLoginIconConfig = {
+  lightUrl?: string | null;
+  darkUrl?: string | null;
+} | null;
 
 type SocialProviderCredentialResponse = {
   clientId: string | null;
@@ -2209,6 +3647,14 @@ const FEATURE_TOGGLE_INFO: Record<
       "OFF показва съобщение в UI и връща 404 за register/forgot/reset API – нови акаунти и възстановяване на пароли стават невъзможни.",
     risk: "Забравилите паролата си потребители ще бъдат блокирани до повторно активиране.",
   },
+  auth2fa: {
+    title: "Auth: 2FA (TOTP)",
+    description:
+      "Позволява Two-factor authentication чрез Authenticator app (TOTP) за password login.",
+    impact:
+      "OFF изключва 2FA потоците и password login не изисква код, дори потребителят да е активирал 2FA преди това.",
+    risk: "Изключването намалява сигурността. Използвай OFF само при инцидент или нужда от emergency access.",
+  },
   captcha: {
     title: "Captcha (global)",
     description:
@@ -2244,14 +3690,6 @@ const FEATURE_TOGGLE_INFO: Record<
     impact:
       "OFF скрива всички CTA за плащане и маркира курсовете като недостъпни за покупка.",
     risk: "Временно спиране на приходи – използвай само при инциденти с плащания.",
-  },
-  gdprLegal: {
-    title: "GDPR / Legal (risk)",
-    description:
-      "Навигация към Terms/Privacy + GDPR инструменти (export/delete).",
-    impact:
-      "OFF скрива правните страници и disable-ва GDPR self-service действия.",
-    risk: "Може да доведе до регулаторни нарушения – увери се, че имаш друго покритие.",
   },
   infraMonitoring: {
     title: "Infra: Monitoring",
@@ -2302,7 +3740,7 @@ function FeatureToggleLabel({
     );
   }
 
-  const stopPropagation = (event: MouseEvent<HTMLButtonElement>) => {
+  const stopPropagation = (event: ReactMouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     event.stopPropagation();
   };
@@ -2536,6 +3974,10 @@ function ThemePreviewCard({
   palette: ThemePalette;
   variant: ThemeVariant;
 }) {
+  const previewMutedText: CSSProperties = {
+    color: palette.foreground,
+    opacity: variant === "dark" ? 0.75 : 0.7,
+  };
   const baseCard: CSSProperties = {
     backgroundColor: palette.card,
     color: palette.foreground,
@@ -2572,10 +4014,28 @@ function ThemePreviewCard({
     color: palette.foreground,
     borderColor: palette.fieldOkBorder,
   };
+  const inputAlert: CSSProperties = {
+    backgroundColor: palette.fieldAlertBg,
+    color: palette.foreground,
+    borderColor: palette.fieldAlertBorder,
+  };
   const inputError: CSSProperties = {
     backgroundColor: palette.fieldErrorBg,
     color: palette.foreground,
     borderColor: palette.fieldErrorBorder,
+  };
+
+  const linkColor = ensureLinkContrast(
+    palette.primary,
+    palette.card,
+    variant,
+    5,
+  );
+
+  const linkStyle: CSSProperties = {
+    color: linkColor,
+    textDecoration: "underline",
+    textUnderlineOffset: 2,
   };
 
   return (
@@ -2590,17 +4050,27 @@ function ThemePreviewCard({
       <div className="rounded-xl border p-4 shadow-sm" style={baseCard}>
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs uppercase tracking-wide text-gray-500">
+            <p
+              className="text-xs uppercase tracking-wide"
+              style={previewMutedText}
+            >
               {variant === "light" ? "Light preview" : "Dark preview"}
             </p>
             <h3 className="text-lg font-semibold">UI sample headline</h3>
-            <p className="mt-1 text-sm text-gray-600">
+            <p className="mt-1 text-sm" style={previewMutedText}>
               Примерен текст за основния body цвят и контрасти.
+            </p>
+            <p className="mt-2 text-sm">
+              Това е примерен текст с нормална плътност и един{" "}
+              <a href="#" style={linkStyle}>
+                примерен линк
+              </a>
+              .
             </p>
           </div>
           <div className="flex flex-col items-center gap-2">
             <div
-              className="h-12 w-2 rounded-full border border-gray-200"
+              className="h-12 w-2 rounded-full border"
               style={{
                 borderColor: palette.border,
                 backgroundColor: palette.scrollTrack,
@@ -2611,7 +4081,7 @@ function ThemePreviewCard({
                 style={{ backgroundColor: palette.scrollThumb }}
               />
             </div>
-            <span className="text-[10px] font-medium text-gray-500">
+            <span className="text-[10px] font-medium" style={previewMutedText}>
               Scroll
             </span>
           </div>
@@ -2642,15 +4112,28 @@ function ThemePreviewCard({
         </span>
         <span
           className="inline-flex items-center rounded-full border px-2 py-0.5"
+          style={{
+            backgroundColor: palette.fieldAlertBg,
+            borderColor: palette.fieldAlertBorder,
+            color: palette.foreground,
+          }}
+        >
+          ⚑ Alert state
+        </span>
+        <span
+          className="inline-flex items-center rounded-full border px-2 py-0.5"
           style={errorChip}
         >
           ⚠ Error state
         </span>
       </div>
 
-      <div className="mt-4 grid gap-3 md:grid-cols-3">
+      <div className="mt-4 grid gap-3 md:grid-cols-4">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+          <p
+            className="text-[11px] font-semibold uppercase tracking-wide"
+            style={previewMutedText}
+          >
             Field (normal)
           </p>
           <div
@@ -2661,7 +4144,10 @@ function ThemePreviewCard({
           </div>
         </div>
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+          <p
+            className="text-[11px] font-semibold uppercase tracking-wide"
+            style={previewMutedText}
+          >
             Field (ok)
           </p>
           <div
@@ -2672,7 +4158,24 @@ function ThemePreviewCard({
           </div>
         </div>
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+          <p
+            className="text-[11px] font-semibold uppercase tracking-wide"
+            style={previewMutedText}
+          >
+            Alert value
+          </p>
+          <div
+            className="mt-2 rounded-md border px-3 py-2 text-sm shadow-sm"
+            style={inputAlert}
+          >
+            Needs attention
+          </div>
+        </div>
+        <div>
+          <p
+            className="text-[11px] font-semibold uppercase tracking-wide"
+            style={previewMutedText}
+          >
             Field (error)
           </p>
           <div
@@ -2774,54 +4277,31 @@ export function StatusBadge({
   variant: "ok" | "missing" | "fallback";
   label: string;
 }) {
-  const classes =
+  const style: CSSProperties =
     variant === "ok"
-      ? "border-green-200 bg-green-50 text-green-700"
+      ? {
+          backgroundColor: "var(--field-ok-bg)",
+          borderColor: "var(--field-ok-border)",
+          color: "var(--primary)",
+        }
       : variant === "fallback"
-        ? "border-amber-200 bg-amber-50 text-amber-800"
-        : "border-red-200 bg-red-50 text-red-700";
+        ? {
+            backgroundColor: "var(--field-alert-bg)",
+            borderColor: "var(--field-alert-border)",
+            color: "var(--foreground)",
+          }
+        : {
+            backgroundColor: "var(--field-error-bg)",
+            borderColor: "var(--field-error-border)",
+            color: "var(--error)",
+          };
   return (
     <span
-      className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${classes}`}
+      className="inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide"
+      style={style}
     >
       {label}
     </span>
-  );
-}
-
-export function InfoTooltip({
-  label,
-  title,
-  description,
-}: {
-  label: string;
-  title: string;
-  description: ReactNode;
-}) {
-  const stopPropagation = (event: MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-  };
-
-  return (
-    <button
-      type="button"
-      onClick={stopPropagation}
-      onMouseDown={stopPropagation}
-      onMouseUp={stopPropagation}
-      className="group relative inline-flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border border-gray-300 bg-white text-[11px] font-semibold text-gray-600 transition hover:border-green-500 hover:text-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
-      aria-label={label}
-    >
-      ?
-      <div className="pointer-events-none absolute right-0 top-6 z-20 hidden w-80 rounded-md border border-gray-200 bg-white p-3 text-sm text-gray-700 shadow-xl group-hover:block group-focus-visible:block">
-        <p className="text-[13px] font-semibold uppercase tracking-wide text-gray-500">
-          {title}
-        </p>
-        <div className="mt-2 text-sm leading-relaxed text-gray-800">
-          {description}
-        </div>
-      </div>
-    </button>
   );
 }
 
@@ -3165,17 +4645,449 @@ function buildSocialTestStates(): Record<SocialProvider, SocialTestState> {
   );
 }
 
-function parseSupportedLangs(raw: string): string[] {
+const KNOWN_LANGUAGE_CODES = [
+  "aa",
+  "ab",
+  "ae",
+  "af",
+  "ak",
+  "am",
+  "an",
+  "ar",
+  "as",
+  "av",
+  "ay",
+  "az",
+  "ba",
+  "be",
+  "bg",
+  "bh",
+  "bi",
+  "bm",
+  "bn",
+  "bo",
+  "br",
+  "bs",
+  "ca",
+  "ce",
+  "ch",
+  "co",
+  "cr",
+  "cs",
+  "cu",
+  "cv",
+  "cy",
+  "da",
+  "de",
+  "dv",
+  "dz",
+  "ee",
+  "el",
+  "en",
+  "eo",
+  "es",
+  "et",
+  "eu",
+  "fa",
+  "ff",
+  "fi",
+  "fj",
+  "fo",
+  "fr",
+  "fy",
+  "ga",
+  "gd",
+  "gl",
+  "gn",
+  "gu",
+  "gv",
+  "ha",
+  "he",
+  "hi",
+  "ho",
+  "hr",
+  "ht",
+  "hu",
+  "hy",
+  "hz",
+  "ia",
+  "id",
+  "ie",
+  "ig",
+  "ii",
+  "ik",
+  "io",
+  "is",
+  "it",
+  "iu",
+  "ja",
+  "jv",
+  "ka",
+  "kg",
+  "ki",
+  "kj",
+  "kk",
+  "kl",
+  "km",
+  "kn",
+  "ko",
+  "kr",
+  "ks",
+  "ku",
+  "kv",
+  "kw",
+  "ky",
+  "la",
+  "lb",
+  "lg",
+  "li",
+  "ln",
+  "lo",
+  "lt",
+  "lu",
+  "lv",
+  "mg",
+  "mh",
+  "mi",
+  "mk",
+  "ml",
+  "mn",
+  "mr",
+  "ms",
+  "mt",
+  "my",
+  "na",
+  "nb",
+  "nd",
+  "ne",
+  "ng",
+  "nl",
+  "nn",
+  "no",
+  "nr",
+  "nv",
+  "ny",
+  "oc",
+  "oj",
+  "om",
+  "or",
+  "os",
+  "pa",
+  "pi",
+  "pl",
+  "ps",
+  "pt",
+  "qu",
+  "rm",
+  "rn",
+  "ro",
+  "ru",
+  "rw",
+  "sa",
+  "sc",
+  "sd",
+  "se",
+  "sg",
+  "si",
+  "sk",
+  "sl",
+  "sm",
+  "sn",
+  "so",
+  "sq",
+  "sr",
+  "ss",
+  "st",
+  "su",
+  "sv",
+  "sw",
+  "ta",
+  "te",
+  "tg",
+  "th",
+  "ti",
+  "tk",
+  "tl",
+  "tn",
+  "to",
+  "tr",
+  "ts",
+  "tt",
+  "tw",
+  "ty",
+  "ug",
+  "uk",
+  "ur",
+  "uz",
+  "ve",
+  "vi",
+  "vo",
+  "wa",
+  "wo",
+  "xh",
+  "yi",
+  "yo",
+  "za",
+  "zh",
+  "zu",
+] as const;
+
+const KNOWN_LANGUAGE_CODE_SET = new Set<string>(KNOWN_LANGUAGE_CODES);
+
+function analyzeLanguageDraft(raw: string): {
+  incoming: string[];
+  invalid: string[];
+  unknown: string[];
+} {
   const parts = (raw ?? "")
     .split(/[,\n\r\t\s]+/)
     .map((p) => p.trim())
     .filter(Boolean);
 
-  const normalized = parts
-    .map((p) => p.toLowerCase())
-    .filter((p) => /^[a-z]{2,5}$/.test(p));
+  const incoming: string[] = [];
+  const invalid: string[] = [];
+  const unknown: string[] = [];
 
-  return Array.from(new Set(normalized));
+  for (const part of parts) {
+    const normalized = part.toLowerCase();
+    if (!/^[a-z]{2,5}$/.test(normalized)) {
+      invalid.push(part);
+      continue;
+    }
+    incoming.push(normalized);
+    if (!KNOWN_LANGUAGE_CODE_SET.has(normalized)) {
+      unknown.push(normalized);
+    }
+  }
+
+  const uniqIncoming = Array.from(new Set(incoming));
+  const uniqUnknown = Array.from(new Set(unknown));
+  return {
+    incoming: uniqIncoming,
+    invalid: Array.from(new Set(invalid)),
+    unknown: uniqUnknown,
+  };
+}
+
+function LanguageDraftAutocomplete(props: {
+  value: string;
+  disabled?: boolean;
+  placeholder?: string;
+  ariaLabel: string;
+  flagByLang?: Record<string, string>;
+  flagGlobal?: string;
+  onChange: (next: string) => void;
+}) {
+  const {
+    value,
+    disabled,
+    placeholder,
+    ariaLabel,
+    flagByLang,
+    flagGlobal,
+    onChange,
+  } = props;
+  const [open, setOpen] = useState(false);
+
+  const raw = value ?? "";
+  const lastCommaIdx = raw.lastIndexOf(",");
+  const lastSpaceIdx = raw.lastIndexOf(" ");
+  const lastSepIdx = Math.max(lastCommaIdx, lastSpaceIdx);
+  const prefix = lastSepIdx >= 0 ? raw.slice(0, lastSepIdx + 1) : "";
+  const tokenRaw = lastSepIdx >= 0 ? raw.slice(lastSepIdx + 1) : raw;
+  const token = (tokenRaw ?? "").trim().toLowerCase();
+
+  const options = useMemo(() => {
+    const all = KNOWN_LANGUAGE_CODES as unknown as readonly string[];
+    if (!token) return Array.from(all);
+    const starts = all.filter((c) => c.startsWith(token));
+    if (starts.length > 0) return starts;
+    return all.filter((c) => c.includes(token));
+  }, [token]);
+
+  const countryFlagCodeSet = useMemo(
+    () =>
+      new Set<string>(
+        Array.isArray(COUNTRY_FLAG_CODES) ? Array.from(COUNTRY_FLAG_CODES) : [],
+      ),
+    [],
+  );
+
+  const normalizeFlagCode = (rawCode: string): string => {
+    const candidate = (rawCode ?? "").trim().toLowerCase();
+    if (!/^[a-z]{2}$/.test(candidate)) return "";
+    return countryFlagCodeSet.has(candidate) ? candidate : "";
+  };
+
+  const getFlagCodeForLang = (langCode: string): string => {
+    const lc = (langCode ?? "").trim().toLowerCase();
+    const fromMap = normalizeFlagCode(flagByLang?.[lc] ?? "");
+    if (fromMap) return fromMap;
+    if (lc === "en") return "gb";
+
+    try {
+      type LocaleLike = { region?: unknown; maximize?: () => LocaleLike };
+      const LocaleCtor = (
+        Intl as unknown as { Locale?: new (tag: string) => LocaleLike }
+      ).Locale;
+      if (typeof LocaleCtor === "function") {
+        const locale = new LocaleCtor(lc);
+        const maximized =
+          locale && typeof locale.maximize === "function"
+            ? locale.maximize()
+            : locale;
+        const region = normalizeFlagCode((maximized?.region ?? "") as string);
+        if (region) return region;
+      }
+    } catch {
+      // ignore
+    }
+
+    const direct = normalizeFlagCode(lc);
+    if (direct) return direct;
+
+    const global = normalizeFlagCode(flagGlobal ?? "");
+    if (global) return global;
+
+    return "us";
+  };
+
+  const applySuggestion = (code: string) => {
+    let normalizedPrefix = prefix;
+    if (normalizedPrefix.endsWith(",")) {
+      normalizedPrefix += " ";
+    } else if (normalizedPrefix.length > 0 && !/\s$/.test(normalizedPrefix)) {
+      normalizedPrefix += " ";
+    }
+    onChange(`${normalizedPrefix}${code}`);
+  };
+
+  return (
+    <div className="relative">
+      <input
+        value={raw}
+        disabled={disabled}
+        onFocus={() => setOpen(true)}
+        onBlur={() => {
+          window.setTimeout(() => {
+            setOpen(false);
+          }, 120);
+        }}
+        onChange={(e) => {
+          onChange(e.target.value);
+          setOpen(true);
+        }}
+        aria-label={ariaLabel}
+        className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 disabled:cursor-not-allowed disabled:opacity-70"
+        placeholder={placeholder}
+      />
+
+      {open ? (
+        <div className="absolute left-0 z-20 mt-1 w-full max-w-[520px] overflow-hidden rounded-md border border-gray-200 bg-white shadow-lg">
+          <div className="max-h-64 overflow-auto py-1">
+            {options.map((code) => {
+              const flagCode = getFlagCodeForLang(code);
+              return (
+                <button
+                  key={`lang-draft-opt-${code}`}
+                  type="button"
+                  disabled={disabled}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => {
+                    applySuggestion(code);
+                    setOpen(false);
+                  }}
+                  className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm text-gray-900 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <span className="font-medium">{code}</span>
+                  {flagCode ? (
+                    <span
+                      aria-hidden="true"
+                      className={`fi fi-${flagCode} h-4 w-4 rounded-sm`}
+                    />
+                  ) : null}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function DefaultLanguageDropdown(props: {
+  value: string;
+  disabled?: boolean;
+  ariaLabel: string;
+  options: string[];
+  onSelect: (next: string) => void;
+}) {
+  const { value, disabled, ariaLabel, options, onSelect } = props;
+  const [open, setOpen] = useState(false);
+
+  const selected = (value ?? "").trim().toLowerCase();
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        aria-label={ariaLabel}
+        disabled={disabled}
+        onClick={() => setOpen((prev) => !prev)}
+        onBlur={() => {
+          window.setTimeout(() => {
+            setOpen(false);
+          }, 120);
+        }}
+        className="mt-2 flex w-full items-center justify-between gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-left text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        <span className="font-medium">{selected || "—"}</span>
+        <span aria-hidden="true" className="text-xs text-gray-500">
+          ▾
+        </span>
+      </button>
+
+      {open ? (
+        <div className="absolute left-0 z-20 mt-1 w-full overflow-hidden rounded-md border border-gray-200 bg-white shadow-lg">
+          <div className="max-h-64 overflow-auto py-1">
+            <button
+              type="button"
+              disabled={disabled}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => {
+                onSelect("");
+                setOpen(false);
+              }}
+              className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <span>—</span>
+              <span className="text-[11px] text-gray-400">clear</span>
+            </button>
+
+            {options.map((code) => (
+              <button
+                key={`default-lang-${code}`}
+                type="button"
+                disabled={disabled}
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => {
+                  onSelect(code);
+                  setOpen(false);
+                }}
+                className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm text-gray-900 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <span className="font-medium">{code}</span>
+                {selected === code ? (
+                  <span className="text-[11px] text-gray-400">selected</span>
+                ) : null}
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
 }
 
 function isValidRedirectUrl(value: string): boolean {
@@ -3190,6 +5102,50 @@ function isValidRedirectUrl(value: string): boolean {
   }
 }
 
+function isValidOptionalHttpUrl(value: string): boolean {
+  const trimmed = (value ?? "").trim();
+  if (!trimmed) return true;
+  return isValidRedirectUrl(trimmed);
+}
+
+function isValidHttpUrl(value: string): boolean {
+  const trimmed = (value ?? "").trim();
+  if (!trimmed) return false;
+  try {
+    const parsed = new URL(trimmed);
+    return parsed.protocol === "http:" || parsed.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+function isValidInfraRabbitmqUrl(value: string): boolean {
+  const trimmed = (value ?? "").trim();
+  if (!trimmed) return false;
+  try {
+    const parsed = new URL(trimmed);
+    return parsed.protocol === "amqp:" || parsed.protocol === "amqps:";
+  } catch {
+    return false;
+  }
+}
+
+function isValidInfraRedisUrl(value: string): boolean {
+  const trimmed = (value ?? "").trim();
+  if (!trimmed) return false;
+
+  try {
+    const parsed = new URL(trimmed);
+    if (parsed.protocol === "redis:" || parsed.protocol === "rediss:") {
+      return Boolean(parsed.hostname);
+    }
+  } catch {
+    // ignore
+  }
+
+  return /^[a-zA-Z0-9.-]+:\d{2,5}$/.test(trimmed);
+}
+
 export default function AdminSettingsPage() {
   const router = useRouter();
 
@@ -3198,7 +5154,7 @@ export default function AdminSettingsPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [themeNotice, setThemeNotice] = useState<{
-    type: "error" | "success";
+    type: "error" | "success" | "alert";
     message: string;
   } | null>(null);
 
@@ -3289,14 +5245,6 @@ export default function AdminSettingsPage() {
 
   const [appName, setAppName] = useState<string>("BeeLMS");
   const [browserTitle, setBrowserTitle] = useState<string>("");
-  const [notFoundTitle, setNotFoundTitle] = useState<string>("");
-  const [notFoundMarkdown, setNotFoundMarkdown] = useState<string>("");
-  const [notFoundTitleByLang, setNotFoundTitleByLang] =
-    useState<StringDictionary>({});
-  const [notFoundMarkdownByLang, setNotFoundMarkdownByLang] =
-    useState<StringDictionary>({});
-  const [notFoundEditingLang, setNotFoundEditingLang] =
-    useState<string>("__global");
   const [faviconUrl, setFaviconUrl] = useState<string>("");
   const faviconFileInputRef = useRef<HTMLInputElement | null>(null);
   const [logoUrl, setLogoUrl] = useState<string>("");
@@ -3336,19 +5284,6 @@ export default function AdminSettingsPage() {
     useState<boolean>(true);
   const [seoSitemapIncludeLegal, setSeoSitemapIncludeLegal] =
     useState<boolean>(true);
-  const [seoOpenGraphTitle, setSeoOpenGraphTitle] = useState<string>("");
-  const [seoOpenGraphDescription, setSeoOpenGraphDescription] =
-    useState<string>("");
-  const [seoOpenGraphImageUrl, setSeoOpenGraphImageUrl] = useState<string>("");
-  const [seoTwitterCard, setSeoTwitterCard] = useState<string>(
-    "summary_large_image",
-  );
-  const [seoTwitterTitle, setSeoTwitterTitle] = useState<string>("");
-  const [seoTwitterDescription, setSeoTwitterDescription] =
-    useState<string>("");
-  const [seoTwitterImageUrl, setSeoTwitterImageUrl] = useState<string>("");
-  const seoOpenGraphFileInputRef = useRef<HTMLInputElement | null>(null);
-  const seoTwitterFileInputRef = useRef<HTMLInputElement | null>(null);
   const [themeMode, setThemeMode] = useState<"light" | "dark" | "system">(
     "system",
   );
@@ -3407,6 +5342,7 @@ export default function AdminSettingsPage() {
 
   useEffect(() => {
     if (typeof document === "undefined") return;
+    if (loading) return;
 
     const root = document.documentElement;
     const palette = effectiveUiTheme === "dark" ? themeDark : themeLight;
@@ -3451,7 +5387,14 @@ export default function AdminSettingsPage() {
         }
       }
     };
-  }, [effectiveUiTheme, systemPrefersDark, themeDark, themeLight, uiThemeMode]);
+  }, [
+    effectiveUiTheme,
+    loading,
+    systemPrefersDark,
+    themeDark,
+    themeLight,
+    uiThemeMode,
+  ]);
 
   useEffect(() => {
     themePresetTargetRef.current = themePresetTarget;
@@ -3461,13 +5404,34 @@ export default function AdminSettingsPage() {
     if (!editingBuiltInThemePresetId || builtInThemePresetsExpanded) {
       return;
     }
-    const visibleIds = new Set(THEME_PRESETS.slice(0, 2).map((p) => p.id));
+    const beePresets = THEME_PRESETS.filter((p) =>
+      BEE_LMS_PRESET_IDS.has(p.id),
+    );
+    const otherPresets = [
+      ...THEME_PRESETS.filter((p) => !BEE_LMS_PRESET_IDS.has(p.id)),
+    ].sort((a, b) => {
+      const hueA = hueFromHex(a.light.primary);
+      const hueB = hueFromHex(b.light.primary);
+      if (Number.isNaN(hueA) && Number.isNaN(hueB)) return 0;
+      if (Number.isNaN(hueA)) return 1;
+      if (Number.isNaN(hueB)) return -1;
+      return hueA - hueB;
+    });
+    const visibleIds = new Set([
+      ...beePresets.map((p) => p.id),
+      ...otherPresets
+        .slice(0, OTHER_THEME_PRESETS_PREVIEW_COUNT)
+        .map((p) => p.id),
+    ]);
     if (!visibleIds.has(editingBuiltInThemePresetId)) {
       setBuiltInThemePresetsExpanded(true);
     }
   }, [builtInThemePresetsExpanded, editingBuiltInThemePresetId]);
 
   const applyThemePreset = (preset: ThemePreset) => {
+    setEditingCustomThemePresetId(null);
+    setCustomThemePresetName("");
+    setCustomThemePresetDescription("");
     setEditingBuiltInThemePresetId(null);
     const target = themePresetTargetRef.current;
     if (target === "light" || target === "both") {
@@ -3547,8 +5511,8 @@ export default function AdminSettingsPage() {
     setCustomThemePresetName(preset.name);
     setCustomThemePresetDescription(preset.description);
     setThemeNotice({
-      type: "success",
-      message: `Заредих preset "${preset.name}" за редакция. Промени цветовете и натисни Save preset (ще се запази като custom).`,
+      type: "alert",
+      message: BUILT_IN_PRESET_EDIT_ALERT_MESSAGE,
     });
   };
 
@@ -3725,11 +5689,39 @@ export default function AdminSettingsPage() {
   const [cursorUrl, setCursorUrl] = useState<string>("");
   const [cursorLightUrl, setCursorLightUrl] = useState<string>("");
   const [cursorDarkUrl, setCursorDarkUrl] = useState<string>("");
+  const [cursorPointerUrl, setCursorPointerUrl] = useState<string>("");
+  const [cursorPointerLightUrl, setCursorPointerLightUrl] =
+    useState<string>("");
+  const [cursorPointerDarkUrl, setCursorPointerDarkUrl] = useState<string>("");
+  const [
+    loginSocialUnavailableMessageEnabled,
+    setLoginSocialUnavailableMessageEnabled,
+  ] = useState<boolean>(true);
+  const [
+    loginSocialResetPasswordHintEnabled,
+    setLoginSocialResetPasswordHintEnabled,
+  ] = useState<boolean>(true);
+  const [
+    registerSocialUnavailableMessageEnabled,
+    setRegisterSocialUnavailableMessageEnabled,
+  ] = useState<boolean>(true);
+  const [poweredByBeeLmsEnabled, setPoweredByBeeLmsEnabled] =
+    useState<boolean>(false);
+  const [poweredByBeeLmsUrl, setPoweredByBeeLmsUrl] = useState<string>("");
+  const [footerSocialLinks, setFooterSocialLinks] = useState<
+    FooterSocialLink[]
+  >(DEFAULT_FOOTER_SOCIAL_LINKS);
+  const footerSocialIconInputRef = useRef<HTMLInputElement | null>(null);
+  const [pendingFooterSocialIconUpload, setPendingFooterSocialIconUpload] =
+    useState<{ id: string; variant: "light" | "dark" } | null>(null);
   const [cursorHotspotX, setCursorHotspotX] = useState<string>("");
   const [cursorHotspotY, setCursorHotspotY] = useState<string>("");
   const cursorFileInputRef = useRef<HTMLInputElement | null>(null);
   const cursorLightFileInputRef = useRef<HTMLInputElement | null>(null);
   const cursorDarkFileInputRef = useRef<HTMLInputElement | null>(null);
+  const cursorPointerFileInputRef = useRef<HTMLInputElement | null>(null);
+  const cursorPointerLightFileInputRef = useRef<HTMLInputElement | null>(null);
+  const cursorPointerDarkFileInputRef = useRef<HTMLInputElement | null>(null);
   const [cursorHotspotTestPos, setCursorHotspotTestPos] = useState<{
     x: number;
     y: number;
@@ -3818,7 +5810,32 @@ export default function AdminSettingsPage() {
   const isUploadingOgImage = uploadingSocialImagePurpose === "open-graph";
   const isUploadingTwitterImage = uploadingSocialImagePurpose === "twitter";
   const isUploadingSharedImage = uploadingSocialImagePurpose === "shared";
-  const baseTitle = (browserTitle.trim() || appName || "").trim() || "BeeLMS";
+  const normalizedAppName = useMemo(
+    () => (appName ?? "").replace(/\s+/g, " ").trim(),
+    [appName],
+  );
+  const appNameValidation = useMemo(() => {
+    const raw = appName ?? "";
+    if (APP_NAME_CONTROL_CHARS.test(raw)) {
+      return "App name не може да съдържа нов ред или control символи.";
+    }
+    if (normalizedAppName.length === 0) {
+      return "App name е задължителен.";
+    }
+    if (normalizedAppName.length < APP_NAME_MIN_LENGTH) {
+      return `App name трябва да е поне ${APP_NAME_MIN_LENGTH} символа.`;
+    }
+    if (normalizedAppName.length > APP_NAME_MAX_LENGTH) {
+      return `App name е ограничен до ${APP_NAME_MAX_LENGTH} символа, за да не чупи header-а.`;
+    }
+    if (!APP_NAME_HAS_ALPHANUMERIC.test(normalizedAppName)) {
+      return "App name трябва да съдържа поне една буква или цифра.";
+    }
+    return null;
+  }, [appName, normalizedAppName]);
+  const appNameCharsUsed = appName?.length ?? 0;
+  const baseTitle =
+    (browserTitle.trim() || normalizedAppName || "").trim() || "BeeLMS";
   const baseDescription =
     socialDescription.trim().length > 0
       ? socialDescription.trim()
@@ -3850,30 +5867,23 @@ export default function AdminSettingsPage() {
     openGraphDescription.trim().length ||
     openGraphImageUrl.trim().length,
   );
-  const twitterSectionHasContent = Boolean(
-    twitterTitle.trim().length ||
-    twitterDescription.trim().length ||
-    twitterImageUrl.trim().length ||
-    (twitterCard.trim().length > 0 && twitterCard !== "summary_large_image") ||
-    twitterAppName.trim().length ||
-    twitterAppIdIphone.trim().length ||
-    twitterAppIdIpad.trim().length ||
-    twitterAppIdGooglePlay.trim().length ||
-    twitterAppUrlIphone.trim().length ||
-    twitterAppUrlIpad.trim().length ||
-    twitterAppUrlGooglePlay.trim().length ||
-    twitterPlayerUrl.trim().length ||
-    twitterPlayerWidth.trim().length ||
-    twitterPlayerHeight.trim().length ||
-    twitterPlayerStream.trim().length ||
-    twitterPlayerStreamContentType.trim().length,
-  );
+  const normalizedTwitterCard = twitterCard.trim() || "summary_large_image";
   const twitterAppHasMinimum =
     twitterAppName.trim().length > 0 && twitterAppIdIphone.trim().length > 0;
   const twitterPlayerHasMinimum =
     twitterPlayerUrl.trim().length > 0 &&
     Number.isFinite(Number(twitterPlayerWidth.trim())) &&
     Number.isFinite(Number(twitterPlayerHeight.trim()));
+  const twitterCardCountsAsContent =
+    normalizedTwitterCard === "summary" ||
+    (normalizedTwitterCard === "app" && twitterAppHasMinimum) ||
+    (normalizedTwitterCard === "player" && twitterPlayerHasMinimum);
+  const twitterSectionHasContent = Boolean(
+    twitterTitle.trim().length ||
+    twitterDescription.trim().length ||
+    twitterImageUrl.trim().length ||
+    twitterCardCountsAsContent,
+  );
 
   const twitterPlayerWidthNumber = Number.isFinite(
     Number(twitterPlayerWidth.trim()),
@@ -3948,9 +5958,9 @@ export default function AdminSettingsPage() {
       ? escapeMetaValue(twitterPreviewImage)
       : "";
 
-    const isSummary = twitterCard === "summary";
-    const isApp = twitterCard === "app";
-    const isPlayer = twitterCard === "player";
+    const isSummary = normalizedTwitterCard === "summary";
+    const isApp = normalizedTwitterCard === "app";
+    const isPlayer = normalizedTwitterCard === "player";
     const effectiveTwitterCard = isSummary
       ? "summary"
       : isApp
@@ -4061,6 +6071,7 @@ export default function AdminSettingsPage() {
 
     return lines.join("\n");
   }, [
+    normalizedTwitterCard,
     ogPreviewDescription,
     ogPreviewImage,
     ogPreviewTitle,
@@ -4072,7 +6083,6 @@ export default function AdminSettingsPage() {
     twitterAppUrlGooglePlay,
     twitterAppUrlIpad,
     twitterAppUrlIphone,
-    twitterCard,
     twitterPlayerHasMinimum,
     twitterPlayerHeightNumber,
     twitterPlayerStream,
@@ -4603,6 +6613,207 @@ export default function AdminSettingsPage() {
     }
   };
 
+  const handleCursorPointerFileSelected: ChangeEventHandler<
+    HTMLInputElement
+  > = async (event) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) {
+      return;
+    }
+
+    const token = getAccessToken();
+    if (!token) {
+      router.replace("/auth/login");
+      return;
+    }
+
+    setError(null);
+    setSuccess(null);
+
+    const previousUrl = (cursorPointerUrl ?? "").trim();
+    const formData = new FormData();
+    formData.append("file", files[0]);
+    if (previousUrl.length > 0) {
+      formData.append("previousUrl", previousUrl);
+    }
+
+    try {
+      const res = await fetch(
+        `${API_BASE_URL}/admin/settings/branding/cursor-pointer`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        },
+      );
+
+      if (res.status === 401) {
+        router.replace("/auth/login");
+        return;
+      }
+
+      if (!res.ok) {
+        const payload = (await res.json()) as { message?: string };
+        setError(payload?.message ?? "Неуспешно качване на cursor файла.");
+        return;
+      }
+
+      const data = (await res.json()) as { url?: string };
+      if (typeof data.url !== "string") {
+        setError("Неуспешно качване на cursor файла.");
+        return;
+      }
+
+      setCursorPointerUrl(data.url);
+      await persistBrandingField(
+        { cursorPointerUrl: data.url },
+        "Hover cursor файлът е качен и запазен. Refesh-ни страницата за да се приложи навсякъде.",
+      );
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Неуспешно качване на cursor файла.",
+      );
+    }
+  };
+
+  const handleCursorPointerLightFileSelected: ChangeEventHandler<
+    HTMLInputElement
+  > = async (event) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) {
+      return;
+    }
+
+    const token = getAccessToken();
+    if (!token) {
+      router.replace("/auth/login");
+      return;
+    }
+
+    setError(null);
+    setSuccess(null);
+
+    const previousUrl = (cursorPointerLightUrl ?? "").trim();
+    const formData = new FormData();
+    formData.append("file", files[0]);
+    if (previousUrl.length > 0) {
+      formData.append("previousUrl", previousUrl);
+    }
+
+    try {
+      const res = await fetch(
+        `${API_BASE_URL}/admin/settings/branding/cursor-pointer-light`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        },
+      );
+
+      if (res.status === 401) {
+        router.replace("/auth/login");
+        return;
+      }
+
+      if (!res.ok) {
+        const payload = (await res.json()) as { message?: string };
+        setError(payload?.message ?? "Неуспешно качване на cursor файла.");
+        return;
+      }
+
+      const data = (await res.json()) as { url?: string };
+      if (typeof data.url !== "string") {
+        setError("Неуспешно качване на cursor файла.");
+        return;
+      }
+
+      setCursorPointerLightUrl(data.url);
+      await persistBrandingField(
+        { cursorPointerLightUrl: data.url },
+        "Hover cursor (light) файлът е качен и запазен. Refesh-ни страницата за да се приложи навсякъде.",
+      );
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Неуспешно качване на cursor файла.",
+      );
+    }
+  };
+
+  const handleCursorPointerDarkFileSelected: ChangeEventHandler<
+    HTMLInputElement
+  > = async (event) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) {
+      return;
+    }
+
+    const token = getAccessToken();
+    if (!token) {
+      router.replace("/auth/login");
+      return;
+    }
+
+    setError(null);
+    setSuccess(null);
+
+    const previousUrl = (cursorPointerDarkUrl ?? "").trim();
+    const formData = new FormData();
+    formData.append("file", files[0]);
+    if (previousUrl.length > 0) {
+      formData.append("previousUrl", previousUrl);
+    }
+
+    try {
+      const res = await fetch(
+        `${API_BASE_URL}/admin/settings/branding/cursor-pointer-dark`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        },
+      );
+
+      if (res.status === 401) {
+        router.replace("/auth/login");
+        return;
+      }
+
+      if (!res.ok) {
+        const payload = (await res.json()) as { message?: string };
+        setError(payload?.message ?? "Неуспешно качване на cursor файла.");
+        return;
+      }
+
+      const data = (await res.json()) as { url?: string };
+      if (typeof data.url !== "string") {
+        setError("Неуспешно качване на cursor файла.");
+        return;
+      }
+
+      setCursorPointerDarkUrl(data.url);
+      await persistBrandingField(
+        { cursorPointerDarkUrl: data.url },
+        "Hover cursor (dark) файлът е качен и запазен. Refesh-ни страницата за да се приложи навсякъде.",
+      );
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Неуспешно качване на cursor файла.",
+      );
+    }
+  };
+
   const handleBrandingFaviconUploadClick = () => {
     if (faviconFileInputRef.current) {
       faviconFileInputRef.current.value = "";
@@ -4661,160 +6872,6 @@ export default function AdminSettingsPage() {
     }
   };
 
-  const persistSeoField = async (
-    patch: Record<string, unknown>,
-    successMessage: string,
-  ) => {
-    const token = getAccessToken();
-    if (!token) {
-      router.replace("/auth/login");
-      return;
-    }
-
-    setError(null);
-    setSuccess(null);
-
-    try {
-      const res = await fetch(`${API_BASE_URL}/admin/settings`, {
-        method: "PATCH",
-        cache: "no-store",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          seo: patch,
-        }),
-      });
-
-      if (res.status === 401) {
-        router.replace("/auth/login");
-        return;
-      }
-
-      if (!res.ok) {
-        setError("Неуспешно запазване на SEO настройките.");
-        return;
-      }
-
-      const updated = (await res.json()) as AdminSettingsResponse;
-      const s = updated.seo;
-      setSeoBaseUrl(s?.baseUrl ?? "");
-      setSeoTitleTemplate(s?.titleTemplate ?? "{page} | {site}");
-      setSeoDefaultTitle(s?.defaultTitle ?? "");
-      setSeoDefaultDescription(s?.defaultDescription ?? "");
-      setSeoRobotsIndex(s?.robots?.index !== false);
-      setSeoSitemapEnabled(s?.sitemap?.enabled !== false);
-      setSeoSitemapIncludeWiki(s?.sitemap?.includeWiki !== false);
-      setSeoSitemapIncludeCourses(s?.sitemap?.includeCourses !== false);
-      setSeoSitemapIncludeLegal(s?.sitemap?.includeLegal !== false);
-      setSeoOpenGraphTitle(s?.openGraph?.defaultTitle ?? "");
-      setSeoOpenGraphDescription(s?.openGraph?.defaultDescription ?? "");
-      setSeoOpenGraphImageUrl(s?.openGraph?.imageUrl ?? "");
-      setSeoTwitterTitle(s?.twitter?.defaultTitle ?? "");
-      setSeoTwitterDescription(s?.twitter?.defaultDescription ?? "");
-      setSeoTwitterImageUrl(s?.twitter?.imageUrl ?? "");
-      setSeoTwitterCard(s?.twitter?.card ?? "summary_large_image");
-
-      setSuccess(successMessage);
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Неуспешно запазване на SEO настройките.",
-      );
-    }
-  };
-
-  const handleSeoOpenGraphUploadClick = () => {
-    if (seoOpenGraphFileInputRef.current) {
-      seoOpenGraphFileInputRef.current.value = "";
-      seoOpenGraphFileInputRef.current.click();
-    }
-  };
-
-  const handleSeoTwitterUploadClick = () => {
-    if (seoTwitterFileInputRef.current) {
-      seoTwitterFileInputRef.current.value = "";
-      seoTwitterFileInputRef.current.click();
-    }
-  };
-
-  const handleSeoImageSelected = async (
-    purpose: "open-graph" | "twitter",
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const files = event.target.files;
-    if (!files || files.length === 0) {
-      return;
-    }
-
-    const token = getAccessToken();
-    if (!token) {
-      router.replace("/auth/login");
-      return;
-    }
-
-    setError(null);
-    setSuccess(null);
-
-    const previousUrl =
-      purpose === "twitter"
-        ? (seoTwitterImageUrl ?? "").trim()
-        : (seoOpenGraphImageUrl ?? "").trim();
-
-    const formData = new FormData();
-    formData.append("file", files[0]);
-    formData.append("purpose", purpose);
-    if (previousUrl.length > 0) {
-      formData.append("previousUrl", previousUrl);
-    }
-
-    try {
-      const res = await fetch(`${API_BASE_URL}/admin/settings/seo/image`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      });
-
-      if (res.status === 401) {
-        router.replace("/auth/login");
-        return;
-      }
-
-      if (!res.ok) {
-        setError("Неуспешно качване на SEO image.");
-        return;
-      }
-
-      const data = (await res.json()) as { url?: string };
-      if (typeof data.url !== "string") {
-        setError("Неуспешно качване на SEO image.");
-        return;
-      }
-
-      if (purpose === "twitter") {
-        setSeoTwitterImageUrl(data.url);
-        await persistSeoField(
-          { twitter: { imageUrl: data.url } },
-          "Twitter image е качен и запазен.",
-        );
-      } else {
-        setSeoOpenGraphImageUrl(data.url);
-        await persistSeoField(
-          { openGraph: { imageUrl: data.url } },
-          "Open Graph image е качен и запазен.",
-        );
-      }
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Неуспешно качване на SEO image.",
-      );
-    }
-  };
-
   const persistBrandingField = async (
     patch: Record<string, unknown>,
     successMessage: string,
@@ -4852,14 +6909,10 @@ export default function AdminSettingsPage() {
       }
 
       if (!res.ok) {
-        if (noticeScope === "theme") {
-          setThemeNotice({
-            type: "error",
-            message: "Неуспешно запазване на branding настройките.",
-          });
-        } else {
-          setError("Неуспешно запазване на branding настройките.");
-        }
+        const payload = (await res.json()) as { message?: string };
+        setError(
+          payload?.message ?? "Неуспешно запазване на branding настройките.",
+        );
         return;
       }
 
@@ -4873,6 +6926,15 @@ export default function AdminSettingsPage() {
       setFontUrlByLang(
         sanitizeStringDictionary(updated.branding?.fontUrlByLang),
       );
+      setLoginSocialUnavailableMessageEnabled(
+        updated.branding?.loginSocialUnavailableMessageEnabled !== false,
+      );
+      setLoginSocialResetPasswordHintEnabled(
+        updated.branding?.loginSocialResetPasswordHintEnabled !== false,
+      );
+      setRegisterSocialUnavailableMessageEnabled(
+        updated.branding?.registerSocialUnavailableMessageEnabled !== false,
+      );
       setCustomThemePresets(
         sanitizeCustomThemePresets(updated.branding?.customThemePresets),
       );
@@ -4880,6 +6942,15 @@ export default function AdminSettingsPage() {
       setLogoUrl(updated.branding?.logoUrl ?? "");
       setLogoLightUrl(updated.branding?.logoLightUrl ?? "");
       setLogoDarkUrl(updated.branding?.logoDarkUrl ?? "");
+      setFooterSocialLinks(
+        sanitizeFooterSocialLinks(updated.branding?.footerSocialLinks ?? null),
+      );
+      setSocialLoginIcons(
+        updated.branding?.socialLoginIcons &&
+          typeof updated.branding.socialLoginIcons === "object"
+          ? (updated.branding.socialLoginIcons as never)
+          : {},
+      );
       {
         const modeRaw = updated.branding?.theme?.mode ?? "system";
         const mode =
@@ -4911,6 +6982,12 @@ export default function AdminSettingsPage() {
       setCursorUrl(updated.branding?.cursorUrl ?? "");
       setCursorLightUrl(updated.branding?.cursorLightUrl ?? "");
       setCursorDarkUrl(updated.branding?.cursorDarkUrl ?? "");
+      setCursorPointerUrl(updated.branding?.cursorPointerUrl ?? "");
+      setCursorPointerLightUrl(updated.branding?.cursorPointerLightUrl ?? "");
+      setCursorPointerDarkUrl(updated.branding?.cursorPointerDarkUrl ?? "");
+      setFooterSocialLinks(
+        sanitizeFooterSocialLinks(updated.branding?.footerSocialLinks ?? null),
+      );
       setCursorHotspotX(
         typeof updated.branding?.cursorHotspot?.x === "number"
           ? String(updated.branding.cursorHotspot.x)
@@ -5390,6 +7467,7 @@ export default function AdminSettingsPage() {
   const [auth, setAuth] = useState(true);
   const [authLogin, setAuthLogin] = useState(true);
   const [authRegister, setAuthRegister] = useState(true);
+  const [auth2fa, setAuth2fa] = useState(false);
   const [captcha, setCaptcha] = useState(false);
   const [captchaLogin, setCaptchaLogin] = useState<boolean>(false);
   const [captchaRegister, setCaptchaRegister] = useState<boolean>(false);
@@ -5398,15 +7476,184 @@ export default function AdminSettingsPage() {
   const [captchaChangePassword, setCaptchaChangePassword] =
     useState<boolean>(false);
   const [paidCourses, setPaidCourses] = useState<boolean>(true);
-  const [gdprLegal, setGdprLegal] = useState<boolean>(true);
   const [socialGoogle, setSocialGoogle] = useState<boolean>(true);
   const [socialFacebook, setSocialFacebook] = useState<boolean>(true);
   const [socialGithub, setSocialGithub] = useState<boolean>(true);
   const [socialLinkedin, setSocialLinkedin] = useState<boolean>(true);
   const [infraRedis, setInfraRedis] = useState<boolean>(false);
+  const [infraRedisUrl, setInfraRedisUrl] = useState<string>("");
   const [infraRabbitmq, setInfraRabbitmq] = useState<boolean>(false);
+  const [infraRabbitmqUrl, setInfraRabbitmqUrl] = useState<string>("");
   const [infraMonitoring, setInfraMonitoring] = useState<boolean>(true);
+  const [infraMonitoringUrl, setInfraMonitoringUrl] = useState<string>("");
   const [infraErrorTracking, setInfraErrorTracking] = useState<boolean>(false);
+  const [infraErrorTrackingUrl, setInfraErrorTrackingUrl] =
+    useState<string>("");
+
+  const infraMonitoringUrlRef = useRef<HTMLInputElement | null>(null);
+  const infraRedisUrlRef = useRef<HTMLInputElement | null>(null);
+  const infraRabbitmqUrlRef = useRef<HTMLInputElement | null>(null);
+  const infraErrorTrackingUrlRef = useRef<HTMLInputElement | null>(null);
+
+  const poweredByBeeLmsUrlRef = useRef<HTMLInputElement | null>(null);
+  const footerSocialUrlRefs = useRef<Record<string, HTMLInputElement | null>>(
+    {},
+  );
+
+  const [infraToggleErrors, setInfraToggleErrors] = useState<
+    Partial<
+      Record<
+        | "infraMonitoring"
+        | "infraRedis"
+        | "infraRabbitmq"
+        | "infraErrorTracking",
+        string
+      >
+    >
+  >({});
+  const [poweredByBeeLmsToggleError, setPoweredByBeeLmsToggleError] = useState<
+    string | null
+  >(null);
+  const [footerSocialToggleErrors, setFooterSocialToggleErrors] = useState<
+    Record<string, string | null>
+  >({});
+
+  const focusAndScroll = (el: HTMLElement | null) => {
+    if (!el) return;
+    el.focus();
+    el.scrollIntoView({ block: "center" });
+  };
+
+  const handleToggleInfra = (
+    key:
+      | "infraMonitoring"
+      | "infraRedis"
+      | "infraRabbitmq"
+      | "infraErrorTracking",
+    next: boolean,
+  ) => {
+    if (!next) {
+      setInfraToggleErrors((prev) => ({ ...prev, [key]: "" }));
+      if (key === "infraMonitoring") setInfraMonitoring(false);
+      if (key === "infraRedis") setInfraRedis(false);
+      if (key === "infraRabbitmq") setInfraRabbitmq(false);
+      if (key === "infraErrorTracking") setInfraErrorTracking(false);
+      return;
+    }
+
+    if (key === "infraMonitoring") {
+      const v = infraMonitoringUrl.trim();
+      if (!isValidHttpUrl(v)) {
+        const msg = "За да включиш Monitoring, въведи валиден http/https URL.";
+        setInfraToggleErrors((prev) => ({ ...prev, infraMonitoring: msg }));
+        setError(msg);
+        focusAndScroll(infraMonitoringUrlRef.current);
+        return;
+      }
+      setInfraToggleErrors((prev) => ({ ...prev, infraMonitoring: "" }));
+      setInfraMonitoring(true);
+      return;
+    }
+
+    if (key === "infraRedis") {
+      const v = infraRedisUrl.trim();
+      if (!isValidInfraRedisUrl(v)) {
+        const msg =
+          "За да включиш Redis, въведи redis://... или host:port (напр. localhost:6379).";
+        setInfraToggleErrors((prev) => ({ ...prev, infraRedis: msg }));
+        setError(msg);
+        focusAndScroll(infraRedisUrlRef.current);
+        return;
+      }
+      setInfraToggleErrors((prev) => ({ ...prev, infraRedis: "" }));
+      setInfraRedis(true);
+      return;
+    }
+
+    if (key === "infraRabbitmq") {
+      const v = infraRabbitmqUrl.trim();
+      if (!isValidInfraRabbitmqUrl(v)) {
+        const msg =
+          "За да включиш RabbitMQ, въведи валиден amqp/amqps URL (напр. amqp://localhost:5672).";
+        setInfraToggleErrors((prev) => ({ ...prev, infraRabbitmq: msg }));
+        setError(msg);
+        focusAndScroll(infraRabbitmqUrlRef.current);
+        return;
+      }
+      setInfraToggleErrors((prev) => ({ ...prev, infraRabbitmq: "" }));
+      setInfraRabbitmq(true);
+      return;
+    }
+
+    const v = infraErrorTrackingUrl.trim();
+    if (!isValidHttpUrl(v)) {
+      const msg =
+        "За да включиш Error tracking, въведи валиден http/https URL.";
+      setInfraToggleErrors((prev) => ({ ...prev, infraErrorTracking: msg }));
+      setError(msg);
+      focusAndScroll(infraErrorTrackingUrlRef.current);
+      return;
+    }
+    setInfraToggleErrors((prev) => ({ ...prev, infraErrorTracking: "" }));
+    setInfraErrorTracking(true);
+  };
+
+  const handleTogglePoweredByBeeLms = (next: boolean) => {
+    if (!next) {
+      setPoweredByBeeLmsToggleError(null);
+      setPoweredByBeeLmsEnabled(false);
+      return;
+    }
+
+    const trimmed = poweredByBeeLmsUrl.trim();
+    if (trimmed.length > 0 && !isValidOptionalHttpUrl(trimmed)) {
+      const msg =
+        "За да включиш Powered by BeeLMS с URL, въведи валиден http/https адрес (или изчисти URL полето).";
+      setPoweredByBeeLmsToggleError(msg);
+      setError(msg);
+      focusAndScroll(poweredByBeeLmsUrlRef.current);
+      return;
+    }
+    setPoweredByBeeLmsToggleError(null);
+    setPoweredByBeeLmsEnabled(true);
+  };
+
+  const handleToggleFooterSocialLink = (id: string, next: boolean) => {
+    const current = footerSocialLinks.find((l) => l.id === id);
+    if (!current) return;
+
+    if (!next) {
+      setFooterSocialToggleErrors((prev) => ({ ...prev, [id]: null }));
+      setFooterSocialLinks((prev) =>
+        prev.map((l) => (l.id === id ? { ...l, enabled: false } : l)),
+      );
+      return;
+    }
+
+    const url = (current.url ?? "").trim();
+    if (!url) {
+      const msg =
+        "За да активираш този линк, попълни URL (например https://...).";
+      setFooterSocialToggleErrors((prev) => ({ ...prev, [id]: msg }));
+      setError(msg);
+      focusAndScroll(footerSocialUrlRefs.current[id] ?? null);
+      return;
+    }
+
+    if (!isValidFooterSocialUrl(current.type, url)) {
+      const msg = footerSocialUrlErrorMessage(current.type);
+      setFooterSocialToggleErrors((prev) => ({ ...prev, [id]: msg }));
+      setError(msg);
+      focusAndScroll(footerSocialUrlRefs.current[id] ?? null);
+      return;
+    }
+
+    setFooterSocialToggleErrors((prev) => ({ ...prev, [id]: null }));
+    setFooterSocialLinks((prev) =>
+      prev.map((l) => (l.id === id ? { ...l, enabled: true } : l)),
+    );
+  };
+
   const [socialStatuses, setSocialStatuses] = useState<SocialProviderStatuses>(
     buildSocialStatuses(null),
   );
@@ -5498,6 +7745,24 @@ export default function AdminSettingsPage() {
   const [socialCredentialForms, setSocialCredentialForms] = useState<
     Record<SocialProvider, SocialCredentialFormState>
   >(() => buildSocialCredentialState());
+  const [socialCredentialsDirty, setSocialCredentialsDirty] = useState(false);
+  const [socialLoginIcons, setSocialLoginIcons] = useState<
+    Partial<Record<SocialProvider, SocialLoginIconConfig>>
+  >({});
+  const socialLoginIconInputRef = useRef<HTMLInputElement | null>(null);
+  const socialClientIdRefs = useRef<Record<string, HTMLInputElement | null>>(
+    {},
+  );
+  const socialRedirectUriRefs = useRef<Record<string, HTMLInputElement | null>>(
+    {},
+  );
+  const socialClientSecretRefs = useRef<
+    Record<string, HTMLInputElement | null>
+  >({});
+  const [pendingSocialLoginIconUpload, setPendingSocialLoginIconUpload] =
+    useState<{ provider: SocialProvider; variant: "light" | "dark" } | null>(
+      null,
+    );
   const [socialFieldErrors, setSocialFieldErrors] = useState<
     Record<SocialProvider, SocialFieldErrors>
   >(() => buildSocialFieldErrors());
@@ -5528,7 +7793,15 @@ export default function AdminSettingsPage() {
       (acc, provider) => {
         const warnings: string[] = [];
         const enabled = socialFeatureStates[provider];
+        const configured = socialStatuses?.[provider]?.configured ?? false;
         if (!enabled) {
+          acc[provider] = warnings;
+          return acc;
+        }
+
+        // Ако backend казва, че доставчикът е configured (env или stored creds),
+        // не показваме предупреждения за липсващи полета във формата.
+        if (configured) {
           acc[provider] = warnings;
           return acc;
         }
@@ -5565,7 +7838,7 @@ export default function AdminSettingsPage() {
       },
       {} as Record<SocialProvider, string[]>,
     );
-  }, [socialCredentialForms, socialFeatureStates]);
+  }, [socialCredentialForms, socialFeatureStates, socialStatuses]);
 
   const clearSocialFieldError = (
     provider: SocialProvider,
@@ -5626,6 +7899,7 @@ export default function AdminSettingsPage() {
     if (!confirmed) {
       return;
     }
+    setSocialCredentialsDirty(true);
     setSocialCredentialForms((prev) => ({
       ...prev,
       [provider]: {
@@ -5638,6 +7912,7 @@ export default function AdminSettingsPage() {
   };
 
   const cancelSecretDeletion = (provider: SocialProvider) => {
+    setSocialCredentialsDirty(true);
     setSocialCredentialForms((prev) => ({
       ...prev,
       [provider]: {
@@ -5655,6 +7930,7 @@ export default function AdminSettingsPage() {
     if (!confirmed) {
       return;
     }
+    setSocialCredentialsDirty(true);
     setSocialCredentialForms((prev) => {
       const current = prev[provider];
       const shouldClearSecret = current.hasClientSecret
@@ -5787,8 +8063,69 @@ export default function AdminSettingsPage() {
       if (!confirmed) {
         return;
       }
+      clearSocialFieldError(provider, "clientId");
+      clearSocialFieldError(provider, "redirectUri");
+      clearSocialFieldError(provider, "clientSecret");
+      socialFeatureSetters[provider](false);
+      return;
     }
-    socialFeatureSetters[provider](nextValue);
+
+    const label = SOCIAL_PROVIDER_LABELS[provider];
+    const form = socialCredentialForms[provider];
+    const status = socialStatuses?.[provider];
+    const configured = status?.configured ?? false;
+
+    if (!configured) {
+      const clientId = form.clientId.trim();
+      const redirectUri = form.redirectUri.trim();
+      const hasNewSecret = form.clientSecretInput.trim().length > 0;
+      const hasStoredSecret = form.hasClientSecret && !form.clearSecret;
+
+      if (!clientId) {
+        const msg = `За да активираш ${label}, въведи Client ID.`;
+        setSocialFieldError(provider, "clientId", msg);
+        setError(msg);
+        focusAndScroll(socialClientIdRefs.current[provider] ?? null);
+        return;
+      }
+
+      if (!redirectUri) {
+        const msg = `За да активираш ${label}, въведи Redirect URL.`;
+        setSocialFieldError(provider, "redirectUri", msg);
+        setError(msg);
+        focusAndScroll(socialRedirectUriRefs.current[provider] ?? null);
+        return;
+      }
+
+      if (!isValidRedirectUrl(redirectUri)) {
+        const msg = `Redirect URL за ${label} е невалиден (трябва http/https).`;
+        setSocialFieldError(provider, "redirectUri", msg);
+        setError(msg);
+        focusAndScroll(socialRedirectUriRefs.current[provider] ?? null);
+        return;
+      }
+
+      if (form.clearSecret) {
+        const msg = `Не можеш да активираш ${label} със secret за изтриване. Изключи изтриването или въведи нов secret.`;
+        setSocialFieldError(provider, "clientSecret", msg);
+        setError(msg);
+        focusAndScroll(socialClientSecretRefs.current[provider] ?? null);
+        return;
+      }
+
+      if (!hasNewSecret && !hasStoredSecret) {
+        const msg = `За да активираш ${label}, въведи Client secret.`;
+        setSocialFieldError(provider, "clientSecret", msg);
+        setError(msg);
+        focusAndScroll(socialClientSecretRefs.current[provider] ?? null);
+        return;
+      }
+    }
+
+    clearSocialFieldError(provider, "clientId");
+    clearSocialFieldError(provider, "redirectUri");
+    clearSocialFieldError(provider, "clientSecret");
+    socialFeatureSetters[provider](true);
   };
 
   const [supportedLangs, setSupportedLangs] = useState<string[]>([
@@ -5798,6 +8135,199 @@ export default function AdminSettingsPage() {
   ]);
   const [languageDraft, setLanguageDraft] = useState<string>("");
   const [defaultLang, setDefaultLang] = useState<string>("bg");
+  const [languageIcons, setLanguageIcons] = useState<
+    NonNullable<InstanceLanguages["icons"]>
+  >({});
+  const [languageFlagPickerGlobal, setLanguageFlagPickerGlobal] =
+    useState<string>("");
+  const [languageFlagPickerByLang, setLanguageFlagPickerByLang] = useState<
+    Record<string, string>
+  >({});
+
+  const languageIconInputRef = useRef<HTMLInputElement | null>(null);
+  const [pendingLanguageIconUpload, setPendingLanguageIconUpload] = useState<{
+    lang: string;
+    variant: "light" | "dark";
+  } | null>(null);
+
+  const languageDraftAnalysis = useMemo(
+    () => analyzeLanguageDraft(languageDraft),
+    [languageDraft],
+  );
+
+  const persistLanguagesField = async (
+    patch: Record<string, unknown>,
+    successMessage: string,
+  ) => {
+    const token = getAccessToken();
+    if (!token) {
+      router.replace("/auth/login");
+      return;
+    }
+
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/admin/settings`, {
+        method: "PATCH",
+        cache: "no-store",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          languages: patch,
+        }),
+      });
+
+      if (res.status === 401) {
+        router.replace("/auth/login");
+        return;
+      }
+
+      if (!res.ok) {
+        const payload = (await res.json()) as { message?: string };
+        setError(payload?.message ?? "Неуспешно запазване на languages.");
+        return;
+      }
+
+      const updated = (await res.json()) as AdminSettingsResponse;
+      const l = updated.languages;
+      setSupportedLangs(Array.isArray(l?.supported) ? l.supported : ["bg"]);
+      setDefaultLang(l?.default ?? "bg");
+      setLanguageIcons(
+        l?.icons && typeof l.icons === "object" ? (l.icons as never) : {},
+      );
+      setLanguageFlagPickerGlobal((l?.flagPicker?.global ?? "").trim());
+      setLanguageFlagPickerByLang(() => {
+        const raw = l?.flagPicker?.byLang;
+        const next: Record<string, string> = {};
+        if (raw && typeof raw === "object") {
+          for (const [k, v] of Object.entries(raw)) {
+            if (typeof v === "string" && v.trim().length > 0) {
+              next[(k ?? "").trim().toLowerCase()] = v.trim().toLowerCase();
+            }
+          }
+        }
+        return next;
+      });
+      setSuccess(successMessage);
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Неуспешно запазване на languages.",
+      );
+    }
+  };
+
+  const handleLanguageIconUploadClick = (
+    lang: string,
+    variant: "light" | "dark",
+  ) => {
+    const normalizedLang = (lang ?? "").trim().toLowerCase();
+    if (!normalizedLang) return;
+    if (languageIconInputRef.current) {
+      languageIconInputRef.current.value = "";
+      setPendingLanguageIconUpload({ lang: normalizedLang, variant });
+      languageIconInputRef.current.click();
+    }
+  };
+
+  const handleLanguageIconSelected: ChangeEventHandler<
+    HTMLInputElement
+  > = async (event) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) {
+      return;
+    }
+
+    const pending = pendingLanguageIconUpload;
+    if (!pending) {
+      return;
+    }
+
+    const token = getAccessToken();
+    if (!token) {
+      router.replace("/auth/login");
+      return;
+    }
+
+    setError(null);
+    setSuccess(null);
+
+    const current = languageIcons?.[pending.lang] ?? null;
+    const previousUrl =
+      pending.variant === "dark"
+        ? (current?.darkUrl ?? "").trim()
+        : (current?.lightUrl ?? "").trim();
+
+    const formData = new FormData();
+    formData.append("file", files[0]);
+    formData.append("lang", pending.lang);
+    formData.append("variant", pending.variant);
+    if (previousUrl.length > 0) {
+      formData.append("previousUrl", previousUrl);
+    }
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/admin/settings/languages/icon`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (res.status === 401) {
+        router.replace("/auth/login");
+        return;
+      }
+
+      if (!res.ok) {
+        let message = "Неуспешно качване на language icon.";
+        try {
+          const payload = (await res.json()) as { message?: string };
+          if (payload?.message) message = payload.message;
+        } catch {
+          // ignore
+        }
+        setError(message);
+        return;
+      }
+
+      const data = (await res.json()) as { url?: string };
+      if (typeof data.url !== "string") {
+        setError("Неуспешно качване на language icon.");
+        return;
+      }
+
+      const nextIcons = {
+        ...(languageIcons ?? {}),
+        [pending.lang]: {
+          ...(languageIcons?.[pending.lang] ?? null),
+          ...(pending.variant === "dark"
+            ? { darkUrl: data.url }
+            : { lightUrl: data.url }),
+        },
+      } as NonNullable<InstanceLanguages["icons"]>;
+
+      setLanguageIcons(nextIcons);
+      await persistLanguagesField(
+        { icons: { [pending.lang]: nextIcons[pending.lang] } },
+        `Language icon (${pending.lang}, ${pending.variant}) е качен и запазен.`,
+      );
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Неуспешно качване на language icon.",
+      );
+    } finally {
+      setPendingLanguageIconUpload(null);
+    }
+  };
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -5841,13 +8371,14 @@ export default function AdminSettingsPage() {
 
         setAppName(data.branding?.appName ?? "BeeLMS");
         setBrowserTitle(data.branding?.browserTitle ?? "");
-        setNotFoundTitle(data.branding?.notFoundTitle ?? "");
-        setNotFoundMarkdown(data.branding?.notFoundMarkdown ?? "");
-        setNotFoundTitleByLang(
-          sanitizeStringDictionary(data.branding?.notFoundTitleByLang),
+        setLoginSocialUnavailableMessageEnabled(
+          data.branding?.loginSocialUnavailableMessageEnabled !== false,
         );
-        setNotFoundMarkdownByLang(
-          sanitizeStringDictionary(data.branding?.notFoundMarkdownByLang),
+        setLoginSocialResetPasswordHintEnabled(
+          data.branding?.loginSocialResetPasswordHintEnabled !== false,
+        );
+        setRegisterSocialUnavailableMessageEnabled(
+          data.branding?.registerSocialUnavailableMessageEnabled !== false,
         );
         setSocialDescription(data.branding?.socialDescription ?? "");
         setFaviconUrl(data.branding?.faviconUrl ?? "");
@@ -5888,6 +8419,13 @@ export default function AdminSettingsPage() {
         setCursorUrl(data.branding?.cursorUrl ?? "");
         setCursorLightUrl(data.branding?.cursorLightUrl ?? "");
         setCursorDarkUrl(data.branding?.cursorDarkUrl ?? "");
+        setCursorPointerUrl(data.branding?.cursorPointerUrl ?? "");
+        setCursorPointerLightUrl(data.branding?.cursorPointerLightUrl ?? "");
+        setCursorPointerDarkUrl(data.branding?.cursorPointerDarkUrl ?? "");
+        setPoweredByBeeLmsEnabled(
+          data.branding?.poweredByBeeLms?.enabled === true,
+        );
+        setPoweredByBeeLmsUrl(data.branding?.poweredByBeeLms?.url ?? "");
         setCursorHotspotX(
           typeof data.branding?.cursorHotspot?.x === "number"
             ? String(data.branding.cursorHotspot.x)
@@ -5912,6 +8450,9 @@ export default function AdminSettingsPage() {
         setOpenGraphTitle(data.branding?.openGraph?.title ?? "");
         setOpenGraphDescription(data.branding?.openGraph?.description ?? "");
         setOpenGraphImageUrl(data.branding?.openGraph?.imageUrl ?? "");
+        setFooterSocialLinks(
+          sanitizeFooterSocialLinks(data.branding?.footerSocialLinks ?? null),
+        );
         setTwitterTitle(data.branding?.twitter?.title ?? "");
         setTwitterDescription(data.branding?.twitter?.description ?? "");
         setTwitterImageUrl(data.branding?.twitter?.imageUrl ?? "");
@@ -5993,26 +8534,46 @@ export default function AdminSettingsPage() {
         setAuth(f?.auth !== false);
         setAuthLogin(f?.authLogin !== false);
         setAuthRegister(f?.authRegister !== false);
+        setAuth2fa(Boolean(f?.auth2fa));
         setCaptcha(Boolean(f?.captcha));
         setCaptchaLogin(Boolean(f?.captchaLogin));
         setCaptchaRegister(Boolean(f?.captchaRegister));
         setCaptchaForgotPassword(Boolean(f?.captchaForgotPassword));
         setCaptchaChangePassword(Boolean(f?.captchaChangePassword));
         setPaidCourses(f?.paidCourses !== false);
-        setGdprLegal(f?.gdprLegal !== false);
         setSocialGoogle(f?.socialGoogle !== false);
         setSocialFacebook(f?.socialFacebook !== false);
         setSocialGithub(f?.socialGithub !== false);
         setSocialLinkedin(f?.socialLinkedin !== false);
         setInfraRedis(Boolean(f?.infraRedis));
+        setInfraRedisUrl(
+          typeof f?.infraRedisUrl === "string" ? f.infraRedisUrl : "",
+        );
         setInfraRabbitmq(Boolean(f?.infraRabbitmq));
+        setInfraRabbitmqUrl(
+          typeof f?.infraRabbitmqUrl === "string" ? f.infraRabbitmqUrl : "",
+        );
         setInfraMonitoring(f?.infraMonitoring !== false);
+        setInfraMonitoringUrl(
+          typeof f?.infraMonitoringUrl === "string" ? f.infraMonitoringUrl : "",
+        );
         setInfraErrorTracking(Boolean(f?.infraErrorTracking));
+        setInfraErrorTrackingUrl(
+          typeof f?.infraErrorTrackingUrl === "string"
+            ? f.infraErrorTrackingUrl
+            : "",
+        );
 
         setInitialFeatures(f ?? null);
         setSocialStatuses(buildSocialStatuses(data.socialProviders ?? null));
         setSocialCredentialForms(
           buildSocialCredentialState(data.socialCredentials),
+        );
+        setSocialLoginIcons(
+          data.branding?.socialLoginIcons &&
+            typeof data.branding.socialLoginIcons === "object"
+            ? (data.branding.socialLoginIcons as never)
+            : {},
         );
         setSocialTestStates(buildSocialTestStates());
 
@@ -6027,18 +8588,27 @@ export default function AdminSettingsPage() {
           setSeoSitemapIncludeWiki(s?.sitemap?.includeWiki !== false);
           setSeoSitemapIncludeCourses(s?.sitemap?.includeCourses !== false);
           setSeoSitemapIncludeLegal(s?.sitemap?.includeLegal !== false);
-          setSeoOpenGraphTitle(s?.openGraph?.defaultTitle ?? "");
-          setSeoOpenGraphDescription(s?.openGraph?.defaultDescription ?? "");
-          setSeoOpenGraphImageUrl(s?.openGraph?.imageUrl ?? "");
-          setSeoTwitterTitle(s?.twitter?.defaultTitle ?? "");
-          setSeoTwitterDescription(s?.twitter?.defaultDescription ?? "");
-          setSeoTwitterImageUrl(s?.twitter?.imageUrl ?? "");
-          setSeoTwitterCard(s?.twitter?.card ?? "summary_large_image");
         }
 
         const l = data.languages;
         setSupportedLangs(Array.isArray(l?.supported) ? l.supported : ["bg"]);
         setDefaultLang(l?.default ?? "bg");
+        setLanguageIcons(
+          l?.icons && typeof l.icons === "object" ? (l.icons as never) : {},
+        );
+        setLanguageFlagPickerGlobal((l?.flagPicker?.global ?? "").trim());
+        setLanguageFlagPickerByLang(() => {
+          const raw = l?.flagPicker?.byLang;
+          const next: Record<string, string> = {};
+          if (raw && typeof raw === "object") {
+            for (const [k, v] of Object.entries(raw)) {
+              if (typeof v === "string" && v.trim().length > 0) {
+                next[(k ?? "").trim().toLowerCase()] = v.trim().toLowerCase();
+              }
+            }
+          }
+          return next;
+        });
       } catch {
         if (!cancelled) {
           setError("Възникна грешка при връзката със сървъра.");
@@ -6069,7 +8639,29 @@ export default function AdminSettingsPage() {
       return;
     }
 
-    const nextAppName = (appName ?? "").trim();
+    if (appNameValidation) {
+      setError(appNameValidation);
+      return;
+    }
+
+    const invalidFooterUrl = footerSocialLinks.find((l) => {
+      const trimmed = (l.url ?? "").trim();
+      if (!trimmed) return false;
+      return !isValidFooterSocialUrl(l.type, trimmed);
+    });
+    if (invalidFooterUrl) {
+      setError(
+        `Footer social link URL е невалиден (${invalidFooterUrl.id}). ${footerSocialUrlErrorMessage(invalidFooterUrl.type)}`,
+      );
+      return;
+    }
+
+    if (poweredByBeeLmsEnabled && !isValidOptionalHttpUrl(poweredByBeeLmsUrl)) {
+      setError("Powered by BeeLMS URL е невалиден.");
+      return;
+    }
+
+    const nextAppName = normalizedAppName;
     if (nextAppName.length < 2) {
       setError("App name трябва да е поне 2 символа.");
       return;
@@ -6094,14 +8686,6 @@ export default function AdminSettingsPage() {
     };
 
     const nextBrowserTitle = normalizeNullableString(browserTitle);
-    const nextNotFoundTitle = normalizeNullableString(notFoundTitle);
-    const nextNotFoundMarkdown = normalizeNullableString(notFoundMarkdown);
-    const nextNotFoundTitleByLang =
-      Object.keys(notFoundTitleByLang).length > 0 ? notFoundTitleByLang : null;
-    const nextNotFoundMarkdownByLang =
-      Object.keys(notFoundMarkdownByLang).length > 0
-        ? notFoundMarkdownByLang
-        : null;
     const nextFaviconUrl = normalizeNullableString(faviconUrl);
     const nextFontUrl = normalizeNullableString(fontUrl);
     const nextLogoUrl = normalizeNullableString(logoUrl);
@@ -6110,10 +8694,19 @@ export default function AdminSettingsPage() {
     const nextCursorUrl = normalizeNullableString(cursorUrl);
     const nextCursorLightUrl = normalizeNullableString(cursorLightUrl);
     const nextCursorDarkUrl = normalizeNullableString(cursorDarkUrl);
+    const nextCursorPointerUrl = normalizeNullableString(cursorPointerUrl);
+    const nextCursorPointerLightUrl = normalizeNullableString(
+      cursorPointerLightUrl,
+    );
+    const nextCursorPointerDarkUrl =
+      normalizeNullableString(cursorPointerDarkUrl);
     const nextCursorHotspotX = normalizeNullableNumber(cursorHotspotX);
     const nextCursorHotspotY = normalizeNullableNumber(cursorHotspotY);
     const nextSocialImageUrl = normalizeNullableString(socialImageUrl);
     const nextSocialDescription = normalizeNullableString(socialDescription);
+    const nextFooterSocialLinks =
+      normalizeFooterSocialLinksForSave(footerSocialLinks);
+    const nextPoweredByBeeLmsUrl = normalizeNullableString(poweredByBeeLmsUrl);
     const nextOpenGraphTitle = normalizeNullableString(openGraphTitle);
     const nextOpenGraphDescription =
       normalizeNullableString(openGraphDescription);
@@ -6250,6 +8843,8 @@ export default function AdminSettingsPage() {
       scrollTrack: normalizeNullableHex(themeLight.scrollTrack),
       fieldOkBg: normalizeNullableHex(themeLight.fieldOkBg),
       fieldOkBorder: normalizeNullableHex(themeLight.fieldOkBorder),
+      fieldAlertBg: normalizeNullableHex(themeLight.fieldAlertBg),
+      fieldAlertBorder: normalizeNullableHex(themeLight.fieldAlertBorder),
       fieldErrorBg: normalizeNullableHex(themeLight.fieldErrorBg),
       fieldErrorBorder: normalizeNullableHex(themeLight.fieldErrorBorder),
     };
@@ -6265,6 +8860,8 @@ export default function AdminSettingsPage() {
       scrollTrack: normalizeNullableHex(themeDark.scrollTrack),
       fieldOkBg: normalizeNullableHex(themeDark.fieldOkBg),
       fieldOkBorder: normalizeNullableHex(themeDark.fieldOkBorder),
+      fieldAlertBg: normalizeNullableHex(themeDark.fieldAlertBg),
+      fieldAlertBorder: normalizeNullableHex(themeDark.fieldAlertBorder),
       fieldErrorBg: normalizeNullableHex(themeDark.fieldErrorBg),
       fieldErrorBorder: normalizeNullableHex(themeDark.fieldErrorBorder),
     };
@@ -6285,7 +8882,6 @@ export default function AdminSettingsPage() {
     const wasAuthEnabled = initialFeatures?.auth !== false;
     const wasAuthLoginEnabled = initialFeatures?.authLogin !== false;
     const wasAuthRegisterEnabled = initialFeatures?.authRegister !== false;
-    const wasGdprEnabled = initialFeatures?.gdprLegal !== false;
     const socialDisables: string[] = [];
     if (initialFeatures?.socialGoogle !== false && socialGoogle === false) {
       socialDisables.push("Google");
@@ -6321,16 +8917,17 @@ export default function AdminSettingsPage() {
       if (!ok) return;
     }
 
-    if (wasGdprEnabled && gdprLegal === false) {
-      const ok = window.confirm(
-        "Сигурен ли си, че искаш да изключиш GDPR/Legal? Това ще скрие legal навигация и ще disable-не GDPR export/delete.",
-      );
-      if (!ok) return;
-    }
-
     for (const provider of SOCIAL_PROVIDERS) {
       const enabled = socialFeatureStates[provider];
       if (!enabled) continue;
+
+      const configured = socialStatuses?.[provider]?.configured ?? false;
+      if (configured) {
+        // Конфигурацията е налична чрез env или stored creds.
+        // Не изискваме form полетата да са попълнени.
+        continue;
+      }
+
       const form = socialCredentialForms[provider];
       const label = SOCIAL_PROVIDER_LABELS[provider];
       const clientId = form.clientId.trim();
@@ -6365,7 +8962,8 @@ export default function AdminSettingsPage() {
 
     // Social OAuth конфигурацията не трябва да блокира запазването на останалите настройки
     // (напр. Theme). Ако има грешки, НЕ пращаме socialCredentials, но продължаваме със Save.
-    const shouldPersistSocialCredentials = !hasFieldErrors;
+    const shouldPersistSocialCredentials =
+      socialCredentialsDirty && !hasFieldErrors;
 
     setSaving(true);
 
@@ -6415,10 +9013,10 @@ export default function AdminSettingsPage() {
           branding: {
             appName: nextAppName,
             browserTitle: nextBrowserTitle,
-            notFoundTitle: nextNotFoundTitle,
-            notFoundMarkdown: nextNotFoundMarkdown,
-            notFoundTitleByLang: nextNotFoundTitleByLang,
-            notFoundMarkdownByLang: nextNotFoundMarkdownByLang,
+            poweredByBeeLms: {
+              enabled: poweredByBeeLmsEnabled,
+              url: poweredByBeeLmsEnabled ? nextPoweredByBeeLmsUrl : null,
+            },
             faviconUrl: nextFaviconUrl,
             fontUrl: nextFontUrl,
             theme: {
@@ -6432,11 +9030,15 @@ export default function AdminSettingsPage() {
             cursorUrl: nextCursorUrl,
             cursorLightUrl: nextCursorLightUrl,
             cursorDarkUrl: nextCursorDarkUrl,
+            cursorPointerUrl: nextCursorPointerUrl,
+            cursorPointerLightUrl: nextCursorPointerLightUrl,
+            cursorPointerDarkUrl: nextCursorPointerDarkUrl,
             cursorHotspot: nextCursorHotspot,
             socialImage: nextSocialImage,
             openGraph: nextOpenGraph,
             twitter: nextTwitter,
             socialDescription: nextSocialDescription,
+            footerSocialLinks: nextFooterSocialLinks,
           },
           features: {
             wiki,
@@ -6453,21 +9055,25 @@ export default function AdminSettingsPage() {
             auth,
             authLogin,
             authRegister,
+            auth2fa,
             captcha,
             captchaLogin,
             captchaRegister,
             captchaForgotPassword,
             captchaChangePassword,
             paidCourses,
-            gdprLegal,
             socialGoogle,
             socialFacebook,
             socialGithub,
             socialLinkedin,
             infraRedis,
+            infraRedisUrl: infraRedisUrl.trim() || null,
             infraRabbitmq,
+            infraRabbitmqUrl: infraRabbitmqUrl.trim() || null,
             infraMonitoring,
+            infraMonitoringUrl: infraMonitoringUrl.trim() || null,
             infraErrorTracking,
+            infraErrorTrackingUrl: infraErrorTrackingUrl.trim() || null,
           },
           seo: {
             baseUrl: normalizeNullableString(seoBaseUrl),
@@ -6483,25 +9089,25 @@ export default function AdminSettingsPage() {
               includeCourses: seoSitemapIncludeCourses,
               includeLegal: seoSitemapIncludeLegal,
             },
-            openGraph: {
-              defaultTitle: normalizeNullableString(seoOpenGraphTitle),
-              defaultDescription: normalizeNullableString(
-                seoOpenGraphDescription,
-              ),
-              imageUrl: normalizeNullableString(seoOpenGraphImageUrl),
-            },
-            twitter: {
-              card: seoTwitterCard,
-              defaultTitle: normalizeNullableString(seoTwitterTitle),
-              defaultDescription: normalizeNullableString(
-                seoTwitterDescription,
-              ),
-              imageUrl: normalizeNullableString(seoTwitterImageUrl),
-            },
           },
           languages: {
             supported: supportedLangs,
             default: nextDefaultLang,
+            icons:
+              Object.keys(languageIcons ?? {}).length > 0
+                ? languageIcons
+                : null,
+            flagPicker:
+              (languageFlagPickerGlobal ?? "").trim().length > 0 ||
+              Object.keys(languageFlagPickerByLang ?? {}).length > 0
+                ? {
+                    global: (languageFlagPickerGlobal ?? "").trim() || null,
+                    byLang:
+                      Object.keys(languageFlagPickerByLang ?? {}).length > 0
+                        ? languageFlagPickerByLang
+                        : null,
+                  }
+                : null,
           },
           socialCredentials:
             shouldPersistSocialCredentials &&
@@ -6527,6 +9133,7 @@ export default function AdminSettingsPage() {
       setSocialCredentialForms(
         buildSocialCredentialState(updated.socialCredentials),
       );
+      setSocialCredentialsDirty(false);
       setCustomThemePresets(
         sanitizeCustomThemePresets(updated.branding?.customThemePresets),
       );
@@ -6535,20 +9142,15 @@ export default function AdminSettingsPage() {
       setGoogleFont(updated.branding?.googleFont ?? "");
       setFontUrl(updated.branding?.fontUrl ?? "");
       setFontLicenseUrl(updated.branding?.fontLicenseUrl ?? "");
-      setNotFoundTitle(updated.branding?.notFoundTitle ?? "");
-      setNotFoundMarkdown(updated.branding?.notFoundMarkdown ?? "");
-      setNotFoundTitleByLang(
-        sanitizeStringDictionary(updated.branding?.notFoundTitleByLang),
-      );
-      setNotFoundMarkdownByLang(
-        sanitizeStringDictionary(updated.branding?.notFoundMarkdownByLang),
-      );
       setLogoUrl(updated.branding?.logoUrl ?? "");
       setLogoLightUrl(updated.branding?.logoLightUrl ?? "");
       setLogoDarkUrl(updated.branding?.logoDarkUrl ?? "");
       setCursorUrl(updated.branding?.cursorUrl ?? "");
       setCursorLightUrl(updated.branding?.cursorLightUrl ?? "");
       setCursorDarkUrl(updated.branding?.cursorDarkUrl ?? "");
+      setCursorPointerUrl(updated.branding?.cursorPointerUrl ?? "");
+      setCursorPointerLightUrl(updated.branding?.cursorPointerLightUrl ?? "");
+      setCursorPointerDarkUrl(updated.branding?.cursorPointerDarkUrl ?? "");
       setCursorHotspotX(
         typeof updated.branding?.cursorHotspot?.x === "number"
           ? String(updated.branding.cursorHotspot.x)
@@ -6621,6 +9223,243 @@ export default function AdminSettingsPage() {
     if (cursorDarkFileInputRef.current) {
       cursorDarkFileInputRef.current.value = "";
       cursorDarkFileInputRef.current.click();
+    }
+  };
+
+  const handleCursorPointerUploadClick = () => {
+    if (cursorPointerFileInputRef.current) {
+      cursorPointerFileInputRef.current.value = "";
+      cursorPointerFileInputRef.current.click();
+    }
+  };
+
+  const handleCursorPointerLightUploadClick = () => {
+    if (cursorPointerLightFileInputRef.current) {
+      cursorPointerLightFileInputRef.current.value = "";
+      cursorPointerLightFileInputRef.current.click();
+    }
+  };
+
+  const handleCursorPointerDarkUploadClick = () => {
+    if (cursorPointerDarkFileInputRef.current) {
+      cursorPointerDarkFileInputRef.current.value = "";
+      cursorPointerDarkFileInputRef.current.click();
+    }
+  };
+
+  const handleFooterSocialIconUploadClick = (
+    id: string,
+    variant: "light" | "dark",
+  ) => {
+    if (footerSocialIconInputRef.current) {
+      footerSocialIconInputRef.current.value = "";
+      setPendingFooterSocialIconUpload({ id, variant });
+      footerSocialIconInputRef.current.click();
+    }
+  };
+
+  const handleFooterSocialIconSelected: ChangeEventHandler<
+    HTMLInputElement
+  > = async (event) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) {
+      return;
+    }
+
+    const pending = pendingFooterSocialIconUpload;
+    if (!pending) {
+      return;
+    }
+
+    const token = getAccessToken();
+    if (!token) {
+      router.replace("/auth/login");
+      return;
+    }
+
+    setError(null);
+    setSuccess(null);
+
+    const currentLink = footerSocialLinks.find((l) => l.id === pending.id);
+    const previousUrl =
+      pending.variant === "dark"
+        ? (currentLink?.iconDarkUrl ?? "").trim()
+        : (currentLink?.iconLightUrl ?? "").trim();
+
+    const formData = new FormData();
+    formData.append("file", files[0]);
+    formData.append("id", pending.id);
+    formData.append("variant", pending.variant);
+    if (previousUrl.length > 0) {
+      formData.append("previousUrl", previousUrl);
+    }
+
+    try {
+      const res = await fetch(
+        `${API_BASE_URL}/admin/settings/branding/footer-social-icon`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        },
+      );
+
+      if (res.status === 401) {
+        router.replace("/auth/login");
+        return;
+      }
+
+      if (!res.ok) {
+        let message = "Неуспешно качване на footer social icon.";
+        try {
+          const payload = (await res.json()) as { message?: string };
+          if (payload?.message) message = payload.message;
+        } catch {
+          // ignore
+        }
+        setError(message);
+        return;
+      }
+
+      const data = (await res.json()) as { url?: string };
+      if (typeof data.url !== "string") {
+        setError("Неуспешно качване на footer social icon.");
+        return;
+      }
+
+      const nextList = footerSocialLinks.map((l) =>
+        l.id === pending.id
+          ? pending.variant === "dark"
+            ? { ...l, iconDarkUrl: data.url }
+            : { ...l, iconLightUrl: data.url }
+          : l,
+      );
+      setFooterSocialLinks(nextList);
+      await persistBrandingField(
+        { footerSocialLinks: nextList },
+        `Footer social icon (${pending.variant}) е качен и запазен.`,
+      );
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Неуспешно качване на footer social icon.",
+      );
+    } finally {
+      setPendingFooterSocialIconUpload(null);
+    }
+  };
+
+  const handleSocialLoginIconUploadClick = (
+    provider: SocialProvider,
+    variant: "light" | "dark",
+  ) => {
+    if (!socialLoginIconInputRef.current) {
+      return;
+    }
+    socialLoginIconInputRef.current.value = "";
+    setPendingSocialLoginIconUpload({ provider, variant });
+    socialLoginIconInputRef.current.click();
+  };
+
+  const handleSocialLoginIconSelected: ChangeEventHandler<
+    HTMLInputElement
+  > = async (event) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) {
+      return;
+    }
+
+    const pending = pendingSocialLoginIconUpload;
+    if (!pending) {
+      return;
+    }
+
+    const token = getAccessToken();
+    if (!token) {
+      router.replace("/auth/login");
+      return;
+    }
+
+    setError(null);
+    setSuccess(null);
+
+    const current = socialLoginIcons?.[pending.provider] ?? null;
+    const previousUrl =
+      pending.variant === "dark"
+        ? (current?.darkUrl ?? "").trim()
+        : (current?.lightUrl ?? "").trim();
+
+    const formData = new FormData();
+    formData.append("file", files[0]);
+    formData.append("provider", pending.provider);
+    formData.append("variant", pending.variant);
+    if (previousUrl.length > 0) {
+      formData.append("previousUrl", previousUrl);
+    }
+
+    try {
+      const res = await fetch(
+        `${API_BASE_URL}/admin/settings/branding/social-login-icon`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        },
+      );
+
+      if (res.status === 401) {
+        router.replace("/auth/login");
+        return;
+      }
+
+      if (!res.ok) {
+        let message = "Неуспешно качване на social login icon.";
+        try {
+          const payload = (await res.json()) as { message?: string };
+          if (payload?.message) message = payload.message;
+        } catch {
+          // ignore
+        }
+        setError(message);
+        return;
+      }
+
+      const data = (await res.json()) as { url?: string };
+      if (typeof data.url !== "string") {
+        setError("Неуспешно качване на social login icon.");
+        return;
+      }
+
+      const nextIcons = {
+        ...(socialLoginIcons ?? {}),
+        [pending.provider]: {
+          ...(socialLoginIcons?.[pending.provider] ?? null),
+          ...(pending.variant === "dark"
+            ? { darkUrl: data.url }
+            : { lightUrl: data.url }),
+        },
+      } as Partial<Record<SocialProvider, SocialLoginIconConfig>>;
+
+      setSocialLoginIcons(nextIcons);
+      await persistBrandingField(
+        {
+          socialLoginIcons: { [pending.provider]: nextIcons[pending.provider] },
+        },
+        `Social login icon (${pending.provider}, ${pending.variant}) е качен и запазен.`,
+      );
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Неуспешно качване на social login icon.",
+      );
+    } finally {
+      setPendingSocialLoginIconUpload(null);
     }
   };
 
@@ -6940,12 +9779,6 @@ export default function AdminSettingsPage() {
 
       {loading && <p className="text-sm text-zinc-600">Зареждане...</p>}
 
-      {!loading && error && (
-        <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          {error}
-        </div>
-      )}
-
       {!loading && (
         <div className="space-y-6">
           <AccordionSection
@@ -6959,7 +9792,7 @@ export default function AdminSettingsPage() {
                   <div className="space-y-2">
                     <p>
                       Настройки за визуалната идентичност на системата – име,
-                      404 страница, theme, favicon/logo, шрифтове и курсор.
+                      theme, favicon/logo, шрифтове и курсор.
                     </p>
                     <p className="text-xs text-gray-500">
                       Промените влизат в сила след &quot;Запази&quot;.
@@ -6989,147 +9822,17 @@ export default function AdminSettingsPage() {
                 placeholder="BeeLMS"
                 disabled={saving}
               />
-            </div>
-
-            <div className="mt-6 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <p className="text-xs uppercase tracking-wide text-gray-500">
-                    404 Page
-                  </p>
-                  <p className="text-sm text-gray-700">
-                    Редактирай глобалната 404 страница (title + Markdown
-                    съдържание).
-                  </p>
-                </div>
-                <InfoTooltip
-                  label="404 page info"
-                  title="404 Page"
-                  description="Това съдържание се показва при несъществуващ URL. Промените влизат в сила след Save."
-                />
-              </div>
-
-              <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div>
-                  <label className="flex items-center justify-between gap-2 text-sm font-medium text-gray-700">
-                    <span className="flex items-center gap-2">
-                      <span>Language override</span>
-                      <InfoTooltip
-                        label="404 language override info"
-                        title="Language override"
-                        description="Избери за кой език редактираш 404 текста. Ако за даден език липсва override, ще се ползва Global (default)."
-                      />
-                    </span>
-                  </label>
-                  <select
-                    value={notFoundEditingLang}
-                    onChange={(e) => setNotFoundEditingLang(e.target.value)}
-                    disabled={saving}
-                    className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
-                  >
-                    <option value="__global">Global (default)</option>
-                    {supportedLangs.map((lang) => (
-                      <option key={lang} value={lang}>
-                        {lang}
-                      </option>
-                    ))}
-                  </select>
-
-                  <label className="flex items-center justify-between gap-2 text-sm font-medium text-gray-700">
-                    <span className="flex items-center gap-2">
-                      <span>404 title</span>
-                      <InfoTooltip
-                        label="404 title info"
-                        title="404 title"
-                        description="Заглавието на 404 страницата. Може да е различно по езици чрез Language override."
-                      />
-                    </span>
-                  </label>
-                  <input
-                    value={
-                      notFoundEditingLang === "__global"
-                        ? notFoundTitle
-                        : (notFoundTitleByLang[notFoundEditingLang] ?? "")
-                    }
-                    onChange={(e) => {
-                      const v = e.target.value;
-                      if (notFoundEditingLang === "__global") {
-                        setNotFoundTitle(v);
-                        return;
-                      }
-                      setNotFoundTitleByLang((prev) =>
-                        upsertStringDictionary(prev, notFoundEditingLang, v),
-                      );
-                    }}
-                    className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
-                    placeholder="Страницата не е намерена"
-                    disabled={saving}
-                  />
-
-                  <label className="mt-4 flex items-center justify-between gap-2 text-sm font-medium text-gray-700">
-                    <span className="flex items-center gap-2">
-                      <span>404 markdown</span>
-                      <InfoTooltip
-                        label="404 markdown info"
-                        title="404 markdown"
-                        description="Markdown съдържание за 404 страницата. Поддържа линкове, списъци и др. Ако override е празен, се използва Global."
-                      />
-                    </span>
-                  </label>
-                  <textarea
-                    value={
-                      notFoundEditingLang === "__global"
-                        ? notFoundMarkdown
-                        : (notFoundMarkdownByLang[notFoundEditingLang] ?? "")
-                    }
-                    onChange={(e) => {
-                      const v = e.target.value;
-                      if (notFoundEditingLang === "__global") {
-                        setNotFoundMarkdown(v);
-                        return;
-                      }
-                      setNotFoundMarkdownByLang((prev) =>
-                        upsertStringDictionary(prev, notFoundEditingLang, v),
-                      );
-                    }}
-                    rows={10}
-                    className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
-                    placeholder="Можеш да ползваш Markdown – линкове, списъци и т.н."
-                    disabled={saving}
-                  />
-                  <p className="mt-1 text-xs text-gray-500">
-                    Ако override е празно за избрания език, ще се ползва Global.
-                  </p>
-                </div>
-
-                <div>
-                  <p className="text-sm font-medium text-gray-700">Preview</p>
-                  <div className="mt-2 rounded-lg border border-gray-200 bg-white p-3">
-                    {(() => {
-                      const effectiveMarkdown =
-                        notFoundEditingLang === "__global"
-                          ? notFoundMarkdown
-                          : (notFoundMarkdownByLang[notFoundEditingLang] ??
-                              "") ||
-                            notFoundMarkdown;
-                      return effectiveMarkdown.trim().length > 0 ? (
-                        <div className="prose prose-zinc max-w-none">
-                          <WikiMarkdown content={effectiveMarkdown} />
-                        </div>
-                      ) : (
-                        <p className="text-sm text-gray-600">
-                          (Няма зададен Markdown. Ще се използва default 404
-                          текст.)
-                        </p>
-                      );
-                    })()}
-                  </div>
-                </div>
-              </div>
+              {appNameValidation ? (
+                <p className="mt-1 text-sm text-red-600">{appNameValidation}</p>
+              ) : (
+                <p className="mt-1 text-xs text-gray-500">
+                  Characters: {appNameCharsUsed}/{APP_NAME_MAX_LENGTH}
+                </p>
+              )}
             </div>
 
             <div className="mt-6">
-              <p className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+              <p className="flex items-center gap-2 text-base font-semibold text-gray-900">
                 <span>Theme</span>
                 <InfoTooltip
                   label="Theme info"
@@ -7148,18 +9851,22 @@ export default function AdminSettingsPage() {
                     />
                   </span>
                 </label>
-                <select
-                  value={themeMode}
-                  onChange={(e) =>
-                    setThemeMode(e.target.value as "light" | "dark" | "system")
-                  }
-                  disabled={saving}
-                  className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
-                >
-                  <option value="system">system</option>
-                  <option value="light">light</option>
-                  <option value="dark">dark</option>
-                </select>
+                <div className="mt-2">
+                  <ListboxSelect
+                    ariaLabel="Theme mode"
+                    value={themeMode}
+                    disabled={saving}
+                    onChange={(next) =>
+                      setThemeMode(next as "light" | "dark" | "system")
+                    }
+                    buttonClassName="flex w-full items-center justify-between gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 disabled:opacity-70"
+                    options={[
+                      { value: "system", label: "system" },
+                      { value: "light", label: "light" },
+                      { value: "dark", label: "dark" },
+                    ]}
+                  />
+                </div>
               </div>
 
               <div className="mt-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
@@ -7186,33 +9893,55 @@ export default function AdminSettingsPage() {
                       title="Apply to"
                       description="Избираш дали preset-ът да се приложи към Light, Dark или и към двете палитри."
                     />
-                    <select
-                      value={themePresetTarget}
-                      onChange={(e) => {
-                        const next = e.target.value as ThemePresetTarget;
-                        themePresetTargetRef.current = next;
-                        setThemePresetTarget(next);
-                        if (next === "light" || next === "dark") {
-                          setThemePreviewVariant(next);
-                        }
-                      }}
-                      disabled={saving}
-                      className="h-9 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
-                    >
-                      {THEME_PRESET_TARGETS.map((target) => (
-                        <option key={target} value={target}>
-                          {THEME_PRESET_TARGET_LABEL[target]}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="h-9">
+                      <ListboxSelect
+                        ariaLabel="Theme preset target"
+                        value={themePresetTarget}
+                        disabled={saving}
+                        onChange={(value) => {
+                          const next = value as ThemePresetTarget;
+                          themePresetTargetRef.current = next;
+                          setThemePresetTarget(next);
+                        }}
+                        buttonClassName="flex h-9 items-center justify-between gap-2 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 disabled:opacity-70"
+                        options={THEME_PRESET_TARGETS.map((target) => ({
+                          value: target,
+                          label: THEME_PRESET_TARGET_LABEL[target],
+                        }))}
+                      />
+                    </div>
                   </div>
                 </div>
 
-                <div className="mt-4 grid gap-3 md:grid-cols-2">
-                  {(builtInThemePresetsExpanded
-                    ? THEME_PRESETS
-                    : THEME_PRESETS.slice(0, 2)
-                  ).map((preset) => {
+                {(() => {
+                  const beePresets = THEME_PRESETS.filter((p) =>
+                    BEE_LMS_PRESET_IDS.has(p.id),
+                  );
+                  const otherPresetsSorted = [
+                    ...THEME_PRESETS.filter(
+                      (p) => !BEE_LMS_PRESET_IDS.has(p.id),
+                    ),
+                  ].sort((a, b) => {
+                    const hueA = hueFromHex(a.light.primary);
+                    const hueB = hueFromHex(b.light.primary);
+                    if (Number.isNaN(hueA) && Number.isNaN(hueB)) return 0;
+                    if (Number.isNaN(hueA)) return 1;
+                    if (Number.isNaN(hueB)) return -1;
+                    return hueA - hueB;
+                  });
+
+                  const visibleOtherPresets = builtInThemePresetsExpanded
+                    ? otherPresetsSorted
+                    : otherPresetsSorted.slice(
+                        0,
+                        OTHER_THEME_PRESETS_PREVIEW_COUNT,
+                      );
+                  const hiddenCount = Math.max(
+                    0,
+                    otherPresetsSorted.length - visibleOtherPresets.length,
+                  );
+
+                  const renderPresetCard = (preset: ThemePreset) => {
                     const isEditing = editingBuiltInThemePresetId === preset.id;
                     const lightForSwatches = isEditing
                       ? themeLight
@@ -7299,25 +10028,49 @@ export default function AdminSettingsPage() {
                         </div>
                       </div>
                     );
-                  })}
-                </div>
+                  };
 
-                {THEME_PRESETS.length > 2 ? (
-                  <div className="mt-4 flex items-center justify-center">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setBuiltInThemePresetsExpanded((prev) => !prev)
-                      }
-                      disabled={saving}
-                      className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      {builtInThemePresetsExpanded
-                        ? "Скрий"
-                        : `Покажи още (${THEME_PRESETS.length - 2})`}
-                    </button>
-                  </div>
-                ) : null}
+                  return (
+                    <div className="mt-4 space-y-4">
+                      {beePresets.length > 0 ? (
+                        <div>
+                          <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+                            beeLMS
+                          </p>
+                          <div className="mt-2 grid gap-3 md:grid-cols-2">
+                            {beePresets.map(renderPresetCard)}
+                          </div>
+                        </div>
+                      ) : null}
+
+                      <div>
+                        <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+                          Curated
+                        </p>
+                        <div className="mt-2 grid gap-3 md:grid-cols-2">
+                          {visibleOtherPresets.map(renderPresetCard)}
+                        </div>
+
+                        {hiddenCount > 0 || builtInThemePresetsExpanded ? (
+                          <div className="mt-4 flex items-center justify-center">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setBuiltInThemePresetsExpanded((prev) => !prev)
+                              }
+                              disabled={saving}
+                              className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                              {builtInThemePresetsExpanded
+                                ? "Скрий"
+                                : `Покажи още (${hiddenCount})`}
+                            </button>
+                          </div>
+                        ) : null}
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
 
               <div className="mt-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
@@ -7340,11 +10093,14 @@ export default function AdminSettingsPage() {
 
                 {themeNotice ? (
                   <div
-                    className={`mt-3 rounded-md border px-4 py-3 text-sm ${
+                    className="mt-3 rounded-md border px-4 py-3 text-sm"
+                    style={
                       themeNotice.type === "error"
-                        ? "border-red-200 bg-red-50 text-red-700"
-                        : "border-green-200 bg-green-50 text-green-700"
-                    }`}
+                        ? ERROR_NOTICE_STYLE
+                        : themeNotice.type === "alert"
+                          ? ALERT_NOTICE_STYLE
+                          : SUCCESS_NOTICE_STYLE
+                    }
                   >
                     {themeNotice.message}
                   </div>
@@ -7398,14 +10154,8 @@ export default function AdminSettingsPage() {
                     disabled={saving}
                     className="inline-flex h-10 items-center justify-center rounded-md px-4 text-sm font-semibold shadow-sm hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
                     style={{
-                      backgroundColor: (themePreviewVariant === "light"
-                        ? themeLight
-                        : themeDark
-                      ).primary,
-                      color: (themePreviewVariant === "light"
-                        ? themeLight
-                        : themeDark
-                      ).foreground,
+                      backgroundColor: "var(--primary)",
+                      color: "var(--foreground)",
                     }}
                   >
                     {editingCustomThemePresetId
@@ -7465,13 +10215,17 @@ export default function AdminSettingsPage() {
                               <div className="flex items-center gap-2">
                                 <button
                                   type="button"
-                                  onClick={() =>
-                                    handleEditCustomThemePreset(preset)
-                                  }
+                                  onClick={() => {
+                                    if (isEditing) {
+                                      void handleCreateCustomThemePreset();
+                                    } else {
+                                      handleEditCustomThemePreset(preset);
+                                    }
+                                  }}
                                   disabled={saving}
                                   className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
                                 >
-                                  Edit
+                                  {isEditing ? "Save new style" : "Edit"}
                                 </button>
                                 <button
                                   type="button"
@@ -7544,7 +10298,7 @@ export default function AdminSettingsPage() {
 
               <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
                 <div className="space-y-4">
-                  <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm lg:sticky lg:top-4">
+                  <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm lg:sticky lg:top-4 lg:z-20">
                     <div className="flex items-center justify-between gap-3">
                       <div>
                         <p className="text-xs uppercase tracking-wide text-gray-500">
@@ -7949,7 +10703,10 @@ export default function AdminSettingsPage() {
               <p className="mt-1 text-xs text-gray-500">
                 Препоръка: WOFF2 (най-добре), иначе WOFF/TTF/OTF. До ~2MB.
               </p>
-              <p className="mt-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+              <p
+                className="mt-2 rounded-md border px-3 py-2 text-xs"
+                style={ALERT_NOTICE_STYLE}
+              >
                 Качените custom font-ове трябва да са със закупен лиценз.
               </p>
 
@@ -8019,32 +10776,25 @@ export default function AdminSettingsPage() {
                 {(() => {
                   return (
                     <div className="flex flex-wrap items-center gap-2">
-                      <select
+                      <ListboxSelect
+                        ariaLabel="Google font"
                         value={googleFont}
                         disabled={saving}
-                        onChange={(e) => {
-                          const next = e.target.value;
+                        onChange={(next) => {
                           setGoogleFont(next);
                           void persistBrandingField(
                             { googleFont: next || null },
                             "Google font изборът е запазен.",
                           );
                         }}
-                        className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
-                      >
-                        <option value="">(custom upload или системен)</option>
-                        {GOOGLE_FONTS.map((f) => (
-                          <option
-                            key={f.value}
-                            value={f.value}
-                            style={f.sampleStyle}
-                            disabled={!f.supportsCyrillic}
-                          >
-                            {f.label}
-                            {!f.supportsCyrillic ? " (Latin-only)" : ""}
-                          </option>
-                        ))}
-                      </select>
+                        options={[
+                          { value: "", label: "(custom upload или системен)" },
+                          ...GOOGLE_FONTS.map((f) => ({
+                            value: f.value,
+                            label: `${f.label}${!f.supportsCyrillic ? " (Latin-only)" : ""}`,
+                          })),
+                        ]}
+                      />
                     </div>
                   );
                 })()}
@@ -8104,11 +10854,11 @@ export default function AdminSettingsPage() {
                             </span>
 
                             <div className="min-w-[240px] flex-1">
-                              <select
+                              <ListboxSelect
+                                ariaLabel={`Google font (${langCode})`}
                                 value={perLangGoogle}
                                 disabled={saving}
-                                onChange={(e) => {
-                                  const next = e.target.value;
+                                onChange={(next) => {
                                   setGoogleFontByLang((prev) =>
                                     upsertStringDictionary(
                                       prev,
@@ -8125,22 +10875,19 @@ export default function AdminSettingsPage() {
                                     `Google font (${langCode}) изборът е запазен.`,
                                   );
                                 }}
-                                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
-                              >
-                                <option value="">(use global)</option>
-                                {GOOGLE_FONTS.map((f) => (
-                                  <option
-                                    key={`${langCode}-${f.value}`}
-                                    value={f.value}
-                                    style={f.sampleStyle}
-                                    disabled={
-                                      langUsesCyrillic && !f.supportsCyrillic
-                                    }
-                                  >
-                                    {f.label}
-                                  </option>
-                                ))}
-                              </select>
+                                options={[
+                                  { value: "", label: "(use global)" },
+                                  ...GOOGLE_FONTS.filter(
+                                    (f) =>
+                                      !(
+                                        langUsesCyrillic && !f.supportsCyrillic
+                                      ),
+                                  ).map((f) => ({
+                                    value: f.value,
+                                    label: f.label,
+                                  })),
+                                ]}
+                              />
                             </div>
 
                             <button
@@ -8452,6 +11199,199 @@ export default function AdminSettingsPage() {
                 </div>
               </div>
 
+              <div className="mt-6">
+                <p className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                  <span>Hover Cursor (Links/Buttons)</span>
+                  <InfoTooltip
+                    label="Hover cursor info"
+                    title="Hover Cursor (Links/Buttons)"
+                    description="Cursor иконка, която се показва при hover върху линкове/бутони. Ако липсва, ще се използва regular cursor."
+                  />
+                </p>
+                <div className="mt-2 flex flex-wrap items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={handleCursorPointerUploadClick}
+                    disabled={saving}
+                    className="inline-flex items-center rounded-md border border-green-600 px-3 py-1.5 text-xs font-semibold text-green-700 hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    Upload hover cursor
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      void persistBrandingField(
+                        { cursorPointerUrl: null },
+                        "Hover cursor е премахнат.",
+                      );
+                    }}
+                    disabled={saving || cursorPointerUrl.trim().length === 0}
+                    className="inline-flex items-center rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    Remove
+                  </button>
+                  <input
+                    ref={cursorPointerFileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleCursorPointerFileSelected}
+                  />
+                  {cursorPointerUrl ? (
+                    <a
+                      href={cursorPointerUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center justify-center rounded-md border border-gray-200 bg-white p-1 shadow-sm hover:bg-gray-50"
+                      aria-label="Hover cursor image preview"
+                      title="Open hover cursor image"
+                    >
+                      <Image
+                        src={cursorPointerUrl}
+                        alt="Hover cursor"
+                        width={28}
+                        height={28}
+                        className="h-7 w-7"
+                        unoptimized
+                        loading="lazy"
+                      />
+                    </a>
+                  ) : (
+                    <span className="text-xs text-gray-500">(fallback)</span>
+                  )}
+                </div>
+
+                <div className="mt-6">
+                  <p className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                    <span>Hover Cursor (Light)</span>
+                    <InfoTooltip
+                      label="Hover cursor light info"
+                      title="Hover Cursor (Light)"
+                      description="Hover cursor само за Light тема. Ако липсва, използваме hover cursor (общия) или regular cursor."
+                    />
+                  </p>
+                  <div className="mt-2 flex flex-wrap items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={handleCursorPointerLightUploadClick}
+                      disabled={saving}
+                      className="inline-flex items-center rounded-md border border-green-600 px-3 py-1.5 text-xs font-semibold text-green-700 hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      Upload hover cursor (light)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        void persistBrandingField(
+                          { cursorPointerLightUrl: null },
+                          "Hover cursor (light) е премахнат.",
+                        );
+                      }}
+                      disabled={
+                        saving || cursorPointerLightUrl.trim().length === 0
+                      }
+                      className="inline-flex items-center rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      Remove
+                    </button>
+                    <input
+                      ref={cursorPointerLightFileInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleCursorPointerLightFileSelected}
+                    />
+                    {cursorPointerLightUrl ? (
+                      <a
+                        href={cursorPointerLightUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center justify-center rounded-md border border-gray-200 bg-white p-1 shadow-sm hover:bg-gray-50"
+                        aria-label="Hover cursor light image preview"
+                        title="Open hover cursor (light) image"
+                      >
+                        <Image
+                          src={cursorPointerLightUrl}
+                          alt="Hover cursor light"
+                          width={28}
+                          height={28}
+                          className="h-7 w-7"
+                          unoptimized
+                          loading="lazy"
+                        />
+                      </a>
+                    ) : (
+                      <span className="text-xs text-gray-500">(fallback)</span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="mt-6">
+                  <p className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                    <span>Hover Cursor (Dark)</span>
+                    <InfoTooltip
+                      label="Hover cursor dark info"
+                      title="Hover Cursor (Dark)"
+                      description="Hover cursor само за Dark тема. Ако липсва, използваме hover cursor (общия) или regular cursor."
+                    />
+                  </p>
+                  <div className="mt-2 flex flex-wrap items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={handleCursorPointerDarkUploadClick}
+                      disabled={saving}
+                      className="inline-flex items-center rounded-md border border-green-600 px-3 py-1.5 text-xs font-semibold text-green-700 hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      Upload hover cursor (dark)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        void persistBrandingField(
+                          { cursorPointerDarkUrl: null },
+                          "Hover cursor (dark) е премахнат.",
+                        );
+                      }}
+                      disabled={
+                        saving || cursorPointerDarkUrl.trim().length === 0
+                      }
+                      className="inline-flex items-center rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      Remove
+                    </button>
+                    <input
+                      ref={cursorPointerDarkFileInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleCursorPointerDarkFileSelected}
+                    />
+                    {cursorPointerDarkUrl ? (
+                      <a
+                        href={cursorPointerDarkUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center justify-center rounded-md border border-gray-200 bg-white p-1 shadow-sm hover:bg-gray-50"
+                        aria-label="Hover cursor dark image preview"
+                        title="Open hover cursor (dark) image"
+                      >
+                        <Image
+                          src={cursorPointerDarkUrl}
+                          alt="Hover cursor dark"
+                          width={28}
+                          height={28}
+                          className="h-7 w-7"
+                          unoptimized
+                          loading="lazy"
+                        />
+                      </a>
+                    ) : (
+                      <span className="text-xs text-gray-500">(fallback)</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
               <div className="mt-3 grid max-w-md grid-cols-2 gap-3">
                 <div>
                   <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
@@ -8605,273 +11545,498 @@ export default function AdminSettingsPage() {
                   </p>
                 ) : null}
               </div>
+
+              <div className="mt-6">
+                <p className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                  <span>Footer & Social links</span>
+                  <InfoTooltip
+                    label="Footer & Social links info"
+                    title="Footer & Social links"
+                    description="Линкове към социални мрежи във footer-а. Можеш да включваш/изключваш predefined (Facebook/X/YouTube) и да добавяш custom линкове. По желание: качи custom икони за Light/Dark."
+                  />
+                </p>
+                <p className="mt-1 text-xs text-gray-500">
+                  Промените по URL/label/enabled се записват при Save.
+                </p>
+
+                <div className="mt-3 rounded-md border border-gray-200 bg-white p-3">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <p className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                        <span>Powered by BeeLMS</span>
+                        <InfoTooltip
+                          label="Powered by BeeLMS info"
+                          title="Powered by BeeLMS"
+                          description="Показва текст във footer-а. По желание можеш да зададеш URL, който да отвори линка при клик. URL трябва да е валиден http/https адрес."
+                        />
+                      </p>
+                      <p className="mt-0.5 text-xs text-gray-500">
+                        Показва текст във footer-а. По желание можеш да зададеш
+                        URL.
+                      </p>
+                    </div>
+                    <ToggleSwitch
+                      checked={poweredByBeeLmsEnabled}
+                      disabled={saving}
+                      label="Powered by BeeLMS enabled"
+                      onChange={(next) => handleTogglePoweredByBeeLms(next)}
+                    />
+                  </div>
+                  {poweredByBeeLmsToggleError ? (
+                    <p className="mt-2 text-xs text-red-600" role="alert">
+                      {poweredByBeeLmsToggleError}
+                    </p>
+                  ) : null}
+                  <div className="mt-3 max-w-md">
+                    <label className="text-sm font-medium text-gray-700">
+                      URL (optional)
+                    </label>
+                    <input
+                      ref={poweredByBeeLmsUrlRef}
+                      value={poweredByBeeLmsUrl}
+                      onChange={(e) => setPoweredByBeeLmsUrl(e.target.value)}
+                      onInput={() => {
+                        if (poweredByBeeLmsToggleError) {
+                          setPoweredByBeeLmsToggleError(null);
+                        }
+                      }}
+                      disabled={saving || !poweredByBeeLmsEnabled}
+                      className={`mt-2 w-full rounded-md border bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:outline-none focus:ring-1 disabled:cursor-not-allowed disabled:opacity-60 ${
+                        poweredByBeeLmsUrl.trim().length > 0 &&
+                        !isValidOptionalHttpUrl(poweredByBeeLmsUrl)
+                          ? "border-red-300 focus:border-red-500 focus:ring-red-500"
+                          : "border-gray-300 focus:border-green-500 focus:ring-green-500"
+                      }`}
+                      placeholder="https://beelms.com"
+                    />
+                    {poweredByBeeLmsUrl.trim().length > 0 &&
+                    !isValidOptionalHttpUrl(poweredByBeeLmsUrl) ? (
+                      <p className="mt-1 text-xs text-red-600">
+                        Невалиден URL. Използвай http:// или https://
+                      </p>
+                    ) : null}
+                  </div>
+                </div>
+
+                <div className="mt-3 space-y-3">
+                  {footerSocialLinks.map((link) => {
+                    const isCustom = link.type === "custom";
+                    const resolvedLabel =
+                      link.label ??
+                      (link.type === "facebook"
+                        ? "Facebook"
+                        : link.type === "youtube"
+                          ? "YouTube"
+                          : link.type === "x"
+                            ? "X"
+                            : "Link");
+
+                    return (
+                      <div
+                        key={link.id}
+                        className="rounded-md border border-gray-200 bg-white p-3"
+                      >
+                        <div className="flex flex-wrap items-start justify-between gap-3">
+                          <div>
+                            <p className="text-sm font-semibold text-gray-900">
+                              {resolvedLabel}
+                            </p>
+                            <p className="mt-0.5 text-xs text-gray-500">
+                              type:{" "}
+                              <span className="font-semibold">{link.type}</span>
+                            </p>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            <ToggleSwitch
+                              checked={link.enabled !== false}
+                              disabled={saving}
+                              label={`Footer social ${link.id} enabled`}
+                              onChange={(next) =>
+                                handleToggleFooterSocialLink(link.id, next)
+                              }
+                            />
+                            {isCustom ? (
+                              <button
+                                type="button"
+                                disabled={saving}
+                                onClick={() => {
+                                  const ok = window.confirm(
+                                    "Сигурен ли си, че искаш да изтриеш този custom social link?",
+                                  );
+                                  if (!ok) return;
+                                  setFooterSocialLinks((prev) =>
+                                    prev.filter((l) => l.id !== link.id),
+                                  );
+                                }}
+                                className="inline-flex items-center rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                              >
+                                Delete
+                              </button>
+                            ) : null}
+                          </div>
+                        </div>
+
+                        <div className="mt-3 grid gap-3 md:grid-cols-2">
+                          <div>
+                            <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                              <span>ID</span>
+                              <InfoTooltip
+                                label="Footer social id info"
+                                title="ID"
+                                description="Уникален идентификатор (slug) за линка. Използва се за upload на иконите. Само малки букви/цифри, '-' и '_'."
+                              />
+                            </label>
+                            <input
+                              value={link.id}
+                              disabled={saving || !isCustom}
+                              onChange={(e) => {
+                                const next = e.target.value
+                                  .trim()
+                                  .toLowerCase();
+                                if (!next) return;
+                                if (!isValidFooterSocialId(next)) {
+                                  return;
+                                }
+                                setFooterSocialLinks((prev) => {
+                                  if (prev.some((l) => l.id === next)) {
+                                    return prev;
+                                  }
+                                  return prev.map((l) =>
+                                    l.id === link.id ? { ...l, id: next } : l,
+                                  );
+                                });
+                              }}
+                              className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 disabled:bg-gray-50"
+                            />
+                            {!isCustom ? (
+                              <p className="mt-1 text-xs text-gray-500">
+                                (predefined)
+                              </p>
+                            ) : null}
+                          </div>
+
+                          <div>
+                            <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                              <span>Label</span>
+                              <InfoTooltip
+                                label="Footer social label info"
+                                title="Label"
+                                description="Текст, който се показва до иконата във footer-а."
+                              />
+                            </label>
+                            <input
+                              value={link.label ?? ""}
+                              disabled={saving}
+                              onChange={(e) => {
+                                const v = e.target.value;
+                                setFooterSocialLinks((prev) =>
+                                  prev.map((l) =>
+                                    l.id === link.id
+                                      ? { ...l, label: v || null }
+                                      : l,
+                                  ),
+                                );
+                              }}
+                              className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                              placeholder={resolvedLabel}
+                            />
+                          </div>
+
+                          <div className="md:col-span-2">
+                            <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                              <span>URL</span>
+                              <InfoTooltip
+                                label="Footer social url info"
+                                title="URL"
+                                description="Линк към социалната мрежа. Препоръка: https://..."
+                              />
+                            </label>
+                            {(() => {
+                              const rawUrl = link.url ?? "";
+                              const trimmed = rawUrl.trim();
+                              const invalid =
+                                trimmed.length > 0 &&
+                                !isValidFooterSocialUrl(link.type, trimmed);
+                              return invalid ? (
+                                <p className="mt-1 text-xs text-red-600">
+                                  {footerSocialUrlErrorMessage(link.type)}
+                                </p>
+                              ) : null;
+                            })()}
+                            <input
+                              value={link.url ?? ""}
+                              disabled={saving}
+                              ref={(el) => {
+                                footerSocialUrlRefs.current[link.id] = el;
+                              }}
+                              onChange={(e) => {
+                                const v = e.target.value;
+                                if (footerSocialToggleErrors[link.id]) {
+                                  setFooterSocialToggleErrors((prev) => ({
+                                    ...prev,
+                                    [link.id]: null,
+                                  }));
+                                }
+                                setFooterSocialLinks((prev) =>
+                                  prev.map((l) =>
+                                    l.id === link.id
+                                      ? { ...l, url: v || null }
+                                      : l,
+                                  ),
+                                );
+                              }}
+                              className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                              placeholder="https://..."
+                            />
+                            {footerSocialToggleErrors[link.id] ? (
+                              <p
+                                className="mt-1 text-xs text-red-600"
+                                role="alert"
+                              >
+                                {footerSocialToggleErrors[link.id]}
+                              </p>
+                            ) : null}
+                          </div>
+                        </div>
+
+                        {isCustom ? (
+                          <div className="mt-4">
+                            <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                              <span>Predefined icon</span>
+                              <InfoTooltip
+                                label="Footer social icon key info"
+                                title="Predefined icon"
+                                description="Избери икона за custom линк. Ако качиш custom icon (Light/Dark), той ще има приоритет."
+                              />
+                            </label>
+                            <FooterSocialIconPicker
+                              value={link.iconKey ?? null}
+                              disabled={saving}
+                              onChange={(nextKey) => {
+                                setFooterSocialLinks((prev) =>
+                                  prev.map((l) =>
+                                    l.id === link.id
+                                      ? { ...l, iconKey: nextKey }
+                                      : l,
+                                  ),
+                                );
+                              }}
+                            />
+                          </div>
+                        ) : null}
+
+                        <div className="mt-4 grid gap-3 md:grid-cols-2">
+                          <div>
+                            <p className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                              <span>Icon (Light)</span>
+                              <InfoTooltip
+                                label="Footer social icon light info"
+                                title="Icon (Light)"
+                                description="По желание: custom икона за Light тема. Ако няма, ще се ползва built-in иконата."
+                              />
+                            </p>
+                            <div className="mt-2 flex flex-wrap items-center gap-3">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleFooterSocialIconUploadClick(
+                                    link.id,
+                                    "light",
+                                  )
+                                }
+                                disabled={saving}
+                                className="inline-flex items-center rounded-md border border-green-600 px-3 py-1.5 text-xs font-semibold text-green-700 hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-60"
+                              >
+                                Upload
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const nextList = footerSocialLinks.map((l) =>
+                                    l.id === link.id
+                                      ? { ...l, iconLightUrl: null }
+                                      : l,
+                                  );
+                                  setFooterSocialLinks(nextList);
+                                  void persistBrandingField(
+                                    { footerSocialLinks: nextList },
+                                    "Footer social icon (light) е премахнат.",
+                                  );
+                                }}
+                                disabled={
+                                  saving || !(link.iconLightUrl ?? "").trim()
+                                }
+                                className="inline-flex items-center rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                              >
+                                Remove
+                              </button>
+                              {(link.iconLightUrl ?? "").trim() ? (
+                                <a
+                                  href={link.iconLightUrl ?? ""}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="inline-flex items-center justify-center rounded-md border border-gray-200 bg-white p-1 shadow-sm hover:bg-gray-50"
+                                  aria-label="Footer icon light preview"
+                                  title="Open icon (light)"
+                                >
+                                  <Image
+                                    src={link.iconLightUrl ?? ""}
+                                    alt="Footer icon light"
+                                    width={28}
+                                    height={28}
+                                    className="h-7 w-7"
+                                    unoptimized
+                                    loading="lazy"
+                                  />
+                                </a>
+                              ) : (
+                                <span className="text-xs text-gray-500">
+                                  (built-in)
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          <div>
+                            <p className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                              <span>Icon (Dark)</span>
+                              <InfoTooltip
+                                label="Footer social icon dark info"
+                                title="Icon (Dark)"
+                                description="По желание: custom икона за Dark тема. Ако няма, ще се ползва built-in иконата."
+                              />
+                            </p>
+                            <div className="mt-2 flex flex-wrap items-center gap-3">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleFooterSocialIconUploadClick(
+                                    link.id,
+                                    "dark",
+                                  )
+                                }
+                                disabled={saving}
+                                className="inline-flex items-center rounded-md border border-green-600 px-3 py-1.5 text-xs font-semibold text-green-700 hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-60"
+                              >
+                                Upload
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const nextList = footerSocialLinks.map((l) =>
+                                    l.id === link.id
+                                      ? { ...l, iconDarkUrl: null }
+                                      : l,
+                                  );
+                                  setFooterSocialLinks(nextList);
+                                  void persistBrandingField(
+                                    { footerSocialLinks: nextList },
+                                    "Footer social icon (dark) е премахнат.",
+                                  );
+                                }}
+                                disabled={
+                                  saving || !(link.iconDarkUrl ?? "").trim()
+                                }
+                                className="inline-flex items-center rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                              >
+                                Remove
+                              </button>
+                              {(link.iconDarkUrl ?? "").trim() ? (
+                                <a
+                                  href={link.iconDarkUrl ?? ""}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="inline-flex items-center justify-center rounded-md border border-gray-200 bg-white p-1 shadow-sm hover:bg-gray-50"
+                                  aria-label="Footer icon dark preview"
+                                  title="Open icon (dark)"
+                                >
+                                  <Image
+                                    src={link.iconDarkUrl ?? ""}
+                                    alt="Footer icon dark"
+                                    width={28}
+                                    height={28}
+                                    className="h-7 w-7"
+                                    unoptimized
+                                    loading="lazy"
+                                  />
+                                </a>
+                              ) : (
+                                <span className="text-xs text-gray-500">
+                                  (built-in)
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                  <div className="pt-2">
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        disabled={saving}
+                        onClick={() => {
+                          const rawId = window.prompt(
+                            "ID за custom линк (само a-z, 0-9, '-' и '_')",
+                            `custom-${Date.now()}`,
+                          );
+                          if (rawId === null) return;
+                          const id = rawId.trim().toLowerCase();
+                          if (!id || !isValidFooterSocialId(id)) {
+                            window.alert("Невалиден ID.");
+                            return;
+                          }
+                          if (footerSocialLinks.some((l) => l.id === id)) {
+                            window.alert("ID вече съществува.");
+                            return;
+                          }
+                          setFooterSocialLinks((prev) => [
+                            ...prev,
+                            {
+                              id,
+                              type: "custom",
+                              label: "",
+                              url: null,
+                              enabled: true,
+                              iconLightUrl: null,
+                              iconDarkUrl: null,
+                            },
+                          ]);
+                        }}
+                        className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        Add custom link
+                      </button>
+                      <InfoTooltip
+                        label="Add custom link info"
+                        title="Add custom link"
+                        description="Добавя нов custom линк във footer-а. След като го добавиш, попълни Label + URL и натисни Save. ID-то се използва и за upload на иконите."
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <input
+                  ref={footerSocialIconInputRef}
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                  className="hidden"
+                  onChange={handleFooterSocialIconSelected}
+                />
+              </div>
             </div>
           </AccordionSection>
 
-          {seoEnabled ? (
-            <AccordionSection
-              title="SEO"
-              description="Safe SEO настройки за публичните страници: base URL, title template, robots, sitemap, Open Graph и Twitter."
-              headerAdornment={
-                <InfoTooltip
-                  label="SEO settings info"
-                  title="SEO"
-                  description="Тези настройки контролират метаданни за публичните страници (без HTML). Полетата са ограничени до безопасни стойности."
-                />
-              }
-              open={Boolean(openSections.seo)}
-              onToggle={() => toggleSection("seo")}
-            >
-              <div className="mt-4 max-w-2xl space-y-4">
-                <div className="space-y-1">
-                  <label className="block text-sm font-medium text-gray-900">
-                    Base URL (canonical)
-                  </label>
-                  <input
-                    value={seoBaseUrl}
-                    onChange={(e) => setSeoBaseUrl(e.target.value)}
-                    disabled={saving}
-                    placeholder="https://example.com"
-                    className="w-full rounded-md border border-gray-300 px-3 py-2"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="block text-sm font-medium text-gray-900">
-                    Title template
-                  </label>
-                  <input
-                    value={seoTitleTemplate}
-                    onChange={(e) => setSeoTitleTemplate(e.target.value)}
-                    disabled={saving}
-                    placeholder="{page} | {site}"
-                    className="w-full rounded-md border border-gray-300 px-3 py-2"
-                  />
-                  <p className="text-xs text-gray-500">
-                    Разрешени placeholders: {"{page}"} и {"{site}"}.
-                  </p>
-                </div>
-
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="space-y-1">
-                    <label className="block text-sm font-medium text-gray-900">
-                      Default title
-                    </label>
-                    <input
-                      value={seoDefaultTitle}
-                      onChange={(e) => setSeoDefaultTitle(e.target.value)}
-                      disabled={saving}
-                      className="w-full rounded-md border border-gray-300 px-3 py-2"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="block text-sm font-medium text-gray-900">
-                      Default description
-                    </label>
-                    <input
-                      value={seoDefaultDescription}
-                      onChange={(e) => setSeoDefaultDescription(e.target.value)}
-                      disabled={saving}
-                      className="w-full rounded-md border border-gray-300 px-3 py-2"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="rounded-md border border-gray-200 bg-white p-3">
-                    <p className="text-sm font-semibold text-gray-900">
-                      Robots
-                    </p>
-                    <div className="mt-2 flex items-center justify-between gap-3">
-                      <span className="text-sm text-gray-700">Index</span>
-                      <ToggleSwitch
-                        checked={seoRobotsIndex}
-                        disabled={saving}
-                        label="Robots index"
-                        onChange={(next) => setSeoRobotsIndex(next)}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="rounded-md border border-gray-200 bg-white p-3">
-                    <p className="text-sm font-semibold text-gray-900">
-                      Sitemap
-                    </p>
-                    <div className="mt-2 space-y-2">
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="text-sm text-gray-700">Enabled</span>
-                        <ToggleSwitch
-                          checked={seoSitemapEnabled}
-                          disabled={saving}
-                          label="Sitemap enabled"
-                          onChange={(next) => setSeoSitemapEnabled(next)}
-                        />
-                      </div>
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="text-sm text-gray-700">Wiki</span>
-                        <ToggleSwitch
-                          checked={seoSitemapIncludeWiki}
-                          disabled={saving}
-                          label="Sitemap wiki"
-                          onChange={(next) => setSeoSitemapIncludeWiki(next)}
-                        />
-                      </div>
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="text-sm text-gray-700">Courses</span>
-                        <ToggleSwitch
-                          checked={seoSitemapIncludeCourses}
-                          disabled={saving}
-                          label="Sitemap courses"
-                          onChange={(next) => setSeoSitemapIncludeCourses(next)}
-                        />
-                      </div>
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="text-sm text-gray-700">Legal</span>
-                        <ToggleSwitch
-                          checked={seoSitemapIncludeLegal}
-                          disabled={saving}
-                          label="Sitemap legal"
-                          onChange={(next) => setSeoSitemapIncludeLegal(next)}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="rounded-md border border-gray-200 bg-white p-3">
-                  <p className="text-sm font-semibold text-gray-900">
-                    Open Graph
-                  </p>
-                  <div className="mt-3 grid gap-3 md:grid-cols-2">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-900">
-                        Default title
-                      </label>
-                      <input
-                        value={seoOpenGraphTitle}
-                        onChange={(e) => setSeoOpenGraphTitle(e.target.value)}
-                        disabled={saving}
-                        className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-900">
-                        Default description
-                      </label>
-                      <input
-                        value={seoOpenGraphDescription}
-                        onChange={(e) =>
-                          setSeoOpenGraphDescription(e.target.value)
-                        }
-                        disabled={saving}
-                        className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2"
-                      />
-                    </div>
-                  </div>
-                  <div className="mt-3 flex flex-wrap items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={handleSeoOpenGraphUploadClick}
-                      disabled={saving}
-                      className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold hover:bg-gray-50 disabled:opacity-60"
-                    >
-                      Upload image
-                    </button>
-                    <span className="text-xs text-gray-500">
-                      {seoOpenGraphImageUrl
-                        ? seoOpenGraphImageUrl
-                        : "(no image)"}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="rounded-md border border-gray-200 bg-white p-3">
-                  <p className="text-sm font-semibold text-gray-900">Twitter</p>
-                  <div className="mt-3 grid gap-3 md:grid-cols-2">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-900">
-                        Card type
-                      </label>
-                      <select
-                        value={seoTwitterCard}
-                        onChange={(e) => setSeoTwitterCard(e.target.value)}
-                        disabled={saving}
-                        className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2"
-                      >
-                        <option value="summary">summary</option>
-                        <option value="summary_large_image">
-                          summary_large_image
-                        </option>
-                      </select>
-                    </div>
-                    <div />
-                    <div>
-                      <label className="block text-sm font-medium text-gray-900">
-                        Default title
-                      </label>
-                      <input
-                        value={seoTwitterTitle}
-                        onChange={(e) => setSeoTwitterTitle(e.target.value)}
-                        disabled={saving}
-                        className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-900">
-                        Default description
-                      </label>
-                      <input
-                        value={seoTwitterDescription}
-                        onChange={(e) =>
-                          setSeoTwitterDescription(e.target.value)
-                        }
-                        disabled={saving}
-                        className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2"
-                      />
-                    </div>
-                  </div>
-                  <div className="mt-3 flex flex-wrap items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={handleSeoTwitterUploadClick}
-                      disabled={saving}
-                      className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold hover:bg-gray-50 disabled:opacity-60"
-                    >
-                      Upload image
-                    </button>
-                    <span className="text-xs text-gray-500">
-                      {seoTwitterImageUrl ? seoTwitterImageUrl : "(no image)"}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="hidden">
-                  <input
-                    ref={seoOpenGraphFileInputRef}
-                    type="file"
-                    accept="image/png,image/jpeg,image/webp"
-                    onChange={(e) =>
-                      void handleSeoImageSelected("open-graph", e)
-                    }
-                  />
-                  <input
-                    ref={seoTwitterFileInputRef}
-                    type="file"
-                    accept="image/png,image/jpeg,image/webp"
-                    onChange={(e) => void handleSeoImageSelected("twitter", e)}
-                  />
-                </div>
-              </div>
-            </AccordionSection>
-          ) : null}
-
           <AccordionSection
-            title="Browser & Social metadata"
-            description="Управлява браузър title, споделена social снимка/описание, Open Graph/Twitter специфики, live preview и validator помощници."
+            title="Metadata & SEO"
+            description="Browser title + Social metadata (Open Graph/Twitter) и (ако е активирано) safe SEO настройки като canonical base URL, title template, robots и sitemap."
             headerAdornment={
               <InfoTooltip
-                label="Какво включва Browser & Social metadata"
-                title="Browser & Social metadata"
+                label="Какво включва Metadata & SEO"
+                title="Metadata & SEO"
                 description={
                   <div className="space-y-2">
                     <p className="text-sm">
@@ -8883,6 +12048,10 @@ export default function AdminSettingsPage() {
                       <li>
                         Поддържай Open Graph и Twitter карти (summary, app,
                         player).
+                      </li>
+                      <li>
+                        По желание: включи SEO (canonical URL, title template,
+                        robots, sitemap).
                       </li>
                       <li>
                         Виж live preview + meta snippet и бързи линкове към
@@ -8897,6 +12066,168 @@ export default function AdminSettingsPage() {
             onToggle={() => toggleSection("metadata")}
           >
             <div className="mt-4 space-y-6">
+              {seoEnabled ? (
+                <div className="rounded-lg border border-gray-200 bg-white px-4 py-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900">SEO</p>
+                      <p className="mt-1 text-xs text-gray-500">
+                        Safe SEO настройки за публичните страници.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div>
+                      <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                        <span>Base URL (canonical)</span>
+                        <InfoTooltip
+                          label="Base URL info"
+                          title="Base URL (canonical)"
+                          description="Базовият домейн за canonical URL-и. Ако е празно, системата няма да добавя canonical тагове."
+                        />
+                      </label>
+                      <input
+                        value={seoBaseUrl}
+                        onChange={(e) => setSeoBaseUrl(e.target.value)}
+                        disabled={saving}
+                        placeholder="https://example.com"
+                        className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                        <span>Title template</span>
+                        <InfoTooltip
+                          label="Title template info"
+                          title="Title template"
+                          description="Шаблон за заглавие. Позволени placeholders: {page} и {site}. Други символи се филтрират за безопасност."
+                        />
+                      </label>
+                      <input
+                        value={seoTitleTemplate}
+                        onChange={(e) => setSeoTitleTemplate(e.target.value)}
+                        disabled={saving}
+                        placeholder="{page} | {site}"
+                        className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                      />
+                      <p className="mt-1 text-xs text-gray-500">
+                        Разрешени placeholders: {"{page}"} и {"{site}"}.
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                        <span>Default title</span>
+                        <InfoTooltip
+                          label="Default title info"
+                          title="Default title"
+                          description="Fallback заглавие за страници без специфично заглавие."
+                        />
+                      </label>
+                      <input
+                        value={seoDefaultTitle}
+                        onChange={(e) => setSeoDefaultTitle(e.target.value)}
+                        disabled={saving}
+                        className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                        <span>Default description</span>
+                        <InfoTooltip
+                          label="Default description info"
+                          title="Default description"
+                          description="Fallback описание за meta description."
+                        />
+                      </label>
+                      <input
+                        value={seoDefaultDescription}
+                        onChange={(e) =>
+                          setSeoDefaultDescription(e.target.value)
+                        }
+                        disabled={saving}
+                        className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div className="rounded-md border border-gray-200 bg-white p-3">
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                          <span>Robots index</span>
+                          <InfoTooltip
+                            label="Robots index info"
+                            title="Robots index"
+                            description="Когато е изключено, системата може да задава noindex (ако има имплементация на публичните страници)."
+                          />
+                        </span>
+                        <ToggleSwitch
+                          checked={seoRobotsIndex}
+                          disabled={saving}
+                          label="Robots index"
+                          onChange={(next) => setSeoRobotsIndex(next)}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="rounded-md border border-gray-200 bg-white p-3">
+                      <p className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                        <span>Sitemap</span>
+                        <InfoTooltip
+                          label="Sitemap info"
+                          title="Sitemap"
+                          description="Контролира дали sitemap се генерира и кои секции се включват."
+                        />
+                      </p>
+                      <div className="mt-2 space-y-2">
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="text-sm text-gray-700">Enabled</span>
+                          <ToggleSwitch
+                            checked={seoSitemapEnabled}
+                            disabled={saving}
+                            label="Sitemap enabled"
+                            onChange={(next) => setSeoSitemapEnabled(next)}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="text-sm text-gray-700">Wiki</span>
+                          <ToggleSwitch
+                            checked={seoSitemapIncludeWiki}
+                            disabled={saving}
+                            label="Sitemap wiki"
+                            onChange={(next) => setSeoSitemapIncludeWiki(next)}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="text-sm text-gray-700">Courses</span>
+                          <ToggleSwitch
+                            checked={seoSitemapIncludeCourses}
+                            disabled={saving}
+                            label="Sitemap courses"
+                            onChange={(next) =>
+                              setSeoSitemapIncludeCourses(next)
+                            }
+                          />
+                        </div>
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="text-sm text-gray-700">Legal</span>
+                          <ToggleSwitch
+                            checked={seoSitemapIncludeLegal}
+                            disabled={saving}
+                            label="Sitemap legal"
+                            onChange={(next) => setSeoSitemapIncludeLegal(next)}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <p className="text-xs text-gray-500">
                   Промените в тази секция влизат в сила след Save.
@@ -9460,19 +12791,23 @@ export default function AdminSettingsPage() {
                         }
                       />
                     </label>
-                    <select
-                      value={twitterCard}
-                      onChange={(e) => setTwitterCard(e.target.value)}
-                      disabled={saving}
-                      className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
-                    >
-                      <option value="summary_large_image">
-                        summary_large_image
-                      </option>
-                      <option value="summary">summary</option>
-                      <option value="app">app</option>
-                      <option value="player">player</option>
-                    </select>
+                    <div className="mt-2">
+                      <ListboxSelect
+                        ariaLabel="Twitter card"
+                        value={twitterCard}
+                        disabled={saving}
+                        onChange={(next) => setTwitterCard(next)}
+                        options={[
+                          {
+                            value: "summary_large_image",
+                            label: "summary_large_image",
+                          },
+                          { value: "summary", label: "summary" },
+                          { value: "app", label: "app" },
+                          { value: "player", label: "player" },
+                        ]}
+                      />
+                    </div>
                   </div>
 
                   {twitterCard === "app" ? (
@@ -10250,6 +13585,25 @@ export default function AdminSettingsPage() {
 
               <div
                 className={`flex items-center gap-3 rounded-md border px-3 py-2 ${
+                  auth2fa
+                    ? "border-green-100 bg-green-50"
+                    : "border-red-100 bg-red-50"
+                }`}
+              >
+                <FeatureToggleLabel
+                  label="Auth: 2FA (TOTP)"
+                  featureKey="auth2fa"
+                />
+                <ToggleSwitch
+                  checked={auth2fa}
+                  disabled={saving || auth === false}
+                  label="Auth 2FA"
+                  onChange={(next) => setAuth2fa(next)}
+                />
+              </div>
+
+              <div
+                className={`flex items-center gap-3 rounded-md border px-3 py-2 ${
                   captcha
                     ? "border-green-100 bg-green-50"
                     : "border-red-100 bg-red-50"
@@ -10372,25 +13726,6 @@ export default function AdminSettingsPage() {
 
               <div
                 className={`flex items-center gap-3 rounded-md border px-3 py-2 ${
-                  gdprLegal
-                    ? "border-green-100 bg-green-50"
-                    : "border-red-100 bg-red-50"
-                }`}
-              >
-                <FeatureToggleLabel
-                  label="GDPR / Legal (risk)"
-                  featureKey="gdprLegal"
-                />
-                <ToggleSwitch
-                  checked={gdprLegal}
-                  disabled={saving}
-                  label="GDPR / Legal"
-                  onChange={(next) => setGdprLegal(next)}
-                />
-              </div>
-
-              <div
-                className={`flex items-center gap-3 rounded-md border px-3 py-2 ${
                   infraMonitoring
                     ? "border-green-100 bg-green-50"
                     : "border-red-100 bg-red-50"
@@ -10400,13 +13735,40 @@ export default function AdminSettingsPage() {
                   label="Infra: Monitoring"
                   featureKey="infraMonitoring"
                 />
+                <input
+                  ref={infraMonitoringUrlRef}
+                  value={infraMonitoringUrl}
+                  onChange={(e) => {
+                    if (infraToggleErrors.infraMonitoring) {
+                      setInfraToggleErrors((prev) => ({
+                        ...prev,
+                        infraMonitoring: "",
+                      }));
+                    }
+                    setInfraMonitoringUrl(e.target.value);
+                  }}
+                  disabled={saving}
+                  placeholder="https://..."
+                  className={`ml-auto w-72 rounded-md border bg-white px-2 py-1 text-xs text-gray-900 shadow-sm focus:outline-none focus:ring-1 ${
+                    infraToggleErrors.infraMonitoring
+                      ? "border-red-300 focus:border-red-500 focus:ring-red-500"
+                      : "border-gray-300 focus:border-green-500 focus:ring-green-500"
+                  }`}
+                />
                 <ToggleSwitch
                   checked={infraMonitoring}
                   disabled={saving}
                   label="Infra Monitoring"
-                  onChange={(next) => setInfraMonitoring(next)}
+                  onChange={(next) =>
+                    handleToggleInfra("infraMonitoring", next)
+                  }
                 />
               </div>
+              {infraToggleErrors.infraMonitoring ? (
+                <p className="-mt-2 text-xs text-red-600" role="alert">
+                  {infraToggleErrors.infraMonitoring}
+                </p>
+              ) : null}
 
               <div
                 className={`flex items-center gap-3 rounded-md border px-3 py-2 ${
@@ -10419,13 +13781,38 @@ export default function AdminSettingsPage() {
                   label="Infra: Redis"
                   featureKey="infraRedis"
                 />
+                <input
+                  ref={infraRedisUrlRef}
+                  value={infraRedisUrl}
+                  onChange={(e) => {
+                    if (infraToggleErrors.infraRedis) {
+                      setInfraToggleErrors((prev) => ({
+                        ...prev,
+                        infraRedis: "",
+                      }));
+                    }
+                    setInfraRedisUrl(e.target.value);
+                  }}
+                  disabled={saving}
+                  placeholder="redis://... или host:port"
+                  className={`ml-auto w-72 rounded-md border bg-white px-2 py-1 text-xs text-gray-900 shadow-sm focus:outline-none focus:ring-1 ${
+                    infraToggleErrors.infraRedis
+                      ? "border-red-300 focus:border-red-500 focus:ring-red-500"
+                      : "border-gray-300 focus:border-green-500 focus:ring-green-500"
+                  }`}
+                />
                 <ToggleSwitch
                   checked={infraRedis}
                   disabled={saving}
                   label="Infra Redis"
-                  onChange={(next) => setInfraRedis(next)}
+                  onChange={(next) => handleToggleInfra("infraRedis", next)}
                 />
               </div>
+              {infraToggleErrors.infraRedis ? (
+                <p className="-mt-2 text-xs text-red-600" role="alert">
+                  {infraToggleErrors.infraRedis}
+                </p>
+              ) : null}
 
               <div
                 className={`flex items-center gap-3 rounded-md border px-3 py-2 ${
@@ -10438,13 +13825,38 @@ export default function AdminSettingsPage() {
                   label="Infra: RabbitMQ"
                   featureKey="infraRabbitmq"
                 />
+                <input
+                  ref={infraRabbitmqUrlRef}
+                  value={infraRabbitmqUrl}
+                  onChange={(e) => {
+                    if (infraToggleErrors.infraRabbitmq) {
+                      setInfraToggleErrors((prev) => ({
+                        ...prev,
+                        infraRabbitmq: "",
+                      }));
+                    }
+                    setInfraRabbitmqUrl(e.target.value);
+                  }}
+                  disabled={saving}
+                  placeholder="amqp://..."
+                  className={`ml-auto w-72 rounded-md border bg-white px-2 py-1 text-xs text-gray-900 shadow-sm focus:outline-none focus:ring-1 ${
+                    infraToggleErrors.infraRabbitmq
+                      ? "border-red-300 focus:border-red-500 focus:ring-red-500"
+                      : "border-gray-300 focus:border-green-500 focus:ring-green-500"
+                  }`}
+                />
                 <ToggleSwitch
                   checked={infraRabbitmq}
                   disabled={saving}
                   label="Infra RabbitMQ"
-                  onChange={(next) => setInfraRabbitmq(next)}
+                  onChange={(next) => handleToggleInfra("infraRabbitmq", next)}
                 />
               </div>
+              {infraToggleErrors.infraRabbitmq ? (
+                <p className="-mt-2 text-xs text-red-600" role="alert">
+                  {infraToggleErrors.infraRabbitmq}
+                </p>
+              ) : null}
 
               <div
                 className={`flex items-center gap-3 rounded-md border px-3 py-2 ${
@@ -10457,13 +13869,40 @@ export default function AdminSettingsPage() {
                   label="Infra: Error tracking"
                   featureKey="infraErrorTracking"
                 />
+                <input
+                  ref={infraErrorTrackingUrlRef}
+                  value={infraErrorTrackingUrl}
+                  onChange={(e) => {
+                    if (infraToggleErrors.infraErrorTracking) {
+                      setInfraToggleErrors((prev) => ({
+                        ...prev,
+                        infraErrorTracking: "",
+                      }));
+                    }
+                    setInfraErrorTrackingUrl(e.target.value);
+                  }}
+                  disabled={saving}
+                  placeholder="https://..."
+                  className={`ml-auto w-72 rounded-md border bg-white px-2 py-1 text-xs text-gray-900 shadow-sm focus:outline-none focus:ring-1 ${
+                    infraToggleErrors.infraErrorTracking
+                      ? "border-red-300 focus:border-red-500 focus:ring-red-500"
+                      : "border-gray-300 focus:border-green-500 focus:ring-green-500"
+                  }`}
+                />
                 <ToggleSwitch
                   checked={infraErrorTracking}
                   disabled={saving}
                   label="Infra Error tracking"
-                  onChange={(next) => setInfraErrorTracking(next)}
+                  onChange={(next) =>
+                    handleToggleInfra("infraErrorTracking", next)
+                  }
                 />
               </div>
+              {infraToggleErrors.infraErrorTracking ? (
+                <p className="-mt-2 text-xs text-red-600" role="alert">
+                  {infraToggleErrors.infraErrorTracking}
+                </p>
+              ) : null}
             </div>
           </AccordionSection>
 
@@ -10492,12 +13931,97 @@ export default function AdminSettingsPage() {
             onToggle={() => toggleSection("social")}
           >
             <div className="mt-4 space-y-5">
+              <div className="rounded-md border border-gray-200 bg-white px-4 py-3">
+                <p className="text-sm font-semibold text-gray-900">
+                  Login съобщения (social)
+                </p>
+                <p className="mt-1 text-xs text-gray-500">
+                  Контролираш дали да се показват помощните съобщения на login
+                  страницата, когато social login е изключен или неуспешен.
+                </p>
+                <div className="mt-3 space-y-2">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="text-sm text-gray-800">
+                      Показвай “Social входовете са изключени…”
+                    </div>
+                    <ToggleSwitch
+                      checked={loginSocialUnavailableMessageEnabled}
+                      disabled={saving}
+                      label="Login social unavailable message"
+                      onChange={(next) => {
+                        setLoginSocialUnavailableMessageEnabled(next);
+                        void persistBrandingField(
+                          { loginSocialUnavailableMessageEnabled: next },
+                          next
+                            ? "Login съобщението за изключен social login е включено."
+                            : "Login съобщението за изключен social login е изключено.",
+                        );
+                      }}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="text-sm text-gray-800">
+                      Показвай “Ако social входът е изключен… (Forgot password
+                      ↗)”
+                    </div>
+                    <ToggleSwitch
+                      checked={loginSocialResetPasswordHintEnabled}
+                      disabled={saving}
+                      label="Login social reset password hint"
+                      onChange={(next) => {
+                        setLoginSocialResetPasswordHintEnabled(next);
+                        void persistBrandingField(
+                          { loginSocialResetPasswordHintEnabled: next },
+                          next
+                            ? "Login подсказката за Forgot password е включена."
+                            : "Login подсказката за Forgot password е изключена.",
+                        );
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-md border border-gray-200 bg-white px-4 py-3">
+                <p className="text-sm font-semibold text-gray-900">
+                  Register съобщения (social)
+                </p>
+                <p className="mt-1 text-xs text-gray-500">
+                  Контролираш дали да се показва съобщението на register
+                  страницата, когато social registration е изключен.
+                </p>
+                <div className="mt-3 space-y-2">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="text-sm text-gray-800">
+                      Показвай “Социалните регистрации са изключени…”
+                    </div>
+                    <ToggleSwitch
+                      checked={registerSocialUnavailableMessageEnabled}
+                      disabled={saving}
+                      label="Register social unavailable message"
+                      onChange={(next) => {
+                        setRegisterSocialUnavailableMessageEnabled(next);
+                        void persistBrandingField(
+                          { registerSocialUnavailableMessageEnabled: next },
+                          next
+                            ? "Register съобщението за изключен social register е включено."
+                            : "Register съобщението за изключен social register е изключено.",
+                        );
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+
               {SOCIAL_PROVIDERS.map((provider) => {
                 const form = socialCredentialForms[provider];
                 const status = socialStatuses?.[provider];
                 const label = SOCIAL_PROVIDER_LABELS[provider];
                 const configured = status?.configured ?? false;
                 const enabled = socialFeatureStates[provider];
+                const iconConfig = socialLoginIcons?.[provider] ?? null;
+                const iconLightUrl = (iconConfig?.lightUrl ?? "").trim();
+                const iconDarkUrl = (iconConfig?.darkUrl ?? "").trim();
                 const trimmedClientId = form.clientId.trim();
                 const trimmedRedirectUri = form.redirectUri.trim();
                 const trimmedNotes = form.notes.trim();
@@ -10506,9 +14030,10 @@ export default function AdminSettingsPage() {
                   form.hasClientSecret && !form.clearSecret;
                 const canTestConnection =
                   enabled &&
-                  trimmedClientId.length > 0 &&
-                  trimmedRedirectUri.length > 0 &&
-                  (hasSecretInput || hasStoredSecret);
+                  (configured ||
+                    (trimmedClientId.length > 0 &&
+                      trimmedRedirectUri.length > 0 &&
+                      (hasSecretInput || hasStoredSecret)));
                 const hasAnyStoredValue =
                   trimmedClientId.length > 0 ||
                   trimmedRedirectUri.length > 0 ||
@@ -10516,11 +14041,23 @@ export default function AdminSettingsPage() {
                   hasStoredSecret ||
                   hasSecretInput ||
                   form.clearSecret;
-                const secretBadgeClasses = form.clearSecret
-                  ? "bg-yellow-100 text-yellow-700"
+                const secretBadgeStyle: CSSProperties = form.clearSecret
+                  ? {
+                      backgroundColor: "var(--field-alert-bg)",
+                      borderColor: "var(--field-alert-border)",
+                      color: "var(--foreground)",
+                    }
                   : form.hasClientSecret
-                    ? "bg-green-100 text-green-700"
-                    : "bg-gray-100 text-gray-600";
+                    ? {
+                        backgroundColor: "var(--field-ok-bg)",
+                        borderColor: "var(--field-ok-border)",
+                        color: "var(--primary)",
+                      }
+                    : {
+                        backgroundColor: "var(--field-error-bg)",
+                        borderColor: "var(--field-error-border)",
+                        color: "var(--error)",
+                      };
                 const secretBadgeText = form.clearSecret
                   ? "за изтриване"
                   : form.hasClientSecret
@@ -10533,8 +14070,8 @@ export default function AdminSettingsPage() {
                   : "⚠ Не е конфигуриран – ще се използват env fallback-и ако има";
                 const testState = socialTestStates[provider];
                 const cardColorClasses = enabled
-                  ? "border-green-100 bg-green-50"
-                  : "border-red-100 bg-red-50";
+                  ? "border-green-200 bg-green-50"
+                  : "border-red-200 bg-red-50";
                 return (
                   <div
                     key={provider}
@@ -10565,11 +14102,153 @@ export default function AdminSettingsPage() {
                         </div>
                       </div>
                       <span
-                        className={`rounded-full px-3 py-1 text-xs font-semibold ${secretBadgeClasses}`}
+                        className="rounded-full border px-3 py-1 text-xs font-semibold"
+                        style={secretBadgeStyle}
                       >
                         Secret: {secretBadgeText}
                       </span>
                     </div>
+
+                    <div className="mt-3 rounded-md border border-gray-200 bg-white px-3 py-3">
+                      <p className="text-xs font-semibold text-gray-800">
+                        Social login икони (custom)
+                      </p>
+                      <p className="mt-1 text-xs text-gray-500">
+                        По желание: качи custom икони за {label}. Ако не са
+                        зададени, системата използва вградените.
+                      </p>
+
+                      <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
+                        <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2">
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-semibold text-gray-700">
+                                Light
+                              </span>
+                              {iconLightUrl.length > 0 ? (
+                                <Image
+                                  src={iconLightUrl}
+                                  alt=""
+                                  width={24}
+                                  height={24}
+                                  className="h-6 w-6 rounded bg-white object-contain"
+                                />
+                              ) : (
+                                <span className="text-xs text-gray-500">—</span>
+                              )}
+                            </div>
+                            <div className="flex flex-wrap items-center justify-end gap-2">
+                              <button
+                                type="button"
+                                disabled={saving}
+                                onClick={() =>
+                                  handleSocialLoginIconUploadClick(
+                                    provider,
+                                    "light",
+                                  )
+                                }
+                                className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                              >
+                                Upload
+                              </button>
+                              <button
+                                type="button"
+                                disabled={saving || iconLightUrl.length < 1}
+                                onClick={() => {
+                                  const ok = window.confirm(
+                                    `Премахване на light иконата за ${label}?`,
+                                  );
+                                  if (!ok) return;
+                                  setSocialLoginIcons((prev) => ({
+                                    ...(prev ?? {}),
+                                    [provider]: {
+                                      ...(prev?.[provider] ?? null),
+                                      lightUrl: null,
+                                    },
+                                  }));
+                                  void persistBrandingField(
+                                    {
+                                      socialLoginIcons: {
+                                        [provider]: { lightUrl: null },
+                                      },
+                                    },
+                                    `Social login icon (${provider}, light) е премахнат.`,
+                                  );
+                                }}
+                                className="inline-flex items-center rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2">
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-semibold text-gray-700">
+                                Dark
+                              </span>
+                              {iconDarkUrl.length > 0 ? (
+                                <Image
+                                  src={iconDarkUrl}
+                                  alt=""
+                                  width={24}
+                                  height={24}
+                                  className="h-6 w-6 rounded bg-white object-contain"
+                                />
+                              ) : (
+                                <span className="text-xs text-gray-500">—</span>
+                              )}
+                            </div>
+                            <div className="flex flex-wrap items-center justify-end gap-2">
+                              <button
+                                type="button"
+                                disabled={saving}
+                                onClick={() =>
+                                  handleSocialLoginIconUploadClick(
+                                    provider,
+                                    "dark",
+                                  )
+                                }
+                                className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                              >
+                                Upload
+                              </button>
+                              <button
+                                type="button"
+                                disabled={saving || iconDarkUrl.length < 1}
+                                onClick={() => {
+                                  const ok = window.confirm(
+                                    `Премахване на dark иконата за ${label}?`,
+                                  );
+                                  if (!ok) return;
+                                  setSocialLoginIcons((prev) => ({
+                                    ...(prev ?? {}),
+                                    [provider]: {
+                                      ...(prev?.[provider] ?? null),
+                                      darkUrl: null,
+                                    },
+                                  }));
+                                  void persistBrandingField(
+                                    {
+                                      socialLoginIcons: {
+                                        [provider]: { darkUrl: null },
+                                      },
+                                    },
+                                    `Social login icon (${provider}, dark) е премахнат.`,
+                                  );
+                                }}
+                                className="inline-flex items-center rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
                     {hasAnyStoredValue ? (
                       <div className="mt-3 flex flex-wrap gap-2">
                         <button
@@ -10636,229 +14315,236 @@ export default function AdminSettingsPage() {
                       </div>
                     ) : null}
 
-                    {enabled ? (
-                      <>
-                        <div className="mt-3">
-                          <label className="flex items-center justify-between gap-2 text-sm font-medium text-gray-700">
-                            <span className="flex items-center gap-2">
-                              <span>Бележки / инструкции (само за админи)</span>
-                              <InfoTooltip
-                                label="Social notes info"
-                                title="Бележки / инструкции"
-                                description="Вътрешни бележки за админи – не се виждат от потребители. Полезно за контакти, инструкции и къде се съхраняват ключове."
-                              />
-                            </span>
-                          </label>
-                          <textarea
-                            value={form.notes}
-                            onChange={(e) =>
-                              setSocialCredentialForms((prev) => ({
-                                ...prev,
-                                [provider]: {
-                                  ...prev[provider],
-                                  notes: e.target.value,
-                                },
-                              }))
-                            }
-                            rows={3}
-                            className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
-                            placeholder="Пример: Креденшъли в 1Password → BeeLMS Social creds. Или инструкции за запитване към IT."
-                            disabled={saving}
+                    <div className="mt-3">
+                      <label className="flex items-center justify-between gap-2 text-sm font-medium text-gray-700">
+                        <span className="flex items-center gap-2">
+                          <span>Бележки / инструкции (само за админи)</span>
+                          <InfoTooltip
+                            label="Social notes info"
+                            title="Бележки / инструкции"
+                            description="Вътрешни бележки за админи – не се виждат от потребители. Полезно за контакти, инструкции и къде се съхраняват ключове."
                           />
-                          <p className="mt-1 text-xs text-gray-500">
-                            Тези бележки не се виждат от потребители – използвай
-                            ги за вътрешни инструкции, контакти или къде се
-                            съхраняват OAuth ключовете.
-                          </p>
-                        </div>
-
-                        <div className="mt-3 rounded-md bg-gray-50 px-3 py-2 text-xs text-gray-600">
-                          {SOCIAL_PROVIDER_SCOPE_HINTS[provider]}
-                        </div>
-                        <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-                          <div>
-                            <label className="flex items-center justify-between gap-2 text-sm font-medium text-gray-700">
-                              <span className="flex items-center gap-2">
-                                <span>Client ID</span>
-                                <InfoTooltip
-                                  label="OAuth client id info"
-                                  title="Client ID"
-                                  description="OAuth Client ID от доставчика (Google/Facebook/GitHub/LinkedIn)."
-                                />
-                              </span>
-                            </label>
-                            <input
-                              value={form.clientId}
-                              onChange={(e) =>
-                                setSocialCredentialForms((prev) => ({
-                                  ...prev,
-                                  [provider]: {
-                                    ...prev[provider],
-                                    clientId: e.target.value,
-                                  },
-                                }))
-                              }
-                              onBlur={() =>
-                                clearSocialFieldError(provider, "clientId")
-                              }
-                              onInput={() =>
-                                clearSocialFieldError(provider, "clientId")
-                              }
-                              className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
-                              placeholder="например 123.apps.googleusercontent.com"
-                              spellCheck={false}
-                              disabled={saving}
-                            />
-                            {socialFieldErrors[provider]?.clientId && (
-                              <p className="mt-1 text-xs text-red-600">
-                                {socialFieldErrors[provider]?.clientId}
-                              </p>
-                            )}
-                          </div>
-
-                          <div>
-                            <label className="flex items-center justify-between gap-2 text-sm font-medium text-gray-700">
-                              <span className="flex items-center gap-2">
-                                <span>Redirect URL</span>
-                                <InfoTooltip
-                                  label="OAuth redirect url info"
-                                  title="Redirect URL"
-                                  description="Callback/Redirect URL, която трябва да е whitelisted при доставчика. Трябва да съвпада 1:1."
-                                />
-                              </span>
-                            </label>
-                            <input
-                              value={form.redirectUri}
-                              onChange={(e) =>
-                                setSocialCredentialForms((prev) => ({
-                                  ...prev,
-                                  [provider]: {
-                                    ...prev[provider],
-                                    redirectUri: e.target.value,
-                                  },
-                                }))
-                              }
-                              onBlur={() =>
-                                validateRedirectUri(provider, form.redirectUri)
-                              }
-                              onInput={(e) =>
-                                validateRedirectUri(
-                                  provider,
-                                  e.currentTarget.value,
-                                )
-                              }
-                              className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
-                              placeholder={
-                                SOCIAL_PROVIDER_REDIRECT_HINTS[provider]
-                              }
-                              spellCheck={false}
-                              disabled={saving}
-                            />
-                            <p className="mt-1 text-xs text-gray-500">
-                              Пример: {SOCIAL_PROVIDER_REDIRECT_HINTS[provider]}
-                            </p>
-                            {socialFieldErrors[provider]?.redirectUri && (
-                              <p className="mt-1 text-xs text-red-600">
-                                {socialFieldErrors[provider]?.redirectUri}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="mt-4">
-                          <label className="flex items-center justify-between gap-2 text-sm font-medium text-gray-700">
-                            <span className="flex items-center gap-2">
-                              <span>
-                                Client secret (въвеждане на нова стойност)
-                              </span>
-                              <InfoTooltip
-                                label="OAuth client secret info"
-                                title="Client secret"
-                                description="Secret ключът от доставчика. За сигурност не се показва. Можеш да зададеш нов secret, или да изтриеш стария."
-                              />
-                            </span>
-                          </label>
-                          <input
-                            type="password"
-                            value={form.clientSecretInput}
-                            disabled={
-                              saving ||
-                              (form.hasClientSecret && !form.clearSecret)
-                            }
-                            onChange={(e) =>
-                              setSocialCredentialForms((prev) => ({
-                                ...prev,
-                                [provider]: {
-                                  ...prev[provider],
-                                  clientSecretInput: e.target.value,
-                                  clearSecret: false,
-                                },
-                              }))
-                            }
-                            onInput={() =>
-                              clearSocialFieldError(provider, "clientSecret")
-                            }
-                            className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
-                            placeholder={
-                              form.hasClientSecret
-                                ? "•••••• (въведи нов secret, за да го замениш)"
-                                : "няма записан secret"
-                            }
-                            autoComplete="new-password"
-                          />
-                          {socialFieldErrors[provider]?.clientSecret && (
-                            <p className="mt-1 text-xs text-red-600">
-                              {socialFieldErrors[provider]?.clientSecret}
-                            </p>
-                          )}
-                          <p className="mt-2 text-xs text-gray-500">
-                            Стойността се изпраща еднократно и не се съхранява
-                            във фронтенда. За да зададеш нов secret, първо
-                            използвай „Изтрий запазения secret“, което ще
-                            позволи въвеждане на нова стойност.
-                          </p>
-                          {form.hasClientSecret && !form.clearSecret ? (
-                            <div className="mt-3 flex flex-wrap items-center gap-2 rounded-md border border-gray-200 bg-white px-3 py-2 text-xs text-gray-700">
-                              <span>Съществува записан secret.</span>
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  confirmDeleteStoredSecret(provider)
-                                }
-                                disabled={saving}
-                                className="inline-flex items-center rounded-md border border-red-300 px-2 py-1 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
-                              >
-                                Изтрий запазения secret
-                              </button>
-                            </div>
-                          ) : null}
-                          {form.clearSecret ? (
-                            <div className="mt-3 flex flex-wrap items-center gap-2 rounded-md border border-yellow-200 bg-yellow-50 px-3 py-2 text-xs text-yellow-900">
-                              <span>
-                                Secret ще бъде изтрит при запазване на
-                                настройките.
-                              </span>
-                              <button
-                                type="button"
-                                onClick={() => cancelSecretDeletion(provider)}
-                                disabled={saving}
-                                className="inline-flex items-center rounded-md border border-yellow-300 px-2 py-1 text-xs font-semibold text-yellow-900 hover:bg-yellow-100 disabled:cursor-not-allowed disabled:opacity-60"
-                              >
-                                Отмени
-                              </button>
-                            </div>
-                          ) : null}
-                        </div>
-                      </>
-                    ) : (
-                      <p className="mt-4 text-xs text-gray-500">
-                        За да редактираш и съхраниш креденшъли за {label},
-                        активирай доставчика.
+                        </span>
+                      </label>
+                      <textarea
+                        value={form.notes}
+                        onChange={(e) =>
+                          setSocialCredentialForms((prev) => ({
+                            ...prev,
+                            [provider]: {
+                              ...prev[provider],
+                              notes: e.target.value,
+                            },
+                          }))
+                        }
+                        onInput={() => setSocialCredentialsDirty(true)}
+                        rows={3}
+                        className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                        placeholder="Пример: Креденшъли в 1Password → BeeLMS Social creds. Или инструкции за запитване към IT."
+                        disabled={saving}
+                      />
+                      <p className="mt-1 text-xs text-gray-500">
+                        Тези бележки не се виждат от потребители – използвай ги
+                        за вътрешни инструкции, контакти или къде се съхраняват
+                        OAuth ключовете.
                       </p>
-                    )}
+                    </div>
+
+                    <div className="mt-3 rounded-md bg-gray-50 px-3 py-2 text-xs text-gray-600">
+                      {SOCIAL_PROVIDER_SCOPE_HINTS[provider]}
+                    </div>
+
+                    <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+                      <div>
+                        <label className="flex items-center justify-between gap-2 text-sm font-medium text-gray-700">
+                          <span className="flex items-center gap-2">
+                            <span>Client ID</span>
+                            <InfoTooltip
+                              label="OAuth client id info"
+                              title="Client ID"
+                              description="OAuth Client ID от доставчика (Google/Facebook/GitHub/LinkedIn)."
+                            />
+                          </span>
+                        </label>
+                        <input
+                          ref={(el) => {
+                            socialClientIdRefs.current[provider] = el;
+                          }}
+                          value={form.clientId}
+                          onChange={(e) =>
+                            setSocialCredentialForms((prev) => ({
+                              ...prev,
+                              [provider]: {
+                                ...prev[provider],
+                                clientId: e.target.value,
+                              },
+                            }))
+                          }
+                          onInput={() => {
+                            setSocialCredentialsDirty(true);
+                            clearSocialFieldError(provider, "clientId");
+                          }}
+                          onBlur={() =>
+                            clearSocialFieldError(provider, "clientId")
+                          }
+                          className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                          placeholder="например 123.apps.googleusercontent.com"
+                          spellCheck={false}
+                          disabled={saving}
+                        />
+                        {socialFieldErrors[provider]?.clientId && (
+                          <p className="mt-1 text-xs text-red-600">
+                            {socialFieldErrors[provider]?.clientId}
+                          </p>
+                        )}
+                      </div>
+
+                      <div>
+                        <label className="flex items-center justify-between gap-2 text-sm font-medium text-gray-700">
+                          <span className="flex items-center gap-2">
+                            <span>Redirect URL</span>
+                            <InfoTooltip
+                              label="OAuth redirect url info"
+                              title="Redirect URL"
+                              description="Callback/Redirect URL, която трябва да е whitelisted при доставчика. Трябва да съвпада 1:1."
+                            />
+                          </span>
+                        </label>
+                        <input
+                          ref={(el) => {
+                            socialRedirectUriRefs.current[provider] = el;
+                          }}
+                          value={form.redirectUri}
+                          onChange={(e) =>
+                            setSocialCredentialForms((prev) => ({
+                              ...prev,
+                              [provider]: {
+                                ...prev[provider],
+                                redirectUri: e.target.value,
+                              },
+                            }))
+                          }
+                          onInput={(e) => {
+                            setSocialCredentialsDirty(true);
+                            validateRedirectUri(
+                              provider,
+                              e.currentTarget.value,
+                            );
+                          }}
+                          onBlur={() =>
+                            validateRedirectUri(provider, form.redirectUri)
+                          }
+                          className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                          placeholder={SOCIAL_PROVIDER_REDIRECT_HINTS[provider]}
+                          spellCheck={false}
+                          disabled={saving}
+                        />
+                        <p className="mt-1 text-xs text-gray-500">
+                          Пример: {SOCIAL_PROVIDER_REDIRECT_HINTS[provider]}
+                        </p>
+                        {socialFieldErrors[provider]?.redirectUri && (
+                          <p className="mt-1 text-xs text-red-600">
+                            {socialFieldErrors[provider]?.redirectUri}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="mt-4">
+                      <label className="flex items-center justify-between gap-2 text-sm font-medium text-gray-700">
+                        <span className="flex items-center gap-2">
+                          <span>
+                            Client secret (въвеждане на нова стойност)
+                          </span>
+                          <InfoTooltip
+                            label="OAuth client secret info"
+                            title="Client secret"
+                            description="Secret ключът от доставчика. За сигурност не се показва. Можеш да зададеш нов secret, или да изтриеш стария."
+                          />
+                        </span>
+                      </label>
+                      <input
+                        ref={(el) => {
+                          socialClientSecretRefs.current[provider] = el;
+                        }}
+                        type="password"
+                        value={form.clientSecretInput}
+                        disabled={
+                          saving || (form.hasClientSecret && !form.clearSecret)
+                        }
+                        onChange={(e) =>
+                          setSocialCredentialForms((prev) => ({
+                            ...prev,
+                            [provider]: {
+                              ...prev[provider],
+                              clientSecretInput: e.target.value,
+                              clearSecret: false,
+                            },
+                          }))
+                        }
+                        onInput={() => {
+                          setSocialCredentialsDirty(true);
+                          clearSocialFieldError(provider, "clientSecret");
+                        }}
+                        className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                        placeholder={
+                          form.hasClientSecret
+                            ? "•••••• (въведи нов secret, за да го замениш)"
+                            : "няма записан secret"
+                        }
+                        autoComplete="new-password"
+                      />
+                      {socialFieldErrors[provider]?.clientSecret && (
+                        <p className="mt-1 text-xs text-red-600">
+                          {socialFieldErrors[provider]?.clientSecret}
+                        </p>
+                      )}
+                      <p className="mt-2 text-xs text-gray-500">
+                        Стойността се изпраща еднократно и не се съхранява във
+                        фронтенда. За да зададеш нов secret, първо използвай
+                        „Изтрий запазения secret“, което ще позволи въвеждане на
+                        нова стойност.
+                      </p>
+                      {form.hasClientSecret && !form.clearSecret ? (
+                        <div className="mt-3 flex flex-wrap items-center gap-2 rounded-md border border-gray-200 bg-white px-3 py-2 text-xs text-gray-700">
+                          <span>Съществува записан secret.</span>
+                          <button
+                            type="button"
+                            onClick={() => confirmDeleteStoredSecret(provider)}
+                            disabled={saving}
+                            className="inline-flex items-center rounded-md border border-red-300 px-2 py-1 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            Изтрий запазения secret
+                          </button>
+                        </div>
+                      ) : null}
+                      {form.clearSecret ? (
+                        <div className="mt-3 flex flex-wrap items-center gap-2 rounded-md border border-yellow-200 bg-yellow-50 px-3 py-2 text-xs text-yellow-900">
+                          <span>
+                            Secret ще бъде изтрит при запазване на настройките.
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => cancelSecretDeletion(provider)}
+                            disabled={saving}
+                            className="inline-flex items-center rounded-md border border-yellow-300 px-2 py-1 text-xs font-semibold text-yellow-900 hover:bg-yellow-100 disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            Отмени
+                          </button>
+                        </div>
+                      ) : null}
+                    </div>
                   </div>
                 );
               })}
+
+              <input
+                ref={socialLoginIconInputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                className="hidden"
+                onChange={handleSocialLoginIconSelected}
+              />
             </div>
           </AccordionSection>
 
@@ -10886,8 +14572,17 @@ export default function AdminSettingsPage() {
             onToggle={() => toggleSection("languages")}
           >
             <div className="mt-4 space-y-4">
-              <div className="flex flex-wrap items-end gap-3">
-                <div className="min-w-[240px] flex-1">
+              <input
+                ref={languageIconInputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                className="hidden"
+                onChange={handleLanguageIconSelected}
+                disabled={saving}
+              />
+
+              <div className="max-w-2xl">
+                <div className="min-w-[240px]">
                   <label className="flex items-center justify-between gap-2 text-sm font-medium text-gray-700">
                     <span className="flex items-center gap-2">
                       <span>
@@ -10900,35 +14595,64 @@ export default function AdminSettingsPage() {
                       />
                     </span>
                   </label>
-                  <input
+                  <LanguageDraftAutocomplete
                     value={languageDraft}
-                    onChange={(e) => setLanguageDraft(e.target.value)}
-                    className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
-                    placeholder="bg, en, de"
                     disabled={saving}
+                    ariaLabel="Supported language codes"
+                    placeholder="bg, en, de"
+                    flagByLang={languageFlagPickerByLang}
+                    flagGlobal={languageFlagPickerGlobal}
+                    onChange={(next) => setLanguageDraft(next)}
                   />
-                </div>
-                <button
-                  type="button"
-                  disabled={saving || languageDraft.trim().length === 0}
-                  onClick={() => {
-                    const incoming = parseSupportedLangs(languageDraft);
-                    if (incoming.length < 1) {
-                      setLanguageDraft("");
-                      return;
+                  {languageDraftAnalysis.invalid.length > 0 ? (
+                    <p className="mt-1 text-sm text-red-600">
+                      Невалидни кодове:{" "}
+                      {languageDraftAnalysis.invalid.join(", ")}
+                    </p>
+                  ) : (
+                    <p className="mt-1 text-xs text-gray-500">
+                      {languageDraft.trim().length} знака
+                    </p>
+                  )}
+
+                  <button
+                    type="button"
+                    disabled={
+                      saving ||
+                      languageDraft.trim().length === 0 ||
+                      languageDraftAnalysis.invalid.length > 0
                     }
-                    setSupportedLangs((prev) => {
-                      const merged = Array.from(
-                        new Set([...prev, ...incoming]),
-                      );
-                      return merged;
-                    });
-                    setLanguageDraft("");
-                  }}
-                  className="inline-flex items-center justify-center rounded-md bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-70"
-                >
-                  Добави
-                </button>
+                    onClick={() => {
+                      const analysis = analyzeLanguageDraft(languageDraft);
+                      const incoming = analysis.incoming;
+                      if (incoming.length < 1) {
+                        setLanguageDraft("");
+                        return;
+                      }
+
+                      const unknownCodes = analysis.unknown;
+                      if (unknownCodes.length > 0) {
+                        const confirmed = window.confirm(
+                          `Код(ове) ${unknownCodes.join(", ")} не са сред познатите предложения (ISO 639-1). Сигурен ли си, че искаш да ги добавиш?`,
+                        );
+                        if (!confirmed) {
+                          return;
+                        }
+                      }
+
+                      setSupportedLangs((prev) => {
+                        const merged = Array.from(
+                          new Set([...prev, ...incoming]),
+                        );
+                        return merged;
+                      });
+                      setLanguageDraft("");
+                    }}
+                    className="mt-2 inline-flex items-center justify-center rounded-md bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-70"
+                  >
+                    Добави
+                  </button>
+                </div>
               </div>
 
               <div className="space-y-2">
@@ -10945,6 +14669,167 @@ export default function AdminSettingsPage() {
                     <span className="text-sm font-medium text-gray-800">
                       {code}
                     </span>
+
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] text-gray-600">flag</span>
+                      <FlagCodeAutocomplete
+                        value={languageFlagPickerByLang?.[code] ?? ""}
+                        disabled={saving}
+                        ariaLabel={`Flag for ${code}`}
+                        onSelect={(rawNext) => {
+                          const next = (rawNext ?? "").trim().toLowerCase();
+                          setLanguageFlagPickerByLang((prev) => {
+                            const nextMap = { ...(prev ?? {}) };
+                            if (!next) {
+                              delete nextMap[code];
+                            } else {
+                              nextMap[code] = next;
+                            }
+                            return nextMap;
+                          });
+                          void persistLanguagesField(
+                            {
+                              flagPicker: {
+                                byLang: {
+                                  [code]: next || null,
+                                },
+                              },
+                            },
+                            `Flag (${code}) е запазен.`,
+                          );
+                        }}
+                      />
+                      {code === "en" &&
+                      !(languageFlagPickerByLang?.[code] ?? "").trim()
+                        .length ? (
+                        <button
+                          type="button"
+                          disabled={saving}
+                          onClick={() => {
+                            setLanguageFlagPickerByLang((prev) => ({
+                              ...(prev ?? {}),
+                              en: "gb",
+                            }));
+                            void persistLanguagesField(
+                              {
+                                flagPicker: {
+                                  byLang: {
+                                    en: "gb",
+                                  },
+                                },
+                              },
+                              "Flag (en) е настроен на GB.",
+                            );
+                          }}
+                          className="inline-flex items-center rounded-md border border-gray-300 bg-white px-2 py-1 text-xs font-semibold text-gray-800 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          GB
+                        </button>
+                      ) : null}
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[11px] text-gray-600">light</span>
+                        {languageIcons?.[code]?.lightUrl ? (
+                          <Image
+                            alt={`Lang ${code} light icon`}
+                            src={languageIcons[code].lightUrl}
+                            className="h-6 w-6 rounded border border-gray-200 bg-white object-contain"
+                            width={24}
+                            height={24}
+                            unoptimized
+                          />
+                        ) : (
+                          <span className="text-[11px] text-gray-500">—</span>
+                        )}
+                        <button
+                          type="button"
+                          disabled={saving}
+                          onClick={() =>
+                            handleLanguageIconUploadClick(code, "light")
+                          }
+                          className="inline-flex items-center rounded-md border border-gray-300 bg-white px-2 py-1 text-xs font-semibold text-gray-800 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          Upload
+                        </button>
+                        <button
+                          type="button"
+                          disabled={
+                            saving ||
+                            !(languageIcons?.[code]?.lightUrl ?? "").trim()
+                              .length
+                          }
+                          onClick={() => {
+                            setLanguageIcons((prev) => ({
+                              ...prev,
+                              [code]: {
+                                ...(prev?.[code] ?? null),
+                                lightUrl: null,
+                              },
+                            }));
+                            void persistLanguagesField(
+                              { icons: { [code]: { lightUrl: null } } },
+                              `Language icon (${code}, light) е премахнат.`,
+                            );
+                          }}
+                          className="inline-flex items-center rounded-md border border-gray-200 bg-white px-2 py-1 text-xs font-semibold text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          Remove
+                        </button>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <span className="text-[11px] text-gray-600">dark</span>
+                        {languageIcons?.[code]?.darkUrl ? (
+                          <Image
+                            alt={`Lang ${code} dark icon`}
+                            src={languageIcons[code].darkUrl}
+                            className="h-6 w-6 rounded border border-gray-200 bg-white object-contain"
+                            width={24}
+                            height={24}
+                            unoptimized
+                          />
+                        ) : (
+                          <span className="text-[11px] text-gray-500">—</span>
+                        )}
+                        <button
+                          type="button"
+                          disabled={saving}
+                          onClick={() =>
+                            handleLanguageIconUploadClick(code, "dark")
+                          }
+                          className="inline-flex items-center rounded-md border border-gray-300 bg-white px-2 py-1 text-xs font-semibold text-gray-800 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          Upload
+                        </button>
+                        <button
+                          type="button"
+                          disabled={
+                            saving ||
+                            !(languageIcons?.[code]?.darkUrl ?? "").trim()
+                              .length
+                          }
+                          onClick={() => {
+                            setLanguageIcons((prev) => ({
+                              ...prev,
+                              [code]: {
+                                ...(prev?.[code] ?? null),
+                                darkUrl: null,
+                              },
+                            }));
+                            void persistLanguagesField(
+                              { icons: { [code]: { darkUrl: null } } },
+                              `Language icon (${code}, dark) е премахнат.`,
+                            );
+                          }}
+                          className="inline-flex items-center rounded-md border border-gray-200 bg-white px-2 py-1 text-xs font-semibold text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+
                     <span className="ml-auto text-xs text-gray-500">
                       {code === defaultLang ? "default" : ""}
                     </span>
@@ -10980,19 +14865,13 @@ export default function AdminSettingsPage() {
                     />
                   </span>
                 </label>
-                <select
+                <DefaultLanguageDropdown
                   value={defaultLang}
-                  onChange={(e) => setDefaultLang(e.target.value)}
                   disabled={saving || supportedLangs.length < 1}
-                  className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  <option value="">—</option>
-                  {supportedLangs.map((code) => (
-                    <option key={`default-${code}`} value={code}>
-                      {code}
-                    </option>
-                  ))}
-                </select>
+                  ariaLabel="Default language"
+                  options={supportedLangs}
+                  onSelect={(next) => setDefaultLang(next)}
+                />
                 <p className="mt-2 text-xs text-gray-500">
                   Default трябва да е един от поддържаните езици.
                 </p>
@@ -11000,8 +14879,20 @@ export default function AdminSettingsPage() {
             </div>
           </AccordionSection>
 
+          {error && (
+            <div
+              className="rounded-md border px-4 py-3 text-sm"
+              style={ERROR_NOTICE_STYLE}
+            >
+              {error}
+            </div>
+          )}
+
           {success && (
-            <div className="rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+            <div
+              className="rounded-md border px-4 py-3 text-sm"
+              style={SUCCESS_NOTICE_STYLE}
+            >
               {success}
             </div>
           )}
@@ -11016,16 +14907,14 @@ export default function AdminSettingsPage() {
                 type="button"
                 onClick={handleSave}
                 disabled={saving}
-                className="inline-flex items-center justify-center rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-700 disabled:opacity-70"
+                className="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold shadow-sm hover:opacity-90 disabled:opacity-70"
+                style={{
+                  backgroundColor: "var(--primary)",
+                  color: "var(--foreground)",
+                }}
               >
                 {saving ? "Запазване..." : "Запази"}
               </button>
-              <Link
-                href="/admin"
-                className="text-sm text-green-700 hover:text-green-800"
-              >
-                Назад към админ таблото →
-              </Link>
             </div>
           </div>
         </div>

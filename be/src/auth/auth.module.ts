@@ -32,6 +32,7 @@ import { LoginProtectionInterceptor } from '../security/account-protection/login
 import { OptionalJwtAuthGuard } from './optional-jwt-auth.guard';
 import { CaptchaService } from '../security/captcha/captcha.service';
 import { SettingsModule } from '../settings/settings.module';
+import { TwoFactorAuthService } from './two-factor-auth.service';
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import { SettingsModule } from '../settings/settings.module';
   ],
   providers: [
     AuthService,
+    TwoFactorAuthService,
     AccountService,
     CaptchaService,
     JwtAuthGuard,

@@ -21,6 +21,7 @@ import { WikiService } from './wiki.service';
 import type { WikiUploadedFile } from './wiki.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { AuthorGuard } from '../auth/author.guard';
+import { AdminGuard } from '../auth/admin.guard';
 import { AdminWikiListItemDto } from './dto/admin-wiki-list-item.dto';
 import { AdminUpdateWikiArticleDto } from './dto/admin-update-wiki-article.dto';
 import { WikiArticleDetailDto } from './dto/wiki-article-detail.dto';
@@ -29,6 +30,8 @@ import { AdminUpdateWikiStatusDto } from './dto/admin-update-wiki-status.dto';
 import { AdminCreateWikiArticleDto } from './dto/admin-create-wiki-article.dto';
 import { WikiMediaItemDto } from './dto/wiki-media-item.dto';
 import { AdminAutosaveWikiDraftDto } from './dto/admin-autosave-wiki-draft.dto';
+import { AdminBulkDeleteWikiArticlesDto } from './dto/admin-bulk-delete-wiki-articles.dto';
+import { AdminBulkUpdateWikiStatusDto } from './dto/admin-bulk-update-wiki-status.dto';
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -41,6 +44,17 @@ interface AuthenticatedRequest extends Request {
 @UseGuards(JwtAuthGuard, AuthorGuard)
 export class AdminWikiController {
   constructor(private readonly wikiService: WikiService) {}
+
+  @Get('articles/count')
+  async getCount(@Req() req: AuthenticatedRequest): Promise<{ total: number }> {
+    const userId = req.user?.userId;
+    if (!userId) {
+      throw new UnauthorizedException('Authenticated user not found');
+    }
+
+    const total = await this.wikiService.getAdminArticlesCount(userId);
+    return { total };
+  }
 
   @Get('articles')
   async findAll(
@@ -121,6 +135,58 @@ export class AdminWikiController {
     }
 
     await this.wikiService.adminUpdateArticleStatus(userId, id, dto.status);
+  }
+
+  @Patch('articles/status/bulk')
+  @HttpCode(200)
+  async bulkUpdateArticleStatus(
+    @Req() req: AuthenticatedRequest,
+    @Body() dto: AdminBulkUpdateWikiStatusDto,
+  ): Promise<{ updated: number }> {
+    const userId = req.user?.userId;
+    if (!userId) {
+      throw new UnauthorizedException('Authenticated user not found');
+    }
+
+    const updated = await this.wikiService.adminBulkUpdateArticleStatus(
+      userId,
+      dto.ids,
+      dto.status,
+    );
+    return { updated };
+  }
+
+  @Delete('articles/bulk')
+  @HttpCode(200)
+  async bulkDeleteArticles(
+    @Req() req: AuthenticatedRequest,
+    @Body() dto: AdminBulkDeleteWikiArticlesDto,
+  ): Promise<{ deleted: number }> {
+    const userId = req.user?.userId;
+    if (!userId) {
+      throw new UnauthorizedException('Authenticated user not found');
+    }
+
+    const deleted = await this.wikiService.adminBulkDeleteArticles(
+      userId,
+      dto.ids,
+    );
+    return { deleted };
+  }
+
+  @Delete('articles/purge-all')
+  @UseGuards(AdminGuard)
+  @HttpCode(200)
+  async purgeAllArticles(
+    @Req() req: AuthenticatedRequest,
+  ): Promise<{ deleted: number }> {
+    const userId = req.user?.userId;
+    if (!userId) {
+      throw new UnauthorizedException('Authenticated user not found');
+    }
+
+    const deleted = await this.wikiService.adminPurgeAllArticles(userId);
+    return { deleted };
   }
 
   @Delete('articles/:id')

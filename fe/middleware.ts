@@ -4,7 +4,9 @@ import { normalizeLang } from "./src/i18n/config";
 
 function shouldSkip(pathname: string): boolean {
   return (
-    pathname.startsWith("/_next") ||
+    pathname.startsWith("/_next/static") ||
+    pathname.startsWith("/_next/image") ||
+    pathname.startsWith("/_next/webpack-hmr") ||
     pathname.startsWith("/favicon.ico") ||
     pathname.startsWith("/api")
   );
@@ -43,6 +45,20 @@ export function middleware(request: NextRequest) {
     url.searchParams.set("lang", urlLang);
 
     const response = NextResponse.redirect(url);
+    response.cookies.set("ui_lang", urlLang, {
+      path: "/",
+      maxAge: 60 * 60 * 24 * 365,
+      sameSite: "lax",
+    });
+
+    return response;
+  }
+
+  const method = request.method.toUpperCase();
+  const shouldRedirectForCookieSync = method === "GET" || method === "HEAD";
+
+  if (shouldRedirectForCookieSync && cookieLangRaw !== urlLang) {
+    const response = NextResponse.redirect(nextUrl);
     response.cookies.set("ui_lang", urlLang, {
       path: "/",
       maxAge: 60 * 60 * 24 * 365,

@@ -6,6 +6,19 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
+export type SocialProviderName = 'google' | 'facebook' | 'github' | 'linkedin';
+
+type HeaderMenuItem = {
+  id: string;
+  label?: string | null;
+  labelByLang?: Record<string, string | null> | null;
+  href: string;
+  enabled?: boolean;
+  clickable?: boolean;
+  newTab?: boolean;
+  children?: HeaderMenuItem[] | null;
+};
+
 export type InstanceBranding = {
   appName: string;
   browserTitle?: string | null;
@@ -13,9 +26,34 @@ export type InstanceBranding = {
   notFoundMarkdown?: string | null;
   notFoundTitleByLang?: Record<string, string | null> | null;
   notFoundMarkdownByLang?: Record<string, string | null> | null;
+  loginSocialUnavailableMessageEnabled?: boolean;
+  loginSocialResetPasswordHintEnabled?: boolean;
+  registerSocialUnavailableMessageEnabled?: boolean;
+  headerMenu?: {
+    enabled?: boolean;
+    items?: HeaderMenuItem[] | null;
+  } | null;
+  pageLinks?: {
+    enabled?: boolean;
+    bySlug?: Record<
+      string,
+      {
+        url?: boolean;
+        header?: boolean;
+        footer?: boolean;
+      }
+    > | null;
+  } | null;
+  poweredByBeeLms?: {
+    enabled?: boolean;
+    url?: string | null;
+  } | null;
   cursorUrl?: string | null;
   cursorLightUrl?: string | null;
   cursorDarkUrl?: string | null;
+  cursorPointerUrl?: string | null;
+  cursorPointerLightUrl?: string | null;
+  cursorPointerDarkUrl?: string | null;
   cursorHotspot?: {
     x?: number | null;
     y?: number | null;
@@ -43,6 +81,8 @@ export type InstanceBranding = {
       scrollTrack?: string | null;
       fieldOkBg?: string | null;
       fieldOkBorder?: string | null;
+      fieldAlertBg?: string | null;
+      fieldAlertBorder?: string | null;
       fieldErrorBg?: string | null;
       fieldErrorBorder?: string | null;
     };
@@ -80,6 +120,8 @@ export type InstanceBranding = {
       scrollTrack?: string | null;
       fieldOkBg?: string | null;
       fieldOkBorder?: string | null;
+      fieldAlertBg?: string | null;
+      fieldAlertBorder?: string | null;
       fieldErrorBg?: string | null;
       fieldErrorBorder?: string | null;
     } | null;
@@ -95,6 +137,8 @@ export type InstanceBranding = {
       scrollTrack?: string | null;
       fieldOkBg?: string | null;
       fieldOkBorder?: string | null;
+      fieldAlertBg?: string | null;
+      fieldAlertBorder?: string | null;
       fieldErrorBg?: string | null;
       fieldErrorBorder?: string | null;
     } | null;
@@ -138,9 +182,72 @@ export type InstanceBranding = {
       streamContentType?: string | null;
     } | null;
   } | null;
-};
 
-export type SocialProviderName = 'google' | 'facebook' | 'github' | 'linkedin';
+  footerSocialLinks?: Array<{
+    id: string;
+    type: 'facebook' | 'x' | 'youtube' | 'custom';
+    label?: string | null;
+    url?: string | null;
+    enabled?: boolean;
+    iconKey?:
+      | 'whatsapp'
+      | 'messenger'
+      | 'signal'
+      | 'skype'
+      | 'imessage'
+      | 'wechat'
+      | 'line'
+      | 'kakaotalk'
+      | 'threema'
+      | 'icq'
+      | 'instagram'
+      | 'tiktok'
+      | 'snapchat'
+      | 'pinterest'
+      | 'threads'
+      | 'bereal'
+      | 'tumblr'
+      | 'bluesky'
+      | 'mastodon'
+      | 'vk'
+      | 'zoom'
+      | 'teams'
+      | 'slack'
+      | 'google-meet'
+      | 'google-chat'
+      | 'reddit'
+      | 'twitch'
+      | 'quora'
+      | 'clubhouse'
+      | 'tinder'
+      | 'github'
+      | 'npm'
+      | 'maven'
+      | 'nuget'
+      | 'pypi'
+      | 'linkedin'
+      | 'discord'
+      | 'telegram'
+      | 'viber'
+      | 'phone'
+      | 'location'
+      | 'link'
+      | 'globe'
+      | null;
+    iconLightUrl?: string | null;
+    iconDarkUrl?: string | null;
+  }> | null;
+
+  socialLoginIcons?: Partial<
+    Record<
+      SocialProviderName,
+      {
+        lightUrl?: string | null;
+        darkUrl?: string | null;
+      }
+    >
+  > | null;
+};
 
 export type SocialProviderCredentials = {
   clientId?: string | null;
@@ -169,17 +276,6 @@ export type InstanceSeo = {
     includeCourses?: boolean;
     includeLegal?: boolean;
   } | null;
-  openGraph?: {
-    defaultTitle?: string | null;
-    defaultDescription?: string | null;
-    imageUrl?: string | null;
-  } | null;
-  twitter?: {
-    card?: 'summary' | 'summary_large_image' | null;
-    defaultTitle?: string | null;
-    defaultDescription?: string | null;
-    imageUrl?: string | null;
-  } | null;
 };
 
 export type InstanceFeatures = {
@@ -197,26 +293,53 @@ export type InstanceFeatures = {
   auth: boolean;
   authLogin: boolean;
   authRegister: boolean;
+  auth2fa: boolean;
   captcha: boolean;
   captchaLogin: boolean;
   captchaRegister: boolean;
   captchaForgotPassword: boolean;
   captchaChangePassword: boolean;
   paidCourses: boolean;
+  paymentsStripe: boolean;
+  paymentsPaypal: boolean;
+  paymentsMypos: boolean;
+  paymentsRevolut: boolean;
+  paymentsDefaultProvider?: 'stripe' | 'paypal' | 'mypos' | 'revolut';
   gdprLegal: boolean;
+  pageTerms: boolean;
+  pagePrivacy: boolean;
+  pageCookiePolicy: boolean;
+  pageImprint: boolean;
+  pageAccessibility: boolean;
+  pageContact: boolean;
+  pageFaq: boolean;
+  pageSupport: boolean;
+  pageNotFound: boolean;
   socialGoogle: boolean;
   socialFacebook: boolean;
   socialGithub: boolean;
   socialLinkedin: boolean;
   infraRedis: boolean;
+  infraRedisUrl?: string | null;
   infraRabbitmq: boolean;
+  infraRabbitmqUrl?: string | null;
   infraMonitoring: boolean;
+  infraMonitoringUrl?: string | null;
   infraErrorTracking: boolean;
+  infraErrorTrackingUrl?: string | null;
 };
 
 export type InstanceLanguages = {
   supported: string[];
   default: string;
+  icons?: Record<
+    string,
+    { lightUrl?: string | null; darkUrl?: string | null } | null
+  > | null;
+  flagPicker?: {
+    global?: string | null;
+    byLang?: Record<string, string | null> | null;
+  } | null;
 };
 
 @Entity('instance_config')

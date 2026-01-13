@@ -48,6 +48,17 @@ describe('Admin Settings controller PATCH (e2e) – social metadata', () => {
     user.role = 'admin';
     await userRepo.save(user);
 
+    // Ensure infraMonitoring is disabled to avoid validation blocking
+    await request(app.getHttpServer())
+      .patch('/api/admin/settings')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({
+        features: {
+          infraMonitoring: false,
+        },
+      })
+      .expect(200);
+
     const beforeRes = await request(app.getHttpServer())
       .get('/api/admin/settings')
       .set('Authorization', `Bearer ${accessToken}`)

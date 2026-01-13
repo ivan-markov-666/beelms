@@ -10,8 +10,11 @@ import {
 import { getAccessToken } from "../../../auth-token";
 import { getApiBaseUrl } from "../../../api-url";
 import { AdminBreadcrumbs } from "../../_components/admin-breadcrumbs";
+import { Pagination } from "../../../_components/pagination";
 
 const API_BASE_URL = getApiBaseUrl();
+
+const DEFAULT_PAGE_SIZE = 20;
 
 type CourseCategory = {
   id: string;
@@ -40,6 +43,9 @@ export default function AdminCourseCategoriesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+
   const [form, setForm] = useState<CreateCategoryForm>(DEFAULT_FORM);
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
@@ -56,6 +62,10 @@ export default function AdminCourseCategoriesPage() {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
 
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [deleteSuccess, setDeleteSuccess] = useState<string | null>(null);
+
   const sorted = useMemo(() => {
     return categories
       .slice()
@@ -65,6 +75,53 @@ export default function AdminCourseCategoriesPage() {
           : a.title.localeCompare(b.title),
       );
   }, [categories]);
+
+  const totalCount = sorted.length;
+  const totalPages =
+    totalCount > 0 ? Math.max(1, Math.ceil(totalCount / pageSize)) : 1;
+  const safeCurrentPage = Math.min(Math.max(currentPage, 1), totalPages);
+  const startIndex = (safeCurrentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const pageItems = sorted.slice(startIndex, endIndex);
+  const showingFrom = totalCount === 0 ? 0 : startIndex + 1;
+  const showingTo = Math.min(endIndex, totalCount);
+
+  const exportCsv = () => {
+    if (totalCount === 0 || typeof window === "undefined") {
+      return;
+    }
+
+    const escapeCsv = (value: string | number): string => {
+      const str = String(value);
+      if (str.includes('"') || str.includes(",") || str.includes("\n")) {
+        return `"${str.replaceAll('"', '""')}"`;
+      }
+      return str;
+    };
+
+    const header = ["id", "title", "slug", "order", "active"];
+    const rows = sorted.map((c) => [
+      c.id,
+      c.title,
+      c.slug,
+      c.order,
+      c.active ? "true" : "false",
+    ]);
+
+    const csv = [header, ...rows]
+      .map((r) => r.map(escapeCsv).join(","))
+      .join("\n");
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `admin-course-categories-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  };
 
   const readErrorMessage = useCallback(
     async (res: Response): Promise<string> => {
@@ -308,6 +365,57 @@ export default function AdminCourseCategoriesPage() {
     }
   };
 
+  const deleteCategory = async (c: CourseCategory) => {
+    if (typeof window === "undefined") return;
+
+    const ok = window.confirm(
+      `Сигурен ли си, че искаш да изтриеш категорията "${c.title}"? Курсовете към нея няма да се изтрият — ще останат некатегоризирани.`,
+    );
+    if (!ok) return;
+
+    setSaveError(null);
+    setSaveSuccess(null);
+    setDeleteError(null);
+    setDeleteSuccess(null);
+    setDeletingId(c.id);
+
+    try {
+      const token = getAccessToken();
+      if (!token) {
+        setDeleteError("Липсва достъп до Admin API.");
+        setDeletingId(null);
+        return;
+      }
+
+      const res = await fetch(
+        `${API_BASE_URL}/admin/course-categories/${encodeURIComponent(c.id)}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      if (!res.ok && res.status !== 204) {
+        const msg = await readErrorMessage(res);
+        setDeleteError(msg || "Неуспешно изтриване на категория.");
+        setDeletingId(null);
+        return;
+      }
+
+      setCategories((prev) => prev.filter((x) => x.id !== c.id));
+      if (editingId === c.id) {
+        cancelEdit();
+      }
+      setDeleteSuccess("Категорията е изтрита.");
+      setDeletingId(null);
+    } catch {
+      setDeleteError("Неуспешно изтриване на категория.");
+      setDeletingId(null);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <section className="space-y-3">
@@ -420,13 +528,23 @@ export default function AdminCourseCategoriesPage() {
           <h2 className="text-lg font-semibold text-gray-900">
             Categories list
           </h2>
-          <button
-            type="button"
-            className="text-sm font-medium text-green-700 hover:text-green-900"
-            onClick={() => void load()}
-          >
-            Reload
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+              onClick={exportCsv}
+              disabled={totalCount === 0}
+            >
+              Export CSV
+            </button>
+            <button
+              type="button"
+              className="text-sm font-medium text-green-700 hover:text-green-900"
+              onClick={() => void load()}
+            >
+              Reload
+            </button>
+          </div>
         </div>
 
         {loading && <p className="mt-3 text-sm text-gray-500">Loading...</p>}
@@ -462,6 +580,24 @@ export default function AdminCourseCategoriesPage() {
           </div>
         )}
 
+        {deleteError && (
+          <div
+            className="mt-3 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+            role="alert"
+          >
+            {deleteError}
+          </div>
+        )}
+
+        {deleteSuccess && (
+          <div
+            className="mt-3 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700"
+            role="status"
+          >
+            {deleteSuccess}
+          </div>
+        )}
+
         {!loading && !error && sorted.length > 0 && (
           <div className="mt-4 overflow-x-auto">
             <table className="min-w-full text-left text-sm">
@@ -475,7 +611,7 @@ export default function AdminCourseCategoriesPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {sorted.map((c) => {
+                {pageItems.map((c) => {
                   const isEditing = editingId === c.id;
                   return (
                     <tr key={c.id} className="hover:bg-gray-50">
@@ -565,13 +701,24 @@ export default function AdminCourseCategoriesPage() {
                             </button>
                           </div>
                         ) : (
-                          <button
-                            type="button"
-                            className="text-sm font-medium text-green-700 hover:text-green-900"
-                            onClick={() => startEdit(c)}
-                          >
-                            Edit
-                          </button>
+                          <div className="flex items-center gap-3">
+                            <button
+                              type="button"
+                              className="text-sm font-medium text-green-700 hover:text-green-900"
+                              disabled={deletingId === c.id}
+                              onClick={() => startEdit(c)}
+                            >
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              className="text-sm font-medium text-red-600 hover:text-red-700 disabled:opacity-60"
+                              disabled={deletingId === c.id}
+                              onClick={() => void deleteCategory(c)}
+                            >
+                              {deletingId === c.id ? "Deleting..." : "Delete"}
+                            </button>
+                          </div>
                         )}
                       </td>
                     </tr>
@@ -579,6 +726,24 @@ export default function AdminCourseCategoriesPage() {
                 })}
               </tbody>
             </table>
+
+            <div className="mt-4 flex items-center justify-between border-t border-gray-200 px-3 py-3 text-xs text-gray-600 md:text-sm">
+              <p>
+                Showing <span className="font-semibold">{showingFrom}</span>-
+                <span className="font-semibold">{showingTo}</span> of{" "}
+                <span className="font-semibold">{totalCount}</span> categories
+              </p>
+              <Pagination
+                currentPage={safeCurrentPage}
+                totalPages={totalPages}
+                onPageChange={(page) => setCurrentPage(page)}
+                pageSize={pageSize}
+                onPageSizeChange={(next) => {
+                  setCurrentPage(1);
+                  setPageSize(next);
+                }}
+              />
+            </div>
           </div>
         )}
       </section>

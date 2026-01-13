@@ -5,9 +5,12 @@ import { Course } from '../courses/course.entity';
 import { CoursePurchase } from '../courses/course-purchase.entity';
 import { PaymentSettings } from './payment-settings.entity';
 import { StripeWebhookEvent } from './stripe-webhook-event.entity';
+import { PaymentCheckout } from './payment-checkout.entity';
 import { PaymentsController } from './payments.controller';
 import { AdminPaymentsController } from './admin-payments.controller';
 import { PaymentsWebhookController } from './payments-webhook.controller';
+import { PaymentsMyposController } from './payments-mypos.controller';
+import { PaymentsRevolutController } from './payments-revolut.controller';
 import { PaymentsService } from './payments.service';
 import { SettingsModule } from '../settings/settings.module';
 
@@ -18,6 +21,7 @@ import { SettingsModule } from '../settings/settings.module';
       CoursePurchase,
       PaymentSettings,
       StripeWebhookEvent,
+      PaymentCheckout,
     ]),
     AuthModule,
     SettingsModule,
@@ -26,6 +30,8 @@ import { SettingsModule } from '../settings/settings.module';
     PaymentsController,
     AdminPaymentsController,
     PaymentsWebhookController,
+    PaymentsMyposController,
+    PaymentsRevolutController,
   ],
   providers: [PaymentsService],
 })

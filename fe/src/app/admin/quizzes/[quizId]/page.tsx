@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import { getAccessToken } from "../../../auth-token";
 import { getApiBaseUrl } from "../../../api-url";
 import { AdminBreadcrumbs } from "../../_components/admin-breadcrumbs";
+import { ListboxSelect } from "../../../_components/listbox-select";
 
 const API_BASE_URL = getApiBaseUrl();
 
@@ -678,7 +679,8 @@ export default function AdminQuizDetailPage() {
             <span className="text-xs font-medium text-gray-600">Title</span>
             <input
               className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400"
-              value={form.title}
+              value={form?.title ?? ""}
+              disabled={!form || saving}
               onChange={(e) =>
                 setForm((p) => (p ? { ...p, title: e.target.value } : p))
               }
@@ -687,31 +689,37 @@ export default function AdminQuizDetailPage() {
 
           <label className="space-y-1">
             <span className="text-xs font-medium text-gray-600">Language</span>
-            <select
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900"
-              value={form.language}
-              onChange={(e) =>
-                setForm((p) => (p ? { ...p, language: e.target.value } : p))
+            <ListboxSelect
+              ariaLabel="Quiz language"
+              value={form?.language ?? "bg"}
+              disabled={!form || saving}
+              onChange={(next) =>
+                setForm((p) => (p ? { ...p, language: next } : p))
               }
-            >
-              <option value="bg">bg</option>
-              <option value="en">en</option>
-            </select>
+              buttonClassName="flex w-full items-center justify-between gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 disabled:bg-gray-50"
+              options={[
+                { value: "bg", label: "bg" },
+                { value: "en", label: "en" },
+              ]}
+            />
           </label>
 
           <label className="space-y-1">
             <span className="text-xs font-medium text-gray-600">Status</span>
-            <select
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900"
-              value={form.status}
-              onChange={(e) =>
-                setForm((p) => (p ? { ...p, status: e.target.value } : p))
+            <ListboxSelect
+              ariaLabel="Quiz status"
+              value={form?.status ?? "draft"}
+              disabled={!form || saving}
+              onChange={(next) =>
+                setForm((p) => (p ? { ...p, status: next } : p))
               }
-            >
-              <option value="draft">draft</option>
-              <option value="active">active</option>
-              <option value="inactive">inactive</option>
-            </select>
+              buttonClassName="flex w-full items-center justify-between gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 disabled:bg-gray-50"
+              options={[
+                { value: "draft", label: "draft" },
+                { value: "active", label: "active" },
+                { value: "inactive", label: "inactive" },
+              ]}
+            />
           </label>
 
           <label className="space-y-1">
@@ -720,7 +728,8 @@ export default function AdminQuizDetailPage() {
             </span>
             <input
               className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400"
-              value={form.passingScore}
+              value={form?.passingScore ?? ""}
+              disabled={!form || saving}
               onChange={(e) =>
                 setForm((p) => (p ? { ...p, passingScore: e.target.value } : p))
               }
@@ -735,7 +744,8 @@ export default function AdminQuizDetailPage() {
           <textarea
             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400"
             rows={3}
-            value={form.description}
+            value={form?.description ?? ""}
+            disabled={!form || saving}
             onChange={(e) =>
               setForm((p) => (p ? { ...p, description: e.target.value } : p))
             }

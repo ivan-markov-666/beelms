@@ -1,10 +1,12 @@
 import type { Repository } from 'typeorm';
+import { BadRequestException } from '@nestjs/common';
 import { SettingsService } from './settings.service';
 import type {
   InstanceBranding,
   InstanceConfig,
   InstanceFeatures,
   InstanceLanguages,
+  InstanceSeo,
   InstanceSocialCredentials,
 } from './instance-config.entity';
 import type { AdminUpdateInstanceSettingsDto } from './dto/admin-update-instance-settings.dto';
@@ -20,15 +22,39 @@ describe('SettingsService – social credentials', () => {
   const defaultBranding: InstanceBranding = {
     appName: 'BeeLMS',
     browserTitle: 'BeeLMS',
+    loginSocialUnavailableMessageEnabled: true,
+    loginSocialResetPasswordHintEnabled: true,
+    registerSocialUnavailableMessageEnabled: true,
+    pageLinks: {
+      enabled: true,
+      bySlug: {
+        terms: { footer: true },
+        privacy: { footer: true },
+        'cookie-policy': { footer: true },
+        imprint: { footer: true },
+        accessibility: { footer: true },
+        contact: { footer: true },
+        faq: { footer: true },
+        support: { footer: true },
+      },
+    },
+    poweredByBeeLms: {
+      enabled: false,
+      url: null,
+    },
     cursorUrl: null,
     cursorLightUrl: null,
     cursorDarkUrl: null,
+    cursorPointerUrl: null,
+    cursorPointerLightUrl: null,
+    cursorPointerDarkUrl: null,
     cursorHotspot: null,
     faviconUrl: null,
     googleFont: null,
     googleFontByLang: null,
     fontUrl: null,
     fontUrlByLang: null,
+    footerSocialLinks: null,
     logoUrl: null,
     logoLightUrl: null,
     logoDarkUrl: null,
@@ -46,29 +72,54 @@ describe('SettingsService – social credentials', () => {
     coursesPublic: true,
     myCourses: true,
     profile: true,
+    accessibilityWidget: true,
+    seo: true,
+    themeLight: true,
+    themeDark: true,
+    themeModeSelector: true,
     auth: true,
     authLogin: true,
     authRegister: true,
+    auth2fa: false,
     captcha: false,
     captchaLogin: false,
     captchaRegister: false,
     captchaForgotPassword: false,
     captchaChangePassword: false,
     paidCourses: true,
+    paymentsStripe: true,
+    paymentsPaypal: true,
+    paymentsMypos: false,
+    paymentsRevolut: false,
     gdprLegal: true,
+    pageTerms: true,
+    pagePrivacy: true,
+    pageCookiePolicy: true,
+    pageImprint: true,
+    pageAccessibility: true,
+    pageContact: true,
+    pageFaq: true,
+    pageSupport: true,
+    pageNotFound: true,
     socialGoogle: true,
     socialFacebook: true,
     socialGithub: true,
     socialLinkedin: true,
     infraRedis: false,
+    infraRedisUrl: null,
     infraRabbitmq: false,
+    infraRabbitmqUrl: null,
     infraMonitoring: true,
+    infraMonitoringUrl: 'https://example.com/monitoring',
     infraErrorTracking: false,
+    infraErrorTrackingUrl: null,
   };
 
   const defaultLanguages: InstanceLanguages = {
     supported: ['bg'],
     default: 'bg',
+    icons: null,
+    flagPicker: null,
   };
 
   const buildConfig = (
@@ -78,6 +129,19 @@ describe('SettingsService – social credentials', () => {
     branding: defaultBranding,
     features: defaultFeatures,
     languages: defaultLanguages,
+    seo: {
+      baseUrl: null,
+      titleTemplate: '{page} | {site}',
+      defaultTitle: null,
+      defaultDescription: null,
+      robots: { index: true },
+      sitemap: {
+        enabled: true,
+        includeWiki: true,
+        includeCourses: true,
+        includeLegal: true,
+      },
+    },
     socialCredentials: null,
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -178,11 +242,14 @@ describe('SettingsService – social credentials', () => {
       },
     } as AdminUpdateInstanceSettingsDto);
 
-    expect(repo.save).toHaveBeenCalledTimes(1);
+    expect(repo.save).toHaveBeenCalled();
     const saveMock = repo.save as jest.MockedFunction<
       (config: InstanceConfig) => Promise<InstanceConfig>
     >;
-    const savedConfig = saveMock.mock.calls[0][0];
+    const savedConfig = saveMock.mock.calls.at(-1)?.[0];
+    if (!savedConfig) {
+      throw new Error('Expected repo.save to be called');
+    }
     expect(savedConfig.socialCredentials?.google).toMatchObject({
       clientId: 'db-client',
       clientSecret: null,
@@ -192,6 +259,305 @@ describe('SettingsService – social credentials', () => {
     expect(savedConfig.socialCredentials?.google?.updatedAt).toEqual(
       expect.any(String),
     );
+  });
+});
+
+describe('SettingsService – infra toggles validation', () => {
+  let repo: {
+    find: jest.Mock;
+    save: jest.Mock;
+    create: jest.Mock;
+  };
+  let service: SettingsService;
+
+  const defaults = (svc: SettingsService) =>
+    svc as unknown as {
+      buildDefaultBranding: () => InstanceBranding;
+      buildDefaultFeatures: () => InstanceFeatures;
+      buildDefaultSeo: () => InstanceSeo;
+    };
+
+  const buildConfig = (
+    overrides: Partial<InstanceConfig> = {},
+  ): InstanceConfig => {
+    const d = defaults(service);
+    const baseSeo = d.buildDefaultSeo();
+    const seo = overrides.seo ?? baseSeo;
+    const restOverrides: Partial<InstanceConfig> = { ...overrides };
+    delete (restOverrides as Partial<Record<string, unknown>>).seo;
+    return {
+      id: 'cfg-id',
+      branding: d.buildDefaultBranding(),
+      features: d.buildDefaultFeatures(),
+      languages: {
+        supported: ['bg'],
+        default: 'bg',
+        icons: null,
+        flagPicker: null,
+      },
+      seo,
+      socialCredentials: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      ...restOverrides,
+    };
+  };
+
+  beforeEach(() => {
+    repo = {
+      find: jest.fn(),
+      save: jest.fn(async (value) => value),
+      create: jest.fn((value) => value),
+    };
+    service = new SettingsService(
+      repo as unknown as Repository<InstanceConfig>,
+    );
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  it('rejects infraMonitoring=true when infraMonitoringUrl is missing/invalid', async () => {
+    repo.find.mockResolvedValue([buildConfig()]);
+
+    await expect(
+      service.updateInstanceConfig({
+        features: {
+          infraMonitoring: true,
+          infraMonitoringUrl: 'ftp://example.com',
+        },
+      } as AdminUpdateInstanceSettingsDto),
+    ).rejects.toThrow(BadRequestException);
+  });
+
+  it('allows infraMonitoring=false with empty url (normalizes to null)', async () => {
+    repo.find.mockResolvedValue([buildConfig()]);
+
+    await service.updateInstanceConfig({
+      features: {
+        infraMonitoring: false,
+        infraMonitoringUrl: '   ',
+      },
+    } as AdminUpdateInstanceSettingsDto);
+
+    expect(repo.save).toHaveBeenCalled();
+    const saveMock = repo.save as jest.MockedFunction<
+      (config: InstanceConfig) => Promise<InstanceConfig>
+    >;
+    const savedConfig = saveMock.mock.calls.at(-1)?.[0];
+    if (!savedConfig) throw new Error('Expected repo.save to be called');
+    expect(savedConfig.features.infraMonitoring).toBe(false);
+    expect(savedConfig.features.infraMonitoringUrl).toBeNull();
+  });
+
+  it('rejects infraErrorTracking=true when infraErrorTrackingUrl is missing/invalid', async () => {
+    repo.find.mockResolvedValue([buildConfig()]);
+
+    await expect(
+      service.updateInstanceConfig({
+        features: {
+          infraErrorTracking: true,
+          infraErrorTrackingUrl: 'not-a-url',
+        },
+      } as AdminUpdateInstanceSettingsDto),
+    ).rejects.toThrow(BadRequestException);
+  });
+
+  it('accepts infraRedis=true for redis://... and host:port and rejects invalid values', async () => {
+    repo.find.mockResolvedValue([buildConfig()]);
+
+    await service.updateInstanceConfig({
+      features: {
+        infraMonitoring: false,
+        infraRedis: true,
+        infraRedisUrl: ' redis://localhost:6379 ',
+      },
+    } as AdminUpdateInstanceSettingsDto);
+
+    const saveMock = repo.save as jest.MockedFunction<
+      (config: InstanceConfig) => Promise<InstanceConfig>
+    >;
+    let savedConfig = saveMock.mock.calls.at(-1)?.[0];
+    if (!savedConfig) throw new Error('Expected repo.save to be called');
+    expect(savedConfig.features.infraRedis).toBe(true);
+    expect(savedConfig.features.infraRedisUrl).toBe('redis://localhost:6379');
+
+    repo.find.mockResolvedValue([buildConfig()]);
+    await service.updateInstanceConfig({
+      features: {
+        infraMonitoring: false,
+        infraRedis: true,
+        infraRedisUrl: 'localhost:6379',
+      },
+    } as AdminUpdateInstanceSettingsDto);
+
+    savedConfig = saveMock.mock.calls.at(-1)?.[0];
+    if (!savedConfig) throw new Error('Expected repo.save to be called');
+    expect(savedConfig.features.infraRedisUrl).toBe('localhost:6379');
+
+    repo.find.mockResolvedValue([buildConfig()]);
+    await expect(
+      service.updateInstanceConfig({
+        features: {
+          infraMonitoring: false,
+          infraRedis: true,
+          infraRedisUrl: 'http://localhost:6379',
+        },
+      } as AdminUpdateInstanceSettingsDto),
+    ).rejects.toThrow(BadRequestException);
+  });
+
+  it('accepts infraRabbitmq=true for amqp(s) URLs and rejects invalid values', async () => {
+    repo.find.mockResolvedValue([buildConfig()]);
+
+    await service.updateInstanceConfig({
+      features: {
+        infraMonitoring: false,
+        infraRabbitmq: true,
+        infraRabbitmqUrl: 'amqp://guest:guest@localhost:5672',
+      },
+    } as AdminUpdateInstanceSettingsDto);
+
+    const saveMock = repo.save as jest.MockedFunction<
+      (config: InstanceConfig) => Promise<InstanceConfig>
+    >;
+    const savedConfig = saveMock.mock.calls.at(-1)?.[0];
+    if (!savedConfig) throw new Error('Expected repo.save to be called');
+    expect(savedConfig.features.infraRabbitmq).toBe(true);
+    expect(savedConfig.features.infraRabbitmqUrl).toBe(
+      'amqp://guest:guest@localhost:5672',
+    );
+
+    repo.find.mockResolvedValue([buildConfig()]);
+    await expect(
+      service.updateInstanceConfig({
+        features: {
+          infraMonitoring: false,
+          infraRabbitmq: true,
+          infraRabbitmqUrl: 'https://example.com',
+        },
+      } as AdminUpdateInstanceSettingsDto),
+    ).rejects.toThrow(BadRequestException);
+  });
+});
+
+describe('SettingsService – 404 i18n overrides', () => {
+  let repo: {
+    find: jest.Mock;
+    save: jest.Mock;
+    create: jest.Mock;
+  };
+  let service: SettingsService;
+
+  beforeEach(() => {
+    repo = {
+      find: jest.fn(),
+      save: jest.fn(async (value) => value),
+      create: jest.fn((value) => value),
+    };
+
+    service = new SettingsService(
+      repo as unknown as Repository<InstanceConfig>,
+    );
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  it('filters notFound*ByLang to supported languages and normalizes keys', async () => {
+    const defaults = service as unknown as {
+      buildDefaultBranding: () => InstanceBranding;
+      buildDefaultFeatures: () => InstanceFeatures;
+      buildDefaultSeo: () => InstanceSeo;
+    };
+    const baseBranding = defaults.buildDefaultBranding();
+    const baseFeatures = defaults.buildDefaultFeatures();
+    const baseSeo = defaults.buildDefaultSeo();
+    repo.find.mockResolvedValue([
+      {
+        id: 'cfg-id',
+        branding: baseBranding,
+        features: { ...baseFeatures, infraMonitoring: false },
+        languages: {
+          supported: ['bg', 'en'],
+          default: 'bg',
+          icons: null,
+          flagPicker: null,
+        },
+        seo: baseSeo,
+        socialCredentials: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    ]);
+
+    const dto = {
+      branding: {
+        notFoundTitleByLang: {
+          EN: 'English title',
+          de: 'German title',
+          '  bg  ': 'Bulgarian title',
+        },
+        notFoundMarkdownByLang: {
+          en: 'EN md',
+          de: 'DE md',
+        },
+      },
+    } as unknown as AdminUpdateInstanceSettingsDto;
+
+    const updated = await service.updateInstanceConfig(dto);
+
+    expect(updated.branding.notFoundTitleByLang).toEqual({
+      en: 'English title',
+      bg: 'Bulgarian title',
+    });
+    expect(updated.branding.notFoundMarkdownByLang).toEqual({ en: 'EN md' });
+  });
+
+  it('turns empty notFound*ByLang maps into null after filtering', async () => {
+    const defaults = service as unknown as {
+      buildDefaultBranding: () => InstanceBranding;
+      buildDefaultFeatures: () => InstanceFeatures;
+      buildDefaultSeo: () => InstanceSeo;
+    };
+    const baseBranding = defaults.buildDefaultBranding();
+    const baseFeatures = defaults.buildDefaultFeatures();
+    const baseSeo = defaults.buildDefaultSeo();
+    repo.find.mockResolvedValue([
+      {
+        id: 'cfg-id',
+        branding: baseBranding,
+        features: { ...baseFeatures, infraMonitoring: false },
+        languages: {
+          supported: ['bg'],
+          default: 'bg',
+          icons: null,
+          flagPicker: null,
+        },
+        seo: baseSeo,
+        socialCredentials: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    ]);
+
+    const dto = {
+      branding: {
+        notFoundTitleByLang: {
+          en: 'English title',
+        },
+        notFoundMarkdownByLang: {
+          en: 'EN md',
+        },
+      },
+    } as unknown as AdminUpdateInstanceSettingsDto;
+
+    const updated = await service.updateInstanceConfig(dto);
+
+    expect(updated.branding.notFoundTitleByLang).toBeNull();
+    expect(updated.branding.notFoundMarkdownByLang).toBeNull();
   });
 });
 
@@ -206,13 +572,37 @@ describe('SettingsService – branding normalization', () => {
   const defaultBranding: InstanceBranding = {
     appName: 'BeeLMS',
     browserTitle: 'BeeLMS',
+    loginSocialUnavailableMessageEnabled: true,
+    loginSocialResetPasswordHintEnabled: true,
+    registerSocialUnavailableMessageEnabled: true,
+    pageLinks: {
+      enabled: true,
+      bySlug: {
+        terms: { footer: true },
+        privacy: { footer: true },
+        'cookie-policy': { footer: true },
+        imprint: { footer: true },
+        accessibility: { footer: true },
+        contact: { footer: true },
+        faq: { footer: true },
+        support: { footer: true },
+      },
+    },
+    poweredByBeeLms: {
+      enabled: false,
+      url: null,
+    },
     cursorUrl: null,
+    cursorPointerUrl: null,
+    cursorPointerLightUrl: null,
+    cursorPointerDarkUrl: null,
     cursorHotspot: null,
     faviconUrl: null,
     googleFont: null,
     googleFontByLang: null,
     fontUrl: null,
     fontUrlByLang: null,
+    footerSocialLinks: null,
     logoUrl: null,
     primaryColor: null,
     socialImage: null,
@@ -228,43 +618,90 @@ describe('SettingsService – branding normalization', () => {
     coursesPublic: true,
     myCourses: true,
     profile: true,
+    accessibilityWidget: true,
+    seo: true,
+    themeLight: true,
+    themeDark: true,
+    themeModeSelector: true,
     auth: true,
     authLogin: true,
     authRegister: true,
+    auth2fa: false,
     captcha: false,
     captchaLogin: false,
     captchaRegister: false,
     captchaForgotPassword: false,
     captchaChangePassword: false,
     paidCourses: true,
+    paymentsStripe: true,
+    paymentsPaypal: true,
+    paymentsMypos: false,
+    paymentsRevolut: false,
     gdprLegal: true,
+    pageTerms: true,
+    pagePrivacy: true,
+    pageCookiePolicy: true,
+    pageImprint: true,
+    pageAccessibility: true,
+    pageContact: true,
+    pageFaq: true,
+    pageSupport: true,
+    pageNotFound: true,
     socialGoogle: true,
     socialFacebook: true,
     socialGithub: true,
     socialLinkedin: true,
     infraRedis: false,
+    infraRedisUrl: null,
     infraRabbitmq: false,
+    infraRabbitmqUrl: null,
     infraMonitoring: true,
+    infraMonitoringUrl: 'https://example.com/monitoring',
     infraErrorTracking: false,
+    infraErrorTrackingUrl: null,
   };
 
   const defaultLanguages: InstanceLanguages = {
     supported: ['bg'],
     default: 'bg',
+    icons: null,
+    flagPicker: null,
   };
 
   const buildConfig = (
     overrides: Partial<InstanceConfig> = {},
-  ): InstanceConfig => ({
-    id: 'cfg-id',
-    branding: defaultBranding,
-    features: defaultFeatures,
-    languages: defaultLanguages,
-    socialCredentials: null,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    ...overrides,
-  });
+  ): InstanceConfig => {
+    const base: InstanceConfig = {
+      id: 'cfg-id',
+      branding: defaultBranding,
+      features: defaultFeatures,
+      languages: defaultLanguages,
+      seo: {
+        baseUrl: null,
+        titleTemplate: '{page} | {site}',
+        defaultTitle: null,
+        defaultDescription: null,
+        robots: { index: true },
+        sitemap: {
+          enabled: true,
+          includeWiki: true,
+          includeCourses: true,
+          includeLegal: true,
+        },
+      },
+      socialCredentials: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    const merged: InstanceConfig = {
+      ...base,
+      ...overrides,
+      seo: overrides.seo ?? base.seo,
+    };
+
+    return merged;
+  };
 
   beforeEach(() => {
     repo = {
@@ -371,11 +808,14 @@ describe('SettingsService – branding normalization', () => {
       },
     } as AdminUpdateInstanceSettingsDto);
 
-    expect(repo.save).toHaveBeenCalledTimes(1);
+    expect(repo.save).toHaveBeenCalled();
     const saveMock = repo.save as jest.MockedFunction<
       (config: InstanceConfig) => Promise<InstanceConfig>
     >;
-    const savedConfig = saveMock.mock.calls[0][0];
+    const savedConfig = saveMock.mock.calls.at(-1)?.[0];
+    if (!savedConfig) {
+      throw new Error('Expected repo.save to be called');
+    }
 
     expect(savedConfig.branding.socialDescription).toBeNull();
     expect(savedConfig.branding.socialImage).toBeNull();

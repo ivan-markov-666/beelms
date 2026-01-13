@@ -45,6 +45,31 @@ describe('Public Settings Endpoint - Social Metadata (e2e)', () => {
     settingsRepo = app.get<Repository<InstanceConfig>>(
       getRepositoryToken(InstanceConfig),
     );
+
+    // Register and login user
+    const { email, accessToken } = await registerAndLogin(
+      app,
+      'social-metadata-e2e',
+    );
+
+    // Upgrade user to admin role FIRST
+    const user = await userRepo.findOne({
+      where: { email },
+    });
+    if (!user) throw new Error('User not found after registerAndLogin');
+    user.role = 'admin';
+    await userRepo.save(user);
+
+    // NOW disable infraMonitoring with valid admin token
+    await request(app.getHttpServer())
+      .patch('/api/admin/settings')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({
+        features: {
+          infraMonitoring: false,
+        },
+      })
+      .expect(200);
   });
 
   afterAll(async () => {
@@ -114,6 +139,17 @@ describe('Public Settings Endpoint - Social Metadata (e2e)', () => {
 
       user.role = 'admin';
       await userRepo.save(user);
+
+      // Ensure infraMonitoring is disabled to avoid validation blocking
+      await request(app.getHttpServer())
+        .patch('/api/admin/settings')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({
+          features: {
+            infraMonitoring: false,
+          },
+        })
+        .expect(200);
 
       // Setup social metadata via admin endpoint
       const socialMetadata = {
@@ -205,6 +241,17 @@ describe('Public Settings Endpoint - Social Metadata (e2e)', () => {
       user.role = 'admin';
       await userRepo.save(user);
 
+      // Ensure infraMonitoring is disabled to avoid validation blocking
+      await request(app.getHttpServer())
+        .patch('/api/admin/settings')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({
+          features: {
+            infraMonitoring: false,
+          },
+        })
+        .expect(200);
+
       // Setup only openGraph data
       const partialMetadata = {
         branding: {
@@ -255,6 +302,17 @@ describe('Public Settings Endpoint - Social Metadata (e2e)', () => {
       user.role = 'admin';
       await userRepo.save(user);
 
+      // Ensure infraMonitoring is disabled to avoid validation blocking
+      await request(app.getHttpServer())
+        .patch('/api/admin/settings')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({
+          features: {
+            infraMonitoring: false,
+          },
+        })
+        .expect(200);
+
       const appCardMetadata = {
         branding: {
           twitter: {
@@ -300,6 +358,17 @@ describe('Public Settings Endpoint - Social Metadata (e2e)', () => {
 
       user.role = 'admin';
       await userRepo.save(user);
+
+      // Ensure infraMonitoring is disabled to avoid validation blocking
+      await request(app.getHttpServer())
+        .patch('/api/admin/settings')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({
+          features: {
+            infraMonitoring: false,
+          },
+        })
+        .expect(200);
 
       const playerCardMetadata = {
         branding: {
@@ -350,6 +419,17 @@ describe('Public Settings Endpoint - Social Metadata (e2e)', () => {
 
       user.role = 'admin';
       await userRepo.save(user);
+
+      // Ensure infraMonitoring is disabled to avoid validation blocking
+      await request(app.getHttpServer())
+        .patch('/api/admin/settings')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({
+          features: {
+            infraMonitoring: false,
+          },
+        })
+        .expect(200);
 
       // Setup with social credentials (should not be exposed)
       const metadataWithCredentials = {
@@ -411,6 +491,17 @@ describe('Public Settings Endpoint - Social Metadata (e2e)', () => {
 
       user.role = 'admin';
       await userRepo.save(user);
+
+      // Ensure infraMonitoring is disabled to avoid validation blocking
+      await request(app.getHttpServer())
+        .patch('/api/admin/settings')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({
+          features: {
+            infraMonitoring: false,
+          },
+        })
+        .expect(200);
 
       // Setup social metadata
       await request(app.getHttpServer())

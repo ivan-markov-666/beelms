@@ -18,6 +18,8 @@ import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { AccountExportRequestDto } from './dto/account-export-request.dto';
 import { UserExportDto } from './dto/user-export.dto';
+import { Enable2faDto } from './dto/enable-2fa.dto';
+import { Disable2faDto } from './dto/disable-2fa.dto';
 import { RateLimit } from '../security/rate-limit/rate-limit.decorator';
 import { CaptchaService } from '../security/captcha/captcha.service';
 import { FeatureEnabledGuard } from '../settings/feature-enabled.guard';
@@ -131,5 +133,57 @@ export class AccountController {
     }
 
     return this.accountService.exportData(req.user.userId);
+  }
+
+  @UseGuards(FeatureEnabledGuard('auth2fa'), JwtAuthGuard)
+  @Get('me/2fa/status')
+  getTwoFactorStatus(@Req() req: AuthenticatedRequest): Promise<{
+    enabled: boolean;
+    confirmedAt: string | null;
+  }> {
+    if (!req.user) {
+      throw new Error('Authenticated user not found in request context');
+    }
+
+    return this.accountService.getTwoFactorStatus(req.user.userId);
+  }
+
+  @UseGuards(FeatureEnabledGuard('auth2fa'), JwtAuthGuard)
+  @Post('me/2fa/setup')
+  setupTwoFactor(@Req() req: AuthenticatedRequest): Promise<{
+    secret: string;
+    otpauthUrl: string;
+  }> {
+    if (!req.user) {
+      throw new Error('Authenticated user not found in request context');
+    }
+
+    return this.accountService.setupTwoFactor(req.user.userId);
+  }
+
+  @UseGuards(FeatureEnabledGuard('auth2fa'), JwtAuthGuard)
+  @Post('me/2fa/enable')
+  enableTwoFactor(
+    @Req() req: AuthenticatedRequest,
+    @Body() dto: Enable2faDto,
+  ): Promise<{ enabled: boolean; confirmedAt: string }> {
+    if (!req.user) {
+      throw new Error('Authenticated user not found in request context');
+    }
+
+    return this.accountService.enableTwoFactor(req.user.userId, dto);
+  }
+
+  @UseGuards(FeatureEnabledGuard('auth2fa'), JwtAuthGuard)
+  @Post('me/2fa/disable')
+  disableTwoFactor(
+    @Req() req: AuthenticatedRequest,
+    @Body() dto: Disable2faDto,
+  ): Promise<{ enabled: boolean }> {
+    if (!req.user) {
+      throw new Error('Authenticated user not found in request context');
+    }
+
+    return this.accountService.disableTwoFactor(req.user.userId, dto);
   }
 }

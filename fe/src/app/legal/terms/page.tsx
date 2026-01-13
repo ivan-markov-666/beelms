@@ -11,8 +11,9 @@ type LegalPageDto = {
   updatedAt: string;
 };
 
-async function fetchLegalTerms(): Promise<LegalPageDto> {
-  const res = await fetch(buildApiUrl("/legal/terms"), {
+async function fetchLegalTerms(lang: SupportedLang): Promise<LegalPageDto> {
+  const query = lang ? `?lang=${encodeURIComponent(lang)}` : "";
+  const res = await fetch(buildApiUrl(`/legal/terms${query}`), {
     next: { revalidate: 60 },
   });
 
@@ -41,7 +42,7 @@ export default async function TermsPage({
 
   const rawLang = resolvedSearchParams.lang ?? null;
   const lang: SupportedLang = normalizeLang(rawLang);
-  const page = await fetchLegalTerms();
+  const page = await fetchLegalTerms(lang);
 
   return (
     <main className="mx-auto flex min-h-screen max-w-3xl flex-col gap-8 px-4 py-10">
@@ -50,7 +51,7 @@ export default async function TermsPage({
           Legal / Terms
         </p>
         <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
-          {t(lang, "common", "legalTermsTitle")}
+          {page.title || t(lang, "common", "legalTermsTitle")}
         </h1>
         <p className="max-w-2xl text-sm text-zinc-600 dark:text-zinc-300">
           {t(lang, "common", "legalTermsIntro")}

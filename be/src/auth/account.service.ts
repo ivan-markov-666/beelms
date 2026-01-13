@@ -14,6 +14,9 @@ import { User } from './user.entity';
 import { UserProfileDto } from './dto/user-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { UserExportDto } from './dto/user-export.dto';
+import { TwoFactorAuthService } from './two-factor-auth.service';
+import { Enable2faDto } from './dto/enable-2fa.dto';
+import { Disable2faDto } from './dto/disable-2fa.dto';
 
 const EMAIL_VERIFICATION_TOKEN_TTL_MS = 24 * 60 * 60 * 1000;
 const DELETED_EMAIL_DOMAIN =
@@ -26,6 +29,7 @@ export class AccountService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepo: Repository<User>,
+    private readonly twoFactorAuth: TwoFactorAuthService,
   ) {}
 
   private buildUserProfileDto(user: User): UserProfileDto {
@@ -217,5 +221,123 @@ export class AccountService {
       createdAt: user.createdAt.toISOString(),
       active: user.active,
     };
+  }
+
+  async getTwoFactorStatus(userId: string): Promise<{
+    enabled: boolean;
+    confirmedAt: string | null;
+  }> {
+    const user = await this.usersRepo.findOne({
+      where: { id: userId, active: true },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return {
+      enabled: user.twoFactorEnabled === true,
+      confirmedAt: user.twoFactorConfirmedAt
+        ? user.twoFactorConfirmedAt.toISOString()
+        : null,
+    };
+  }
+
+  async setupTwoFactor(userId: string): Promise<{
+    secret: string;
+    otpauthUrl: string;
+  }> {
+    const user = await this.usersRepo.findOne({
+      where: { id: userId, active: true },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (user.twoFactorEnabled === true) {
+      throw new BadRequestException('two factor already enabled');
+    }
+
+    const secret = this.twoFactorAuth.generateSecret();
+    const issuer = process.env.TWO_FA_ISSUER ?? 'BeeLMS';
+    const otpauthUrl = this.twoFactorAuth.buildOtpAuthUrl({
+      issuer,
+      email: user.email,
+      secret,
+    });
+
+    return { secret, otpauthUrl };
+  }
+
+  async enableTwoFactor(
+    userId: string,
+    dto: Enable2faDto,
+  ): Promise<{
+    enabled: boolean;
+    confirmedAt: string;
+  }> {
+    const user = await this.usersRepo.findOne({
+      where: { id: userId, active: true },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const ok = this.twoFactorAuth.verifyCode({
+      code: dto.code,
+      secret: dto.secret,
+    });
+
+    if (!ok) {
+      throw new BadRequestException('invalid 2fa code');
+    }
+
+    user.twoFactorSecret = this.twoFactorAuth.encryptSecret(dto.secret);
+    user.twoFactorEnabled = true;
+    user.twoFactorConfirmedAt = new Date();
+
+    const saved = await this.usersRepo.save(user);
+
+    return {
+      enabled: true,
+      confirmedAt: saved.twoFactorConfirmedAt
+        ? saved.twoFactorConfirmedAt.toISOString()
+        : new Date().toISOString(),
+    };
+  }
+
+  async disableTwoFactor(
+    userId: string,
+    dto: Disable2faDto,
+  ): Promise<{
+    enabled: boolean;
+  }> {
+    const user = await this.usersRepo.findOne({
+      where: { id: userId, active: true },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (!user.twoFactorEnabled || !user.twoFactorSecret) {
+      return { enabled: false };
+    }
+
+    const secret = this.twoFactorAuth.decryptSecret(user.twoFactorSecret);
+    const ok = this.twoFactorAuth.verifyCode({ code: dto.code, secret });
+    if (!ok) {
+      throw new BadRequestException('invalid 2fa code');
+    }
+
+    user.twoFactorEnabled = false;
+    user.twoFactorSecret = null;
+    user.twoFactorConfirmedAt = null;
+
+    await this.usersRepo.save(user);
+
+    return { enabled: false };
   }
 }

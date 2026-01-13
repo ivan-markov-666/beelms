@@ -7,9 +7,11 @@ import {
   Post,
   Query,
   Req,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import type { Request } from 'express';
+import type { Response } from 'express';
 import { WikiService } from './wiki.service';
 import { WikiListItemDto } from './dto/wiki-list-item.dto';
 import { WikiArticleDetailDto } from './dto/wiki-article-detail.dto';
@@ -57,6 +59,7 @@ export class WikiController {
 
   @Get('articles')
   async findAll(
+    @Res({ passthrough: true }) res: Response,
     @Query('page') page?: string,
     @Query('pageSize') pageSize?: string,
     @Query('q') q?: string,
@@ -64,12 +67,15 @@ export class WikiController {
   ): Promise<WikiListItemDto[]> {
     const pageNum = page ? Number(page) : undefined;
     const pageSizeNum = pageSize ? Number(pageSize) : undefined;
-    return this.wikiService.getActiveArticlesList(
+    const result = await this.wikiService.getActiveArticlesListPaged(
       pageNum,
       pageSizeNum,
       q,
       lang,
     );
+
+    res.setHeader('X-Total-Count', String(result.total));
+    return result.items;
   }
 
   @Get('articles/:slug')

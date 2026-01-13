@@ -113,13 +113,18 @@ describe('WikiService', () => {
     expect(articleRepo.find as jest.Mock).toHaveBeenCalledTimes(1);
     const firstCall = (articleRepo.find as jest.Mock).mock.calls[0] as [
       {
-        skip: number;
-        take: number;
+        where?: unknown;
+        relations?: unknown;
+        order?: unknown;
       },
     ];
     const options = firstCall[0];
-    expect(options.skip).toBe(0);
-    expect(options.take).toBe(20);
+    expect(options).toEqual(
+      expect.objectContaining({
+        relations: ['versions'],
+        order: { updatedAt: 'DESC' },
+      }),
+    );
   });
 
   it('normalizes invalid page and pageSize to safe defaults', async () => {
@@ -130,36 +135,59 @@ describe('WikiService', () => {
 
     expect(articleRepo.find as jest.Mock).toHaveBeenCalledTimes(2);
 
-    const calls = (articleRepo.find as jest.Mock).mock.calls as [
-      {
-        skip: number;
-        take: number;
-      }[],
-    ];
+    const calls = (articleRepo.find as jest.Mock).mock.calls as Array<
+      [
+        {
+          where?: unknown;
+          relations?: unknown;
+          order?: unknown;
+        },
+      ]
+    >;
 
     for (let i = 0; i < calls.length; i += 1) {
       const call = calls[i];
       const options = call[0];
-      expect(options.skip).toBe(0);
-      expect(options.take).toBe(20);
+      expect(options).toEqual(
+        expect.objectContaining({
+          relations: ['versions'],
+          order: { updatedAt: 'DESC' },
+        }),
+      );
     }
   });
 
   it('calculates skip and take for given page and pageSize', async () => {
-    (articleRepo.find as jest.Mock).mockResolvedValue([]);
+    const now = new Date();
 
-    await service.getActiveArticlesList(2, 10);
+    (articleRepo.find as jest.Mock).mockResolvedValue(
+      Array.from(
+        { length: 25 },
+        (_, i) =>
+          ({
+            id: String(i + 1),
+            slug: `slug-${i + 1}`,
+            status: 'active',
+            visibility: 'public',
+            createdAt: now,
+            updatedAt: now,
+            versions: [
+              {
+                language: 'bg',
+                title: `Title ${i + 1}`,
+                isPublished: true,
+                createdAt: now,
+              },
+            ],
+          }) as unknown as WikiArticle,
+      ),
+    );
+
+    const result = await service.getActiveArticlesList(2, 10);
 
     expect(articleRepo.find as jest.Mock).toHaveBeenCalledTimes(1);
-    const firstCall = (articleRepo.find as jest.Mock).mock.calls[0] as [
-      {
-        skip: number;
-        take: number;
-      },
-    ];
-    const options = firstCall[0];
-    expect(options.skip).toBe(10);
-    expect(options.take).toBe(10);
+    expect(result).toHaveLength(10);
+    expect(result[0]?.slug).toBe('slug-11');
   });
 
   it('returns active articles with latest published version', async () => {

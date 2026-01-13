@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { Suspense } from "react";
 import "./globals.css";
+import "katex/dist/katex.min.css";
 import "@fontsource/inter/latin.css";
 import "@fontsource/inter/latin-ext.css";
 import "@fontsource/inter/cyrillic.css";
@@ -39,6 +40,10 @@ import { AnalyticsConsentBanner } from "./_components/analytics-consent-banner";
 import { AnalyticsTracker } from "./_components/analytics-tracker";
 import { normalizeLang } from "../i18n/config";
 import { buildApiUrl } from "./api-url";
+import {
+  getPublicSettings,
+  type PublicSettings,
+} from "./_data/public-settings";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -97,6 +102,8 @@ async function fetchPublicSettingsForMetadata(): Promise<{
         scrollTrack?: string | null;
         fieldOkBg?: string | null;
         fieldOkBorder?: string | null;
+        fieldAlertBg?: string | null;
+        fieldAlertBorder?: string | null;
         fieldErrorBg?: string | null;
         fieldErrorBorder?: string | null;
       } | null;
@@ -112,6 +119,8 @@ async function fetchPublicSettingsForMetadata(): Promise<{
         scrollTrack?: string | null;
         fieldOkBg?: string | null;
         fieldOkBorder?: string | null;
+        fieldAlertBg?: string | null;
+        fieldAlertBorder?: string | null;
         fieldErrorBg?: string | null;
         fieldErrorBorder?: string | null;
       } | null;
@@ -256,6 +265,42 @@ async function fetchPublicSettingsForMetadata(): Promise<{
     };
   } catch {
     return {};
+  }
+}
+
+async function fetchPublicSettingsForLayout(): Promise<PublicSettings | null> {
+  try {
+    return await getPublicSettings();
+  } catch {
+    return null;
+  }
+}
+
+async function fetchCustomPagesForLayout(
+  lang: string,
+): Promise<Array<{ slug: string; title: string; updatedAt: string }>> {
+  try {
+    const query = lang ? `?lang=${encodeURIComponent(lang)}` : "";
+    const res = await fetch(`${buildApiUrl("/pages/custom")}${query}`, {
+      cache: "no-store",
+    });
+    if (!res.ok) return [];
+    const data = (await res.json()) as Array<{
+      slug?: string;
+      title?: string;
+      updatedAt?: string;
+    }>;
+    return Array.isArray(data)
+      ? data
+          .map((p) => ({
+            slug: (p.slug ?? "").trim().toLowerCase(),
+            title: (p.title ?? "").trim(),
+            updatedAt: (p.updatedAt ?? "").trim(),
+          }))
+          .filter((p) => Boolean(p.slug))
+      : [];
+  } catch {
+    return [];
   }
 }
 
@@ -408,13 +453,13 @@ export default async function RootLayout({
 }>) {
   const h = await headers();
   const lang = normalizeLang(h.get("x-ui-lang"));
-  const publicSettings = await fetchPublicSettingsForMetadata();
-  const themeModeRaw = publicSettings.branding?.theme?.mode ?? "system";
-  const themeAllowLight = publicSettings.features?.themeLight !== false;
-  const themeAllowDark = publicSettings.features?.themeDark !== false;
+  const publicSettings = await fetchPublicSettingsForLayout();
+  const themeModeRaw = publicSettings?.branding?.theme?.mode ?? "system";
+  const themeAllowLight = publicSettings?.features?.themeLight !== false;
+  const themeAllowDark = publicSettings?.features?.themeDark !== false;
   const allowSystem = themeAllowDark && themeAllowLight;
   const themeModeSelectorEnabled =
-    publicSettings.features?.themeModeSelector !== false;
+    publicSettings?.features?.themeModeSelector !== false;
 
   const themeModeNormalized =
     themeModeRaw === "light" ||
@@ -434,6 +479,33 @@ export default async function RootLayout({
   })();
 
   const userThemeStorageKey = "beelms.themeMode";
+  const cookieStore = await cookies();
+  const cookieThemeRaw = (
+    cookieStore.get(userThemeStorageKey)?.value ?? ""
+  ).trim();
+  const cookieThemeMode =
+    cookieThemeRaw === "light" ||
+    cookieThemeRaw === "dark" ||
+    cookieThemeRaw === "system"
+      ? cookieThemeRaw
+      : null;
+
+  const initialThemeMode = (() => {
+    if (!themeModeSelectorEnabled) {
+      return defaultThemeMode;
+    }
+
+    const next = cookieThemeMode ?? defaultThemeMode;
+
+    if (next === "system") {
+      return allowSystem ? "system" : themeAllowLight ? "light" : "dark";
+    }
+    if (next === "light") {
+      return themeAllowLight ? "light" : "dark";
+    }
+    return themeAllowDark ? "dark" : "light";
+  })();
+
   const themeInitScript = `(() => {
     try {
       const allowLight = ${JSON.stringify(themeAllowLight)};
@@ -447,11 +519,16 @@ export default async function RootLayout({
         try {
           localStorage.removeItem(${JSON.stringify(userThemeStorageKey)});
         } catch {}
+        try {
+          document.cookie = ${JSON.stringify(userThemeStorageKey)} + "=; path=/; max-age=0; samesite=lax";
+        } catch {}
         return;
       }
 
       const raw = localStorage.getItem(${JSON.stringify(userThemeStorageKey)});
-      let next = (raw === "light" || raw === "dark" || raw === "system") ? raw : fallback;
+      const attr = document.documentElement.getAttribute("data-theme");
+      const attrMode = (attr === "light" || attr === "dark" || attr === "system") ? attr : null;
+      let next = (raw === "light" || raw === "dark" || raw === "system") ? raw : (attrMode ?? fallback);
 
       if (next === "system" && !allowSystem) {
         next = allowLight ? "light" : "dark";
@@ -464,6 +541,9 @@ export default async function RootLayout({
       }
 
       document.documentElement.setAttribute("data-theme", next);
+      try {
+        document.cookie = ${JSON.stringify(userThemeStorageKey)} + "=" + encodeURIComponent(next) + "; path=/; max-age=31536000; samesite=lax";
+      } catch {}
       if (raw !== next) {
         try {
           localStorage.setItem(${JSON.stringify(userThemeStorageKey)}, next);
@@ -496,10 +576,10 @@ export default async function RootLayout({
   })();`;
 
   const accessibilityWidgetEnabled =
-    publicSettings.features?.accessibilityWidget !== false;
+    publicSettings?.features?.accessibilityWidget !== false;
 
-  const lightPalette = publicSettings.branding?.theme?.light ?? null;
-  const darkPalette = publicSettings.branding?.theme?.dark ?? null;
+  const lightPalette = publicSettings?.branding?.theme?.light ?? null;
+  const darkPalette = publicSettings?.branding?.theme?.dark ?? null;
 
   const themeValue = (value: string | null | undefined, fallback: string) => {
     const trimmed = (value ?? "").trim();
@@ -518,6 +598,8 @@ export default async function RootLayout({
     scrollTrack: themeValue(lightPalette?.scrollTrack, "#f0fdf4"),
     fieldOkBg: themeValue(lightPalette?.fieldOkBg, "#f0fdf4"),
     fieldOkBorder: themeValue(lightPalette?.fieldOkBorder, "#dcfce7"),
+    fieldAlertBg: themeValue(lightPalette?.fieldAlertBg, "#fff7ed"),
+    fieldAlertBorder: themeValue(lightPalette?.fieldAlertBorder, "#fed7aa"),
     fieldErrorBg: themeValue(lightPalette?.fieldErrorBg, "#fef2f2"),
     fieldErrorBorder: themeValue(lightPalette?.fieldErrorBorder, "#fee2e2"),
   };
@@ -534,6 +616,8 @@ export default async function RootLayout({
     scrollTrack: themeValue(darkPalette?.scrollTrack, "#0b2a16"),
     fieldOkBg: themeValue(darkPalette?.fieldOkBg, "#052e16"),
     fieldOkBorder: themeValue(darkPalette?.fieldOkBorder, "#14532d"),
+    fieldAlertBg: themeValue(darkPalette?.fieldAlertBg, "#2a1607"),
+    fieldAlertBorder: themeValue(darkPalette?.fieldAlertBorder, "#9a3412"),
     fieldErrorBg: themeValue(darkPalette?.fieldErrorBg, "#450a0a"),
     fieldErrorBorder: themeValue(darkPalette?.fieldErrorBorder, "#7f1d1d"),
   };
@@ -551,6 +635,8 @@ export default async function RootLayout({
     --theme-light-scroll-track: ${themeLight.scrollTrack};
     --theme-light-field-ok-bg: ${themeLight.fieldOkBg};
     --theme-light-field-ok-border: ${themeLight.fieldOkBorder};
+    --theme-light-field-alert-bg: ${themeLight.fieldAlertBg};
+    --theme-light-field-alert-border: ${themeLight.fieldAlertBorder};
     --theme-light-field-error-bg: ${themeLight.fieldErrorBg};
     --theme-light-field-error-border: ${themeLight.fieldErrorBorder};
 
@@ -565,6 +651,8 @@ export default async function RootLayout({
     --theme-dark-scroll-track: ${themeDark.scrollTrack};
     --theme-dark-field-ok-bg: ${themeDark.fieldOkBg};
     --theme-dark-field-ok-border: ${themeDark.fieldOkBorder};
+    --theme-dark-field-alert-bg: ${themeDark.fieldAlertBg};
+    --theme-dark-field-alert-border: ${themeDark.fieldAlertBorder};
     --theme-dark-field-error-bg: ${themeDark.fieldErrorBg};
     --theme-dark-field-error-border: ${themeDark.fieldErrorBorder};
   }
@@ -582,6 +670,8 @@ export default async function RootLayout({
     --scroll-track: var(--theme-light-scroll-track);
     --field-ok-bg: var(--theme-light-field-ok-bg);
     --field-ok-border: var(--theme-light-field-ok-border);
+    --field-alert-bg: var(--theme-light-field-alert-bg);
+    --field-alert-border: var(--theme-light-field-alert-border);
     --field-error-bg: var(--theme-light-field-error-bg);
     --field-error-border: var(--theme-light-field-error-border);
   }
@@ -599,6 +689,8 @@ export default async function RootLayout({
     --scroll-track: var(--theme-dark-scroll-track);
     --field-ok-bg: var(--theme-dark-field-ok-bg);
     --field-ok-border: var(--theme-dark-field-ok-border);
+    --field-alert-bg: var(--theme-dark-field-alert-bg);
+    --field-alert-border: var(--theme-dark-field-alert-border);
     --field-error-bg: var(--theme-dark-field-error-bg);
     --field-error-border: var(--theme-dark-field-error-border);
   }
@@ -616,6 +708,8 @@ export default async function RootLayout({
     --scroll-track: var(--theme-light-scroll-track);
     --field-ok-bg: var(--theme-light-field-ok-bg);
     --field-ok-border: var(--theme-light-field-ok-border);
+    --field-alert-bg: var(--theme-light-field-alert-bg);
+    --field-alert-border: var(--theme-light-field-alert-border);
     --field-error-bg: var(--theme-light-field-error-bg);
     --field-error-border: var(--theme-light-field-error-border);
   }
@@ -634,20 +728,27 @@ export default async function RootLayout({
       --scroll-track: var(--theme-dark-scroll-track);
       --field-ok-bg: var(--theme-dark-field-ok-bg);
       --field-ok-border: var(--theme-dark-field-ok-border);
+      --field-alert-bg: var(--theme-dark-field-alert-bg);
+      --field-alert-border: var(--theme-dark-field-alert-border);
       --field-error-bg: var(--theme-dark-field-error-bg);
       --field-error-border: var(--theme-dark-field-error-border);
     }
   }
   `;
-  const cursorUrl = publicSettings.branding?.cursorUrl ?? null;
-  const cursorLightUrl = publicSettings.branding?.cursorLightUrl ?? null;
-  const cursorDarkUrl = publicSettings.branding?.cursorDarkUrl ?? null;
-  const cursorHotspotX = publicSettings.branding?.cursorHotspot?.x ?? null;
-  const cursorHotspotY = publicSettings.branding?.cursorHotspot?.y ?? null;
-  const globalFontUrl = publicSettings.branding?.fontUrl ?? null;
-  const globalGoogleFontKey = publicSettings.branding?.googleFont ?? null;
-  const fontUrlByLang = publicSettings.branding?.fontUrlByLang ?? null;
-  const googleFontByLang = publicSettings.branding?.googleFontByLang ?? null;
+  const cursorUrl = publicSettings?.branding?.cursorUrl ?? null;
+  const cursorLightUrl = publicSettings?.branding?.cursorLightUrl ?? null;
+  const cursorDarkUrl = publicSettings?.branding?.cursorDarkUrl ?? null;
+  const cursorPointerUrl = publicSettings?.branding?.cursorPointerUrl ?? null;
+  const cursorPointerLightUrl =
+    publicSettings?.branding?.cursorPointerLightUrl ?? null;
+  const cursorPointerDarkUrl =
+    publicSettings?.branding?.cursorPointerDarkUrl ?? null;
+  const cursorHotspotX = publicSettings?.branding?.cursorHotspot?.x ?? null;
+  const cursorHotspotY = publicSettings?.branding?.cursorHotspot?.y ?? null;
+  const globalFontUrl = publicSettings?.branding?.fontUrl ?? null;
+  const globalGoogleFontKey = publicSettings?.branding?.googleFont ?? null;
+  const fontUrlByLang = publicSettings?.branding?.fontUrlByLang ?? null;
+  const googleFontByLang = publicSettings?.branding?.googleFontByLang ?? null;
 
   const langFontUrl = fontUrlByLang?.[lang] ?? null;
   const langGoogleFontKey = googleFontByLang?.[lang] ?? null;
@@ -664,10 +765,42 @@ export default async function RootLayout({
 
   const resolvedLightCursor = cursorLightUrl ?? cursorUrl;
   const resolvedDarkCursor = cursorDarkUrl ?? cursorUrl;
-  const hasCursor = Boolean(resolvedLightCursor || resolvedDarkCursor);
+  const resolvedLightPointerCursor = cursorPointerLightUrl ?? cursorPointerUrl;
+  const resolvedDarkPointerCursor = cursorPointerDarkUrl ?? cursorPointerUrl;
+
+  const resolvedAnyLightCursor = resolvedLightCursor ?? resolvedDarkCursor;
+  const resolvedAnyDarkCursor = resolvedDarkCursor ?? resolvedLightCursor;
+  const resolvedAnyLightPointerCursor =
+    resolvedLightPointerCursor ?? resolvedDarkPointerCursor;
+  const resolvedAnyDarkPointerCursor =
+    resolvedDarkPointerCursor ?? resolvedLightPointerCursor;
+
+  const clampCursorHotspot = (value: unknown): number => {
+    if (typeof value !== "number") return 8;
+    if (!Number.isFinite(value)) return 8;
+    if (value < 0) return 0;
+    if (value > 128) return 128;
+    return Math.round(value);
+  };
+
+  const resolvedCursorHotspotX = clampCursorHotspot(cursorHotspotX);
+  const resolvedCursorHotspotY = clampCursorHotspot(cursorHotspotY);
+
+  const hasAnyCursor = Boolean(
+    resolvedLightCursor ||
+    resolvedDarkCursor ||
+    resolvedLightPointerCursor ||
+    resolvedDarkPointerCursor,
+  );
+
+  const customPagesForNav = await fetchCustomPagesForLayout(lang);
+  const customPagesForFooter = customPagesForNav.map(({ slug, title }) => ({
+    slug,
+    title,
+  }));
 
   return (
-    <html lang={lang} data-theme={defaultThemeMode} suppressHydrationWarning>
+    <html lang={lang} data-theme={initialThemeMode} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         <script
@@ -677,91 +810,140 @@ export default async function RootLayout({
               : a11yInitScriptDisabled,
           }}
         />
-      </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
         <style>{themeCss}</style>
         {effectiveFontUrl ? (
           <style>{`@font-face { font-family: "BrandingFont"; src: url("${effectiveFontUrl}"); font-display: swap; } :root { --font-sans: "BrandingFont"; --font-geist-sans: "BrandingFont"; } body { font-family: var(--font-sans), Arial, Helvetica, sans-serif !important; }`}</style>
         ) : googleFontEntry ? (
           <style>{`:root { --font-sans: "${googleFontEntry.cssName}"; --font-geist-sans: "${googleFontEntry.cssName}"; } body { font-family: var(--font-sans), ${googleFontEntry.fallback}, system-ui, -apple-system, "Segoe UI", sans-serif !important; }`}</style>
         ) : null}
-        {hasCursor ? (
+        {hasAnyCursor ? (
           <style>{`
-          html[data-theme="light"],
+          html[data-theme="light"] * {
+            cursor: inherit !important;
+          }
+
           html[data-theme="light"] body {
-            cursor: url("${resolvedLightCursor ?? resolvedDarkCursor}") ${typeof cursorHotspotX === "number" ? cursorHotspotX : 8} ${typeof cursorHotspotY === "number" ? cursorHotspotY : 8}, auto !important;
-          }
-          html[data-theme="light"] a,
-          html[data-theme="light"] button,
-          html[data-theme="light"] [role="button"],
-          html[data-theme="light"] input,
-          html[data-theme="light"] select,
-          html[data-theme="light"] textarea,
-          html[data-theme="light"] label,
-          html[data-theme="light"] .cursor-pointer {
-            cursor: url("${resolvedLightCursor ?? resolvedDarkCursor}") ${typeof cursorHotspotX === "number" ? cursorHotspotX : 8} ${typeof cursorHotspotY === "number" ? cursorHotspotY : 8}, pointer !important;
+            ${resolvedLightCursor || resolvedDarkCursor ? `cursor: url("${resolvedLightCursor ?? resolvedDarkCursor}") ${resolvedCursorHotspotX} ${resolvedCursorHotspotY}, auto !important;` : ""}
           }
 
-          html[data-theme="dark"],
+          html[data-theme="dark"] * {
+            cursor: inherit !important;
+          }
+
           html[data-theme="dark"] body {
-            cursor: url("${resolvedDarkCursor ?? resolvedLightCursor}") ${typeof cursorHotspotX === "number" ? cursorHotspotX : 8} ${typeof cursorHotspotY === "number" ? cursorHotspotY : 8}, auto !important;
-          }
-          html[data-theme="dark"] a,
-          html[data-theme="dark"] button,
-          html[data-theme="dark"] [role="button"],
-          html[data-theme="dark"] input,
-          html[data-theme="dark"] select,
-          html[data-theme="dark"] textarea,
-          html[data-theme="dark"] label,
-          html[data-theme="dark"] .cursor-pointer {
-            cursor: url("${resolvedDarkCursor ?? resolvedLightCursor}") ${typeof cursorHotspotX === "number" ? cursorHotspotX : 8} ${typeof cursorHotspotY === "number" ? cursorHotspotY : 8}, pointer !important;
+            ${resolvedDarkCursor || resolvedLightCursor ? `cursor: url("${resolvedDarkCursor ?? resolvedLightCursor}") ${resolvedCursorHotspotX} ${resolvedCursorHotspotY}, auto !important;` : ""}
           }
 
-          html[data-theme="system"],
-          html[data-theme="system"] body {
-            cursor: url("${resolvedLightCursor ?? resolvedDarkCursor}") ${typeof cursorHotspotX === "number" ? cursorHotspotX : 8} ${typeof cursorHotspotY === "number" ? cursorHotspotY : 8}, auto !important;
+          html[data-theme="system"] * {
+            cursor: inherit !important;
           }
-          html[data-theme="system"] a,
-          html[data-theme="system"] button,
-          html[data-theme="system"] [role="button"],
-          html[data-theme="system"] input,
-          html[data-theme="system"] select,
-          html[data-theme="system"] textarea,
-          html[data-theme="system"] label,
-          html[data-theme="system"] .cursor-pointer {
-            cursor: url("${resolvedLightCursor ?? resolvedDarkCursor}") ${typeof cursorHotspotX === "number" ? cursorHotspotX : 8} ${typeof cursorHotspotY === "number" ? cursorHotspotY : 8}, pointer !important;
+
+          html[data-theme="system"] body {
+            ${resolvedLightCursor || resolvedDarkCursor ? `cursor: url("${resolvedLightCursor ?? resolvedDarkCursor}") ${resolvedCursorHotspotX} ${resolvedCursorHotspotY}, auto !important;` : ""}
+          }
+
+          html[data-theme="light"] footer {
+            ${resolvedLightCursor || resolvedDarkCursor ? `cursor: url("${resolvedLightCursor ?? resolvedDarkCursor}") ${resolvedCursorHotspotX} ${resolvedCursorHotspotY}, auto !important;` : ""}
+          }
+
+          html[data-theme="dark"] footer {
+            ${resolvedDarkCursor || resolvedLightCursor ? `cursor: url("${resolvedDarkCursor ?? resolvedLightCursor}") ${resolvedCursorHotspotX} ${resolvedCursorHotspotY}, auto !important;` : ""}
+          }
+
+          html[data-theme="system"] footer {
+            ${resolvedLightCursor || resolvedDarkCursor ? `cursor: url("${resolvedLightCursor ?? resolvedDarkCursor}") ${resolvedCursorHotspotX} ${resolvedCursorHotspotY}, auto !important;` : ""}
           }
 
           @media (prefers-color-scheme: dark) {
-            html[data-theme="system"],
-            html[data-theme="system"] body {
-              cursor: url("${resolvedDarkCursor ?? resolvedLightCursor}") ${typeof cursorHotspotX === "number" ? cursorHotspotX : 8} ${typeof cursorHotspotY === "number" ? cursorHotspotY : 8}, auto !important;
+            html[data-theme="system"] * {
+              cursor: inherit !important;
             }
+
+            html[data-theme="system"] body {
+              ${resolvedDarkCursor || resolvedLightCursor ? `cursor: url("${resolvedDarkCursor ?? resolvedLightCursor}") ${resolvedCursorHotspotX} ${resolvedCursorHotspotY}, auto !important;` : ""}
+            }
+          }
+
+          html[data-theme="light"] a,
+          html[data-theme="light"] button,
+          html[data-theme="light"] [role="button"],
+          html[data-theme="light"] [role="option"],
+          html[data-theme="light"] .cursor-pointer {
+            cursor: url("${resolvedAnyLightPointerCursor ?? resolvedAnyLightCursor}") ${resolvedCursorHotspotX} ${resolvedCursorHotspotY}${resolvedAnyLightPointerCursor && resolvedAnyLightCursor ? `, url("${resolvedAnyLightCursor}") ${resolvedCursorHotspotX} ${resolvedCursorHotspotY}` : ""}, pointer !important;
+          }
+
+          html[data-theme="dark"] a,
+          html[data-theme="dark"] button,
+          html[data-theme="dark"] [role="button"],
+          html[data-theme="dark"] [role="option"],
+          html[data-theme="dark"] .cursor-pointer {
+            cursor: url("${resolvedAnyDarkPointerCursor ?? resolvedAnyDarkCursor}") ${resolvedCursorHotspotX} ${resolvedCursorHotspotY}${resolvedAnyDarkPointerCursor && resolvedAnyDarkCursor ? `, url("${resolvedAnyDarkCursor}") ${resolvedCursorHotspotX} ${resolvedCursorHotspotY}` : ""}, pointer !important;
+          }
+
+          html[data-theme="system"] a,
+          html[data-theme="system"] button,
+          html[data-theme="system"] [role="button"],
+          html[data-theme="system"] [role="option"],
+          html[data-theme="system"] .cursor-pointer {
+            cursor: url("${resolvedAnyLightPointerCursor ?? resolvedAnyLightCursor}") ${resolvedCursorHotspotX} ${resolvedCursorHotspotY}${resolvedAnyLightPointerCursor && resolvedAnyLightCursor ? `, url("${resolvedAnyLightCursor}") ${resolvedCursorHotspotX} ${resolvedCursorHotspotY}` : ""}, pointer !important;
+          }
+
+          html[data-theme="light"] footer a,
+          html[data-theme="light"] footer button,
+          html[data-theme="light"] footer [role="button"],
+          html[data-theme="light"] footer [role="option"],
+          html[data-theme="light"] footer .cursor-pointer {
+            cursor: url("${resolvedAnyLightPointerCursor ?? resolvedAnyLightCursor}") ${resolvedCursorHotspotX} ${resolvedCursorHotspotY}${resolvedAnyLightPointerCursor && resolvedAnyLightCursor ? `, url("${resolvedAnyLightCursor}") ${resolvedCursorHotspotX} ${resolvedCursorHotspotY}` : ""}, pointer !important;
+          }
+
+          html[data-theme="dark"] footer a,
+          html[data-theme="dark"] footer button,
+          html[data-theme="dark"] footer [role="button"],
+          html[data-theme="dark"] footer [role="option"],
+          html[data-theme="dark"] footer .cursor-pointer {
+            cursor: url("${resolvedAnyDarkPointerCursor ?? resolvedAnyDarkCursor}") ${resolvedCursorHotspotX} ${resolvedCursorHotspotY}${resolvedAnyDarkPointerCursor && resolvedAnyDarkCursor ? `, url("${resolvedAnyDarkCursor}") ${resolvedCursorHotspotX} ${resolvedCursorHotspotY}` : ""}, pointer !important;
+          }
+
+          html[data-theme="system"] footer a,
+          html[data-theme="system"] footer button,
+          html[data-theme="system"] footer [role="button"],
+          html[data-theme="system"] footer [role="option"],
+          html[data-theme="system"] footer .cursor-pointer {
+            cursor: url("${resolvedAnyLightPointerCursor ?? resolvedAnyLightCursor}") ${resolvedCursorHotspotX} ${resolvedCursorHotspotY}${resolvedAnyLightPointerCursor && resolvedAnyLightCursor ? `, url("${resolvedAnyLightCursor}") ${resolvedCursorHotspotX} ${resolvedCursorHotspotY}` : ""}, pointer !important;
+          }
+
+          @media (prefers-color-scheme: dark) {
             html[data-theme="system"] a,
             html[data-theme="system"] button,
             html[data-theme="system"] [role="button"],
-            html[data-theme="system"] input,
-            html[data-theme="system"] select,
-            html[data-theme="system"] textarea,
-            html[data-theme="system"] label,
+            html[data-theme="system"] [role="option"],
             html[data-theme="system"] .cursor-pointer {
-              cursor: url("${resolvedDarkCursor ?? resolvedLightCursor}") ${typeof cursorHotspotX === "number" ? cursorHotspotX : 8} ${typeof cursorHotspotY === "number" ? cursorHotspotY : 8}, pointer !important;
+              cursor: url("${resolvedAnyDarkPointerCursor ?? resolvedAnyDarkCursor}") ${resolvedCursorHotspotX} ${resolvedCursorHotspotY}${resolvedAnyDarkPointerCursor && resolvedAnyDarkCursor ? `, url("${resolvedAnyDarkCursor}") ${resolvedCursorHotspotX} ${resolvedCursorHotspotY}` : ""}, pointer !important;
             }
           }
           `}</style>
         ) : null}
+      </head>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        suppressHydrationWarning
+      >
         <div className="flex min-h-screen flex-col bg-gray-50">
           <Suspense fallback={null}>
-            <HeaderNav />
+            <HeaderNav
+              initialPublicSettings={publicSettings}
+              initialCustomPages={customPagesForNav}
+            />
           </Suspense>
           <Suspense fallback={null}>
             <AnalyticsTracker />
           </Suspense>
           <div className="flex-1">{children}</div>
           <Suspense fallback={null}>
-            <SiteFooter />
+            <SiteFooter
+              initialPublicSettings={publicSettings}
+              initialCustomPages={customPagesForFooter}
+            />
           </Suspense>
           <Suspense fallback={null}>
             <AnalyticsConsentBanner />

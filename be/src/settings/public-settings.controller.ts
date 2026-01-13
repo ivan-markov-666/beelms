@@ -56,7 +56,14 @@ export class PublicSettingsController {
 
     return {
       branding,
-      features: cfg.features,
+      features: (() => {
+        const f = { ...cfg.features } as Record<string, unknown>;
+        delete f.infraRedisUrl;
+        delete f.infraRabbitmqUrl;
+        delete f.infraMonitoringUrl;
+        delete f.infraErrorTrackingUrl;
+        return f;
+      })(),
       languages: cfg.languages,
       seo: cfg.features?.seo !== false ? (cfg.seo ?? null) : null,
     };

@@ -6,10 +6,13 @@ import { t } from "../../../i18n/t";
 import { getAccessToken } from "../../auth-token";
 import { getApiBaseUrl } from "../../api-url";
 import { AdminBreadcrumbs } from "../_components/admin-breadcrumbs";
+import { Pagination } from "../../_components/pagination";
+import { InfoTooltip } from "../_components/info-tooltip";
+import { ListboxSelect } from "../../_components/listbox-select";
 
 const API_BASE_URL = getApiBaseUrl();
 
-const MAX_VISIBLE_ITEMS = 100;
+const DEFAULT_PAGE_SIZE = 20;
 
 type ActivityType = "wiki" | "user";
 type ActivityAction =
@@ -55,6 +58,8 @@ export default function AdminActivityPage() {
   const [customFrom, setCustomFrom] = useState("");
   const [customTo, setCustomTo] = useState("");
   const todayIso = new Date().toLocaleDateString("en-CA");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
 
   const handleExportCsv = () => {
     if (filteredItems.length === 0 || typeof window === "undefined") {
@@ -266,10 +271,19 @@ export default function AdminActivityPage() {
     });
   })();
 
-  const limitedItems = filteredItems.slice(0, MAX_VISIBLE_ITEMS);
+  const totalCount = filteredItems.length;
+  const totalPages =
+    totalCount > 0 ? Math.max(1, Math.ceil(totalCount / pageSize)) : 1;
+  const safeCurrentPage = Math.min(Math.max(currentPage, 1), totalPages);
+  const startIndex = (safeCurrentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const pageItems = filteredItems.slice(startIndex, endIndex);
 
-  const hasItems = !loading && !error && limitedItems.length > 0;
-  const noItems = !loading && !error && limitedItems.length === 0;
+  const showingFrom = totalCount === 0 ? 0 : startIndex + 1;
+  const showingTo = Math.min(endIndex, totalCount);
+
+  const hasItems = !loading && !error && pageItems.length > 0;
+  const noItems = !loading && !error && pageItems.length === 0;
 
   return (
     <div className="space-y-6">
@@ -282,9 +296,16 @@ export default function AdminActivityPage() {
         />
 
         <div className="space-y-1">
-          <h1 className="text-3xl font-bold text-gray-900 md:text-4xl">
-            {t(lang, "common", "adminActivityTitle")}
-          </h1>
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="text-3xl font-bold text-gray-900 md:text-4xl">
+              {t(lang, "common", "adminActivityTitle")}
+            </h1>
+            <InfoTooltip
+              label="Activity overview info"
+              title="Активност"
+              description="Прегледай последните wiki и user действия. Използвай филтрите и диапазоните по-долу за да стесниш резултатите."
+            />
+          </div>
           <p className="text-gray-600">
             {t(lang, "common", "adminActivitySubtitle")}
           </p>
@@ -292,6 +313,16 @@ export default function AdminActivityPage() {
       </section>
 
       <section className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-base font-semibold text-gray-900">
+            Филтри и диапазон
+          </h2>
+          <InfoTooltip
+            label="Activity filters info"
+            title="Филтри"
+            description='Комбинирай търсене, тип, действие и времеви диапазон. "Custom" ти позволява да избереш From/To дати.'
+          />
+        </div>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
           <div className="md:col-span-2">
             <div className="relative">
@@ -322,81 +353,125 @@ export default function AdminActivityPage() {
               />
             </div>
             <div className="mt-2">
-              <select
+              <ListboxSelect
+                ariaLabel="Activity range"
                 value={rangePreset}
-                onChange={(event) => {
-                  const value = event.target.value;
+                onChange={(value) => {
                   setRangePreset(value);
                   if (value !== "custom") {
                     setCustomFrom("");
                     setCustomTo("");
                   }
                 }}
-                className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
-              >
-                <option value="">
-                  {t(lang, "common", "adminActivityFilterRangeAll")}
-                </option>
-                <option value="last_1d">
-                  {t(lang, "common", "adminActivityFilterRangeLastDay")}
-                </option>
-                <option value="last_7d">
-                  {t(lang, "common", "adminActivityFilterRangeLastWeek")}
-                </option>
-                <option value="last_30d">
-                  {t(lang, "common", "adminActivityFilterRangeLastMonth")}
-                </option>
-                <option value="last_365d">
-                  {t(lang, "common", "adminActivityFilterRangeLastYear")}
-                </option>
-                <option value="custom">
-                  {t(lang, "common", "adminActivityFilterRangeCustom")}
-                </option>
-              </select>
+                options={[
+                  {
+                    value: "",
+                    label: t(lang, "common", "adminActivityFilterRangeAll"),
+                  },
+                  {
+                    value: "last_1d",
+                    label: t(lang, "common", "adminActivityFilterRangeLastDay"),
+                  },
+                  {
+                    value: "last_7d",
+                    label: t(
+                      lang,
+                      "common",
+                      "adminActivityFilterRangeLastWeek",
+                    ),
+                  },
+                  {
+                    value: "last_30d",
+                    label: t(
+                      lang,
+                      "common",
+                      "adminActivityFilterRangeLastMonth",
+                    ),
+                  },
+                  {
+                    value: "last_365d",
+                    label: t(
+                      lang,
+                      "common",
+                      "adminActivityFilterRangeLastYear",
+                    ),
+                  },
+                  {
+                    value: "custom",
+                    label: t(lang, "common", "adminActivityFilterRangeCustom"),
+                  },
+                ]}
+              />
             </div>
           </div>
 
           <div>
-            <select
+            <ListboxSelect
+              ariaLabel="Activity type"
               value={typeFilter}
-              onChange={(event) => setTypeFilter(event.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
-            >
-              <option value="">
-                {t(lang, "common", "adminActivityFilterTypeAll")}
-              </option>
-              <option value="wiki">
-                {t(lang, "common", "adminActivityFilterTypeWiki")}
-              </option>
-              <option value="user">
-                {t(lang, "common", "adminActivityFilterTypeUser")}
-              </option>
-            </select>
+              onChange={(next) => setTypeFilter(next)}
+              options={[
+                {
+                  value: "",
+                  label: t(lang, "common", "adminActivityFilterTypeAll"),
+                },
+                {
+                  value: "wiki",
+                  label: t(lang, "common", "adminActivityFilterTypeWiki"),
+                },
+                {
+                  value: "user",
+                  label: t(lang, "common", "adminActivityFilterTypeUser"),
+                },
+              ]}
+            />
           </div>
 
-          <div>
-            <select
+          <div className="flex flex-col">
+            <ListboxSelect
+              ariaLabel="Activity action"
               value={actionFilter}
-              onChange={(event) => setActionFilter(event.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
-            >
-              <option value="">
-                {t(lang, "common", "adminActivityFilterActionAll")}
-              </option>
-              <option value="article_created">
-                {t(lang, "common", "adminActivityFilterActionArticleCreated")}
-              </option>
-              <option value="article_updated">
-                {t(lang, "common", "adminActivityFilterActionArticleUpdated")}
-              </option>
-              <option value="user_registered">
-                {t(lang, "common", "adminActivityFilterActionUserRegistered")}
-              </option>
-              <option value="user_deactivated">
-                {t(lang, "common", "adminActivityFilterActionUserDeactivated")}
-              </option>
-            </select>
-            <div className="mt-2 flex justify-end">
+              onChange={(next) => setActionFilter(next)}
+              options={[
+                {
+                  value: "",
+                  label: t(lang, "common", "adminActivityFilterActionAll"),
+                },
+                {
+                  value: "article_created",
+                  label: t(
+                    lang,
+                    "common",
+                    "adminActivityFilterActionArticleCreated",
+                  ),
+                },
+                {
+                  value: "article_updated",
+                  label: t(
+                    lang,
+                    "common",
+                    "adminActivityFilterActionArticleUpdated",
+                  ),
+                },
+                {
+                  value: "user_registered",
+                  label: t(
+                    lang,
+                    "common",
+                    "adminActivityFilterActionUserRegistered",
+                  ),
+                },
+                {
+                  value: "user_deactivated",
+                  label: t(
+                    lang,
+                    "common",
+                    "adminActivityFilterActionUserDeactivated",
+                  ),
+                },
+              ]}
+            />
+            <div className="mt-2 flex items-center justify-end gap-2">
               <button
                 type="button"
                 onClick={handleExportCsv}
@@ -404,6 +479,11 @@ export default function AdminActivityPage() {
               >
                 {t(lang, "common", "adminActivityExportButton")}
               </button>
+              <InfoTooltip
+                label="Activity export info"
+                title="Export CSV"
+                description="Експортът генерира CSV на базата на текущите филтри и видимия времеви диапазон."
+              />
             </div>
           </div>
         </div>
@@ -476,7 +556,7 @@ export default function AdminActivityPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {limitedItems.map((item, index) => (
+                {pageItems.map((item, index) => (
                   <tr
                     key={`${item.occurredAt}-${item.type}-${item.action}-${item.entityId}-${index}`}
                     className="hover:bg-gray-50"
@@ -526,12 +606,29 @@ export default function AdminActivityPage() {
               </tbody>
             </table>
           </div>
-          <div className="border-t border-gray-100 bg-gray-50 px-6 py-2 text-xs text-gray-600">
-            {t(lang, "common", "adminActivityFooterCountPrefix")}{" "}
-            {limitedItems.length}{" "}
-            {t(lang, "common", "adminActivityFooterCountOf")}{" "}
-            {filteredItems.length}{" "}
-            {t(lang, "common", "adminActivityFooterCountSuffix")}
+          <div className="flex flex-col gap-3 border-t border-gray-100 bg-gray-50 px-6 py-3 text-xs text-gray-600 md:flex-row md:items-center md:justify-between">
+            <span>
+              Showing <span className="font-semibold">{showingFrom}</span>-
+              <span className="font-semibold">{showingTo}</span> of{" "}
+              <span className="font-semibold">{totalCount}</span>
+            </span>
+            <div className="flex items-center gap-2">
+              <InfoTooltip
+                label="Activity pagination info"
+                title="Pagination"
+                description="Използвай стрелките и page size за да прегледаш повече активности. Настройването на page size ще рестартира към страница 1."
+              />
+              <Pagination
+                currentPage={safeCurrentPage}
+                totalPages={totalPages}
+                onPageChange={(page) => setCurrentPage(page)}
+                pageSize={pageSize}
+                onPageSizeChange={(next) => {
+                  setCurrentPage(1);
+                  setPageSize(next);
+                }}
+              />
+            </div>
           </div>
         </section>
       )}

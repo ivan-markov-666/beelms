@@ -266,6 +266,7 @@ export type WikiRichEditorProps = {
   onChangeMarkdown: (markdown: string) => void;
   disabled?: boolean;
   onEditorReady?: (editor: Editor | null) => void;
+  exportFileName?: string;
 };
 
 export function WikiRichEditor({
@@ -273,6 +274,7 @@ export function WikiRichEditor({
   onChangeMarkdown,
   disabled,
   onEditorReady,
+  exportFileName,
 }: WikiRichEditorProps) {
   const turndown = useMemo(() => createTurndown(), []);
 
@@ -384,10 +386,10 @@ export function WikiRichEditor({
   }
 
   const btnBase =
-    "rounded border px-2 py-1 text-xs font-semibold hover:bg-white/70 disabled:cursor-not-allowed disabled:opacity-50";
+    "rounded border px-2 py-1 text-xs font-semibold hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50";
 
-  const btnActive = "bg-white border-zinc-400 text-zinc-900";
-  const btnIdle = "bg-white/40 border-zinc-300 text-zinc-800";
+  const btnActive = "bg-gray-50 border-gray-300 text-gray-900";
+  const btnIdle = "bg-white border-gray-300 text-gray-800";
 
   const isCaptionParagraph = (node: PMNode | null | undefined) => {
     if (!node || node.type.name !== "paragraph") {
@@ -483,11 +485,66 @@ export function WikiRichEditor({
 
   const canActOnImage = !!findClosestImageInSelectionBlock();
 
+  const getLatestMarkdown = (): string => {
+    try {
+      const html = editor.getHTML();
+      const sanitizedHtml = DOMPurify.sanitize(html, {
+        USE_PROFILES: { html: true },
+      });
+      return turndown.turndown(sanitizedHtml).trim();
+    } catch {
+      return (markdown ?? "").trim();
+    }
+  };
+
+  const downloadMarkdown = () => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const content = getLatestMarkdown();
+    const name =
+      (exportFileName ?? "wiki-article.md").trim() || "wiki-article.md";
+    const blob = new Blob([content], { type: "text/markdown;charset=utf-8" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.setTimeout(() => window.URL.revokeObjectURL(url), 250);
+  };
+
+  const insertInlineFormula = () => {
+    const input = window.prompt("LaTeX (inline)", "E=mc^2");
+    if (input === null) {
+      return;
+    }
+    const trimmed = input.trim();
+    if (!trimmed) {
+      return;
+    }
+    editor.chain().focus().insertContent(`$${trimmed}$`).run();
+  };
+
+  const insertBlockFormula = () => {
+    const input = window.prompt("LaTeX (block)", "\\frac{a}{b}");
+    if (input === null) {
+      return;
+    }
+    const trimmed = input.trim();
+    if (!trimmed) {
+      return;
+    }
+    editor.chain().focus().insertContent(`\n\n$$\n${trimmed}\n$$\n\n`).run();
+  };
+
   return (
     <div className="space-y-2">
       <div className="flex flex-wrap gap-2 rounded-md border border-zinc-200 bg-zinc-50 p-2">
-        <div className="flex flex-wrap items-center gap-2 rounded-md border border-sky-300 bg-sky-100 p-2">
-          <span className="px-1 text-[10px] font-bold uppercase tracking-wide text-sky-700">
+        <div className="flex flex-wrap items-center gap-2 rounded-md border border-gray-200 bg-gray-50 p-2">
+          <span className="px-1 text-[10px] font-bold uppercase tracking-wide text-gray-600">
             Text
           </span>
 
@@ -508,7 +565,31 @@ export function WikiRichEditor({
             Redo
           </button>
 
-          <div className="mx-1 h-5 w-px bg-sky-200" />
+          <div className="mx-1 h-5 w-px bg-gray-200" />
+
+          <button
+            type="button"
+            className={`${btnBase} ${btnIdle}`}
+            onClick={insertInlineFormula}
+          >
+            Formula (inline)
+          </button>
+          <button
+            type="button"
+            className={`${btnBase} ${btnIdle}`}
+            onClick={insertBlockFormula}
+          >
+            Formula (block)
+          </button>
+          <button
+            type="button"
+            className={`${btnBase} ${btnIdle}`}
+            onClick={downloadMarkdown}
+          >
+            Export .md
+          </button>
+
+          <div className="mx-1 h-5 w-px bg-gray-200" />
 
           <button
             type="button"
@@ -564,7 +645,7 @@ export function WikiRichEditor({
             H4
           </button>
 
-          <div className="mx-1 h-5 w-px bg-sky-200" />
+          <div className="mx-1 h-5 w-px bg-gray-200" />
 
           <button
             type="button"
@@ -886,8 +967,8 @@ export function WikiRichEditor({
           </button>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 rounded-md border border-violet-300 bg-violet-100 p-2">
-          <span className="px-1 text-[10px] font-bold uppercase tracking-wide text-violet-700">
+        <div className="flex flex-wrap items-center gap-2 rounded-md border border-gray-200 bg-gray-50 p-2">
+          <span className="px-1 text-[10px] font-bold uppercase tracking-wide text-gray-600">
             Table
           </span>
 

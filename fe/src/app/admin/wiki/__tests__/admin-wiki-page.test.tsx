@@ -4,9 +4,13 @@ import AdminWikiPage from "../page";
 import { ACCESS_TOKEN_KEY } from "../../../auth-token";
 
 jest.mock("next/navigation", () => ({
+  useRouter: jest.fn(),
+  usePathname: jest.fn(),
   useSearchParams: jest.fn(),
 }));
 
+const useRouterMock = nextNavigation.useRouter as jest.Mock;
+const usePathnameMock = nextNavigation.usePathname as jest.Mock;
 const useSearchParamsMock = nextNavigation.useSearchParams as jest.Mock;
 
 function makeSearchParams(query: string) {
@@ -25,6 +29,12 @@ describe("AdminWikiPage", () => {
   beforeEach(() => {
     jest.resetAllMocks();
     window.localStorage.clear();
+    useRouterMock.mockReturnValue({
+      push: jest.fn(),
+      replace: jest.fn(),
+      prefetch: jest.fn(),
+    });
+    usePathnameMock.mockReturnValue("/admin/wiki");
     useSearchParamsMock.mockReturnValue(makeSearchParams("lang=bg"));
   });
 

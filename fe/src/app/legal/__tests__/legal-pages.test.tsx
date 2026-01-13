@@ -3,22 +3,38 @@ import PrivacyPage from "../privacy/page";
 import TermsPage from "../terms/page";
 
 describe("Legal pages", () => {
-  const mockLegalPage = {
-    slug: "terms",
-    title: "Legal page",
-    contentMarkdown: "# Heading\n\nSome content",
-    updatedAt: new Date().toISOString(),
-  };
-
   beforeEach(() => {
     const globalWithFetch = global as typeof global & {
       fetch: jest.Mock;
     };
 
-    globalWithFetch.fetch = jest.fn().mockResolvedValue({
-      ok: true,
-      json: async () => mockLegalPage,
-    } as Response);
+    globalWithFetch.fetch = jest
+      .fn()
+      .mockImplementation(async (input: RequestInfo) => {
+        const url = String(input);
+
+        if (url.includes("/legal/privacy")) {
+          return {
+            ok: true,
+            json: async () => ({
+              slug: "privacy",
+              title: "Privacy custom title",
+              contentMarkdown: "# Heading\n\nSome content",
+              updatedAt: new Date().toISOString(),
+            }),
+          } as unknown as Response;
+        }
+
+        return {
+          ok: true,
+          json: async () => ({
+            slug: "terms",
+            title: "Terms custom title",
+            contentMarkdown: "# Heading\n\nSome content",
+            updatedAt: new Date().toISOString(),
+          }),
+        } as unknown as Response;
+      });
   });
 
   afterEach(() => {
@@ -29,15 +45,13 @@ describe("Legal pages", () => {
     const ui = await PrivacyPage({ searchParams: { lang: "bg" } });
     render(ui);
 
-    expect(
-      screen.getByText("Политика за поверителност и GDPR"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Privacy custom title")).toBeInTheDocument();
   });
 
   it("renders Terms of Use page title", async () => {
     const ui = await TermsPage({ searchParams: { lang: "bg" } });
     render(ui);
 
-    expect(screen.getByText("Условия за ползване")).toBeInTheDocument();
+    expect(screen.getByText("Terms custom title")).toBeInTheDocument();
   });
 });

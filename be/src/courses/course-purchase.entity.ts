@@ -50,6 +50,46 @@ export class CoursePurchase {
   })
   stripePaymentIntentId: string | null;
 
+  @Column({
+    name: 'paypal_order_id',
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+  })
+  paypalOrderId: string | null;
+
+  @Column({
+    name: 'paypal_capture_id',
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+  })
+  paypalCaptureId: string | null;
+
+  @Column({
+    name: 'mypos_order_id',
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+  })
+  myposOrderId: string | null;
+
+  @Column({
+    name: 'mypos_trnref',
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+  })
+  myposTrnref: string | null;
+
+  @Column({
+    name: 'revolut_order_id',
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+  })
+  revolutOrderId: string | null;
+
   @Column({ name: 'amount_cents', type: 'integer', nullable: true })
   amountCents: number | null;
 

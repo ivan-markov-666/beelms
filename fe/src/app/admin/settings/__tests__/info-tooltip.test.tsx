@@ -13,7 +13,7 @@ describe("InfoTooltip", () => {
   it("stops click propagation to parent container", async () => {
     const user = userEvent.setup();
     const onOuterClick = jest.fn();
-    const { InfoTooltip } = await import("../page");
+    const { InfoTooltip } = await import("../../_components/info-tooltip");
 
     render(
       <div onClick={onOuterClick}>
@@ -30,7 +30,7 @@ describe("InfoTooltip", () => {
   });
 
   it("renders tooltip content in DOM (initially hidden)", async () => {
-    const { InfoTooltip } = await import("../page");
+    const { InfoTooltip } = await import("../../_components/info-tooltip");
 
     render(
       <InfoTooltip

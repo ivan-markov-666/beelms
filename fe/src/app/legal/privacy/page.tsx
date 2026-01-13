@@ -11,8 +11,9 @@ type LegalPageDto = {
   updatedAt: string;
 };
 
-async function fetchLegalPrivacy(): Promise<LegalPageDto> {
-  const res = await fetch(buildApiUrl("/legal/privacy"), {
+async function fetchLegalPrivacy(lang: SupportedLang): Promise<LegalPageDto> {
+  const query = lang ? `?lang=${encodeURIComponent(lang)}` : "";
+  const res = await fetch(buildApiUrl(`/legal/privacy${query}`), {
     next: { revalidate: 60 },
   });
 
@@ -41,7 +42,7 @@ export default async function PrivacyPage({
 
   const rawLang = resolvedSearchParams.lang ?? null;
   const lang: SupportedLang = normalizeLang(rawLang);
-  const page = await fetchLegalPrivacy();
+  const page = await fetchLegalPrivacy(lang);
 
   return (
     <main className="mx-auto flex min-h-screen max-w-3xl flex-col gap-8 px-4 py-10">
@@ -50,7 +51,7 @@ export default async function PrivacyPage({
           Legal / GDPR
         </p>
         <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
-          {t(lang, "common", "legalPrivacyTitle")}
+          {page.title || t(lang, "common", "legalPrivacyTitle")}
         </h1>
         <p className="max-w-2xl text-sm text-zinc-600 dark:text-zinc-300">
           {t(lang, "common", "legalPrivacyIntro")}

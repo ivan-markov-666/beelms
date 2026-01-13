@@ -54,6 +54,8 @@ export const messages: Messages = {
         "Социалните входове са ограничени. Ако сте използвали Google/Facebook/GitHub/LinkedIn, сменете паролата си чрез 'Забравена парола' и после влезте с имейл + новата парола.",
       socialResetPasswordHint:
         "Ако социалният вход (Google/Facebook/GitHub/LinkedIn) е изключен или липсва, можете да използвате 'Забравена парола', за да си зададете парола и да влезете с имейл + парола.",
+      socialResetPasswordHintNoProviders:
+        "Ако social sign-in е изключен или липсва, можете да използвате 'Забравена парола', за да си зададете парола и да влезете с имейл + парола.",
       loginGoogleDisabled:
         "Входът с Google е временно изключен от администратора.",
       loginGoogleUnavailable:
@@ -80,6 +82,8 @@ export const messages: Messages = {
       loginCaptchaPlaceholder:
         "CAPTCHA / reCAPTCHA (placeholder) – в реалната система се показва само след няколко последователни неуспешни опита за вход.",
       loginCaptchaLabel: "CAPTCHA / reCAPTCHA",
+      loginCaptchaNotAvailable:
+        "CAPTCHA е изискан, но интеграцията е изключена или не е конфигурирана. Моля, опитайте отново или се свържете с администратор.",
       loginErrorEmailRequired: "Моля, въведете имейл.",
       loginErrorEmailInvalid: "Моля, въведете валиден имейл адрес.",
       loginErrorPasswordRequired: "Моля, въведете парола.",
@@ -89,6 +93,20 @@ export const messages: Messages = {
       loginErrorNetwork: "Възникна грешка при връзката със сървъра.",
       loginErrorDisabled:
         "Входът за стандартни потребители е изключен от администратора.",
+      twoFactorTitle: "Двуфакторна автентикация",
+      twoFactorSubtitle:
+        "Въведете 6-цифрения код от приложението за автентикация.",
+      twoFactorCodeLabel: "Код",
+      twoFactorSubmit: "Потвърди",
+      twoFactorSubmitLoading: "Потвърждаване...",
+      twoFactorBackToLogin: "Обратно към вход",
+      twoFactorErrorMissingChallenge:
+        "Липсва 2FA challenge. Моля, влезте отново.",
+      twoFactorErrorCodeRequired: "Моля, въведете 6-цифрен код.",
+      twoFactorErrorCodeInvalidFormat: "Невалиден формат на кода.",
+      twoFactorErrorInvalidCode: "Невалиден код. Моля, опитайте отново.",
+      twoFactorErrorGeneric:
+        "Потвърждението на 2FA не успя. Моля, опитайте отново по-късно.",
       loginLoading: "Зареждане...",
       registerTitle: "Регистрация",
       registerSubtitle: "Създайте нов акаунт.",
@@ -301,6 +319,7 @@ export const messages: Messages = {
       adminDashboardTabUsers: "Потребители",
       adminDashboardTabMetrics: "Метрики",
       adminDashboardTabActivity: "Активност",
+      adminDashboardTabPayments: "Payments",
       adminDashboardCardUsersTitle: "Регистрирани потребители",
       adminDashboardCardUsersTrend: "+12% спрямо миналия месец",
       adminDashboardCardUsersTrendSuffix: "спрямо миналия месец",
@@ -507,11 +526,15 @@ export const messages: Messages = {
       loginCaptchaPlaceholder:
         "CAPTCHA / reCAPTCHA (placeholder) – in the real system it appears only after several consecutive failed login attempts.",
       loginCaptchaLabel: "CAPTCHA / reCAPTCHA",
+      loginCaptchaNotAvailable:
+        "CAPTCHA is required, but the integration is disabled or not configured. Please try again or contact an administrator.",
       loginErrorEmailRequired: "Please enter your email.",
       loginErrorEmailInvalid: "Please enter a valid email address.",
       loginErrorPasswordRequired: "Please enter your password.",
       socialResetPasswordHint:
         "If social sign-in (Google/Facebook/GitHub/LinkedIn) is unavailable, you can use 'Forgot password' to set a password and then sign in with email + password.",
+      socialResetPasswordHintNoProviders:
+        "If social sign-in is unavailable, you can use 'Forgot password' to set a password and then sign in with email + password.",
       loginErrorInvalidCredentials: "Invalid login details.",
       loginErrorCaptchaRequired: "Please confirm that you are not a robot.",
       loginErrorGeneric: "Sign in failed. Please try again later.",
@@ -634,6 +657,18 @@ export const messages: Messages = {
         "You will no longer have access to your profile. If you decide to use BeeLMS again in the future, you will need to create a new account.",
       accountDeletedPrimaryCta: "Go to home page",
       accountDeletedSecondaryCta: "Go to Wiki articles",
+      twoFactorTitle: "Two-factor authentication",
+      twoFactorSubtitle: "Enter the 6-digit code from your authenticator app.",
+      twoFactorCodeLabel: "Code",
+      twoFactorSubmit: "Verify",
+      twoFactorSubmitLoading: "Verifying...",
+      twoFactorBackToLogin: "Back to login",
+      twoFactorErrorMissingChallenge:
+        "Missing 2FA challenge. Please log in again.",
+      twoFactorErrorCodeRequired: "Please enter the 6-digit code.",
+      twoFactorErrorCodeInvalidFormat: "Invalid code format.",
+      twoFactorErrorInvalidCode: "Invalid code. Please try again.",
+      twoFactorErrorGeneric: "2FA verification failed. Please try again later.",
     },
     common: {
       adminUsersTitle: "Admin Users",
@@ -688,6 +723,7 @@ export const messages: Messages = {
       adminDashboardTabUsers: "Users",
       adminDashboardTabMetrics: "Metrics",
       adminDashboardTabActivity: "Activity",
+      adminDashboardTabPayments: "Payments",
       adminDashboardCardUsersTitle: "Registered Users",
       adminDashboardCardUsersTrend: "+12% from last month",
       adminDashboardCardUsersTrendSuffix: "from last month",
@@ -892,17 +928,36 @@ export const messages: Messages = {
       loginCaptchaPlaceholder:
         "CAPTCHA / reCAPTCHA (Platzhalter) – im echten System erscheint es nur nach mehreren fehlgeschlagenen Anmeldeversuchen.",
       loginCaptchaLabel: "CAPTCHA / reCAPTCHA",
+      loginCaptchaNotAvailable:
+        "CAPTCHA wird benötigt, aber die Integration ist deaktiviert oder nicht konfiguriert. Bitte versuche es erneut oder kontaktiere einen Administrator.",
       loginErrorEmailRequired: "Bitte gib deine E-Mail-Adresse ein.",
       loginErrorEmailInvalid: "Bitte gib eine gültige E-Mail-Adresse ein.",
       loginErrorPasswordRequired: "Bitte gib dein Passwort ein.",
       socialResetPasswordHint:
         "Wenn Social Sign-in (Google/Facebook/GitHub/LinkedIn) nicht verfügbar ist, kannst du über 'Passwort vergessen' ein Passwort setzen und dich danach mit E-Mail + Passwort anmelden.",
+      socialResetPasswordHintNoProviders:
+        "Wenn Social Sign-in nicht verfügbar ist, kannst du über 'Passwort vergessen' ein Passwort setzen und dich danach mit E-Mail + Passwort anmelden.",
       loginErrorInvalidCredentials: "Ungültige Anmeldedaten.",
       loginErrorCaptchaRequired: "Bitte bestätige, dass du kein Roboter bist.",
       loginErrorGeneric:
-        "Anmeldung fehlgeschlagen. Bitte versuche es später erneut.",
+        "Die Anmeldung ist fehlgeschlagen. Bitte versuche es später erneut.",
       loginErrorNetwork: "Es ist ein Netzwerkfehler aufgetreten.",
-      loginErrorDisabled: "Die Anmeldung ist für Standardbenutzer deaktiviert.",
+      loginErrorDisabled:
+        "Die Anmeldung für Standardbenutzer wurde vom Administrator deaktiviert.",
+      twoFactorTitle: "Zwei-Faktor-Authentifizierung",
+      twoFactorSubtitle:
+        "Gib den 6-stelligen Code aus deiner Authenticator-App ein.",
+      twoFactorCodeLabel: "Code",
+      twoFactorSubmit: "Bestätigen",
+      twoFactorSubmitLoading: "Wird bestätigt...",
+      twoFactorBackToLogin: "Zurück zur Anmeldung",
+      twoFactorErrorMissingChallenge:
+        "Fehlende 2FA-Challenge. Bitte melde dich erneut an.",
+      twoFactorErrorCodeRequired: "Bitte gib den 6-stelligen Code ein.",
+      twoFactorErrorCodeInvalidFormat: "Ungültiges Code-Format.",
+      twoFactorErrorInvalidCode: "Ungültiger Code. Bitte versuche es erneut.",
+      twoFactorErrorGeneric:
+        "Die 2FA-Bestätigung ist fehlgeschlagen. Bitte versuche es später erneut.",
       loginLoading: "Laden...",
       registerTitle: "Konto erstellen",
       registerSubtitle:
@@ -1075,6 +1130,7 @@ export const messages: Messages = {
       adminDashboardTabUsers: "Benutzer",
       adminDashboardTabMetrics: "Metriken",
       adminDashboardTabActivity: "Aktivitäten",
+      adminDashboardTabPayments: "Payments",
       adminDashboardCardUsersTitle: "Registrierte Benutzer",
       adminDashboardCardUsersTrend: "+12 % im Vergleich zum Vormonat",
       adminDashboardCardUsersTrendSuffix: "im Vergleich zum Vormonat",

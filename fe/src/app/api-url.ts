@@ -10,7 +10,9 @@ function normalizeBaseUrl(base: string): string {
 }
 
 export function getApiBaseUrl(): string {
-  const envBase = process.env.NEXT_PUBLIC_API_BASE_URL;
+  const internalBase =
+    typeof window === "undefined" ? process.env.API_INTERNAL_BASE_URL : null;
+  const envBase = internalBase || process.env.NEXT_PUBLIC_API_BASE_URL;
   if (!envBase || envBase.trim().length === 0) {
     return DEFAULT_API_BASE_URL;
   }

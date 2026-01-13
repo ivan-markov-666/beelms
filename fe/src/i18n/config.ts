@@ -11,15 +11,11 @@ export function normalizeLang(
   supportedLangs?: readonly string[],
   fallbackLang?: string,
 ): SupportedLang {
-  const fallbackCandidates =
-    supportedLangs && supportedLangs.length > 0
-      ? supportedLangs
-      : (SUPPORTED_LANGS as readonly string[]);
-
   const fallback =
     (fallbackLang && fallbackLang.trim()) ||
-    (fallbackCandidates[0] ?? DEFAULT_LANG) ||
-    DEFAULT_LANG;
+    (supportedLangs && supportedLangs.length > 0
+      ? (supportedLangs[0] ?? DEFAULT_LANG)
+      : DEFAULT_LANG);
 
   const normalizedRaw = (raw ?? "").trim();
   if (!normalizedRaw) {

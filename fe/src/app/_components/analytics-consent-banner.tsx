@@ -65,7 +65,7 @@ export function AnalyticsConsentBanner() {
   if (consent === "loading" || !visible) return null;
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-50 border-t border-gray-200 bg-white/95 backdrop-blur">
+    <div className="fixed inset-x-0 bottom-0 z-50 border-t border-gray-200 bg-[color-mix(in_srgb,var(--card)_95%,transparent)] backdrop-blur">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-1">
           <p className="text-sm font-semibold text-gray-900">

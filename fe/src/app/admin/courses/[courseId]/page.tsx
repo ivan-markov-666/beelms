@@ -5,9 +5,23 @@ import { useParams } from "next/navigation";
 import { getAccessToken } from "../../../auth-token";
 import { getApiBaseUrl } from "../../../api-url";
 import { AdminBreadcrumbs } from "../../_components/admin-breadcrumbs";
+import { InfoTooltip } from "../../_components/info-tooltip";
 import Link from "next/link";
+import { ListboxSelect } from "../../../_components/listbox-select";
 
 const API_BASE_URL = getApiBaseUrl();
+
+type PaymentProviderStatus = {
+  configured: boolean;
+  enabled: boolean;
+};
+
+type PaymentProvidersStatusResponse = {
+  stripe: PaymentProviderStatus;
+  paypal: PaymentProviderStatus;
+  mypos: PaymentProviderStatus;
+  revolut: PaymentProviderStatus;
+};
 
 type CourseModuleItem = {
   id: string;
@@ -118,6 +132,26 @@ export default function AdminCourseDetailPage() {
 
   const [categories, setCategories] = useState<CourseCategory[]>([]);
   const [categoriesLoading, setCategoriesLoading] = useState(false);
+
+  const [categorySearch, setCategorySearch] = useState<string>("");
+
+  const [paymentProvidersStatus, setPaymentProvidersStatus] =
+    useState<PaymentProvidersStatusResponse | null>(null);
+
+  const hasActivePaymentProvider = useMemo(() => {
+    const s = paymentProvidersStatus;
+    if (!s) return true;
+    return (
+      (s.stripe.enabled && s.stripe.configured) ||
+      (s.paypal.enabled && s.paypal.configured) ||
+      (s.mypos.enabled && s.mypos.configured) ||
+      (s.revolut.enabled && s.revolut.configured)
+    );
+  }, [paymentProvidersStatus]);
+
+  const paidCourseDisabled = paymentProvidersStatus
+    ? !hasActivePaymentProvider
+    : false;
 
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
@@ -384,6 +418,42 @@ export default function AdminCourseDetailPage() {
     };
   }, [loadCategories]);
 
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      const token = getAccessToken();
+      if (!token) return;
+
+      void (async () => {
+        try {
+          const res = await fetch(
+            `${API_BASE_URL}/admin/payments/providers/status`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+              cache: "no-store",
+            },
+          );
+
+          if (res.status === 401) {
+            return;
+          }
+
+          if (!res.ok) {
+            return;
+          }
+
+          const data = (await res.json()) as PaymentProvidersStatusResponse;
+          setPaymentProvidersStatus(data);
+        } catch {
+          // ignore
+        }
+      })();
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, []);
+
   const handleAddCurriculumItem = async () => {
     if (typeof window === "undefined") return;
     if (!courseId) return;
@@ -517,6 +587,13 @@ export default function AdminCourseDetailPage() {
         payload.categoryId = nextCategoryId ? nextCategoryId : null;
       }
       if (courseForm.isPaid !== course.isPaid) {
+        if (courseForm.isPaid && paidCourseDisabled) {
+          setCourseSaveError(
+            "Paid course опцията е изключена, защото няма активен метод за плащане. Активирай поне един payment provider от Admin → Payments.",
+          );
+          setCourseSaving(false);
+          return;
+        }
         payload.isPaid = courseForm.isPaid;
       }
 
@@ -934,68 +1011,92 @@ export default function AdminCourseDetailPage() {
 
           <label className="space-y-1">
             <span className="text-xs font-medium text-gray-600">Language</span>
-            <select
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900"
+            <ListboxSelect
+              ariaLabel="Course language"
               value={courseForm?.language ?? "bg"}
-              onChange={(e) =>
-                setCourseForm((p) =>
-                  p ? { ...p, language: e.target.value } : p,
-                )
+              onChange={(next) =>
+                setCourseForm((p) => (p ? { ...p, language: next } : p))
               }
-            >
-              <option value="bg">bg</option>
-              <option value="en">en</option>
-            </select>
+              buttonClassName="flex w-full items-center justify-between gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900"
+              options={[
+                { value: "bg", label: "bg" },
+                { value: "en", label: "en" },
+              ]}
+            />
           </label>
 
           <label className="space-y-1">
             <span className="text-xs font-medium text-gray-600">Status</span>
-            <select
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900"
+            <ListboxSelect
+              ariaLabel="Course status"
               value={courseForm?.status ?? "draft"}
-              onChange={(e) =>
-                setCourseForm((p) => (p ? { ...p, status: e.target.value } : p))
+              onChange={(next) =>
+                setCourseForm((p) => (p ? { ...p, status: next } : p))
               }
-            >
-              <option value="draft">draft</option>
-              <option value="active">active</option>
-              <option value="inactive">inactive</option>
-            </select>
+              buttonClassName="flex w-full items-center justify-between gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900"
+              options={[
+                { value: "draft", label: "draft" },
+                { value: "active", label: "active" },
+                { value: "inactive", label: "inactive" },
+              ]}
+            />
           </label>
 
           <label className="space-y-1">
             <span className="text-xs font-medium text-gray-600">Category</span>
-            <select
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900"
-              value={courseForm?.categoryId ?? ""}
-              onChange={(e) =>
-                setCourseForm((p) =>
-                  p ? { ...p, categoryId: e.target.value } : p,
-                )
-              }
+            <input
+              className="mb-2 w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400"
+              value={categorySearch}
+              onChange={(e) => setCategorySearch(e.target.value)}
+              placeholder="Search category..."
               disabled={categoriesLoading}
-            >
-              <option value="">(none)</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.title}
-                </option>
-              ))}
-            </select>
+            />
+            <ListboxSelect
+              ariaLabel="Course category"
+              value={courseForm?.categoryId ?? ""}
+              disabled={categoriesLoading}
+              onChange={(next) =>
+                setCourseForm((p) => (p ? { ...p, categoryId: next } : p))
+              }
+              buttonClassName="flex w-full items-center justify-between gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 disabled:bg-gray-50"
+              options={[
+                { value: "", label: "(none)" },
+                ...categories
+                  .filter((c) => {
+                    const q = categorySearch.trim().toLowerCase();
+                    if (!q) return true;
+                    return (c.title ?? "").toLowerCase().includes(q);
+                  })
+                  .map((c) => ({ value: c.id, label: c.title })),
+              ]}
+            />
           </label>
 
-          <label className="flex items-center gap-2 rounded-md border border-gray-200 px-3 py-2">
-            <input
-              type="checkbox"
-              checked={courseForm?.isPaid ?? false}
-              onChange={(e) =>
-                setCourseForm((p) =>
-                  p ? { ...p, isPaid: e.target.checked } : p,
-                )
-              }
-            />
-            <span className="text-sm text-gray-700">Paid course</span>
-          </label>
+          <div className="flex items-center justify-between gap-2 rounded-md border border-gray-200 px-3 py-2">
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={courseForm?.isPaid ?? false}
+                disabled={
+                  courseSaving ||
+                  (paidCourseDisabled && !(courseForm?.isPaid ?? false))
+                }
+                onChange={(e) =>
+                  setCourseForm((p) =>
+                    p ? { ...p, isPaid: e.target.checked } : p,
+                  )
+                }
+              />
+              <span className="text-sm text-gray-700">Paid course</span>
+            </label>
+            {paidCourseDisabled ? (
+              <InfoTooltip
+                label="Paid course disabled info"
+                title="Paid course"
+                description="Опцията става активна след като активираш поне един метод за плащане от Admin → Payments (и той е configured)."
+              />
+            ) : null}
+          </div>
 
           <label className="space-y-1">
             <span className="text-xs font-medium text-gray-600">Currency</span>
@@ -1007,7 +1108,7 @@ export default function AdminCourseDetailPage() {
                   p ? { ...p, currency: e.target.value } : p,
                 )
               }
-              disabled={!(courseForm?.isPaid ?? false)}
+              disabled={!(courseForm?.isPaid ?? false) || paidCourseDisabled}
               placeholder="eur"
             />
           </label>
@@ -1024,7 +1125,7 @@ export default function AdminCourseDetailPage() {
                   p ? { ...p, priceCents: e.target.value } : p,
                 )
               }
-              disabled={!(courseForm?.isPaid ?? false)}
+              disabled={!(courseForm?.isPaid ?? false) || paidCourseDisabled}
               inputMode="numeric"
               placeholder="999"
             />
@@ -1061,20 +1162,22 @@ export default function AdminCourseDetailPage() {
         <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-4">
           <label className="space-y-1">
             <span className="text-xs font-medium text-gray-600">Type</span>
-            <select
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900"
+            <ListboxSelect
+              ariaLabel="Curriculum item type"
               value={form.itemType}
-              onChange={(e) =>
+              onChange={(next) =>
                 setForm((p) => ({
                   ...p,
-                  itemType: e.target.value as "wiki" | "quiz" | "task",
+                  itemType: next as "wiki" | "quiz" | "task",
                 }))
               }
-            >
-              <option value="wiki">wiki</option>
-              <option value="task">task</option>
-              <option value="quiz">quiz</option>
-            </select>
+              buttonClassName="flex w-full items-center justify-between gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900"
+              options={[
+                { value: "wiki", label: "wiki" },
+                { value: "task", label: "task" },
+                { value: "quiz", label: "quiz" },
+              ]}
+            />
           </label>
 
           <label className="space-y-1">
@@ -1104,38 +1207,36 @@ export default function AdminCourseDetailPage() {
           ) : form.itemType === "task" ? (
             <label className="space-y-1">
               <span className="text-xs font-medium text-gray-600">Task</span>
-              <select
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900"
+              <ListboxSelect
+                ariaLabel="Task"
                 value={form.taskId}
-                onChange={(e) =>
-                  setForm((p) => ({ ...p, taskId: e.target.value }))
-                }
-              >
-                <option value="">(select task)</option>
-                {tasks.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.title} ({t.language}, {t.status})
-                  </option>
-                ))}
-              </select>
+                onChange={(next) => setForm((p) => ({ ...p, taskId: next }))}
+                buttonClassName="flex w-full items-center justify-between gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900"
+                options={[
+                  { value: "", label: "(select task)" },
+                  ...tasks.map((t) => ({
+                    value: t.id,
+                    label: `${t.title} (${t.language}, ${t.status})`,
+                  })),
+                ]}
+              />
             </label>
           ) : (
             <label className="space-y-1">
               <span className="text-xs font-medium text-gray-600">Quiz</span>
-              <select
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900"
+              <ListboxSelect
+                ariaLabel="Quiz"
                 value={form.quizId}
-                onChange={(e) =>
-                  setForm((p) => ({ ...p, quizId: e.target.value }))
-                }
-              >
-                <option value="">(select quiz)</option>
-                {quizzes.map((q) => (
-                  <option key={q.id} value={q.id}>
-                    {q.title} ({q.language}, {q.status})
-                  </option>
-                ))}
-              </select>
+                onChange={(next) => setForm((p) => ({ ...p, quizId: next }))}
+                buttonClassName="flex w-full items-center justify-between gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900"
+                options={[
+                  { value: "", label: "(select quiz)" },
+                  ...quizzes.map((q) => ({
+                    value: q.id,
+                    label: `${q.title} (${q.language}, ${q.status})`,
+                  })),
+                ]}
+              />
             </label>
           )}
 
@@ -1305,44 +1406,46 @@ export default function AdminCourseDetailPage() {
                             <span className="text-[11px] font-medium text-gray-600">
                               Task
                             </span>
-                            <select
-                              className="w-full rounded-md border border-gray-300 px-2 py-1 text-sm text-gray-900"
+                            <ListboxSelect
+                              ariaLabel="Task"
                               value={draft.taskId}
-                              onChange={(e) =>
+                              onChange={(next) =>
                                 setEditDraft((p) =>
-                                  p ? { ...p, taskId: e.target.value } : p,
+                                  p ? { ...p, taskId: next } : p,
                                 )
                               }
-                            >
-                              <option value="">(select task)</option>
-                              {tasks.map((t) => (
-                                <option key={t.id} value={t.id}>
-                                  {t.title} ({t.language}, {t.status})
-                                </option>
-                              ))}
-                            </select>
+                              buttonClassName="flex w-full items-center justify-between gap-2 rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-900"
+                              options={[
+                                { value: "", label: "(select task)" },
+                                ...tasks.map((t) => ({
+                                  value: t.id,
+                                  label: `${t.title} (${t.language}, ${t.status})`,
+                                })),
+                              ]}
+                            />
                           </label>
                         ) : item.itemType === "quiz" ? (
                           <label className="space-y-1">
                             <span className="text-[11px] font-medium text-gray-600">
                               Quiz
                             </span>
-                            <select
-                              className="w-full rounded-md border border-gray-300 px-2 py-1 text-sm text-gray-900"
+                            <ListboxSelect
+                              ariaLabel="Quiz"
                               value={draft.quizId}
-                              onChange={(e) =>
+                              onChange={(next) =>
                                 setEditDraft((p) =>
-                                  p ? { ...p, quizId: e.target.value } : p,
+                                  p ? { ...p, quizId: next } : p,
                                 )
                               }
-                            >
-                              <option value="">(select quiz)</option>
-                              {quizzes.map((q) => (
-                                <option key={q.id} value={q.id}>
-                                  {q.title} ({q.language}, {q.status})
-                                </option>
-                              ))}
-                            </select>
+                              buttonClassName="flex w-full items-center justify-between gap-2 rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-900"
+                              options={[
+                                { value: "", label: "(select quiz)" },
+                                ...quizzes.map((q) => ({
+                                  value: q.id,
+                                  label: `${q.title} (${q.language}, ${q.status})`,
+                                })),
+                              ]}
+                            />
                           </label>
                         ) : (
                           <div />

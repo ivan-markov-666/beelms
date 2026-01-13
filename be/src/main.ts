@@ -33,6 +33,18 @@ export async function createApp(): Promise<NestExpressApplication> {
     },
   });
 
+  app.useBodyParser('urlencoded', {
+    extended: false,
+    limit: process.env.REQUEST_BODY_LIMIT ?? '1mb',
+    verify: (
+      req: Request & { rawBody?: Buffer },
+      _res: Response,
+      buf: Buffer,
+    ) => {
+      req.rawBody = buf;
+    },
+  });
+
   app.use(
     helmet({
       contentSecurityPolicy: {
@@ -78,6 +90,7 @@ export async function createApp(): Promise<NestExpressApplication> {
   app.enableCors({
     origin: process.env.FRONTEND_ORIGIN ?? 'http://localhost:3001',
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+    exposedHeaders: ['X-Total-Count', 'Content-Disposition'],
   });
   app.useStaticAssets(path.join(mediaRoot, 'wiki'), {
     prefix: '/wiki/media',

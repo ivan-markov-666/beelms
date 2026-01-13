@@ -1,16 +1,27 @@
 "use client";
 
-import { type FormEvent, useCallback, useEffect, useState } from "react";
+import {
+  type FormEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { useSearchParams } from "next/navigation";
 import { useCurrentLang } from "../../../i18n/useCurrentLang";
 import { t } from "../../../i18n/t";
 import { getAccessToken } from "../../auth-token";
 import { getApiBaseUrl } from "../../api-url";
 import { AdminBreadcrumbs } from "../_components/admin-breadcrumbs";
+import { Pagination } from "../../_components/pagination";
+import { InfoTooltip } from "../_components/info-tooltip";
+import { ListboxSelect } from "../../_components/listbox-select";
+import { ConfirmDialog } from "../_components/confirm-dialog";
+import { StyledCheckbox } from "../_components/styled-checkbox";
 
 const API_BASE_URL = getApiBaseUrl();
 
-const PAGE_SIZE = 20;
+const DEFAULT_PAGE_SIZE = 20;
 
 type UserRole = "user" | "admin" | "monitoring" | "teacher" | "author";
 
@@ -74,12 +85,15 @@ function getUserInitials(email: string): string {
 export default function AdminUsersPage() {
   const lang = useCurrentLang();
   const searchParams = useSearchParams();
+  const [myUserId, setMyUserId] = useState<string | null>(null);
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [effectiveSearch, setEffectiveSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+  const [totalCount, setTotalCount] = useState<number>(0);
   const [statusFilter, setStatusFilter] = useState("");
   const [roleFilter, setRoleFilter] = useState("");
   const [toggleError, setToggleError] = useState<string | null>(null);
@@ -90,6 +104,52 @@ export default function AdminUsersPage() {
   const [statsError, setStatsError] = useState<string | null>(null);
   const [statsLoading, setStatsLoading] = useState(false);
   const [didInitFromQuery, setDidInitFromQuery] = useState(false);
+
+  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
+  const selectedSet = useMemo(
+    () => new Set(selectedUserIds),
+    [selectedUserIds],
+  );
+  const [bulkActionError, setBulkActionError] = useState<string | null>(null);
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const [bulkDeleteSubmitting, setBulkDeleteSubmitting] = useState(false);
+  const [purgeTotalCount, setPurgeTotalCount] = useState<number>(0);
+  const [purgeAllOpen, setPurgeAllOpen] = useState(false);
+  const [purgeAllSubmitting, setPurgeAllSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    let cancelled = false;
+
+    const loadMe = async () => {
+      try {
+        const token = getAccessToken();
+        if (!token) return;
+
+        const res = await fetch(`${API_BASE_URL}/users/me`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!res.ok) return;
+
+        const data = (await res.json()) as { id?: string };
+        const id = (data.id ?? "").trim();
+        if (!cancelled) {
+          setMyUserId(id || null);
+        }
+      } catch {
+        // ignore
+      }
+    };
+
+    void loadMe();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (didInitFromQuery) return;
@@ -112,6 +172,7 @@ export default function AdminUsersPage() {
     async (options?: {
       query?: string;
       page?: number;
+      pageSize?: number;
       status?: string;
       role?: string;
     }) => {
@@ -121,9 +182,14 @@ export default function AdminUsersPage() {
       setError(null);
       setToggleError(null);
       setRoleUpdateError(null);
+      setBulkActionError(null);
 
       const query = options?.query;
       const page = options?.page && options.page > 0 ? options.page : 1;
+      const pageSize =
+        options?.pageSize && options.pageSize > 0
+          ? options.pageSize
+          : DEFAULT_PAGE_SIZE;
       const status = options?.status;
       const role = options?.role;
 
@@ -146,7 +212,7 @@ export default function AdminUsersPage() {
           params.set("role", role);
         }
         params.set("page", String(page));
-        params.set("pageSize", String(PAGE_SIZE));
+        params.set("pageSize", String(pageSize));
 
         const url = `${API_BASE_URL}/admin/users?${params.toString()}`;
 
@@ -162,8 +228,24 @@ export default function AdminUsersPage() {
           return;
         }
 
-        const data = (await res.json()) as AdminUser[];
-        setUsers(data ?? []);
+        const raw = (await res.json()) as unknown;
+        const data = Array.isArray(raw)
+          ? (raw as AdminUser[])
+          : Array.isArray((raw as { items?: unknown }).items)
+            ? ((raw as { items: AdminUser[] }).items ?? [])
+            : Array.isArray((raw as { users?: unknown }).users)
+              ? ((raw as { users: AdminUser[] }).users ?? [])
+              : [];
+        setUsers(data);
+
+        const rawTotal = res.headers?.get?.("X-Total-Count") ?? "";
+        const parsedTotal = Number.parseInt(rawTotal, 10);
+        if (Number.isFinite(parsedTotal) && parsedTotal >= 0) {
+          setTotalCount(parsedTotal);
+        } else {
+          setTotalCount(data.length);
+        }
+
         setLoading(false);
       } catch {
         setError(t(lang, "common", "adminUsersError"));
@@ -172,6 +254,68 @@ export default function AdminUsersPage() {
     },
     [lang],
   );
+
+  const loadPurgeCount = useCallback(async () => {
+    if (typeof window === "undefined") return;
+
+    try {
+      const token = getAccessToken();
+      if (!token) return;
+
+      const res = await fetch(`${API_BASE_URL}/admin/users/count`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!res.ok) return;
+
+      const data = (await res.json()) as { total?: number };
+      const total = typeof data.total === "number" ? data.total : 0;
+      setPurgeTotalCount(Number.isFinite(total) && total >= 0 ? total : 0);
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  const exportCsv = async () => {
+    if (typeof window === "undefined") return;
+
+    try {
+      const token = getAccessToken();
+      if (!token) return;
+
+      const params = new URLSearchParams();
+      if (effectiveSearch.trim()) params.set("q", effectiveSearch.trim());
+      if (statusFilter) params.set("status", statusFilter);
+      if (roleFilter) params.set("role", roleFilter);
+
+      const url = `${API_BASE_URL}/admin/users/export.csv?${params.toString()}`;
+      const res = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) {
+        return;
+      }
+
+      const blob = await res.blob();
+      const dlUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const header = res.headers?.get?.("Content-Disposition") ?? "";
+      const match = /filename="?([^";]+)"?/i.exec(header);
+      const filename = match?.[1] ? match[1] : "users.csv";
+      a.href = dlUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(dlUrl);
+    } catch {
+      // ignore
+    }
+  };
 
   const loadStats = useCallback(async () => {
     if (typeof window === "undefined") return;
@@ -212,14 +356,33 @@ export default function AdminUsersPage() {
     void loadUsers({
       query: effectiveSearch,
       page: currentPage,
+      pageSize,
       status: statusFilter || undefined,
       role: roleFilter || undefined,
     });
-  }, [loadUsers, effectiveSearch, currentPage, statusFilter, roleFilter]);
+  }, [
+    loadUsers,
+    effectiveSearch,
+    currentPage,
+    pageSize,
+    statusFilter,
+    roleFilter,
+  ]);
 
   useEffect(() => {
     void loadStats();
   }, [loadStats]);
+
+  useEffect(() => {
+    void loadPurgeCount();
+  }, [loadPurgeCount]);
+
+  useEffect(() => {
+    const allowed = new Set(users.map((u) => u.id));
+    setSelectedUserIds((prev) =>
+      prev.filter((id) => allowed.has(id) && id !== myUserId),
+    );
+  }, [users, myUserId]);
 
   const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -324,59 +487,46 @@ export default function AdminUsersPage() {
 
   const hasUsers = !loading && !error && users.length > 0;
 
-  const isSearching = effectiveSearch.trim().length > 0;
+  const selectableUsers = users.filter((u) => u.id !== myUserId);
+  const isAllVisibleSelected =
+    selectableUsers.length > 0 &&
+    selectableUsers.every((u) => selectedSet.has(u.id));
+  const hasAnySelected = selectedUserIds.length > 0;
 
-  const totalUsers =
-    !isSearching && stats && typeof stats.totalUsers === "number"
-      ? stats.totalUsers
-      : users.length;
+  const selectAllVisible = () => {
+    const visibleIds = selectableUsers.map((u) => u.id);
+    setSelectedUserIds((prev) => {
+      const next = new Set(prev);
+      for (const id of visibleIds) next.add(id);
+      return Array.from(next);
+    });
+  };
+
+  const clearAllVisible = () => {
+    const visible = new Set(selectableUsers.map((u) => u.id));
+    setSelectedUserIds((prev) => prev.filter((id) => !visible.has(id)));
+  };
+
+  const toggleSelected = (id: string) => {
+    if (myUserId && id === myUserId) {
+      return;
+    }
+    setSelectedUserIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+    );
+  };
+
+  const totalUsers = totalCount;
 
   const totalPages =
-    !isSearching && totalUsers > 0
-      ? Math.max(1, Math.ceil(totalUsers / PAGE_SIZE))
-      : 1;
+    totalUsers > 0 ? Math.max(1, Math.ceil(totalUsers / pageSize)) : 1;
 
-  const showingFrom =
-    !isSearching && totalUsers > 0 ? (currentPage - 1) * PAGE_SIZE + 1 : 0;
+  const showingFrom = totalUsers > 0 ? (currentPage - 1) * pageSize + 1 : 0;
 
   const showingTo =
-    !isSearching && totalUsers > 0
-      ? Math.min(currentPage * PAGE_SIZE, totalUsers)
+    totalUsers > 0
+      ? Math.min(currentPage * pageSize, totalUsers)
       : users.length;
-
-  const paginationItems: Array<number | "ellipsis"> = [];
-
-  if (!isSearching && totalPages > 1) {
-    if (totalPages <= 7) {
-      for (let page = 1; page <= totalPages; page += 1) {
-        paginationItems.push(page);
-      }
-    } else {
-      const firstPage = 1;
-      const lastPage = totalPages;
-
-      paginationItems.push(firstPage);
-
-      const startPage = Math.max(currentPage - 1, firstPage + 1);
-      const endPage = Math.min(currentPage + 1, lastPage - 1);
-
-      if (startPage > firstPage + 1) {
-        paginationItems.push("ellipsis");
-      }
-
-      for (let page = startPage; page <= endPage; page += 1) {
-        paginationItems.push(page);
-      }
-
-      if (endPage < lastPage - 1) {
-        paginationItems.push("ellipsis");
-      }
-
-      if (lastPage > firstPage) {
-        paginationItems.push(lastPage);
-      }
-    }
-  }
 
   return (
     <div className="space-y-4">
@@ -389,9 +539,16 @@ export default function AdminUsersPage() {
 
       <div className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
         <div className="mb-6 flex flex-col gap-1">
-          <h2 className="text-xl font-semibold text-zinc-900">
-            {t(lang, "common", "adminUsersTitle")}
-          </h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-xl font-semibold text-zinc-900">
+              {t(lang, "common", "adminUsersTitle")}
+            </h2>
+            <InfoTooltip
+              label="Users management info"
+              title="Users Management"
+              description="Управление на потребители: търсене, филтри, промяна на роля, деактивиране/активиране и export на резултатите."
+            />
+          </div>
           <p className="text-sm text-zinc-600">
             {t(lang, "common", "adminUsersSubtitle")}
           </p>
@@ -446,13 +603,13 @@ export default function AdminUsersPage() {
                     <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
                       {t(lang, "common", "adminUsersStatsActive")}
                     </p>
-                    <p className="mt-1 text-2xl font-semibold text-green-700">
+                    <p className="mt-1 text-2xl font-semibold text-[color:var(--primary)]">
                       {stats.activeUsers}
                     </p>
                   </div>
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-50">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-zinc-50">
                     <svg
-                      className="h-5 w-5 text-green-600"
+                      className="h-5 w-5 text-[color:var(--primary)]"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -528,7 +685,7 @@ export default function AdminUsersPage() {
           )}
         </div>
 
-        <section className="mb-6 rounded-lg border border-zinc-200 bg-white p-4 shadow-sm">
+        <section className="mb-6 rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <form
               className="md:col-span-1 flex items-center gap-3"
@@ -552,50 +709,53 @@ export default function AdminUsersPage() {
                 <input
                   type="search"
                   placeholder={t(lang, "common", "adminUsersSearchPlaceholder")}
-                  className="w-full rounded-lg border border-zinc-300 bg-white py-2 pl-9 pr-3 text-sm text-zinc-900 shadow-sm placeholder:text-zinc-400 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full rounded-lg border border-[color:var(--border)] bg-white py-2 pl-9 pr-3 text-sm text-[color:var(--foreground)] shadow-sm placeholder:text-zinc-400 focus:border-[color:var(--primary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)]"
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
                 />
               </div>
               <button
                 type="submit"
-                className="inline-flex items-center rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700"
+                className="inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium text-white shadow-sm hover:opacity-90"
+                style={{ backgroundColor: "var(--primary)" }}
               >
                 {t(lang, "common", "adminUsersSearchButton")}
               </button>
             </form>
 
             <div>
-              <select
+              <ListboxSelect
+                ariaLabel="Users status"
                 value={statusFilter}
-                onChange={(event) => {
+                onChange={(next) => {
                   setCurrentPage(1);
-                  setStatusFilter(event.target.value);
+                  setStatusFilter(next);
                 }}
-                className="w-full rounded-lg border border-zinc-300 px-4 py-2 text-sm text-zinc-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
-              >
-                <option value="">All Status</option>
-                <option value="active">Active</option>
-                <option value="deactivated">Deactivated</option>
-              </select>
+                options={[
+                  { value: "", label: "All Status" },
+                  { value: "active", label: "Active" },
+                  { value: "deactivated", label: "Deactivated" },
+                ]}
+              />
             </div>
 
             <div>
-              <select
+              <ListboxSelect
+                ariaLabel="Users role"
                 value={roleFilter}
-                onChange={(event) => {
+                onChange={(next) => {
                   setCurrentPage(1);
-                  setRoleFilter(event.target.value);
+                  setRoleFilter(next);
                 }}
-                className="w-full rounded-lg border border-zinc-300 px-4 py-2 text-sm text-zinc-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
-              >
-                <option value="">All Roles</option>
-                <option value="user">User</option>
-                <option value="admin">Admin</option>
-                <option value="monitoring">Monitoring</option>
-                <option value="teacher">Teacher</option>
-                <option value="author">Author</option>
-              </select>
+                options={[
+                  { value: "", label: "All Roles" },
+                  { value: "user", label: "User" },
+                  { value: "admin", label: "Admin" },
+                  { value: "monitoring", label: "Monitoring" },
+                  { value: "teacher", label: "Teacher" },
+                  { value: "author", label: "Author" },
+                ]}
+              />
             </div>
           </div>
         </section>
@@ -630,10 +790,83 @@ export default function AdminUsersPage() {
                 {roleUpdateError}
               </p>
             )}
+            {bulkActionError && (
+              <div
+                className="mb-3 rounded-md border px-4 py-3 text-sm"
+                style={{
+                  backgroundColor: "var(--field-error-bg)",
+                  borderColor: "var(--field-error-border)",
+                  color: "var(--error)",
+                }}
+                role="alert"
+              >
+                {bulkActionError}
+              </div>
+            )}
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => void exportCsv()}
+                  className="rounded-md border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60 md:text-sm"
+                  disabled={totalUsers <= 0}
+                >
+                  Export CSV
+                </button>
+                <InfoTooltip
+                  label="Users table controls info"
+                  title="Users table"
+                  description="Използвай Rows per page за 10/20/50/100. Export CSV генерира файл от текущите филтри (server-side)."
+                />
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs font-medium text-zinc-700 md:text-sm">
+                  Selected: {selectedUserIds.length}
+                </span>
+                <button
+                  type="button"
+                  className="rounded-md border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60 md:text-sm"
+                  disabled={!hasAnySelected}
+                  onClick={() => {
+                    setBulkActionError(null);
+                    setBulkDeleteOpen(true);
+                  }}
+                >
+                  Delete selected
+                </button>
+                <button
+                  type="button"
+                  className="rounded-md border border-[color:var(--field-error-border)] bg-white px-3 py-2 text-xs font-semibold shadow-sm hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60 md:text-sm"
+                  style={{ color: "var(--error)" }}
+                  disabled={purgeTotalCount <= 0}
+                  onClick={() => {
+                    setBulkActionError(null);
+                    setPurgeAllOpen(true);
+                  }}
+                >
+                  Delete all ({purgeTotalCount})
+                </button>
+              </div>
+            </div>
             <div className="overflow-x-auto">
               <table className="min-w-full table-fixed border-collapse text-sm">
                 <thead>
                   <tr className="border-b border-zinc-200 bg-zinc-50 text-left text-xs font-medium uppercase tracking-wide text-zinc-500">
+                    <th className="px-3 py-2 align-middle">
+                      <StyledCheckbox
+                        checked={isAllVisibleSelected}
+                        onChange={(checked) => {
+                          if (checked) {
+                            selectAllVisible();
+                          } else {
+                            clearAllVisible();
+                          }
+                        }}
+                        ariaLabel="Select all visible"
+                        disabled={selectableUsers.length === 0}
+                      />
+                    </th>
                     <th className="px-3 py-2 align-middle">
                       {t(lang, "common", "adminUsersColEmail")}
                     </th>
@@ -662,9 +895,17 @@ export default function AdminUsersPage() {
                         className="border-b border-zinc-100 last:border-b-0 hover:bg-zinc-50"
                       >
                         <td className="px-3 py-2 align-middle">
+                          <StyledCheckbox
+                            checked={selectedSet.has(user.id)}
+                            onChange={() => toggleSelected(user.id)}
+                            ariaLabel={`Select ${user.email}`}
+                            disabled={!!myUserId && user.id === myUserId}
+                          />
+                        </td>
+                        <td className="px-3 py-2 align-middle">
                           <div className="flex items-center">
-                            <div className="mr-3 flex h-9 w-9 items-center justify-center rounded-full bg-green-100">
-                              <span className="text-xs font-semibold text-green-700">
+                            <div className="mr-3 flex h-9 w-9 items-center justify-center rounded-full bg-zinc-100">
+                              <span className="text-xs font-semibold text-[color:var(--primary)]">
                                 {getUserInitials(user.email)}
                               </span>
                             </div>
@@ -687,7 +928,7 @@ export default function AdminUsersPage() {
                             }
                             className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${
                               user.active
-                                ? "border-green-200 bg-green-50 text-green-700"
+                                ? "border-[color:var(--primary)] bg-white text-[color:var(--primary)]"
                                 : "border-zinc-200 bg-zinc-50 text-zinc-600"
                             } ${isTogglingThis ? "opacity-70" : ""}`}
                           >
@@ -702,24 +943,19 @@ export default function AdminUsersPage() {
                           {formatDateTime(user.createdAt)}
                         </td>
                         <td className="px-3 py-2 align-middle">
-                          <select
-                            aria-label={`Role for ${user.email}`}
+                          <ListboxSelect
+                            ariaLabel={`Role for ${user.email}`}
                             value={user.role}
                             disabled={isUpdatingRoleThis}
-                            onChange={(event) =>
-                              void handleChangeRole(
-                                user.id,
-                                event.target.value as UserRole,
-                              )
+                            onChange={(next) =>
+                              void handleChangeRole(user.id, next as UserRole)
                             }
-                            className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-70"
-                          >
-                            {USER_ROLES.map((role) => (
-                              <option key={role} value={role}>
-                                {role}
-                              </option>
-                            ))}
-                          </select>
+                            buttonClassName="flex w-full items-center justify-between gap-2 rounded-lg border border-[color:var(--border)] bg-white px-3 py-2 text-sm text-[color:var(--foreground)] shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] disabled:opacity-70"
+                            options={USER_ROLES.map((role) => ({
+                              value: role,
+                              label: role,
+                            }))}
+                          />
                         </td>
                         <td className="px-3 py-2 align-middle text-right text-sm">
                           <button
@@ -742,69 +978,162 @@ export default function AdminUsersPage() {
                 </tbody>
               </table>
             </div>
-            {!isSearching && totalUsers > 0 && (
-              <div className="mt-4 flex items-center justify-between border-t border-zinc-200 px-3 py-3 text-xs text-zinc-600 md:text-sm">
+            {totalUsers > 0 && (
+              <div className="mt-4 flex flex-col gap-3 border-t border-zinc-200 px-3 py-3 text-xs text-zinc-600 md:flex-row md:items-center md:justify-between md:text-sm">
                 <p>
                   Showing <span className="font-semibold">{showingFrom}</span>-
                   <span className="font-semibold">{showingTo}</span> of{" "}
                   <span className="font-semibold">{totalUsers}</span> users
                 </p>
-                <div className="flex items-center space-x-2">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setCurrentPage((page) => Math.max(page - 1, 1))
-                    }
-                    className="rounded-lg border border-zinc-300 px-3 py-2 text-xs text-zinc-500 disabled:cursor-not-allowed disabled:opacity-60 md:text-sm"
-                    disabled={currentPage === 1}
-                  >
-                    Previous
-                  </button>
-                  {paginationItems.map((item, index) => {
-                    if (item === "ellipsis") {
-                      return (
-                        <button
-                          key={`ellipsis-${index}`}
-                          type="button"
-                          className="rounded-lg border border-zinc-300 px-3 py-2 text-xs text-zinc-700 md:text-sm"
-                          disabled
-                        >
-                          ...
-                        </button>
-                      );
-                    }
-
-                    const pageNumber = item;
-                    const isActivePage = pageNumber === currentPage;
-
-                    return (
-                      <button
-                        key={pageNumber}
-                        type="button"
-                        onClick={() => setCurrentPage(pageNumber)}
-                        className={
-                          isActivePage
-                            ? "rounded-lg bg-green-600 px-3 py-2 text-xs font-semibold text-white md:text-sm"
-                            : "rounded-lg border border-zinc-300 px-3 py-2 text-xs text-zinc-700 hover:bg-zinc-50 md:text-sm"
-                        }
-                      >
-                        {pageNumber}
-                      </button>
-                    );
-                  })}
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setCurrentPage((page) => Math.min(page + 1, totalPages))
-                    }
-                    className="rounded-lg border border-zinc-300 px-3 py-2 text-xs text-zinc-700 disabled:cursor-not-allowed disabled:opacity-60 md:text-sm"
-                    disabled={currentPage >= totalPages}
-                  >
-                    Next
-                  </button>
-                </div>
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={(page) => setCurrentPage(page)}
+                  pageSize={pageSize}
+                  onPageSizeChange={(next) => {
+                    setCurrentPage(1);
+                    setPageSize(next);
+                  }}
+                />
               </div>
             )}
+
+            <ConfirmDialog
+              open={bulkDeleteOpen}
+              title="Изтриване на избраните потребители"
+              description="Избраните потребители ще бъдат физически изтрити. Това действие е необратимо. Вашият акаунт няма да бъде изтрит."
+              details={
+                <div>
+                  Брой избрани:{" "}
+                  <span className="font-semibold">
+                    {selectedUserIds.length}
+                  </span>
+                </div>
+              }
+              confirmLabel="Изтрий"
+              cancelLabel="Отказ"
+              danger
+              submitting={bulkDeleteSubmitting}
+              error={bulkActionError}
+              onCancel={() => {
+                if (bulkDeleteSubmitting) return;
+                setBulkDeleteOpen(false);
+                setBulkActionError(null);
+              }}
+              onConfirm={() => {
+                if (bulkDeleteSubmitting) return;
+                void (async () => {
+                  setBulkDeleteSubmitting(true);
+                  setBulkActionError(null);
+                  try {
+                    const token = getAccessToken();
+                    if (!token) throw new Error("missing-token");
+
+                    const res = await fetch(
+                      `${API_BASE_URL}/admin/users/bulk`,
+                      {
+                        method: "DELETE",
+                        headers: {
+                          "Content-Type": "application/json",
+                          Authorization: `Bearer ${token}`,
+                        },
+                        body: JSON.stringify({
+                          ids: selectedUserIds.filter((id) => id !== myUserId),
+                        }),
+                      },
+                    );
+
+                    if (!res.ok) {
+                      throw new Error(`failed-${res.status}`);
+                    }
+
+                    const data = (await res.json()) as { deleted?: number };
+                    const deleted =
+                      typeof data.deleted === "number" && data.deleted > 0
+                        ? data.deleted
+                        : 0;
+
+                    setBulkDeleteOpen(false);
+                    setSelectedUserIds([]);
+                    void loadUsers({
+                      query: effectiveSearch,
+                      page: currentPage,
+                      pageSize,
+                      status: statusFilter || undefined,
+                      role: roleFilter || undefined,
+                    });
+                    void loadStats();
+                    void loadPurgeCount();
+                    if (deleted > 0) {
+                      setPurgeTotalCount((p) => Math.max(0, p - deleted));
+                    }
+                  } catch {
+                    setBulkActionError(
+                      "Възникна грешка при bulk изтриването на потребители.",
+                    );
+                  } finally {
+                    setBulkDeleteSubmitting(false);
+                  }
+                })();
+              }}
+            />
+
+            <ConfirmDialog
+              open={purgeAllOpen}
+              title="Изтриване на всички потребители"
+              description={`Ще изтриете абсолютно всички потребители (${purgeTotalCount}). Това действие е необратимо. Вашият акаунт няма да бъде изтрит.`}
+              confirmLabel="Изтрий всички"
+              cancelLabel="Отказ"
+              danger
+              submitting={purgeAllSubmitting}
+              error={bulkActionError}
+              onCancel={() => {
+                if (purgeAllSubmitting) return;
+                setPurgeAllOpen(false);
+                setBulkActionError(null);
+              }}
+              onConfirm={() => {
+                if (purgeAllSubmitting) return;
+                void (async () => {
+                  setPurgeAllSubmitting(true);
+                  setBulkActionError(null);
+                  try {
+                    const token = getAccessToken();
+                    if (!token) throw new Error("missing-token");
+
+                    const res = await fetch(
+                      `${API_BASE_URL}/admin/users/purge-all`,
+                      {
+                        method: "DELETE",
+                        headers: {
+                          Authorization: `Bearer ${token}`,
+                        },
+                      },
+                    );
+
+                    if (!res.ok) {
+                      throw new Error(`failed-${res.status}`);
+                    }
+
+                    await res.json();
+
+                    setPurgeAllOpen(false);
+                    setSelectedUserIds([]);
+                    setUsers([]);
+                    setTotalCount(0);
+                    setPurgeTotalCount(0);
+                    void loadStats();
+                    void loadPurgeCount();
+                  } catch {
+                    setBulkActionError(
+                      "Възникна грешка при изтриване на всички потребители.",
+                    );
+                  } finally {
+                    setPurgeAllSubmitting(false);
+                  }
+                })();
+              }}
+            />
           </>
         )}
       </div>

@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { IsNull, Repository } from 'typeorm';
+import { Brackets, In, IsNull, Repository } from 'typeorm';
 import { User } from '../auth/user.entity';
 import type { UserRole } from '../auth/user-role';
 import { Course } from './course.entity';
@@ -18,7 +18,9 @@ import { WikiArticle } from '../wiki/wiki-article.entity';
 import { WikiArticleVersion } from '../wiki/wiki-article-version.entity';
 import { WikiArticleDetailDto } from '../wiki/dto/wiki-article-detail.dto';
 import { CourseSummaryDto } from './dto/course-summary.dto';
+import { AdminCourseSummaryDto } from './dto/admin-course-summary.dto';
 import { CourseDetailDto } from './dto/course-detail.dto';
+import { AdminCourseDetailDto } from './dto/admin-course-detail.dto';
 import { CourseModuleItemDto } from './dto/course-module-item.dto';
 import { MyCourseListItemDto } from './dto/my-course-list-item.dto';
 import { CourseCategoryDto } from './dto/course-category.dto';
@@ -34,6 +36,7 @@ import {
 } from './dto/admin-course-category.dto';
 import { Quiz } from '../assessments/quiz.entity';
 import { Task } from '../tasks/task.entity';
+import { SettingsService } from '../settings/settings.service';
 
 @Injectable()
 export class CoursesService {
@@ -60,7 +63,133 @@ export class CoursesService {
     private readonly quizRepo: Repository<Quiz>,
     @InjectRepository(Task)
     private readonly taskRepo: Repository<Task>,
+    private readonly settingsService: SettingsService,
   ) {}
+
+  async getAdminCoursesCount(actorUserId: string): Promise<number> {
+    const role = await this.getActiveUserRole(actorUserId);
+    if (role === 'teacher') {
+      return this.courseRepo.count({ where: { createdByUserId: actorUserId } });
+    }
+    return this.courseRepo.count();
+  }
+
+  async adminBulkUpdateCourseStatus(
+    actorUserId: string,
+    ids: string[],
+    status: string,
+  ): Promise<number> {
+    const uniqueIds = Array.from(new Set(ids.map((id) => id.trim()))).filter(
+      (id) => id.length > 0,
+    );
+    if (uniqueIds.length === 0) {
+      return 0;
+    }
+
+    const role = await this.getActiveUserRole(actorUserId);
+    if (role === 'teacher') {
+      const allowed = await this.courseRepo.find({
+        where: { id: In(uniqueIds), createdByUserId: actorUserId },
+        select: { id: true },
+      });
+      const allowedIds = allowed.map((c) => c.id);
+      if (allowedIds.length !== uniqueIds.length) {
+        throw new NotFoundException('Course not found');
+      }
+
+      const result = await this.courseRepo.update(
+        { id: In(allowedIds), createdByUserId: actorUserId },
+        { status },
+      );
+      return result.affected ?? 0;
+    }
+
+    const result = await this.courseRepo.update(
+      { id: In(uniqueIds) },
+      { status },
+    );
+    return result.affected ?? 0;
+  }
+
+  async adminBulkDeleteCourses(
+    actorUserId: string,
+    ids: string[],
+  ): Promise<number> {
+    const uniqueIds = Array.from(new Set(ids.map((id) => id.trim()))).filter(
+      (id) => id.length > 0,
+    );
+    if (uniqueIds.length === 0) {
+      return 0;
+    }
+
+    const role = await this.getActiveUserRole(actorUserId);
+    if (role === 'teacher') {
+      const allowed = await this.courseRepo.find({
+        where: { id: In(uniqueIds), createdByUserId: actorUserId },
+        select: { id: true },
+      });
+      const allowedIds = allowed.map((c) => c.id);
+      if (allowedIds.length !== uniqueIds.length) {
+        throw new NotFoundException('Course not found');
+      }
+
+      const result = await this.courseRepo.delete({
+        id: In(allowedIds),
+        createdByUserId: actorUserId,
+      });
+      return result.affected ?? 0;
+    }
+
+    const result = await this.courseRepo.delete({ id: In(uniqueIds) });
+    return result.affected ?? 0;
+  }
+
+  async adminPurgeAllCourses(actorUserId: string): Promise<number> {
+    const role = await this.getActiveUserRole(actorUserId);
+    if (role !== 'admin') {
+      throw new ForbiddenException('Admin access required');
+    }
+
+    const result = await this.courseRepo
+      .createQueryBuilder()
+      .delete()
+      .from(Course)
+      .execute();
+    return result.affected ?? 0;
+  }
+
+  async isPaidCoursePaymentAvailable(): Promise<boolean> {
+    const cfg = await this.settingsService.getOrCreateInstanceConfig();
+    const features = cfg.features;
+
+    const stripeEnabled = features?.paymentsStripe !== false;
+    const paypalEnabled = features?.paymentsPaypal !== false;
+    const myposEnabled = features?.paymentsMypos === true;
+    const revolutEnabled = features?.paymentsRevolut === true;
+
+    const stripeConfigured =
+      (process.env.STRIPE_SECRET_KEY ?? '').trim().length > 0;
+    const paypalConfigured =
+      (process.env.PAYPAL_CLIENT_ID ?? '').trim().length > 0 &&
+      (process.env.PAYPAL_CLIENT_SECRET ?? '').trim().length > 0;
+    const myposConfigured =
+      (process.env.MYPOS_SID ?? '').trim().length > 0 &&
+      (process.env.MYPOS_WALLET_NUMBER ?? '').trim().length > 0 &&
+      (process.env.MYPOS_KEY_INDEX ?? '').trim().length > 0 &&
+      (process.env.MYPOS_PRIVATE_KEY ?? '').trim().length > 0 &&
+      (process.env.MYPOS_API_PUBLIC_CERT ?? '').trim().length > 0;
+    const revolutConfigured =
+      (process.env.REVOLUT_API_KEY ?? '').trim().length > 0 &&
+      ((process.env.REVOLUT_WEBHOOK_SIGNING_SECRET ?? '').trim().length > 0 ||
+        (process.env.REVOLUT_WEBHOOK_SECRET ?? '').trim().length > 0);
+
+    return (
+      (stripeEnabled && stripeConfigured) ||
+      (paypalEnabled && paypalConfigured) ||
+      (myposEnabled && myposConfigured) ||
+      (revolutEnabled && revolutConfigured)
+    );
+  }
 
   private toCategoryDto(category: CourseCategory): CourseCategoryDto {
     return {
@@ -91,6 +220,277 @@ export class CoursesService {
               title: course.category.title,
             }
           : null,
+    };
+  }
+
+  private toAdminSummary(course: Course): AdminCourseSummaryDto {
+    const createdAt = course.createdAt ?? new Date();
+    const updatedAt = course.updatedAt ?? createdAt;
+
+    return {
+      ...this.toSummary(course),
+      createdByUserId: course.createdByUserId ?? null,
+      createdAt: createdAt.toISOString(),
+      updatedAt: updatedAt.toISOString(),
+    };
+  }
+
+  private async buildAdminCoursesQuery(
+    actorUserId: string,
+    filters: {
+      q?: string;
+      status?: string;
+      language?: string;
+      paid?: 'paid' | 'free';
+      categoryId?: string;
+    },
+  ) {
+    const role = await this.getActiveUserRole(actorUserId);
+
+    const qb = this.courseRepo
+      .createQueryBuilder('course')
+      .leftJoinAndSelect('course.category', 'category');
+
+    if (role === 'teacher') {
+      qb.where('course.createdByUserId = :userId', { userId: actorUserId });
+    }
+
+    const q = (filters.q ?? '').trim().toLowerCase();
+    if (q) {
+      qb.andWhere(
+        new Brackets((where) => {
+          where
+            .where('LOWER(course.id) LIKE :q', { q: `%${q}%` })
+            .orWhere('LOWER(course.title) LIKE :q', { q: `%${q}%` })
+            .orWhere('LOWER(course.description) LIKE :q', { q: `%${q}%` })
+            .orWhere('LOWER(course.language) LIKE :q', { q: `%${q}%` })
+            .orWhere('LOWER(course.status) LIKE :q', { q: `%${q}%` })
+            .orWhere('LOWER(category.title) LIKE :q', { q: `%${q}%` })
+            .orWhere('LOWER(category.slug) LIKE :q', { q: `%${q}%` });
+        }),
+      );
+    }
+
+    const status = (filters.status ?? '').trim().toLowerCase();
+    if (status) {
+      qb.andWhere('LOWER(course.status) = :status', { status });
+    }
+
+    const language = (filters.language ?? '').trim().toLowerCase();
+    if (language) {
+      qb.andWhere('LOWER(course.language) = :language', { language });
+    }
+
+    if (filters.paid === 'paid') {
+      qb.andWhere('course.isPaid = :isPaid', { isPaid: true });
+    }
+    if (filters.paid === 'free') {
+      qb.andWhere('course.isPaid = :isPaid', { isPaid: false });
+    }
+
+    const categoryId = (filters.categoryId ?? '').trim();
+    if (categoryId) {
+      qb.andWhere('course.categoryId = :categoryId', { categoryId });
+    }
+
+    return qb;
+  }
+
+  async getAdminCoursesListPaged(
+    actorUserId: string,
+    options: {
+      page: number;
+      pageSize: number;
+      q?: string;
+      status?: string;
+      language?: string;
+      paid?: 'paid' | 'free';
+      categoryId?: string;
+      sortKey?:
+        | 'createdAt'
+        | 'updatedAt'
+        | 'title'
+        | 'category'
+        | 'language'
+        | 'status'
+        | 'paid'
+        | 'price';
+      sortDir?: 'asc' | 'desc';
+    },
+  ): Promise<{ items: AdminCourseSummaryDto[]; total: number }> {
+    const page =
+      Number.isFinite(options.page) && options.page > 0 ? options.page : 1;
+    const pageSize =
+      Number.isFinite(options.pageSize) && options.pageSize > 0
+        ? Math.min(options.pageSize, 100)
+        : 20;
+
+    const qb = await this.buildAdminCoursesQuery(actorUserId, {
+      q: options.q,
+      status: options.status,
+      language: options.language,
+      paid: options.paid,
+      categoryId: options.categoryId,
+    });
+
+    const sortKey = (options.sortKey ?? 'createdAt').trim();
+    const sortDir = options.sortDir === 'asc' ? 'ASC' : 'DESC';
+
+    switch (sortKey) {
+      case 'title':
+        qb.orderBy('course.title', sortDir);
+        break;
+      case 'category':
+        qb.orderBy('category.title', sortDir);
+        break;
+      case 'language':
+        qb.orderBy('course.language', sortDir);
+        break;
+      case 'status':
+        qb.orderBy('course.status', sortDir);
+        break;
+      case 'paid':
+        qb.orderBy('course.isPaid', sortDir);
+        break;
+      case 'price':
+        qb.orderBy('course.priceCents', sortDir);
+        break;
+      case 'updatedAt':
+        qb.orderBy('course.updatedAt', sortDir);
+        break;
+      case 'createdAt':
+      default:
+        qb.orderBy('course.createdAt', sortDir);
+        break;
+    }
+
+    qb.skip((page - 1) * pageSize).take(pageSize);
+
+    const [courses, total] = await qb.getManyAndCount();
+    return { items: courses.map((c) => this.toAdminSummary(c)), total };
+  }
+
+  async exportAdminCoursesCsv(
+    actorUserId: string,
+    options: {
+      q?: string;
+      status?: string;
+      language?: string;
+      paid?: 'paid' | 'free';
+      categoryId?: string;
+      sortKey?:
+        | 'createdAt'
+        | 'updatedAt'
+        | 'title'
+        | 'category'
+        | 'language'
+        | 'status'
+        | 'paid'
+        | 'price';
+      sortDir?: 'asc' | 'desc';
+    },
+  ): Promise<{ csv: string; filename: string }> {
+    const qb = await this.buildAdminCoursesQuery(actorUserId, {
+      q: options.q,
+      status: options.status,
+      language: options.language,
+      paid: options.paid,
+      categoryId: options.categoryId,
+    });
+
+    const sortKey = (options.sortKey ?? 'createdAt').trim();
+    const sortDir = options.sortDir === 'asc' ? 'ASC' : 'DESC';
+
+    switch (sortKey) {
+      case 'title':
+        qb.orderBy('course.title', sortDir);
+        break;
+      case 'category':
+        qb.orderBy('category.title', sortDir);
+        break;
+      case 'language':
+        qb.orderBy('course.language', sortDir);
+        break;
+      case 'status':
+        qb.orderBy('course.status', sortDir);
+        break;
+      case 'paid':
+        qb.orderBy('course.isPaid', sortDir);
+        break;
+      case 'price':
+        qb.orderBy('course.priceCents', sortDir);
+        break;
+      case 'updatedAt':
+        qb.orderBy('course.updatedAt', sortDir);
+        break;
+      case 'createdAt':
+      default:
+        qb.orderBy('course.createdAt', sortDir);
+        break;
+    }
+
+    const courses = await qb.getMany();
+    const summaries = courses.map((c) => this.toAdminSummary(c));
+
+    const escapeCsv = (
+      value: string | number | boolean | null | undefined,
+    ): string => {
+      const raw =
+        value === null || typeof value === 'undefined' ? '' : `${value}`;
+      const needsQuotes = /[\n\r",]/.test(raw);
+      const escaped = raw.replace(/"/g, '""');
+      return needsQuotes ? `"${escaped}"` : escaped;
+    };
+
+    const rows: string[] = [];
+    rows.push(
+      [
+        'id',
+        'title',
+        'description',
+        'language',
+        'status',
+        'isPaid',
+        'currency',
+        'priceCents',
+        'createdByUserId',
+        'createdAt',
+        'updatedAt',
+        'categoryId',
+        'categoryTitle',
+        'categorySlug',
+      ]
+        .map(escapeCsv)
+        .join(','),
+    );
+
+    for (const c of summaries) {
+      rows.push(
+        [
+          c.id,
+          c.title,
+          c.description,
+          c.language,
+          c.status,
+          c.isPaid ? 'true' : 'false',
+          c.currency ?? '',
+          typeof c.priceCents === 'number' ? c.priceCents : '',
+          c.createdByUserId ?? '',
+          c.createdAt,
+          c.updatedAt,
+          c.categoryId ?? '',
+          c.category?.title ?? '',
+          c.category?.slug ?? '',
+        ]
+          .map(escapeCsv)
+          .join(','),
+      );
+    }
+
+    const ts = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+    return {
+      csv: `\uFEFF${rows.join('\n')}`,
+      filename: `courses-${ts}.csv`,
     };
   }
 
@@ -175,6 +575,18 @@ export class CoursesService {
 
     const saved = await this.courseCategoryRepo.save(category);
     return this.toCategoryDto(saved);
+  }
+
+  async adminDeleteCourseCategory(id: string): Promise<void> {
+    const category = await this.courseCategoryRepo.findOne({ where: { id } });
+    if (!category) {
+      throw new NotFoundException('Category not found');
+    }
+
+    await this.courseRepo.manager.transaction(async (manager) => {
+      await manager.update(Course, { categoryId: id }, { categoryId: null });
+      await manager.delete(CourseCategory, { id });
+    });
   }
 
   private async getActiveUserRole(userId: string): Promise<UserRole> {
@@ -278,6 +690,18 @@ export class CoursesService {
     if (!curriculumItem) {
       throw new NotFoundException('Quiz not found');
     }
+  }
+
+  async getQuizCurriculumItemId(
+    courseId: string,
+    quizId: string,
+  ): Promise<string | null> {
+    const curriculumItem = await this.curriculumRepo.findOne({
+      where: { courseId, itemType: 'quiz', quizId },
+      select: ['id'],
+    });
+
+    return curriculumItem?.id ?? null;
   }
 
   private async validateCurriculumRefs(
@@ -389,6 +813,74 @@ export class CoursesService {
 
     const courses = await qb.getMany();
     return courses.map((c) => this.toSummary(c));
+  }
+
+  async getPublicCatalogPaged(options: {
+    page: number;
+    pageSize: number;
+    q?: string;
+    language?: string;
+    paid?: 'paid' | 'free';
+    categorySlug?: string;
+    sortKey?: 'createdAt' | 'title';
+    sortDir?: 'asc' | 'desc';
+  }): Promise<{ items: CourseSummaryDto[]; total: number }> {
+    const page =
+      Number.isFinite(options.page) && options.page > 0 ? options.page : 1;
+    const pageSize =
+      Number.isFinite(options.pageSize) && options.pageSize > 0
+        ? Math.min(options.pageSize, 100)
+        : 20;
+
+    const qb = this.courseRepo
+      .createQueryBuilder('course')
+      .leftJoinAndSelect('course.category', 'category')
+      .where('course.status = :status', { status: 'active' });
+
+    const categorySlug = (options.categorySlug ?? '').trim().toLowerCase();
+    if (categorySlug) {
+      qb.andWhere('LOWER(category.slug) = :slug', { slug: categorySlug });
+      qb.andWhere('category.active = true');
+    }
+
+    const q = (options.q ?? '').trim().toLowerCase();
+    if (q) {
+      qb.andWhere(
+        new Brackets((where) => {
+          where
+            .where('LOWER(course.id) LIKE :q', { q: `%${q}%` })
+            .orWhere('LOWER(course.title) LIKE :q', { q: `%${q}%` })
+            .orWhere('LOWER(course.description) LIKE :q', { q: `%${q}%` })
+            .orWhere('LOWER(category.title) LIKE :q', { q: `%${q}%` })
+            .orWhere('LOWER(category.slug) LIKE :q', { q: `%${q}%` });
+        }),
+      );
+    }
+
+    const language = (options.language ?? '').trim().toLowerCase();
+    if (language) {
+      qb.andWhere('LOWER(course.language) = :language', { language });
+    }
+
+    if (options.paid === 'paid') {
+      qb.andWhere('course.isPaid = :isPaid', { isPaid: true });
+    }
+    if (options.paid === 'free') {
+      qb.andWhere('course.isPaid = :isPaid', { isPaid: false });
+    }
+
+    const sortKey = (options.sortKey ?? 'createdAt').trim();
+    const sortDir = options.sortDir === 'asc' ? 'ASC' : 'DESC';
+    if (sortKey === 'title') {
+      qb.orderBy('course.title', sortDir);
+    } else {
+      qb.orderBy('course.createdAt', sortDir);
+    }
+
+    qb.skip((page - 1) * pageSize).take(pageSize);
+
+    const [courses, total] = await qb.getManyAndCount();
+    return { items: courses.map((c) => this.toSummary(c)), total };
   }
 
   async getPublicCourseDetail(courseId: string): Promise<CourseDetailDto> {
@@ -519,27 +1011,22 @@ export class CoursesService {
     };
   }
 
-  async getAdminCoursesList(actorUserId: string): Promise<CourseSummaryDto[]> {
-    const role = await this.getActiveUserRole(actorUserId);
-
-    const qb = this.courseRepo
-      .createQueryBuilder('course')
-      .leftJoinAndSelect('course.category', 'category')
-      .orderBy('course.createdAt', 'DESC');
-
-    if (role === 'teacher') {
-      qb.where('course.createdByUserId = :userId', { userId: actorUserId });
-    }
-
-    const courses = await qb.getMany();
-
-    return courses.map((c) => this.toSummary(c));
+  async getAdminCoursesList(
+    actorUserId: string,
+  ): Promise<AdminCourseSummaryDto[]> {
+    const { items } = await this.getAdminCoursesListPaged(actorUserId, {
+      page: 1,
+      pageSize: 100,
+      sortKey: 'createdAt',
+      sortDir: 'desc',
+    });
+    return items;
   }
 
   async getAdminCourseDetail(
     courseId: string,
     actorUserId: string,
-  ): Promise<CourseDetailDto> {
+  ): Promise<AdminCourseDetailDto> {
     await this.requireCourseOwnershipForTeacher(actorUserId, courseId);
 
     const course = await this.courseRepo
@@ -555,7 +1042,7 @@ export class CoursesService {
     const curriculum = await this.loadCurriculum(courseId);
 
     return {
-      ...this.toSummary(course),
+      ...this.toAdminSummary(course),
       curriculum,
     };
   }
@@ -563,7 +1050,7 @@ export class CoursesService {
   async adminCreateCourse(
     dto: AdminCreateCourseDto,
     actorUserId: string,
-  ): Promise<CourseDetailDto> {
+  ): Promise<AdminCourseDetailDto> {
     const role = await this.getActiveUserRole(actorUserId);
     if (role !== 'admin' && role !== 'teacher') {
       throw new ForbiddenException('Access denied');
@@ -627,7 +1114,7 @@ export class CoursesService {
     const curriculum = await this.loadCurriculum(saved.id);
 
     return {
-      ...this.toSummary(effectiveCourse),
+      ...this.toAdminSummary(effectiveCourse),
       curriculum,
     };
   }
@@ -636,7 +1123,7 @@ export class CoursesService {
     courseId: string,
     dto: AdminUpdateCourseDto,
     actorUserId: string,
-  ): Promise<CourseDetailDto> {
+  ): Promise<AdminCourseDetailDto> {
     await this.requireCourseOwnershipForTeacher(actorUserId, courseId);
 
     const course = await this.courseRepo.findOne({ where: { id: courseId } });
@@ -730,7 +1217,7 @@ export class CoursesService {
     const curriculum = await this.loadCurriculum(saved.id);
 
     return {
-      ...this.toSummary(effectiveCourse),
+      ...this.toAdminSummary(effectiveCourse),
       curriculum,
     };
   }
@@ -980,6 +1467,34 @@ export class CoursesService {
     });
 
     await this.enrollmentRepo.save(enrollment);
+  }
+
+  async unenrollFromCourse(userId: string, courseId: string): Promise<void> {
+    const enrollment = await this.enrollmentRepo.findOne({
+      where: { courseId, userId },
+      relations: ['course'],
+    });
+
+    if (!enrollment) {
+      return;
+    }
+
+    const course = enrollment.course;
+    if (course?.isPaid) {
+      throw new ForbiddenException('Paid course cannot be removed');
+    }
+
+    await this.enrollmentRepo.manager.transaction(async (manager) => {
+      await manager.delete(UserCurriculumProgress, {
+        userId,
+        courseId,
+      });
+
+      await manager.delete(CourseEnrollment, {
+        userId,
+        courseId,
+      });
+    });
   }
 
   async adminGrantCourseAccess(

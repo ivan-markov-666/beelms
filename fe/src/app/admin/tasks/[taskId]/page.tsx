@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import { getAccessToken } from "../../../auth-token";
 import { getApiBaseUrl } from "../../../api-url";
 import { AdminBreadcrumbs } from "../../_components/admin-breadcrumbs";
+import { ListboxSelect } from "../../../_components/listbox-select";
 
 const API_BASE_URL = getApiBaseUrl();
 
@@ -347,31 +348,35 @@ export default function AdminTaskDetailPage() {
 
           <label className="space-y-1">
             <span className="text-xs font-medium text-gray-600">Language</span>
-            <select
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900"
+            <ListboxSelect
+              ariaLabel="Task language"
               value={form?.language ?? "bg"}
-              onChange={(e) =>
-                setForm((p) => (p ? { ...p, language: e.target.value } : p))
+              onChange={(next) =>
+                setForm((p) => (p ? { ...p, language: next } : p))
               }
-            >
-              <option value="bg">bg</option>
-              <option value="en">en</option>
-            </select>
+              buttonClassName="flex w-full items-center justify-between gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900"
+              options={[
+                { value: "bg", label: "bg" },
+                { value: "en", label: "en" },
+              ]}
+            />
           </label>
 
           <label className="space-y-1">
             <span className="text-xs font-medium text-gray-600">Status</span>
-            <select
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900"
+            <ListboxSelect
+              ariaLabel="Task status"
               value={form?.status ?? "draft"}
-              onChange={(e) =>
-                setForm((p) => (p ? { ...p, status: e.target.value } : p))
+              onChange={(next) =>
+                setForm((p) => (p ? { ...p, status: next } : p))
               }
-            >
-              <option value="draft">draft</option>
-              <option value="active">active</option>
-              <option value="inactive">inactive</option>
-            </select>
+              buttonClassName="flex w-full items-center justify-between gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900"
+              options={[
+                { value: "draft", label: "draft" },
+                { value: "active", label: "active" },
+                { value: "inactive", label: "inactive" },
+              ]}
+            />
           </label>
         </div>
 

@@ -146,6 +146,24 @@ export class User {
   })
   privacyAcceptedAt: Date | null;
 
+  @Column({ name: 'two_factor_enabled', type: 'boolean', default: false })
+  twoFactorEnabled: boolean;
+
+  @Column({
+    name: 'two_factor_secret',
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+  })
+  twoFactorSecret: string | null;
+
+  @Column({
+    name: 'two_factor_confirmed_at',
+    type: 'timestamp with time zone',
+    nullable: true,
+  })
+  twoFactorConfirmedAt: Date | null;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
