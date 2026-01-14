@@ -1,7 +1,7 @@
 # beelms – Dev & Local Docker Setup
 
 > **Under Active Development**  
-> **What the system already have:** BeeLMS is a full-stack LMS platform powered by **NestJS** (backend API) and **Next.js** (frontend). The MVP build is ~90% complete and we plan to ship a stable release by the end of **February 2026**.
+> **What the system already have:** BeeLMS is a full-stack LMS platform powered by **NestJS** (backend API) and **Next.js** (frontend). The MVP build is ~90% complete and I am planning to ship a stable release by the end of **February 2026**.
 
 ## Core capabilities (current MVP)
 
