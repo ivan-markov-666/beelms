@@ -1,32 +1,44 @@
 # beelms – Dev & Local Docker Setup
 
-Това репо съдържа примерна инсталация на core рамката **beelms**:
-- Next.js frontend (FE)
-- NestJS API (BE)
-- PostgreSQL база данни
+> **Under Active Development**  
+> **What the system already have:** BeeLMS is a full-stack LMS platform powered by **NestJS** (backend API) and **Next.js** (frontend). The MVP build is ~90% complete and we plan to ship a stable release by the end of **February 2026**.
 
-Този README описва **как да стартирате проекта за dev** и **как да го стартирате през Docker локално**. Няма инструкции за stage/production – те са извън текущия обхват.
+## Core capabilities (current MVP)
+
+- **Admin settings & branding** – customize app name, colors, favicon, fonts, themes, social links, live previews and SEO helpers.
+- **Courses & content** – public/private courses, paid courses with Stripe / PayPal, wiki modules and system pages (Terms, Privacy, FAQ, etc.).
+- **Authentication & security** – email/password login, social sign-ins (Google/Facebook/GitHub/LinkedIn), CAPTCHA protections and admin-managed OAuth credentials.
+- **Payments & automation** – Stripe webhooks, PayPal Orders API, sandbox tooling for admins, automated seed/migration scripts.
+- **Localization & accessibility** – multi-language support, accessibility widget, responsive UI and SSR rendering for key screens.
+- **DevOps tooling** – docker-compose for API/DB, CLI scaffolding for new instances, OpenAPI docs and a local “poor man’s CI” (BE+FE test suites).
+
+This repo hosts a reference installation of the **beelms** core stack:
+- Next.js frontend (`fe/`)
+- NestJS API (`be/`)
+- PostgreSQL database
+
+The README explains how to run the project locally (dev mode and Docker). Stage/production guides are out of scope for now.
 
 ---
 
-## 0. Статус и текущ фокус
+## 0. Status & current focus
 
-- 2025-12-30: Завършен **Deep Audit Pass #7** – BE ↔ OpenAPI, backlog ↔ story specs и FE routes са синхронизирани. `STORY-TASKS-1` е маркиран като ✅ Implemented. Следващ фокус: автоматизиране на OpenAPI синка (STORY-DOCS-1).
+- 2025‑12‑30: Completed **Deep Audit Pass #7** – BE ↔ OpenAPI, backlog ↔ story specs and FE routes are synchronized. `STORY-TASKS-1` is ✅ Implemented. Next focus: automate the OpenAPI sync (STORY-DOCS-1).
 
 ---
 
-## 1. Структура на проекта (накратко)
+## 1. Project structure (overview)
 
 - `fe/` – Next.js frontend
 - `be/` – NestJS backend API (`/api/...`)
-- `docs/` – архитектура, OpenAPI, API примери, DB модел
-- `docker-compose.yml` – локална Docker конфигурация за **db + api**
+- `docs/` – architecture, OpenAPI specs, API examples, DB model
+- `docker-compose.yml` – local Docker setup for **db + api**
 
 ---
 
 ## 1.1. DB migrations & seed (quick commands)
 
-Команди от root на репото (wrapper-и към `be/`):
+Run from repository root (wrappers to scripts in `be/`):
 
 ```bash
 # Migration run/check/show/revert
@@ -35,160 +47,144 @@ npm run be:migration:check
 npm run be:migration:show
 npm run be:migration:revert
 
-# OpenAPI
+# OpenAPI lint
 npm run docs:openapi:lint
 
-# Seed (dev, без build)
+# Seed (dev, no build)
 npm run be:seed:dev
 
-# Seed (compiled, изисква `npm --prefix be run build` ако се пуска от host)
+# Seed (compiled; requires `npm --prefix be run build` if triggered from host)
 npm run be:seed:wiki
 npm run be:seed:courses
 ```
 
 ---
 
-## 2. Dev setup (без Docker) – локално стартиране с hot reload
+## 2. Dev setup (without Docker) – local hot reload
 
-Този вариант е удобен, когато правите промени по кода (BE/FE) и искате **автоматичен reload**.
+Ideal when editing BE/FE code and you want automatic reloads.
 
-### 2.x. Команди от root директорията (npm --prefix)
+### 2.x. Root-level commands (npm --prefix)
 
-Можеш да стартираш скриптовете за BE/FE директно от root на репото, без да влизаш в папките:
+You can run BE/FE scripts directly from the repo root:
 
 ```bash
-# BE
+# Backend
 npm --prefix be run build
 npm --prefix be run start:dev
 
-# FE
+# Frontend
 npm --prefix fe run build
 npm --prefix fe run dev -- -p 3001
 ```
 
-### 2.1. Предварителни изисквания
+### 2.1. Prerequisites
 
-- Node.js LTS (напр. 22.x)
-- npm или pnpm (примерите са с npm)
-- Локално инсталиран PostgreSQL **или** стартиран `docker-compose` само за db (виж по-долу)
+- Node.js LTS (e.g., 22.x)
+- npm or pnpm (examples use npm)
+- Local PostgreSQL **or** Docker Compose (DB-only) – see below
 
-### 2.2. Стартиране на PostgreSQL през Docker (по избор)
+### 2.2. Start PostgreSQL via Docker (optional)
 
-Ако нямате локален Postgres, може да ползвате само db услугата от `docker-compose.yml`:
+If you don’t have Postgres installed locally, spin up only the DB service:
 
 ```bash
-# В root на репото
+# In repo root
 docker compose -f docker-compose.yml -f docker-compose.db-host.yml up -d db
 ```
 
-- DB ще е достъпен на `localhost:5432` (или друг порт, ако зададеш `DB_PORT_PUBLISHED`) c:
+- DB will listen on `localhost:5432` (or `DB_PORT_PUBLISHED` if overridden):
   - DB: `beelms`
   - User: `beelms`
   - Password: `beelms`
 
-### 2.3. Стартиране на BE (NestJS API) в dev режим
+### 2.3. Run BE (NestJS API) in dev mode
 
 ```bash
 cd be
-npm install        # само първия път
-npm run start:dev  # NestJS с --watch и hot reload
+npm install        # first time only
+npm run start:dev  # NestJS with --watch + hot reload
 ```
 
-- API се стартира на `http://localhost:3000`.
-- Всички пътища са под `/api`, защото в `main.ts` има `app.setGlobalPrefix('api')`.
-  - Примери:
-    - `GET http://localhost:3000/api/health`
-    - `POST http://localhost:3000/api/auth/login`
-    - `POST http://localhost:3000/api/admin/wiki/articles`
+- API runs on `http://localhost:3000`.
+- All routes are prefixed with `/api` (`app.setGlobalPrefix('api')` in `main.ts`):
+  - `GET http://localhost:3000/api/health`
+  - `POST http://localhost:3000/api/auth/login`
+  - `POST http://localhost:3000/api/admin/wiki/articles`
 
-> Ако променяте BE кода и стартирате през `npm run start:dev`, **няма нужда** от ръчен `npm run build` – NestJS сам компилира при промени.
+> When using `npm run start:dev`, there is **no need** to run `npm run build`; NestJS re-compiles automatically.
 
-### 2.4. Стартиране на FE (Next.js) в dev режим
+### 2.4. Run FE (Next.js) in dev mode
 
 ```bash
 cd fe
-npm install        # само първия път
+npm install        # first time only
 npm run dev -- -p 3001
 ```
 
-- FE слуша на `http://localhost:3001` (виж `package.json` / `next.config.js`).
-  Ако искаш друг порт, можеш да го промениш с `npm run dev -- -p <PORT>`.
-- В `.env.local` на FE (или по подразбиране) `NEXT_PUBLIC_API_BASE_URL` трябва да сочи към BE:
+- FE listens on `http://localhost:3001` (see `package.json` / `next.config.js`).
+- Change the port with `npm run dev -- -p <PORT>` if needed.
+- In `fe/.env.local`, ensure `NEXT_PUBLIC_API_BASE_URL` points to the BE:
 
 ```bash
 NEXT_PUBLIC_API_BASE_URL=http://localhost:3000/api
 ```
 
-#### 2.4.1.1. API URL helper (frontend)
+#### 2.4.1. API URL helper (frontend)
 
-- **Никога не конкатенирай `/api` ръчно.** Вместо това използвай споделения helper `fe/src/app/api-url.ts`.
-- `getApiBaseUrl()` връща нормализираната стойност (гарантира, че завършва на `/api`, дори env да е без него).
-- `buildApiUrl("/auth/login")` добавя пътя със сигурен водещ `/`.
-- Това означава, че компонентите/страниците просто викат:
+- **Never** concatenate `/api` manually. Use `fe/src/app/api-url.ts`.
+- `getApiBaseUrl()` normalizes the base (always ends with `/api`).
+- `buildApiUrl("/auth/login")` prepends the path safely.
+- Components/pages simply do:
 
   ```ts
   import { buildApiUrl } from "../api-url";
   await fetch(buildApiUrl("/auth/login"), { ... });
   ```
 
-- В репото има Jest guard, който фейлва, ако се появи директна употреба на `NEXT_PUBLIC_API_BASE_URL` извън `api-url.ts`.
+- Jest guard ensures `NEXT_PUBLIC_API_BASE_URL` is not used directly outside `api-url.ts`.
 
-#### 2.4.1.2. CAPTCHA / reCAPTCHA (anti-bot) – env vars
+#### 2.4.2. CAPTCHA / reCAPTCHA (anti-bot) – env vars
 
-CAPTCHA е имплементирана като **Google reCAPTCHA (v2 checkbox)**.
+We use **Google reCAPTCHA v2 checkbox**.
 
 - FE (`fe/.env.local`):
 
 ```bash
 NEXT_PUBLIC_RECAPTCHA_SITE_KEY=your_site_key
 
-# (по избор) DEV bypass ако reCAPTCHA script-ът е блокиран локално.
-# Работи само когато NODE_ENV != production.
+# optional dev bypass if the script is blocked locally
 NEXT_PUBLIC_RECAPTCHA_DEV_BYPASS=true
 ```
 
-- BE (`be/.env` / env на процеса):
+- BE (`be/.env`):
 
 ```bash
 RECAPTCHA_SECRET_KEY=your_secret_key
-
-# включва captcha изискване за /auth/register и /auth/forgot-password
-AUTH_REQUIRE_CAPTCHA=true
-
-# включва captcha изискване за /users/me/export
-ACCOUNT_EXPORT_REQUIRE_CAPTCHA=true
-
-# (по избор) изисква captcha при /auth/login след N неуспешни опита (default 3)
-AUTH_LOGIN_CAPTCHA_THRESHOLD=3
-
-# по избор: dev bypass на външната проверка към Google
-CAPTCHA_VERIFY_DISABLED=true
+AUTH_REQUIRE_CAPTCHA=true            # /auth/register, /auth/forgot-password
+ACCOUNT_EXPORT_REQUIRE_CAPTCHA=true  # /users/me/export
+AUTH_LOGIN_CAPTCHA_THRESHOLD=3       # request CAPTCHA after N failed logins
+CAPTCHA_VERIFY_DISABLED=true         # optional dev bypass for Google verification
 ```
 
 Notes:
 
-- В **dev/test** среда BE не прави реална HTTP верификация към Google (за да не блокира локалната работа), но когато `AUTH_REQUIRE_CAPTCHA=true` / `ACCOUNT_EXPORT_REQUIRE_CAPTCHA=true` се изисква да се подаде **непразен** `captchaToken`.
-- В **production** (`NODE_ENV=production`) BE валидира `captchaToken` чрез `https://www.google.com/recaptcha/api/siteverify`.
-- `AUTH_LOGIN_CAPTCHA_THRESHOLD` контролира след колко неуспешни login опита (за комбинацията `ip+email`) FE ще поиска CAPTCHA и BE ще започне да изисква `captchaToken`.
-- В `NODE_ENV=test` login CAPTCHA е изключена по подразбиране (за да не влияе на e2e тестовете). Ако е нужно да се тества изрично, може да се включи с `AUTH_LOGIN_CAPTCHA_TEST_MODE=true`.
-- Ако reCAPTCHA widget не се визуализира локално, най-честата причина е блокиране на `recaptcha/api.js` от adblock/Brave shields/корпоративна мрежа. FE пробва и fallback домейн `https://www.recaptcha.net/recaptcha/api.js`.
+- In **dev/test**, BE skips the external Google verification but still requires a non-empty `captchaToken` if the feature flags are true.
+- In **production**, BE verifies via `https://www.google.com/recaptcha/api/siteverify`.
+- `AUTH_LOGIN_CAPTCHA_THRESHOLD` controls the IP+email failure count before FE asks for CAPTCHA.
+- In `NODE_ENV=test`, login CAPTCHA is disabled by default (can be re-enabled with `AUTH_LOGIN_CAPTCHA_TEST_MODE=true`).
+- If the widget is missing locally, check blockers (adblock, Brave shields, corporate proxies). FE will also try `https://www.recaptcha.net/recaptcha/api.js`.
 
-#### 2.4.1. Stripe payments (Paid courses) – env vars
+### 2.5. Stripe payments (paid courses) – env vars
 
-#### 2.4.1.0. Payments (Stripe / PayPal) – как работи (важно)
+#### 2.5.1. Payments (Stripe / PayPal) – how it works
 
-В проекта има 2 различни неща:
+- **Payment provider configuration** (keys, sandbox/live) is server-side via BE env vars.
+- **Admin → Payments → Sandbox** is UI tooling to generate test checkout URLs; it is not a separate mode.
+- Stripe sandbox vs live depends on using `sk_test_...` / `sk_live_...` and matching webhook secrets.
+- PayPal sandbox vs live depends on `PAYPAL_MODE=sandbox|live` + credentials.
 
-- **Payment provider конфигурация** (Stripe/PayPal ключове, sandbox/live режим) – това е **server-side** и в момента се контролира основно чрез **env променливи** в BE.
-- **Admin → Payments → Sandbox** – това е **UI tooling** за администратори (да генерират test checkout URL и да дебъгват), не е отделен “payment режим”.
-
-Тоест не е нужно да имаш отделна “не-sandbox” опция в Admin UI, за да работи production flow.
-Sandbox vs Live при Stripe/PayPal се определя от:
-
-- За Stripe: дали ползваш `sk_test_...`/`sk_live_...` + съответните webhook secrets.
-- За PayPal: `PAYPAL_MODE=sandbox|live` + съответните PayPal credentials.
-
-За да работи Stripe checkout flow за paid courses (STORY-PAYMENTS-1):
+Stripe checkout flow (STORY-PAYMENTS-1):
 
 - FE (`fe/.env.local`):
 
@@ -196,7 +192,7 @@ Sandbox vs Live при Stripe/PayPal се определя от:
 NEXT_PUBLIC_STRIPE_PAYMENTS=true
 ```
 
-- BE (`be/.env` / env на процеса):
+- BE (`be/.env`):
 
 ```bash
 STRIPE_SECRET_KEY=sk_test_...
@@ -207,99 +203,77 @@ STRIPE_COURSE_PRICE_CENTS=999
 
 Notes:
 
-- `STRIPE_SECRET_KEY` трябва да е test mode secret key от Stripe.
-- `STRIPE_WEBHOOK_SECRET` е webhook signing secret за endpoint-а `/api/payments/webhook`.
-- `FRONTEND_ORIGIN` се ползва за success/cancel redirect URL-и.
-- `STRIPE_COURSE_PRICE_CENTS` е fallback цена (ако няма per-course pricing и няма `payment_settings`).
+- `STRIPE_SECRET_KEY` must be a test secret key for dev.
+- `STRIPE_WEBHOOK_SECRET` signs incoming webhook events.
+- `FRONTEND_ORIGIN` configures success/cancel redirect URLs.
+- `STRIPE_COURSE_PRICE_CENTS` is the fallback price if per-course pricing is absent.
 
-##### Stripe webhook (задължително за автоматично “unlock”)
+##### Stripe webhook (required for automatic unlock)
 
-Stripe purchase се записва в BE при обработка на webhook event-и.
-
-- **Webhook URL (dev):** `http://localhost:3000/api/payments/webhook`
-
-Опции за dev:
-
-- **Stripe CLI (препоръчително):**
+- Dev webhook URL: `http://localhost:3000/api/payments/webhook`
+- Suggested dev workflow:
   - `stripe login`
   - `stripe listen --forward-to http://localhost:3000/api/payments/webhook`
-  - Stripe CLI ще ти даде `whsec_...` → сложи го в `STRIPE_WEBHOOK_SECRET`.
-
-В production:
-
-- Настрой webhook endpoint в Stripe Dashboard към публичния URL на BE: `https://<your-api-host>/api/payments/webhook`
-- Копирай signing secret-а в `STRIPE_WEBHOOK_SECRET`.
+  - Copy the CLI-provided `whsec_...` into `STRIPE_WEBHOOK_SECRET`.
+- Production: configure the dashboard webhook to `https://<api-host>/api/payments/webhook` and copy the secret.
 
 ##### Stripe testing flow (dev)
 
-1. Увери се, че feature-ът `paidCourses` е включен.
-2. В Admin → Payments настрой currency/price (или остави defaults).
-3. Отвори платен курс като потребител и натисни “Enroll/Buy”.
-4. Stripe redirect към Checkout.
-5. След success ще се отвори `.../courses/:courseId/checkout/success?session_id=...` и FE ще изчака purchase да се запише + ще направи enroll.
+1. Ensure `paidCourses` feature is on.
+2. Configure currency/price via Admin → Payments (or keep defaults).
+3. Open a paid course, press “Enroll/Buy”.
+4. User is redirected to Stripe Checkout.
+5. After success, user lands on `/courses/:courseId/checkout/success?session_id=...`; FE waits for the webhook to persist the purchase and enrolls the student.
 
-#### 2.4.1.1. PayPal payments (Paid courses) – env vars
+### 2.6. PayPal payments – env vars
 
-PayPal е интегриран чрез **PayPal Orders API** (create order → approve → capture).
+PayPal integration uses the **Orders API** (create → approve → capture).
 
 - FE (`fe/.env.local`):
 
 ```bash
-# включва PayPal като възможен provider във frontend-а
 NEXT_PUBLIC_PAYPAL_PAYMENTS=true
-
-# избор на provider за paid checkout.
-# ако не е зададено: default е "stripe".
-NEXT_PUBLIC_PAYMENT_PROVIDER=paypal
+NEXT_PUBLIC_PAYMENT_PROVIDER=paypal   # default is “stripe” if omitted
 ```
 
-- BE (`be/.env` / env на процеса):
+- BE (`be/.env`):
 
 ```bash
 PAYPAL_MODE=sandbox
 PAYPAL_CLIENT_ID=your_sandbox_client_id
 PAYPAL_CLIENT_SECRET=your_sandbox_client_secret
-
 FRONTEND_ORIGIN=http://localhost:3001
 ```
 
 Notes:
 
-- `PAYPAL_MODE`:
-  - `sandbox` използва `https://api-m.sandbox.paypal.com`
-  - `live` използва `https://api-m.paypal.com`
-- `FRONTEND_ORIGIN` се ползва за return/cancel URL-и към FE:
+- `PAYPAL_MODE=sandbox` uses `https://api-m.sandbox.paypal.com`; `live` uses `https://api-m.paypal.com`.
+- `FRONTEND_ORIGIN` controls return/cancel URLs:
   - success: `/courses/:courseId/checkout/paypal/success?token=...`
   - cancel: `/courses/:courseId/checkout/paypal/cancel`
 
 ##### PayPal testing flow (dev)
 
-1. Увери се, че `PAYPAL_MODE=sandbox` и имаш sandbox REST app в PayPal Developer Dashboard.
-2. Увери се, че `NEXT_PUBLIC_PAYPAL_PAYMENTS=true` и `NEXT_PUBLIC_PAYMENT_PROVIDER=paypal`.
-3. Отвори платен курс като потребител и натисни “Enroll/Buy”.
-4. Ще бъдеш пренасочен към PayPal approval.
-5. След approve ще се върнеш на `.../checkout/paypal/success?token=...`.
-   - FE ще извика `POST /api/courses/:courseId/paypal/verify` (capture + запис на purchase)
-   - после ще изчака purchase status и ще извика enroll.
+1. Ensure `PAYPAL_MODE=sandbox` and a sandbox REST app exists.
+2. Set `NEXT_PUBLIC_PAYPAL_PAYMENTS=true` and `NEXT_PUBLIC_PAYMENT_PROVIDER=paypal`.
+3. Start a paid course checkout; you’ll be redirected to PayPal approval.
+4. After approval, PayPal redirects back to `/checkout/paypal/success?token=...`.
+5. FE calls `POST /api/courses/:courseId/paypal/verify` (capture + persist) and then enrolls when status is complete.
 
-##### Admin → Payments → PayPal → Sandbox (tooling)
+##### Admin → Payments → PayPal → Sandbox tooling
 
-Това е удобен shortcut за админ:
+- Shortcut for admins to generate approval URLs via `POST /api/courses/:courseId/checkout?provider=paypal`.
+- Useful for debugging without going through the full course UI.
 
-- Генерира approval URL чрез `POST /api/courses/:courseId/checkout?provider=paypal`.
-- Полезно е за debug/testing без да минаваш през course page UI.
+### 2.7. Google OAuth (login/register) – env vars
 
-Така Admin UI (напр. `/admin/wiki`) ще вика реалните NestJS endpoint-и.
+For STORY-AUTH-5:
 
-#### 2.4.2. Google OAuth (Login/Register with Google) – env vars
+1. Create an **OAuth 2.0 Client** in [Google Cloud Console](https://console.cloud.google.com/apis/credentials) (type “Web application”).
+2. Add `http://localhost:3000` (BE) and `http://localhost:3001` (FE) as **Authorized JavaScript origins**.
+3. Add `http://localhost:3000/api/auth/google/callback` as an **Authorized redirect URI** (same value goes into `GOOGLE_OAUTH_REDIRECT_URL`).
 
-За STORY-AUTH-5 (Google социален login) трябва да създадеш **OAuth 2.0 Client** в [Google Cloud Console](https://console.cloud.google.com/apis/credentials):
-
-1. Тип “Web application”.
-2. Добави `http://localhost:3000` (BE) и `http://localhost:3001` (FE) като **Authorized JavaScript origins** в dev.
-3. Добави `http://localhost:3000/api/auth/google/callback` като **Authorized redirect URI** (същият URL трябва да влезе и в `GOOGLE_OAUTH_REDIRECT_URL`).
-
-След това попълни новите BE env променливи (в `be/.env` или секретния ви мениджър):
+Populate BE env vars (`be/.env`):
 
 ```bash
 GOOGLE_CLIENT_ID=your-google-client-id
@@ -307,61 +281,59 @@ GOOGLE_CLIENT_SECRET=your-google-client-secret
 GOOGLE_OAUTH_REDIRECT_URL=http://localhost:3000/api/auth/google/callback
 ```
 
-Tip: `FRONTEND_ORIGIN` трябва да сочи към FE URL (примерно `http://localhost:3001`), за да може backend-ът да редиректне потребителя обратно след `/auth/google/callback`.
+Tip: `FRONTEND_ORIGIN` must point to the FE so BE can redirect back after `/auth/google/callback`.
 
-Проверка, че конфигурацията работи (без още да имаме FE бутон):
+Validation steps (without a dedicated FE button yet):
 
 1. `npm --prefix be run start:dev`
-2. `curl "http://localhost:3000/api/auth/google/authorize"` – отговорът съдържа `url` и `state`.
-3. Отвори върнатия `url` в браузър, завърши Google consent flow → backend редиректва към `FRONTEND_ORIGIN/auth/social-callback?...`.
+2. `curl "http://localhost:3000/api/auth/google/authorize"` – returns `{ url, state }`.
+3. Open the URL, complete consent, BE redirects to `FRONTEND_ORIGIN/auth/social-callback?...`.
 
-> ⚠️ **Важно:** от 2026-01 нататък OAuth креденшълите **се държат в DB** (таблица `instance_config.social_credentials`) и се управляват от админ UI. Env променливите по-горе служат само като първоначален fallback – веднага щом админът въведе стойности през UI, те се използват приоритетно. Secret-ите никога не се връщат към клиентския код.
+> ⚠️ **Important:** Starting January 2026, OAuth credentials live in DB (`instance_config.social_credentials`) and are managed via admin UI. Env vars only act as initial fallback; once admins save values, DB overrides them. Secrets are never returned to clients.
 
-#### 2.4.3. Админ управление на социални креденшъли (Google/Facebook/GitHub/LinkedIn)
+### 2.8. Admin management of social credentials (Google/Facebook/GitHub/LinkedIn)
 
-1. Логни се като админ и отвори `/admin/settings`.
-2. В секцията **“OAuth креденшъли”** ще видиш отделни карти за Google, Facebook, GitHub и LinkedIn:
-   - Въвеждаш **Client ID** и **Redirect URL** (пример: `http://localhost:3000/api/auth/google/callback`).
-   - При нужда въвеждаш **нов client secret** – той се изпраща еднократно към backend-а и не се показва отново.
-   - Можеш да маркираш „Изтрий съхранения secret“, за да занулиш стойността (напр. при ротация).
-3. След **Запази**:
-   - Backend-ът валидира и записва стойностите в `instance_config.social_credentials`.
-   - Всички OAuth услуги (Google/Facebook/GitHub/LinkedIn) започват да четат стойности от DB, а ако липсват – падат към env променливите.
-   - Статусът „Configured“ в същата страница се обновява спрямо реално наличните креденшъли.
+1. Log in as admin → `/admin/settings`.
+2. In **“OAuth Credentials”** you’ll find cards per provider:
+   - Enter **Client ID** and **Redirect URL** (e.g., `http://localhost:3000/api/auth/google/callback`).
+   - Add a **new client secret** if needed (sent once, never shown again).
+   - Use “Delete stored secret” to nullify credentials (e.g., rotation).
+3. After clicking **Save**:
+   - BE validates and stores values in `instance_config.social_credentials`.
+   - OAuth services read from DB and fallback to env vars only if missing.
+   - “Configured” status updates based on actual stored secrets/IDs.
 
-> Secret-ите никога не се връщат в API отговора – UI-то получава само флаг `hasClientSecret`. Това позволява на админа да вижда дали има въведено secret, без да го разкриваме.
+> Secrets never appear in API responses; UI only gets a `hasClientSecret` flag so admins know if a secret exists.
 
 ---
 
 ## 3. Local Docker setup – db + api
 
-Този вариант е удобен, когато искаш **бързо да вдигнеш backend-а и базата** без да мислиш за локална инсталация на Postgres и Node версии. FE (Next.js) обикновено се стартира отделно в dev режим.
+Great for quickly running backend + database without managing local Postgres/Node installations. FE (Next.js) typically runs locally in dev mode.
 
-### 3.1. Стартиране на контейнерите
-
-В root на проекта:
+### 3.1. Start containers
 
 ```bash
-# Build + start db и api (NestJS)
+# Build + start db and api (NestJS)
 docker compose up -d
 ```
 
-Това стартира услугите:
+Services:
 
-- **db** – Postgres 16 (по подразбиране не е exposed към host)
-- **migrate** – one-off контейнер, който прилага TypeORM миграции
-- **api** – NestJS API на `http://localhost:3000`
+- **db** – Postgres 16 (not exposed to host by default)
+- **migrate** – one-off container applying TypeORM migrations
+- **api** – NestJS API at `http://localhost:3000`
 
-> Ако ти трябва DB достъп от host (psql, локален BE без Docker), ползвай override файла: `docker-compose.db-host.yml`.
+> Need DB access from host (psql/local BE)? Use `docker-compose.db-host.yml` override.
 
-> Обърни внимание: `api` услугата се билдва от директорията `be/` чрез `be/Dockerfile`. Ако промениш BE кода, трябва да rebuild-неш контейнера.
+> Remember: `api` builds from `be/Dockerfile`. After backend code changes, rebuild the container.
 
 ### 3.1.1. Docker dev workflow (cheatsheet)
 
-Команди от root (еквивалентни `npm run docker:*` wrapper-и също са налични в `package.json`):
+Root-level commands (mirrored by `npm run docker:*` in `package.json`):
 
 ```bash
-# Start DB+migrations+API
+# Start DB + migrations + API
 docker compose up -d
 
 # Stop containers (keep volumes)
@@ -370,186 +342,175 @@ docker compose down
 # Stop + delete volumes (fresh DB)
 docker compose down -v
 
-# Rebuild только API container след промени в `be/`
+# Rebuild API container after code changes
 docker compose up -d --build api
 
-# Run migrations explicitly (one-off)
+# Run migrations manually
 docker compose run --rm migrate
 
 # Seed data (Wiki/Courses)
 docker compose exec api npm run seed:wiki
 docker compose exec api npm run seed:courses
 
-# Opt-in DB host access (publish DB port)
+# Publish DB port to host
 docker compose -f docker-compose.yml -f docker-compose.db-host.yml up -d db
 ```
 
-### 3.2. Rebuild на BE контейнера след промени по кода
-
-Ако работиш по NestJS кода в `be/` и искаш контейнерът да отразява промените (напр. новия Admin Wiki create endpoint), изпълни:
+### 3.2. Rebuild API container after code changes
 
 ```bash
 docker compose build api
 docker compose up -d api
 ```
 
-Това ще:
+This rebuilds the `api` image from the latest `be/` code and restarts only that service.
 
-- презбилдне image-а за `api` услугата от актуалния `be/` код (виж `docker-compose.yml`);
-- рестартира само `api` услугата.
-
-Алтернативно, с **една** команда можеш да направиш rebuild + start само на `api`:
+Shortcut (rebuild + start):
 
 ```bash
 docker compose up -d --build api
 ```
 
-### 3.3. Спиране на контейнерите
+### 3.3. Stop containers
 
 ```bash
 docker compose down
 ```
 
-Това спира `db` и `api` и премахва контейнерите. Volume-ът за Postgres (`db-data`) остава, освен ако не го изтриеш изрично.
+This stops `db` and `api`, removing containers but keeping the Postgres volume (`db-data`) unless you explicitly delete it.
 
-### 3.4. Миграции на базата (TypeORM + Docker)
+### 3.4. Database migrations (TypeORM + Docker)
 
-Схемата на базата за BE се управлява с TypeORM миграции, конфигурирани в `be/data-source.ts`.
-Миграциите се създават локално (на хоста), а най-често се изпълняват през `api` контейнера.
+BE schema is managed via TypeORM migrations configured in `be/data-source.ts`. Migrations are created locally but often executed inside the `api` container.
 
-#### Генериране на нова миграция (пример: добавяне на нова колона)
+#### Generate a migration (example: new column)
 
-1. Увери се, че Postgres (`db` service) върви:
+1. Ensure Postgres (`db` service) is running:
 
    ```bash
    docker compose -f docker-compose.yml -f docker-compose.db-host.yml up -d db
    ```
 
-2. От папка `be/` генерирай миграция според променения код (entities):
+2. From `be/`, generate migration based on updated entities:
 
    ```bash
    cd be
    npm run typeorm -- migration:generate src/migrations/AddSomethingDescriptive
    ```
 
-   Това създава нов `.ts` файл в `be/src/migrations/` (име с таймстемп).
+   This creates a timestamped file in `be/src/migrations/`.
 
-3. По желание – commit-вай миграционните файлове в Git заедно с промяната по entity-тата.
+3. Commit migration files together with entity changes if desired.
 
-#### Пускане на миграциите през Docker (стандартен път)
+#### Run migrations via Docker (standard path)
 
-Обичайният workflow за apply на всички pending миграции към Docker базата е:
-
-1. Увери се, че контейнерите са билднати/пуснати:
+1. Ensure containers are built/running:
 
    ```bash
    docker compose up -d db api
    ```
 
-2. Пусни всички чакащи миграции **с една команда**:
+2. Apply all pending migrations with one command:
 
    ```bash
    docker compose exec api npm run migration:run
    ```
 
-Това изпълнява `npm run migration:run` вътре в `api` контейнера срещу `beelms` базата (Postgres контейнер `db`).
+This executes `npm run migration:run` inside the `api` container against the `beelms` database.
 
-#### Комбинирана команда: миграции + Wiki seed (по избор)
-
-За локален setup, след промени по схемата, често искаме и да seed-нем Wiki:
+#### Combined command: migrations + Wiki seed (optional)
 
 ```bash
 docker compose exec api sh -c "npm run migration:run && npm run seed:wiki"
 ```
 
-Това:
-- прилага всички миграции;
-- пуска `seed:wiki` (идемпотентен; може да се вика многократно).
+- Applies all migrations.
+- Seeds the Wiki (idempotent; safe to run multiple times).
 
 ---
 
-## 4. Типични dev комбинации
+## 4. Typical dev combos
 
-### 4.1. Всичко локално (Node + Postgres през Docker)
+### 4.1. Everything local (Node) + Postgres via Docker
 
-1. Стартирай само Postgres:
+1. Start Postgres only:
 
    ```bash
    docker compose -f docker-compose.yml -f docker-compose.db-host.yml up -d db
    ```
-2. Стартирай BE dev:
+2. Start BE dev:
 
    ```bash
    cd be
    npm run start:dev
    ```
-3. Стартирай FE dev:
+3. Start FE dev:
 
    ```bash
    cd fe
    npm run dev
    ```
 
-### 4.2. Всичко през Docker за BE + DB, FE локално
+### 4.2. Docker for BE + DB, FE locally
 
-1. В root:
+1. In repo root:
 
    ```bash
    docker compose up -d
    ```
 
-2. Стартирай FE dev (локално):
+2. Start FE dev locally:
 
    ```bash
    cd fe
    npm run dev
    ```
 
-Увери се, че `NEXT_PUBLIC_API_BASE_URL` във FE сочи към `http://localhost:3000/api`.
+Ensure `NEXT_PUBLIC_API_BASE_URL` points to `http://localhost:3000/api`.
 
 ---
 
-## 5. Debug на проблеми като 404 на Admin Wiki create
+## 5. Debugging issues like 404 on Admin Wiki create
 
-Ако FE вика `POST http://localhost:3000/api/admin/wiki/articles`, но получаваш `404 Not Found`:
+If FE calls `POST http://localhost:3000/api/admin/wiki/articles` and gets `404 Not Found`:
 
-1. Провери, че BE, който върви на `3000`, е
-   - или стартиран с `npm run start:dev` в `be/`,
-   - или е `api` услугата от Docker Compose, билдната от актуалния код (`docker compose build api`).
-2. Увери се, че `GET http://localhost:3000/api/health` връща отговор.
-3. Пробвай директно с `curl` към Admin Wiki create endpoint-а (виж `docs/architecture/admin-wiki-api-examples.md`).
-4. Ако променяш BE кода и ползваш Docker, не забравяй **rebuild** стъпката от т. 3.2.
-
----
-
-За по-детайлна документация за API/DB виж:
-- `docs/architecture/api-db-docs-index.md` – входна точка към OpenAPI, DB модел и всички `*-api-examples.md`.
+1. Verify BE on port 3000 is either:
+   - running via `npm run start:dev` in `be/`, or
+   - the Docker `api` service built from current code (`docker compose build api`).
+2. Check `GET http://localhost:3000/api/health`.
+3. Curl the Admin Wiki endpoint directly (see `docs/architecture/admin-wiki-api-examples.md`).
+4. If using Docker, remember to rebuild the API container after code changes (section 3.2).
 
 ---
 
-## 6. WS-CORE-4 CLI scaffold и локален "бедняшки CI"
+For deeper API/DB documentation see:
+- `docs/architecture/api-db-docs-index.md` – entry point for OpenAPI, DB model, `*-api-examples.md`, etc.
 
-В това репо има експериментален CLI прототип за scaffold на нов beelms core проект:
+---
 
-- пакет: `tools/create-beelms-app/`
-- команда (локално):
+## 6. WS-CORE-4 CLI scaffold & local “poor man’s CI”
+
+This repo includes an experimental CLI prototype for scaffolding new BeeLMS core instances:
+
+- Package: `tools/create-beelms-app/`
+- Commands (local):
   - `node tools/create-beelms-app/dist/index.js my-lms`
   - `node tools/create-beelms-app/dist/index.js my-lms --api-only`
 
-CLI-то създава структура от вида:
+CLI output structure:
 
 ```text
 my-lms/
-  api/    # NestJS backend (копие на be/)
-  web/    # Next.js frontend (копие на fe/, по избор)
-  docker/ # docker-compose.yml + DX helper скриптове
-  env/    # място за .env.example файлове
+  api/    # NestJS backend (copy of be/)
+  web/    # Next.js frontend (copy of fe/, optional)
+  docker/ # docker-compose.yml + DX helper scripts
+  env/    # folder for .env.example files
   README.md
 ```
 
-### 6.1. Локален "бедняшки CI" (BE + FE + CLI)
+### 6.1. Local “poor man’s CI” (BE + FE + CLI)
 
-Препоръчителен ритуал преди по-големи промени/merge към `main`:
+Suggested routine before large changes/merges to `main`:
 
 - Backend:
   - `cd be`
@@ -557,10 +518,8 @@ my-lms/
 - Frontend:
   - `cd fe`
   - `npm run test`
-- CLI + Docker smoke (по желание, напр. преди release):
+- CLI + Docker smoke (optional, e.g., pre-release):
   - `cd tools/create-beelms-app`
   - `npm run smoke`
 
-Подробности и примерни git `pre-push` hook-ове (Windows / Linux/macOS) има в:
-
-- `docs/LOCAL_CI.md`
+See `docs/LOCAL_CI.md` for more details and sample git `pre-push` hooks (Windows / Linux / macOS).

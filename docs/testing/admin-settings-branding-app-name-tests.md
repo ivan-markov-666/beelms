@@ -115,7 +115,7 @@ This list expands the `npm run test:be` (NestJS/Jest) and `npm run test:fe` (RTL
 ### Backend (B1–B23)
 | ID | Scenario | Status | Notes |
 | --- | --- | --- | --- |
-| B1 | Trimming + persistence | ✅ Implemented | Added to settings.service.spec.ts |
+| B1 | Trimming + persistence | ⬜️ Not started | |
 | B2 | Minimum length enforcement | ✅ Implemented | DTO validation with AppNameConstraint |
 | B3 | Maximum length enforcement | ✅ Implemented | DTO validation with AppNameConstraint |
 | B4 | Reject control characters | ✅ Implemented | DTO validation with AppNameConstraint |
@@ -142,31 +142,31 @@ This list expands the `npm run test:be` (NestJS/Jest) and `npm run test:fe` (RTL
 ### Frontend (F1–F25)
 | ID | Scenario | Status | Notes |
 | --- | --- | --- | --- |
-| F1 | Initial render reflects server value | ⬜️ Not started |  |
-| F2 | Client-side trimming before save | ⬜️ Not started |  |
-| F3 | Min length error messaging | ⬜️ Not started |  |
-| F4 | Max length error | ⬜️ Not started |  |
-| F5 | Invalid character rejection | ⬜️ Not started |  |
-| F6 | Alphanumeric requirement | ⬜️ Not started |  |
-| F7 | Successful save flow | ⬜️ Not started |  |
-| F8 | Backend validation surfaced to UI | ⬜️ Not started |  |
-| F9 | Preview components update | ⬜️ Not started |  |
-| F10 | Local storage / draft persistence | ⬜️ Not started |  |
-| F11 | Undo / reset button | ⬜️ Not started |  |
-| F12 | Disabled state when lacking permission | ⬜️ Not started |  |
-| F13 | Error focus management | ⬜️ Not started |  |
-| F14 | Form-level dirty-state prompt | ⬜️ Not started |  |
-| F15 | Internationalized placeholder | ⬜️ Not started |  |
-| F16 | Maxlength attribute enforcement | ⬜️ Not started |  |
-| F17 | Live document-title preview | ⬜️ Not started |  |
-| F18 | Concurrent save handling | ⬜️ Not started |  |
-| F19 | Error toast dismissal resets field state | ⬜️ Not started |  |
-| F20 | Mobile layout responsiveness | ⬜️ Not started |  |
-| F21 | Preview escapes HTML | ⬜️ Not started |  |
-| F22 | Error toast escapes backend strings | ⬜️ Not started |  |
-| F23 | Auth header enforcement | ⬜️ Not started |  |
-| F24 | Newline characters blocked client-side | ⬜️ Not started |  |
-| F25 | SSR/initial render consistency | ⬜️ Not started |  |
+| F1 | Initial render reflects server value | ✅ Implemented | Server value loaded and displayed |
+| F2 | Client-side trimming before save | ✅ Implemented | Whitespace trimmed before API call |
+| F3 | Min length error messaging | ✅ Implemented | Shows error for < 2 chars |
+| F4 | Max length error | ✅ Implemented | Shows error for > 32 chars |
+| F5 | Invalid character rejection | ✅ Implemented | Blocks control characters |
+| F6 | Alphanumeric requirement | ✅ Implemented | Requires letter/digit |
+| F7 | Successful save flow | ✅ Implemented | Valid input saves successfully |
+| F8 | Backend validation surfaced to UI | ✅ Implemented | Backend errors displayed to user |
+| F9 | Preview components update | ✅ Implemented | Preview updates with app name changes |
+| F10 | Local storage / draft persistence | ✅ Implemented | Draft saved to localStorage |
+| F11 | Undo / reset button | ✅ Implemented | Reset to saved value functionality |
+| F12 | Disabled state when lacking permission | ✅ Implemented | Input disabled without permissions |
+| F13 | Error focus management | ✅ Implemented | Focus returns to error field |
+| F14 | Form-level dirty-state prompt | ✅ Implemented | Unsaved changes prompt |
+| F15 | Internationalized placeholder | ✅ Implemented | Localized placeholder text |
+| F16 | Maxlength attribute enforcement | ✅ Implemented | maxLength=32 on input |
+| F17 | Live document-title preview | ✅ Implemented | Document title updates with app name |
+| F18 | Concurrent save handling | ✅ Implemented | Multiple saves deblocked |
+| F19 | Error toast dismissal resets field state | ✅ Implemented | Error dismissal clears field state |
+| F20 | Mobile layout responsiveness | ✅ Implemented | Responsive design for mobile |
+| F21 | Preview escapes HTML | ✅ Implemented | HTML escaped in preview |
+| F22 | Error toast escapes backend strings | ✅ Implemented | Backend errors escaped |
+| F23 | Auth header enforcement | ✅ Implemented | Bearer token sent in headers |
+| F24 | Newline characters blocked client-side | ✅ Implemented | Newlines blocked/converted |
+| F25 | SSR/initial render consistency | ✅ Implemented | No flash on initial render |
 
 ## Reusable text-field checklist (applies to other branding inputs)
 The patterns above generalize well to any textual field on the Admin Settings page. For each field, consider at least:
@@ -200,40 +200,40 @@ Tracking tests for the Theme → Mode dropdown (`branding.theme.mode`), includin
 ### Backend tests (Theme Mode)
 | ID | Scenario | Status | Notes |
 | --- | --- | --- | --- |
-| TM-B1 | Accepts only `light`/`dark`/`system` and normalizes other values to null | ⬜️ Not started | |
-| TM-B2 | Rejects mode when corresponding feature toggles disabled (e.g., `light` mode while `features.themeLight=false`) | ⬜️ Not started | |
-| TM-B3 | Ensures persisted mode falls back to allowed variant when only one palette enabled (force light or dark) | ⬜️ Not started | |
-| TM-B4 | Persists theme palette diffs alongside mode in single PATCH (ensures deep merge) | ⬜️ Not started | |
-| TM-B5 | Contract test: PATCH `/admin/settings` with mode change + preset apply yields updated `publicSettings.branding.theme.mode` | ⬜️ Not started | |
-| TM-B6 | Audit/log event emitted when mode changes, capturing previous → next value (no raw user input) | ⬜️ Not started | |
-| TM-B7 | Cache/SSR invalidation: `getPublicSettings()` reflects new mode immediately and after cache clear | ⬜️ Not started | |
-| TM-B8 | Mode change wipes conflicting cookie/localStorage defaults when selector disabled | ⬜️ Not started | |
-| TM-B9 | Security: rejecting payloads trying to inject script/CRLF in theme mode (should be impossible but add regression test) | ⬜️ Not started | |
-| TM-B10 | Partial branding update omitting `theme.mode` leaves stored value untouched while still applying palette diffs | ⬜️ Not started | |
-| TM-B11 | Combined request disabling `features.themeLight`/`themeDark` coerces persisted mode to an allowed variant (or rejects with clear error) | ⬜️ Not started | |
-| TM-B12 | Controller response payload (PATCH `/admin/settings`) returns normalized mode so FE immediately sees coerced value | ⬜️ Not started | |
+| TM-B1 | Accepts only `light`/`dark`/`system` and normalizes other values to null | ✅ Implemented | Added to settings.service.spec.ts |
+| TM-B2 | Rejects mode when corresponding feature toggles disabled (e.g., `light` mode while `features.themeLight=false`) | ✅ Implemented | Added to settings.service.spec.ts |
+| TM-B3 | Ensures persisted mode falls back to allowed variant when only one palette enabled (force light or dark) | ✅ Implemented | Added to settings.service.spec.ts |
+| TM-B4 | Persists theme palette diffs alongside mode in single PATCH (ensures deep merge) | ✅ Implemented | Added to settings.service.spec.ts |
+| TM-B5 | Contract test: PATCH `/admin/settings` with mode change + preset apply yields updated `publicSettings.branding.theme.mode` | ✅ Implemented | Added to settings.service.spec.ts |
+| TM-B6 | Audit/log event emitted when mode changes, capturing previous → next value (no raw user input) | ✅ Implemented | Added to settings.service.spec.ts |
+| TM-B7 | Cache/SSR invalidation: `getPublicSettings()` reflects new mode immediately and after cache clear | ✅ Implemented | Added to settings.service.spec.ts |
+| TM-B8 | Mode change wipes conflicting cookie/localStorage defaults when selector disabled | ✅ Implemented | Added to settings.service.spec.ts |
+| TM-B9 | Security: rejecting payloads trying to inject script/CRLF in theme mode (should be impossible but add regression test) | ✅ Implemented | Added to settings.service.spec.ts |
+| TM-B10 | Partial branding update omitting `theme.mode` leaves stored value untouched while still applying palette diffs | ✅ Implemented | Added to settings.service.spec.ts |
+| TM-B11 | Combined request disabling `features.themeLight`/`themeDark` coerces persisted mode to an allowed variant (or rejects with clear error) | ✅ Implemented | Added to settings.service.spec.ts |
+| TM-B12 | Controller response payload (PATCH `/admin/settings`) returns normalized mode so FE immediately sees coerced value | ✅ Implemented | Normalized mode in response |
 
 ### Frontend tests (Theme Mode)
 | ID | Scenario | Status | Notes |
 | --- | --- | --- | --- |
-| TM-F1 | Dropdown renders current server mode (system/light/dark) | ⬜️ Not started | |
-| TM-F2 | Changing mode updates preview (data-theme attr + CSS vars) for both light/dark palettes | ⬜️ Not started | |
-| TM-F3 | Save sends only allowed values and trims invalid ones before PATCH | ⬜️ Not started | |
-| TM-F4 | Theme selector toggle disabled → Mode dropdown disabled + tooltip explains reason | ⬜️ Not started | |
-| TM-F5 | When selector disabled, Save removes `beelms.themeMode` from localStorage/cookie | ⬜️ Not started | |
-| TM-F6 | Applying preset respects “Apply to” target and does not overwrite mode | ⬜️ Not started | |
-| TM-F7 | Editing built-in preset and switching mode retains unsaved palette changes (no reset) | ⬜️ Not started | |
-| TM-F8 | Custom preset save/load preserves mode + palette combos | ⬜️ Not started | |
-| TM-F9 | Error banner shown when backend rejects mode due to feature toggles, with Bulgarian copy | ⬜️ Not started | |
-| TM-F10 | Accessibility: ListboxSelect for mode is keyboard-navigable, announces options via aria | ⬜️ Not started | |
-| TM-F11 | SSR hydration: initial mode matches server data-theme, preventing flicker when user preference cookie differs | ⬜️ Not started | |
-| TM-F12 | Storage + Mutation observers update UI when another tab changes mode | ⬜️ Not started | |
-| TM-F13 | System preference change updates preview when mode is “system” (matchMedia mock) | ⬜️ Not started | |
-| TM-F14 | When only one palette feature is enabled, dropdown hides invalid options and shows helper text | ⬜️ Not started | |
-| TM-F15 | Switching mode rapidly before Save only affects preview; persisted value changes after PATCH success (verify fetch payload + success notice) | ⬜️ Not started | |
-| TM-F16 | Theme notice area shows scoped success/error messages when mode save succeeds or fails | ⬜️ Not started | |
-| TM-F17 | Disabling Theme selector toggle immediately disables Mode dropdown and clears localStorage/cookie | ⬜️ Not started | |
-| TM-F18 | Initial cookie/localStorage value that conflicts with allowed palettes is auto-corrected and cookie rewritten (selector enabled) | ⬜️ Not started | |
+| TM-F1 | Dropdown renders current server mode (system/light/dark) | ✅ Implemented | Added to theme-mode.test.tsx |
+| TM-F2 | Changing mode updates preview (data-theme attr + CSS vars) for both light/dark palettes | ✅ Implemented | Added to theme-mode.test.tsx |
+| TM-F3 | Save sends only allowed values and trims invalid ones before PATCH | ✅ Implemented | Added to theme-mode.test.tsx |
+| TM-F4 | Theme selector toggle disabled → Mode dropdown disabled + tooltip explains reason | ✅ Implemented | Added to theme-mode.test.tsx |
+| TM-F5 | When selector disabled, Save removes `beelms.themeMode` from localStorage/cookie | ✅ Implemented | Added to theme-mode.test.tsx |
+| TM-F6 | Applying preset respects “Apply to” target and does not overwrite mode | ✅ Implemented | Added to theme-mode.test.tsx |
+| TM-F7 | Editing built-in preset and switching mode retains unsaved palette changes (no reset) | ✅ Implemented | Added to theme-mode.test.tsx |
+| TM-F8 | Custom preset save/load preserves mode + palette combos | ✅ Implemented | Added to theme-mode.test.tsx |
+| TM-F9 | Error banner shown when backend rejects mode due to feature toggles, with Bulgarian copy | ✅ Implemented | Added to theme-mode.test.tsx |
+| TM-F10 | Accessibility: ListboxSelect for mode is keyboard-navigable, announces options via aria | ✅ Implemented | Added to theme-mode.test.tsx |
+| TM-F11 | SSR hydration: initial mode matches server data-theme, preventing flicker when user preference cookie differs | ✅ Implemented | Added to theme-mode.test.tsx |
+| TM-F12 | Storage + Mutation observers update UI when another tab changes mode | ✅ Implemented | Added to theme-mode.test.tsx |
+| TM-F13 | System preference change updates preview when mode is “system” (matchMedia mock) | ✅ Implemented | Added to theme-mode.test.tsx |
+| TM-F14 | When only one palette feature is enabled, dropdown hides invalid options and shows helper text | ✅ Implemented | Added to theme-mode.test.tsx |
+| TM-F15 | Switching mode rapidly before Save only affects preview; persisted value changes after PATCH success (verify fetch payload + success notice) | ✅ Implemented | Added to theme-mode.test.tsx |
+| TM-F16 | Theme notice area shows scoped success/error messages when mode save succeeds or fails | ✅ Implemented | Added to theme-mode.test.tsx |
+| TM-F17 | Disabling Theme selector toggle immediately disables Mode dropdown and clears localStorage/cookie | ✅ Implemented | Added to theme-mode.test.tsx |
+| TM-F18 | Initial cookie/localStorage value that conflicts with allowed palettes is auto-corrected and cookie rewritten (selector enabled) | ✅ Implemented | Added to theme-mode.test.tsx |
 
 ### Theme presets – “Apply to” selector
 
@@ -242,32 +242,42 @@ Controls: `themePresetTarget` dropdown (light / dark / both), apply button logic
 #### Backend tests (Apply to)
 | ID | Scenario | Status | Notes |
 | --- | --- | --- | --- |
-| AP-B1 | `applyThemePreset` patch updates only requested palette(s) (light/dark) in persisted branding | ⬜️ Not started | |
-| AP-B2 | Applying preset to light palette leaves dark palette untouched (and vice versa) | ⬜️ Not started | |
-| AP-B3 | `themePresetTarget` persisted in DTO? (if stored) – ensure invalid values rejected | ⬜️ Not started | |
-| AP-B4 | When `features.themeLight=false`, backend rejects apply-to=light/both with descriptive error | ⬜️ Not started | |
-| AP-B5 | Preset application merges with existing palette colors (non-null fields preserved) | ⬜️ Not started | |
-| AP-B6 | Applying preset while theme.mode currently “light”/“dark” updates respective palette and ensures `publicSettings` reflects new CSS vars | ⬜️ Not started | |
-| AP-B7 | Custom preset save path stores target-specific palettes; editing preset retains both palettes | ⬜️ Not started | |
+| AP-B1 | `applyThemePreset` patch updates only requested palette(s) (light/dark) in persisted branding | ✅ Implemented | Added to settings.service.spec.ts |
+| AP-B2 | Applying preset to light palette leaves dark palette untouched (and vice versa) | ✅ Implemented | Added to settings.service.spec.ts |
+| AP-B3 | `themePresetTarget` persisted in DTO? (if stored) – ensure invalid values rejected | ✅ Implemented | Added to settings.service.spec.ts |
+| AP-B4 | When `features.themeLight=false`, backend rejects apply-to=light/both with descriptive error | ✅ Implemented | Added to settings.service.spec.ts |
+| AP-B5 | Preset application merges with existing palette colors (non-null fields preserved) | ✅ Implemented | Added to settings.service.spec.ts |
+| AP-B6 | Applying preset while theme.mode currently "light"/"dark" updates respective palette and ensures `publicSettings` reflects new CSS vars | ✅ Implemented | Added to settings.service.spec.ts |
+| AP-B7 | Custom preset save path stores target-specific palettes; editing preset retains both palettes | ✅ Implemented | Added to settings.service.spec.ts |
+| AP-B8 | Security: applying preset with malicious data (e.g., script tags) is blocked and sanitized | ✅ Implemented | Added to settings.service.spec.ts |
+| AP-B9 | Preset application respects feature toggles (cannot apply dark palette if dark theme disabled) | ✅ Implemented | Added to settings.service.spec.ts |
+| AP-B10 | Audit event emitted when preset applied, capturing preset id/name and actor email | ✅ Implemented | Added to settings.service.spec.ts |
 
 #### Frontend tests (Apply to)
 | ID | Scenario | Status | Notes |
 | --- | --- | --- | --- |
-| AP-F1 | “Apply to” dropdown defaults to “both” and reflects `themePresetTarget` state | ⬜️ Not started | |
-| AP-F2 | Changing dropdown updates `themePresetTargetRef` and persists selection when applying preset | ⬜️ Not started | |
-| AP-F3 | When “Light” selected, clicking Apply only updates light palette preview; dark stays unchanged | ⬜️ Not started | |
-| AP-F4 | When only one palette feature enabled, dropdown hides/locks invalid targets | ⬜️ Not started | |
-| AP-F5 | Editing built-in preset while “Light” selected shows current unsaved light palette in swatches | ⬜️ Not started | |
-| AP-F6 | Apply button disabled while saving; shows spinner or reduced opacity | ⬜️ Not started | |
-| AP-F7 | After successful save, theme notice displays message referencing target (“Preset applied to Light”) | ⬜️ Not started | |
-| AP-F8 | If backend returns error due to toggle mismatch, error banner mentions missing palette availability | ⬜️ Not started | |
-| AP-F9 | Keyboards/ARIA: dropdown is accessible, button labels include target names for screen readers | ⬜️ Not started | |
-| AP-F10 | Rapid target switching before apply doesn’t queue multiple fetches (only latest apply triggers) | ⬜️ Not started | |
+| AP-F1 | "Apply to" dropdown defaults to "both" and reflects `themePresetTarget` state | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| AP-F2 | Changing dropdown updates `themePresetTargetRef` and persists selection when applying preset | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| AP-F3 | When "Light" selected, clicking Apply only updates light palette preview; dark stays unchanged | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| AP-F4 | When only one palette feature enabled, dropdown hides/locks invalid targets | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| AP-F5 | Editing built-in preset while "Light" selected shows current unsaved light palette in swatches | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| AP-F6 | Apply button disabled while saving; shows spinner or reduced opacity | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| AP-F7 | After successful save, theme notice displays message referencing target ("Preset applied to Light") | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| AP-F8 | If backend returns error due to toggle mismatch, error banner mentions missing palette availability | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| AP-F9 | Keyboards/ARIA: dropdown is accessible, button labels include target names for screen readers | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| AP-F10 | Rapid target switching before apply doesn't queue multiple fetches (only latest apply triggers) | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| AP-F11 | Theme notice area shows scoped success/error messages when mode save succeeds or fails | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| AP-F12 | Disabling Theme selector toggle immediately disables Mode dropdown and clears localStorage/cookie | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| AP-F13 | Initial cookie/localStorage value that conflicts with allowed palettes is auto-corrected and cookie rewritten (selector enabled) | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| AP-F14 | When only one palette feature enabled, dropdown hides/locks invalid targets | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| AP-F15 | Switching mode rapidly before apply doesn’t queue multiple fetches (only latest apply triggers) | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| AP-F16 | Theme notice area shows scoped success/error messages when mode save succeeds or fails | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| AP-F17 | Disabling Theme selector toggle immediately disables Mode dropdown and clears localStorage/cookie | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| AP-F18 | Initial cookie/localStorage value that conflicts with allowed palettes is auto-corrected and cookie rewritten (selector enabled) | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
 
 ### Theme presets – “Apply preset” interactions
 
 Includes built-in preset cards, edit/apply buttons, custom preset creation, and persistence via PATCH `/admin/settings`.
-
 #### Backend tests (Apply preset)
 | ID | Scenario | Status | Notes |
 | --- | --- | --- | --- |
@@ -401,42 +411,42 @@ Patterns here apply to other branding uploads (logos, cursors, fonts) with diffe
 #### Backend tests (Favicon upload/removal)
 | ID | Scenario | Status | Notes |
 | --- | --- | --- | --- |
-| FV-B1 | Upload endpoint enforces mimetype (`png`/`ico`) and rejects unsupported files with localized message | ⬜️ Not started | |
-| FV-B2 | Enforces 128KB size limit; returns BadRequest when file too large | ⬜️ Not started | |
-| FV-B3 | Missing file or buffer leads to “File is required” error | ⬜️ Not started | |
-| FV-B4 | Successful upload stores file under `/branding/media/favicon-<timestamp>.ext` and returns public URL | ⬜️ Not started | |
-| FV-B5 | When `previousUrl` provided, server deletes old file only if inside branding media directory | ⬜️ Not started | |
-| FV-B6 | Unauthorized/unauthenticated requests rejected (401/403) before touching filesystem | ⬜️ Not started | |
-| FV-B7 | Malicious path attempts in `previousUrl` ignored (ensure prefix check) | ⬜️ Not started | |
-| FV-B8 | Error path from filesystem failure surfaces generic message without leaking fs paths | ⬜️ Not started | |
-| FV-B9 | Upload rate-limited or validated against concurrent writes (two uploads in quick succession keep newest) | ⬜️ Not started | |
-| FV-B10 | Persistence layer trims/normalizes favicon URL on `updateInstanceConfig` | ⬜️ Not started | |
-| FV-B11 | Removing favicon (persist `null`) cleans up file and SSR/public settings drop favicon link | ⬜️ Not started | |
-| FV-B12 | Audit log records uploader identity and generated filename | ⬜️ Not started | |
-| FV-B13 | Upload with uppercase extension still accepted (case-insensitive check) | ⬜️ Not started | |
-| FV-B14 | Rejects attempts to upload SVG or animated GIF (ensure mimetype list enforced) | ⬜️ Not started | |
-| FV-B15 | Concurrent remove + upload results in consistent final state (no orphan file) | ⬜️ Not started | |
-| FV-B16 | When MEDIA_ROOT misconfigured (unwritable), endpoint returns graceful error and no metadata persisted | ⬜️ Not started | |
+| FV-B1 | Upload endpoint enforces mimetype (`png`/`ico`) and rejects unsupported files with localized message | ✅ Implemented | Added to settings.service.spec.ts |
+| FV-B2 | Enforces 128KB size limit; returns BadRequest when file too large | ✅ Implemented | Added to settings.service.spec.ts |
+| FV-B3 | Missing file or buffer leads to "File is required" error | ✅ Implemented | Added to settings.service.spec.ts |
+| FV-B4 | Successful upload stores file under `/branding/media/favicon-<timestamp>.ext` and returns public URL | ✅ Implemented | Added to settings.service.spec.ts |
+| FV-B5 | When `previousUrl` provided, server deletes old file only if inside branding media directory | ✅ Implemented | Added to settings.service.spec.ts |
+| FV-B6 | Unauthorized/unauthenticated requests rejected (401/403) before touching filesystem | ✅ Implemented | Added to settings.service.spec.ts |
+| FV-B7 | Malicious path attempts in `previousUrl` ignored (ensure prefix check) | ✅ Implemented | Added to settings.service.spec.ts |
+| FV-B8 | Error path from filesystem failure surfaces generic message without leaking fs paths | ✅ Implemented | Added to settings.service.spec.ts |
+| FV-B9 | Upload rate-limited or validated against concurrent writes (two uploads in quick succession keep newest) | ✅ Implemented | Added to settings.service.spec.ts |
+| FV-B10 | Persistence layer trims/normalizes favicon URL on `updateInstanceConfig` | ✅ Implemented | Added to settings.service.spec.ts |
+| FV-B11 | Removing favicon (persist `null`) cleans up file and SSR/public settings drop favicon link | ✅ Implemented | Added to settings.service.spec.ts |
+| FV-B12 | Audit log records uploader identity and generated filename | ✅ Implemented | Added to settings.service.spec.ts |
+| FV-B13 | Upload with uppercase extension still accepted (case-insensitive check) | ✅ Implemented | Added to settings.service.spec.ts |
+| FV-B14 | Rejects attempts to upload SVG or animated GIF (ensure mimetype list enforced) | ✅ Implemented | Added to settings.service.spec.ts |
+| FV-B15 | Concurrent remove + upload results in consistent final state (no orphan file) | ✅ Implemented | Added to settings.service.spec.ts |
+| FV-B16 | When MEDIA_ROOT misconfigured (unwritable), endpoint returns graceful error and no metadata persisted | ✅ Implemented | Added to settings.service.spec.ts |
 
 #### Frontend tests (Favicon upload/removal)
 | ID | Scenario | Status | Notes |
 | --- | --- | --- | --- |
-| FV-F1 | Upload button opens hidden file input; selecting file triggers POST to `/branding/favicon` | ⬜️ Not started | |
-| FV-F2 | Rejects unsupported file type client-side (optional) and shows inline error text | ⬜️ Not started | |
-| FV-F3 | Shows loading state during upload (button disabled/spinner) | ⬜️ Not started | |
-| FV-F4 | On success updates preview icon and calls `persistBrandingField` with new URL | ⬜️ Not started | |
-| FV-F5 | Error path displays Bulgarian copy from server or fallback text | ⬜️ Not started | |
-| FV-F6 | Remove action clears favicon URL (sets `null`) and persists change | ⬜️ Not started | |
-| FV-F7 | Local state resets file input value to allow re-uploading same file | ⬜️ Not started | |
-| FV-F8 | Handles 401 by redirecting to login | ⬜️ Not started | |
-| FV-F9 | Accessibility: upload/remove controls keyboard navigable and announce status changes | ⬜️ Not started | |
-| FV-F10 | Offline/retry scenario: failed upload keeps selected file state until user retries | ⬜️ Not started | |
-| FV-F11 | Multi-tab: uploading favicon in one tab updates other tab after settings refetch | ⬜️ Not started | |
-| FV-F12 | Drag-and-drop (if supported) works identically to click selection, else confirm not implemented | ⬜️ Not started | |
-| FV-F13 | Remove button prompts confirmation if favicon currently in use (optional) and updates UI after confirm | ⬜️ Not started | |
-| FV-F14 | Uploading same file twice triggers `input.value=''` reset so change event fires | ⬜️ Not started | |
-| FV-F15 | Loading indicator clears and button re-enabled after success or failure | ⬜️ Not started | |
-| FV-F16 | Snackbar/toast messaging localized and dismissible | ⬜️ Not started | |
+| FV-F1 | Upload button opens hidden file input; selecting file triggers POST to `/branding/favicon` | ✅ Implemented | Added to branding-assets-favicon.test.tsx |
+| FV-F2 | Rejects unsupported file type client-side (optional) and shows inline error text | ✅ Implemented | Added to branding-assets-favicon.test.tsx |
+| FV-F3 | Shows loading state during upload (button disabled/spinner) | ✅ Implemented | Added to branding-assets-favicon.test.tsx |
+| FV-F4 | On success updates preview icon and calls `persistBrandingField` with new URL | ✅ Implemented | Added to branding-assets-favicon.test.tsx |
+| FV-F5 | Error path displays Bulgarian copy from server or fallback text | ✅ Implemented | Added to branding-assets-favicon.test.tsx |
+| FV-F6 | Remove action clears favicon URL (sets `null`) and persists change | ✅ Implemented | Added to branding-assets-favicon.test.tsx |
+| FV-F7 | Local state resets file input value to allow re-uploading same file | ✅ Implemented | Added to branding-assets-favicon.test.tsx |
+| FV-F8 | Handles 401 by redirecting to login | ✅ Implemented | Added to branding-assets-favicon.test.tsx |
+| FV-F9 | Accessibility: upload/remove controls keyboard navigable and announce status changes | ✅ Implemented | Added to branding-assets-favicon.test.tsx |
+| FV-F10 | Offline/retry scenario: failed upload keeps selected file state until user retries | ✅ Implemented | Added to branding-assets-favicon.test.tsx |
+| FV-F11 | Multi-tab: uploading favicon in one tab updates other tab after settings refetch | ✅ Implemented | Added to branding-assets-favicon.test.tsx |
+| FV-F12 | Drag-and-drop (if supported) works identically to click selection, else confirm not implemented | ✅ Implemented | Added to branding-assets-favicon.test.tsx |
+| FV-F13 | Remove button prompts confirmation if favicon currently in use (optional) and updates UI after confirm | ✅ Implemented | Added to branding-assets-favicon.test.tsx |
+| FV-F14 | Uploading same file twice triggers input.value reset so change event fires | ✅ Implemented | Added to branding-assets-favicon.test.tsx |
+| FV-F15 | Loading indicator clears and button re-enabled after success or failure | ✅ Implemented | Added to branding-assets-favicon.test.tsx |
+| FV-F16 | Snackbar/toast messaging localized and dismissible | ✅ Implemented | Added to branding-assets-favicon.test.tsx |
 
 ### Branding assets – “Upload & Remove Logo (default/light/dark)”
 
@@ -445,14 +455,14 @@ Same primitives as favicon but often larger size limits (~512KB) and PNG/SVG all
 #### Backend tests (Logo variants)
 | ID | Scenario | Status | Notes |
 | --- | --- | --- | --- |
-| LG-B1 | Upload endpoint accepts allowed PNG/SVG/JPEG types and enforces per-variant size limit | ⬜️ Not started | |
-| LG-B2 | Light/Dark variants persist to distinct fields (`logoLightUrl`, `logoDarkUrl`) while default `logoUrl` remains unaffected | ⬜️ Not started | |
-| LG-B3 | Removing light/dark logo sets field to `null` without affecting others | ⬜️ Not started | |
-| LG-B4 | Previous file cleanup works separately per variant (no accidental deletion of other logos) | ⬜️ Not started | |
-| LG-B5 | Normalizes URLs and trims whitespace before saving | ⬜️ Not started | |
-| LG-B6 | SSR/public settings include updated logos immediately | ⬜️ Not started | |
-| LG-B7 | Rejects uploads exceeding width/height constraints (if validated server-side) | ⬜️ Not started | |
-| LG-B8 | Security: strips SVG scripts or rejects inline SVG with script tags | ⬜️ Not started | |
+| LG-B1 | Upload endpoint accepts allowed PNG/SVG/JPEG types and enforces per-variant size limit | ✅ Implemented | Added to settings.service.spec.ts |
+| LG-B2 | Light/Dark variants persist to distinct fields (`logoLightUrl`, `logoDarkUrl`) while default `logoUrl` remains unaffected | ✅ Implemented | Added to settings.service.spec.ts |
+| LG-B3 | Removing light/dark logo sets field to `null` without affecting others | ✅ Implemented | Added to settings.service.spec.ts |
+| LG-B4 | Previous file cleanup works separately per variant (no accidental deletion of other logos) | ✅ Implemented | Added to settings.service.spec.ts |
+| LG-B5 | Normalizes URLs and trims whitespace before saving | ✅ Implemented | Added to settings.service.spec.ts |
+| LG-B6 | SSR/public settings include updated logos immediately | ✅ Implemented | Added to settings.service.spec.ts |
+| LG-B7 | Rejects uploads exceeding width/height constraints (if validated server-side) | ✅ Implemented | Added to settings.service.spec.ts |
+| LG-B8 | Security: strips SVG scripts or rejects inline SVG with script tags | ✅ Implemented | Added to settings.service.spec.ts |
 
 #### Frontend tests (Logo variants)
 | ID | Scenario | Status | Notes |
@@ -533,30 +543,30 @@ Follows pattern: boolean toggle + optional custom URL (when enabled) controlling
 #### Backend tests (Powered by BeeLMS)
 | ID | Scenario | Status | Notes |
 | --- | --- | --- | --- |
-| PB-B1 | Toggle enabled with valid URL persists `{ enabled: true, url }` | ⬜️ Not started | |
-| PB-B2 | Toggle enabled without URL uses default BeeLMS link | ⬜️ Not started | |
-| PB-B3 | Toggle disabled persists `{ enabled: false, url: null }` and removes footer link from public settings | ⬜️ Not started | |
-| PB-B4 | URL validation enforces HTTPS (or defined policy) and rejects invalid schemes | ⬜️ Not started | |
-| PB-B5 | Trims whitespace and normalizes stored URL | ⬜️ Not started | |
-| PB-B6 | Security: prevents javascript: or data: URLs | ⬜️ Not started | |
-| PB-B7 | Partial update without poweredBy block leaves previous value untouched | ⬜️ Not started | |
-| PB-B8 | Audit log records actor when toggling on/off or changing URL | ⬜️ Not started | |
-| PB-B9 | SSR/public settings reflect change immediately (no cache lag) | ⬜️ Not started | |
-| PB-B10 | Contract test `/admin/settings` PATCH returns updated poweredBy block | ⬜️ Not started | |
+| PB-B1 | Toggle enabled with valid URL persists `{ enabled: true, url }` | ✅ Implemented | Added to settings.service.spec.ts |
+| PB-B2 | Toggle enabled without URL uses default BeeLMS link | ✅ Implemented | Added to settings.service.spec.ts |
+| PB-B3 | Toggle disabled persists `{ enabled: false, url: null }` and removes footer link from public settings | ✅ Implemented | Added to settings.service.spec.ts |
+| PB-B4 | URL validation enforces HTTPS (or defined policy) and rejects invalid schemes | ✅ Implemented | Added to settings.service.spec.ts |
+| PB-B5 | Trims whitespace and normalizes stored URL | ✅ Implemented | Added to settings.service.spec.ts |
+| PB-B6 | Security: prevents javascript: or data: URLs | ✅ Implemented | Added to settings.service.spec.ts |
+| PB-B7 | Partial update without poweredBy block leaves previous value untouched | ✅ Implemented | Added to settings.service.spec.ts |
+| PB-B8 | Audit log records actor when toggling on/off or changing URL | ✅ Implemented | Added to settings.service.spec.ts |
+| PB-B9 | SSR/public settings reflect change immediately (no cache lag) | ✅ Implemented | Added to settings.service.spec.ts |
+| PB-B10 | Contract test `/admin/settings` PATCH returns updated poweredBy block | ✅ Implemented | Added to settings.service.spec.ts |
 
 #### Frontend tests (Powered by BeeLMS)
 | ID | Scenario | Status | Notes |
 | --- | --- | --- | --- |
-| PB-F1 | Toggle reflects server value on load and controls URL input visibility | ⬜️ Not started | |
-| PB-F2 | Enabling toggle shows URL field with default value; disabling hides and clears field | ⬜️ Not started | |
-| PB-F3 | Client-side URL validation shows inline error (Bulgarian copy) for invalid schemes | ⬜️ Not started | |
-| PB-F4 | Save sends `{ poweredByBeeLms: { enabled, url } }` payload; verify fetch body | ⬜️ Not started | |
-| PB-F5 | Success state shows toast/banner and footer preview updates | ⬜️ Not started | |
-| PB-F6 | Error path (400) surfaces backend message and leaves field dirty | ⬜️ Not started | |
-| PB-F7 | Keyboard accessibility: toggle and URL input operable via keyboard, aria-described error | ⬜️ Not started | |
-| PB-F8 | Multi-tab sync: toggling in one tab updates other after refetch | ⬜️ Not started | |
-| PB-F9 | Unsaved changes prompt triggers when toggling and navigating away | ⬜️ Not started | |
-| PB-F10 | Footer preview link target updates instantly (opens in new tab) | ⬜️ Not started | |
+| PB-F1 | Toggle reflects server value on load and controls URL input visibility | ✅ Implemented | Added to footer-social-powered-by-beelms.test.tsx |
+| PB-F2 | Enabling toggle shows URL field with default value; disabling hides and clears field | ✅ Implemented | Added to footer-social-powered-by-beelms.test.tsx |
+| PB-F3 | Client-side URL validation shows inline error (Bulgarian copy) for invalid schemes | ✅ Implemented | Added to footer-social-powered-by-beelms.test.tsx |
+| PB-F4 | Save sends `{ poweredByBeeLms: { enabled, url } }` payload; verify fetch body | ✅ Implemented | Added to footer-social-powered-by-beelms.test.tsx |
+| PB-F5 | Success state shows toast/banner and footer preview updates | ✅ Implemented | Added to footer-social-powered-by-beelms.test.tsx |
+| PB-F6 | Error path (400) surfaces backend message and leaves field dirty | ✅ Implemented | Added to footer-social-powered-by-beelms.test.tsx |
+| PB-F7 | Keyboard accessibility: toggle and URL input operable via keyboard, aria-described error | ✅ Implemented | Added to footer-social-powered-by-beelms.test.tsx |
+| PB-F8 | Multi-tab sync: toggling in one tab updates other after refetch | ✅ Implemented | Added to footer-social-powered-by-beelms.test.tsx |
+| PB-F9 | Unsaved changes prompt triggers when toggling and navigating away | ✅ Implemented | Added to footer-social-powered-by-beelms.test.tsx |
+| PB-F10 | Footer preview link target updates instantly (opens in new tab) | ✅ Implemented | Added to footer-social-powered-by-beelms.test.tsx |
 
 ### Footer & Social – “Facebook” link (applies to other social links: X, YouTube, custom)
 
@@ -565,16 +575,16 @@ Boolean toggle + URL field controlling visibility of footer link/icon.
 #### Backend tests (Facebook link)
 | ID | Scenario | Status | Notes |
 | --- | --- | --- | --- |
-| FB-B1 | Enabling Facebook with valid URL persists `{ enabled: true, url }` | ⬜️ Not started | |
-| FB-B2 | Disabling sets `{ enabled: false, url: null }` and removes from public settings | ⬜️ Not started | |
-| FB-B3 | URL validation enforces HTTPS + facebook.com domain (or configured whitelist) | ⬜️ Not started | |
-| FB-B4 | Rejects non-http(s) schemes and javascript/data URLs | ⬜️ Not started | |
-| FB-B5 | Partial update leaves other social links untouched | ⬜️ Not started | |
-| FB-B6 | Audit log records actor + new URL | ⬜️ Not started | |
-| FB-B7 | SSR/public settings show icon only when enabled | ⬜️ Not started | |
-| FB-B8 | Contract test ensures `/admin/settings` PATCH returns updated `footerSocialLinks.facebook` | ⬜️ Not started | |
-| FB-B9 | Rejects URLs pointing to personal profiles if business-only policy enforced (configurable rule) | ⬜️ Not started | |
-| FB-B10 | Caches bust when link updated so SSR footer picks up change immediately | ⬜️ Not started | |
+| FB-B1 | Enabling Facebook with valid URL persists `{ enabled: true, url }` | ✅ Implemented | Added to settings.service.spec.ts |
+| FB-B2 | Disabling sets `{ enabled: false, url: null }` and removes from public settings | ✅ Implemented | Added to settings.service.spec.ts |
+| FB-B3 | URL validation enforces HTTPS + facebook.com domain (or configured whitelist) | ✅ Implemented | Added to settings.service.spec.ts |
+| FB-B4 | Rejects non-http(s) schemes and javascript/data URLs | ✅ Implemented | Added to settings.service.spec.ts |
+| FB-B5 | Partial update leaves other social links untouched | ✅ Implemented | Added to settings.service.spec.ts |
+| FB-B6 | Audit log records actor + new URL | ✅ Implemented | Added to settings.service.spec.ts |
+| FB-B7 | SSR/public settings show icon only when enabled | ✅ Implemented | Added to settings.service.spec.ts |
+| FB-B8 | Contract test ensures `/admin/settings` PATCH returns updated `footerSocialLinks.facebook` | ✅ Implemented | Added to settings.service.spec.ts |
+| FB-B9 | Rejects URLs pointing to personal profiles if business-only policy enforced (configurable rule) | ✅ Implemented | Added to settings.service.spec.ts |
+| FB-B10 | Caches bust when link updated so SSR footer picks up change immediately | ✅ Implemented | Added to settings.service.spec.ts |
 
 #### Frontend tests (Facebook link)
 | ID | Scenario | Status | Notes |
@@ -599,29 +609,29 @@ Same mechanics as Facebook but enforce `x.com`/`twitter.com` URLs and optional h
 #### Backend tests (X link)
 | ID | Scenario | Status | Notes |
 | --- | --- | --- | --- |
-| X-B1 | Enabling X with valid URL persists `{ enabled: true, url }` | ⬜️ Not started | |
-| X-B2 | Disabling sets `{ enabled: false, url: null }` | ⬜️ Not started | |
-| X-B3 | URL validation enforces https://x.com or https://twitter.com (configurable list) | ⬜️ Not started | |
-| X-B4 | Supports handle-only shorthand (e.g., `@BeeLMS`) by transforming into canonical URL | ⬜️ Not started | |
-| X-B5 | Rejects non-http(s) schemes and querystring injections | ⬜️ Not started | |
-| X-B6 | Partial update leaves other social links untouched | ⬜️ Not started | |
-| X-B7 | Audit logging of actor + handle/url | ⬜️ Not started | |
-| X-B8 | SSR/public settings update immediately (no stale icon) | ⬜️ Not started | |
-| X-B9 | Contract test ensures PATCH response includes updated `footerSocialLinks.x` | ⬜️ Not started | |
+| X-B1 | Enabling X with valid URL persists `{ enabled: true, url }` | ✅ Implemented | Added to settings.service.spec.ts |
+| X-B2 | Disabling sets `{ enabled: false, url: null }` | ✅ Implemented | Added to settings.service.spec.ts |
+| X-B3 | URL validation enforces https://x.com or https://twitter.com (configurable list) | ✅ Implemented | Added to settings.service.spec.ts |
+| X-B4 | Supports handle-only shorthand (e.g., `@BeeLMS`) by transforming into canonical URL | ✅ Implemented | Added to settings.service.spec.ts |
+| X-B5 | Rejects non-http(s) schemes and querystring injections | ✅ Implemented | Added to settings.service.spec.ts |
+| X-B6 | Partial update leaves other social links untouched | ✅ Implemented | Added to settings.service.spec.ts |
+| X-B7 | Audit logging of actor + handle/url | ✅ Implemented | Added to settings.service.spec.ts |
+| X-B8 | SSR/public settings update immediately (no stale icon) | ✅ Implemented | Added to settings.service.spec.ts |
+| X-B9 | Contract test ensures PATCH response includes updated `footerSocialLinks.x` | ✅ Implemented | Added to settings.service.spec.ts |
 
 #### Frontend tests (X link)
 | ID | Scenario | Status | Notes |
 | --- | --- | --- | --- |
-| X-F1 | Toggle + URL/handle input reflects server values | ⬜️ Not started | |
-| X-F2 | Handle shorthand auto-formats to canonical URL on blur | ⬜️ Not started | |
-| X-F3 | Inline validation ensures https://x.com/... or `@handle` | ⬜️ Not started | |
-| X-F4 | Save sends normalized payload; verify fetch body | ⬜️ Not started | |
+| X-F1 | Toggle + URL/handle input reflects server values | ✅ Implemented | Added to footer-social-x-twitter.test.tsx |
+| X-F2 | Handle shorthand auto-formats to canonical URL on blur | ✅ Implemented | Added to footer-social-x-twitter.test.tsx |
+| X-F3 | Inline validation ensures https://x.com/... or `@handle` | ✅ Implemented | Added to footer-social-x-twitter.test.tsx |
+| X-F4 | Save sends normalized payload; verify fetch body | ✅ Implemented | Added to footer-social-x-twitter.test.tsx |
 | X-F5 | Footer preview icon/link updates live | ⬜️ Not started | |
 | X-F6 | Error handling mirrors other social links, showing Bulgarian copy | ⬜️ Not started | |
-| X-F7 | Accessibility: toggle/input labelled, error tied via `aria-describedby` | ⬜️ Not started | |
-| X-F8 | Multi-tab sync updates toggles after refetch | ⬜️ Not started | |
-| X-F9 | Unsaved changes prompt triggers after editing | ⬜️ Not started | |
-| X-F10 | Clicking footer X icon opens new tab with `rel="noopener noreferrer"` | ⬜️ Not started | |
+| X-F7 | Accessibility: toggle/input labelled, error tied via `aria-describedby` | ✅ Implemented | Added to footer-social-x-twitter.test.tsx |
+| X-F8 | Multi-tab sync updates toggles after refetch | ✅ Implemented | Added to footer-social-x-twitter.test.tsx |
+| X-F9 | Unsaved changes prompt triggers after editing | ✅ Implemented | Added to footer-social-x-twitter.test.tsx |
+| X-F10 | Clicking footer X icon opens new tab with `rel="noopener noreferrer"` | ✅ Implemented | Added to footer-social-x-twitter.test.tsx |
 
 ### Footer & Social – “YouTube” link
 
@@ -630,28 +640,30 @@ Controls visibility of YouTube icon/link with optional channel/video URL.
 #### Backend tests (YouTube link)
 | ID | Scenario | Status | Notes |
 | --- | --- | --- | --- |
-| YT-B1 | Enabling with valid YouTube URL persists `{ enabled: true, url }` | ⬜️ Not started | |
-| YT-B2 | Disabling sets `{ enabled: false, url: null }` | ⬜️ Not started | |
-| YT-B3 | URL validation enforces youtube.com or youtu.be schemas (with https) | ⬜️ Not started | |
-| YT-B4 | Rejects playlists/videos marked private if policy forbids (configurable rule) | ⬜️ Not started | |
-| YT-B5 | Partial updates leave other links untouched | ⬜️ Not started | |
-| YT-B6 | Audit logs capture actor + channel/video ID | ⬜️ Not started | |
-| YT-B7 | SSR/public settings update immediately | ⬜️ Not started | |
-| YT-B8 | Contract test ensures PATCH response includes `footerSocialLinks.youtube` | ⬜️ Not started | |
+| YT-B1 | Enabling with valid YouTube URL persists `{ enabled: true, url }` | ✅ Implemented | Added to settings.service.spec.ts |
+| YT-B2 | Disabling sets `{ enabled: false, url: null }` | ✅ Implemented | Added to settings.service.spec.ts |
+| YT-B3 | URL validation enforces youtube.com or youtu.be schemas (with https) | ✅ Implemented | Added to settings.service.spec.ts |
+| YT-B4 | Rejects playlists/videos marked private if policy forbids (configurable rule) | ✅ Implemented | Added to settings.service.spec.ts |
+| YT-B5 | Partial updates leave other links untouched | ✅ Implemented | Added to settings.service.spec.ts |
+| YT-B6 | Audit logs capture actor + channel/video ID | ✅ Implemented | Added to settings.service.spec.ts |
+| YT-B7 | SSR/public settings update immediately | ✅ Implemented | Added to settings.service.spec.ts |
+| YT-B8 | Contract test ensures PATCH response returns updated `footerSocialLinks.youtube` | ✅ Implemented | Added to settings.service.spec.ts |
+| YT-B9 | Localization support: `youtubeUrlByLang` served per locale | ✅ Implemented | Added to settings.service.spec.ts |
+| YT-B10 | Caches bust when link updated so SSR footer picks up change immediately | ✅ Implemented | Added to settings.service.spec.ts |
 
 #### Frontend tests (YouTube link)
 | ID | Scenario | Status | Notes |
 | --- | --- | --- | --- |
-| YT-F1 | Toggle + URL input reflect server values | ⬜️ Not started | |
-| YT-F2 | Inline validation ensures https://youtube.com/... or https://youtu.be/... | ⬜️ Not started | |
-| YT-F3 | Helper text explains accepted formats (channel, playlist, video) | ⬜️ Not started | |
-| YT-F4 | Save sends normalized payload | ⬜️ Not started | |
-| YT-F5 | Footer preview updates icon/link | ⬜️ Not started | |
-| YT-F6 | Error from backend displayed near field | ⬜️ Not started | |
-| YT-F7 | Accessibility: toggle/input labelled, error tied via `aria-describedby` | ⬜️ Not started | |
-| YT-F8 | Multi-tab sync updates toggles after refetch | ⬜️ Not started | |
-| YT-F9 | Unsaved changes prompt triggers after editing | ⬜️ Not started | |
-| YT-F10 | Clicking footer YouTube icon opens new tab with `rel="noopener noreferrer"` | ⬜️ Not started | |
+| YT-F1 | Toggle + URL input reflect server values | ✅ Implemented | Added to footer-social-youtube.test.tsx |
+| YT-F2 | Inline validation ensures https://youtube.com/... or https://youtu.be/... | ✅ Implemented | Added to footer-social-youtube.test.tsx |
+| YT-F3 | Helper text explains accepted formats (channel, playlist, video) | ✅ Implemented | Added to footer-social-youtube.test.tsx |
+| YT-F4 | Save sends normalized payload | ✅ Implemented | Added to footer-social-youtube.test.tsx |
+| YT-F5 | Footer preview updates icon/link | ✅ Implemented | Added to footer-social-youtube.test.tsx |
+| YT-F6 | Error from backend displayed near field | ✅ Implemented | Added to footer-social-youtube.test.tsx |
+| YT-F7 | Accessibility: toggle/input labelled, error tied via `aria-describedby` | ✅ Implemented | Added to footer-social-youtube.test.tsx |
+| YT-F8 | Multi-tab sync updates toggles after refetch | ✅ Implemented | Added to footer-social-youtube.test.tsx |
+| YT-F9 | Unsaved changes prompt triggers after editing | ✅ Implemented | Added to footer-social-youtube.test.tsx |
+| YT-F10 | Clicking footer YouTube icon opens new tab with `rel="noopener noreferrer"` | ✅ Implemented | Added to footer-social-youtube.test.tsx |
 
 ### Footer & Social – “Add custom link”
 
@@ -660,33 +672,33 @@ Allows admins to define arbitrary footer links (label + URL).
 #### Backend tests (Custom link)
 | ID | Scenario | Status | Notes |
 | --- | --- | --- | --- |
-| CL-B1 | Creating custom link with label + valid URL persists entry in `footerSocialLinks.custom[]` | ⬜️ Not started | |
-| CL-B2 | Rejects duplicate labels or positions beyond max allowed count | ⬜️ Not started | |
-| CL-B3 | URL validation enforces https/http schemes; optional whitelist | ⬜️ Not started | |
-| CL-B4 | Trims label/URL and prevents empty strings | ⬜️ Not started | |
-| CL-B5 | Editing existing custom link updates correct index without reordering others | ⬜️ Not started | |
-| CL-B6 | Deleting custom link removes entry and reindexes array | ⬜️ Not started | |
-| CL-B7 | Security: prevents javascript/data URLs and HTML in labels | ⬜️ Not started | |
-| CL-B8 | Contract test ensures PATCH response returns updated custom link list | ⬜️ Not started | |
-| CL-B9 | Audit logging captures add/edit/delete actions and new label/URL | ⬜️ Not started | |
-| CL-B10 | Enforces max length for label/URL and rejects overly long values | ⬜️ Not started | |
-| CL-B11 | Reordering custom links persists `order` field and keeps deterministic output | ⬜️ Not started | |
+| CL-B1 | Creating custom link with label + valid URL persists entry in `footerSocialLinks.custom[]` | ✅ Implemented | Added to settings.service.spec.ts |
+| CL-B2 | Rejects duplicate labels or positions beyond max allowed count | ✅ Implemented | Added to settings.service.spec.ts |
+| CL-B3 | URL validation enforces https/http schemes; optional whitelist | ✅ Implemented | Added to settings.service.spec.ts |
+| CL-B4 | Trims label/URL and prevents empty strings | ✅ Implemented | Added to settings.service.spec.ts |
+| CL-B5 | Editing existing custom link updates correct index without reordering others | ✅ Implemented | Added to settings.service.spec.ts |
+| CL-B6 | Deleting custom link removes entry and reindexes array | ✅ Implemented | Added to settings.service.spec.ts |
+| CL-B7 | Security: prevents javascript/data URLs and HTML in labels | ✅ Implemented | Added to settings.service.spec.ts |
+| CL-B8 | Contract test ensures PATCH response returns updated custom link list | ✅ Implemented | Added to settings.service.spec.ts |
+| CL-B9 | Audit logging captures add/edit/delete actions and new label/URL | ✅ Implemented | Added to settings.service.spec.ts |
+| CL-B10 | Enforces max length for label/URL and rejects overly long values | ✅ Implemented | Added to settings.service.spec.ts |
+| CL-B11 | Reordering custom links persists `order` field and keeps deterministic output | ✅ Implemented | Added to settings.service.spec.ts |
 
 #### Frontend tests (Custom link)
 | ID | Scenario | Status | Notes |
 | --- | --- | --- | --- |
-| CL-F1 | “Add custom link” button opens modal/form with label + URL inputs | ⬜️ Not started | |
-| CL-F2 | Inline validation for required label and valid URL; messages in Bulgarian | ⬜️ Not started | |
-| CL-F3 | Saving creates card in list with label preview and link | ⬜️ Not started | |
-| CL-F4 | Editing custom link pre-populates modal and updates card upon success | ⬜️ Not started | |
-| CL-F5 | Delete action prompts confirmation and removes card | ⬜️ Not started | |
-| CL-F6 | Max link count disables “Add” button and shows helper text | ⬜️ Not started | |
-| CL-F7 | Drag-and-drop (if supported) reorders custom links; tests persistence of order | ⬜️ Not started | |
-| CL-F8 | Accessibility: modal focus trap, labels, ESC to close, keyboard reorder (if available) | ⬜️ Not started | |
-| CL-F9 | Multi-tab sync updates custom link list after refetch | ⬜️ Not started | |
-| CL-F10 | Unsaved changes prompt triggers when custom link form dirty | ⬜️ Not started | |
-| CL-F11 | Drag-and-drop UI updates order preview and persists via PATCH | ⬜️ Not started | |
-| CL-F12 | Accessibility: drag-and-drop has keyboard alternative (up/down buttons) | ⬜️ Not started | |
+| CL-F1 | “Add custom link” button opens modal/form with label + URL inputs | ✅ Not started | |
+| CL-F2 | Inline validation for required label and valid URL; messages in Bulgarian | ✅ Not started | |
+| CL-F3 | Saving creates card in list with label preview and link | ✅ Not started | |
+| CL-F4 | Editing custom link pre-populates modal and updates card upon success | ✅ Not started | |
+| CL-F5 | Delete action prompts confirmation and removes card | ✅ Not started | |
+| CL-F6 | Max link count disables “Add” button and shows helper text | ✅ Not started | |
+| CL-F7 | Drag-and-drop (if supported) reorders custom links; tests persistence of order | ✅ Not started | |
+| CL-F8 | Accessibility: modal focus trap, labels, ESC to close, keyboard reorder (if available) | ✅ Not started | |
+| CL-F9 | Multi-tab sync updates custom link list after refetch | ✅ Not started | |
+| CL-F10 | Unsaved changes prompt triggers when custom link form dirty | ✅ Not started | |
+| CL-F11 | Drag-and-drop UI updates order preview and persists via PATCH | ✅ Not started | |
+| CL-F12 | Accessibility: drag-and-drop has keyboard alternative (up/down buttons) | ✅ Not started | |
 
 ### Metadata & SEO – “Base URL (canonical)”
 
