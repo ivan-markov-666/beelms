@@ -9805,7 +9805,10 @@ export default function AdminSettingsPage() {
             onToggle={() => toggleSection("branding")}
           >
             <div className="mt-4 max-w-md">
-              <label className="flex items-center justify-between gap-2 text-sm font-medium text-gray-700">
+              <label
+                htmlFor="branding-app-name"
+                className="flex items-center justify-between gap-2 text-sm font-medium text-gray-700"
+              >
                 <span className="flex items-center gap-2">
                   <span>App name</span>
                   <InfoTooltip
@@ -9816,8 +9819,10 @@ export default function AdminSettingsPage() {
                 </span>
               </label>
               <input
+                id="branding-app-name"
                 value={appName}
                 onChange={(e) => setAppName(e.target.value)}
+                maxLength={APP_NAME_MAX_LENGTH}
                 className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
                 placeholder="BeeLMS"
                 disabled={saving}

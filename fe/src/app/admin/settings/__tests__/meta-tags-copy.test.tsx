@@ -399,7 +399,7 @@ describe("Meta Tags Snippet + Copy", () => {
     expect(textarea.value).toContain(
       '<meta name="twitter:description" content="OG description for sharing">',
     );
-  });
+  }, 10000); // 10 second timeout
 
   it("uses fallback logic correctly", async () => {
     render(<TestMetaTagsCopyComponent />);

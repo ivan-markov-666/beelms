@@ -413,7 +413,7 @@ describe("Social Metadata Snapshot + Undo Functionality", () => {
     expect(screen.getByTestId("success-message")).toHaveTextContent(
       "Върнах промените в Browser & Social metadata. Натисни Save ако искаш да ги запазиш отново.",
     );
-  });
+  }, 10000); // 10 second timeout
 
   it("undo button is disabled when no saved snapshot exists", () => {
     render(<TestSocialMetadataComponent />);

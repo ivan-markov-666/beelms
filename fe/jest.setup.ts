@@ -22,3 +22,7 @@ if (!window.matchMedia) {
     } as MediaQueryList;
   };
 }
+
+if (!HTMLElement.prototype.scrollIntoView) {
+  HTMLElement.prototype.scrollIntoView = () => {};
+}

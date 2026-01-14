@@ -679,9 +679,42 @@ export class AdminUpdateSocialLoginIconsDto {
   linkedin?: AdminUpdateSocialLoginIconDto;
 }
 
+@ValidatorConstraint({ name: 'appName', async: false })
+export class AppNameConstraint implements ValidatorConstraintInterface {
+  validate(value: unknown): boolean {
+    if (typeof value !== 'string') return false;
+
+    const trimmed = value.trim();
+
+    // Length validation: 2-32 characters
+    if (trimmed.length < 2 || trimmed.length > 32) return false;
+
+    // No control characters allowed
+    for (let i = 0; i < trimmed.length; i++) {
+      const charCode = trimmed.charCodeAt(i);
+      if (charCode <= 31 || charCode === 127) return false;
+    }
+
+    // Must contain at least one Unicode letter or digit
+    const hasLetterOrDigit = /[\p{L}\p{N}]/u.test(trimmed);
+    if (!hasLetterOrDigit) return false;
+
+    // Block HTML tags to prevent XSS
+    const hasHtmlTags = /<[a-z][\s\S]*>/i.test(trimmed);
+    if (hasHtmlTags) return false;
+
+    return true;
+  }
+
+  defaultMessage(): string {
+    return 'App name must be 2-32 characters, contain no control characters/HTML, and include at least one letter or digit';
+  }
+}
+
 export class AdminUpdateBrandingDto {
   @IsOptional()
   @IsString()
+  @Validate(AppNameConstraint)
   appName?: string;
 
   @IsOptional()
