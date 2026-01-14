@@ -453,7 +453,7 @@ describe('SettingsService – 404 i18n overrides', () => {
 
   beforeEach(() => {
     repo = {
-      find: jest.fn(async () => [buildConfig()]),
+      find: jest.fn().mockResolvedValue([buildConfig()]),
       save: jest.fn(async (value) => value),
       create: jest.fn((value) => value),
     };
