@@ -19,13 +19,12 @@ yarn-error.log*
 coverage/
 
 # Environment variables
-# .env
-# .env.*.local
-# !.env.example
+.env
 
 # IDE / Editor folders
 .idea/
 .vscode/
+.windsurf/
 
 # OS / Misc
 .DS_Store

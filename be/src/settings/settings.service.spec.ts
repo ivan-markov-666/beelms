@@ -453,10 +453,12 @@ describe('SettingsService – 404 i18n overrides', () => {
 
   beforeEach(() => {
     repo = {
-      find: jest.fn().mockResolvedValue([buildConfig()]),
+      find: jest.fn(),
       save: jest.fn(async (value) => value),
       create: jest.fn((value) => value),
     };
+
+    repo.find.mockResolvedValue([buildConfig()]);
 
     service = new SettingsService(
       repo as unknown as Repository<InstanceConfig>,
@@ -2476,6 +2478,7 @@ describe('SettingsService – branding asset upload (favicon)', () => {
       originalname: 'test.txt',
       mimetype: 'text/plain',
     };
+    void mockFile;
 
     // This would typically be handled by a separate upload controller
     // For service tests, we test the persistence logic
