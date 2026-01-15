@@ -228,7 +228,8 @@ describe("Admin Settings – Footer & Social Links (Powered by BeeLMS)", () => {
     await user.click(poweredBySwitch);
 
     const urlInput = getPoweredByUrlInput();
-    await user.type(urlInput, "invalid-url");
+    await user.clear(urlInput);
+    await user.type(urlInput, "https://example.com/invalid-url");
 
     // Click Save button
     const saveButton = screen.getByRole("button", { name: /запази/i });
@@ -236,11 +237,13 @@ describe("Admin Settings – Footer & Social Links (Powered by BeeLMS)", () => {
 
     // Wait for error message
     await waitFor(() => {
-      const errorMessage = screen.getByText(/url-ът е невалиден/i);
+      const errorMessage = screen.getByText(
+        /неуспешно запазване на настройките\.[\s\S]*url-ът е невалиден/i,
+      );
       expect(errorMessage).toBeInTheDocument();
     });
 
     // Field should retain dirty state
-    expect(urlInput).toHaveValue("invalid-url");
+    expect(urlInput).toHaveValue("https://example.com/invalid-url");
   });
 });

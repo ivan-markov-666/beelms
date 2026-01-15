@@ -129,12 +129,12 @@ export function ListboxSelect<T extends string>({
           if (event.key === "Escape") {
             setOpen(false);
           }
-          if (
-            event.key === "ArrowDown" ||
-            event.key === "Enter" ||
-            event.key === " "
-          ) {
+          if (event.key === "ArrowDown") {
             setOpen(true);
+          }
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            setOpen((prev) => !prev);
           }
         }}
         className={

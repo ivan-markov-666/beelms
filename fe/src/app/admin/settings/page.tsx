@@ -5148,9 +5148,12 @@ function isValidInfraRedisUrl(value: string): boolean {
 
 export default function AdminSettingsPage() {
   const router = useRouter();
+  const routerRef = useRef(router);
+  routerRef.current = router;
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const saveInFlightRef = useRef(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [themeNotice, setThemeNotice] = useState<{
@@ -8341,7 +8344,7 @@ export default function AdminSettingsPage() {
 
       const token = getAccessToken();
       if (!token) {
-        router.replace("/auth/login");
+        routerRef.current.replace("/auth/login");
         return;
       }
 
@@ -8354,7 +8357,7 @@ export default function AdminSettingsPage() {
         });
 
         if (res.status === 401) {
-          router.replace("/auth/login");
+          routerRef.current.replace("/auth/login");
           return;
         }
 
@@ -8625,9 +8628,11 @@ export default function AdminSettingsPage() {
     return () => {
       cancelled = true;
     };
-  }, [router]);
+  }, []);
 
   const handleSave = async () => {
+    if (saveInFlightRef.current) return;
+    saveInFlightRef.current = true;
     setError(null);
     setSuccess(null);
     const nextFieldErrors = buildSocialFieldErrors();
@@ -8635,11 +8640,13 @@ export default function AdminSettingsPage() {
 
     const token = getAccessToken();
     if (!token) {
+      saveInFlightRef.current = false;
       router.replace("/auth/login");
       return;
     }
 
     if (appNameValidation) {
+      saveInFlightRef.current = false;
       setError(appNameValidation);
       return;
     }
@@ -8650,6 +8657,7 @@ export default function AdminSettingsPage() {
       return !isValidFooterSocialUrl(l.type, trimmed);
     });
     if (invalidFooterUrl) {
+      saveInFlightRef.current = false;
       setError(
         `Footer social link URL е невалиден (${invalidFooterUrl.id}). ${footerSocialUrlErrorMessage(invalidFooterUrl.type)}`,
       );
@@ -8657,12 +8665,14 @@ export default function AdminSettingsPage() {
     }
 
     if (poweredByBeeLmsEnabled && !isValidOptionalHttpUrl(poweredByBeeLmsUrl)) {
+      saveInFlightRef.current = false;
       setError("Powered by BeeLMS URL е невалиден.");
       return;
     }
 
     const nextAppName = normalizedAppName;
     if (nextAppName.length < 2) {
+      saveInFlightRef.current = false;
       setError("App name трябва да е поне 2 символа.");
       return;
     }
@@ -8867,6 +8877,7 @@ export default function AdminSettingsPage() {
     };
 
     if (supportedLangs.length < 1) {
+      saveInFlightRef.current = false;
       setError(
         "languages.supported трябва да съдържа поне 1 език (напр. bg, en).",
       );
@@ -8875,6 +8886,7 @@ export default function AdminSettingsPage() {
 
     const nextDefaultLang = (defaultLang ?? "").trim().toLowerCase();
     if (!supportedLangs.includes(nextDefaultLang)) {
+      saveInFlightRef.current = false;
       setError("languages.default трябва да е включен в languages.supported.");
       return;
     }
@@ -9118,20 +9130,43 @@ export default function AdminSettingsPage() {
       });
 
       if (res.status === 401) {
+        saveInFlightRef.current = false;
         router.replace("/auth/login");
         return;
       }
 
       if (!res.ok) {
-        setError("Неуспешно запазване на настройките.");
+        let backendMessage: string | null = null;
+        try {
+          const payload = (await res.json()) as { message?: unknown };
+          if (typeof payload?.message === "string") {
+            const trimmed = payload.message.trim();
+            if (trimmed.length > 0) {
+              backendMessage = trimmed;
+            }
+          }
+        } catch {
+          // ignore
+        }
+        setError(
+          backendMessage
+            ? `Неуспешно запазване на настройките. ${backendMessage}`
+            : "Неуспешно запазване на настройките.",
+        );
         return;
       }
 
-      const updated = (await res.json()) as AdminSettingsResponse;
-      setInitialFeatures(updated.features);
+      const payload = (await res.json()) as unknown;
+      const updated = payload as AdminSettingsResponse;
+      const backendSuccessMessage =
+        typeof (payload as { message?: unknown })?.message === "string"
+          ? String((payload as { message?: unknown }).message).trim()
+          : "";
+
+      setInitialFeatures(updated.features ?? null);
       setSocialStatuses(buildSocialStatuses(updated.socialProviders ?? null));
       setSocialCredentialForms(
-        buildSocialCredentialState(updated.socialCredentials),
+        buildSocialCredentialState(updated.socialCredentials ?? null),
       );
       setSocialCredentialsDirty(false);
       setCustomThemePresets(
@@ -9194,13 +9229,16 @@ export default function AdminSettingsPage() {
       }
 
       setSuccess(
-        hasFieldErrors
-          ? "Настройките са запазени (без Social OAuth credentials – има липсващи полета)."
-          : "Настройките са запазени.",
+        backendSuccessMessage.length > 0
+          ? backendSuccessMessage
+          : hasFieldErrors
+            ? "Настройките са запазени (без Social OAuth credentials – има липсващи полета)."
+            : "Настройките са запазени.",
       );
     } catch {
       setError("Възникна грешка при връзката със сървъра.");
     } finally {
+      saveInFlightRef.current = false;
       setSaving(false);
     }
   };

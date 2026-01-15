@@ -101,7 +101,7 @@ describe("Admin Settings – Theme Mode", () => {
       json: async () => createMockSettingsResponse("system"),
     });
 
-    const { user } = await renderAndOpenTheme();
+    await renderAndOpenTheme();
 
     const dropdown = screen.getByRole("combobox", { name: /theme mode/i });
     expect(dropdown).toBeInTheDocument();

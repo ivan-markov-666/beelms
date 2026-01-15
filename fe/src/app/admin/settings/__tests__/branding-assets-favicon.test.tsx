@@ -164,7 +164,9 @@ describe("Admin Settings – Branding Assets (Favicon)", () => {
 
     const { user } = await renderAndOpenBrandingAssets();
 
-    const uploadButton = screen.getByRole("button", { name: /upload favicon/i });
+    const uploadButton = screen.getByRole("button", {
+      name: /upload favicon/i,
+    });
     expect(uploadButton).toBeInTheDocument();
 
     // Simulate file selection
@@ -227,7 +229,8 @@ describe("Admin Settings – Branding Assets (Favicon)", () => {
       })
       .mockResolvedValueOnce({
         ok: true,
-        json: async () => createMockSettingsResponse("https://cdn.example.com/favicon.ico"),
+        json: async () =>
+          createMockSettingsResponse("https://cdn.example.com/favicon.ico"),
       });
 
     const { user } = await renderAndOpenBrandingAssets();
@@ -239,8 +242,13 @@ describe("Admin Settings – Branding Assets (Favicon)", () => {
 
     // Wait for preview link to appear
     await waitFor(() => {
-      const previewLink = screen.getByRole("link", { name: /favicon preview/i });
-      expect(previewLink).toHaveAttribute("href", "https://cdn.example.com/favicon.ico");
+      const previewLink = screen.getByRole("link", {
+        name: /favicon preview/i,
+      });
+      expect(previewLink).toHaveAttribute(
+        "href",
+        "https://cdn.example.com/favicon.ico",
+      );
     });
   });
 
@@ -248,7 +256,8 @@ describe("Admin Settings – Branding Assets (Favicon)", () => {
     mockFetch
       .mockResolvedValueOnce({
         ok: true,
-        json: async () => createMockSettingsResponse("https://cdn.example.com/favicon.ico"),
+        json: async () =>
+          createMockSettingsResponse("https://cdn.example.com/favicon.ico"),
       })
       .mockResolvedValueOnce({
         ok: true,
@@ -258,7 +267,10 @@ describe("Admin Settings – Branding Assets (Favicon)", () => {
     const { user } = await renderAndOpenBrandingAssets();
 
     const previewLink = screen.getByRole("link", { name: /favicon preview/i });
-    expect(previewLink).toHaveAttribute("href", "https://cdn.example.com/favicon.ico");
+    expect(previewLink).toHaveAttribute(
+      "href",
+      "https://cdn.example.com/favicon.ico",
+    );
 
     const removeButton = within(getFaviconControlsContainer()).getByRole(
       "button",

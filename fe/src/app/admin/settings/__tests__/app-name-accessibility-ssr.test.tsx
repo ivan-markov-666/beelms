@@ -261,11 +261,14 @@ describe("Admin Settings – App Name (F17-F25)", () => {
       expect(appNameInput).toBeInTheDocument();
     });
 
-    // Mock successful save
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({ success: true }),
+    // Mock successful save, but keep it in-flight to simulate rapid concurrent clicks.
+    const patchDeferred: { resolve: ((value: Response) => void) | null } = {
+      resolve: null,
+    };
+    const patchPromise: Promise<Response> = new Promise((resolve) => {
+      patchDeferred.resolve = resolve;
     });
+    mockFetch.mockImplementationOnce(() => patchPromise);
 
     // Act - trigger multiple saves rapidly
     const appNameInput = screen.getByLabelText(/^App name$/i, {
@@ -277,9 +280,11 @@ describe("Admin Settings – App Name (F17-F25)", () => {
     await user.type(appNameInput, "Concurrent Test");
 
     // Click save multiple times rapidly
-    await user.click(saveButton);
-    await user.click(saveButton);
-    await user.click(saveButton);
+    await Promise.all([
+      user.click(saveButton),
+      user.click(saveButton),
+      user.click(saveButton),
+    ]);
 
     // Assert - should only make one API call (concurrent saves should be deblocked)
     await waitFor(() => {
@@ -289,6 +294,19 @@ describe("Admin Settings – App Name (F17-F25)", () => {
           call[1]?.method === "PATCH" && call[1]?.body?.includes?.('"appName"'),
       );
       expect(patchCalls.length).toBe(1);
+    });
+
+    // Allow the in-flight request to finish so the component can clean up.
+    if (patchDeferred.resolve) {
+      patchDeferred.resolve({
+        ok: true,
+        status: 200,
+        json: async () => ({ success: true }),
+      } as unknown as Response);
+    }
+
+    await waitFor(() => {
+      expect(screen.getByText(/настройките са запазени/i)).toBeInTheDocument();
     });
   });
 
@@ -323,7 +341,9 @@ describe("Admin Settings – App Name (F17-F25)", () => {
 
     // Wait for error to appear
     await waitFor(() => {
-      const errorMessage = screen.getByText(/Неуспешно запазване на настройките\./i);
+      const errorMessage = screen.getByText(
+        /Неуспешно запазване на настройките\./i,
+      );
       expect(errorMessage).toBeInTheDocument();
     });
 
