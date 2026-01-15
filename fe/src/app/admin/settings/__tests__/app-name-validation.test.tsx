@@ -295,8 +295,10 @@ describe("Admin Settings – App Name (F1-F8)", () => {
 
     // Assert
     await waitFor(() => {
-      const errorMessage = screen.getByText(/ограничен до \d+ символа/i);
-      expect(errorMessage).toBeInTheDocument();
+      expect(appNameInput).toHaveValue("A".repeat(32));
+      expect(
+        screen.getByText(/characters:\s*32\s*\/\s*32/i),
+      ).toBeInTheDocument();
     });
   });
 
@@ -376,8 +378,10 @@ describe("Admin Settings – App Name (F1-F8)", () => {
 
     // Check for success indication (could be toast, message, etc.)
     await waitFor(() => {
-      // This might need adjustment based on actual success UI
-      expect(screen.queryByText(/error/i)).not.toBeInTheDocument();
+      expect(screen.getByText(/настройките са запазени/i)).toBeInTheDocument();
+      expect(
+        screen.queryByText(/неуспешно запазване на настройките\./i),
+      ).not.toBeInTheDocument();
     });
   });
 

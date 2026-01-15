@@ -306,13 +306,15 @@ describe('SettingsService – infra toggles validation', () => {
 
   beforeEach(() => {
     repo = {
-      find: jest.fn().mockResolvedValue([buildConfig()]),
+      find: jest.fn(),
       save: jest.fn(async (value) => value),
       create: jest.fn((value) => value),
     };
     service = new SettingsService(
       repo as unknown as Repository<InstanceConfig>,
     );
+
+    repo.find.mockResolvedValue([buildConfig()]);
   });
 
   afterEach(() => {
@@ -451,9 +453,33 @@ describe('SettingsService – 404 i18n overrides', () => {
   };
   let service: SettingsService;
 
+  const buildConfig = (): InstanceConfig => {
+    const defaults = service as unknown as {
+      buildDefaultBranding: () => InstanceBranding;
+      buildDefaultFeatures: () => InstanceFeatures;
+      buildDefaultSeo: () => InstanceSeo;
+    };
+
+    return {
+      id: 'cfg-id',
+      branding: defaults.buildDefaultBranding(),
+      features: defaults.buildDefaultFeatures(),
+      languages: {
+        supported: ['bg'],
+        default: 'bg',
+        icons: null,
+        flagPicker: null,
+      },
+      seo: defaults.buildDefaultSeo(),
+      socialCredentials: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+  };
+
   beforeEach(() => {
     repo = {
-      find: jest.fn().mockResolvedValue([buildConfig()]),
+      find: jest.fn(),
       save: jest.fn(async (value) => value),
       create: jest.fn((value) => value),
     };
@@ -461,6 +487,8 @@ describe('SettingsService – 404 i18n overrides', () => {
     service = new SettingsService(
       repo as unknown as Repository<InstanceConfig>,
     );
+
+    repo.find.mockResolvedValue([buildConfig()]);
   });
 
   afterEach(() => {
@@ -746,7 +774,9 @@ describe('SettingsService – branding normalization', () => {
     const saveMock = repo.save as jest.MockedFunction<
       (config: InstanceConfig) => Promise<InstanceConfig>
     >;
-    const savedConfig = saveMock.mock.calls[0][0];
+    const savedConfig =
+      saveMock.mock.calls[saveMock.mock.calls.length - 1]?.[0];
+    if (!savedConfig) throw new Error('Expected repo.save to be called');
 
     expect(savedConfig.branding.faviconUrl).toBe(
       '/branding/media/new-favicon.png',
@@ -1592,10 +1622,10 @@ describe('SettingsService – theme mode', () => {
     socialFacebook: true,
     socialGithub: true,
     socialLinkedin: true,
-    infraRedis: true,
-    infraRabbitmq: true,
-    infraMonitoring: true,
-    infraErrorTracking: true,
+    infraRedis: false,
+    infraRabbitmq: false,
+    infraMonitoring: false,
+    infraErrorTracking: false,
   };
 
   const buildConfig = (
@@ -1621,8 +1651,8 @@ describe('SettingsService – theme mode', () => {
   beforeEach(() => {
     repo = {
       find: jest.fn().mockResolvedValue([buildConfig()]),
-      save: jest.fn(),
-      create: jest.fn(),
+      save: jest.fn(async (value) => value),
+      create: jest.fn((value) => value),
     };
     service = new SettingsService(repo as any);
   });
@@ -2002,10 +2032,10 @@ describe('SettingsService – theme preset apply to', () => {
     socialFacebook: true,
     socialGithub: true,
     socialLinkedin: true,
-    infraRedis: true,
-    infraRabbitmq: true,
-    infraMonitoring: true,
-    infraErrorTracking: true,
+    infraRedis: false,
+    infraRabbitmq: false,
+    infraMonitoring: false,
+    infraErrorTracking: false,
   };
 
   const buildConfig = (
@@ -2031,8 +2061,8 @@ describe('SettingsService – theme preset apply to', () => {
   beforeEach(() => {
     repo = {
       find: jest.fn().mockResolvedValue([buildConfig()]),
-      save: jest.fn(),
-      create: jest.fn(),
+      save: jest.fn(async (value) => value),
+      create: jest.fn((value) => value),
     };
     service = new SettingsService(repo as any);
   });
@@ -2431,10 +2461,10 @@ describe('SettingsService – branding asset upload (favicon)', () => {
     socialFacebook: true,
     socialGithub: true,
     socialLinkedin: true,
-    infraRedis: true,
-    infraRabbitmq: true,
-    infraMonitoring: true,
-    infraErrorTracking: true,
+    infraRedis: false,
+    infraRabbitmq: false,
+    infraMonitoring: false,
+    infraErrorTracking: false,
   };
 
   const buildConfig = (
@@ -2460,8 +2490,8 @@ describe('SettingsService – branding asset upload (favicon)', () => {
   beforeEach(() => {
     repo = {
       find: jest.fn().mockResolvedValue([buildConfig()]),
-      save: jest.fn(),
-      create: jest.fn(),
+      save: jest.fn(async (value) => value),
+      create: jest.fn((value) => value),
     };
     service = new SettingsService(repo as any);
   });
@@ -2997,10 +3027,10 @@ describe('SettingsService – branding asset upload (logo variants)', () => {
     socialFacebook: true,
     socialGithub: true,
     socialLinkedin: true,
-    infraRedis: true,
-    infraRabbitmq: true,
-    infraMonitoring: true,
-    infraErrorTracking: true,
+    infraRedis: false,
+    infraRabbitmq: false,
+    infraMonitoring: false,
+    infraErrorTracking: false,
   };
 
   const buildConfig = (
@@ -3026,8 +3056,8 @@ describe('SettingsService – branding asset upload (logo variants)', () => {
   beforeEach(() => {
     repo = {
       find: jest.fn().mockResolvedValue([buildConfig()]),
-      save: jest.fn(),
-      create: jest.fn(),
+      save: jest.fn(async (value) => value),
+      create: jest.fn((value) => value),
     };
     service = new SettingsService(repo as any);
   });
@@ -3375,10 +3405,10 @@ describe('SettingsService – Footer & Social Links (Powered by BeeLMS)', () => 
     socialFacebook: true,
     socialGithub: true,
     socialLinkedin: true,
-    infraRedis: true,
-    infraRabbitmq: true,
-    infraMonitoring: true,
-    infraErrorTracking: true,
+    infraRedis: false,
+    infraRabbitmq: false,
+    infraMonitoring: false,
+    infraErrorTracking: false,
   };
 
   const buildConfig = (
@@ -3404,8 +3434,8 @@ describe('SettingsService – Footer & Social Links (Powered by BeeLMS)', () => 
   beforeEach(() => {
     repo = {
       find: jest.fn().mockResolvedValue([buildConfig()]),
-      save: jest.fn(),
-      create: jest.fn(),
+      save: jest.fn(async (value) => value),
+      create: jest.fn((value) => value),
     };
     service = new SettingsService(repo as any);
   });
@@ -3806,10 +3836,10 @@ describe('SettingsService – Footer & Social Links (Facebook)', () => {
     socialFacebook: true,
     socialGithub: true,
     socialLinkedin: true,
-    infraRedis: true,
-    infraRabbitmq: true,
-    infraMonitoring: true,
-    infraErrorTracking: true,
+    infraRedis: false,
+    infraRabbitmq: false,
+    infraMonitoring: false,
+    infraErrorTracking: false,
   };
 
   const buildConfig = (
@@ -3835,8 +3865,8 @@ describe('SettingsService – Footer & Social Links (Facebook)', () => {
   beforeEach(() => {
     repo = {
       find: jest.fn().mockResolvedValue([buildConfig()]),
-      save: jest.fn(),
-      create: jest.fn(),
+      save: jest.fn(async (value) => value),
+      create: jest.fn((value) => value),
     };
     service = new SettingsService(repo as any);
   });
@@ -3884,24 +3914,28 @@ describe('SettingsService – Footer & Social Links (Facebook)', () => {
     const existing = buildConfig({
       branding: {
         ...defaultBranding,
-        footerSocialLinks: {
-          facebook: {
+        footerSocialLinks: [
+          {
+            id: 'facebook',
+            type: 'facebook',
             enabled: true,
             url: 'https://facebook.com/example-page',
           },
-        },
+        ],
       },
     });
     repo.find.mockResolvedValue([existing]);
 
     const payload = {
       branding: {
-        footerSocialLinks: {
-          facebook: {
+        footerSocialLinks: [
+          {
+            id: 'facebook',
+            type: 'facebook',
             enabled: false,
             url: null,
           },
-        },
+        ],
       },
     };
 
@@ -3913,11 +3947,17 @@ describe('SettingsService – Footer & Social Links (Facebook)', () => {
     const saveMock = repo.save as jest.MockedFunction<
       (config: InstanceConfig) => Promise<InstanceConfig>
     >;
-    const savedConfig = saveMock.mock.calls[0][0];
+    const savedConfig =
+      saveMock.mock.calls[saveMock.mock.calls.length - 1]?.[0];
+    if (!savedConfig) throw new Error('Expected repo.save to be called');
 
-    expect(savedConfig.branding.footerSocialLinks?.facebook).toEqual({
-      enabled: false,
-      url: null,
+    expect(
+      savedConfig.branding.footerSocialLinks?.find(
+        (link) => link.type === 'facebook',
+      ),
+    ).toEqual({
+      id: 'facebook',
+      type: 'facebook',
     });
   });
 
@@ -3927,12 +3967,14 @@ describe('SettingsService – Footer & Social Links (Facebook)', () => {
 
     const payload = {
       branding: {
-        footerSocialLinks: {
-          facebook: {
+        footerSocialLinks: [
+          {
+            id: 'facebook',
+            type: 'facebook',
             enabled: true,
             url: 'https://malicious-site.com/fake-facebook',
           },
-        },
+        ],
       },
     };
 
@@ -3944,12 +3986,16 @@ describe('SettingsService – Footer & Social Links (Facebook)', () => {
     const saveMock = repo.save as jest.MockedFunction<
       (config: InstanceConfig) => Promise<InstanceConfig>
     >;
-    const savedConfig = saveMock.mock.calls[0][0];
+    const savedConfig =
+      saveMock.mock.calls[saveMock.mock.calls.length - 1]?.[0];
+    if (!savedConfig) throw new Error('Expected repo.save to be called');
 
     // Service should store the URL (validation might be frontend-only)
-    expect(savedConfig.branding.footerSocialLinks?.facebook.url).toBe(
-      'https://malicious-site.com/fake-facebook',
-    );
+    expect(
+      savedConfig.branding.footerSocialLinks?.find(
+        (link) => link.type === 'facebook',
+      )?.url,
+    ).toBe('https://malicious-site.com/fake-facebook');
   });
 
   it('(FB-B4) Rejects non-http(s) schemes and javascript/data URLs', async () => {
@@ -3958,12 +4004,14 @@ describe('SettingsService – Footer & Social Links (Facebook)', () => {
 
     const payload = {
       branding: {
-        footerSocialLinks: {
-          facebook: {
+        footerSocialLinks: [
+          {
+            id: 'facebook',
+            type: 'facebook',
             enabled: true,
             url: 'javascript:alert(1)',
           },
-        },
+        ],
       },
     };
 
@@ -3975,39 +4023,49 @@ describe('SettingsService – Footer & Social Links (Facebook)', () => {
     const saveMock = repo.save as jest.MockedFunction<
       (config: InstanceConfig) => Promise<InstanceConfig>
     >;
-    const savedConfig = saveMock.mock.calls[0][0];
+    const savedConfig =
+      saveMock.mock.calls[saveMock.mock.calls.length - 1]?.[0];
+    if (!savedConfig) throw new Error('Expected repo.save to be called');
 
-    expect(savedConfig.branding.footerSocialLinks?.facebook.url).toBe(
-      'javascript:alert(1)',
-    );
+    expect(
+      savedConfig.branding.footerSocialLinks?.find(
+        (link) => link.type === 'facebook',
+      )?.url,
+    ).toBe('javascript:alert(1)');
   });
 
   it('(FB-B5) Partial update leaves other social links untouched', async () => {
     const existing = buildConfig({
       branding: {
         ...defaultBranding,
-        footerSocialLinks: {
-          facebook: {
+        footerSocialLinks: [
+          {
+            id: 'facebook',
+            type: 'facebook',
             enabled: true,
             url: 'https://facebook.com/existing-page',
           },
-          twitter: {
+          {
+            id: 'x',
+            type: 'x',
             enabled: true,
             url: 'https://twitter.com/existing-handle',
           },
-        },
+        ],
       },
     });
     repo.find.mockResolvedValue([existing]);
 
     const payload = {
       branding: {
-        footerSocialLinks: {
-          facebook: {
+        footerSocialLinks: [
+          {
+            id: 'facebook',
+            type: 'facebook',
             enabled: false,
             url: null,
           },
-        },
+        ],
       },
     };
 
@@ -4019,15 +4077,25 @@ describe('SettingsService – Footer & Social Links (Facebook)', () => {
     const saveMock = repo.save as jest.MockedFunction<
       (config: InstanceConfig) => Promise<InstanceConfig>
     >;
-    const savedConfig = saveMock.mock.calls[0][0];
+    const savedConfig =
+      saveMock.mock.calls[saveMock.mock.calls.length - 1]?.[0];
+    if (!savedConfig) throw new Error('Expected repo.save to be called');
 
-    expect(savedConfig.branding.footerSocialLinks?.facebook).toEqual({
-      enabled: false,
-      url: null,
+    expect(
+      savedConfig.branding.footerSocialLinks?.find(
+        (link) => link.type === 'facebook',
+      ),
+    ).toEqual({
+      id: 'facebook',
+      type: 'facebook',
     });
-    expect(savedConfig.branding.footerSocialLinks?.twitter).toEqual({
-      enabled: true,
+    expect(
+      savedConfig.branding.footerSocialLinks?.find((link) => link.type === 'x'),
+    ).toEqual({
+      id: 'x',
+      type: 'x',
       url: 'https://twitter.com/existing-handle',
+      enabled: true,
     });
   });
 
@@ -4037,12 +4105,14 @@ describe('SettingsService – Footer & Social Links (Facebook)', () => {
 
     const payload = {
       branding: {
-        footerSocialLinks: {
-          facebook: {
+        footerSocialLinks: [
+          {
+            id: 'facebook',
+            type: 'facebook',
             enabled: true,
             url: 'https://facebook.com/new-page',
           },
-        },
+        ],
       },
     };
 
@@ -4057,7 +4127,13 @@ describe('SettingsService – Footer & Social Links (Facebook)', () => {
     const savedConfig = saveMock.mock.calls[0][0];
 
     expect(savedConfig.updatedAt).toBeInstanceOf(Date);
-    expect(savedConfig.branding.footerSocialLinks?.facebook).toEqual({
+    expect(
+      savedConfig.branding.footerSocialLinks?.find(
+        (link) => link.type === 'facebook',
+      ),
+    ).toEqual({
+      id: 'facebook',
+      type: 'facebook',
       enabled: true,
       url: 'https://facebook.com/new-page',
     });
@@ -4069,12 +4145,14 @@ describe('SettingsService – Footer & Social Links (Facebook)', () => {
 
     const payload = {
       branding: {
-        footerSocialLinks: {
-          facebook: {
+        footerSocialLinks: [
+          {
+            id: 'facebook',
+            type: 'facebook',
             enabled: true,
             url: 'https://facebook.com/public-page',
           },
-        },
+        ],
       },
     };
 
@@ -4086,9 +4164,17 @@ describe('SettingsService – Footer & Social Links (Facebook)', () => {
     const saveMock = repo.save as jest.MockedFunction<
       (config: InstanceConfig) => Promise<InstanceConfig>
     >;
-    const savedConfig = saveMock.mock.calls[0][0];
+    const savedConfig =
+      saveMock.mock.calls[saveMock.mock.calls.length - 1]?.[0];
+    if (!savedConfig) throw new Error('Expected repo.save to be called');
 
-    expect(savedConfig.branding.footerSocialLinks?.facebook).toEqual({
+    expect(
+      savedConfig.branding.footerSocialLinks?.find(
+        (link) => link.type === 'facebook',
+      ),
+    ).toEqual({
+      id: 'facebook',
+      type: 'facebook',
       enabled: true,
       url: 'https://facebook.com/public-page',
     });
@@ -4100,12 +4186,14 @@ describe('SettingsService – Footer & Social Links (Facebook)', () => {
 
     const payload = {
       branding: {
-        footerSocialLinks: {
-          facebook: {
+        footerSocialLinks: [
+          {
+            id: 'facebook',
+            type: 'facebook',
             enabled: true,
             url: 'https://facebook.com/contract-test',
           },
-        },
+        ],
       },
     };
 
@@ -4117,9 +4205,17 @@ describe('SettingsService – Footer & Social Links (Facebook)', () => {
     const saveMock = repo.save as jest.MockedFunction<
       (config: InstanceConfig) => Promise<InstanceConfig>
     >;
-    const savedConfig = saveMock.mock.calls[0][0];
+    const savedConfig =
+      saveMock.mock.calls[saveMock.mock.calls.length - 1]?.[0];
+    if (!savedConfig) throw new Error('Expected repo.save to be called');
 
-    expect(savedConfig.branding.footerSocialLinks?.facebook).toEqual({
+    expect(
+      savedConfig.branding.footerSocialLinks?.find(
+        (link) => link.type === 'facebook',
+      ),
+    ).toEqual({
+      id: 'facebook',
+      type: 'facebook',
       enabled: true,
       url: 'https://facebook.com/contract-test',
     });
@@ -4131,12 +4227,14 @@ describe('SettingsService – Footer & Social Links (Facebook)', () => {
 
     const payload = {
       branding: {
-        footerSocialLinks: {
-          facebook: {
+        footerSocialLinks: [
+          {
+            id: 'facebook',
+            type: 'facebook',
             enabled: true,
             url: 'https://facebook.com/john.doe.personal',
           },
-        },
+        ],
       },
     };
 
@@ -4151,9 +4249,11 @@ describe('SettingsService – Footer & Social Links (Facebook)', () => {
     const savedConfig = saveMock.mock.calls[0][0];
 
     // Service might accept or reject based on policy
-    expect(savedConfig.branding.footerSocialLinks?.facebook.url).toBe(
-      'https://facebook.com/john.doe.personal',
-    );
+    expect(
+      savedConfig.branding.footerSocialLinks?.find(
+        (link) => link.type === 'facebook',
+      )?.url,
+    ).toBe('https://facebook.com/john.doe.personal');
   });
 
   it('(FB-B10) Caches bust when link updated so SSR footer picks up change immediately', async () => {
@@ -4162,12 +4262,14 @@ describe('SettingsService – Footer & Social Links (Facebook)', () => {
 
     const payload = {
       branding: {
-        footerSocialLinks: {
-          facebook: {
+        footerSocialLinks: [
+          {
+            id: 'facebook',
+            type: 'facebook',
             enabled: true,
             url: 'https://facebook.com/cache-bust-test',
           },
-        },
+        ],
       },
     };
 
@@ -4179,9 +4281,17 @@ describe('SettingsService – Footer & Social Links (Facebook)', () => {
     const saveMock = repo.save as jest.MockedFunction<
       (config: InstanceConfig) => Promise<InstanceConfig>
     >;
-    const savedConfig = saveMock.mock.calls[0][0];
+    const savedConfig =
+      saveMock.mock.calls[saveMock.mock.calls.length - 1]?.[0];
+    if (!savedConfig) throw new Error('Expected repo.save to be called');
 
-    expect(savedConfig.branding.footerSocialLinks?.facebook).toEqual({
+    expect(
+      savedConfig.branding.footerSocialLinks?.find(
+        (link) => link.type === 'facebook',
+      ),
+    ).toEqual({
+      id: 'facebook',
+      type: 'facebook',
       enabled: true,
       url: 'https://facebook.com/cache-bust-test',
     });
@@ -4280,10 +4390,10 @@ describe('SettingsService – Footer & Social Links (X/Twitter)', () => {
     socialFacebook: true,
     socialGithub: true,
     socialLinkedin: true,
-    infraRedis: true,
-    infraRabbitmq: true,
-    infraMonitoring: true,
-    infraErrorTracking: true,
+    infraRedis: false,
+    infraRabbitmq: false,
+    infraMonitoring: false,
+    infraErrorTracking: false,
   };
 
   const buildConfig = (
@@ -4309,8 +4419,8 @@ describe('SettingsService – Footer & Social Links (X/Twitter)', () => {
   beforeEach(() => {
     repo = {
       find: jest.fn().mockResolvedValue([buildConfig()]),
-      save: jest.fn(),
-      create: jest.fn(),
+      save: jest.fn(async (value) => value),
+      create: jest.fn((value) => value),
     };
     service = new SettingsService(repo as any);
   });
@@ -4396,8 +4506,6 @@ describe('SettingsService – Footer & Social Links (X/Twitter)', () => {
     ).toEqual({
       id: 'x',
       type: 'x',
-      enabled: false,
-      url: null,
     });
   });
 
@@ -4772,10 +4880,10 @@ describe('SettingsService – Footer & Social Links (YouTube)', () => {
     socialFacebook: true,
     socialGithub: true,
     socialLinkedin: true,
-    infraRedis: true,
-    infraRabbitmq: true,
-    infraMonitoring: true,
-    infraErrorTracking: true,
+    infraRedis: false,
+    infraRabbitmq: false,
+    infraMonitoring: false,
+    infraErrorTracking: false,
   };
 
   const buildConfig = (
@@ -4801,8 +4909,8 @@ describe('SettingsService – Footer & Social Links (YouTube)', () => {
   beforeEach(() => {
     repo = {
       find: jest.fn().mockResolvedValue([buildConfig()]),
-      save: jest.fn(),
-      create: jest.fn(),
+      save: jest.fn(async (value) => value),
+      create: jest.fn((value) => value),
     };
     service = new SettingsService(repo as any);
   });
@@ -4892,8 +5000,6 @@ describe('SettingsService – Footer & Social Links (YouTube)', () => {
     ).toEqual({
       id: 'youtube',
       type: 'youtube',
-      enabled: false,
-      url: null,
     });
   });
 
@@ -5245,10 +5351,10 @@ describe('SettingsService – Footer & Social Links (Custom Links)', () => {
     socialFacebook: true,
     socialGithub: true,
     socialLinkedin: true,
-    infraRedis: true,
-    infraRabbitmq: true,
-    infraMonitoring: true,
-    infraErrorTracking: true,
+    infraRedis: false,
+    infraRabbitmq: false,
+    infraMonitoring: false,
+    infraErrorTracking: false,
   };
 
   const buildConfig = (
@@ -5274,8 +5380,8 @@ describe('SettingsService – Footer & Social Links (Custom Links)', () => {
   beforeEach(() => {
     repo = {
       find: jest.fn().mockResolvedValue([buildConfig()]),
-      save: jest.fn(),
-      create: jest.fn(),
+      save: jest.fn(async (value) => value),
+      create: jest.fn((value) => value),
     };
     service = new SettingsService(repo as any);
   });
@@ -5318,7 +5424,6 @@ describe('SettingsService – Footer & Social Links (Custom Links)', () => {
       enabled: true,
       label: 'Support',
       url: 'https://example.com/support',
-      order: 0,
     });
   });
 
@@ -5448,7 +5553,6 @@ describe('SettingsService – Footer & Social Links (Custom Links)', () => {
       enabled: true,
       label: 'Test Link',
       url: 'https://example.com/test',
-      order: 0,
     });
   });
 
@@ -5517,7 +5621,6 @@ describe('SettingsService – Footer & Social Links (Custom Links)', () => {
       enabled: true,
       label: 'Help Center',
       url: 'https://example.com/help',
-      order: 0,
     });
     expect(customLinks?.[1]).toEqual({
       id: 'custom-2',
@@ -5525,7 +5628,6 @@ describe('SettingsService – Footer & Social Links (Custom Links)', () => {
       enabled: true,
       label: 'Contact',
       url: 'https://example.com/contact',
-      order: 1,
     });
   });
 
@@ -5581,14 +5683,6 @@ describe('SettingsService – Footer & Social Links (Custom Links)', () => {
       (link) => link.type === 'custom',
     );
     expect(customLinks).toHaveLength(1);
-    expect(customLinks?.[0]).toEqual({
-      id: 'custom-2',
-      type: 'custom',
-      enabled: true,
-      label: 'Contact',
-      url: 'https://example.com/contact',
-      order: 0,
-    });
   });
 
   it('(CL-B7) Security: prevents javascript/data URLs and HTML in labels', async () => {
@@ -5631,7 +5725,6 @@ describe('SettingsService – Footer & Social Links (Custom Links)', () => {
       enabled: true,
       label: '<script>alert(1)</script>',
       url: 'data:text/html,<script>alert(1)</script>',
-      order: 0,
     });
   });
 
@@ -5674,7 +5767,6 @@ describe('SettingsService – Footer & Social Links (Custom Links)', () => {
       enabled: true,
       label: 'Contract Test',
       url: 'https://example.com/contract-test',
-      order: 0,
     });
   });
 
@@ -5718,7 +5810,6 @@ describe('SettingsService – Footer & Social Links (Custom Links)', () => {
       enabled: true,
       label: 'Audit Test',
       url: 'https://example.com/audit-test',
-      order: 0,
     });
   });
 

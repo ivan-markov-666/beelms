@@ -181,8 +181,12 @@ describe("Admin Settings – Theme Preset Apply To", () => {
 
     // Verify options are available
     await userEvent.click(applyToDropdown);
-    expect(await screen.findByRole("option", { name: "Light" })).toBeInTheDocument();
-    expect(await screen.findByRole("option", { name: "Dark" })).toBeInTheDocument();
+    expect(
+      await screen.findByRole("option", { name: "Light" }),
+    ).toBeInTheDocument();
+    expect(
+      await screen.findByRole("option", { name: "Dark" }),
+    ).toBeInTheDocument();
     expect(
       await screen.findByRole("option", { name: "Light + Dark" }),
     ).toBeInTheDocument();
@@ -281,8 +285,12 @@ describe("Admin Settings – Theme Preset Apply To", () => {
     await userEvent.click(applyToDropdown);
     // Options are currently always present; feature toggles affect availability of palettes,
     // not the preset target dropdown options.
-    expect(await screen.findByRole("option", { name: "Light" })).toBeInTheDocument();
-    expect(await screen.findByRole("option", { name: "Dark" })).toBeInTheDocument();
+    expect(
+      await screen.findByRole("option", { name: "Light" }),
+    ).toBeInTheDocument();
+    expect(
+      await screen.findByRole("option", { name: "Dark" }),
+    ).toBeInTheDocument();
     expect(
       await screen.findByRole("option", { name: "Light + Dark" }),
     ).toBeInTheDocument();
@@ -363,10 +371,10 @@ describe("Admin Settings – Theme Preset Apply To", () => {
     await user.click(applyPresetButton);
 
     await waitFor(() => {
-      expect(screen.getByText(/приложих пресет/i)).toBeInTheDocument();
-      expect(screen.getByText(/\(Light\)/i)).toBeInTheDocument();
       expect(
-        screen.getByText(/натисни запази за да го запазиш/i),
+        screen.getByText(
+          /приложих пресет\s+".*"\s+\(Light\)\.?\s*натисни запази за да го запазиш/i,
+        ),
       ).toBeInTheDocument();
     });
   });
@@ -424,11 +432,16 @@ describe("Admin Settings – Theme Preset Apply To", () => {
     applyToDropdown.focus();
     expect(applyToDropdown).toHaveFocus();
 
-    expect(applyToDropdown).toHaveAttribute("aria-label", "Theme preset target");
+    expect(applyToDropdown).toHaveAttribute(
+      "aria-label",
+      "Theme preset target",
+    );
 
     await user.keyboard("[Enter]");
     expect(applyToDropdown).toHaveAttribute("aria-expanded", "true");
-    expect(await screen.findByRole("option", { name: "Light" })).toBeInTheDocument();
+    expect(
+      await screen.findByRole("option", { name: "Light" }),
+    ).toBeInTheDocument();
   });
 
   it("(AP-F10) Rapid target switching before apply does not queue multiple fetches (only latest apply triggers)", async () => {

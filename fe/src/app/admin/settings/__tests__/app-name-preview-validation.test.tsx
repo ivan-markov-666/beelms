@@ -85,7 +85,8 @@ const renderAndOpenBranding = async () => {
   return { ...renderResult, user };
 };
 
-const getAppNameInput = () => screen.getByRole("textbox", { name: /app name/i });
+const getAppNameInput = () =>
+  screen.getByRole("textbox", { name: /app name/i });
 
 // Helper to mock successful API response
 const mockSuccessfulResponse = (appName = "BeeLMS") => {

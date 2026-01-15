@@ -1225,6 +1225,11 @@ export class AdminUpdateInstanceSettingsDto {
 
   @IsOptional()
   @ValidateNested()
+  @Type(() => AdminUpdateThemeDto)
+  theme?: AdminUpdateThemeDto | null;
+
+  @IsOptional()
+  @ValidateNested()
   @Type(() => AdminUpdateFeaturesDto)
   features?: AdminUpdateFeaturesDto;
 
