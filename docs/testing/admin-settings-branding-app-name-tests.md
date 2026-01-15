@@ -281,25 +281,25 @@ Includes built-in preset cards, edit/apply buttons, custom preset creation, and 
 #### Backend tests (Apply preset)
 | ID | Scenario | Status | Notes |
 | --- | --- | --- | --- |
-| PR-B1 | Built-in preset apply merges palette colors and persists to correct targets (respecting Apply-to state) | ⬜️ Not started | |
-| PR-B2 | Editing a built-in preset derives from current stored palette; backend ensures immutable preset data isn’t persisted unless explicitly saved | ⬜️ Not started | |
-| PR-B3 | Custom preset save validates name/description (length, symbols) and trims whitespace | ⬜️ Not started | |
-| PR-B4 | Saving custom preset stores both light/dark palettes; loading preset reproduces identical palette objects | ⬜️ Not started | |
-| PR-B5 | Duplicate custom preset names allowed? (define behavior) – add test to ensure deterministic conflict handling | ⬜️ Not started | |
-| PR-B6 | Custom preset edit updates by ID and does not reorder other presets; ensures max count (<=50) enforced | ⬜️ Not started | |
-| PR-B7 | Deleting preset (if supported) removes entry and `publicSettings.branding.customThemePresets` reflects change | ⬜️ Not started | |
-| PR-B8 | Applying preset with invalid data (missing colors) rejected with descriptive error | ⬜️ Not started | |
-| PR-B9 | Preset application honors feature toggles (cannot apply dark palette if dark theme disabled) | ⬜️ Not started | |
-| PR-B10 | Security: preset name/description sanitized (no script tags, newline injection) before persistence | ⬜️ Not started | |
-| PR-B11 | Audit event emitted when preset applied or saved, capturing preset id/name and actor email | ⬜️ Not started | |
-| PR-B12 | Public settings serialization includes new palettes immediately after preset apply | ⬜️ Not started | |
-| PR-B13 | Race condition: two preset applies in quick succession persist latest state (repo.save last call wins) | ⬜️ Not started | |
-| PR-B14 | Applying preset while theme.mode=system updates both palettes; ensure SSR default theme picks correct CSS values | ⬜️ Not started | |
-| PR-B15 | Preset metadata localization (if supported) persists per-lang descriptions correctly | ⬜️ Not started | |
-| PR-B16 | Importing presets via API enforces size limits (max hex values, number of presets) | ⬜️ Not started | |
-| PR-B17 | Applying preset after deleting related custom preset handles missing reference gracefully | ⬜️ Not started | |
-| PR-B18 | Preset apply honors transaction boundaries—if palette validation fails, no partial palette stored | ⬜️ Not started | |
-| PR-B19 | Ensure default preset list is immutable (backend rejects attempts to save built-in preset changes unless copying to custom) | ⬜️ Not started | |
+| PR-B1 | Built-in preset apply merges palette colors and persists to correct targets (respecting Apply-to state) | ✅ Implemented | Added to settings.service.spec.ts |
+| PR-B2 | Editing a built-in preset derives from current stored palette; backend ensures immutable preset data isn’t persisted unless explicitly saved | ✅ Implemented | Added to settings.service.spec.ts |
+| PR-B3 | Custom preset save validates name/description (length, symbols) and trims whitespace | ✅ Implemented | Added to settings.service.spec.ts |
+| PR-B4 | Saving custom preset stores both light/dark palettes; loading preset reproduces identical palette objects | ✅ Implemented | Added to settings.service.spec.ts |
+| PR-B5 | Duplicate custom preset names allowed? (define behavior) – add test to ensure deterministic conflict handling | ✅ Implemented | Added to settings.service.spec.ts |
+| PR-B6 | Custom preset edit updates by ID and does not reorder other presets; ensures max count (<=50) enforced | ✅ Implemented | Added to settings.service.spec.ts |
+| PR-B7 | Deleting preset (if supported) removes entry and `publicSettings.branding.customThemePresets` reflects change | ✅ Implemented | Added to settings.service.spec.ts |
+| PR-B8 | Applying preset with invalid data (missing colors) rejected with descriptive error | ✅ Implemented | Added to settings.service.spec.ts |
+| PR-B9 | Preset application honors feature toggles (cannot apply dark palette if dark theme disabled) | ✅ Implemented | Added to settings.service.spec.ts |
+| PR-B10 | Security: preset name/description sanitized (no script tags, newline injection) before persistence | ✅ Implemented | Added to settings.service.spec.ts |
+| PR-B11 | Audit event emitted when preset applied or saved, capturing preset id/name and actor email | ✅ Implemented | Added to settings.service.spec.ts |
+| PR-B12 | Public settings serialization includes new palettes immediately after preset apply | ✅ Implemented | Added to settings.service.spec.ts |
+| PR-B13 | Race condition: two preset applies in quick succession persist latest state (repo.save last call wins) | ✅ Implemented | Added to settings.service.spec.ts |
+| PR-B14 | Applying preset while theme.mode=system updates both palettes; ensure SSR default theme picks correct CSS values | ✅ Implemented | Added to settings.service.spec.ts |
+| PR-B15 | Preset metadata localization (if supported) persists per-lang descriptions correctly | ✅ Implemented | Added to settings.service.spec.ts |
+| PR-B16 | Importing presets via API enforces size limits (max hex values, number of presets) | ✅ Implemented | Added to settings.service.spec.ts |
+| PR-B17 | Applying preset after deleting related custom preset handles missing reference gracefully | ✅ Implemented | Added to settings.service.spec.ts |
+| PR-B18 | Preset apply honors transaction boundaries—if palette validation fails, no partial palette stored | ✅ Implemented | Added to settings.service.spec.ts |
+| PR-B19 | Ensure default preset list is immutable (backend rejects attempts to save built-in preset changes unless copying to custom) | ✅ Implemented | Added to settings.service.spec.ts |
 
 #### Frontend tests (Apply preset)
 | ID | Scenario | Status | Notes |
