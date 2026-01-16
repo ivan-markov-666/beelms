@@ -123,31 +123,40 @@ describe('SettingsService – social credentials', () => {
     flagPicker: null,
   };
 
-  const buildConfig = (
-    overrides: Partial<InstanceConfig> = {},
-  ): InstanceConfig => ({
-    id: 'cfg-id',
-    branding: defaultBranding,
-    features: defaultFeatures,
-    languages: defaultLanguages,
-    seo: {
-      baseUrl: null,
-      titleTemplate: '{page} | {site}',
-      defaultTitle: null,
-      defaultDescription: null,
-      robots: { index: true },
-      sitemap: {
-        enabled: true,
-        includeWiki: true,
-        includeCourses: true,
-        includeLegal: true,
+  type ConfigOverrides = Omit<Partial<InstanceConfig>, 'branding'> & {
+    branding?: Partial<InstanceBranding>;
+  };
+
+  const buildConfig = (overrides: ConfigOverrides = {}): InstanceConfig => {
+    const { branding, ...rest } = overrides;
+
+    return {
+      id: 'cfg-id',
+      branding: {
+        ...defaultBranding,
+        ...branding,
       },
-    },
-    socialCredentials: null,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    ...overrides,
-  });
+      features: defaultFeatures,
+      languages: defaultLanguages,
+      seo: {
+        baseUrl: null,
+        titleTemplate: '{page} | {site}',
+        defaultTitle: null,
+        defaultDescription: null,
+        robots: { index: true },
+        sitemap: {
+          enabled: true,
+          includeWiki: true,
+          includeCourses: true,
+          includeLegal: true,
+        },
+      },
+      socialCredentials: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      ...rest,
+    };
+  };
 
   beforeEach(() => {
     repo = {
@@ -1628,25 +1637,31 @@ describe('SettingsService – theme mode', () => {
     infraErrorTracking: false,
   };
 
-  const buildConfig = (
-    overrides: Partial<InstanceConfig> = {},
-  ): InstanceConfig => ({
-    id: 'test-id',
-    branding: {
-      ...defaultBranding,
-      ...overrides.branding,
-    },
-    features: { ...defaultFeatures },
-    languages: {
-      default: 'bg',
-      supported: ['bg', 'en'],
-    },
-    seo: {},
-    socialCredentials: {},
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    ...overrides,
-  });
+  type ConfigOverrides = Omit<Partial<InstanceConfig>, 'branding'> & {
+    branding?: Partial<InstanceBranding>;
+  };
+
+  const buildConfig = (overrides: ConfigOverrides = {}): InstanceConfig => {
+    const { branding, ...rest } = overrides;
+
+    return {
+      id: 'test-id',
+      branding: {
+        ...defaultBranding,
+        ...branding,
+      },
+      features: { ...defaultFeatures },
+      languages: {
+        default: 'bg',
+        supported: ['bg', 'en'],
+      },
+      seo: {},
+      socialCredentials: {},
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      ...rest,
+    };
+  };
 
   beforeEach(() => {
     repo = {
@@ -2038,25 +2053,31 @@ describe('SettingsService – theme preset apply to', () => {
     infraErrorTracking: false,
   };
 
-  const buildConfig = (
-    overrides: Partial<InstanceConfig> = {},
-  ): InstanceConfig => ({
-    id: 'test-id',
-    branding: {
-      ...defaultBranding,
-      ...overrides.branding,
-    },
-    features: { ...defaultFeatures },
-    languages: {
-      default: 'bg',
-      supported: ['bg', 'en'],
-    },
-    seo: {},
-    socialCredentials: {},
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    ...overrides,
-  });
+  type ConfigOverrides = Omit<Partial<InstanceConfig>, 'branding'> & {
+    branding?: Partial<InstanceBranding>;
+  };
+
+  const buildConfig = (overrides: ConfigOverrides = {}): InstanceConfig => {
+    const { branding, ...rest } = overrides;
+
+    return {
+      id: 'test-id',
+      branding: {
+        ...defaultBranding,
+        ...branding,
+      },
+      features: { ...defaultFeatures },
+      languages: {
+        default: 'bg',
+        supported: ['bg', 'en'],
+      },
+      seo: {},
+      socialCredentials: {},
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      ...rest,
+    };
+  };
 
   beforeEach(() => {
     repo = {
@@ -3256,25 +3277,31 @@ describe('SettingsService – custom theme presets', () => {
     infraErrorTracking: false,
   };
 
-  const buildConfig = (
-    overrides: Partial<InstanceConfig> = {},
-  ): InstanceConfig => ({
-    id: 'test-id',
-    branding: {
-      ...defaultBranding,
-      ...overrides.branding,
-    },
-    features: { ...defaultFeatures },
-    languages: {
-      default: 'bg',
-      supported: ['bg', 'en'],
-    },
-    seo: {},
-    socialCredentials: {},
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    ...overrides,
-  });
+  type ConfigOverrides = Omit<Partial<InstanceConfig>, 'branding'> & {
+    branding?: Partial<InstanceBranding>;
+  };
+
+  const buildConfig = (overrides: ConfigOverrides = {}): InstanceConfig => {
+    const { branding, ...rest } = overrides;
+
+    return {
+      id: 'test-id',
+      branding: {
+        ...defaultBranding,
+        ...branding,
+      },
+      features: { ...defaultFeatures },
+      languages: {
+        default: 'bg',
+        supported: ['bg', 'en'],
+      },
+      seo: {},
+      socialCredentials: {},
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      ...rest,
+    };
+  };
 
   beforeEach(() => {
     repo = {
@@ -5228,6 +5255,299 @@ describe('SettingsService – branding asset upload (logo variants)', () => {
     expect(savedConfig.branding.logoUrl).toBe(
       'https://cdn.example.com/branding/media/logo.svg',
     );
+  });
+});
+
+describe('SettingsService – branding asset upload (fonts)', () => {
+  let repo: {
+    find: jest.Mock;
+    save: jest.Mock;
+    create: jest.Mock;
+  };
+  let service: SettingsService;
+
+  const defaultBranding: InstanceBranding = {
+    appName: 'BeeLMS',
+    browserTitle: 'BeeLMS',
+    loginSocialUnavailableMessageEnabled: true,
+    loginSocialResetPasswordHintEnabled: true,
+    registerSocialUnavailableMessageEnabled: true,
+    pageLinks: {
+      enabled: true,
+      bySlug: {
+        terms: { footer: true },
+        privacy: { footer: true },
+        'cookie-policy': { footer: true },
+        imprint: { footer: true },
+        accessibility: { footer: true },
+        contact: { footer: true },
+        faq: { footer: true },
+        support: { footer: true },
+      },
+    },
+    poweredByBeeLms: { enabled: false, url: null },
+    cursorUrl: null,
+    cursorLightUrl: null,
+    cursorDarkUrl: null,
+    cursorPointerUrl: null,
+    cursorPointerLightUrl: null,
+    cursorPointerDarkUrl: null,
+    cursorHotspot: { x: 8, y: 8 },
+    faviconUrl: null,
+    logoUrl: null,
+    logoLightUrl: null,
+    logoDarkUrl: null,
+    fontUrl: null,
+    fontUrlByLang: {},
+    fontLicenseUrl: null,
+    fontLicenseUrlByLang: {},
+    theme: {
+      mode: 'system',
+      light: { background: '#ffffff', foreground: '#000000' },
+      dark: { background: '#000000', foreground: '#ffffff' },
+    },
+  };
+
+  const defaultFeatures: InstanceFeatures = {
+    wiki: true,
+    wikiPublic: true,
+    courses: true,
+    coursesPublic: true,
+    myCourses: true,
+    profile: true,
+    accessibilityWidget: true,
+    seo: true,
+    themeLight: true,
+    themeDark: true,
+    themeModeSelector: true,
+    auth: true,
+    authLogin: true,
+    authRegister: true,
+    auth2fa: true,
+    captcha: true,
+    captchaLogin: true,
+    captchaRegister: true,
+    captchaForgotPassword: true,
+    captchaChangePassword: true,
+    paidCourses: true,
+    paymentsStripe: true,
+    paymentsPaypal: true,
+    paymentsMypos: true,
+    paymentsRevolut: true,
+    gdprLegal: true,
+    pageTerms: true,
+    pagePrivacy: true,
+    pageCookiePolicy: true,
+    pageImprint: true,
+    pageAccessibility: true,
+    pageContact: true,
+    pageFaq: true,
+    pageSupport: true,
+    pageNotFound: true,
+    socialGoogle: true,
+    socialFacebook: true,
+    socialGithub: true,
+    socialLinkedin: true,
+    infraRedis: false,
+    infraRabbitmq: false,
+    infraMonitoring: false,
+    infraErrorTracking: false,
+  };
+
+  const buildConfig = (
+    overrides: Partial<InstanceConfig> = {},
+  ): InstanceConfig => ({
+    id: 'test-id',
+    branding: {
+      ...defaultBranding,
+      ...overrides.branding,
+    },
+    features: { ...defaultFeatures },
+    languages: {
+      default: 'bg',
+      supported: ['bg', 'en'],
+    },
+    seo: {},
+    socialCredentials: {},
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    ...overrides,
+  });
+
+  beforeEach(() => {
+    repo = {
+      find: jest.fn().mockResolvedValue([buildConfig()]),
+      save: jest.fn(async (value) => value),
+      create: jest.fn((value) => value),
+    };
+    service = new SettingsService(repo as any);
+  });
+
+  it('(FT-B4) Removing font sets fontUrl to null', async () => {
+    const existing = buildConfig({
+      branding: {
+        ...defaultBranding,
+        fontUrl: 'https://cdn.example.com/branding/media/font.woff2',
+      },
+    });
+    repo.find.mockResolvedValue([existing]);
+
+    const payload = {
+      branding: {
+        fontUrl: null,
+      },
+    };
+
+    await service.updateInstanceConfig(
+      payload as AdminUpdateInstanceSettingsDto,
+    );
+
+    const saveMock = repo.save as jest.MockedFunction<
+      (config: InstanceConfig) => Promise<InstanceConfig>
+    >;
+    const savedConfig = saveMock.mock.calls[0][0];
+
+    expect(savedConfig.branding.fontUrl).toBeNull();
+  });
+
+  it('(FT-B5) Per-language font overrides persist and filter unsupported locales', async () => {
+    const existing = buildConfig();
+    repo.find.mockResolvedValue([existing]);
+
+    const payload = {
+      branding: {
+        fontUrlByLang: {
+          BG: 'https://cdn.example.com/branding/media/font-bg.woff2',
+          fr: 'https://cdn.example.com/branding/media/font-fr.woff2',
+          ' en ': 'https://cdn.example.com/branding/media/font-en.woff2',
+        },
+      },
+    };
+
+    await service.updateInstanceConfig(
+      payload as AdminUpdateInstanceSettingsDto,
+    );
+
+    const saveMock = repo.save as jest.MockedFunction<
+      (config: InstanceConfig) => Promise<InstanceConfig>
+    >;
+    const savedConfig = saveMock.mock.calls[0][0];
+
+    expect(savedConfig.branding.fontUrlByLang).toEqual({
+      bg: 'https://cdn.example.com/branding/media/font-bg.woff2',
+      en: 'https://cdn.example.com/branding/media/font-en.woff2',
+    });
+  });
+
+  it('(FT-B6) Normalizes font URLs and prunes empty per-language entries', async () => {
+    const existing = buildConfig();
+    repo.find.mockResolvedValue([existing]);
+
+    const payload = {
+      branding: {
+        fontUrl: '  https://cdn.example.com/branding/media/font.woff2  ',
+        fontUrlByLang: {
+          bg: '  /branding/media/font-bg.woff2  ',
+          en: '   ',
+        },
+      },
+    };
+
+    await service.updateInstanceConfig(
+      payload as AdminUpdateInstanceSettingsDto,
+    );
+
+    const saveMock = repo.save as jest.MockedFunction<
+      (config: InstanceConfig) => Promise<InstanceConfig>
+    >;
+    const savedConfig = saveMock.mock.calls[0][0];
+
+    expect(savedConfig.branding.fontUrl).toBe(
+      'https://cdn.example.com/branding/media/font.woff2',
+    );
+    expect(savedConfig.branding.fontUrlByLang).toEqual({
+      bg: '/branding/media/font-bg.woff2',
+    });
+  });
+
+  it('(FT-B7) Per-language font URLs persist without filesystem path leakage', async () => {
+    const existing = buildConfig();
+    repo.find.mockResolvedValue([existing]);
+
+    const bgUrl = 'https://cdn.example.com/branding/media/font-bg.woff2';
+    const payload = {
+      branding: {
+        fontUrlByLang: {
+          bg: bgUrl,
+        },
+      },
+    };
+
+    await service.updateInstanceConfig(
+      payload as AdminUpdateInstanceSettingsDto,
+    );
+
+    const saveMock = repo.save as jest.MockedFunction<
+      (config: InstanceConfig) => Promise<InstanceConfig>
+    >;
+    const savedConfig = saveMock.mock.calls[0][0];
+
+    expect(savedConfig.branding.fontUrlByLang).toEqual({ bg: bgUrl });
+    expect(savedConfig.branding.fontUrlByLang?.bg ?? '').not.toContain(
+      process.cwd(),
+    );
+  });
+
+  it('(FT-B8) Audit placeholder updates timestamp when font overrides change', async () => {
+    const existing = buildConfig();
+    repo.find.mockResolvedValue([existing]);
+
+    const payload = {
+      branding: {
+        fontUrlByLang: {
+          bg: 'https://cdn.example.com/branding/media/font-bg.woff2',
+        },
+      },
+    };
+
+    await service.updateInstanceConfig(
+      payload as AdminUpdateInstanceSettingsDto,
+    );
+
+    const saveMock = repo.save as jest.MockedFunction<
+      (config: InstanceConfig) => Promise<InstanceConfig>
+    >;
+    const savedConfig = saveMock.mock.calls[0][0];
+
+    expect(savedConfig.updatedAt).toBeInstanceOf(Date);
+  });
+
+  it('(FL-B3) Removing license file clears fontLicenseUrl', async () => {
+    const existing = buildConfig({
+      branding: {
+        ...defaultBranding,
+        fontLicenseUrl:
+          'https://cdn.example.com/branding/media/font-license.pdf',
+      },
+    });
+    repo.find.mockResolvedValue([existing]);
+
+    const payload = {
+      branding: {
+        fontLicenseUrl: null,
+      },
+    };
+
+    await service.updateInstanceConfig(
+      payload as AdminUpdateInstanceSettingsDto,
+    );
+
+    const saveMock = repo.save as jest.MockedFunction<
+      (config: InstanceConfig) => Promise<InstanceConfig>
+    >;
+    const savedConfig = saveMock.mock.calls[0][0];
+
+    expect(savedConfig.branding.fontLicenseUrl).toBeNull();
   });
 });
 

@@ -341,6 +341,9 @@ export class AdminSettingsController {
     const maxBytes = options?.maxBytes ?? 2 * 1024 * 1024;
     const size =
       typeof file.size === 'number' ? file.size : file.buffer?.length;
+    if (typeof size === 'number' && size <= 0) {
+      throw new BadRequestException('File is empty');
+    }
     if (typeof size === 'number' && size > maxBytes) {
       throw new BadRequestException('File is too large');
     }
@@ -397,6 +400,9 @@ export class AdminSettingsController {
     const maxBytes = options?.maxBytes ?? 5 * 1024 * 1024;
     const size =
       typeof file.size === 'number' ? file.size : file.buffer?.length;
+    if (typeof size === 'number' && size <= 0) {
+      throw new BadRequestException('File is empty');
+    }
     if (typeof size === 'number' && size > maxBytes) {
       throw new BadRequestException('File is too large');
     }
