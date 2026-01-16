@@ -483,22 +483,22 @@ Includes base font file and optional per-language variants.
 #### Backend tests (Font uploads)
 | ID | Scenario | Status | Notes |
 | --- | --- | --- | --- |
-| FT-B1 | Accepts only `.woff2/.woff/.ttf/.otf` and enforces 2MB limit | ⬜️ Not started | |
-| FT-B2 | Rejects uploads without buffer or with zero bytes | ⬜️ Not started | |
-| FT-B3 | Saves file with `font-*.ext` prefix and returns media URL | ⬜️ Not started | |
-| FT-B4 | Removing font (`fontUrl = null`) deletes previous file and resets typography preview | ⬜️ Not started | |
-| FT-B5 | Per-language font overrides stored in `fontUrlByLang` map; invalid locale codes rejected | ⬜️ Not started | |
-| FT-B6 | Normalizes URLs and ensures sanitized dictionary entries | ⬜️ Not started | |
-| FT-B7 | Import/export preserves per-language fonts without leaking absolute paths | ⬜️ Not started | |
-| FT-B8 | Audit logs capture uploader + target language | ⬜️ Not started | |
+| FT-B1 | Accepts only `.woff2/.woff/.ttf/.otf` and enforces 2MB limit | ✅ Implemented | Added to admin-settings.controller.spec.ts |
+| FT-B2 | Rejects uploads without buffer or with zero bytes | ✅ Implemented | Added to admin-settings.controller.spec.ts |
+| FT-B3 | Saves file with `font-*.ext` prefix and returns media URL | ✅ Implemented | Added to admin-settings.controller.spec.ts |
+| FT-B4 | Removing font (`fontUrl = null`) deletes previous file and resets typography preview | ✅ Implemented | Added to settings.service.spec.ts |
+| FT-B5 | Per-language font overrides stored in `fontUrlByLang` map; invalid locale codes rejected | ✅ Implemented | Added to settings.service.spec.ts |
+| FT-B6 | Normalizes URLs and ensures sanitized dictionary entries | ✅ Implemented | Added to settings.service.spec.ts |
+| FT-B7 | Import/export preserves per-language fonts without leaking absolute paths | ✅ Implemented | Added to settings.service.spec.ts |
+| FT-B8 | Audit logs capture uploader + target language | ✅ Implemented | Added to settings.service.spec.ts |
 
 #### Backend tests (Font license upload)
 | ID | Scenario | Status | Notes |
 | --- | --- | --- | --- |
-| FL-B1 | Allows only approved extensions (pdf/txt/doc/docx/odt/png/jpg/jpeg/webp/zip) and 5MB size | ⬜️ Not started | |
-| FL-B2 | Missing buffer or invalid mime returns BadRequest | ⬜️ Not started | |
-| FL-B3 | Removing license file cleans up media entry | ⬜️ Not started | |
-| FL-B4 | Security: prevents script injection via document name | ⬜️ Not started | |
+| FL-B1 | Allows only approved extensions (pdf/txt/doc/docx/odt/png/jpg/jpeg/webp/zip) and 5MB size | ✅ Implemented | Added to admin-settings.controller.spec.ts |
+| FL-B2 | Missing buffer or invalid mime returns BadRequest | ✅ Implemented | Added to admin-settings.controller.spec.ts |
+| FL-B3 | Removing license file cleans up media entry | ✅ Implemented | Added to settings.service.spec.ts |
+| FL-B4 | Security: prevents script injection via document name | ✅ Implemented | Added to admin-settings.controller.spec.ts |
 
 #### Frontend tests (Fonts & licenses)
 | ID | Scenario | Status | Notes |
