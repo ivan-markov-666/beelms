@@ -6,7 +6,9 @@ import {
   IsObject,
   IsOptional,
   IsString,
+  Max,
   Matches,
+  Min,
   ArrayMinSize,
   Validate,
   ValidateIf,
@@ -20,10 +22,14 @@ import { Type } from 'class-transformer';
 export class AdminUpdateCursorHotspotDto {
   @IsOptional()
   @IsInt()
+  @Min(0)
+  @Max(255)
   x?: number | null;
 
   @IsOptional()
   @IsInt()
+  @Min(0)
+  @Max(255)
   y?: number | null;
 }
 

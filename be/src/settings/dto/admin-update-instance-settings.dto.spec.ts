@@ -86,3 +86,25 @@ describe('AdminUpdateBrandingDto – twitter card consistency', () => {
     expect(twitterError?.children?.[0]?.property).toBe('card');
   });
 });
+
+describe('AdminUpdateBrandingDto – cursor hotspot validation', () => {
+  it('accepts hotspot values between 0 and 255', async () => {
+    const dto = plainToInstance(AdminUpdateBrandingDto, {
+      cursorHotspot: { x: 0, y: 255 },
+    });
+
+    const errors = await validate(dto);
+    expect(errors).toEqual([]);
+  });
+
+  it('rejects hotspot values outside 0-255 range', async () => {
+    const dto = plainToInstance(AdminUpdateBrandingDto, {
+      cursorHotspot: { x: -1, y: 256 },
+    });
+
+    const errors = await validate(dto);
+    expect(errors.length).toBeGreaterThan(0);
+    const hotspotError = errors.find((e) => e.property === 'cursorHotspot');
+    expect(hotspotError).toBeDefined();
+  });
+});

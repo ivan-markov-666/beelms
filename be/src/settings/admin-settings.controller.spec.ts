@@ -17,6 +17,30 @@ type FontUploadHarness = {
   handleBrandingLicenseUpload: (file: BrandingUploadedFile) => Promise<string>;
 };
 
+type CursorUploadHarness = {
+  uploadCursor: (file: BrandingUploadedFile) => Promise<{ url: string }>;
+  uploadCursorLight: (
+    file: BrandingUploadedFile,
+    previousUrl?: string,
+  ) => Promise<{ url: string }>;
+  uploadCursorDark: (
+    file: BrandingUploadedFile,
+    previousUrl?: string,
+  ) => Promise<{ url: string }>;
+  uploadCursorPointer: (
+    file: BrandingUploadedFile,
+    previousUrl?: string,
+  ) => Promise<{ url: string }>;
+  uploadCursorPointerLight: (
+    file: BrandingUploadedFile,
+    previousUrl?: string,
+  ) => Promise<{ url: string }>;
+  uploadCursorPointerDark: (
+    file: BrandingUploadedFile,
+    previousUrl?: string,
+  ) => Promise<{ url: string }>;
+};
+
 describe('AdminSettingsController – branding font uploads', () => {
   let controller: AdminSettingsController;
 
@@ -94,6 +118,97 @@ describe('AdminSettingsController – branding font uploads', () => {
     expect(url).toBe('/branding/media/font-1700000000000.woff2');
 
     nowSpy.mockRestore();
+  });
+});
+
+describe('AdminSettingsController – branding cursor uploads', () => {
+  let controller: AdminSettingsController;
+
+  const mockSettingsService = {} as unknown as SettingsService;
+  const mockSocialAvailability = {
+    getProviderStatuses: jest.fn(),
+  } as unknown as SocialLoginAvailabilityService;
+  const mockSocialDiagnostics = {
+    testConnection: jest.fn(),
+  } as unknown as SocialProviderDiagnosticsService;
+
+  const buildFile = (
+    overrides: Partial<BrandingUploadedFile> = {},
+  ): BrandingUploadedFile => ({
+    originalname: 'cursor.png',
+    buffer: Buffer.from('cursor-data'),
+    size: 128,
+    mimetype: 'image/png',
+    ...overrides,
+  });
+
+  const getHarness = () => controller as unknown as CursorUploadHarness;
+
+  beforeEach(() => {
+    controller = new AdminSettingsController(
+      mockSettingsService,
+      mockSocialAvailability,
+      mockSocialDiagnostics,
+    );
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+    delete process.env.MEDIA_ROOT;
+  });
+
+  it('(CS-B1) Accepts PNG/WebP and enforces 256KB limit', async () => {
+    await expect(
+      getHarness().uploadCursor(buildFile({ mimetype: 'image/gif' })),
+    ).rejects.toThrow('Unsupported file type');
+
+    await expect(
+      getHarness().uploadCursor(
+        buildFile({ size: 256 * 1024 + 1, buffer: Buffer.alloc(1) }),
+      ),
+    ).rejects.toThrow('File is too large');
+  });
+
+  it('(CS-B3) Stores separate URLs for cursor variants', async () => {
+    const nowSpy = jest.spyOn(Date, 'now').mockReturnValue(1700000000000);
+    jest.spyOn(fs.promises, 'mkdir').mockResolvedValue(undefined);
+    jest.spyOn(fs.promises, 'writeFile').mockResolvedValue(undefined);
+
+    const harness = getHarness();
+
+    await expect(harness.uploadCursor(buildFile())).resolves.toEqual({
+      url: '/branding/media/cursor-1700000000000.png',
+    });
+    await expect(harness.uploadCursorLight(buildFile())).resolves.toEqual({
+      url: '/branding/media/cursor-light-1700000000000.png',
+    });
+    await expect(harness.uploadCursorDark(buildFile())).resolves.toEqual({
+      url: '/branding/media/cursor-dark-1700000000000.png',
+    });
+    await expect(harness.uploadCursorPointer(buildFile())).resolves.toEqual({
+      url: '/branding/media/cursor-pointer-1700000000000.png',
+    });
+    const cursorPointerLightUpload =
+      harness.uploadCursorPointerLight(buildFile());
+    const cursorPointerDarkUpload =
+      harness.uploadCursorPointerDark(buildFile());
+
+    await expect(cursorPointerLightUpload).resolves.toEqual({
+      url: '/branding/media/cursor-pointer-light-1700000000000.png',
+    });
+    await expect(cursorPointerDarkUpload).resolves.toEqual({
+      url: '/branding/media/cursor-pointer-dark-1700000000000.png',
+    });
+
+    nowSpy.mockRestore();
+  });
+
+  it('(CS-B6) Rejects animated cursor uploads (GIF)', async () => {
+    await expect(
+      getHarness().uploadCursor(
+        buildFile({ mimetype: 'image/gif', originalname: 'cursor.gif' }),
+      ),
+    ).rejects.toThrow('Unsupported file type');
   });
 });
 
