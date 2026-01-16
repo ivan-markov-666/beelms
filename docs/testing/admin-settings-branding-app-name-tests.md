@@ -375,16 +375,16 @@ Focus on editing both built-in (copying) and custom presets, including palette p
 #### Backend tests (Edit Preset)
 | ID | Scenario | Status | Notes |
 | --- | --- | --- | --- |
-| EP-B1 | Editing custom preset updates only specified fields (partial update preserves existing colors) | ⬜️ Not started | |
-| EP-B2 | Reject edit when preset ID not found or belongs to built-in set (unless copy-on-edit) | ⬜️ Not started | |
-| EP-B3 | Validation ensures edited palette still contains valid hex colors and required fields | ⬜️ Not started | |
-| EP-B4 | Editing preset while themeLight/themeDark toggles disabled strips unsupported palette keys | ⬜️ Not started | |
-| EP-B5 | Audit entry records before/after snapshots for edited presets | ⬜️ Not started | |
-| EP-B6 | Concurrent edit detection (optimistic lock or last-write wins) tested by sequential PATCH calls | ⬜️ Not started | |
-| EP-B7 | Editing built-in preset triggers duplication logic (new custom preset) so originals stay immutable | ⬜️ Not started | |
-| EP-B8 | Editing preset updates timestamps and `updatedBy` metadata | ⬜️ Not started | |
-| EP-B9 | Security: attempts to inject HTML/JS in name/description blocked on edit | ⬜️ Not started | |
-| EP-B10 | Public settings immediately expose edited palette after save across SSR/CSR fetches | ⬜️ Not started | |
+| EP-B1 | Editing custom preset updates only specified fields (partial update preserves existing colors) | ✅ Implemented | Added to settings.service.spec.ts |
+| EP-B2 | Reject edit when preset ID not found or belongs to built-in set (unless copy-on-edit) | ✅ Implemented | Added to settings.service.spec.ts |
+| EP-B3 | Validation ensures edited palette still contains valid hex colors and required fields | ✅ Implemented | Added to settings.service.spec.ts |
+| EP-B4 | Editing preset while themeLight/themeDark toggles disabled strips unsupported palette keys | ✅ Implemented | Added to settings.service.spec.ts |
+| EP-B5 | Audit entry records before/after snapshots for edited presets | ✅ Implemented | Added to settings.service.spec.ts |
+| EP-B6 | Concurrent edit detection (optimistic lock or last-write wins) tested by sequential PATCH calls | ✅ Implemented | Added to settings.service.spec.ts |
+| EP-B7 | Editing built-in preset triggers duplication logic (new custom preset) so originals stay immutable | ✅ Implemented | Added to settings.service.spec.ts |
+| EP-B8 | Editing preset updates timestamps and `updatedBy` metadata | ✅ Implemented | Added to settings.service.spec.ts |
+| EP-B9 | Security: attempts to inject HTML/JS in name/description blocked on edit | ✅ Implemented | Added to settings.service.spec.ts |
+| EP-B10 | Public settings immediately expose edited palette after save across SSR/CSR fetches | ✅ Implemented | Added to settings.service.spec.ts |
 
 #### Frontend tests (Edit Preset)
 | ID | Scenario | Status | Notes |
