@@ -390,17 +390,18 @@ Focus on editing both built-in (copying) and custom presets, including palette p
 | ID | Scenario | Status | Notes |
 | --- | --- | --- | --- |
 | EP-F1 | Clicking “Edit” on custom preset opens modal with prefilled name/description/colors | ⬜️ Not started | |
-| EP-F2 | Editing built-in preset forces user to “Save as custom preset” (if required) and restricts overwriting | ⬜️ Not started | |
-| EP-F3 | Changing colors in edit modal updates preview swatches live | ⬜️ Not started | |
-| EP-F4 | Cancel button restores previous palette, leaving unsaved changes discarded | ⬜️ Not started | |
-| EP-F5 | Saving edit triggers PATCH with minimal diff (only changed fields) | ⬜️ Not started | |
-| EP-F6 | Validation errors highlight inputs and prevent saving until resolved | ⬜️ Not started | |
-| EP-F7 | Editing preset while another save in flight disables inputs to avoid double submit | ⬜️ Not started | |
-| EP-F8 | After successful edit, preset card updates without full page reload (state sync) | ⬜️ Not started | |
-| EP-F9 | Error from backend (e.g., invalid color) displayed inside modal with Bulgarian text | ⬜️ Not started | |
-| EP-F10 | Keyboard accessibility: modal focus trap, Save triggers via Enter, Escape closes without saving | ⬜️ Not started | |
-| EP-F11 | Multi-tab scenario: editing preset in one tab reflects in others after refetch | ⬜️ Not started | |
-| EP-F12 | Unsaved changes warning when closing modal or navigating away | ⬜️ Not started | |
+| EP-F1 | Clicking “Edit” on custom preset opens modal with prefilled name/description/colors | ✅ Implemented | Added to `fe/src/app/admin/settings/__tests__/theme-preset-apply-to.test.tsx` |
+| EP-F2 | Editing built-in preset forces user to “Save as custom preset” (if required) and restricts overwriting | ✅ Implemented | Added to `fe/src/app/admin/settings/__tests__/theme-preset-apply-to.test.tsx` |
+| EP-F3 | Changing colors in edit modal updates preview swatches live | ✅ Implemented | Added to `fe/src/app/admin/settings/__tests__/theme-preset-apply-to.test.tsx` |
+| EP-F4 | Cancel button restores previous palette, leaving unsaved changes discarded | ✅ Implemented | Added to `fe/src/app/admin/settings/__tests__/theme-preset-apply-to.test.tsx` |
+| EP-F5 | Saving edit triggers PATCH with minimal diff (only changed fields) | ✅ Implemented | Added to `fe/src/app/admin/settings/__tests__/theme-preset-apply-to.test.tsx` |
+| EP-F6 | Validation errors highlight inputs and prevent saving until resolved | ✅ Implemented | Added to `fe/src/app/admin/settings/__tests__/theme-preset-apply-to.test.tsx` |
+| EP-F7 | Editing preset while another save in flight disables inputs to avoid double submit | ✅ Implemented | Added to `fe/src/app/admin/settings/__tests__/theme-preset-apply-to.test.tsx` |
+| EP-F8 | After successful edit, preset card updates without full page reload (state sync) | ✅ Implemented | Added to `fe/src/app/admin/settings/__tests__/theme-preset-apply-to.test.tsx` |
+| EP-F9 | Error from backend (e.g., invalid color) displayed inside modal with Bulgarian text | ✅ Implemented | Added to `fe/src/app/admin/settings/__tests__/theme-preset-apply-to.test.tsx` |
+| EP-F10 | Keyboard accessibility: modal focus trap, Save triggers via Enter, Escape closes without saving | ✅ Implemented | Added to `fe/src/app/admin/settings/__tests__/theme-preset-apply-to.test.tsx` |
+| EP-F11 | Multi-tab scenario: editing preset in one tab reflects in others after refetch | ✅ Implemented | Added to `fe/src/app/admin/settings/__tests__/theme-preset-apply-to.test.tsx` |
+| EP-F12 | Unsaved changes warning when closing modal or navigating away | ✅ Implemented | Added to `fe/src/app/admin/settings/__tests__/theme-preset-apply-to.test.tsx` |
 
 ### Branding assets – “Upload & Remove Favicon”
 

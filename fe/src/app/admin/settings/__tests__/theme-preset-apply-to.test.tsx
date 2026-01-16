@@ -1297,6 +1297,805 @@ describe("Admin Settings – Theme Preset Apply To", () => {
   });
 });
 
+describe("Admin Settings – Theme Preset Edit Flows", () => {
+  beforeEach(() => {
+    mockFetch.mockReset();
+  });
+
+  it("(EP-F1) Clicking Edit on custom preset pre-fills name/description/colors", async () => {
+    const initialResponse = createMockSettingsResponse();
+    initialResponse.branding.customThemePresets = [
+      {
+        id: "custom-1",
+        name: "Custom Bee",
+        description: "Warm",
+        light: {
+          background: "#fefefe",
+          foreground: "#000000",
+          primary: "#007bff",
+          secondary: "#6c757d",
+        },
+        dark: {
+          background: "#111111",
+          foreground: "#ffffff",
+          primary: "#0d6efd",
+          secondary: "#6c757d",
+        },
+      },
+    ];
+
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => initialResponse,
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({}),
+      });
+
+    const { user } = await renderAndOpenTheme();
+
+    const presetCard = screen
+      .getByText("Custom Bee")
+      .closest("div.rounded-lg") as HTMLElement | null;
+    if (!presetCard) {
+      throw new Error("Custom preset card not found");
+    }
+    await user.click(within(presetCard).getByRole("button", { name: "Edit" }));
+
+    const nameInput = screen.getByPlaceholderText(
+      "Име (напр. light-bee + dark-bee)",
+    ) as HTMLInputElement;
+    const descriptionInput = screen.getByPlaceholderText(
+      "Описание (по желание)",
+    ) as HTMLInputElement;
+
+    expect(nameInput).toHaveValue("Custom Bee");
+    expect(descriptionInput).toHaveValue("Warm");
+    expect(
+      getPaletteHexInput("Light palette", "Background hex value"),
+    ).toHaveValue("#fefefe");
+    expect(
+      getPaletteHexInput("Dark palette", "Background hex value"),
+    ).toHaveValue("#111111");
+  });
+
+  it("(EP-F2) Editing built-in preset prompts save-as-custom and prevents overwrite", async () => {
+    const initialResponse = createMockSettingsResponse();
+    const patchResponse = createMockSettingsResponse();
+    patchResponse.branding.customThemePresets = [
+      {
+        id: "custom-1",
+        name: "Golden Honey Copy",
+        description: "Copy",
+        light: {
+          background: "#f5f3ef",
+          foreground: "#2b2419",
+          primary: "#f0b90b",
+          secondary: "#f59e42",
+        },
+        dark: {
+          background: "#1a1613",
+          foreground: "#e8e6e1",
+          primary: "#f5c951",
+          secondary: "#f0ad6f",
+        },
+      },
+    ];
+
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => initialResponse,
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => patchResponse,
+      });
+
+    const { user } = await renderAndOpenTheme();
+
+    const editPresetButton = screen.getAllByRole("button", {
+      name: /^edit$/i,
+    })[0];
+    await user.click(editPresetButton);
+
+    expect(
+      await screen.findByText(/Промени цветовете, избери ново име/i),
+    ).toBeInTheDocument();
+
+    const nameInput = screen.getByPlaceholderText(
+      "Име (напр. light-bee + dark-bee)",
+    ) as HTMLInputElement;
+    await user.clear(nameInput);
+    await user.type(nameInput, "Golden Honey Copy");
+
+    const saveButton = screen.getByRole("button", { name: /save preset/i });
+    await user.click(saveButton);
+
+    await waitFor(() => {
+      expect(mockFetch).toHaveBeenCalledTimes(2);
+    });
+
+    const patchCall = mockFetch.mock.calls[1][1] as RequestInit;
+    const body = JSON.parse(patchCall.body as string) as {
+      branding: { customThemePresets: Array<Record<string, unknown>> };
+    };
+
+    expect(body.branding.customThemePresets[0].name).toBe("Golden Honey Copy");
+  });
+
+  it("(EP-F3) Editing colors updates preview swatches live", async () => {
+    const initialResponse = createMockSettingsResponse();
+    initialResponse.branding.customThemePresets = [
+      {
+        id: "custom-1",
+        name: "Custom Bee",
+        description: "Warm",
+        light: {
+          background: "#fefefe",
+          foreground: "#000000",
+          primary: "#007bff",
+          secondary: "#6c757d",
+        },
+        dark: {
+          background: "#111111",
+          foreground: "#ffffff",
+          primary: "#0d6efd",
+          secondary: "#6c757d",
+        },
+      },
+    ];
+
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => initialResponse,
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({}),
+      });
+
+    const { user } = await renderAndOpenTheme();
+
+    const presetCard = screen
+      .getByText("Custom Bee")
+      .closest("div.rounded-lg") as HTMLElement | null;
+    if (!presetCard) {
+      throw new Error("Custom preset card not found");
+    }
+    await user.click(within(presetCard).getByRole("button", { name: "Edit" }));
+
+    const lightBackgroundInput = getPaletteHexInput(
+      "Light palette",
+      "Background hex value",
+    );
+    await user.clear(lightBackgroundInput);
+    lightBackgroundInput.focus();
+    await user.paste("#123456");
+
+    await waitFor(() => {
+      const updatedCard = screen
+        .getByText("Custom Bee")
+        .closest("div.rounded-lg") as HTMLElement | null;
+      if (!updatedCard) {
+        throw new Error("Custom preset card not found");
+      }
+      expect(
+        within(updatedCard).getByTitle("Light background: #123456"),
+      ).toBeInTheDocument();
+    });
+  });
+
+  it("(EP-F4) Cancel edit clears state and restores preset swatches", async () => {
+    const initialResponse = createMockSettingsResponse();
+    initialResponse.branding.customThemePresets = [
+      {
+        id: "custom-1",
+        name: "Custom Bee",
+        description: "Warm",
+        light: {
+          background: "#fefefe",
+          foreground: "#000000",
+          primary: "#007bff",
+          secondary: "#6c757d",
+        },
+        dark: {
+          background: "#111111",
+          foreground: "#ffffff",
+          primary: "#0d6efd",
+          secondary: "#6c757d",
+        },
+      },
+    ];
+
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => initialResponse,
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({}),
+      });
+
+    const { user } = await renderAndOpenTheme();
+
+    const presetCard = screen
+      .getByText("Custom Bee")
+      .closest("div.rounded-lg") as HTMLElement | null;
+    if (!presetCard) {
+      throw new Error("Custom preset card not found");
+    }
+    await user.click(within(presetCard).getByRole("button", { name: "Edit" }));
+
+    const lightBackgroundInput = getPaletteHexInput(
+      "Light palette",
+      "Background hex value",
+    );
+    await user.clear(lightBackgroundInput);
+    await user.type(lightBackgroundInput, "#123456");
+
+    const cancelButton = await screen.findByRole("button", {
+      name: "Cancel edit",
+    });
+    await user.click(cancelButton);
+
+    expect(screen.queryByText(/Editing preset:/i)).not.toBeInTheDocument();
+    expect(lightBackgroundInput).not.toHaveValue("#123456");
+
+    const restoredCard = screen
+      .getByText("Custom Bee")
+      .closest("div.rounded-lg") as HTMLElement | null;
+    if (!restoredCard) {
+      throw new Error("Custom preset card not found");
+    }
+    expect(
+      within(restoredCard).getByTitle("Light background: #fefefe"),
+    ).toBeInTheDocument();
+  });
+
+  it("(EP-F5) Saving edit sends PATCH with customThemePresets diff only", async () => {
+    const initialResponse = createMockSettingsResponse();
+    initialResponse.branding.customThemePresets = [
+      {
+        id: "custom-1",
+        name: "Custom Bee",
+        description: "Warm",
+        light: {
+          background: "#fefefe",
+          foreground: "#000000",
+          primary: "#007bff",
+          secondary: "#6c757d",
+        },
+        dark: {
+          background: "#111111",
+          foreground: "#ffffff",
+          primary: "#0d6efd",
+          secondary: "#6c757d",
+        },
+      },
+    ];
+
+    const patchResponse = createMockSettingsResponse();
+    patchResponse.branding.customThemePresets = [
+      {
+        id: "custom-1",
+        name: "Custom Bee Updated",
+        description: "Warm",
+        light: {
+          background: "#fefefe",
+          foreground: "#000000",
+          primary: "#007bff",
+          secondary: "#6c757d",
+        },
+        dark: {
+          background: "#111111",
+          foreground: "#ffffff",
+          primary: "#0d6efd",
+          secondary: "#6c757d",
+        },
+      },
+    ];
+
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => initialResponse,
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => patchResponse,
+      });
+
+    const { user } = await renderAndOpenTheme();
+
+    const presetCard = screen
+      .getByText("Custom Bee")
+      .closest("div.rounded-lg") as HTMLElement | null;
+    if (!presetCard) {
+      throw new Error("Custom preset card not found");
+    }
+    await user.click(within(presetCard).getByRole("button", { name: "Edit" }));
+
+    const nameInput = screen.getByPlaceholderText(
+      "Име (напр. light-bee + dark-bee)",
+    ) as HTMLInputElement;
+    await user.clear(nameInput);
+    await user.type(nameInput, "Custom Bee Updated");
+
+    const updateButton = screen.getByRole("button", {
+      name: /update preset/i,
+    });
+    await user.click(updateButton);
+
+    await waitFor(() => {
+      expect(mockFetch).toHaveBeenCalledTimes(2);
+    });
+
+    const patchCall = mockFetch.mock.calls[1][1] as RequestInit;
+    const body = JSON.parse(patchCall.body as string) as {
+      branding: Record<string, unknown>;
+    };
+
+    expect(Object.keys(body.branding)).toEqual(["customThemePresets"]);
+  });
+
+  it("(EP-F6) Validation errors prevent saving until resolved", async () => {
+    const initialResponse = createMockSettingsResponse();
+    initialResponse.branding.customThemePresets = [
+      {
+        id: "custom-1",
+        name: "Custom Bee",
+        description: "Warm",
+        light: {
+          background: "#fefefe",
+          foreground: "#000000",
+          primary: "#007bff",
+          secondary: "#6c757d",
+        },
+        dark: {
+          background: "#111111",
+          foreground: "#ffffff",
+          primary: "#0d6efd",
+          secondary: "#6c757d",
+        },
+      },
+    ];
+
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => initialResponse,
+    });
+
+    const { user } = await renderAndOpenTheme();
+
+    const presetCard = screen
+      .getByText("Custom Bee")
+      .closest("div.rounded-lg") as HTMLElement | null;
+    if (!presetCard) {
+      throw new Error("Custom preset card not found");
+    }
+    await user.click(within(presetCard).getByRole("button", { name: "Edit" }));
+
+    const nameInput = screen.getByPlaceholderText(
+      "Име (напр. light-bee + dark-bee)",
+    ) as HTMLInputElement;
+    await user.clear(nameInput);
+    await user.type(nameInput, "A");
+
+    const updateButton = screen.getByRole("button", {
+      name: /update preset/i,
+    });
+    await user.click(updateButton);
+
+    expect(
+      await screen.findByText("Име на пресета трябва да е поне 2 символа."),
+    ).toBeInTheDocument();
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("(EP-F7) Edit inputs disable while save is in flight", async () => {
+    let resolveSave: ((value: Response) => void) | undefined;
+    const savePromise = new Promise<Response>((resolve) => {
+      resolveSave = resolve;
+    });
+
+    const initialResponse = createMockSettingsResponse();
+    initialResponse.branding.customThemePresets = [
+      {
+        id: "custom-1",
+        name: "Custom Bee",
+        description: "Warm",
+        light: {
+          background: "#fefefe",
+          foreground: "#000000",
+          primary: "#007bff",
+          secondary: "#6c757d",
+        },
+        dark: {
+          background: "#111111",
+          foreground: "#ffffff",
+          primary: "#0d6efd",
+          secondary: "#6c757d",
+        },
+      },
+    ];
+
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => initialResponse,
+      })
+      .mockReturnValueOnce(savePromise as unknown as Promise<Response>);
+
+    const { user } = await renderAndOpenTheme();
+
+    const presetCard = screen
+      .getByText("Custom Bee")
+      .closest("div.rounded-lg") as HTMLElement | null;
+    if (!presetCard) {
+      throw new Error("Custom preset card not found");
+    }
+    await user.click(within(presetCard).getByRole("button", { name: "Edit" }));
+
+    const nameInput = screen.getByPlaceholderText(
+      "Име (напр. light-bee + dark-bee)",
+    ) as HTMLInputElement;
+    await user.clear(nameInput);
+    await user.type(nameInput, "Custom Bee Updated");
+
+    const updateButton = screen.getByRole("button", {
+      name: /update preset/i,
+    });
+    await user.click(updateButton);
+
+    await waitFor(() => {
+      expect(updateButton).toBeDisabled();
+    });
+    expect(nameInput).toBeDisabled();
+
+    if (resolveSave) {
+      resolveSave({
+        ok: true,
+        json: async () => createMockSettingsResponse(),
+      } as Response);
+    }
+  });
+
+  it("(EP-F8) Successful edit updates preset card without full reload", async () => {
+    const initialResponse = createMockSettingsResponse();
+    initialResponse.branding.customThemePresets = [
+      {
+        id: "custom-1",
+        name: "Custom Bee",
+        description: "Warm",
+        light: {
+          background: "#fefefe",
+          foreground: "#000000",
+          primary: "#007bff",
+          secondary: "#6c757d",
+        },
+        dark: {
+          background: "#111111",
+          foreground: "#ffffff",
+          primary: "#0d6efd",
+          secondary: "#6c757d",
+        },
+      },
+    ];
+
+    const patchResponse = createMockSettingsResponse();
+    patchResponse.branding.customThemePresets = [
+      {
+        id: "custom-1",
+        name: "Custom Bee Updated",
+        description: "Warm",
+        light: {
+          background: "#fefefe",
+          foreground: "#000000",
+          primary: "#007bff",
+          secondary: "#6c757d",
+        },
+        dark: {
+          background: "#111111",
+          foreground: "#ffffff",
+          primary: "#0d6efd",
+          secondary: "#6c757d",
+        },
+      },
+    ];
+
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => initialResponse,
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => patchResponse,
+      });
+
+    const { user } = await renderAndOpenTheme();
+
+    const presetCard = screen
+      .getByText("Custom Bee")
+      .closest("div.rounded-lg") as HTMLElement | null;
+    if (!presetCard) {
+      throw new Error("Custom preset card not found");
+    }
+    await user.click(within(presetCard).getByRole("button", { name: "Edit" }));
+
+    const nameInput = screen.getByPlaceholderText(
+      "Име (напр. light-bee + dark-bee)",
+    ) as HTMLInputElement;
+    await user.clear(nameInput);
+    await user.type(nameInput, "Custom Bee Updated");
+
+    const updateButton = screen.getByRole("button", {
+      name: /update preset/i,
+    });
+    await user.click(updateButton);
+
+    expect(await screen.findByText("Custom Bee Updated")).toBeInTheDocument();
+    expect(screen.queryByText("Custom Bee")).not.toBeInTheDocument();
+  });
+
+  it("(EP-F9) Backend validation error is surfaced in theme notice", async () => {
+    const initialResponse = createMockSettingsResponse();
+    initialResponse.branding.customThemePresets = [
+      {
+        id: "custom-1",
+        name: "Custom Bee",
+        description: "Warm",
+        light: {
+          background: "#fefefe",
+          foreground: "#000000",
+          primary: "#007bff",
+          secondary: "#6c757d",
+        },
+        dark: {
+          background: "#111111",
+          foreground: "#ffffff",
+          primary: "#0d6efd",
+          secondary: "#6c757d",
+        },
+      },
+    ];
+
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => initialResponse,
+      })
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 400,
+        json: async () => ({ message: "Невалиден цвят" }),
+      });
+
+    const { user } = await renderAndOpenTheme();
+
+    const presetCard = screen
+      .getByText("Custom Bee")
+      .closest("div.rounded-lg") as HTMLElement | null;
+    if (!presetCard) {
+      throw new Error("Custom preset card not found");
+    }
+    await user.click(within(presetCard).getByRole("button", { name: "Edit" }));
+
+    const updateButton = screen.getByRole("button", {
+      name: /update preset/i,
+    });
+    await user.click(updateButton);
+
+    expect(await screen.findByText("Невалиден цвят")).toBeInTheDocument();
+  });
+
+  it("(EP-F10) Keyboard: Escape does not submit; Enter triggers update", async () => {
+    const initialResponse = createMockSettingsResponse();
+    initialResponse.branding.customThemePresets = [
+      {
+        id: "custom-1",
+        name: "Custom Bee",
+        description: "Warm",
+        light: {
+          background: "#fefefe",
+          foreground: "#000000",
+          primary: "#007bff",
+          secondary: "#6c757d",
+        },
+        dark: {
+          background: "#111111",
+          foreground: "#ffffff",
+          primary: "#0d6efd",
+          secondary: "#6c757d",
+        },
+      },
+    ];
+
+    const patchResponse = createMockSettingsResponse();
+    patchResponse.branding.customThemePresets = [
+      {
+        id: "custom-1",
+        name: "Custom Bee Updated",
+        description: "Warm",
+        light: {
+          background: "#fefefe",
+          foreground: "#000000",
+          primary: "#007bff",
+          secondary: "#6c757d",
+        },
+        dark: {
+          background: "#111111",
+          foreground: "#ffffff",
+          primary: "#0d6efd",
+          secondary: "#6c757d",
+        },
+      },
+    ];
+
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => initialResponse,
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => patchResponse,
+      });
+
+    const { user } = await renderAndOpenTheme();
+
+    const presetCard = screen
+      .getByText("Custom Bee")
+      .closest("div.rounded-lg") as HTMLElement | null;
+    if (!presetCard) {
+      throw new Error("Custom preset card not found");
+    }
+    await user.click(within(presetCard).getByRole("button", { name: "Edit" }));
+
+    const updateButton = screen.getByRole("button", {
+      name: /update preset/i,
+    });
+    updateButton.focus();
+    await user.keyboard("{Escape}");
+
+    expect(screen.getByText(/Editing preset:/i)).toBeInTheDocument();
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+
+    await user.keyboard("{Enter}");
+    await waitFor(() => {
+      expect(mockFetch).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  it("(EP-F11) Updated preset list is reflected after re-fetch", async () => {
+    const initialResponse = createMockSettingsResponse();
+    initialResponse.branding.customThemePresets = [
+      {
+        id: "custom-1",
+        name: "Custom Bee",
+        description: "Warm",
+        light: {
+          background: "#fefefe",
+          foreground: "#000000",
+          primary: "#007bff",
+          secondary: "#6c757d",
+        },
+        dark: {
+          background: "#111111",
+          foreground: "#ffffff",
+          primary: "#0d6efd",
+          secondary: "#6c757d",
+        },
+      },
+    ];
+
+    const patchResponse = createMockSettingsResponse();
+    patchResponse.branding.customThemePresets = [
+      {
+        id: "custom-1",
+        name: "Custom Bee Updated",
+        description: "Warm",
+        light: {
+          background: "#fefefe",
+          foreground: "#000000",
+          primary: "#007bff",
+          secondary: "#6c757d",
+        },
+        dark: {
+          background: "#111111",
+          foreground: "#ffffff",
+          primary: "#0d6efd",
+          secondary: "#6c757d",
+        },
+      },
+    ];
+
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => initialResponse,
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => patchResponse,
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => patchResponse,
+      });
+
+    const { user, renderResult } = await renderAndOpenTheme();
+
+    const presetCard = screen
+      .getByText("Custom Bee")
+      .closest("div.rounded-lg") as HTMLElement | null;
+    if (!presetCard) {
+      throw new Error("Custom preset card not found");
+    }
+    await user.click(within(presetCard).getByRole("button", { name: "Edit" }));
+
+    const updateButton = screen.getByRole("button", {
+      name: /update preset/i,
+    });
+    await user.click(updateButton);
+
+    renderResult.unmount();
+    await renderAndOpenTheme();
+
+    expect(await screen.findByText("Custom Bee Updated")).toBeInTheDocument();
+  });
+
+  it("(EP-F12) No unsaved changes prompt is registered for preset edits", async () => {
+    const initialResponse = createMockSettingsResponse();
+    initialResponse.branding.customThemePresets = [
+      {
+        id: "custom-1",
+        name: "Custom Bee",
+        description: "Warm",
+        light: {
+          background: "#fefefe",
+          foreground: "#000000",
+          primary: "#007bff",
+          secondary: "#6c757d",
+        },
+        dark: {
+          background: "#111111",
+          foreground: "#ffffff",
+          primary: "#0d6efd",
+          secondary: "#6c757d",
+        },
+      },
+    ];
+
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => initialResponse,
+    });
+
+    const { user } = await renderAndOpenTheme();
+
+    const presetCard = screen
+      .getByText("Custom Bee")
+      .closest("div.rounded-lg") as HTMLElement | null;
+    if (!presetCard) {
+      throw new Error("Custom preset card not found");
+    }
+    await user.click(within(presetCard).getByRole("button", { name: "Edit" }));
+
+    const nameInput = screen.getByPlaceholderText(
+      "Име (напр. light-bee + dark-bee)",
+    ) as HTMLInputElement;
+    await user.type(nameInput, "X");
+
+    expect(window.onbeforeunload).toBeNull();
+  });
+});
+
 describe("Admin Settings – Custom Theme Presets", () => {
   beforeEach(() => {
     mockFetch.mockReset();
