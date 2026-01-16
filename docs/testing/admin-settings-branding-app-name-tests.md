@@ -304,28 +304,28 @@ Includes built-in preset cards, edit/apply buttons, custom preset creation, and 
 #### Frontend tests (Apply preset)
 | ID | Scenario | Status | Notes |
 | --- | --- | --- | --- |
-| PR-F1 | Built-in preset cards render with correct swatches/badges (BeeLMS vs other) | ⬜️ Not started | |
-| PR-F2 | Clicking “Edit” loads preset colors into palette editors (light/dark inputs update) | ⬜️ Not started | |
-| PR-F3 | Switching preset while editing another resets editing state and form fields | ⬜️ Not started | |
-| PR-F4 | Apply button copies preset colors to preview palettes according to Apply-to dropdown | ⬜️ Not started | |
-| PR-F5 | Custom preset form validation: name/description lengths, required fields, duplicate names warning | ⬜️ Not started | |
-| PR-F6 | Saving custom preset triggers PATCH with sanitized colors + metadata; success toast updates preset list | ⬜️ Not started | |
-| PR-F7 | Editing custom preset updates existing card in list without duplication | ⬜️ Not started | |
-| PR-F8 | Invisible presets beyond preview (OTHER_THEME_PRESETS_PREVIEW_COUNT) expand when requested; tests hidden count indicator | ⬜️ Not started | |
-| PR-F9 | Apply + Save flows: after applying preset, hitting Save persists colors; verify fetch payload includes updated palettes | ⬜️ Not started | |
-| PR-F10 | Error states: backend failure when saving preset surfaces message in theme notice area | ⬜️ Not started | |
-| PR-F11 | Accessibility: preset cards and buttons reachable via keyboard, `aria-pressed`/labels on apply/edit actions | ⬜️ Not started | |
-| PR-F12 | Loading state disables Apply/Save buttons to prevent double submission | ⬜️ Not started | |
-| PR-F13 | Preset search/filter (if any) returns expected subset; otherwise confirm not implemented | ⬜️ Not started | |
-| PR-F14 | Preset thumbnails respect current theme preview variant (light/dark) | ⬜️ Not started | |
-| PR-F15 | When features.themeLight or themeDark toggled off, preset UI communicates limitation (disabled apply button + tooltip) | ⬜️ Not started | |
-| PR-F16 | Multi-tab sync: custom preset created in one tab appears in another after refetch/mutation observer | ⬜️ Not started | |
-| PR-F17 | Undoing unsaved preset apply (e.g., collapse section) restores savedThemeLight/dark states | ⬜️ Not started | |
-| PR-F18 | Attempting to edit built-in preset prompts user to create a copy (if required) and verifies resulting flow | ⬜️ Not started | |
-| PR-F19 | Preset cards show confirmation before deletion (if available) and removal updates UI | ⬜️ Not started | |
-| PR-F20 | Validation errors on custom preset form highlight specific fields and focus the first invalid input | ⬜️ Not started | |
-| PR-F21 | Preset list virtualization/scrolling works with many entries (>=50) without layout thrash | ⬜️ Not started | |
-| PR-F22 | Saving preset while offline (fetch rejects) shows retry CTA and preserves entered data | ⬜️ Not started | |
+| PR-F1 | Built-in preset cards render with correct swatches/badges (BeeLMS vs other) | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| PR-F2 | Clicking “Edit” loads preset colors into palette editors (light/dark inputs update) | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| PR-F3 | Switching preset while editing another resets editing state and form fields | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| PR-F4 | Apply button copies preset colors to preview palettes according to Apply-to dropdown | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| PR-F5 | Custom preset form validation: name/description lengths, required fields, duplicate names warning | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| PR-F6 | Saving custom preset triggers PATCH with sanitized colors + metadata; success toast updates preset list | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| PR-F7 | Editing custom preset updates existing card in list without duplication | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| PR-F8 | Invisible presets beyond preview (OTHER_THEME_PRESETS_PREVIEW_COUNT) expand when requested; tests hidden count indicator | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| PR-F9 | Apply + Save flows: after applying preset, hitting Save persists colors; verify fetch payload includes updated palettes | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| PR-F10 | Error states: backend failure when saving preset surfaces message in theme notice area | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| PR-F11 | Accessibility: preset cards and buttons reachable via keyboard, `aria-pressed`/labels on apply/edit actions | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| PR-F12 | Loading state disables Apply/Save buttons to prevent double submission | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| PR-F13 | Preset search/filter (if any) returns expected subset; otherwise confirm not implemented | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| PR-F14 | Preset thumbnails respect current theme preview variant (light/dark) | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| PR-F15 | When features.themeLight or themeDark toggled off, preset UI communicates limitation (disabled apply button + tooltip) | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| PR-F16 | Multi-tab sync: custom preset created in one tab appears in another after refetch/mutation observer | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| PR-F17 | Undoing unsaved preset apply (e.g., collapse section) restores savedThemeLight/dark states | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| PR-F18 | Attempting to edit built-in preset prompts user to create a copy (if required) and verifies resulting flow | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| PR-F19 | Preset cards show confirmation before deletion (if available) and removal updates UI | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| PR-F20 | Validation errors on custom preset form highlight specific fields and focus the first invalid input | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| PR-F21 | Preset list virtualization/scrolling works with many entries (>=50) without layout thrash | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| PR-F22 | Saving preset while offline (fetch rejects) shows retry CTA and preserves entered data | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
 
 ### Theme presets – “Custom Presets” management
 
