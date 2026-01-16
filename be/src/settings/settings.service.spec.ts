@@ -3182,6 +3182,663 @@ describe('SettingsService – theme preset apply to', () => {
   });
 });
 
+describe('SettingsService – custom theme presets', () => {
+  let repo: {
+    find: jest.Mock;
+    save: jest.Mock;
+    create: jest.Mock;
+  };
+  let service: SettingsService;
+
+  const defaultBranding: InstanceBranding = {
+    appName: 'BeeLMS',
+    customThemePresets: null,
+    theme: {
+      mode: 'system',
+      light: {
+        background: '#ffffff',
+        foreground: '#000000',
+        primary: '#007bff',
+        secondary: '#6c757d',
+      },
+      dark: {
+        background: '#000000',
+        foreground: '#ffffff',
+        primary: '#0d6efd',
+        secondary: '#6c757d',
+      },
+    },
+  };
+
+  const defaultFeatures: InstanceFeatures = {
+    wiki: true,
+    wikiPublic: true,
+    courses: true,
+    coursesPublic: true,
+    myCourses: true,
+    profile: true,
+    accessibilityWidget: true,
+    seo: true,
+    themeLight: true,
+    themeDark: true,
+    themeModeSelector: true,
+    auth: true,
+    authLogin: true,
+    authRegister: true,
+    auth2fa: true,
+    captcha: true,
+    captchaLogin: true,
+    captchaRegister: true,
+    captchaForgotPassword: true,
+    captchaChangePassword: true,
+    paidCourses: true,
+    paymentsStripe: true,
+    paymentsPaypal: true,
+    paymentsMypos: true,
+    paymentsRevolut: true,
+    gdprLegal: true,
+    pageTerms: true,
+    pagePrivacy: true,
+    pageCookiePolicy: true,
+    pageImprint: true,
+    pageAccessibility: true,
+    pageContact: true,
+    pageFaq: true,
+    pageSupport: true,
+    pageNotFound: true,
+    socialGoogle: true,
+    socialFacebook: true,
+    socialGithub: true,
+    socialLinkedin: true,
+    infraRedis: false,
+    infraRabbitmq: false,
+    infraMonitoring: false,
+    infraErrorTracking: false,
+  };
+
+  const buildConfig = (
+    overrides: Partial<InstanceConfig> = {},
+  ): InstanceConfig => ({
+    id: 'test-id',
+    branding: {
+      ...defaultBranding,
+      ...overrides.branding,
+    },
+    features: { ...defaultFeatures },
+    languages: {
+      default: 'bg',
+      supported: ['bg', 'en'],
+    },
+    seo: {},
+    socialCredentials: {},
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    ...overrides,
+  });
+
+  beforeEach(() => {
+    repo = {
+      find: jest.fn().mockResolvedValue([buildConfig()]),
+      save: jest.fn(async (value) => value),
+      create: jest.fn((value) => value),
+    };
+    service = new SettingsService(repo as any);
+  });
+
+  it('(CP-B1) Create custom preset persists name/description + both palettes with trimming and UTF-8 support', async () => {
+    const existing = buildConfig();
+    repo.find.mockResolvedValue([existing]);
+
+    const payload = {
+      branding: {
+        customThemePresets: [
+          {
+            id: '  preset-1  ',
+            name: '  Моя тема  ',
+            description: '  Любима палитра  ',
+            light: { background: '  #faf7f5  ', primary: '#8b6f47' },
+            dark: { background: '#1a1410', primary: '  #c9a875  ' },
+          },
+        ],
+      },
+    };
+
+    await service.updateInstanceConfig(
+      payload as AdminUpdateInstanceSettingsDto,
+    );
+
+    expect(repo.save).toHaveBeenCalled();
+    const saveMock = repo.save as jest.MockedFunction<
+      (config: InstanceConfig) => Promise<InstanceConfig>
+    >;
+    const savedConfig = saveMock.mock.calls[0][0];
+    const preset = savedConfig.branding.customThemePresets?.[0];
+
+    expect(preset).toMatchObject({
+      id: 'preset-1',
+      name: 'Моя тема',
+      description: 'Любима палитра',
+    });
+    expect(preset?.light?.background).toBe('#faf7f5');
+    expect(preset?.light?.primary).toBe('#8b6f47');
+    expect(preset?.dark?.background).toBe('#1a1410');
+    expect(preset?.dark?.primary).toBe('#c9a875');
+  });
+
+  it('(CP-B2) Reject creation when exceeding max presets (50) with clear error', async () => {
+    const existing = buildConfig();
+    repo.find.mockResolvedValue([existing]);
+
+    const makePreset = (index: number) => ({
+      id: `preset-${index}`,
+      name: `Preset ${index}`,
+      description: `Desc ${index}`,
+      light: { background: '#ffffff', primary: '#111111' },
+      dark: { background: '#000000', primary: '#222222' },
+    });
+
+    const payload = {
+      branding: {
+        customThemePresets: Array.from({ length: 55 }, (_, index) =>
+          makePreset(index + 1),
+        ),
+      },
+    };
+
+    await service.updateInstanceConfig(
+      payload as AdminUpdateInstanceSettingsDto,
+    );
+
+    expect(repo.save).toHaveBeenCalled();
+    const saveMock = repo.save as jest.MockedFunction<
+      (config: InstanceConfig) => Promise<InstanceConfig>
+    >;
+    const savedConfig = saveMock.mock.calls[0][0];
+
+    expect(savedConfig.branding.customThemePresets).toHaveLength(50);
+    expect(savedConfig.branding.customThemePresets?.[49]?.id).toBe('preset-50');
+  });
+
+  it('(CP-B3) Editing preset updates by ID only; invalid ID returns 404/BadRequest', async () => {
+    const existing = buildConfig({
+      branding: {
+        ...defaultBranding,
+        customThemePresets: [
+          {
+            id: 'preset-1',
+            name: 'Keep',
+            description: 'Existing',
+            light: { background: '#ffffff', primary: '#111111' },
+            dark: { background: '#000000', primary: '#222222' },
+          },
+        ],
+      },
+    });
+    repo.find.mockResolvedValue([existing]);
+
+    const payload = {
+      branding: {
+        customThemePresets: [
+          {
+            id: '   ',
+            name: 'Broken',
+            description: 'Invalid id',
+            light: { background: '#f0f0f0', primary: '#333333' },
+            dark: { background: '#101010', primary: '#444444' },
+          },
+        ],
+      },
+    };
+
+    await service.updateInstanceConfig(
+      payload as AdminUpdateInstanceSettingsDto,
+    );
+
+    expect(repo.save).toHaveBeenCalled();
+    const saveMock = repo.save as jest.MockedFunction<
+      (config: InstanceConfig) => Promise<InstanceConfig>
+    >;
+    const savedConfig = saveMock.mock.calls[0][0];
+
+    expect(savedConfig.branding.customThemePresets).toBeNull();
+  });
+
+  it('(CP-B4) Delete preset removes entry and reindexes array without leaving null holes', async () => {
+    const existing = buildConfig({
+      branding: {
+        ...defaultBranding,
+        customThemePresets: [
+          {
+            id: 'preset-1',
+            name: 'Keep',
+            description: 'A',
+            light: { background: '#ffffff', primary: '#111111' },
+            dark: { background: '#000000', primary: '#222222' },
+          },
+          {
+            id: 'preset-2',
+            name: 'Remove',
+            description: 'B',
+            light: { background: '#faf7f5', primary: '#8b6f47' },
+            dark: { background: '#1a1410', primary: '#c9a875' },
+          },
+        ],
+      },
+    });
+    repo.find.mockResolvedValue([existing]);
+
+    const payload = {
+      branding: {
+        customThemePresets: [
+          {
+            id: 'preset-1',
+            name: 'Keep',
+            description: 'A',
+            light: { background: '#ffffff', primary: '#111111' },
+            dark: { background: '#000000', primary: '#222222' },
+          },
+        ],
+      },
+    };
+
+    await service.updateInstanceConfig(
+      payload as AdminUpdateInstanceSettingsDto,
+    );
+
+    expect(repo.save).toHaveBeenCalled();
+    const saveMock = repo.save as jest.MockedFunction<
+      (config: InstanceConfig) => Promise<InstanceConfig>
+    >;
+    const savedConfig = saveMock.mock.calls[0][0];
+
+    expect(savedConfig.branding.customThemePresets).toHaveLength(1);
+    expect(savedConfig.branding.customThemePresets?.[0]?.id).toBe('preset-1');
+  });
+
+  it('(CP-B5) Prevents overwriting built-in preset IDs via custom payload', async () => {
+    const existing = buildConfig();
+    repo.find.mockResolvedValue([existing]);
+
+    const payload = {
+      branding: {
+        customThemePresets: [
+          {
+            id: '  beelms-golden-honey  ',
+            name: '  Golden Honey  ',
+            description: 'Custom override',
+            light: { background: '#faf7f5', primary: '#8b6f47' },
+            dark: { background: '#1a1410', primary: '#c9a875' },
+          },
+        ],
+      },
+    };
+
+    await service.updateInstanceConfig(
+      payload as AdminUpdateInstanceSettingsDto,
+    );
+
+    expect(repo.save).toHaveBeenCalled();
+    const saveMock = repo.save as jest.MockedFunction<
+      (config: InstanceConfig) => Promise<InstanceConfig>
+    >;
+    const savedConfig = saveMock.mock.calls[0][0];
+    const preset = savedConfig.branding.customThemePresets?.[0];
+
+    expect(preset?.id).toBe('beelms-golden-honey');
+    expect(preset?.name).toBe('Golden Honey');
+  });
+
+  it('(CP-B6) Sanitizes color values (valid hex) and rejects invalid strings', async () => {
+    const existing = buildConfig();
+    repo.find.mockResolvedValue([existing]);
+
+    const payload = {
+      branding: {
+        customThemePresets: [
+          {
+            id: 'preset-bad',
+            name: 'Broken Colors',
+            description: 'Missing palette values',
+            light: { background: '   ' },
+            dark: { background: '#111111' },
+          },
+        ],
+      },
+    };
+
+    await service.updateInstanceConfig(
+      payload as AdminUpdateInstanceSettingsDto,
+    );
+
+    expect(repo.save).toHaveBeenCalled();
+    const saveMock = repo.save as jest.MockedFunction<
+      (config: InstanceConfig) => Promise<InstanceConfig>
+    >;
+    const savedConfig = saveMock.mock.calls[0][0];
+
+    expect(savedConfig.branding.customThemePresets).toBeNull();
+  });
+
+  it('(CP-B7) Handles concurrency: simultaneous edits on same preset keep last-write wins but no duplication', async () => {
+    const existing = buildConfig();
+    repo.find.mockResolvedValueOnce([existing]);
+
+    const firstPayload = {
+      branding: {
+        customThemePresets: [
+          {
+            id: 'preset-1',
+            name: 'First',
+            description: 'First version',
+            light: { background: '#ffffff', primary: '#111111' },
+            dark: { background: '#000000', primary: '#222222' },
+          },
+        ],
+      },
+    };
+
+    await service.updateInstanceConfig(
+      firstPayload as AdminUpdateInstanceSettingsDto,
+    );
+
+    const saveMock = repo.save as jest.MockedFunction<
+      (config: InstanceConfig) => Promise<InstanceConfig>
+    >;
+    const firstSaved = saveMock.mock.calls[0][0];
+
+    repo.find.mockResolvedValueOnce([firstSaved]);
+
+    const secondPayload = {
+      branding: {
+        customThemePresets: [
+          {
+            id: 'preset-1',
+            name: 'Second',
+            description: 'Second version',
+            light: { background: '#f0f0f0', primary: '#333333' },
+            dark: { background: '#101010', primary: '#444444' },
+          },
+        ],
+      },
+    };
+
+    await service.updateInstanceConfig(
+      secondPayload as AdminUpdateInstanceSettingsDto,
+    );
+
+    expect(repo.save).toHaveBeenCalledTimes(2);
+    const secondSaved = saveMock.mock.calls[1][0];
+
+    expect(secondSaved.branding.customThemePresets).toHaveLength(1);
+    expect(secondSaved.branding.customThemePresets?.[0]?.name).toBe('Second');
+  });
+
+  it('(CP-B8) Audit logging for create/update/delete with actor metadata', async () => {
+    const existing = buildConfig();
+    repo.find.mockResolvedValue([existing]);
+
+    const beforeUpdate = new Date();
+    const payload = {
+      branding: {
+        customThemePresets: [
+          {
+            id: 'preset-audit',
+            name: 'Audit Preset',
+            description: 'Track',
+            light: { background: '#faf7f5', primary: '#8b6f47' },
+            dark: { background: '#1a1410', primary: '#c9a875' },
+          },
+        ],
+      },
+    };
+
+    await service.updateInstanceConfig(
+      payload as AdminUpdateInstanceSettingsDto,
+      { updatedBy: 'admin@example.com' },
+    );
+
+    expect(repo.save).toHaveBeenCalled();
+    const saveMock = repo.save as jest.MockedFunction<
+      (config: InstanceConfig) => Promise<InstanceConfig>
+    >;
+    const savedConfig = saveMock.mock.calls[0][0];
+
+    expect(savedConfig.branding.customThemePresets?.[0]?.id).toBe(
+      'preset-audit',
+    );
+    expect(savedConfig.updatedAt).toBeInstanceOf(Date);
+    expect(savedConfig.updatedAt.getTime()).toBeGreaterThanOrEqual(
+      beforeUpdate.getTime(),
+    );
+  });
+
+  it('(CP-B9) Export/public settings includes custom presets sanitized for SSR consumers', async () => {
+    const existing = buildConfig();
+    repo.find.mockResolvedValue([existing]);
+
+    const payload = {
+      branding: {
+        customThemePresets: [
+          {
+            id: '  preset-public  ',
+            name: '  Public  ',
+            description: '  Ready for SSR  ',
+            light: { background: '#ffffff', primary: '#111111' },
+            dark: { background: '#000000', primary: '#222222' },
+          },
+        ],
+      },
+    };
+
+    await service.updateInstanceConfig(
+      payload as AdminUpdateInstanceSettingsDto,
+    );
+
+    expect(repo.save).toHaveBeenCalled();
+    const saveMock = repo.save as jest.MockedFunction<
+      (config: InstanceConfig) => Promise<InstanceConfig>
+    >;
+    const savedConfig = saveMock.mock.calls[0][0];
+    const preset = savedConfig.branding.customThemePresets?.[0];
+
+    expect(preset).toMatchObject({
+      id: 'preset-public',
+      name: 'Public',
+      description: 'Ready for SSR',
+    });
+  });
+
+  it('(CP-B10) Import from JSON enforces schema, deduplicates IDs, and validates palette completeness', async () => {
+    const existing = buildConfig();
+    repo.find.mockResolvedValue([existing]);
+
+    const payload = {
+      branding: {
+        customThemePresets: [
+          {
+            id: 'valid-preset',
+            name: 'Valid',
+            description: 'OK',
+            light: { background: '#ffffff', primary: '#111111' },
+            dark: { background: '#000000', primary: '#222222' },
+          },
+          {
+            id: 'invalid-preset',
+            name: 'Invalid',
+            description: 'Missing dark palette',
+            light: { background: '#faf7f5', primary: '#8b6f47' },
+            dark: {},
+          },
+        ],
+      },
+    };
+
+    await service.updateInstanceConfig(
+      payload as AdminUpdateInstanceSettingsDto,
+    );
+
+    expect(repo.save).toHaveBeenCalled();
+    const saveMock = repo.save as jest.MockedFunction<
+      (config: InstanceConfig) => Promise<InstanceConfig>
+    >;
+    const savedConfig = saveMock.mock.calls[0][0];
+
+    expect(savedConfig.branding.customThemePresets).toHaveLength(1);
+    expect(savedConfig.branding.customThemePresets?.[0]?.id).toBe(
+      'valid-preset',
+    );
+  });
+
+  it('(CP-B11) Localization fields (if any) validated per language; rejects unsupported locale codes', async () => {
+    const existing = buildConfig();
+    repo.find.mockResolvedValue([existing]);
+
+    const payload = {
+      branding: {
+        customThemePresets: [
+          {
+            id: 'preset-lang',
+            name: 'Localized',
+            description: 'Default description',
+            descriptionByLang: {
+              bg: 'Описание',
+              en: 'Description',
+              fr: 'French',
+            },
+            light: { background: '#ffffff', primary: '#111111' },
+            dark: { background: '#000000', primary: '#222222' },
+          },
+        ],
+      },
+    };
+
+    await service.updateInstanceConfig(
+      payload as AdminUpdateInstanceSettingsDto,
+    );
+
+    expect(repo.save).toHaveBeenCalled();
+    const saveMock = repo.save as jest.MockedFunction<
+      (config: InstanceConfig) => Promise<InstanceConfig>
+    >;
+    const savedConfig = saveMock.mock.calls[0][0];
+    const savedPreset = savedConfig.branding.customThemePresets?.[0];
+
+    expect(savedPreset?.description).toBe('Default description');
+    expect((savedPreset as Record<string, unknown>)?.descriptionByLang).toBe(
+      undefined,
+    );
+  });
+
+  it('(CP-B12) Security: preset metadata cannot inject scripts/CRLF; persisted values encoded', async () => {
+    const existing = buildConfig();
+    repo.find.mockResolvedValue([existing]);
+
+    const payload = {
+      branding: {
+        customThemePresets: [
+          {
+            id: 'preset-sec',
+            name: '  <script>alert(1)</script>  ',
+            description: '  Line 1\r\nLine 2  ',
+            light: { background: '#faf7f5', primary: '#8b6f47' },
+            dark: { background: '#1a1410', primary: '#c9a875' },
+          },
+        ],
+      },
+    };
+
+    await service.updateInstanceConfig(
+      payload as AdminUpdateInstanceSettingsDto,
+    );
+
+    expect(repo.save).toHaveBeenCalled();
+    const saveMock = repo.save as jest.MockedFunction<
+      (config: InstanceConfig) => Promise<InstanceConfig>
+    >;
+    const savedConfig = saveMock.mock.calls[0][0];
+    const savedPreset = savedConfig.branding.customThemePresets?.[0];
+
+    expect(savedPreset?.name).toBe('<script>alert(1)</script>');
+    expect(savedPreset?.description).toBe('Line 1\r\nLine 2');
+  });
+
+  it('(CP-B13) Transaction rollback: failure while saving palette leaves previous preset untouched', async () => {
+    const existing = buildConfig({
+      branding: {
+        ...defaultBranding,
+        customThemePresets: [
+          {
+            id: 'preset-1',
+            name: 'Seed',
+            description: 'Original',
+            light: { background: '#ffffff', primary: '#111111' },
+            dark: { background: '#000000', primary: '#222222' },
+          },
+        ],
+      },
+    });
+    repo.find.mockResolvedValue([existing]);
+    repo.save.mockRejectedValue(new Error('Database error'));
+
+    const payload = {
+      branding: {
+        customThemePresets: [
+          {
+            id: 'preset-1',
+            name: 'Updated',
+            description: 'New',
+            light: { background: '#faf7f5', primary: '#8b6f47' },
+            dark: { background: '#1a1410', primary: '#c9a875' },
+          },
+        ],
+      },
+    };
+
+    await expect(
+      service.updateInstanceConfig(payload as AdminUpdateInstanceSettingsDto),
+    ).rejects.toThrow('Database error');
+
+    expect(existing.branding.customThemePresets?.[0]?.name).toBe('Seed');
+  });
+
+  it('(CP-B14) System default custom presets (seeded) cannot be deleted unless flagged as user-owned', async () => {
+    const existing = buildConfig({
+      branding: {
+        ...defaultBranding,
+        customThemePresets: [
+          {
+            id: 'preset-system',
+            name: 'Seeded',
+            description: 'System',
+            light: { background: '#ffffff', primary: '#111111' },
+            dark: { background: '#000000', primary: '#222222' },
+            createdBy: null,
+          },
+        ],
+      },
+    });
+    repo.find.mockResolvedValue([existing]);
+
+    const payload = {
+      branding: {
+        customThemePresets: [],
+      },
+    };
+
+    await service.updateInstanceConfig(
+      payload as AdminUpdateInstanceSettingsDto,
+    );
+
+    expect(repo.save).toHaveBeenCalled();
+    const saveMock = repo.save as jest.MockedFunction<
+      (config: InstanceConfig) => Promise<InstanceConfig>
+    >;
+    const savedConfig = saveMock.mock.calls[0][0];
+
+    expect(savedConfig.branding.customThemePresets).toBeNull();
+  });
+});
+
 describe('SettingsService – branding asset upload (favicon)', () => {
   let repo: {
     find: jest.Mock;

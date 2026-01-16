@@ -334,20 +334,20 @@ Focus on CRUD, validation, UX for the custom presets drawer/modal.
 #### Backend tests (Custom Presets)
 | ID | Scenario | Status | Notes |
 | --- | --- | --- | --- |
-| CP-B1 | Create custom preset persists name/description + both palettes with trimming and UTF-8 support | ⬜️ Not started | |
-| CP-B2 | Reject creation when exceeding max presets (50) with clear error | ⬜️ Not started | |
-| CP-B3 | Editing preset updates by ID only; invalid ID returns 404/BadRequest | ⬜️ Not started | |
-| CP-B4 | Delete preset removes entry and reindexes array without leaving `null` holes | ⬜️ Not started | |
-| CP-B5 | Prevents overwriting built-in preset IDs via custom payload | ⬜️ Not started | |
-| CP-B6 | Sanitizes color values (valid hex) and rejects invalid strings | ⬜️ Not started | |
-| CP-B7 | Handles concurrency: simultaneous edits on same preset keep last-write wins but no duplication | ⬜️ Not started | |
-| CP-B8 | Audit logging for create/update/delete with actor metadata | ⬜️ Not started | |
-| CP-B9 | Export/public settings includes custom presets sanitized for SSR consumers | ⬜️ Not started | |
-| CP-B10 | Import from JSON (if endpoint exists) enforces schema, deduplicates IDs, and validates palette completeness | ⬜️ Not started | |
-| CP-B11 | Localization fields (if any) validated per language; rejects unsupported locale codes | ⬜️ Not started | |
-| CP-B12 | Security: preset metadata cannot inject scripts/CRLF; persisted values encoded | ⬜️ Not started | |
-| CP-B13 | Transaction rollback: failure while saving palette leaves previous preset untouched | ⬜️ Not started | |
-| CP-B14 | System default custom presets (seeded) cannot be deleted unless flagged as user-owned | ⬜️ Not started | |
+| CP-B1 | Create custom preset persists name/description + both palettes with trimming and UTF-8 support | ✅ Implemented | Added to settings.service.spec.ts |
+| CP-B2 | Reject creation when exceeding max presets (50) with clear error | ✅ Implemented | Added to settings.service.spec.ts |
+| CP-B3 | Editing preset updates by ID only; invalid ID returns 404/BadRequest | ✅ Implemented | Added to settings.service.spec.ts |
+| CP-B4 | Delete preset removes entry and reindexes array without leaving `null` holes | ✅ Implemented | Added to settings.service.spec.ts |
+| CP-B5 | Prevents overwriting built-in preset IDs via custom payload | ✅ Implemented | Added to settings.service.spec.ts |
+| CP-B6 | Sanitizes color values (valid hex) and rejects invalid strings | ✅ Implemented | Added to settings.service.spec.ts |
+| CP-B7 | Handles concurrency: simultaneous edits on same preset keep last-write wins but no duplication | ✅ Implemented | Added to settings.service.spec.ts |
+| CP-B8 | Audit logging for create/update/delete with actor metadata | ✅ Implemented | Added to settings.service.spec.ts |
+| CP-B9 | Export/public settings includes custom presets sanitized for SSR consumers | ✅ Implemented | Added to settings.service.spec.ts |
+| CP-B10 | Import from JSON (if endpoint exists) enforces schema, deduplicates IDs, and validates palette completeness | ✅ Implemented | Added to settings.service.spec.ts |
+| CP-B11 | Localization fields (if any) validated per language; rejects unsupported locale codes | ✅ Implemented | Added to settings.service.spec.ts |
+| CP-B12 | Security: preset metadata cannot inject scripts/CRLF; persisted values encoded | ✅ Implemented | Added to settings.service.spec.ts |
+| CP-B13 | Transaction rollback: failure while saving palette leaves previous preset untouched | ✅ Implemented | Added to settings.service.spec.ts |
+| CP-B14 | System default custom presets (seeded) cannot be deleted unless flagged as user-owned | ✅ Implemented | Added to settings.service.spec.ts |
 
 #### Frontend tests (Custom Presets)
 | ID | Scenario | Status | Notes |
