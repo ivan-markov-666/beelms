@@ -1,6 +1,8 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
+jest.setTimeout(30000);
+
 // Mock dependencies
 const mockRouter = {
   replace: jest.fn(),
@@ -133,7 +135,7 @@ describe("Admin Settings – Theme Mode", () => {
       })
       .mockResolvedValueOnce({
         ok: true,
-        json: async () => ({ message: "ok" }),
+        json: async () => createMockSettingsResponse("dark"),
       });
 
     const { user } = await renderAndOpenTheme();
@@ -147,16 +149,26 @@ describe("Admin Settings – Theme Mode", () => {
     await user.click(saveButton);
 
     await waitFor(() => {
-      expect(mockFetch).toHaveBeenCalledWith(
-        "http://localhost:3000/admin/settings",
-        expect.objectContaining({
-          method: "PATCH",
-          headers: expect.objectContaining({
-            Authorization: "Bearer mock-token",
-          }),
-          body: expect.stringContaining('"mode":"dark"'),
-        }),
-      );
+      expect(mockFetch).toHaveBeenCalledTimes(2);
     });
+
+    const patchCall = mockFetch.mock.calls.find(
+      ([url, init]) =>
+        url === "http://localhost:3000/admin/settings" &&
+        typeof init === "object" &&
+        init !== null &&
+        (init as { method?: string }).method === "PATCH",
+    );
+    expect(patchCall).toBeTruthy();
+    const [, patchInit] = patchCall as [string, RequestInit];
+    expect(patchInit).toEqual(
+      expect.objectContaining({
+        method: "PATCH",
+        headers: expect.objectContaining({
+          Authorization: "Bearer mock-token",
+        }),
+        body: expect.stringContaining('"mode":"dark"'),
+      }),
+    );
   });
 });

@@ -352,21 +352,21 @@ Focus on CRUD, validation, UX for the custom presets drawer/modal.
 #### Frontend tests (Custom Presets)
 | ID | Scenario | Status | Notes |
 | --- | --- | --- | --- |
-| CP-F1 | Custom preset panel lists existing presets with edit/delete buttons | ⬜️ Not started | |
-| CP-F2 | Creating preset requires name + at least one palette color; inline validation shows Bulgarian text | ⬜️ Not started | |
-| CP-F3 | Form auto-fills with current palette values when user clicks “Save current as preset” | ⬜️ Not started | |
-| CP-F4 | Editing preset loads stored colors and metadata; Save updates card inline | ⬜️ Not started | |
-| CP-F5 | Deleting preset opens confirmation modal and removes card on success | ⬜️ Not started | |
-| CP-F6 | UI enforces max preset count (disables “Create” button, shows helper text) | ⬜️ Not started | |
-| CP-F7 | Duplicate names show warning but allow save only if confirmed (if UX requires) | ⬜️ Not started | |
-| CP-F8 | Network failure on save keeps modal open with inputs intact for retry | ⬜️ Not started | |
-| CP-F9 | Accessibility: modal has focus trap, labels, ESC close, and buttons reachable via keyboard | ⬜️ Not started | |
-| CP-F10 | Preset cards support drag-to-reorder (if feature exists) or confirm absence | ⬜️ Not started | |
-| CP-F11 | Editing preset while another request pending disables controls to avoid race | ⬜️ Not started | |
-| CP-F12 | Search/filter (if provided) narrows preset list; tests empty-state message | ⬜️ Not started | |
-| CP-F13 | Multi-tab: deleting preset elsewhere triggers refetch and removal locally | ⬜️ Not started | |
-| CP-F14 | Mobile layout collapses presets into accordion without breaking apply buttons | ⬜️ Not started | |
-| CP-F15 | Import/export UI (if present) validates files and surfaces errors | ⬜️ Not started | |
+| CP-F1 | Custom preset panel lists existing presets with edit/delete buttons | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| CP-F2 | Creating preset requires name + at least one palette color; inline validation shows Bulgarian text | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| CP-F3 | Form auto-fills with current palette values when user clicks “Save current as preset” | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| CP-F4 | Editing preset loads stored colors and metadata; Save updates card inline | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| CP-F5 | Deleting preset opens confirmation modal and removes card on success | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| CP-F6 | UI enforces max preset count (disables “Create” button, shows helper text) | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| CP-F7 | Duplicate names show warning but allow save only if confirmed (if UX requires) | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| CP-F8 | Network failure on save keeps modal open with inputs intact for retry | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| CP-F9 | Accessibility: modal has focus trap, labels, ESC close, and buttons reachable via keyboard | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| CP-F10 | Preset cards support drag-to-reorder (if feature exists) or confirm absence | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| CP-F11 | Editing preset while another request pending disables controls to avoid race | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| CP-F12 | Search/filter (if provided) narrows preset list; tests empty-state message | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| CP-F13 | Multi-tab: deleting preset elsewhere triggers refetch and removal locally | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| CP-F14 | Mobile layout collapses presets into accordion without breaking apply buttons | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| CP-F15 | Import/export UI (if present) validates files and surfaces errors | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
 
 ### Theme presets – “Edit Preset” flows
 

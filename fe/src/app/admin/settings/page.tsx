@@ -6893,6 +6893,8 @@ export default function AdminSettingsPage() {
       setSuccess(null);
     }
 
+    saveInFlightRef.current = true;
+    setSaving(true);
     try {
       const res = await fetch(`${API_BASE_URL}/admin/settings`, {
         method: "PATCH",
@@ -6913,9 +6915,13 @@ export default function AdminSettingsPage() {
 
       if (!res.ok) {
         const payload = (await res.json()) as { message?: string };
-        setError(
-          payload?.message ?? "Неуспешно запазване на branding настройките.",
-        );
+        const message =
+          payload?.message ?? "Неуспешно запазване на branding настройките.";
+        if (noticeScope === "theme") {
+          setThemeNotice({ type: "error", message });
+        } else {
+          setError(message);
+        }
         return;
       }
 
@@ -7024,6 +7030,9 @@ export default function AdminSettingsPage() {
       } else {
         setError(message);
       }
+    } finally {
+      saveInFlightRef.current = false;
+      setSaving(false);
     }
   };
 
