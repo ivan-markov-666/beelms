@@ -27,6 +27,14 @@ import { AdminGrantCourseAccessDto } from './dto/admin-grant-course-access.dto';
 import { AdminBulkDeleteCoursesDto } from './dto/admin-bulk-delete-courses.dto';
 import { AdminBulkUpdateCourseStatusDto } from './dto/admin-bulk-update-course-status.dto';
 
+function parseLanguages(raw: string | undefined): string[] {
+  const parts = (raw ?? '')
+    .split(',')
+    .map((p) => p.trim().toLowerCase())
+    .filter((p) => p.length > 0);
+  return Array.from(new Set(parts));
+}
+
 interface AuthenticatedRequest extends Request {
   user?: {
     userId: string;
@@ -58,6 +66,7 @@ export class AdminCoursesController {
     @Query('pageSize') pageSize?: string,
     @Query('q') q?: string,
     @Query('status') status?: string,
+    @Query('languages') languages?: string,
     @Query('language') language?: string,
     @Query('paid') paid?: 'paid' | 'free',
     @Query('categoryId') categoryId?: string,
@@ -81,12 +90,21 @@ export class AdminCoursesController {
     const pageNum = page ? Number(page) : 1;
     const pageSizeNum = pageSize ? Number(pageSize) : 20;
 
+    const langsFromList = parseLanguages(languages);
+    const languageNormalized = (language ?? '').trim().toLowerCase();
+    const effectiveLanguages =
+      langsFromList.length > 0
+        ? langsFromList
+        : languageNormalized
+          ? [languageNormalized]
+          : undefined;
+
     const result = await this.coursesService.getAdminCoursesListPaged(userId, {
       page: pageNum,
       pageSize: pageSizeNum,
       q,
       status,
-      language,
+      languages: effectiveLanguages,
       paid,
       categoryId,
       sortKey,
@@ -103,6 +121,7 @@ export class AdminCoursesController {
     @Res() res: Response,
     @Query('q') q?: string,
     @Query('status') status?: string,
+    @Query('languages') languages?: string,
     @Query('language') language?: string,
     @Query('paid') paid?: 'paid' | 'free',
     @Query('categoryId') categoryId?: string,
@@ -123,12 +142,21 @@ export class AdminCoursesController {
       throw new UnauthorizedException('Authenticated user not found');
     }
 
+    const langsFromList = parseLanguages(languages);
+    const languageNormalized = (language ?? '').trim().toLowerCase();
+    const effectiveLanguages =
+      langsFromList.length > 0
+        ? langsFromList
+        : languageNormalized
+          ? [languageNormalized]
+          : undefined;
+
     const { csv, filename } = await this.coursesService.exportAdminCoursesCsv(
       userId,
       {
         q,
         status,
-        language,
+        languages: effectiveLanguages,
         paid,
         categoryId,
         sortKey,

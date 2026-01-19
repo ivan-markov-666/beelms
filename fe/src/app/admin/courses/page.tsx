@@ -5,6 +5,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { useCurrentLang } from "../../../i18n/useCurrentLang";
@@ -78,6 +79,7 @@ type CreateCourseForm = {
   title: string;
   description: string;
   language: string;
+  languages: string[];
   status: string;
   isPaid: boolean;
   categoryId: string;
@@ -101,6 +103,7 @@ const createDefaultCourseForm = (language: string): CreateCourseForm => ({
   title: "",
   description: "",
   language: language || "bg",
+  languages: [(language || "bg").trim().toLowerCase()].filter(Boolean),
   status: "draft",
   isPaid: false,
   categoryId: "",
@@ -156,7 +159,7 @@ export default function AdminCoursesPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [statusFilter, setStatusFilter] = useState("");
-  const [languageFilter, setLanguageFilter] = useState("");
+  const [languageFilters, setLanguageFilters] = useState<string[]>([]);
   const [paidFilter, setPaidFilter] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [sortKey, setSortKey] = useState<CourseSortKey>("title");
@@ -166,13 +169,99 @@ export default function AdminCoursesPage() {
     return supportedAdminLangs.length > 0 ? supportedAdminLangs : ["bg"];
   }, [supportedAdminLangs]);
 
-  const filterLanguageOptions = useMemo(() => {
-    const set = new Set(languageOptions);
-    if (languageFilter && !set.has(languageFilter)) {
-      set.add(languageFilter);
-    }
-    return Array.from(set);
-  }, [languageOptions, languageFilter]);
+  const [createLanguageDropdownOpen, setCreateLanguageDropdownOpen] =
+    useState(false);
+  const createLanguageDropdownRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!createLanguageDropdownOpen) return;
+
+    const onMouseDown = (event: MouseEvent) => {
+      const el = createLanguageDropdownRef.current;
+      if (!el) return;
+      if (event.target instanceof Node && !el.contains(event.target)) {
+        setCreateLanguageDropdownOpen(false);
+      }
+    };
+
+    window.addEventListener("mousedown", onMouseDown);
+    return () => window.removeEventListener("mousedown", onMouseDown);
+  }, [createLanguageDropdownOpen]);
+
+  const [languageDropdownOpen, setLanguageDropdownOpen] = useState(false);
+  const languageDropdownRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!languageDropdownOpen) return;
+
+    const onMouseDown = (event: MouseEvent) => {
+      const el = languageDropdownRef.current;
+      if (!el) return;
+      if (event.target instanceof Node && !el.contains(event.target)) {
+        setLanguageDropdownOpen(false);
+      }
+    };
+
+    window.addEventListener("mousedown", onMouseDown);
+    return () => window.removeEventListener("mousedown", onMouseDown);
+  }, [languageDropdownOpen]);
+
+  useEffect(() => {
+    setLanguageFilters((prev) => prev.filter((l) => languageOptions.includes(l)));
+  }, [languageOptions]);
+
+  const languageFiltersLabel = useMemo(() => {
+    const unique = Array.from(
+      new Set(
+        (languageFilters ?? [])
+          .map((l) => (l ?? "").trim().toLowerCase())
+          .filter((l) => l.length > 0),
+      ),
+    );
+    if (unique.length === 0) return "All languages";
+    if (unique.length === 1) return unique[0]!.toUpperCase();
+    return `${unique.length} languages`;
+  }, [languageFilters]);
+
+  const selectedLanguagesSet = useMemo(() => {
+    return new Set(
+      (languageFilters ?? [])
+        .map((l) => (l ?? "").trim().toLowerCase())
+        .filter((l) => l.length > 0),
+    );
+  }, [languageFilters]);
+
+  const toggleAllLanguages = useCallback(() => {
+    setCurrentPage(1);
+    setLanguageFilters([]);
+  }, []);
+
+  const toggleLanguageFilter = useCallback(
+    (code: string) => {
+      const normalized = (code ?? "").trim().toLowerCase();
+      if (!normalized) return;
+
+      setCurrentPage(1);
+      setLanguageFilters((prev) => {
+        const prevNormalized = (prev ?? [])
+          .map((l) => (l ?? "").trim().toLowerCase())
+          .filter((l) => l.length > 0);
+
+        if (prevNormalized.length === 0) {
+          return [normalized];
+        }
+
+        const set = new Set(prevNormalized);
+        if (set.has(normalized)) {
+          set.delete(normalized);
+        } else {
+          set.add(normalized);
+        }
+        return Array.from(set);
+      });
+    },
+    [],
+  );
 
   useEffect(() => {
     setForm((prev) => {
@@ -187,6 +276,76 @@ export default function AdminCoursesPage() {
       return prev;
     });
   }, [languageOptions, defaultLanguage]);
+
+  useEffect(() => {
+    setForm((prev) => {
+      const valid = new Set(languageOptions.map((l) => l.trim().toLowerCase()));
+      const next = Array.from(
+        new Set(
+          (prev.languages ?? [])
+            .map((l) => (l ?? "").trim().toLowerCase())
+            .filter((l) => l.length > 0 && valid.has(l)),
+        ),
+      );
+
+      const fallback = (prev.language ?? "").trim().toLowerCase();
+      if (next.length === 0) {
+        const first =
+          (fallback && valid.has(fallback)
+            ? fallback
+            : valid.size > 0
+              ? Array.from(valid)[0]
+              : "bg") ?? "bg";
+        return { ...prev, language: first, languages: [first] };
+      }
+
+      const primary = next[0] ?? fallback;
+      return primary && primary !== prev.language
+        ? { ...prev, language: primary, languages: next }
+        : { ...prev, languages: next };
+    });
+  }, [languageOptions]);
+
+  const createSelectedLanguagesSet = useMemo(() => {
+    return new Set(
+      (form.languages ?? [])
+        .map((l) => (l ?? "").trim().toLowerCase())
+        .filter((l) => l.length > 0),
+    );
+  }, [form.languages]);
+
+  const createLanguagesLabel = useMemo(() => {
+    const unique = Array.from(createSelectedLanguagesSet);
+    if (unique.length === 0) return "Select languages";
+    if (unique.length === 1) return unique[0]!.toUpperCase();
+    return `${unique.length} languages`;
+  }, [createSelectedLanguagesSet]);
+
+  const toggleCreateLanguage = useCallback(
+    (code: string) => {
+      const normalized = (code ?? "").trim().toLowerCase();
+      if (!normalized) return;
+
+      setForm((prev) => {
+        const prevNormalized = (prev.languages ?? [])
+          .map((l) => (l ?? "").trim().toLowerCase())
+          .filter((l) => l.length > 0);
+        const set = new Set(prevNormalized);
+        if (set.has(normalized)) {
+          set.delete(normalized);
+        } else {
+          set.add(normalized);
+        }
+        const next = Array.from(set);
+        if (next.length === 0) {
+          return prev;
+        }
+        const primary = next[0] ?? prev.language;
+        return { ...prev, language: primary, languages: next };
+      });
+    },
+    [],
+  );
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -488,7 +647,7 @@ export default function AdminCoursesPage() {
       page?: number;
       pageSize?: number;
       status?: string;
-      language?: string;
+      languages?: string[];
       paid?: string;
       categoryId?: string;
       sortKey?: CourseSortKey;
@@ -514,7 +673,7 @@ export default function AdminCoursesPage() {
             ? Math.min(options.pageSize, 100)
             : DEFAULT_PAGE_SIZE;
         const status = options?.status;
-        const language = options?.language;
+        const languages = options?.languages;
         const paid = options?.paid;
         const categoryId = options?.categoryId;
         const sortKey = options?.sortKey;
@@ -527,8 +686,15 @@ export default function AdminCoursesPage() {
         if (status) {
           params.set("status", status);
         }
-        if (language) {
-          params.set("language", language);
+        const normalizedLanguages = Array.from(
+          new Set(
+            (languages ?? [])
+              .map((l) => (l ?? "").trim().toLowerCase())
+              .filter((l) => l.length > 0),
+          ),
+        );
+        if (normalizedLanguages.length > 0) {
+          params.set("languages", normalizedLanguages.join(","));
         }
         if (paid) {
           params.set("paid", paid);
@@ -587,7 +753,7 @@ export default function AdminCoursesPage() {
       page: effectivePage,
       pageSize,
       status: statusFilter || undefined,
-      language: languageFilter || undefined,
+      languages: languageFilters.length > 0 ? languageFilters : undefined,
       paid: paidFilter || undefined,
       categoryId: categoryFilter || undefined,
       sortKey,
@@ -652,7 +818,16 @@ export default function AdminCoursesPage() {
       const params = new URLSearchParams();
       if (effectiveSearch.trim()) params.set("q", effectiveSearch.trim());
       if (statusFilter) params.set("status", statusFilter);
-      if (languageFilter) params.set("language", languageFilter);
+      const normalizedLanguages = Array.from(
+        new Set(
+          (languageFilters ?? [])
+            .map((l) => (l ?? "").trim().toLowerCase())
+            .filter((l) => l.length > 0),
+        ),
+      );
+      if (normalizedLanguages.length > 0) {
+        params.set("languages", normalizedLanguages.join(","));
+      }
       if (paidFilter) params.set("paid", paidFilter);
       if (categoryFilter) params.set("categoryId", categoryFilter);
       if (sortKey) params.set("sortKey", sortKey);
@@ -700,7 +875,7 @@ export default function AdminCoursesPage() {
         page: effectivePage,
         pageSize,
         status: statusFilter || undefined,
-        language: languageFilter || undefined,
+        languages: languageFilters.length > 0 ? languageFilters : undefined,
         paid: paidFilter || undefined,
         categoryId: categoryFilter || undefined,
         sortKey,
@@ -714,7 +889,7 @@ export default function AdminCoursesPage() {
     effectivePage,
     pageSize,
     statusFilter,
-    languageFilter,
+    languageFilters,
     paidFilter,
     categoryFilter,
     sortKey,
@@ -765,7 +940,14 @@ export default function AdminCoursesPage() {
       const payload = {
         title: form.title.trim(),
         description: form.description.trim(),
-        language: form.language,
+        language: (form.language ?? "").trim().toLowerCase(),
+        languages: Array.from(
+          new Set(
+            (form.languages ?? [])
+              .map((l) => (l ?? "").trim().toLowerCase())
+              .filter((l) => l.length > 0),
+          ),
+        ),
         status: form.status,
         isPaid: effectiveIsPaid,
         ...(form.categoryId.trim()
@@ -970,16 +1152,43 @@ export default function AdminCoursesPage() {
               <span className="text-xs font-medium text-gray-600">
                 Language
               </span>
-              <ListboxSelect
-                ariaLabel="Course language"
-                value={form.language}
-                onChange={(next) => setForm((p) => ({ ...p, language: next }))}
-                buttonClassName="flex w-full items-center justify-between gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900"
-                options={languageOptions.map((code) => ({
-                  value: code,
-                  label: code,
-                }))}
-              />
+              <div className="relative" ref={createLanguageDropdownRef}>
+                <button
+                  type="button"
+                  className="flex w-full items-center justify-between gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900"
+                  onClick={() =>
+                    setCreateLanguageDropdownOpen((prev) => !prev)
+                  }
+                  aria-haspopup="listbox"
+                  aria-expanded={createLanguageDropdownOpen}
+                >
+                  <span>{createLanguagesLabel}</span>
+                  <span className="text-gray-400">▾</span>
+                </button>
+
+                {createLanguageDropdownOpen && (
+                  <div className="absolute z-20 mt-1 w-full rounded-lg border border-gray-200 bg-white shadow-lg">
+                    <div className="max-h-60 overflow-y-auto">
+                      {languageOptions.map((code) => (
+                        <label
+                          key={code}
+                          className="flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-sm text-gray-800 hover:bg-gray-50"
+                        >
+                          <input
+                            type="checkbox"
+                            className="h-4 w-4 rounded border-gray-300 text-[color:var(--primary)] focus:ring-[color:var(--primary)]"
+                            checked={createSelectedLanguagesSet.has(
+                              code.trim().toLowerCase(),
+                            )}
+                            onChange={() => toggleCreateLanguage(code)}
+                          />
+                          <span>{code.toUpperCase()}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             </label>
 
             <label className="space-y-1">
@@ -1213,21 +1422,49 @@ export default function AdminCoursesPage() {
             </div>
 
             <div>
-              <ListboxSelect
-                ariaLabel="Courses language"
-                value={languageFilter}
-                onChange={(next) => {
-                  setCurrentPage(1);
-                  setLanguageFilter(next);
-                }}
-                options={[
-                  { value: "", label: "All languages" },
-                  ...filterLanguageOptions.map((code) => ({
-                    value: code,
-                    label: code.toUpperCase(),
-                  })),
-                ]}
-              />
+              <div className="relative" ref={languageDropdownRef}>
+                <button
+                  type="button"
+                  className="flex w-full items-center justify-between rounded-lg border border-[color:var(--border)] bg-white px-3 py-2 text-sm text-[color:var(--foreground)] shadow-sm hover:bg-gray-50 focus:border-[color:var(--primary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)]"
+                  onClick={() => setLanguageDropdownOpen((prev) => !prev)}
+                  aria-haspopup="listbox"
+                  aria-expanded={languageDropdownOpen}
+                >
+                  <span>{languageFiltersLabel}</span>
+                  <span className="text-gray-400">▾</span>
+                </button>
+
+                {languageDropdownOpen && (
+                  <div className="absolute z-20 mt-1 w-full rounded-lg border border-gray-200 bg-white shadow-lg">
+                    <label className="flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-sm text-gray-800 hover:bg-gray-50">
+                      <input
+                        type="checkbox"
+                        className="h-4 w-4 rounded border-gray-300 text-[color:var(--primary)] focus:ring-[color:var(--primary)]"
+                        checked={languageFilters.length === 0}
+                        onChange={() => toggleAllLanguages()}
+                      />
+                      <span>All languages</span>
+                    </label>
+
+                    <div className="max-h-60 overflow-y-auto border-t border-gray-100">
+                      {languageOptions.map((code) => (
+                        <label
+                          key={code}
+                          className="flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-sm text-gray-800 hover:bg-gray-50"
+                        >
+                          <input
+                            type="checkbox"
+                            className="h-4 w-4 rounded border-gray-300 text-[color:var(--primary)] focus:ring-[color:var(--primary)]"
+                            checked={selectedLanguagesSet.has(code)}
+                            onChange={() => toggleLanguageFilter(code)}
+                          />
+                          <span>{code.toUpperCase()}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
             <div>

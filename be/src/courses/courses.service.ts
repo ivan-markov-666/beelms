@@ -202,11 +202,24 @@ export class CoursesService {
   }
 
   private toSummary(course: Course): CourseSummaryDto {
+    const languages = Array.from(
+      new Set(
+        (course.languages ?? [])
+          .map((l) => (l ?? '').trim().toLowerCase())
+          .filter((l) => l.length > 0),
+      ),
+    );
+    if (languages.length === 0) {
+      const fallback = (course.language ?? '').trim().toLowerCase();
+      if (fallback) languages.push(fallback);
+    }
+
     return {
       id: course.id,
       title: course.title,
       description: course.description,
       language: course.language,
+      languages,
       status: course.status,
       isPaid: !!course.isPaid,
       currency: course.currency ?? null,
@@ -240,7 +253,7 @@ export class CoursesService {
     filters: {
       q?: string;
       status?: string;
-      language?: string;
+      languages?: string[];
       paid?: 'paid' | 'free';
       categoryId?: string;
     },
@@ -276,9 +289,15 @@ export class CoursesService {
       qb.andWhere('LOWER(course.status) = :status', { status });
     }
 
-    const language = (filters.language ?? '').trim().toLowerCase();
-    if (language) {
-      qb.andWhere('LOWER(course.language) = :language', { language });
+    const languages = Array.from(
+      new Set(
+        (filters.languages ?? [])
+          .map((l) => (l ?? '').trim().toLowerCase())
+          .filter((l) => l.length > 0),
+      ),
+    );
+    if (languages.length > 0) {
+      qb.andWhere('LOWER(course.language) IN (:...languages)', { languages });
     }
 
     if (filters.paid === 'paid') {
@@ -303,7 +322,7 @@ export class CoursesService {
       pageSize: number;
       q?: string;
       status?: string;
-      language?: string;
+      languages?: string[];
       paid?: 'paid' | 'free';
       categoryId?: string;
       sortKey?:
@@ -328,7 +347,7 @@ export class CoursesService {
     const qb = await this.buildAdminCoursesQuery(actorUserId, {
       q: options.q,
       status: options.status,
-      language: options.language,
+      languages: options.languages,
       paid: options.paid,
       categoryId: options.categoryId,
     });
@@ -375,7 +394,7 @@ export class CoursesService {
     options: {
       q?: string;
       status?: string;
-      language?: string;
+      languages?: string[];
       paid?: 'paid' | 'free';
       categoryId?: string;
       sortKey?:
@@ -393,7 +412,7 @@ export class CoursesService {
     const qb = await this.buildAdminCoursesQuery(actorUserId, {
       q: options.q,
       status: options.status,
-      language: options.language,
+      languages: options.languages,
       paid: options.paid,
       categoryId: options.categoryId,
     });
@@ -1075,10 +1094,28 @@ export class CoursesService {
       }
     }
 
+    const normalizedLanguages = Array.from(
+      new Set(
+        (dto.languages ?? [])
+          .map((l) => (l ?? '').trim().toLowerCase())
+          .filter((l) => l.length > 0),
+      ),
+    );
+    const fallbackLanguage = (dto.language ?? '').trim().toLowerCase();
+    const effectiveLanguages =
+      normalizedLanguages.length > 0
+        ? normalizedLanguages
+        : fallbackLanguage
+          ? [fallbackLanguage]
+          : [];
+    const primaryLanguage =
+      effectiveLanguages[0] ?? fallbackLanguage ?? dto.language;
+
     const course = this.courseRepo.create({
       title: dto.title,
       description: dto.description,
-      language: dto.language,
+      language: primaryLanguage,
+      languages: effectiveLanguages,
       status: dto.status,
       isPaid,
       currency: isPaid && currency ? currency : null,
@@ -1142,6 +1179,20 @@ export class CoursesService {
 
     if (typeof dto.language === 'string') {
       course.language = dto.language;
+    }
+
+    if (Array.isArray(dto.languages)) {
+      const normalizedLanguages = Array.from(
+        new Set(
+          (dto.languages ?? [])
+            .map((l) => (l ?? '').trim().toLowerCase())
+            .filter((l) => l.length > 0),
+        ),
+      );
+      if (normalizedLanguages.length > 0) {
+        course.languages = normalizedLanguages;
+        course.language = normalizedLanguages[0] ?? course.language;
+      }
     }
 
     if (typeof dto.status === 'string') {
