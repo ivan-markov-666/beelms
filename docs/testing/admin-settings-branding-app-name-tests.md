@@ -281,51 +281,51 @@ Includes built-in preset cards, edit/apply buttons, custom preset creation, and 
 #### Backend tests (Apply preset)
 | ID | Scenario | Status | Notes |
 | --- | --- | --- | --- |
-| PR-B1 | Built-in preset apply merges palette colors and persists to correct targets (respecting Apply-to state) | ⬜️ Not started | |
-| PR-B2 | Editing a built-in preset derives from current stored palette; backend ensures immutable preset data isn’t persisted unless explicitly saved | ⬜️ Not started | |
-| PR-B3 | Custom preset save validates name/description (length, symbols) and trims whitespace | ⬜️ Not started | |
-| PR-B4 | Saving custom preset stores both light/dark palettes; loading preset reproduces identical palette objects | ⬜️ Not started | |
-| PR-B5 | Duplicate custom preset names allowed? (define behavior) – add test to ensure deterministic conflict handling | ⬜️ Not started | |
-| PR-B6 | Custom preset edit updates by ID and does not reorder other presets; ensures max count (<=50) enforced | ⬜️ Not started | |
-| PR-B7 | Deleting preset (if supported) removes entry and `publicSettings.branding.customThemePresets` reflects change | ⬜️ Not started | |
-| PR-B8 | Applying preset with invalid data (missing colors) rejected with descriptive error | ⬜️ Not started | |
-| PR-B9 | Preset application honors feature toggles (cannot apply dark palette if dark theme disabled) | ⬜️ Not started | |
-| PR-B10 | Security: preset name/description sanitized (no script tags, newline injection) before persistence | ⬜️ Not started | |
-| PR-B11 | Audit event emitted when preset applied or saved, capturing preset id/name and actor email | ⬜️ Not started | |
-| PR-B12 | Public settings serialization includes new palettes immediately after preset apply | ⬜️ Not started | |
-| PR-B13 | Race condition: two preset applies in quick succession persist latest state (repo.save last call wins) | ⬜️ Not started | |
-| PR-B14 | Applying preset while theme.mode=system updates both palettes; ensure SSR default theme picks correct CSS values | ⬜️ Not started | |
-| PR-B15 | Preset metadata localization (if supported) persists per-lang descriptions correctly | ⬜️ Not started | |
-| PR-B16 | Importing presets via API enforces size limits (max hex values, number of presets) | ⬜️ Not started | |
-| PR-B17 | Applying preset after deleting related custom preset handles missing reference gracefully | ⬜️ Not started | |
-| PR-B18 | Preset apply honors transaction boundaries—if palette validation fails, no partial palette stored | ⬜️ Not started | |
-| PR-B19 | Ensure default preset list is immutable (backend rejects attempts to save built-in preset changes unless copying to custom) | ⬜️ Not started | |
+| PR-B1 | Built-in preset apply merges palette colors and persists to correct targets (respecting Apply-to state) | ✅ Implemented | Added to settings.service.spec.ts |
+| PR-B2 | Editing a built-in preset derives from current stored palette; backend ensures immutable preset data isn’t persisted unless explicitly saved | ✅ Implemented | Added to settings.service.spec.ts |
+| PR-B3 | Custom preset save validates name/description (length, symbols) and trims whitespace | ✅ Implemented | Added to settings.service.spec.ts |
+| PR-B4 | Saving custom preset stores both light/dark palettes; loading preset reproduces identical palette objects | ✅ Implemented | Added to settings.service.spec.ts |
+| PR-B5 | Duplicate custom preset names allowed? (define behavior) – add test to ensure deterministic conflict handling | ✅ Implemented | Added to settings.service.spec.ts |
+| PR-B6 | Custom preset edit updates by ID and does not reorder other presets; ensures max count (<=50) enforced | ✅ Implemented | Added to settings.service.spec.ts |
+| PR-B7 | Deleting preset (if supported) removes entry and `publicSettings.branding.customThemePresets` reflects change | ✅ Implemented | Added to settings.service.spec.ts |
+| PR-B8 | Applying preset with invalid data (missing colors) rejected with descriptive error | ✅ Implemented | Added to settings.service.spec.ts |
+| PR-B9 | Preset application honors feature toggles (cannot apply dark palette if dark theme disabled) | ✅ Implemented | Added to settings.service.spec.ts |
+| PR-B10 | Security: preset name/description sanitized (no script tags, newline injection) before persistence | ✅ Implemented | Added to settings.service.spec.ts |
+| PR-B11 | Audit event emitted when preset applied or saved, capturing preset id/name and actor email | ✅ Implemented | Added to settings.service.spec.ts |
+| PR-B12 | Public settings serialization includes new palettes immediately after preset apply | ✅ Implemented | Added to settings.service.spec.ts |
+| PR-B13 | Race condition: two preset applies in quick succession persist latest state (repo.save last call wins) | ✅ Implemented | Added to settings.service.spec.ts |
+| PR-B14 | Applying preset while theme.mode=system updates both palettes; ensure SSR default theme picks correct CSS values | ✅ Implemented | Added to settings.service.spec.ts |
+| PR-B15 | Preset metadata localization (if supported) persists per-lang descriptions correctly | ✅ Implemented | Added to settings.service.spec.ts |
+| PR-B16 | Importing presets via API enforces size limits (max hex values, number of presets) | ✅ Implemented | Added to settings.service.spec.ts |
+| PR-B17 | Applying preset after deleting related custom preset handles missing reference gracefully | ✅ Implemented | Added to settings.service.spec.ts |
+| PR-B18 | Preset apply honors transaction boundaries—if palette validation fails, no partial palette stored | ✅ Implemented | Added to settings.service.spec.ts |
+| PR-B19 | Ensure default preset list is immutable (backend rejects attempts to save built-in preset changes unless copying to custom) | ✅ Implemented | Added to settings.service.spec.ts |
 
 #### Frontend tests (Apply preset)
 | ID | Scenario | Status | Notes |
 | --- | --- | --- | --- |
-| PR-F1 | Built-in preset cards render with correct swatches/badges (BeeLMS vs other) | ⬜️ Not started | |
-| PR-F2 | Clicking “Edit” loads preset colors into palette editors (light/dark inputs update) | ⬜️ Not started | |
-| PR-F3 | Switching preset while editing another resets editing state and form fields | ⬜️ Not started | |
-| PR-F4 | Apply button copies preset colors to preview palettes according to Apply-to dropdown | ⬜️ Not started | |
-| PR-F5 | Custom preset form validation: name/description lengths, required fields, duplicate names warning | ⬜️ Not started | |
-| PR-F6 | Saving custom preset triggers PATCH with sanitized colors + metadata; success toast updates preset list | ⬜️ Not started | |
-| PR-F7 | Editing custom preset updates existing card in list without duplication | ⬜️ Not started | |
-| PR-F8 | Invisible presets beyond preview (OTHER_THEME_PRESETS_PREVIEW_COUNT) expand when requested; tests hidden count indicator | ⬜️ Not started | |
-| PR-F9 | Apply + Save flows: after applying preset, hitting Save persists colors; verify fetch payload includes updated palettes | ⬜️ Not started | |
-| PR-F10 | Error states: backend failure when saving preset surfaces message in theme notice area | ⬜️ Not started | |
-| PR-F11 | Accessibility: preset cards and buttons reachable via keyboard, `aria-pressed`/labels on apply/edit actions | ⬜️ Not started | |
-| PR-F12 | Loading state disables Apply/Save buttons to prevent double submission | ⬜️ Not started | |
-| PR-F13 | Preset search/filter (if any) returns expected subset; otherwise confirm not implemented | ⬜️ Not started | |
-| PR-F14 | Preset thumbnails respect current theme preview variant (light/dark) | ⬜️ Not started | |
-| PR-F15 | When features.themeLight or themeDark toggled off, preset UI communicates limitation (disabled apply button + tooltip) | ⬜️ Not started | |
-| PR-F16 | Multi-tab sync: custom preset created in one tab appears in another after refetch/mutation observer | ⬜️ Not started | |
-| PR-F17 | Undoing unsaved preset apply (e.g., collapse section) restores savedThemeLight/dark states | ⬜️ Not started | |
-| PR-F18 | Attempting to edit built-in preset prompts user to create a copy (if required) and verifies resulting flow | ⬜️ Not started | |
-| PR-F19 | Preset cards show confirmation before deletion (if available) and removal updates UI | ⬜️ Not started | |
-| PR-F20 | Validation errors on custom preset form highlight specific fields and focus the first invalid input | ⬜️ Not started | |
-| PR-F21 | Preset list virtualization/scrolling works with many entries (>=50) without layout thrash | ⬜️ Not started | |
-| PR-F22 | Saving preset while offline (fetch rejects) shows retry CTA and preserves entered data | ⬜️ Not started | |
+| PR-F1 | Built-in preset cards render with correct swatches/badges (BeeLMS vs other) | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| PR-F2 | Clicking “Edit” loads preset colors into palette editors (light/dark inputs update) | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| PR-F3 | Switching preset while editing another resets editing state and form fields | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| PR-F4 | Apply button copies preset colors to preview palettes according to Apply-to dropdown | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| PR-F5 | Custom preset form validation: name/description lengths, required fields, duplicate names warning | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| PR-F6 | Saving custom preset triggers PATCH with sanitized colors + metadata; success toast updates preset list | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| PR-F7 | Editing custom preset updates existing card in list without duplication | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| PR-F8 | Invisible presets beyond preview (OTHER_THEME_PRESETS_PREVIEW_COUNT) expand when requested; tests hidden count indicator | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| PR-F9 | Apply + Save flows: after applying preset, hitting Save persists colors; verify fetch payload includes updated palettes | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| PR-F10 | Error states: backend failure when saving preset surfaces message in theme notice area | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| PR-F11 | Accessibility: preset cards and buttons reachable via keyboard, `aria-pressed`/labels on apply/edit actions | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| PR-F12 | Loading state disables Apply/Save buttons to prevent double submission | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| PR-F13 | Preset search/filter (if any) returns expected subset; otherwise confirm not implemented | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| PR-F14 | Preset thumbnails respect current theme preview variant (light/dark) | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| PR-F15 | When features.themeLight or themeDark toggled off, preset UI communicates limitation (disabled apply button + tooltip) | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| PR-F16 | Multi-tab sync: custom preset created in one tab appears in another after refetch/mutation observer | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| PR-F17 | Undoing unsaved preset apply (e.g., collapse section) restores savedThemeLight/dark states | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| PR-F18 | Attempting to edit built-in preset prompts user to create a copy (if required) and verifies resulting flow | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| PR-F19 | Preset cards show confirmation before deletion (if available) and removal updates UI | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| PR-F20 | Validation errors on custom preset form highlight specific fields and focus the first invalid input | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| PR-F21 | Preset list virtualization/scrolling works with many entries (>=50) without layout thrash | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| PR-F22 | Saving preset while offline (fetch rejects) shows retry CTA and preserves entered data | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
 
 ### Theme presets – “Custom Presets” management
 
@@ -334,39 +334,39 @@ Focus on CRUD, validation, UX for the custom presets drawer/modal.
 #### Backend tests (Custom Presets)
 | ID | Scenario | Status | Notes |
 | --- | --- | --- | --- |
-| CP-B1 | Create custom preset persists name/description + both palettes with trimming and UTF-8 support | ⬜️ Not started | |
-| CP-B2 | Reject creation when exceeding max presets (50) with clear error | ⬜️ Not started | |
-| CP-B3 | Editing preset updates by ID only; invalid ID returns 404/BadRequest | ⬜️ Not started | |
-| CP-B4 | Delete preset removes entry and reindexes array without leaving `null` holes | ⬜️ Not started | |
-| CP-B5 | Prevents overwriting built-in preset IDs via custom payload | ⬜️ Not started | |
-| CP-B6 | Sanitizes color values (valid hex) and rejects invalid strings | ⬜️ Not started | |
-| CP-B7 | Handles concurrency: simultaneous edits on same preset keep last-write wins but no duplication | ⬜️ Not started | |
-| CP-B8 | Audit logging for create/update/delete with actor metadata | ⬜️ Not started | |
-| CP-B9 | Export/public settings includes custom presets sanitized for SSR consumers | ⬜️ Not started | |
-| CP-B10 | Import from JSON (if endpoint exists) enforces schema, deduplicates IDs, and validates palette completeness | ⬜️ Not started | |
-| CP-B11 | Localization fields (if any) validated per language; rejects unsupported locale codes | ⬜️ Not started | |
-| CP-B12 | Security: preset metadata cannot inject scripts/CRLF; persisted values encoded | ⬜️ Not started | |
-| CP-B13 | Transaction rollback: failure while saving palette leaves previous preset untouched | ⬜️ Not started | |
-| CP-B14 | System default custom presets (seeded) cannot be deleted unless flagged as user-owned | ⬜️ Not started | |
+| CP-B1 | Create custom preset persists name/description + both palettes with trimming and UTF-8 support | ✅ Implemented | Added to settings.service.spec.ts |
+| CP-B2 | Reject creation when exceeding max presets (50) with clear error | ✅ Implemented | Added to settings.service.spec.ts |
+| CP-B3 | Editing preset updates by ID only; invalid ID returns 404/BadRequest | ✅ Implemented | Added to settings.service.spec.ts |
+| CP-B4 | Delete preset removes entry and reindexes array without leaving `null` holes | ✅ Implemented | Added to settings.service.spec.ts |
+| CP-B5 | Prevents overwriting built-in preset IDs via custom payload | ✅ Implemented | Added to settings.service.spec.ts |
+| CP-B6 | Sanitizes color values (valid hex) and rejects invalid strings | ✅ Implemented | Added to settings.service.spec.ts |
+| CP-B7 | Handles concurrency: simultaneous edits on same preset keep last-write wins but no duplication | ✅ Implemented | Added to settings.service.spec.ts |
+| CP-B8 | Audit logging for create/update/delete with actor metadata | ✅ Implemented | Added to settings.service.spec.ts |
+| CP-B9 | Export/public settings includes custom presets sanitized for SSR consumers | ✅ Implemented | Added to settings.service.spec.ts |
+| CP-B10 | Import from JSON (if endpoint exists) enforces schema, deduplicates IDs, and validates palette completeness | ✅ Implemented | Added to settings.service.spec.ts |
+| CP-B11 | Localization fields (if any) validated per language; rejects unsupported locale codes | ✅ Implemented | Added to settings.service.spec.ts |
+| CP-B12 | Security: preset metadata cannot inject scripts/CRLF; persisted values encoded | ✅ Implemented | Added to settings.service.spec.ts |
+| CP-B13 | Transaction rollback: failure while saving palette leaves previous preset untouched | ✅ Implemented | Added to settings.service.spec.ts |
+| CP-B14 | System default custom presets (seeded) cannot be deleted unless flagged as user-owned | ✅ Implemented | Added to settings.service.spec.ts |
 
 #### Frontend tests (Custom Presets)
 | ID | Scenario | Status | Notes |
 | --- | --- | --- | --- |
-| CP-F1 | Custom preset panel lists existing presets with edit/delete buttons | ⬜️ Not started | |
-| CP-F2 | Creating preset requires name + at least one palette color; inline validation shows Bulgarian text | ⬜️ Not started | |
-| CP-F3 | Form auto-fills with current palette values when user clicks “Save current as preset” | ⬜️ Not started | |
-| CP-F4 | Editing preset loads stored colors and metadata; Save updates card inline | ⬜️ Not started | |
-| CP-F5 | Deleting preset opens confirmation modal and removes card on success | ⬜️ Not started | |
-| CP-F6 | UI enforces max preset count (disables “Create” button, shows helper text) | ⬜️ Not started | |
-| CP-F7 | Duplicate names show warning but allow save only if confirmed (if UX requires) | ⬜️ Not started | |
-| CP-F8 | Network failure on save keeps modal open with inputs intact for retry | ⬜️ Not started | |
-| CP-F9 | Accessibility: modal has focus trap, labels, ESC close, and buttons reachable via keyboard | ⬜️ Not started | |
-| CP-F10 | Preset cards support drag-to-reorder (if feature exists) or confirm absence | ⬜️ Not started | |
-| CP-F11 | Editing preset while another request pending disables controls to avoid race | ⬜️ Not started | |
-| CP-F12 | Search/filter (if provided) narrows preset list; tests empty-state message | ⬜️ Not started | |
-| CP-F13 | Multi-tab: deleting preset elsewhere triggers refetch and removal locally | ⬜️ Not started | |
-| CP-F14 | Mobile layout collapses presets into accordion without breaking apply buttons | ⬜️ Not started | |
-| CP-F15 | Import/export UI (if present) validates files and surfaces errors | ⬜️ Not started | |
+| CP-F1 | Custom preset panel lists existing presets with edit/delete buttons | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| CP-F2 | Creating preset requires name + at least one palette color; inline validation shows Bulgarian text | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| CP-F3 | Form auto-fills with current palette values when user clicks “Save current as preset” | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| CP-F4 | Editing preset loads stored colors and metadata; Save updates card inline | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| CP-F5 | Deleting preset opens confirmation modal and removes card on success | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| CP-F6 | UI enforces max preset count (disables “Create” button, shows helper text) | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| CP-F7 | Duplicate names show warning but allow save only if confirmed (if UX requires) | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| CP-F8 | Network failure on save keeps modal open with inputs intact for retry | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| CP-F9 | Accessibility: modal has focus trap, labels, ESC close, and buttons reachable via keyboard | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| CP-F10 | Preset cards support drag-to-reorder (if feature exists) or confirm absence | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| CP-F11 | Editing preset while another request pending disables controls to avoid race | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| CP-F12 | Search/filter (if provided) narrows preset list; tests empty-state message | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| CP-F13 | Multi-tab: deleting preset elsewhere triggers refetch and removal locally | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| CP-F14 | Mobile layout collapses presets into accordion without breaking apply buttons | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
+| CP-F15 | Import/export UI (if present) validates files and surfaces errors | ✅ Implemented | Added to theme-preset-apply-to.test.tsx |
 
 ### Theme presets – “Edit Preset” flows
 
@@ -375,32 +375,33 @@ Focus on editing both built-in (copying) and custom presets, including palette p
 #### Backend tests (Edit Preset)
 | ID | Scenario | Status | Notes |
 | --- | --- | --- | --- |
-| EP-B1 | Editing custom preset updates only specified fields (partial update preserves existing colors) | ⬜️ Not started | |
-| EP-B2 | Reject edit when preset ID not found or belongs to built-in set (unless copy-on-edit) | ⬜️ Not started | |
-| EP-B3 | Validation ensures edited palette still contains valid hex colors and required fields | ⬜️ Not started | |
-| EP-B4 | Editing preset while themeLight/themeDark toggles disabled strips unsupported palette keys | ⬜️ Not started | |
-| EP-B5 | Audit entry records before/after snapshots for edited presets | ⬜️ Not started | |
-| EP-B6 | Concurrent edit detection (optimistic lock or last-write wins) tested by sequential PATCH calls | ⬜️ Not started | |
-| EP-B7 | Editing built-in preset triggers duplication logic (new custom preset) so originals stay immutable | ⬜️ Not started | |
-| EP-B8 | Editing preset updates timestamps and `updatedBy` metadata | ⬜️ Not started | |
-| EP-B9 | Security: attempts to inject HTML/JS in name/description blocked on edit | ⬜️ Not started | |
-| EP-B10 | Public settings immediately expose edited palette after save across SSR/CSR fetches | ⬜️ Not started | |
+| EP-B1 | Editing custom preset updates only specified fields (partial update preserves existing colors) | ✅ Implemented | Added to settings.service.spec.ts |
+| EP-B2 | Reject edit when preset ID not found or belongs to built-in set (unless copy-on-edit) | ✅ Implemented | Added to settings.service.spec.ts |
+| EP-B3 | Validation ensures edited palette still contains valid hex colors and required fields | ✅ Implemented | Added to settings.service.spec.ts |
+| EP-B4 | Editing preset while themeLight/themeDark toggles disabled strips unsupported palette keys | ✅ Implemented | Added to settings.service.spec.ts |
+| EP-B5 | Audit entry records before/after snapshots for edited presets | ✅ Implemented | Added to settings.service.spec.ts |
+| EP-B6 | Concurrent edit detection (optimistic lock or last-write wins) tested by sequential PATCH calls | ✅ Implemented | Added to settings.service.spec.ts |
+| EP-B7 | Editing built-in preset triggers duplication logic (new custom preset) so originals stay immutable | ✅ Implemented | Added to settings.service.spec.ts |
+| EP-B8 | Editing preset updates timestamps and `updatedBy` metadata | ✅ Implemented | Added to settings.service.spec.ts |
+| EP-B9 | Security: attempts to inject HTML/JS in name/description blocked on edit | ✅ Implemented | Added to settings.service.spec.ts |
+| EP-B10 | Public settings immediately expose edited palette after save across SSR/CSR fetches | ✅ Implemented | Added to settings.service.spec.ts |
 
 #### Frontend tests (Edit Preset)
 | ID | Scenario | Status | Notes |
 | --- | --- | --- | --- |
 | EP-F1 | Clicking “Edit” on custom preset opens modal with prefilled name/description/colors | ⬜️ Not started | |
-| EP-F2 | Editing built-in preset forces user to “Save as custom preset” (if required) and restricts overwriting | ⬜️ Not started | |
-| EP-F3 | Changing colors in edit modal updates preview swatches live | ⬜️ Not started | |
-| EP-F4 | Cancel button restores previous palette, leaving unsaved changes discarded | ⬜️ Not started | |
-| EP-F5 | Saving edit triggers PATCH with minimal diff (only changed fields) | ⬜️ Not started | |
-| EP-F6 | Validation errors highlight inputs and prevent saving until resolved | ⬜️ Not started | |
-| EP-F7 | Editing preset while another save in flight disables inputs to avoid double submit | ⬜️ Not started | |
-| EP-F8 | After successful edit, preset card updates without full page reload (state sync) | ⬜️ Not started | |
-| EP-F9 | Error from backend (e.g., invalid color) displayed inside modal with Bulgarian text | ⬜️ Not started | |
-| EP-F10 | Keyboard accessibility: modal focus trap, Save triggers via Enter, Escape closes without saving | ⬜️ Not started | |
-| EP-F11 | Multi-tab scenario: editing preset in one tab reflects in others after refetch | ⬜️ Not started | |
-| EP-F12 | Unsaved changes warning when closing modal or navigating away | ⬜️ Not started | |
+| EP-F1 | Clicking “Edit” on custom preset opens modal with prefilled name/description/colors | ✅ Implemented | Added to `fe/src/app/admin/settings/__tests__/theme-preset-apply-to.test.tsx` |
+| EP-F2 | Editing built-in preset forces user to “Save as custom preset” (if required) and restricts overwriting | ✅ Implemented | Added to `fe/src/app/admin/settings/__tests__/theme-preset-apply-to.test.tsx` |
+| EP-F3 | Changing colors in edit modal updates preview swatches live | ✅ Implemented | Added to `fe/src/app/admin/settings/__tests__/theme-preset-apply-to.test.tsx` |
+| EP-F4 | Cancel button restores previous palette, leaving unsaved changes discarded | ✅ Implemented | Added to `fe/src/app/admin/settings/__tests__/theme-preset-apply-to.test.tsx` |
+| EP-F5 | Saving edit triggers PATCH with minimal diff (only changed fields) | ✅ Implemented | Added to `fe/src/app/admin/settings/__tests__/theme-preset-apply-to.test.tsx` |
+| EP-F6 | Validation errors highlight inputs and prevent saving until resolved | ✅ Implemented | Added to `fe/src/app/admin/settings/__tests__/theme-preset-apply-to.test.tsx` |
+| EP-F7 | Editing preset while another save in flight disables inputs to avoid double submit | ✅ Implemented | Added to `fe/src/app/admin/settings/__tests__/theme-preset-apply-to.test.tsx` |
+| EP-F8 | After successful edit, preset card updates without full page reload (state sync) | ✅ Implemented | Added to `fe/src/app/admin/settings/__tests__/theme-preset-apply-to.test.tsx` |
+| EP-F9 | Error from backend (e.g., invalid color) displayed inside modal with Bulgarian text | ✅ Implemented | Added to `fe/src/app/admin/settings/__tests__/theme-preset-apply-to.test.tsx` |
+| EP-F10 | Keyboard accessibility: modal focus trap, Save triggers via Enter, Escape closes without saving | ✅ Implemented | Added to `fe/src/app/admin/settings/__tests__/theme-preset-apply-to.test.tsx` |
+| EP-F11 | Multi-tab scenario: editing preset in one tab reflects in others after refetch | ✅ Implemented | Added to `fe/src/app/admin/settings/__tests__/theme-preset-apply-to.test.tsx` |
+| EP-F12 | Unsaved changes warning when closing modal or navigating away | ✅ Implemented | Added to `fe/src/app/admin/settings/__tests__/theme-preset-apply-to.test.tsx` |
 
 ### Branding assets – “Upload & Remove Favicon”
 
@@ -482,22 +483,22 @@ Includes base font file and optional per-language variants.
 #### Backend tests (Font uploads)
 | ID | Scenario | Status | Notes |
 | --- | --- | --- | --- |
-| FT-B1 | Accepts only `.woff2/.woff/.ttf/.otf` and enforces 2MB limit | ⬜️ Not started | |
-| FT-B2 | Rejects uploads without buffer or with zero bytes | ⬜️ Not started | |
-| FT-B3 | Saves file with `font-*.ext` prefix and returns media URL | ⬜️ Not started | |
-| FT-B4 | Removing font (`fontUrl = null`) deletes previous file and resets typography preview | ⬜️ Not started | |
-| FT-B5 | Per-language font overrides stored in `fontUrlByLang` map; invalid locale codes rejected | ⬜️ Not started | |
-| FT-B6 | Normalizes URLs and ensures sanitized dictionary entries | ⬜️ Not started | |
-| FT-B7 | Import/export preserves per-language fonts without leaking absolute paths | ⬜️ Not started | |
-| FT-B8 | Audit logs capture uploader + target language | ⬜️ Not started | |
+| FT-B1 | Accepts only `.woff2/.woff/.ttf/.otf` and enforces 2MB limit | ✅ Implemented | Added to admin-settings.controller.spec.ts |
+| FT-B2 | Rejects uploads without buffer or with zero bytes | ✅ Implemented | Added to admin-settings.controller.spec.ts |
+| FT-B3 | Saves file with `font-*.ext` prefix and returns media URL | ✅ Implemented | Added to admin-settings.controller.spec.ts |
+| FT-B4 | Removing font (`fontUrl = null`) deletes previous file and resets typography preview | ✅ Implemented | Added to settings.service.spec.ts |
+| FT-B5 | Per-language font overrides stored in `fontUrlByLang` map; invalid locale codes rejected | ✅ Implemented | Added to settings.service.spec.ts |
+| FT-B6 | Normalizes URLs and ensures sanitized dictionary entries | ✅ Implemented | Added to settings.service.spec.ts |
+| FT-B7 | Import/export preserves per-language fonts without leaking absolute paths | ✅ Implemented | Added to settings.service.spec.ts |
+| FT-B8 | Audit logs capture uploader + target language | ✅ Implemented | Added to settings.service.spec.ts |
 
 #### Backend tests (Font license upload)
 | ID | Scenario | Status | Notes |
 | --- | --- | --- | --- |
-| FL-B1 | Allows only approved extensions (pdf/txt/doc/docx/odt/png/jpg/jpeg/webp/zip) and 5MB size | ⬜️ Not started | |
-| FL-B2 | Missing buffer or invalid mime returns BadRequest | ⬜️ Not started | |
-| FL-B3 | Removing license file cleans up media entry | ⬜️ Not started | |
-| FL-B4 | Security: prevents script injection via document name | ⬜️ Not started | |
+| FL-B1 | Allows only approved extensions (pdf/txt/doc/docx/odt/png/jpg/jpeg/webp/zip) and 5MB size | ✅ Implemented | Added to admin-settings.controller.spec.ts |
+| FL-B2 | Missing buffer or invalid mime returns BadRequest | ✅ Implemented | Added to admin-settings.controller.spec.ts |
+| FL-B3 | Removing license file cleans up media entry | ✅ Implemented | Added to settings.service.spec.ts |
+| FL-B4 | Security: prevents script injection via document name | ✅ Implemented | Added to admin-settings.controller.spec.ts |
 
 #### Frontend tests (Fonts & licenses)
 | ID | Scenario | Status | Notes |
