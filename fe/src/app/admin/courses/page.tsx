@@ -207,7 +207,9 @@ export default function AdminCoursesPage() {
   }, [languageDropdownOpen]);
 
   useEffect(() => {
-    setLanguageFilters((prev) => prev.filter((l) => languageOptions.includes(l)));
+    setLanguageFilters((prev) =>
+      prev.filter((l) => languageOptions.includes(l)),
+    );
   }, [languageOptions]);
 
   const languageFiltersLabel = useMemo(() => {
@@ -236,32 +238,29 @@ export default function AdminCoursesPage() {
     setLanguageFilters([]);
   }, []);
 
-  const toggleLanguageFilter = useCallback(
-    (code: string) => {
-      const normalized = (code ?? "").trim().toLowerCase();
-      if (!normalized) return;
+  const toggleLanguageFilter = useCallback((code: string) => {
+    const normalized = (code ?? "").trim().toLowerCase();
+    if (!normalized) return;
 
-      setCurrentPage(1);
-      setLanguageFilters((prev) => {
-        const prevNormalized = (prev ?? [])
-          .map((l) => (l ?? "").trim().toLowerCase())
-          .filter((l) => l.length > 0);
+    setCurrentPage(1);
+    setLanguageFilters((prev) => {
+      const prevNormalized = (prev ?? [])
+        .map((l) => (l ?? "").trim().toLowerCase())
+        .filter((l) => l.length > 0);
 
-        if (prevNormalized.length === 0) {
-          return [normalized];
-        }
+      if (prevNormalized.length === 0) {
+        return [normalized];
+      }
 
-        const set = new Set(prevNormalized);
-        if (set.has(normalized)) {
-          set.delete(normalized);
-        } else {
-          set.add(normalized);
-        }
-        return Array.from(set);
-      });
-    },
-    [],
-  );
+      const set = new Set(prevNormalized);
+      if (set.has(normalized)) {
+        set.delete(normalized);
+      } else {
+        set.add(normalized);
+      }
+      return Array.from(set);
+    });
+  }, []);
 
   useEffect(() => {
     setForm((prev) => {
@@ -321,31 +320,28 @@ export default function AdminCoursesPage() {
     return `${unique.length} languages`;
   }, [createSelectedLanguagesSet]);
 
-  const toggleCreateLanguage = useCallback(
-    (code: string) => {
-      const normalized = (code ?? "").trim().toLowerCase();
-      if (!normalized) return;
+  const toggleCreateLanguage = useCallback((code: string) => {
+    const normalized = (code ?? "").trim().toLowerCase();
+    if (!normalized) return;
 
-      setForm((prev) => {
-        const prevNormalized = (prev.languages ?? [])
-          .map((l) => (l ?? "").trim().toLowerCase())
-          .filter((l) => l.length > 0);
-        const set = new Set(prevNormalized);
-        if (set.has(normalized)) {
-          set.delete(normalized);
-        } else {
-          set.add(normalized);
-        }
-        const next = Array.from(set);
-        if (next.length === 0) {
-          return prev;
-        }
-        const primary = next[0] ?? prev.language;
-        return { ...prev, language: primary, languages: next };
-      });
-    },
-    [],
-  );
+    setForm((prev) => {
+      const prevNormalized = (prev.languages ?? [])
+        .map((l) => (l ?? "").trim().toLowerCase())
+        .filter((l) => l.length > 0);
+      const set = new Set(prevNormalized);
+      if (set.has(normalized)) {
+        set.delete(normalized);
+      } else {
+        set.add(normalized);
+      }
+      const next = Array.from(set);
+      if (next.length === 0) {
+        return prev;
+      }
+      const primary = next[0] ?? prev.language;
+      return { ...prev, language: primary, languages: next };
+    });
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -1156,9 +1152,7 @@ export default function AdminCoursesPage() {
                 <button
                   type="button"
                   className="flex w-full items-center justify-between gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900"
-                  onClick={() =>
-                    setCreateLanguageDropdownOpen((prev) => !prev)
-                  }
+                  onClick={() => setCreateLanguageDropdownOpen((prev) => !prev)}
                   aria-haspopup="listbox"
                   aria-expanded={createLanguageDropdownOpen}
                 >
