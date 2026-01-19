@@ -168,7 +168,7 @@ export default function MyCoursesPage() {
 
       {loading && <p className="text-sm text-zinc-600">Зареждане...</p>}
 
-      {error && <p className="text-sm text-red-700">{error}</p>}
+      {error && <p className="text-sm text-[color:var(--error)]">{error}</p>}
 
       {!loading && !error && items.length === 0 && (
         <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
@@ -177,7 +177,7 @@ export default function MyCoursesPage() {
           </p>
           <Link
             href="/courses"
-            className="mt-3 inline-block text-sm text-green-700 hover:text-green-800"
+            className="mt-3 inline-block text-sm text-[color:var(--primary)] hover:opacity-90"
           >
             Отиди към Courses →
           </Link>
@@ -194,16 +194,27 @@ export default function MyCoursesPage() {
               <div className="mb-3 flex items-start justify-between gap-3">
                 <Link
                   href={`/courses/${course.id}`}
-                  className="text-lg font-semibold text-gray-900 hover:text-green-800"
+                  className="text-lg font-semibold text-gray-900 hover:opacity-90"
                 >
                   {course.title}
                 </Link>
                 <span
-                  className={`shrink-0 rounded-full px-2 py-1 text-[11px] font-semibold ${
+                  className="shrink-0 rounded-full border px-2 py-1 text-[11px] font-semibold"
+                  style={
                     course.isPaid
-                      ? "bg-amber-100 text-amber-800"
-                      : "bg-emerald-100 text-emerald-800"
-                  }`}
+                      ? {
+                          borderColor: "var(--attention)",
+                          backgroundColor:
+                            "color-mix(in srgb, var(--attention) 15%, white)",
+                          color: "var(--attention)",
+                        }
+                      : {
+                          borderColor: "var(--primary)",
+                          backgroundColor:
+                            "color-mix(in srgb, var(--primary) 15%, white)",
+                          color: "var(--primary)",
+                        }
+                  }
                 >
                   {course.isPaid ? "Paid" : "Free"}
                 </span>
@@ -220,9 +231,10 @@ export default function MyCoursesPage() {
                   </div>
                   <div className="mt-2 h-2 w-full rounded-full bg-gray-100">
                     <div
-                      className="h-2 rounded-full bg-green-600"
+                      className="h-2 rounded-full"
                       style={{
                         width: `${Math.min(Math.max(course.progressPercent, 0), 100)}%`,
+                        backgroundColor: "var(--primary)",
                       }}
                     />
                   </div>
@@ -241,7 +253,7 @@ export default function MyCoursesPage() {
               <div className="mt-4 flex items-center gap-3">
                 <Link
                   href={`/courses/${course.id}`}
-                  className="text-sm text-green-700 hover:text-green-800"
+                  className="text-sm text-[color:var(--primary)] hover:opacity-90"
                 >
                   {courseCtaLabel(course.enrollmentStatus)}
                 </Link>
@@ -249,7 +261,7 @@ export default function MyCoursesPage() {
                 {course.enrollmentStatus === "completed" && (
                   <Link
                     href={`/my-courses/${course.id}/certificate`}
-                    className="text-sm text-green-700 hover:text-green-800"
+                    className="text-sm text-[color:var(--primary)] hover:opacity-90"
                   >
                     Certificate →
                   </Link>
@@ -260,7 +272,12 @@ export default function MyCoursesPage() {
                     type="button"
                     onClick={() => void handleRemove(course)}
                     disabled={removingCourseId === course.id}
-                    className="ml-auto rounded-md border border-red-200 bg-white px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="ml-auto rounded-md border px-3 py-1.5 text-xs font-semibold shadow-sm hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+                    style={{
+                      backgroundColor: "var(--error)",
+                      borderColor: "var(--error)",
+                      color: "var(--on-error)",
+                    }}
                   >
                     {removingCourseId === course.id ? "Removing..." : "Remove"}
                   </button>

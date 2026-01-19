@@ -299,7 +299,12 @@ export function EnrollCourseButton({
     return (
       <Link
         href="/auth/login"
-        className="inline-flex items-center justify-center rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-700"
+        className="inline-flex items-center justify-center rounded-lg border px-4 py-2 text-sm font-semibold shadow-sm hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-1"
+        style={{
+          backgroundColor: "var(--primary)",
+          borderColor: "var(--primary)",
+          color: "var(--on-primary)",
+        }}
       >
         Вход за записване
       </Link>
@@ -312,7 +317,12 @@ export function EnrollCourseButton({
         type="button"
         onClick={enroll}
         disabled={phase !== "idle" || enrolled}
-        className="inline-flex items-center justify-center rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-700 disabled:opacity-70"
+        className="inline-flex items-center justify-center rounded-lg border px-4 py-2 text-sm font-semibold shadow-sm hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-1 disabled:opacity-70"
+        style={{
+          backgroundColor: "var(--primary)",
+          borderColor: "var(--primary)",
+          color: "var(--on-primary)",
+        }}
       >
         {phase === "unlocking"
           ? "Отключване..."
@@ -329,13 +339,15 @@ export function EnrollCourseButton({
                 : "Enroll"}
       </button>
 
-      {success && <p className="text-sm text-green-700">{success}</p>}
-      {error && <p className="text-sm text-red-700">{error}</p>}
+      {success && (
+        <p className="text-sm text-[color:var(--primary)]">{success}</p>
+      )}
+      {error && <p className="text-sm text-[color:var(--error)]">{error}</p>}
 
       {success && (
         <Link
           href="/my-courses"
-          className="text-sm text-green-700 hover:text-green-800"
+          className="text-sm text-[color:var(--primary)] hover:opacity-90"
         >
           Виж My Courses →
         </Link>

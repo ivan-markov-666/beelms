@@ -677,13 +677,21 @@ export default function ProfilePage() {
   if (globalError) {
     return (
       <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-8">
-        <main className="w-full max-w-md rounded-lg border border-red-200 bg-white p-6 shadow-sm">
-          <p className="text-sm text-red-600" role="alert">
+        <main
+          className="w-full max-w-md rounded-lg border bg-white p-6 shadow-sm"
+          style={{ borderColor: "var(--error)" }}
+        >
+          <p className="text-sm text-[color:var(--error)]" role="alert">
             {globalError}
           </p>
           <button
             type="button"
-            className="mt-4 rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800"
+            className="mt-4 rounded-md border px-4 py-2 text-sm font-medium shadow-sm hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-1"
+            style={{
+              backgroundColor: "var(--primary)",
+              borderColor: "var(--primary)",
+              color: "var(--on-primary)",
+            }}
             onClick={() => router.replace("/auth/login")}
           >
             Към страницата за вход
@@ -719,7 +727,7 @@ export default function ProfilePage() {
           <h2 className="mb-6 flex items-center gap-2 text-xl font-bold text-[color:var(--foreground)]">
             <span
               aria-hidden="true"
-              className="mr-2 inline-flex h-6 w-6 items-center justify-center text-green-600"
+              className="mr-2 inline-flex h-6 w-6 items-center justify-center text-[color:var(--primary)]"
             >
               <svg
                 className="h-6 w-6"
@@ -760,11 +768,14 @@ export default function ProfilePage() {
                   <p className="mt-1 text-sm text-zinc-900">{profile.email}</p>
                   {emailChangeLimitWarning && !emailEditOpen && (
                     <>
-                      <p className="mt-1 text-xs text-amber-700" role="alert">
+                      <p
+                        className="mt-1 text-xs text-[color:var(--attention)]"
+                        role="alert"
+                      >
                         {emailChangeLimitWarning}
                       </p>
                       {profile.emailChangeLimitResetAt && (
-                        <p className="mt-0.5 text-[11px] text-amber-700">
+                        <p className="mt-0.5 text-[11px] text-[color:var(--attention)]">
                           Лимитът ще бъде нулиран около{" "}
                           {formatDateTime(profile.emailChangeLimitResetAt)}.
                         </p>
@@ -774,7 +785,7 @@ export default function ProfilePage() {
                 </div>
                 <button
                   type="button"
-                  className="text-xs font-medium text-green-700 hover:text-green-800"
+                  className="text-xs font-medium text-[color:var(--primary)] hover:opacity-90"
                   onClick={() => {
                     setEmailInput(profile.email);
                     setEmailEditOpen((open) => !open);
@@ -800,28 +811,37 @@ export default function ProfilePage() {
                   <input
                     id="email-input"
                     type="email"
-                    className="block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-zinc-800 focus:outline-none focus:ring-1 focus:ring-zinc-800"
+                    className="block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
                     value={emailInput}
                     onChange={(e) => setEmailInput(e.target.value)}
                     disabled={emailSubmitting}
                   />
                   {emailError && (
-                    <p className="text-xs text-red-600" role="alert">
+                    <p
+                      className="text-xs text-[color:var(--error)]"
+                      role="alert"
+                    >
                       {emailError}
                     </p>
                   )}
                   {emailSuccess && (
-                    <p className="text-xs text-green-600" role="status">
+                    <p
+                      className="text-xs text-[color:var(--primary)]"
+                      role="status"
+                    >
                       {emailSuccess}
                     </p>
                   )}
                   {emailChangeLimitWarning && (
                     <>
-                      <p className="text-xs text-amber-700" role="alert">
+                      <p
+                        className="text-xs text-[color:var(--attention)]"
+                        role="alert"
+                      >
                         {emailChangeLimitWarning}
                       </p>
                       {profile.emailChangeLimitResetAt && (
-                        <p className="text-[11px] text-amber-700">
+                        <p className="text-[11px] text-[color:var(--attention)]">
                           Лимитът ще бъде нулиран около{" "}
                           {formatDateTime(profile.emailChangeLimitResetAt)}.
                         </p>
@@ -831,7 +851,12 @@ export default function ProfilePage() {
                   <div className="flex items-center gap-2 pt-1">
                     <button
                       type="submit"
-                      className="rounded-md bg-green-600 px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-green-700 disabled:opacity-70"
+                      className="rounded-md border px-3 py-1.5 text-xs font-medium shadow-sm hover:opacity-90 disabled:opacity-70"
+                      style={{
+                        backgroundColor: "var(--primary)",
+                        borderColor: "var(--primary)",
+                        color: "var(--on-primary)",
+                      }}
                       disabled={emailSubmitting}
                     >
                       Запази
@@ -870,7 +895,7 @@ export default function ProfilePage() {
                 </div>
                 <button
                   type="button"
-                  className="text-xs font-medium text-emerald-700 hover:text-emerald-800"
+                  className="text-xs font-medium text-[color:var(--primary)] hover:opacity-90"
                   onClick={() => {
                     setPasswordEditOpen((open) => !open);
                     setPasswordError(null);
@@ -882,12 +907,18 @@ export default function ProfilePage() {
               </div>
 
               {passwordError && (
-                <p className="mt-2 text-xs text-red-600" role="alert">
+                <p
+                  className="mt-2 text-xs text-[color:var(--error)]"
+                  role="alert"
+                >
                   {passwordError}
                 </p>
               )}
               {passwordSuccess && (
-                <p className="mt-2 text-xs text-green-600" role="status">
+                <p
+                  className="mt-2 text-xs text-[color:var(--primary)]"
+                  role="status"
+                >
                   {passwordSuccess}
                 </p>
               )}
@@ -908,7 +939,7 @@ export default function ProfilePage() {
                       <input
                         id="current-password"
                         type="password"
-                        className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-zinc-800 focus:outline-none focus:ring-1 focus:ring-zinc-800"
+                        className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
                         value={currentPassword}
                         onChange={(e) => setCurrentPassword(e.target.value)}
                         disabled={passwordSubmitting}
@@ -924,7 +955,7 @@ export default function ProfilePage() {
                       <input
                         id="new-password"
                         type="password"
-                        className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-zinc-800 focus:outline-none focus:ring-1 focus:ring-zinc-800"
+                        className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
                         disabled={passwordSubmitting}
@@ -940,7 +971,7 @@ export default function ProfilePage() {
                       <input
                         id="confirm-password"
                         type="password"
-                        className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-zinc-800 focus:outline-none focus:ring-1 focus:ring-zinc-800"
+                        className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         disabled={passwordSubmitting}
@@ -950,7 +981,12 @@ export default function ProfilePage() {
                   <div className="flex items-center gap-2 pt-1">
                     <button
                       type="submit"
-                      className="rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-emerald-700 disabled:opacity-70"
+                      className="rounded-md border px-3 py-1.5 text-xs font-medium shadow-sm hover:opacity-90 disabled:opacity-70"
+                      style={{
+                        backgroundColor: "var(--primary)",
+                        borderColor: "var(--primary)",
+                        color: "var(--on-primary)",
+                      }}
                       disabled={passwordSubmitting}
                     >
                       Запази
@@ -1006,7 +1042,7 @@ export default function ProfilePage() {
                   {!twoFactorEnabled ? (
                     <button
                       type="button"
-                      className="text-xs font-medium text-emerald-700 hover:text-emerald-800"
+                      className="text-xs font-medium text-[color:var(--primary)] hover:opacity-90"
                       onClick={handleTwoFactorSetup}
                       disabled={twoFactorLoading}
                     >
@@ -1015,7 +1051,7 @@ export default function ProfilePage() {
                   ) : (
                     <button
                       type="button"
-                      className="text-xs font-medium text-red-700 hover:text-red-800"
+                      className="text-xs font-medium text-[color:var(--error)] hover:opacity-90"
                       onClick={() => {
                         setTwoFactorDisableOpen((open) => !open);
                         setTwoFactorSetupOpen(false);
@@ -1030,12 +1066,18 @@ export default function ProfilePage() {
                 </div>
 
                 {twoFactorError && (
-                  <p className="mt-2 text-xs text-red-600" role="alert">
+                  <p
+                    className="mt-2 text-xs text-[color:var(--error)]"
+                    role="alert"
+                  >
                     {twoFactorError}
                   </p>
                 )}
                 {twoFactorSuccess && (
-                  <p className="mt-2 text-xs text-green-600" role="status">
+                  <p
+                    className="mt-2 text-xs text-[color:var(--primary)]"
+                    role="status"
+                  >
                     {twoFactorSuccess}
                   </p>
                 )}
@@ -1086,7 +1128,7 @@ export default function ProfilePage() {
                         id="twofactor-enable-code"
                         inputMode="numeric"
                         autoComplete="one-time-code"
-                        className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-zinc-800 focus:outline-none focus:ring-1 focus:ring-zinc-800"
+                        className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
                         value={twoFactorEnableCode}
                         onChange={(e) => setTwoFactorEnableCode(e.target.value)}
                         disabled={twoFactorLoading}
@@ -1096,7 +1138,12 @@ export default function ProfilePage() {
                     <div className="flex items-center gap-2 pt-1">
                       <button
                         type="submit"
-                        className="rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-emerald-700 disabled:opacity-70"
+                        className="rounded-md border px-3 py-1.5 text-xs font-medium shadow-sm hover:opacity-90 disabled:opacity-70"
+                        style={{
+                          backgroundColor: "var(--primary)",
+                          borderColor: "var(--primary)",
+                          color: "var(--on-primary)",
+                        }}
                         disabled={twoFactorLoading || !twoFactorSetupSecret}
                       >
                         Активирай
@@ -1137,7 +1184,7 @@ export default function ProfilePage() {
                         id="twofactor-disable-code"
                         inputMode="numeric"
                         autoComplete="one-time-code"
-                        className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-zinc-800 focus:outline-none focus:ring-1 focus:ring-zinc-800"
+                        className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
                         value={twoFactorDisableCode}
                         onChange={(e) =>
                           setTwoFactorDisableCode(e.target.value)
@@ -1152,7 +1199,7 @@ export default function ProfilePage() {
                         className="rounded-md px-3 py-1.5 text-xs font-medium shadow-sm hover:opacity-90 disabled:opacity-70"
                         style={{
                           backgroundColor: "var(--error)",
-                          color: "var(--foreground)",
+                          color: "var(--on-error)",
                         }}
                         disabled={twoFactorLoading}
                       >
@@ -1196,7 +1243,7 @@ export default function ProfilePage() {
           <h2 className="mb-4 flex items-center gap-2 text-xl font-bold text-[color:var(--foreground)]">
             <span
               aria-hidden="true"
-              className="mr-2 inline-flex h-6 w-6 items-center justify-center text-blue-600"
+              className="mr-2 inline-flex h-6 w-6 items-center justify-center text-[color:var(--primary)]"
             >
               <svg
                 className="h-6 w-6"
@@ -1247,7 +1294,7 @@ export default function ProfilePage() {
             className="flex items-center rounded-lg px-6 py-3 text-sm font-semibold shadow-sm hover:opacity-90 disabled:opacity-70"
             style={{
               backgroundColor: "var(--secondary)",
-              color: "var(--foreground)",
+              color: "var(--on-secondary)",
             }}
             disabled={exportSubmitting}
           >
@@ -1268,12 +1315,15 @@ export default function ProfilePage() {
             Експортирай моите данни
           </button>
           {exportError && (
-            <p className="mt-2 text-xs text-red-600" role="alert">
+            <p className="mt-2 text-xs text-[color:var(--error)]" role="alert">
               {exportError}
             </p>
           )}
           {exportSuccess && (
-            <p className="mt-2 text-xs text-green-600" role="status">
+            <p
+              className="mt-2 text-xs text-[color:var(--primary)]"
+              role="status"
+            >
               {exportSuccess}
             </p>
           )}
@@ -1303,7 +1353,7 @@ export default function ProfilePage() {
           <h2 className="mb-4 flex items-center gap-2 text-xl font-bold text-[color:var(--foreground)]">
             <span
               aria-hidden="true"
-              className="mr-2 inline-flex h-6 w-6 items-center justify-center text-red-600"
+              className="mr-2 inline-flex h-6 w-6 items-center justify-center text-[color:var(--error)]"
             >
               <svg
                 className="h-6 w-6"
@@ -1346,7 +1396,7 @@ export default function ProfilePage() {
             className="flex items-center rounded-lg px-6 py-3 text-sm font-semibold shadow-sm hover:opacity-90"
             style={{
               backgroundColor: "var(--error)",
-              color: "var(--foreground)",
+              color: "var(--on-error)",
             }}
           >
             <svg
@@ -1366,7 +1416,7 @@ export default function ProfilePage() {
             Изтрий акаунта завинаги
           </button>
           {deleteError && (
-            <p className="mt-2 text-xs text-red-600" role="alert">
+            <p className="mt-2 text-xs text-[color:var(--error)]" role="alert">
               {deleteError}
             </p>
           )}
@@ -1395,7 +1445,7 @@ export default function ProfilePage() {
                   className="rounded-md px-3 py-1.5 text-xs font-medium hover:opacity-90"
                   style={{
                     backgroundColor: "var(--error)",
-                    color: "var(--foreground)",
+                    color: "var(--on-error)",
                   }}
                   onClick={() => {
                     setDeleteStep1Open(false);
@@ -1432,7 +1482,7 @@ export default function ProfilePage() {
                   className="rounded-md px-3 py-1.5 text-xs font-medium hover:opacity-90 disabled:opacity-70"
                   style={{
                     backgroundColor: "var(--error)",
-                    color: "var(--foreground)",
+                    color: "var(--on-error)",
                   }}
                   onClick={handleFinalDelete}
                   disabled={deleteSubmitting}

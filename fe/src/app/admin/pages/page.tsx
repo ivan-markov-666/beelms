@@ -172,11 +172,11 @@ function ToggleSwitch({
         if (disabled) return;
         onChange(!checked);
       }}
-      className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full border transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 ${
-        checked
-          ? "border-green-500 bg-green-600"
-          : "border-gray-300 bg-gray-200"
-      }`}
+      className="relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full border transition-colors focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+      style={{
+        backgroundColor: checked ? "var(--primary)" : "#e5e7eb",
+        borderColor: checked ? "var(--primary)" : "#d1d5db",
+      }}
     >
       <span
         className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition ${
@@ -1231,7 +1231,7 @@ export default function AdminPagesPage() {
                         <input
                           value={customSlug}
                           onChange={(e) => setCustomSlug(e.target.value)}
-                          className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                          className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
                           placeholder="my-page"
                           disabled={saving}
                         />
@@ -1266,7 +1266,7 @@ export default function AdminPagesPage() {
                           value={editingLang}
                           onChange={(next) => setEditingLang(next)}
                           disabled={saving}
-                          buttonClassName="flex w-full items-center justify-between gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 disabled:opacity-60"
+                          buttonClassName="flex w-full items-center justify-between gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)] disabled:opacity-60"
                           options={[
                             { value: "__global", label: "Global (default)" },
                             ...supportedLangs.map((lang) => ({
@@ -1300,7 +1300,7 @@ export default function AdminPagesPage() {
                             upsertStringDictionary(prev, editingLang, v),
                           );
                         }}
-                        className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                        className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
                         placeholder="Terms and Conditions"
                         disabled={saving}
                       />
@@ -1324,7 +1324,12 @@ export default function AdminPagesPage() {
                         type="button"
                         onClick={onSave}
                         disabled={saving}
-                        className="inline-flex items-center justify-center rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-700 disabled:opacity-70"
+                        className="inline-flex items-center justify-center rounded-lg border px-4 py-2 text-sm font-semibold shadow-sm hover:opacity-90 disabled:opacity-70"
+                        style={{
+                          backgroundColor: "var(--primary)",
+                          borderColor: "var(--primary)",
+                          color: "var(--on-primary)",
+                        }}
                       >
                         {saving ? "Запазване..." : "Запази"}
                       </button>
@@ -1333,7 +1338,12 @@ export default function AdminPagesPage() {
                           type="button"
                           onClick={onDeleteCustom}
                           disabled={saving}
-                          className="inline-flex items-center justify-center rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-700 shadow-sm hover:bg-red-50 disabled:opacity-70"
+                          className="inline-flex items-center justify-center rounded-lg border px-4 py-2 text-sm font-semibold shadow-sm hover:opacity-90 disabled:opacity-70"
+                          style={{
+                            backgroundColor: "var(--error)",
+                            borderColor: "var(--error)",
+                            color: "var(--on-error)",
+                          }}
                         >
                           Изтрий
                         </button>
@@ -1376,7 +1386,7 @@ export default function AdminPagesPage() {
                           value={notFoundEditingLang}
                           onChange={(next) => setNotFoundEditingLang(next)}
                           disabled={saving}
-                          buttonClassName="flex w-full items-center justify-between gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 disabled:opacity-60"
+                          buttonClassName="flex w-full items-center justify-between gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)] disabled:opacity-60"
                           options={[
                             { value: "__global", label: "Global (default)" },
                             ...supportedLangs.map((lang) => ({
@@ -1414,7 +1424,7 @@ export default function AdminPagesPage() {
                             ),
                           );
                         }}
-                        className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                        className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
                         placeholder="Страницата не е намерена"
                         disabled={saving}
                       />
@@ -1438,7 +1448,12 @@ export default function AdminPagesPage() {
                         type="button"
                         onClick={onSaveNotFound}
                         disabled={saving}
-                        className="inline-flex items-center justify-center rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-700 disabled:opacity-70"
+                        className="inline-flex items-center justify-center rounded-lg border px-4 py-2 text-sm font-semibold shadow-sm hover:opacity-90 disabled:opacity-70"
+                        style={{
+                          backgroundColor: "var(--primary)",
+                          borderColor: "var(--primary)",
+                          color: "var(--on-primary)",
+                        }}
                       >
                         {saving ? "Запазване..." : "Запази"}
                       </button>

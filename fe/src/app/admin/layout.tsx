@@ -76,6 +76,12 @@ function AdminNavigationTabs({
       visible: role === "admin",
     },
     {
+      href: "/admin/backups",
+      label: t(lang, "common", "adminDashboardTabBackups"),
+      active: pathname.startsWith("/admin/backups"),
+      visible: role === "admin",
+    },
+    {
       href: "/admin/pages",
       label: "Pages",
       active:

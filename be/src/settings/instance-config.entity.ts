@@ -8,6 +8,63 @@ import {
 
 export type SocialProviderName = 'google' | 'facebook' | 'github' | 'linkedin';
 
+export type BackupRemoteProvider = 's3';
+
+export type InstanceBackupRemoteS3Config = {
+  accessKeyId?: string | null;
+  secretAccessKey?: string | null;
+  bucket?: string | null;
+  region?: string | null;
+  prefix?: string | null;
+};
+
+export type InstanceBackupRemoteConfig = {
+  enabled?: boolean;
+  provider?: BackupRemoteProvider | null;
+  s3?: InstanceBackupRemoteS3Config | null;
+};
+
+export type InstanceBackupScheduleConfig = {
+  enabled?: boolean;
+  timezone?: string | null;
+  timeOfDay?: string | null;
+  timesOfDay?: string[] | null;
+  lastRunAt?: string | null;
+  lastRunKey?: string | null;
+  encryptionPassword?: string | null;
+};
+
+export type BackupRetentionTimePeriod =
+  | '1_minute'
+  | 'weekly'
+  | 'monthly'
+  | '2_months'
+  | '3_months'
+  | '6_months'
+  | 'yearly'
+  | 'never';
+
+export type InstanceBackupRetentionTimeConfig = {
+  enabled?: boolean;
+  period?: BackupRetentionTimePeriod | null;
+};
+
+export type InstanceBackupRetentionCountConfig = {
+  enabled?: boolean;
+  keepLast?: number | null;
+};
+
+export type InstanceBackupRetentionConfig = {
+  time?: InstanceBackupRetentionTimeConfig | null;
+  count?: InstanceBackupRetentionCountConfig | null;
+};
+
+export type InstanceBackupConfig = {
+  remote?: InstanceBackupRemoteConfig | null;
+  schedule?: InstanceBackupScheduleConfig | null;
+  retention?: InstanceBackupRetentionConfig | null;
+};
+
 type HeaderMenuItem = {
   id: string;
   label?: string | null;
@@ -74,6 +131,7 @@ export type InstanceBranding = {
       foreground?: string | null;
       primary?: string | null;
       secondary?: string | null;
+      attention?: string | null;
       error?: string | null;
       card?: string | null;
       border?: string | null;
@@ -91,6 +149,7 @@ export type InstanceBranding = {
       foreground?: string | null;
       primary?: string | null;
       secondary?: string | null;
+      attention?: string | null;
       error?: string | null;
       card?: string | null;
       border?: string | null;
@@ -113,6 +172,7 @@ export type InstanceBranding = {
       foreground?: string | null;
       primary?: string | null;
       secondary?: string | null;
+      attention?: string | null;
       error?: string | null;
       card?: string | null;
       border?: string | null;
@@ -130,6 +190,7 @@ export type InstanceBranding = {
       foreground?: string | null;
       primary?: string | null;
       secondary?: string | null;
+      attention?: string | null;
       error?: string | null;
       card?: string | null;
       border?: string | null;
@@ -361,6 +422,9 @@ export class InstanceConfig {
 
   @Column({ type: 'jsonb', name: 'social_credentials', nullable: true })
   socialCredentials: InstanceSocialCredentials | null;
+
+  @Column({ type: 'jsonb', name: 'backup_config', nullable: true })
+  backupConfig: InstanceBackupConfig | null;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

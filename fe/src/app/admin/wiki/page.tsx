@@ -13,6 +13,7 @@ import { InfoTooltip } from "../_components/info-tooltip";
 import { ListboxSelect } from "../../_components/listbox-select";
 import { ConfirmDialog } from "../_components/confirm-dialog";
 import { StyledCheckbox } from "../_components/styled-checkbox";
+import { useAdminSupportedLanguages } from "../_hooks/use-admin-supported-languages";
 
 const API_BASE_URL = getApiBaseUrl();
 
@@ -110,17 +111,14 @@ export default function AdminWikiPage() {
   const [statusUpdateError, setStatusUpdateError] = useState<string | null>(
     null,
   );
-  const [deleteArticleStep1Id, setDeleteArticleStep1Id] = useState<
-    string | null
-  >(null);
-  const [deleteArticleStep2Id, setDeleteArticleStep2Id] = useState<
-    string | null
-  >(null);
-  const [deleteArticleError, setDeleteArticleError] = useState<string | null>(
-    null,
-  );
-  const [deleteArticleSubmitting, setDeleteArticleSubmitting] = useState(false);
-  const [didInitFromQuery, setDidInitFromQuery] = useState(false);
+  const { languages: supportedAdminLangs } = useAdminSupportedLanguages();
+  const languageFilterOptions = useMemo(() => {
+    const codes = new Set(supportedAdminLangs);
+    if (languageFilter && !codes.has(languageFilter)) {
+      codes.add(languageFilter);
+    }
+    return Array.from(codes);
+  }, [supportedAdminLangs, languageFilter]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -206,25 +204,7 @@ export default function AdminWikiPage() {
     };
   }, [isAdmin]);
 
-  const deleteArticleTarget =
-    deleteArticleStep2Id == null
-      ? null
-      : (articles.find((article) => article.id === deleteArticleStep2Id) ??
-        null);
-
   useEffect(() => {
-    if (!didInitFromQuery) {
-      const statusParam = (searchParams.get("status") ?? "").toLowerCase();
-      if (
-        statusParam === "draft" ||
-        statusParam === "active" ||
-        statusParam === "inactive"
-      ) {
-        setStatusFilter(statusParam);
-      }
-      setDidInitFromQuery(true);
-    }
-
     if (typeof window === "undefined") return;
 
     let cancelled = false;
@@ -288,7 +268,7 @@ export default function AdminWikiPage() {
     return () => {
       cancelled = true;
     };
-  }, [languageFilter, headerLang, didInitFromQuery, searchParams]);
+  }, [languageFilter, headerLang, searchParams]);
 
   useEffect(() => {
     if (!articles.length) {
@@ -666,9 +646,16 @@ export default function AdminWikiPage() {
                   {t(headerLang, "common", "adminWikiStatsTotalHelper")}
                 </p>
               </div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50">
+              <div
+                className="flex h-10 w-10 items-center justify-center rounded-lg"
+                style={{
+                  background:
+                    "color-mix(in srgb, var(--secondary) 12%, transparent)",
+                }}
+              >
                 <svg
-                  className="h-5 w-5 text-blue-600"
+                  className="h-5 w-5"
+                  style={{ color: "var(--secondary)" }}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -697,9 +684,16 @@ export default function AdminWikiPage() {
                   {t(headerLang, "common", "adminWikiStatsActiveHelper")}
                 </p>
               </div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-zinc-50">
+              <div
+                className="flex h-10 w-10 items-center justify-center rounded-lg"
+                style={{
+                  background:
+                    "color-mix(in srgb, var(--primary) 12%, transparent)",
+                }}
+              >
                 <svg
-                  className="h-5 w-5 text-[color:var(--primary)]"
+                  className="h-5 w-5"
+                  style={{ color: "var(--primary)" }}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -721,16 +715,23 @@ export default function AdminWikiPage() {
                 <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
                   {t(headerLang, "common", "adminWikiStatsDraft")}
                 </p>
-                <p className="mt-1 text-2xl font-semibold text-amber-700">
+                <p className="mt-1 text-2xl font-semibold text-[color:var(--attention)]">
                   {metricsDraftArticles}
                 </p>
                 <p className="mt-1 text-[11px] text-gray-500">
                   {t(headerLang, "common", "adminWikiStatsDraftHelper")}
                 </p>
               </div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-50">
+              <div
+                className="flex h-10 w-10 items-center justify-center rounded-lg"
+                style={{
+                  background:
+                    "color-mix(in srgb, var(--attention) 12%, transparent)",
+                }}
+              >
                 <svg
-                  className="h-5 w-5 text-amber-600"
+                  className="h-5 w-5"
+                  style={{ color: "var(--attention)" }}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -752,16 +753,23 @@ export default function AdminWikiPage() {
                 <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
                   {t(headerLang, "common", "adminWikiStatsInactive")}
                 </p>
-                <p className="mt-1 text-2xl font-semibold text-gray-700">
+                <p className="mt-1 text-2xl font-semibold text-[color:var(--foreground)]">
                   {metricsInactiveArticles}
                 </p>
                 <p className="mt-1 text-[11px] text-gray-500">
                   {t(headerLang, "common", "adminWikiStatsInactiveHelper")}
                 </p>
               </div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100">
+              <div
+                className="flex h-10 w-10 items-center justify-center rounded-lg"
+                style={{
+                  background:
+                    "color-mix(in srgb, var(--foreground) 6%, transparent)",
+                }}
+              >
                 <svg
-                  className="h-5 w-5 text-gray-600"
+                  className="h-5 w-5"
+                  style={{ color: "var(--foreground)" }}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -816,9 +824,10 @@ export default function AdminWikiPage() {
               onChange={(next) => setLanguageFilter(next)}
               options={[
                 { value: "", label: "All Languages" },
-                { value: "bg", label: "Bulgarian" },
-                { value: "en", label: "English" },
-                { value: "de", label: "German" },
+                ...languageFilterOptions.map((code) => ({
+                  value: code,
+                  label: code.toUpperCase(),
+                })),
               ]}
             />
           </div>
@@ -991,7 +1000,6 @@ export default function AdminWikiPage() {
                   const canToggleStatus =
                     normalizedStatus === "active" ||
                     normalizedStatus === "inactive";
-                  const isActive = normalizedStatus === "active";
 
                   return (
                     <tr key={article.id} className="hover:bg-gray-50">
@@ -1019,7 +1027,13 @@ export default function AdminWikiPage() {
                             {langs.map((lng) => (
                               <span
                                 key={lng}
-                                className="rounded bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700"
+                                className="rounded border px-2 py-1 text-xs font-semibold"
+                                style={{
+                                  borderColor: "color-mix(in srgb, var(--primary) 35%, transparent)",
+                                  background:
+                                    "color-mix(in srgb, var(--primary) 10%, transparent)",
+                                  color: "var(--foreground)",
+                                }}
                               >
                                 {lng.toUpperCase()}
                               </span>
@@ -1042,13 +1056,13 @@ export default function AdminWikiPage() {
                       <td className="px-6 py-4 align-middle text-right text-sm">
                         <Link
                           href={`/admin/wiki/${article.slug}/edit`}
-                          className="mr-3 font-medium text-blue-600 hover:text-blue-700"
+                          className="mr-3 font-medium text-[color:var(--secondary)] hover:opacity-80"
                         >
                           Edit
                         </Link>
                         <Link
                           href={`/admin/wiki/${article.slug}/edit#versions`}
-                          className="mr-3 font-medium text-purple-600 hover:text-purple-700"
+                          className="mr-3 font-medium text-[color:var(--primary)] hover:opacity-80"
                         >
                           Versions
                         </Link>
@@ -1060,7 +1074,7 @@ export default function AdminWikiPage() {
                             className={`font-medium ${
                               isInactive
                                 ? "text-[color:var(--primary)] hover:opacity-80"
-                                : "text-orange-600 hover:text-orange-700"
+                                : "text-[color:var(--attention)] hover:opacity-80"
                             } ${isUpdating ? "cursor-not-allowed opacity-60" : ""}`}
                           >
                             {isUpdating
@@ -1070,21 +1084,6 @@ export default function AdminWikiPage() {
                                 : "Deactivate"}
                           </button>
                         )}
-                        <button
-                          type="button"
-                          disabled={isActive}
-                          className={`ml-3 font-medium ${
-                            isActive
-                              ? "cursor-not-allowed text-gray-400"
-                              : "hover:opacity-80"
-                          }`}
-                          style={
-                            isActive ? undefined : { color: "var(--error)" }
-                          }
-                          onClick={() => setDeleteArticleStep1Id(article.id)}
-                        >
-                          Delete
-                        </button>
                       </td>
                     </tr>
                   );
@@ -1112,158 +1111,6 @@ export default function AdminWikiPage() {
           </div>
         </section>
       )}
-      {deleteArticleStep1Id && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 px-4">
-          <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
-            <h3 className="mb-2 text-base font-semibold text-gray-900">
-              Изтриване на статия
-            </h3>
-            <div
-              className="mb-4 rounded-md border px-4 py-3 text-sm"
-              style={{
-                backgroundColor: "var(--field-error-bg)",
-                borderColor: "var(--field-error-border)",
-                color: "var(--error)",
-              }}
-            >
-              Тази статия ще бъде завинаги премахната заедно с всички нейни
-              версии. Това действие е необратимо и може да повлияе на
-              проследимостта на промените.
-            </div>
-            <div className="flex justify-end gap-2">
-              <button
-                type="button"
-                className="rounded-md border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-800 hover:bg-gray-50"
-                onClick={() => setDeleteArticleStep1Id(null)}
-              >
-                Затвори
-              </button>
-              <button
-                type="button"
-                className="rounded-md px-3 py-1.5 text-xs font-medium text-white hover:opacity-90"
-                style={{ backgroundColor: "var(--error)" }}
-                onClick={() => {
-                  setDeleteArticleStep2Id(deleteArticleStep1Id);
-                  setDeleteArticleStep1Id(null);
-                }}
-              >
-                OK
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-      {deleteArticleStep2Id && deleteArticleTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
-            <h3 className="mb-2 text-base font-semibold text-gray-900">
-              Потвърдете изтриването на статията
-            </h3>
-            <p className="mb-3 text-sm text-gray-700">
-              Наистина ли искате да изтриете тази статия? Това действие е
-              окончателно и не може да бъде отменено.
-            </p>
-            <p className="mb-3 text-xs text-gray-600">
-              Заглавие:{" "}
-              <span className="font-semibold">{deleteArticleTarget.title}</span>
-              <br />
-              Slug:{" "}
-              <span className="font-mono">{deleteArticleTarget.slug}</span>
-              <br />
-              Последно обновена на{" "}
-              {formatDateTime(deleteArticleTarget.updatedAt)}.
-            </p>
-            {deleteArticleError && (
-              <p
-                className="mb-3 text-xs"
-                style={{ color: "var(--error)" }}
-                role="alert"
-              >
-                {deleteArticleError}
-              </p>
-            )}
-            <div className="flex justify-end gap-2">
-              <button
-                type="button"
-                className="rounded-md border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-800 hover:bg-gray-50 disabled:opacity-70"
-                onClick={() => setDeleteArticleStep2Id(null)}
-                disabled={deleteArticleSubmitting}
-              >
-                Отказ
-              </button>
-              <button
-                type="button"
-                className="rounded-md px-3 py-1.5 text-xs font-medium text-white hover:opacity-90 disabled:opacity-70"
-                style={{ backgroundColor: "var(--error)" }}
-                onClick={async () => {
-                  if (typeof window === "undefined") return;
-                  if (!deleteArticleStep2Id) return;
-
-                  setDeleteArticleError(null);
-                  setDeleteArticleSubmitting(true);
-
-                  try {
-                    const token = getAccessToken();
-                    if (!token) {
-                      setDeleteArticleError(
-                        "Липсва достъп до Admin API. Моля, влезте отново като администратор.",
-                      );
-                      setDeleteArticleSubmitting(false);
-                      return;
-                    }
-
-                    const res = await fetch(
-                      `${API_BASE_URL}/admin/wiki/articles/${encodeURIComponent(
-                        deleteArticleStep2Id,
-                      )}`,
-                      {
-                        method: "DELETE",
-                        headers: {
-                          Authorization: `Bearer ${token}`,
-                        },
-                      },
-                    );
-
-                    if (!res.ok) {
-                      if (res.status === 404) {
-                        setDeleteArticleError("Статията не беше намерена.");
-                      } else {
-                        setDeleteArticleError(
-                          "Възникна грешка при изтриване на статията.",
-                        );
-                      }
-                      setDeleteArticleSubmitting(false);
-                      return;
-                    }
-
-                    setArticles((current) =>
-                      current.filter(
-                        (article) => article.id !== deleteArticleStep2Id,
-                      ),
-                    );
-                    setLanguagesByArticleId((current) => {
-                      const next = { ...current };
-                      delete next[deleteArticleStep2Id];
-                      return next;
-                    });
-                    setDeleteArticleStep2Id(null);
-                  } catch {
-                    setDeleteArticleError(
-                      "Възникна грешка при изтриване на статията.",
-                    );
-                  } finally {
-                    setDeleteArticleSubmitting(false);
-                  }
-                }}
-                disabled={deleteArticleSubmitting}
-              >
-                Да, изтрий статията
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       <ConfirmDialog
         open={bulkDeleteOpen}
         title="Изтриване на избраните статии"

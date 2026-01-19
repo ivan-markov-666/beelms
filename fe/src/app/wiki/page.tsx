@@ -14,6 +14,7 @@ type WikiArticle = {
   id: string;
   slug: string;
   language: string;
+  languages?: string[];
   title: string;
   status: string;
   updatedAt: string;
@@ -66,7 +67,20 @@ async function fetchWikiArticles(
         ? data.length
         : 0;
 
-  return { items: Array.isArray(data) ? data : [], total };
+  const items = Array.isArray(data)
+    ? data.map((item) => {
+        const fallbackLanguages = item.language ? [item.language] : [];
+        const normalizedLanguages = Array.isArray(item.languages)
+          ? item.languages.filter((lng): lng is string => typeof lng === "string" && lng.trim().length > 0)
+          : fallbackLanguages;
+        return {
+          ...item,
+          languages: normalizedLanguages.length > 0 ? normalizedLanguages : fallbackLanguages,
+        };
+      })
+    : [];
+
+  return { items, total };
 }
 
 function WikiFiltersForm({
@@ -250,6 +264,7 @@ export default async function WikiPage({
             <div className="mt-auto pt-2">
               <WikiArticleMeta
                 language={article.language}
+                languages={article.languages}
                 updatedAt={article.updatedAt}
               />
             </div>

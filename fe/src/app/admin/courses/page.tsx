@@ -18,6 +18,7 @@ import { InfoTooltip } from "../_components/info-tooltip";
 import { ListboxSelect } from "../../_components/listbox-select";
 import { ConfirmDialog } from "../_components/confirm-dialog";
 import { StyledCheckbox } from "../_components/styled-checkbox";
+import { useAdminSupportedLanguages } from "../_hooks/use-admin-supported-languages";
 
 const API_BASE_URL = getApiBaseUrl();
 
@@ -96,19 +97,21 @@ type PaymentProvidersStatusResponse = {
   revolut: PaymentProviderStatus;
 };
 
-const DEFAULT_FORM: CreateCourseForm = {
+const createDefaultCourseForm = (language: string): CreateCourseForm => ({
   title: "",
   description: "",
-  language: "bg",
+  language: language || "bg",
   status: "draft",
   isPaid: false,
   categoryId: "",
   currency: "eur",
   priceCents: "999",
-};
+});
 
 export default function AdminCoursesPage() {
   const lang = useCurrentLang();
+  const { languages: supportedAdminLangs, defaultLanguage } =
+    useAdminSupportedLanguages();
   const [courses, setCourses] = useState<CourseSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -123,6 +126,13 @@ export default function AdminCoursesPage() {
     () => new Set(selectedCourseIds),
     [selectedCourseIds],
   );
+  const [form, setForm] = useState<CreateCourseForm>(() =>
+    createDefaultCourseForm(defaultLanguage),
+  );
+  const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
+  const [createSuccess, setCreateSuccess] = useState<string | null>(null);
+  const [createdCourseId, setCreatedCourseId] = useState<string | null>(null);
 
   const [bulkActionError, setBulkActionError] = useState<string | null>(null);
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
@@ -151,6 +161,32 @@ export default function AdminCoursesPage() {
   const [categoryFilter, setCategoryFilter] = useState("");
   const [sortKey, setSortKey] = useState<CourseSortKey>("title");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
+
+  const languageOptions = useMemo(() => {
+    return supportedAdminLangs.length > 0 ? supportedAdminLangs : ["bg"];
+  }, [supportedAdminLangs]);
+
+  const filterLanguageOptions = useMemo(() => {
+    const set = new Set(languageOptions);
+    if (languageFilter && !set.has(languageFilter)) {
+      set.add(languageFilter);
+    }
+    return Array.from(set);
+  }, [languageOptions, languageFilter]);
+
+  useEffect(() => {
+    setForm((prev) => {
+      const normalized = (prev.language ?? "").trim().toLowerCase();
+      const validOptions = languageOptions;
+      if (!normalized || !validOptions.includes(normalized)) {
+        return {
+          ...prev,
+          language: validOptions[0] ?? defaultLanguage ?? "bg",
+        };
+      }
+      return prev;
+    });
+  }, [languageOptions, defaultLanguage]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -236,12 +272,6 @@ export default function AdminCoursesPage() {
       cancelled = true;
     };
   }, [isAdmin]);
-
-  const [form, setForm] = useState<CreateCourseForm>(DEFAULT_FORM);
-  const [creating, setCreating] = useState(false);
-  const [createError, setCreateError] = useState<string | null>(null);
-  const [createSuccess, setCreateSuccess] = useState<string | null>(null);
-  const [createdCourseId, setCreatedCourseId] = useState<string | null>(null);
 
   const [categorySearch, setCategorySearch] = useState("");
   const normalizedCategorySearch = categorySearch.trim().toLowerCase();
@@ -767,7 +797,7 @@ export default function AdminCoursesPage() {
       }
 
       const created = (await res.json()) as CourseDetail;
-      setForm(DEFAULT_FORM);
+      setForm(createDefaultCourseForm(defaultLanguage));
       setCreating(false);
 
       setCourses((prev) => [created, ...prev]);
@@ -945,10 +975,10 @@ export default function AdminCoursesPage() {
                 value={form.language}
                 onChange={(next) => setForm((p) => ({ ...p, language: next }))}
                 buttonClassName="flex w-full items-center justify-between gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900"
-                options={[
-                  { value: "bg", label: "bg" },
-                  { value: "en", label: "en" },
-                ]}
+                options={languageOptions.map((code) => ({
+                  value: code,
+                  label: code,
+                }))}
               />
             </label>
 
@@ -1192,8 +1222,10 @@ export default function AdminCoursesPage() {
                 }}
                 options={[
                   { value: "", label: "All languages" },
-                  { value: "bg", label: "bg" },
-                  { value: "en", label: "en" },
+                  ...filterLanguageOptions.map((code) => ({
+                    value: code,
+                    label: code.toUpperCase(),
+                  })),
                 ]}
               />
             </div>

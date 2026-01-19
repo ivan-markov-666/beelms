@@ -805,9 +805,16 @@ export default function AdminMetricsPage() {
             <h2 className="text-sm font-medium text-gray-600">
               {t(lang, "common", "adminDashboardCardUsersTitle")}
             </h2>
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
+            <div
+              className="flex h-10 w-10 items-center justify-center rounded-lg"
+              style={{
+                backgroundColor:
+                  "color-mix(in srgb, var(--primary) 15%, white)",
+              }}
+            >
               <svg
-                className="h-5 w-5 text-blue-600"
+                className="h-5 w-5"
+                style={{ color: "var(--primary)" }}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -831,7 +838,7 @@ export default function AdminMetricsPage() {
               )}
 
               {!loading && error && (
-                <p className="text-sm text-red-600" role="alert">
+                <p className="text-sm text-[color:var(--error)]" role="alert">
                   {error}
                 </p>
               )}
@@ -840,7 +847,7 @@ export default function AdminMetricsPage() {
                   <p className="text-3xl font-bold text-gray-900">
                     {hasMetrics ? totalUsers.toLocaleString("bg-BG") : "—"}
                   </p>
-                  <p className="mt-1 text-sm text-green-600">
+                  <p className="mt-1 text-sm text-[color:var(--primary)]">
                     {usersTrendText}
                   </p>
                   <p className="mt-0.5 text-xs text-gray-500">
@@ -870,9 +877,16 @@ export default function AdminMetricsPage() {
                     {userStats.totalUsers}
                   </p>
                 </div>
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50">
+                <div
+                  className="flex h-10 w-10 items-center justify-center rounded-lg"
+                  style={{
+                    backgroundColor:
+                      "color-mix(in srgb, var(--primary) 12%, white)",
+                  }}
+                >
                   <svg
-                    className="h-5 w-5 text-blue-600"
+                    className="h-5 w-5"
+                    style={{ color: "var(--primary)" }}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -894,13 +908,20 @@ export default function AdminMetricsPage() {
                   <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
                     {t(lang, "common", "adminUsersStatsActive")}
                   </p>
-                  <p className="mt-1 text-2xl font-semibold text-green-700">
+                  <p className="mt-1 text-2xl font-semibold text-[color:var(--primary)]">
                     {userStats.activeUsers}
                   </p>
                 </div>
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-50">
+                <div
+                  className="flex h-10 w-10 items-center justify-center rounded-lg"
+                  style={{
+                    backgroundColor:
+                      "color-mix(in srgb, var(--primary) 12%, white)",
+                  }}
+                >
                   <svg
-                    className="h-5 w-5 text-green-600"
+                    className="h-5 w-5"
+                    style={{ color: "var(--primary)" }}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -922,13 +943,20 @@ export default function AdminMetricsPage() {
                   <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
                     {t(lang, "common", "adminUsersStatsDeactivated")}
                   </p>
-                  <p className="mt-1 text-2xl font-semibold text-orange-600">
+                  <p className="mt-1 text-2xl font-semibold text-[color:var(--attention)]">
                     {userStats.deactivatedUsers}
                   </p>
                 </div>
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-50">
+                <div
+                  className="flex h-10 w-10 items-center justify-center rounded-lg"
+                  style={{
+                    backgroundColor:
+                      "color-mix(in srgb, var(--attention) 12%, white)",
+                  }}
+                >
                   <svg
-                    className="h-5 w-5 text-orange-500"
+                    className="h-5 w-5"
+                    style={{ color: "var(--attention)" }}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -950,13 +978,20 @@ export default function AdminMetricsPage() {
                   <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
                     {t(lang, "common", "adminUsersStatsAdmins")}
                   </p>
-                  <p className="mt-1 text-2xl font-semibold text-purple-700">
+                  <p className="mt-1 text-2xl font-semibold text-[color:var(--secondary)]">
                     {userStats.adminUsers}
                   </p>
                 </div>
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-50">
+                <div
+                  className="flex h-10 w-10 items-center justify-center rounded-lg"
+                  style={{
+                    backgroundColor:
+                      "color-mix(in srgb, var(--secondary) 12%, white)",
+                  }}
+                >
                   <svg
-                    className="h-5 w-5 text-purple-600"
+                    className="h-5 w-5"
+                    style={{ color: "var(--secondary)" }}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -1071,7 +1106,7 @@ export default function AdminMetricsPage() {
                       value={periodFrom}
                       onChange={(event) => setPeriodFrom(event.target.value)}
                       max={todayIso}
-                      className="mt-1 rounded-md border border-gray-300 px-2 py-1 text-xs text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500 md:mt-0"
+                      className="mt-1 rounded-md border border-gray-300 px-2 py-1 text-xs text-gray-900 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] md:mt-0"
                     />
                   </label>
                   <label className="flex flex-col text-xs text-gray-600 md:flex-row md:items-center md:gap-2">
@@ -1083,7 +1118,7 @@ export default function AdminMetricsPage() {
                       value={periodTo}
                       onChange={(event) => setPeriodTo(event.target.value)}
                       max={todayIso}
-                      className="mt-1 rounded-md border border-gray-300 px-2 py-1 text-xs text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500 md:mt-0"
+                      className="mt-1 rounded-md border border-gray-300 px-2 py-1 text-xs text-gray-900 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] md:mt-0"
                     />
                   </label>
                 </div>
@@ -1098,13 +1133,13 @@ export default function AdminMetricsPage() {
                   <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
                     {t(lang, "common", "adminActivityActionUserRegistered")}
                   </p>
-                  <p className="mt-1 text-2xl font-semibold text-green-700">
+                  <p className="mt-1 text-2xl font-semibold text-[color:var(--primary)]">
                     {effectiveActivityStats.userRegistered}
                   </p>
                   <p className="mt-1 text-[11px] text-gray-500">
                     <Link
                       href="/admin/users?status=active"
-                      className="text-green-700 hover:text-green-800 hover:underline"
+                      className="text-[color:var(--primary)] hover:opacity-90 hover:underline"
                     >
                       {t(
                         lang,
@@ -1114,9 +1149,16 @@ export default function AdminMetricsPage() {
                     </Link>
                   </p>
                 </div>
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-50">
+                <div
+                  className="flex h-10 w-10 items-center justify-center rounded-lg"
+                  style={{
+                    backgroundColor:
+                      "color-mix(in srgb, var(--primary) 12%, white)",
+                  }}
+                >
                   <svg
-                    className="h-5 w-5 text-green-600"
+                    className="h-5 w-5"
+                    style={{ color: "var(--primary)" }}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -1138,13 +1180,13 @@ export default function AdminMetricsPage() {
                   <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
                     {t(lang, "common", "adminActivityActionUserDeactivated")}
                   </p>
-                  <p className="mt-1 text-2xl font-semibold text-red-700">
+                  <p className="mt-1 text-2xl font-semibold text-[color:var(--error)]">
                     {effectiveActivityStats.userDeactivated}
                   </p>
                   <p className="mt-1 text-[11px] text-gray-500">
                     <Link
                       href="/admin/users"
-                      className="text-red-700 hover:text-red-800 hover:underline"
+                      className="text-[color:var(--error)] hover:opacity-90 hover:underline"
                     >
                       {t(
                         lang,
@@ -1154,9 +1196,16 @@ export default function AdminMetricsPage() {
                     </Link>
                   </p>
                 </div>
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-50">
+                <div
+                  className="flex h-10 w-10 items-center justify-center rounded-lg"
+                  style={{
+                    backgroundColor:
+                      "color-mix(in srgb, var(--error) 12%, white)",
+                  }}
+                >
                   <svg
-                    className="h-5 w-5 text-red-600"
+                    className="h-5 w-5"
+                    style={{ color: "var(--error)" }}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -1178,13 +1227,13 @@ export default function AdminMetricsPage() {
                   <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
                     {t(lang, "common", "adminActivityActionArticleCreated")}
                   </p>
-                  <p className="mt-1 text-2xl font-semibold text-blue-700">
+                  <p className="mt-1 text-2xl font-semibold text-[color:var(--primary)]">
                     {effectiveActivityStats.articleCreated}
                   </p>
                   <p className="mt-1 text-[11px] text-gray-500">
                     <Link
                       href="/admin/wiki?status=draft"
-                      className="text-blue-700 hover:text-blue-800 hover:underline"
+                      className="text-[color:var(--primary)] hover:opacity-90 hover:underline"
                     >
                       {t(
                         lang,
@@ -1194,9 +1243,16 @@ export default function AdminMetricsPage() {
                     </Link>
                   </p>
                 </div>
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50">
+                <div
+                  className="flex h-10 w-10 items-center justify-center rounded-lg"
+                  style={{
+                    backgroundColor:
+                      "color-mix(in srgb, var(--primary) 12%, white)",
+                  }}
+                >
                   <svg
-                    className="h-5 w-5 text-blue-600"
+                    className="h-5 w-5"
+                    style={{ color: "var(--primary)" }}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -1218,13 +1274,13 @@ export default function AdminMetricsPage() {
                   <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
                     {t(lang, "common", "adminActivityActionArticleUpdated")}
                   </p>
-                  <p className="mt-1 text-2xl font-semibold text-amber-700">
+                  <p className="mt-1 text-2xl font-semibold text-[color:var(--attention)]">
                     {effectiveActivityStats.articleUpdated}
                   </p>
                   <p className="mt-1 text-[11px] text-gray-500">
                     <Link
                       href="/admin/wiki"
-                      className="text-amber-700 hover:text-amber-800 hover:underline"
+                      className="text-[color:var(--attention)] hover:opacity-90 hover:underline"
                     >
                       {t(
                         lang,
@@ -1234,9 +1290,16 @@ export default function AdminMetricsPage() {
                     </Link>
                   </p>
                 </div>
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-50">
+                <div
+                  className="flex h-10 w-10 items-center justify-center rounded-lg"
+                  style={{
+                    backgroundColor:
+                      "color-mix(in srgb, var(--attention) 12%, white)",
+                  }}
+                >
                   <svg
-                    className="h-5 w-5 text-amber-600"
+                    className="h-5 w-5"
+                    style={{ color: "var(--attention)" }}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -1267,13 +1330,13 @@ export default function AdminMetricsPage() {
               <>{t(lang, "common", "adminMetricsNetUsersChangeZero")}</>
             )}
             {netUserChange > 0 && (
-              <span className="text-green-700">
+              <span className="text-[color:var(--primary)]">
                 +{netUserChange}{" "}
                 {t(lang, "common", "adminMetricsNetUsersChangePositiveSuffix")}
               </span>
             )}
             {netUserChange < 0 && (
-              <span className="text-red-700">
+              <span className="text-[color:var(--error)]">
                 {netUserChange}{" "}
                 {t(lang, "common", "adminMetricsNetUsersChangeNegativeSuffix")}
               </span>
@@ -1305,14 +1368,17 @@ export default function AdminMetricsPage() {
                       {formatMonthLabel(point.month)}
                     </div>
                     <div className="flex items-center space-x-3">
-                      <div className="w-24 text-[11px] text-green-700">
+                      <div className="w-24 text-[11px] text-[color:var(--primary)]">
                         {t(lang, "common", "adminActivityActionUserRegistered")}
                       </div>
                       <div className="flex-1 h-2 rounded-full bg-gray-100">
                         {widthRegistered > 0 && (
                           <div
-                            className="h-2 rounded-full bg-green-500"
-                            style={{ width: `${widthRegistered}%` }}
+                            className="h-2 rounded-full"
+                            style={{
+                              backgroundColor: "var(--primary)",
+                              width: `${widthRegistered}%`,
+                            }}
                           />
                         )}
                       </div>
@@ -1321,7 +1387,7 @@ export default function AdminMetricsPage() {
                       </div>
                     </div>
                     <div className="flex items-center space-x-3">
-                      <div className="w-24 text-[11px] text-red-700">
+                      <div className="w-24 text-[11px] text-[color:var(--error)]">
                         {t(
                           lang,
                           "common",
@@ -1331,8 +1397,11 @@ export default function AdminMetricsPage() {
                       <div className="flex-1 h-2 rounded-full bg-gray-100">
                         {widthDeactivated > 0 && (
                           <div
-                            className="h-2 rounded-full bg-red-500"
-                            style={{ width: `${widthDeactivated}%` }}
+                            className="h-2 rounded-full"
+                            style={{
+                              backgroundColor: "var(--error)",
+                              width: `${widthDeactivated}%`,
+                            }}
                           />
                         )}
                       </div>
@@ -1365,9 +1434,16 @@ export default function AdminMetricsPage() {
                     {wikiStats.totalArticles}
                   </p>
                 </div>
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50">
+                <div
+                  className="flex h-10 w-10 items-center justify-center rounded-lg"
+                  style={{
+                    backgroundColor:
+                      "color-mix(in srgb, var(--primary) 12%, white)",
+                  }}
+                >
                   <svg
-                    className="h-5 w-5 text-blue-600"
+                    className="h-5 w-5"
+                    style={{ color: "var(--primary)" }}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -1389,13 +1465,20 @@ export default function AdminMetricsPage() {
                   <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
                     {t(lang, "common", "adminWikiStatsActive")}
                   </p>
-                  <p className="mt-1 text-2xl font-semibold text-green-700">
+                  <p className="mt-1 text-2xl font-semibold text-[color:var(--primary)]">
                     {wikiStats.activeArticles}
                   </p>
                 </div>
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-50">
+                <div
+                  className="flex h-10 w-10 items-center justify-center rounded-lg"
+                  style={{
+                    backgroundColor:
+                      "color-mix(in srgb, var(--primary) 12%, white)",
+                  }}
+                >
                   <svg
-                    className="h-5 w-5 text-green-600"
+                    className="h-5 w-5"
+                    style={{ color: "var(--primary)" }}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -1417,13 +1500,20 @@ export default function AdminMetricsPage() {
                   <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
                     {t(lang, "common", "adminWikiStatsDraft")}
                   </p>
-                  <p className="mt-1 text-2xl font-semibold text-amber-700">
+                  <p className="mt-1 text-2xl font-semibold text-[color:var(--attention)]">
                     {wikiStats.draftArticles}
                   </p>
                 </div>
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-50">
+                <div
+                  className="flex h-10 w-10 items-center justify-center rounded-lg"
+                  style={{
+                    backgroundColor:
+                      "color-mix(in srgb, var(--attention) 12%, white)",
+                  }}
+                >
                   <svg
-                    className="h-5 w-5 text-amber-600"
+                    className="h-5 w-5"
+                    style={{ color: "var(--attention)" }}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -1517,7 +1607,7 @@ export default function AdminMetricsPage() {
                     >
                       <Link
                         href={`/wiki/${encodeURIComponent(row.slug)}`}
-                        className="text-sm text-green-700 hover:text-green-800 hover:underline"
+                        className="text-sm text-[color:var(--primary)] hover:opacity-90 hover:underline"
                       >
                         {row.slug}
                       </Link>
@@ -1544,7 +1634,7 @@ export default function AdminMetricsPage() {
                   >
                     <Link
                       href={`/wiki/${encodeURIComponent(row.slug)}`}
-                      className="text-sm text-green-700 hover:text-green-800 hover:underline"
+                      className="text-sm text-[color:var(--primary)] hover:opacity-90 hover:underline"
                     >
                       {row.slug}
                     </Link>
@@ -1589,8 +1679,11 @@ export default function AdminMetricsPage() {
                           </div>
                           <div className="flex-1 h-2 rounded-full bg-gray-100">
                             <div
-                              className="h-2 rounded-full bg-green-500"
-                              style={{ width: `${width}%` }}
+                              className="h-2 rounded-full"
+                              style={{
+                                backgroundColor: "var(--primary)",
+                                width: `${width}%`,
+                              }}
                             />
                           </div>
                           <div className="w-10 text-right text-xs text-gray-700">
@@ -1635,8 +1728,11 @@ export default function AdminMetricsPage() {
                           </div>
                           <div className="flex-1 h-2 rounded-full bg-gray-100">
                             <div
-                              className="h-2 rounded-full bg-blue-500"
-                              style={{ width: `${width}%` }}
+                              className="h-2 rounded-full"
+                              style={{
+                                backgroundColor: "var(--secondary)",
+                                width: `${width}%`,
+                              }}
                             />
                           </div>
                           <div className="w-10 text-right text-xs text-gray-700">
@@ -1717,7 +1813,7 @@ export default function AdminMetricsPage() {
                   >
                     <Link
                       href={`/wiki/${encodeURIComponent(row.slug)}`}
-                      className="text-sm text-green-700 hover:text-green-800 hover:underline"
+                      className="text-sm text-[color:var(--primary)] hover:opacity-90 hover:underline"
                     >
                       {row.slug}
                     </Link>
@@ -1819,8 +1915,11 @@ export default function AdminMetricsPage() {
                           </div>
                           <div className="flex-1 h-2 rounded-full bg-gray-100">
                             <div
-                              className="h-2 rounded-full bg-red-500"
-                              style={{ width: `${width}%` }}
+                              className="h-2 rounded-full"
+                              style={{
+                                backgroundColor: "var(--error)",
+                                width: `${width}%`,
+                              }}
                             />
                           </div>
                           <div className="w-10 text-right text-xs text-gray-700">
@@ -1857,7 +1956,7 @@ export default function AdminMetricsPage() {
                 <input
                   value={wikiAttentionSearch}
                   onChange={(e) => setWikiAttentionSearch(e.target.value)}
-                  className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-[color:var(--primary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)]"
                   placeholder={t(
                     lang,
                     "common",
@@ -1874,7 +1973,7 @@ export default function AdminMetricsPage() {
                   type="number"
                   value={wikiAttentionMinViews}
                   onChange={(e) => setWikiAttentionMinViews(e.target.value)}
-                  className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-[color:var(--primary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)]"
                   min={0}
                 />
               </label>
@@ -1887,7 +1986,7 @@ export default function AdminMetricsPage() {
                   type="number"
                   value={wikiAttentionMinVotes}
                   onChange={(e) => setWikiAttentionMinVotes(e.target.value)}
-                  className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-[color:var(--primary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)]"
                   min={0}
                 />
               </label>
@@ -1906,7 +2005,7 @@ export default function AdminMetricsPage() {
                   onChange={(e) =>
                     setWikiAttentionMinNotHelpfulRate(e.target.value)
                   }
-                  className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-[color:var(--primary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)]"
                   min={0}
                   max={100}
                   step={1}
@@ -1923,7 +2022,7 @@ export default function AdminMetricsPage() {
               <button
                 type="button"
                 onClick={exportWikiAttentionCsv}
-                className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1"
+                className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-1"
               >
                 {t(lang, "common", "adminWikiAttentionExportCsv")}
               </button>
@@ -2023,13 +2122,13 @@ export default function AdminMetricsPage() {
                         <div className="flex flex-col gap-1">
                           <Link
                             href={`/wiki/${encodeURIComponent(row.slug)}`}
-                            className="text-green-700 hover:text-green-800 hover:underline"
+                            className="text-[color:var(--primary)] hover:opacity-90 hover:underline"
                           >
                             {row.slug}
                           </Link>
                           <Link
                             href={`/admin/wiki/${encodeURIComponent(row.slug)}/edit`}
-                            className="text-xs font-medium text-blue-600 hover:text-blue-700"
+                            className="text-xs font-medium text-[color:var(--primary)] hover:opacity-90"
                           >
                             {t(lang, "common", "adminWikiAttentionEdit")}
                           </Link>
@@ -2102,12 +2201,12 @@ export default function AdminMetricsPage() {
           </header>
 
           {advancedError && (
-            <p className="text-sm text-red-600" role="alert">
+            <p className="text-sm text-[color:var(--error)]" role="alert">
               {advancedError}
             </p>
           )}
           {exportAdvancedError && (
-            <p className="text-sm text-red-600" role="alert">
+            <p className="text-sm text-[color:var(--error)]" role="alert">
               {exportAdvancedError}
             </p>
           )}
@@ -2253,8 +2352,11 @@ export default function AdminMetricsPage() {
                               </div>
                               <div className="flex-1 h-2 rounded-full bg-gray-100">
                                 <div
-                                  className="h-2 rounded-full bg-blue-500"
-                                  style={{ width: `${width}%` }}
+                                  className="h-2 rounded-full"
+                                  style={{
+                                    backgroundColor: "var(--secondary)",
+                                    width: `${width}%`,
+                                  }}
                                 />
                               </div>
                               <div className="w-10 text-right text-xs text-gray-700">
@@ -2302,8 +2404,11 @@ export default function AdminMetricsPage() {
                               </div>
                               <div className="flex-1 h-2 rounded-full bg-gray-100">
                                 <div
-                                  className="h-2 rounded-full bg-green-500"
-                                  style={{ width: `${width}%` }}
+                                  className="h-2 rounded-full"
+                                  style={{
+                                    backgroundColor: "var(--primary)",
+                                    width: `${width}%`,
+                                  }}
                                 />
                               </div>
                               <div className="w-10 text-right text-xs text-gray-700">

@@ -200,6 +200,11 @@ export class AdminUpdateThemePaletteDto {
   @IsOptional()
   @IsString()
   @Matches(ThemeHexColorConstraint.REGEX)
+  attention?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @Matches(ThemeHexColorConstraint.REGEX)
   error?: string | null;
 
   @IsOptional()
@@ -290,6 +295,11 @@ export class AdminUpdateThemePresetPaletteDto {
   @IsString()
   @Matches(ThemeHexColorConstraint.REGEX)
   secondary?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @Matches(ThemeHexColorConstraint.REGEX)
+  attention?: string | null;
 
   @IsOptional()
   @IsString()

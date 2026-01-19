@@ -193,7 +193,7 @@ export function Pagination({
                   const parsed = Number.parseInt(next, 10);
                   setPageSizeAndReset(parsed);
                 }}
-                buttonClassName="flex w-full items-center justify-between gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs text-gray-700 shadow-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500 md:text-sm"
+                buttonClassName="flex w-full items-center justify-between gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs text-gray-700 shadow-sm focus:outline-none md:text-sm"
                 options={safePageSizeOptions.map((n) => ({
                   value: String(n),
                   label: String(n),
@@ -208,7 +208,7 @@ export function Pagination({
             <button
               type="button"
               onClick={() => navigateToPage(1)}
-              className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs text-gray-700 hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-60 md:text-sm"
+              className="be-btn-ghost rounded-lg border px-3 py-2 text-xs disabled:cursor-not-allowed disabled:opacity-60 md:text-sm"
               disabled={prevDisabled}
             >
               First
@@ -217,7 +217,7 @@ export function Pagination({
             <button
               type="button"
               onClick={() => navigateToPage(safeCurrentPage - 1)}
-              className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs text-gray-700 hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-60 md:text-sm"
+              className="be-btn-ghost rounded-lg border px-3 py-2 text-xs disabled:cursor-not-allowed disabled:opacity-60 md:text-sm"
               disabled={prevDisabled}
             >
               Previous
@@ -245,8 +245,17 @@ export function Pagination({
                   onClick={() => navigateToPage(pageNumber)}
                   className={
                     isActive
-                      ? "rounded-lg bg-green-600 px-3 py-2 text-xs font-semibold text-white md:text-sm"
-                      : "rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs text-gray-700 hover:bg-green-50 md:text-sm"
+                      ? "rounded-lg border px-3 py-2 text-xs font-semibold md:text-sm"
+                      : "be-btn-ghost rounded-lg border px-3 py-2 text-xs md:text-sm"
+                  }
+                  style={
+                    isActive
+                      ? {
+                          backgroundColor: "var(--primary)",
+                          borderColor: "var(--primary)",
+                          color: "var(--on-primary)",
+                        }
+                      : undefined
                   }
                   disabled={isActive}
                 >
@@ -258,7 +267,7 @@ export function Pagination({
             <button
               type="button"
               onClick={() => navigateToPage(safeCurrentPage + 1)}
-              className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs text-gray-700 hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-60 md:text-sm"
+              className="be-btn-ghost rounded-lg border px-3 py-2 text-xs disabled:cursor-not-allowed disabled:opacity-60 md:text-sm"
               disabled={nextDisabled}
             >
               Next
@@ -267,7 +276,7 @@ export function Pagination({
             <button
               type="button"
               onClick={() => navigateToPage(safeTotalPages)}
-              className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs text-gray-700 hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-60 md:text-sm"
+              className="be-btn-ghost rounded-lg border px-3 py-2 text-xs disabled:cursor-not-allowed disabled:opacity-60 md:text-sm"
               disabled={nextDisabled}
             >
               Last

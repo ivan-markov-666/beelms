@@ -122,7 +122,7 @@ export function CourseProgressPanel({
         </p>
         <Link
           href="/auth/login"
-          className="mt-3 inline-block text-sm text-green-700 hover:text-green-800"
+          className="mt-3 inline-block text-sm text-[color:var(--primary)] hover:opacity-90"
         >
           Вход →
         </Link>
@@ -134,7 +134,7 @@ export function CourseProgressPanel({
     return (
       <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
         <h2 className="text-lg font-semibold text-gray-900">Прогрес</h2>
-        <p className="mt-2 text-sm text-red-700">{error}</p>
+        <p className="mt-2 text-sm text-[color:var(--error)]">{error}</p>
       </section>
     );
   }
@@ -156,8 +156,11 @@ export function CourseProgressPanel({
 
       <div className="mt-3 h-2 w-full rounded-full bg-gray-100">
         <div
-          className="h-2 rounded-full bg-green-600"
-          style={{ width: `${safePercent}%` }}
+          className="h-2 rounded-full"
+          style={{
+            width: `${safePercent}%`,
+            backgroundColor: "var(--primary)",
+          }}
         />
       </div>
 
@@ -169,7 +172,12 @@ export function CourseProgressPanel({
         <div className="mt-4">
           <Link
             href={`/my-courses/${encodeURIComponent(courseId)}/certificate`}
-            className="inline-flex items-center justify-center rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-700"
+            className="inline-flex items-center justify-center rounded-lg border px-4 py-2 text-sm font-semibold shadow-sm hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-1"
+            style={{
+              backgroundColor: "var(--primary)",
+              borderColor: "var(--primary)",
+              color: "var(--on-primary)",
+            }}
           >
             Certificate
           </Link>
@@ -183,7 +191,7 @@ export function CourseProgressPanel({
               <span
                 className={`mt-[3px] inline-block h-4 w-4 rounded-full border ${
                   item.completed
-                    ? "border-green-600 bg-green-600"
+                    ? "border-[color:var(--primary)] bg-[color:var(--primary)]"
                     : "border-gray-300 bg-white"
                 }`}
                 aria-label={item.completed ? "Completed" : "Not completed"}
@@ -196,7 +204,7 @@ export function CourseProgressPanel({
                     )}/wiki/${encodeURIComponent(
                       item.wikiSlug,
                     )}?lang=${encodeURIComponent(courseLanguage)}`}
-                    className="font-medium text-green-700 hover:text-green-800 hover:underline"
+                    className="font-medium text-[color:var(--primary)] hover:opacity-90 hover:underline"
                   >
                     {item.title}
                   </Link>
@@ -205,7 +213,7 @@ export function CourseProgressPanel({
                     href={`/courses/${encodeURIComponent(
                       courseId,
                     )}/tasks/${encodeURIComponent(item.taskId)}`}
-                    className="font-medium text-green-700 hover:text-green-800 hover:underline"
+                    className="font-medium text-[color:var(--primary)] hover:opacity-90 hover:underline"
                   >
                     {item.title}
                   </Link>
@@ -214,7 +222,7 @@ export function CourseProgressPanel({
                     href={`/courses/${encodeURIComponent(
                       courseId,
                     )}/quizzes/${encodeURIComponent(item.quizId)}`}
-                    className="font-medium text-green-700 hover:text-green-800 hover:underline"
+                    className="font-medium text-[color:var(--primary)] hover:opacity-90 hover:underline"
                   >
                     {item.title}
                   </Link>

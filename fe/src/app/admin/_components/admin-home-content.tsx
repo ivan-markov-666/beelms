@@ -50,10 +50,10 @@ function formatActivityDateTime(value: string): string {
 }
 
 function getActivityDotClass(action: ActivityAction): string {
-  if (action === "article_created") return "bg-green-500";
-  if (action === "user_registered") return "bg-blue-500";
-  if (action === "article_updated") return "bg-yellow-500";
-  if (action === "user_deactivated") return "bg-red-500";
+  if (action === "article_created") return "bg-[color:var(--primary)]";
+  if (action === "user_registered") return "bg-[color:var(--secondary)]";
+  if (action === "article_updated") return "bg-[color:var(--attention)]";
+  if (action === "user_deactivated") return "bg-[color:var(--error)]";
   return "bg-gray-400";
 }
 
@@ -209,7 +209,7 @@ export function AdminHomeContent() {
       {/* Page header */}
       <section className="mb-2">
         <div className="mb-2 flex items-center text-sm text-gray-500">
-          <Link href="/" className="hover:text-green-600">
+          <Link href="/" className="hover:text-[color:var(--primary)]">
             {t(lang, "common", "adminDashboardBreadcrumbHome")}
           </Link>
           <svg
@@ -254,7 +254,12 @@ export function AdminHomeContent() {
 
       {!loading && error && (
         <div
-          className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+          className="rounded-md border px-4 py-3 text-sm"
+          style={{
+            borderColor: "var(--error)",
+            backgroundColor: "color-mix(in srgb, var(--error) 10%, white)",
+            color: "var(--error)",
+          }}
           role="alert"
         >
           {error}
@@ -269,9 +274,16 @@ export function AdminHomeContent() {
             <h3 className="text-sm font-medium text-gray-600">
               {t(lang, "common", "adminDashboardCardUsersTitle")}
             </h3>
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100">
+            <div
+              className="flex h-10 w-10 items-center justify-center rounded-lg"
+              style={{
+                backgroundColor:
+                  "color-mix(in srgb, var(--primary) 15%, white)",
+              }}
+            >
               <svg
-                className="h-6 w-6 text-green-600"
+                className="h-6 w-6"
+                style={{ color: "var(--primary)" }}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -291,7 +303,9 @@ export function AdminHomeContent() {
               <p className="text-3xl font-bold text-gray-900">
                 {hasMetrics ? totalUsers.toLocaleString("bg-BG") : "—"}
               </p>
-              <p className="mt-1 text-sm text-green-600">{usersTrendText}</p>
+              <p className="mt-1 text-sm text-[color:var(--primary)]">
+                {usersTrendText}
+              </p>
               <p className="mt-0.5 text-xs text-gray-500">
                 {t(lang, "common", "adminDashboardCardUsersTrendHelp")}
               </p>
@@ -305,9 +319,16 @@ export function AdminHomeContent() {
             <h3 className="text-sm font-medium text-gray-600">
               {t(lang, "common", "adminDashboardCardArticlesTitle")}
             </h3>
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
+            <div
+              className="flex h-10 w-10 items-center justify-center rounded-lg"
+              style={{
+                backgroundColor:
+                  "color-mix(in srgb, var(--secondary) 15%, white)",
+              }}
+            >
               <svg
-                className="h-6 w-6 text-blue-600"
+                className="h-6 w-6"
+                style={{ color: "var(--secondary)" }}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -327,7 +348,7 @@ export function AdminHomeContent() {
               <p className="text-3xl font-bold text-gray-900">
                 {hasMetrics ? totalArticles.toLocaleString("bg-BG") : "—"}
               </p>
-              <p className="mt-1 text-sm text-blue-600">
+              <p className="mt-1 text-sm text-[color:var(--secondary)]">
                 {t(lang, "common", "adminDashboardCardArticlesSubtitle")}
               </p>
             </div>
@@ -343,11 +364,12 @@ export function AdminHomeContent() {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <Link
             href="/admin/wiki"
-            className="group flex items-center justify-between rounded-lg border border-gray-200 p-4 transition hover:border-green-500 hover:bg-green-50"
+            className="group flex items-center justify-between rounded-lg border border-gray-200 p-4 transition hover:border-[color:var(--primary)]"
           >
             <div className="flex items-center space-x-3">
               <svg
-                className="h-6 w-6 text-gray-400 group-hover:text-green-600"
+                className="h-6 w-6 text-gray-400"
+                style={{ color: "var(--primary)" }}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -365,7 +387,8 @@ export function AdminHomeContent() {
               </span>
             </div>
             <svg
-              className="h-5 w-5 text-gray-400 group-hover:text-green-600"
+              className="h-5 w-5 text-gray-400"
+              style={{ color: "var(--primary)" }}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -382,11 +405,12 @@ export function AdminHomeContent() {
 
           <Link
             href="/admin/users"
-            className="group flex items-center justify-between rounded-lg border border-gray-200 p-4 transition hover:border-green-500 hover:bg-green-50"
+            className="group flex items-center justify-between rounded-lg border border-gray-200 p-4 transition"
           >
             <div className="flex items-center space-x-3">
               <svg
-                className="h-6 w-6 text-gray-400 group-hover:text-green-600"
+                className="h-6 w-6 text-gray-400"
+                style={{ color: "var(--primary)" }}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -404,7 +428,7 @@ export function AdminHomeContent() {
               </span>
             </div>
             <svg
-              className="h-5 w-5 text-gray-400 group-hover:text-green-600"
+              className="h-5 w-5 text-gray-400 group-hover:text-[color:var(--primary)]"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -421,11 +445,12 @@ export function AdminHomeContent() {
 
           <a
             href="#metrics"
-            className="group flex items-center justify-between rounded-lg border border-gray-200 p-4 transition hover:border-green-500 hover:bg-green-50"
+            className="group flex items-center justify-between rounded-lg border border-gray-200 p-4 transition"
           >
             <div className="flex items-center space-x-3">
               <svg
-                className="h-6 w-6 text-gray-400 group-hover:text-green-600"
+                className="h-6 w-6 text-gray-400"
+                style={{ color: "var(--primary)" }}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -468,7 +493,7 @@ export function AdminHomeContent() {
           </h2>
           <Link
             href="/admin/activity"
-            className="text-sm font-medium text-green-700 hover:text-green-800"
+            className="text-sm font-medium text-[color:var(--primary)] hover:opacity-90"
           >
             {t(lang, "common", "adminDashboardRecentActivityViewAll")}
           </Link>
@@ -481,7 +506,7 @@ export function AdminHomeContent() {
         )}
 
         {!activityLoading && activityError && (
-          <p className="text-sm text-red-600" role="alert">
+          <p className="text-sm text-[color:var(--error)]" role="alert">
             {activityError}
           </p>
         )}

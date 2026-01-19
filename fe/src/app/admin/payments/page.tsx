@@ -116,11 +116,11 @@ function ToggleSwitch({
         if (disabled) return;
         onChange(!checked);
       }}
-      className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full border transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 ${
-        checked
-          ? "border-green-500 bg-green-600"
-          : "border-gray-300 bg-gray-200"
-      }`}
+      className="relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full border transition-colors focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+      style={{
+        backgroundColor: checked ? "var(--primary)" : "#e5e7eb",
+        borderColor: checked ? "var(--primary)" : "#d1d5db",
+      }}
     >
       <span
         className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition ${
@@ -671,14 +671,12 @@ export default function AdminPaymentsPage() {
                 <div className="mt-3 space-y-2 text-sm text-gray-900">
                   <ListboxSelect
                     ariaLabel="Default provider"
-                    value={defaultProvider}
-                    disabled={
-                      defaultProviderBusy || providerToggleBusy !== null
-                    }
+                    value={providerStatus?.defaultProvider ?? "stripe"}
+                    disabled={defaultProviderBusy || saving}
                     onChange={(next) =>
                       void updateDefaultProvider(next as ProviderKey)
                     }
-                    buttonClassName="flex w-full items-center justify-between gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 disabled:opacity-70"
+                    buttonClassName="flex w-full items-center justify-between gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)] disabled:opacity-70"
                     options={[
                       { value: "stripe", label: "Stripe" },
                       { value: "paypal", label: "PayPal" },
@@ -1269,7 +1267,7 @@ export default function AdminPaymentsPage() {
                         value={currency}
                         onChange={(e) => setCurrency(e.target.value)}
                         list="currency-options"
-                        className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                        className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
                         placeholder="eur"
                         disabled={saving}
                       />
@@ -1291,7 +1289,7 @@ export default function AdminPaymentsPage() {
                         value={priceCents}
                         onChange={(e) => setPriceCents(e.target.value)}
                         inputMode="numeric"
-                        className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                        className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
                         placeholder="999"
                         disabled={saving}
                       />
@@ -1306,7 +1304,12 @@ export default function AdminPaymentsPage() {
                       type="button"
                       onClick={onSave}
                       disabled={saving}
-                      className="inline-flex items-center justify-center rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-700 disabled:opacity-70"
+                      className="inline-flex items-center justify-center rounded-lg border px-4 py-2 text-sm font-semibold shadow-sm hover:opacity-90 disabled:opacity-70"
+                      style={{
+                        backgroundColor: "var(--primary)",
+                        borderColor: "var(--primary)",
+                        color: "var(--on-primary)",
+                      }}
                     >
                       {saving ? "Запазване..." : "Запази"}
                     </button>
@@ -1340,14 +1343,19 @@ export default function AdminPaymentsPage() {
                         value={sandboxCourseId}
                         onChange={(e) => setSandboxCourseId(e.target.value)}
                         disabled={sandboxBusy}
-                        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
                         placeholder="e.g. 9b2e..."
                       />
                       <button
                         type="button"
                         onClick={createTestCheckout}
                         disabled={sandboxBusy}
-                        className="inline-flex items-center justify-center rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-700 disabled:opacity-70"
+                        className="inline-flex items-center justify-center rounded-lg border px-4 py-2 text-sm font-semibold shadow-sm hover:opacity-90 disabled:opacity-70"
+                        style={{
+                          backgroundColor: "var(--primary)",
+                          borderColor: "var(--primary)",
+                          color: "var(--on-primary)",
+                        }}
                       >
                         {sandboxBusy ? "Working..." : "Create test checkout"}
                       </button>
@@ -1371,7 +1379,7 @@ export default function AdminPaymentsPage() {
                           onClick={() =>
                             void copyToClipboard(sandboxCheckoutUrl)
                           }
-                          className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+                          className="be-btn-ghost rounded-md border px-3 py-1.5 text-xs font-semibold"
                         >
                           Copy
                         </button>
@@ -1380,7 +1388,7 @@ export default function AdminPaymentsPage() {
                           onClick={() =>
                             window.open(sandboxCheckoutUrl, "_blank")
                           }
-                          className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+                          className="be-btn-ghost rounded-md border px-3 py-1.5 text-xs font-semibold"
                         >
                           Open
                         </button>
@@ -1426,7 +1434,7 @@ export default function AdminPaymentsPage() {
                           onChange={(next) =>
                             setEventsStatus(next as StripeWebhookEventStatus)
                           }
-                          buttonClassName="flex w-full items-center justify-between gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 disabled:opacity-70"
+                          buttonClassName="flex w-full items-center justify-between gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none disabled:opacity-70"
                           options={[
                             { value: "failed", label: "failed" },
                             { value: "received", label: "received" },
@@ -1445,7 +1453,7 @@ export default function AdminPaymentsPage() {
                           value={eventsLimit}
                           disabled={eventsBusy}
                           onChange={(next) => setEventsLimit(next)}
-                          buttonClassName="flex w-full items-center justify-between gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 disabled:opacity-70"
+                          buttonClassName="flex w-full items-center justify-between gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none disabled:opacity-70"
                           options={[
                             { value: "10", label: "10" },
                             { value: "20", label: "20" },
@@ -1460,7 +1468,7 @@ export default function AdminPaymentsPage() {
                         type="button"
                         onClick={() => void fetchWebhookEvents()}
                         disabled={eventsBusy}
-                        className="inline-flex w-full items-center justify-center rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-70"
+                        className="be-btn-ghost inline-flex w-full items-center justify-center rounded-lg border px-4 py-2 text-sm font-semibold shadow-sm disabled:opacity-70"
                       >
                         {eventsBusy ? "Loading..." : "Refresh"}
                       </button>
@@ -1472,7 +1480,7 @@ export default function AdminPaymentsPage() {
                       type="button"
                       onClick={exportWebhookEventsCsv}
                       disabled={events.length === 0}
-                      className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="be-btn-ghost rounded-lg border px-3 py-2 text-sm font-medium shadow-sm disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       Export CSV
                     </button>
@@ -1527,7 +1535,7 @@ export default function AdminPaymentsPage() {
                                     void retryWebhookEvent(e.eventId)
                                   }
                                   disabled={retryingEventId === e.eventId}
-                                  className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-70"
+                                  className="be-btn-ghost rounded-md border px-3 py-1.5 text-xs font-semibold disabled:opacity-70"
                                 >
                                   {retryingEventId === e.eventId
                                     ? "Retrying..."
@@ -1592,7 +1600,7 @@ export default function AdminPaymentsPage() {
                           setPaypalSandboxCourseId(e.target.value)
                         }
                         disabled={paypalSandboxBusy}
-                        className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                        className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
                         placeholder="e.g. 9b2e..."
                       />
                     </div>
@@ -1601,7 +1609,12 @@ export default function AdminPaymentsPage() {
                         type="button"
                         onClick={createPaypalTestCheckout}
                         disabled={paypalSandboxBusy}
-                        className="inline-flex items-center justify-center rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-700 disabled:opacity-70"
+                        className="inline-flex items-center justify-center rounded-lg border px-4 py-2 text-sm font-semibold shadow-sm hover:opacity-90 disabled:opacity-70"
+                        style={{
+                          backgroundColor: "var(--primary)",
+                          borderColor: "var(--primary)",
+                          color: "var(--on-primary)",
+                        }}
                       >
                         {paypalSandboxBusy
                           ? "Working..."
@@ -1624,7 +1637,7 @@ export default function AdminPaymentsPage() {
                           onClick={() =>
                             void copyToClipboard(paypalSandboxCheckoutUrl)
                           }
-                          className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+                          className="be-btn-ghost rounded-md border px-3 py-1.5 text-xs font-semibold"
                         >
                           Copy
                         </button>
@@ -1633,7 +1646,7 @@ export default function AdminPaymentsPage() {
                           onClick={() =>
                             window.open(paypalSandboxCheckoutUrl, "_blank")
                           }
-                          className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+                          className="be-btn-ghost rounded-md border px-3 py-1.5 text-xs font-semibold"
                         >
                           Open
                         </button>
@@ -1692,7 +1705,7 @@ export default function AdminPaymentsPage() {
                           setMyposSandboxCourseId(e.target.value)
                         }
                         disabled={myposSandboxBusy}
-                        className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                        className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
                         placeholder="e.g. 9b2e..."
                       />
                     </div>
@@ -1701,7 +1714,12 @@ export default function AdminPaymentsPage() {
                         type="button"
                         onClick={createMyposTestCheckout}
                         disabled={myposSandboxBusy}
-                        className="inline-flex items-center justify-center rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-700 disabled:opacity-70"
+                        className="inline-flex items-center justify-center rounded-lg border px-4 py-2 text-sm font-semibold shadow-sm hover:opacity-90 disabled:opacity-70"
+                        style={{
+                          backgroundColor: "var(--primary)",
+                          borderColor: "var(--primary)",
+                          color: "var(--on-primary)",
+                        }}
                       >
                         {myposSandboxBusy
                           ? "Working..."
@@ -1724,7 +1742,7 @@ export default function AdminPaymentsPage() {
                           onClick={() =>
                             void copyToClipboard(myposSandboxCheckoutUrl)
                           }
-                          className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+                          className="be-btn-ghost rounded-md border px-3 py-1.5 text-xs font-semibold"
                         >
                           Copy
                         </button>
@@ -1733,7 +1751,7 @@ export default function AdminPaymentsPage() {
                           onClick={() =>
                             window.open(myposSandboxCheckoutUrl, "_blank")
                           }
-                          className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+                          className="be-btn-ghost rounded-md border px-3 py-1.5 text-xs font-semibold"
                         >
                           Open
                         </button>
@@ -1792,7 +1810,7 @@ export default function AdminPaymentsPage() {
                           setRevolutSandboxCourseId(e.target.value)
                         }
                         disabled={revolutSandboxBusy}
-                        className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                        className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
                         placeholder="e.g. 9b2e..."
                       />
                     </div>
@@ -1801,7 +1819,12 @@ export default function AdminPaymentsPage() {
                         type="button"
                         onClick={createRevolutTestCheckout}
                         disabled={revolutSandboxBusy}
-                        className="inline-flex items-center justify-center rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-700 disabled:opacity-70"
+                        className="inline-flex items-center justify-center rounded-lg border px-4 py-2 text-sm font-semibold shadow-sm hover:opacity-90 disabled:opacity-70"
+                        style={{
+                          backgroundColor: "var(--primary)",
+                          borderColor: "var(--primary)",
+                          color: "var(--on-primary)",
+                        }}
                       >
                         {revolutSandboxBusy
                           ? "Working..."
@@ -1824,7 +1847,7 @@ export default function AdminPaymentsPage() {
                           onClick={() =>
                             void copyToClipboard(revolutSandboxCheckoutUrl)
                           }
-                          className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+                          className="be-btn-ghost rounded-md border px-3 py-1.5 text-xs font-semibold"
                         >
                           Copy
                         </button>
@@ -1833,7 +1856,7 @@ export default function AdminPaymentsPage() {
                           onClick={() =>
                             window.open(revolutSandboxCheckoutUrl, "_blank")
                           }
-                          className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+                          className="be-btn-ghost rounded-md border px-3 py-1.5 text-xs font-semibold"
                         >
                           Open
                         </button>

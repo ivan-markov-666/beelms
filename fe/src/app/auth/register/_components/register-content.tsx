@@ -535,7 +535,12 @@ export function RegisterContent() {
           <section className="rounded-lg border border-gray-200 bg-white p-8 shadow-sm">
             <button
               type="button"
-              className="w-full rounded-lg bg-green-600 py-3 text-sm font-semibold text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1"
+              className="w-full rounded-lg border py-3 text-sm font-semibold shadow-sm hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-1"
+              style={{
+                backgroundColor: "var(--primary)",
+                borderColor: "var(--primary)",
+                color: "var(--on-primary)",
+              }}
               onClick={() => router.push("/auth/login")}
             >
               {t(lang, "auth", "registerDisabledLoginCta")}
@@ -737,7 +742,7 @@ export function RegisterContent() {
                 type="email"
                 autoComplete="email"
                 placeholder="your@email.com"
-                className="block w-full rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-green-600 focus:outline-none focus:ring-1 focus:ring-green-600"
+                className="block w-full rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
                 value={email}
                 onChange={(e) => {
                   setEmail(e.target.value);
@@ -767,7 +772,7 @@ export function RegisterContent() {
                   type={showPassword ? "text" : "password"}
                   autoComplete="new-password"
                   placeholder="********"
-                  className="block w-full rounded-lg border border-gray-300 px-4 py-2 pr-10 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-green-600 focus:outline-none focus:ring-1 focus:ring-green-600"
+                  className="block w-full rounded-lg border border-gray-300 px-4 py-2 pr-10 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
                   value={password}
                   onChange={(e) => {
                     setPassword(e.target.value);
@@ -856,10 +861,10 @@ export function RegisterContent() {
                 <p
                   className={`mt-1 text-xs ${
                     passwordStrength === "strong"
-                      ? "text-green-600"
+                      ? "text-[color:var(--primary)]"
                       : passwordStrength === "medium"
-                        ? "text-yellow-600"
-                        : "text-red-600"
+                        ? "text-[color:var(--attention)]"
+                        : "text-[color:var(--error)]"
                   }`}
                 >
                   {passwordStrength === "strong"
@@ -885,7 +890,7 @@ export function RegisterContent() {
                   type={showConfirmPassword ? "text" : "password"}
                   autoComplete="new-password"
                   placeholder="********"
-                  className="block w-full rounded-lg border border-gray-300 px-4 py-2 pr-10 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-green-600 focus:outline-none focus:ring-1 focus:ring-green-600"
+                  className="block w-full rounded-lg border border-gray-300 px-4 py-2 pr-10 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
                   value={confirmPassword}
                   onChange={(e) => {
                     setConfirmPassword(e.target.value);
@@ -982,7 +987,8 @@ export function RegisterContent() {
               <input
                 id="terms"
                 type="checkbox"
-                className="mt-1 h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500"
+                className="mt-1 h-4 w-4 rounded border-gray-300"
+                style={{ accentColor: "var(--primary)" }}
                 checked={acceptTerms}
                 onChange={(e) => {
                   setAcceptTerms(e.target.checked);
@@ -994,7 +1000,7 @@ export function RegisterContent() {
                 {t(lang, "auth", "registerTermsPrefix")}
                 <button
                   type="button"
-                  className="cursor-pointer text-green-700 hover:text-green-800 underline-offset-2 hover:underline"
+                  className="cursor-pointer text-[color:var(--primary)] underline-offset-2 hover:underline"
                   onClick={() => router.push("/legal/terms")}
                   disabled={submitting}
                 >
@@ -1003,7 +1009,7 @@ export function RegisterContent() {
                 {t(lang, "auth", "registerTermsAnd")}
                 <button
                   type="button"
-                  className="cursor-pointer text-emerald-700 hover:text-emerald-800 underline-offset-2 hover:underline"
+                  className="cursor-pointer text-[color:var(--primary)] underline-offset-2 hover:underline"
                   onClick={() => router.push("/legal/privacy")}
                   disabled={submitting}
                 >
@@ -1055,14 +1061,19 @@ export function RegisterContent() {
               </p>
             )}
             {formSuccess && (
-              <p className="text-sm text-green-600" role="status">
+              <p className="text-sm text-[color:var(--primary)]" role="status">
                 {formSuccess}
               </p>
             )}
 
             <button
               type="submit"
-              className="w-full rounded-lg bg-green-600 py-3 text-sm font-semibold text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-70"
+              className="w-full rounded-lg border py-3 text-sm font-semibold shadow-sm hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-70"
+              style={{
+                backgroundColor: "var(--primary)",
+                borderColor: "var(--primary)",
+                color: "var(--on-primary)",
+              }}
               disabled={submitting}
             >
               {submitting
@@ -1077,7 +1088,7 @@ export function RegisterContent() {
             {t(lang, "auth", "registerHasAccount")}{" "}
             <button
               type="button"
-              className="cursor-pointer font-semibold text-green-700 hover:text-green-800"
+              className="cursor-pointer font-semibold text-[color:var(--primary)] hover:opacity-90"
               onClick={() => router.push("/auth/login")}
               disabled={submitting}
             >

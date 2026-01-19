@@ -64,7 +64,12 @@ export function SocialCallbackContent() {
             </p>
             <button
               type="button"
-              className="w-full rounded-lg bg-green-600 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1"
+              className="w-full rounded-lg border py-2 text-sm font-semibold shadow-sm hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-1"
+              style={{
+                backgroundColor: "var(--primary)",
+                borderColor: "var(--primary)",
+                color: "var(--on-primary)",
+              }}
               onClick={() => router.push("/auth/login")}
             >
               {t(lang, "auth", "socialCallbackErrorCta")}
