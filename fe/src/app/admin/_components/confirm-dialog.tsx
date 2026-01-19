@@ -40,8 +40,14 @@ export function ConfirmDialog({
   const confirmButtonStyle: CSSProperties = danger
     ? {
         backgroundColor: "var(--error)",
+        color: "var(--on-error)",
+        borderColor: "var(--error)",
       }
-    : {};
+    : {
+        backgroundColor: "var(--primary)",
+        color: "var(--on-primary)",
+        borderColor: "var(--primary)",
+      };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
@@ -82,7 +88,7 @@ export function ConfirmDialog({
         <div className="flex justify-end gap-2">
           <button
             type="button"
-            className="rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-800 hover:bg-zinc-50 disabled:opacity-70"
+            className="be-btn-ghost rounded-md border px-3 py-1.5 text-xs font-medium disabled:opacity-70"
             onClick={onCancel}
             disabled={!!submitting}
           >
@@ -90,11 +96,7 @@ export function ConfirmDialog({
           </button>
           <button
             type="button"
-            className={
-              danger
-                ? "rounded-md px-3 py-1.5 text-xs font-medium text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
-                : "rounded-md bg-green-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-70"
-            }
+            className="rounded-md border px-3 py-1.5 text-xs font-medium hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
             style={confirmButtonStyle}
             onClick={onConfirm}
             disabled={!!submitting}

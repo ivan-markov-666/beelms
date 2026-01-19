@@ -44,14 +44,19 @@ export function AccountDeletedContent() {
           <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
             <button
               type="button"
-              className="inline-flex cursor-pointer items-center justify-center rounded-lg bg-green-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2"
+              className="inline-flex cursor-pointer items-center justify-center rounded-lg border px-6 py-3 text-sm font-semibold shadow-sm transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--primary)] focus-visible:ring-offset-2"
+              style={{
+                backgroundColor: "var(--primary)",
+                borderColor: "var(--primary)",
+                color: "var(--on-primary)",
+              }}
               onClick={() => router.push("/")}
             >
               {t(lang, "auth", "accountDeletedPrimaryCta")}
             </button>
             <button
               type="button"
-              className="inline-flex cursor-pointer items-center justify-center rounded-lg border border-green-200 bg-white px-6 py-3 text-sm font-semibold text-green-700 shadow-sm transition hover:bg-green-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2"
+              className="be-btn-ghost inline-flex cursor-pointer items-center justify-center rounded-lg border px-6 py-3 text-sm font-semibold shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--primary)] focus-visible:ring-offset-2"
               onClick={() => router.push("/wiki")}
             >
               {t(lang, "auth", "accountDeletedSecondaryCta")}

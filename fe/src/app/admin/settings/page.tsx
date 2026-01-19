@@ -24,6 +24,7 @@ const THEME_FIELD_KEYS = [
   "foreground",
   "primary",
   "secondary",
+  "attention",
   "error",
   "card",
   "border",
@@ -44,6 +45,7 @@ const THEME_FIELD_ORDER: ThemeFieldKey[] = [
   "foreground",
   "primary",
   "secondary",
+  "attention",
   "error",
   "card",
   "border",
@@ -85,6 +87,13 @@ const THEME_FIELD_DEFS: Record<
     description: "Вторичен акцент за линкове/информационни елементи.",
     token: "--secondary / --theme-*-secondary",
     example: "Информационни банери, вторични бутони",
+  },
+  attention: {
+    label: "Attention",
+    description:
+      "Акцент за действия, които изискват внимание (напр. Отказ, потенциално destructive действия).",
+    token: "--attention / --theme-*-attention",
+    example: "Отказ, Изтрий избраните",
   },
   error: {
     label: "Error",
@@ -271,6 +280,23 @@ function contrastRatio(hexA: string, hexB: string): number {
   return (brightest + 0.05) / (darkest + 0.05);
 }
 
+function pickOnColor(background: string, fallback = "#000000"): string {
+  const bg = expandToSixHex(background) ?? background;
+  const white = "#ffffff";
+  const black = "#000000";
+  const contrastWithWhite = contrastRatio(bg, white);
+  const contrastWithBlack = contrastRatio(bg, black);
+
+  if (
+    !Number.isFinite(contrastWithWhite) ||
+    !Number.isFinite(contrastWithBlack)
+  ) {
+    return fallback;
+  }
+
+  return contrastWithWhite >= contrastWithBlack ? white : black;
+}
+
 function mixHex(base: string, target: string, amount: number): string {
   const baseRgb = hexToRgb(base);
   const targetRgb = hexToRgb(target);
@@ -342,12 +368,24 @@ function normalizeButtonContrast(
 ): ThemePalette {
   return {
     ...palette,
-    primary: ensureButtonContrast(palette.primary, palette.foreground, variant),
-    secondary: ensureButtonContrast(
+    primary: ensureLinkContrast(
+      palette.primary,
+      palette.background,
+      variant,
+      variant === "dark" ? 4.2 : 5,
+    ),
+    secondary: ensureLinkContrast(
       palette.secondary,
+      palette.background,
+      variant,
+      variant === "dark" ? 4.2 : 5,
+    ),
+    attention: ensureButtonContrast(
+      palette.attention,
       palette.foreground,
       variant,
     ),
+    error: ensureButtonContrast(palette.error, palette.foreground, variant),
   };
 }
 
@@ -364,6 +402,19 @@ function completeThemePalette(
         : fallback[key];
     return acc;
   }, {} as ThemePalette);
+
+  const attentionAccent = "#f59e0b";
+  if (
+    typeof partial.attention !== "string" ||
+    partial.attention.trim().length === 0
+  ) {
+    const tone = variant === "dark" ? merged.card : merged.background;
+    merged.attention = mixHex(
+      attentionAccent,
+      tone,
+      variant === "dark" ? 0.18 : 0.24,
+    );
+  }
 
   const alertAccent = "#f59e0b";
   if (
@@ -389,6 +440,45 @@ function completeThemePalette(
 
   return normalizeButtonContrast(merged, variant);
 }
+
+function applyPresetButtonAccents(
+  palette: ThemePalette,
+  variant: ThemeVariant,
+): ThemePalette {
+  const baseAttention = variant === "dark" ? "#fbbf24" : "#f59e0b";
+  const baseError = variant === "dark" ? "#f87171" : "#dc2626";
+
+  const tone = variant === "dark" ? palette.card : palette.background;
+
+  const withAccents: ThemePalette = {
+    ...palette,
+    attention: mixHex(baseAttention, tone, variant === "dark" ? 0.14 : 0.22),
+    error: mixHex(baseError, tone, variant === "dark" ? 0.12 : 0.18),
+  };
+
+  return normalizeButtonContrast(withAccents, variant);
+}
+
+function buildPresetActionButtonStyles(palette: ThemePalette): {
+  edit: CSSProperties;
+  apply: CSSProperties;
+} {
+  return {
+    edit: {
+      backgroundColor: palette.card,
+      borderColor: palette.border,
+      color: palette.foreground,
+    },
+    apply: {
+      backgroundColor: palette.card,
+      borderColor: palette.primary,
+      color: palette.primary,
+    },
+  };
+}
+
+const PRESET_ACTION_BUTTON_CLASS =
+  "rounded-full border px-3 py-1 text-xs font-semibold shadow-sm cursor-pointer hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60";
 
 const SUCCESS_NOTICE_STYLE: CSSProperties = {
   backgroundColor: "var(--field-ok-bg)",
@@ -416,6 +506,7 @@ const DEFAULT_THEME_LIGHT: Record<ThemeFieldKey, string> = {
   foreground: "#171717",
   primary: "#16a34a",
   secondary: "#2563eb",
+  attention: "#f59e0b",
   error: "#dc2626",
   card: "#ffffff",
   border: "#e5e7eb",
@@ -434,6 +525,7 @@ const DEFAULT_THEME_DARK: Record<ThemeFieldKey, string> = {
   foreground: "#e5e7eb",
   primary: "#22c55e",
   secondary: "#60a5fa",
+  attention: "#fbbf24",
   error: "#fb7185",
   card: "#111827",
   border: "#374151",
@@ -2138,20 +2230,23 @@ const RAW_THEME_PRESETS: ThemePresetDraft[] = [
 ];
 
 const THEME_PRESETS: ThemePreset[] = RAW_THEME_PRESETS.map((preset) => {
+  const lightBase = completeThemePalette(
+    preset.light,
+    DEFAULT_THEME_LIGHT as ThemePalette,
+    "light",
+  );
+  const darkBase = completeThemePalette(
+    preset.dark,
+    DEFAULT_THEME_DARK as ThemePalette,
+    "dark",
+  );
+
   return {
     id: preset.id,
     name: preset.name,
     description: preset.description,
-    light: completeThemePalette(
-      preset.light,
-      DEFAULT_THEME_LIGHT as ThemePalette,
-      "light",
-    ),
-    dark: completeThemePalette(
-      preset.dark,
-      DEFAULT_THEME_DARK as ThemePalette,
-      "dark",
-    ),
+    light: applyPresetButtonAccents(lightBase, "light"),
+    dark: applyPresetButtonAccents(darkBase, "dark"),
   };
 });
 const THEME_PRESET_TARGETS: ThemePresetTarget[] = ["light", "dark", "both"];
@@ -2177,6 +2272,7 @@ const THEME_PRESET_SWATCH_KEYS: ThemeFieldKey[] = [
   "foreground",
   "primary",
   "secondary",
+  "attention",
 ];
 
 const HEX_COLOR_FULL_PATTERN = /^#[0-9a-fA-F]{6}$/;
@@ -2614,7 +2710,7 @@ function FooterSocialIconPicker({
         type="button"
         disabled={disabled}
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 disabled:cursor-not-allowed disabled:bg-gray-50"
+        className="flex w-full items-center justify-between rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)] disabled:cursor-not-allowed disabled:bg-gray-50"
       >
         <span className="flex items-center gap-2">
           {SelectedIcon ? (
@@ -3269,7 +3365,7 @@ function FlagCodeAutocomplete(props: {
           }}
           placeholder="bg"
           aria-label={ariaLabel}
-          className="w-[88px] rounded-md border border-gray-300 bg-white px-2 py-1 text-xs text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 disabled:cursor-not-allowed disabled:opacity-60"
+          className="w-[88px] rounded-md border border-gray-300 bg-white px-2 py-1 text-xs text-gray-900 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)] disabled:cursor-not-allowed disabled:opacity-60"
         />
         {(value ?? "").trim().length ? (
           <span
@@ -3753,7 +3849,7 @@ function FeatureToggleLabel({
         onClick={stopPropagation}
         onMouseDown={stopPropagation}
         onMouseUp={stopPropagation}
-        className="group relative ml-auto inline-flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border border-gray-300 bg-white text-[11px] font-semibold text-gray-600 transition hover:border-green-500 hover:text-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
+        className="group relative ml-auto inline-flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border border-gray-300 bg-white text-[11px] font-semibold text-gray-600 transition hover:border-[color:var(--primary)] hover:text-[color:var(--primary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)]"
         aria-label={`${info.title} информация`}
       >
         ?
@@ -3769,8 +3865,10 @@ function FeatureToggleLabel({
             {info.impact}
           </p>
           {info.risk ? (
-            <p className="mt-2 text-sm leading-relaxed text-red-700">
-              <span className="font-semibold text-red-800">Риск:</span>{" "}
+            <p className="mt-2 text-sm leading-relaxed text-[color:var(--error)]">
+              <span className="font-semibold text-[color:var(--error)]">
+                Риск:
+              </span>{" "}
               {info.risk}
             </p>
           ) : null}
@@ -3978,21 +4076,147 @@ function ThemePreviewCard({
     color: palette.foreground,
     opacity: variant === "dark" ? 0.75 : 0.7,
   };
+  const previewVars: CSSProperties & Record<`--${string}`, string> = {
+    "--background": palette.background,
+    "--foreground": palette.foreground,
+    "--primary": palette.primary,
+    "--secondary": palette.secondary,
+    "--attention": palette.attention,
+    "--error": palette.error,
+    "--on-primary": pickOnColor(palette.primary, palette.foreground),
+    "--on-secondary": pickOnColor(palette.secondary, palette.foreground),
+    "--on-attention": pickOnColor(palette.attention, palette.foreground),
+    "--on-error": pickOnColor(palette.error, palette.foreground),
+    "--card": palette.card,
+    "--border": palette.border,
+  };
   const baseCard: CSSProperties = {
     backgroundColor: palette.card,
     color: palette.foreground,
     borderColor: palette.border,
   };
+  const hoverMixTarget = variant === "dark" ? "black" : "white";
+  const fillHoverWeight = variant === "dark" ? 88 : 92;
+  const subtleHoverWeight = variant === "dark" ? 28 : 12;
+  const hoverMix = (color: string, weight: number) =>
+    `color-mix(in srgb, ${color} ${weight}%, ${hoverMixTarget})`;
   const primaryButton: CSSProperties = {
     backgroundColor: palette.primary,
-    color: palette.foreground,
+    color: pickOnColor(palette.primary, palette.foreground),
     borderColor: palette.primary,
+  };
+  const primaryButtonHover: CSSProperties = {
+    ...primaryButton,
+    backgroundColor: hoverMix(palette.primary, fillHoverWeight),
   };
   const secondaryButton: CSSProperties = {
     backgroundColor: palette.secondary,
-    color: palette.foreground,
+    color: pickOnColor(palette.secondary, palette.foreground),
     borderColor: palette.secondary,
   };
+  const secondaryButtonHover: CSSProperties = {
+    ...secondaryButton,
+    backgroundColor: hoverMix(palette.secondary, fillHoverWeight),
+  };
+  const attentionButton: CSSProperties = {
+    backgroundColor: palette.attention,
+    color: pickOnColor(palette.attention, palette.foreground),
+    borderColor: palette.attention,
+  };
+  const attentionButtonHover: CSSProperties = {
+    ...attentionButton,
+    backgroundColor: hoverMix(palette.attention, fillHoverWeight),
+  };
+  const outlineButton: CSSProperties = {
+    backgroundColor: "transparent",
+    color: palette.primary,
+    borderColor: palette.primary,
+  };
+  const outlineButtonHover: CSSProperties = {
+    ...outlineButton,
+    backgroundColor: hoverMix(palette.primary, subtleHoverWeight),
+  };
+  const destructiveButton: CSSProperties = {
+    backgroundColor: palette.error,
+    color: pickOnColor(palette.error, palette.foreground),
+    borderColor: palette.error,
+  };
+  const destructiveButtonHover: CSSProperties = {
+    ...destructiveButton,
+    backgroundColor: hoverMix(palette.error, fillHoverWeight),
+  };
+  const ghostButton: CSSProperties = {
+    backgroundColor: "transparent",
+    borderColor: palette.border,
+    color: palette.foreground,
+    boxShadow: "none",
+  };
+  const ghostButtonHover: CSSProperties = {
+    ...ghostButton,
+    backgroundColor: "color-mix(in srgb, var(--foreground) 6%, var(--card))",
+    borderColor: "color-mix(in srgb, var(--foreground) 18%, var(--border))",
+  };
+  const linkColor = ensureLinkContrast(palette.primary, palette.card, variant);
+  const linkButton: CSSProperties = {
+    backgroundColor: "transparent",
+    borderColor: "transparent",
+    color: "var(--secondary)",
+    boxShadow: "none",
+    textDecoration: "none",
+  };
+  const linkButtonHover: CSSProperties = {
+    ...linkButton,
+    color: "color-mix(in srgb, var(--secondary) 85%, var(--foreground))",
+    textDecoration: "underline",
+    textUnderlineOffset: 2,
+  };
+  const buttonPreviewConfigs: {
+    key: string;
+    label: string;
+    base: CSSProperties;
+    hover: CSSProperties;
+  }[] = [
+    {
+      key: "primary",
+      label: "Primary",
+      base: primaryButton,
+      hover: primaryButtonHover,
+    },
+    {
+      key: "secondary",
+      label: "Secondary",
+      base: secondaryButton,
+      hover: secondaryButtonHover,
+    },
+    {
+      key: "outline",
+      label: "Outline",
+      base: outlineButton,
+      hover: outlineButtonHover,
+    },
+    {
+      key: "attention",
+      label: "Attention",
+      base: attentionButton,
+      hover: attentionButtonHover,
+    },
+    {
+      key: "destructive",
+      label: "Destructive",
+      base: destructiveButton,
+      hover: destructiveButtonHover,
+    },
+    {
+      key: "ghost",
+      label: "Ghost",
+      base: ghostButton,
+      hover: ghostButtonHover,
+    },
+    { key: "link", label: "Link", base: linkButton, hover: linkButtonHover },
+  ];
+  const sharedButtonClass =
+    "rounded-full border px-3 py-1 text-xs font-semibold shadow-sm cursor-pointer disabled:cursor-not-allowed disabled:opacity-60";
+  const presetActionStyles = buildPresetActionButtonStyles(palette);
   const okChip: CSSProperties = {
     backgroundColor: palette.fieldOkBg,
     borderColor: palette.fieldOkBorder,
@@ -4025,13 +4249,6 @@ function ThemePreviewCard({
     borderColor: palette.fieldErrorBorder,
   };
 
-  const linkColor = ensureLinkContrast(
-    palette.primary,
-    palette.card,
-    variant,
-    5,
-  );
-
   const linkStyle: CSSProperties = {
     color: linkColor,
     textDecoration: "underline",
@@ -4047,7 +4264,10 @@ function ThemePreviewCard({
         borderColor: palette.border,
       }}
     >
-      <div className="rounded-xl border p-4 shadow-sm" style={baseCard}>
+      <div
+        className="rounded-xl border p-4 shadow-sm"
+        style={{ ...baseCard, ...previewVars }}
+      >
         <div className="flex items-start justify-between gap-4">
           <div>
             <p
@@ -4060,7 +4280,7 @@ function ThemePreviewCard({
             <p className="mt-1 text-sm" style={previewMutedText}>
               Примерен текст за основния body цвят и контрасти.
             </p>
-            <p className="mt-2 text-sm">
+            <p className="mt-2 text-sm" style={{ color: palette.foreground }}>
               Това е примерен текст с нормална плътност и един{" "}
               <a href="#" style={linkStyle}>
                 примерен линк
@@ -4086,21 +4306,136 @@ function ThemePreviewCard({
             </span>
           </div>
         </div>
-        <div className="mt-4 flex flex-wrap gap-2">
-          <button
-            type="button"
-            className="rounded-full border px-3 py-1 text-xs font-semibold shadow-sm"
-            style={primaryButton}
+        <div className="mt-4 space-y-2">
+          <p
+            className="text-[11px] font-semibold uppercase tracking-wide"
+            style={previewMutedText}
           >
-            Primary CTA
-          </button>
-          <button
-            type="button"
-            className="rounded-full border px-3 py-1 text-xs font-semibold shadow-sm"
-            style={secondaryButton}
+            Buttons (default)
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {buttonPreviewConfigs.map(({ key, label, base }) => (
+              <button
+                key={`${key}-default`}
+                type="button"
+                className={sharedButtonClass}
+                style={base}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <p
+            className="text-[11px] font-semibold uppercase tracking-wide"
+            style={previewMutedText}
           >
-            Secondary
-          </button>
+            Buttons (hover)
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {buttonPreviewConfigs.map(({ key, label, hover }) => (
+              <button
+                key={`${key}-hover`}
+                type="button"
+                className={sharedButtonClass}
+                style={hover}
+                aria-label={`${label} hover state`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <p
+            className="text-[11px] font-semibold uppercase tracking-wide"
+            style={previewMutedText}
+          >
+            Buttons (disabled)
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {buttonPreviewConfigs.map(({ key, label, base }) => (
+              <button
+                key={`${key}-disabled`}
+                type="button"
+                className={sharedButtonClass}
+                style={base}
+                disabled
+                aria-label={`${label} disabled state`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <p
+            className="text-[11px] font-semibold uppercase tracking-wide"
+            style={previewMutedText}
+          >
+            Admin actions (Presets)
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              className={PRESET_ACTION_BUTTON_CLASS}
+              style={presetActionStyles.edit}
+            >
+              Edit
+            </button>
+            <button
+              type="button"
+              className={PRESET_ACTION_BUTTON_CLASS}
+              style={presetActionStyles.apply}
+            >
+              Apply
+            </button>
+          </div>
+          <p
+            className="text-[11px] font-semibold uppercase tracking-wide"
+            style={previewMutedText}
+          >
+            Admin actions (hover)
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              className={PRESET_ACTION_BUTTON_CLASS}
+              style={{ ...presetActionStyles.edit, opacity: 0.9 }}
+              aria-label="Edit hover state"
+            >
+              Edit
+            </button>
+            <button
+              type="button"
+              className={PRESET_ACTION_BUTTON_CLASS}
+              style={{ ...presetActionStyles.apply, opacity: 0.9 }}
+              aria-label="Apply hover state"
+            >
+              Apply
+            </button>
+          </div>
+          <p
+            className="text-[11px] font-semibold uppercase tracking-wide"
+            style={previewMutedText}
+          >
+            Admin actions (disabled)
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              className={PRESET_ACTION_BUTTON_CLASS}
+              style={presetActionStyles.edit}
+              disabled
+              aria-label="Edit disabled state"
+            >
+              Edit
+            </button>
+            <button
+              type="button"
+              className={PRESET_ACTION_BUTTON_CLASS}
+              style={presetActionStyles.apply}
+              disabled
+              aria-label="Apply disabled state"
+            >
+              Apply
+            </button>
+          </div>
         </div>
       </div>
       <div className="mt-3 flex flex-wrap items-center gap-3 text-xs font-medium">
@@ -4128,11 +4463,11 @@ function ThemePreviewCard({
         </span>
       </div>
 
-      <div className="mt-4 grid gap-3 md:grid-cols-4">
-        <div>
+      <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="flex flex-col gap-2">
           <p
             className="text-[11px] font-semibold uppercase tracking-wide"
-            style={previewMutedText}
+            style={{ ...previewMutedText, minHeight: "28px" }}
           >
             Field (normal)
           </p>
@@ -4143,12 +4478,12 @@ function ThemePreviewCard({
             Example input
           </div>
         </div>
-        <div>
+        <div className="flex flex-col gap-2">
           <p
             className="text-[11px] font-semibold uppercase tracking-wide"
-            style={previewMutedText}
+            style={{ ...previewMutedText, minHeight: "28px" }}
           >
-            Field (ok)
+            Field (OK)
           </p>
           <div
             className="mt-2 rounded-md border px-3 py-2 text-sm shadow-sm"
@@ -4157,10 +4492,10 @@ function ThemePreviewCard({
             Valid value
           </div>
         </div>
-        <div>
+        <div className="flex flex-col gap-2">
           <p
             className="text-[11px] font-semibold uppercase tracking-wide"
-            style={previewMutedText}
+            style={{ ...previewMutedText, minHeight: "28px" }}
           >
             Alert value
           </p>
@@ -4171,10 +4506,10 @@ function ThemePreviewCard({
             Needs attention
           </div>
         </div>
-        <div>
+        <div className="flex flex-col gap-2">
           <p
             className="text-[11px] font-semibold uppercase tracking-wide"
-            style={previewMutedText}
+            style={{ ...previewMutedText, minHeight: "28px" }}
           >
             Field (error)
           </p>
@@ -4467,9 +4802,9 @@ function ToggleSwitch({
         if (disabled) return;
         onChange(!checked);
       }}
-      className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full border transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 ${
+      className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full border transition-colors focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 ${
         checked
-          ? "border-green-500 bg-green-600"
+          ? "border-[color:var(--primary)] bg-[color:var(--primary)]"
           : "border-gray-300 bg-gray-200"
       }`}
     >
@@ -4574,7 +4909,12 @@ function ConfirmModal({
             type="button"
             onClick={onConfirm}
             disabled={!confirmEnabled}
-            className="inline-flex items-center justify-center rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex items-center justify-center rounded-md border px-4 py-2 text-sm font-semibold shadow-sm hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+            style={{
+              backgroundColor: "var(--error)",
+              borderColor: "var(--error)",
+              color: "var(--on-error)",
+            }}
           >
             {confirmLabel}
           </button>
@@ -4978,7 +5318,7 @@ function LanguageDraftAutocomplete(props: {
           setOpen(true);
         }}
         aria-label={ariaLabel}
-        className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 disabled:cursor-not-allowed disabled:opacity-70"
+        className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)] disabled:cursor-not-allowed disabled:opacity-70"
         placeholder={placeholder}
       />
 
@@ -5040,7 +5380,7 @@ function DefaultLanguageDropdown(props: {
             setOpen(false);
           }, 120);
         }}
-        className="mt-2 flex w-full items-center justify-between gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-left text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 disabled:cursor-not-allowed disabled:opacity-60"
+        className="mt-2 flex w-full items-center justify-between gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-left text-sm text-gray-900 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)] disabled:cursor-not-allowed disabled:opacity-60"
       >
         <span className="font-medium">{selected || "—"}</span>
         <span aria-hidden="true" className="text-xs text-gray-500">
@@ -5272,6 +5612,10 @@ export default function AdminSettingsPage() {
   const perLangFontLicenseFileInputRef = useRef<HTMLInputElement | null>(null);
   const [pendingFontLicenseLang, setPendingFontLicenseLang] =
     useState<string>("");
+  const [pendingFontRetry, setPendingFontRetry] = useState<{
+    file: File;
+    langCode: string | null;
+  } | null>(null);
 
   const [seoBaseUrl, setSeoBaseUrl] = useState<string>("");
   const [seoTitleTemplate, setSeoTitleTemplate] =
@@ -5936,9 +6280,9 @@ export default function AdminSettingsPage() {
   ]);
 
   const socialInputClassOk =
-    "mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500";
+    "mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]";
   const socialInputClassError =
-    "mt-2 w-full rounded-md border border-red-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500";
+    "mt-2 w-full rounded-md border border-[color:var(--error)] bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-[color:var(--error)] focus:outline-none focus:ring-1 focus:ring-[color:var(--error)]";
 
   const escapeMetaValue = (value: string) => {
     return value
@@ -6344,6 +6688,7 @@ export default function AdminSettingsPage() {
 
     setError(null);
     setSuccess(null);
+    setPendingFontRetry(null);
 
     const previousUrl = (fontUrlByLang?.[langCode] ?? "").trim();
     const formData = new FormData();
@@ -6374,15 +6719,19 @@ export default function AdminSettingsPage() {
         } catch {
           // ignore
         }
+        setPendingFontRetry({ file: files[0], langCode });
         setError(message);
         return;
       }
 
       const data = (await res.json()) as { url?: string };
       if (typeof data.url !== "string") {
+        setPendingFontRetry({ file: files[0], langCode });
         setError("Неуспешно качване на font файла.");
         return;
       }
+
+      setPendingFontRetry(null);
 
       setFontUrlByLang((prev) =>
         upsertStringDictionary(prev, langCode, data.url),
@@ -6392,6 +6741,7 @@ export default function AdminSettingsPage() {
         `Font (${langCode}) файлът е качен и запазен. Refesh-ни страницата за да се приложи навсякъде.`,
       );
     } catch (err) {
+      setPendingFontRetry({ file: files[0], langCode });
       setError(
         err instanceof Error ? err.message : "Неуспешно качване на font файла.",
       );
@@ -7022,6 +7372,10 @@ export default function AdminSettingsPage() {
       } else {
         setSuccess(successMessage);
       }
+
+      try {
+        localStorage.setItem("beelms.adminSettingsSync", String(Date.now()));
+      } catch {}
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Неуспешно запазване на branding.";
@@ -7033,6 +7387,82 @@ export default function AdminSettingsPage() {
     } finally {
       saveInFlightRef.current = false;
       setSaving(false);
+    }
+  };
+
+  const retryLastFontUpload = async () => {
+    if (!pendingFontRetry) return;
+
+    const file = pendingFontRetry.file;
+    const langCode = pendingFontRetry.langCode;
+    const token = getAccessToken();
+    if (!token) {
+      router.replace("/auth/login");
+      return;
+    }
+
+    setError(null);
+    setSuccess(null);
+
+    const previousUrl = langCode
+      ? (fontUrlByLang?.[langCode] ?? "").trim()
+      : (fontUrl ?? "").trim();
+    const formData = new FormData();
+    formData.append("file", file);
+    if (previousUrl.length > 0) {
+      formData.append("previousUrl", previousUrl);
+    }
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/admin/settings/branding/font`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (res.status === 401) {
+        router.replace("/auth/login");
+        return;
+      }
+
+      if (!res.ok) {
+        let message = "Неуспешно качване на font файла.";
+        try {
+          const payload = (await res.json()) as { message?: string };
+          if (payload?.message) message = payload.message;
+        } catch {}
+        setError(message);
+        return;
+      }
+
+      const data = (await res.json()) as { url?: string };
+      if (typeof data.url !== "string") {
+        setError("Неуспешно качване на font файла.");
+        return;
+      }
+
+      setPendingFontRetry(null);
+      if (langCode) {
+        setFontUrlByLang((prev) =>
+          upsertStringDictionary(prev, langCode, data.url),
+        );
+        await persistBrandingField(
+          { fontUrlByLang: { [langCode]: data.url } },
+          `Font (${langCode}) файлът е качен и запазен. Refesh-ни страницата за да се приложи навсякъде.`,
+        );
+      } else {
+        setFontUrl(data.url);
+        await persistBrandingField(
+          { fontUrl: data.url },
+          "Font файлът е качен и запазен. Refesh-ни страницата за да се приложи навсякъде.",
+        );
+      }
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Неуспешно качване на font файла.",
+      );
     }
   };
 
@@ -7367,15 +7797,19 @@ export default function AdminSettingsPage() {
         } catch {
           // ignore
         }
+        setPendingFontRetry({ file: files[0], langCode: null });
         setError(message);
         return;
       }
 
       const data = (await res.json()) as { url?: string };
       if (typeof data.url !== "string") {
+        setPendingFontRetry({ file: files[0], langCode: null });
         setError("Неуспешно качване на font файла.");
         return;
       }
+
+      setPendingFontRetry(null);
 
       setFontUrl(data.url);
       await persistBrandingField(
@@ -7383,6 +7817,7 @@ export default function AdminSettingsPage() {
         "Font файлът е качен и запазен. Refesh-ни страницата за да се приложи навсякъде.",
       );
     } catch (err) {
+      setPendingFontRetry({ file: files[0], langCode: null });
       setError(
         err instanceof Error ? err.message : "Неуспешно качване на font файла.",
       );
@@ -7462,7 +7897,9 @@ export default function AdminSettingsPage() {
     }
   };
   const metadataSectionAccent = (filled: boolean) =>
-    filled ? "border-green-100 bg-green-50" : "border-red-100 bg-red-50";
+    filled
+      ? "border-[color:color-mix(in srgb, var(--primary) 25%, white)] bg-[color:color-mix(in srgb, var(--primary) 10%, white)]"
+      : "border-[color:color-mix(in srgb, var(--error) 25%, white)] bg-[color:color-mix(in srgb, var(--error) 10%, white)]";
 
   const [wiki, setWiki] = useState<boolean>(true);
   const [wikiPublic, setWikiPublic] = useState<boolean>(true);
@@ -8634,8 +9071,17 @@ export default function AdminSettingsPage() {
 
     void init();
 
+    const settingsSyncKey = "beelms.adminSettingsSync";
+    const syncHandler = (e: StorageEvent) => {
+      if (e.key !== settingsSyncKey) return;
+      if (cancelled) return;
+      void init();
+    };
+    window.addEventListener("storage", syncHandler);
+
     return () => {
       cancelled = true;
+      window.removeEventListener("storage", syncHandler);
     };
   }, []);
 
@@ -9870,12 +10316,14 @@ export default function AdminSettingsPage() {
                 value={appName}
                 onChange={(e) => setAppName(e.target.value)}
                 maxLength={APP_NAME_MAX_LENGTH}
-                className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
                 placeholder="BeeLMS"
                 disabled={saving}
               />
               {appNameValidation ? (
-                <p className="mt-1 text-sm text-red-600">{appNameValidation}</p>
+                <p className="mt-1 text-sm text-[color:var(--error)]">
+                  {appNameValidation}
+                </p>
               ) : (
                 <p className="mt-1 text-xs text-gray-500">
                   Characters: {appNameCharsUsed}/{APP_NAME_MAX_LENGTH}
@@ -9911,7 +10359,7 @@ export default function AdminSettingsPage() {
                     onChange={(next) =>
                       setThemeMode(next as "light" | "dark" | "system")
                     }
-                    buttonClassName="flex w-full items-center justify-between gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 disabled:opacity-70"
+                    buttonClassName="flex w-full items-center justify-between gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)] disabled:opacity-70"
                     options={[
                       { value: "system", label: "system" },
                       { value: "light", label: "light" },
@@ -9950,12 +10398,11 @@ export default function AdminSettingsPage() {
                         ariaLabel="Theme preset target"
                         value={themePresetTarget}
                         disabled={saving}
-                        onChange={(value) => {
-                          const next = value as ThemePresetTarget;
+                        onSelect={(next) => {
                           themePresetTargetRef.current = next;
                           setThemePresetTarget(next);
                         }}
-                        buttonClassName="flex h-9 items-center justify-between gap-2 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 disabled:opacity-70"
+                        buttonClassName="flex h-9 items-center justify-between gap-2 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-900 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)] disabled:opacity-70"
                         options={THEME_PRESET_TARGETS.map((target) => ({
                           value: target,
                           label: THEME_PRESET_TARGET_LABEL[target],
@@ -9999,8 +10446,13 @@ export default function AdminSettingsPage() {
                       ? themeLight
                       : preset.light;
                     const darkForSwatches = isEditing ? themeDark : preset.dark;
-                    const activePalette =
-                      themePreviewVariant === "light" ? themeLight : themeDark;
+                    const applyPaletteTarget = themePresetTargetRef.current;
+                    const actionPalette =
+                      applyPaletteTarget === "dark"
+                        ? darkForSwatches
+                        : lightForSwatches;
+                    const actionButtonStyles =
+                      buildPresetActionButtonStyles(actionPalette);
 
                     return (
                       <div
@@ -10023,7 +10475,8 @@ export default function AdminSettingsPage() {
                                 handleEditBuiltInThemePreset(preset)
                               }
                               disabled={saving}
-                              className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                              className={PRESET_ACTION_BUTTON_CLASS}
+                              style={actionButtonStyles.edit}
                             >
                               Edit
                             </button>
@@ -10031,11 +10484,8 @@ export default function AdminSettingsPage() {
                               type="button"
                               onClick={() => applyThemePreset(preset)}
                               disabled={saving}
-                              className="inline-flex items-center justify-center rounded-md border bg-white px-3 py-1.5 text-xs font-semibold hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
-                              style={{
-                                borderColor: activePalette.primary,
-                                color: activePalette.primary,
-                              }}
+                              className={PRESET_ACTION_BUTTON_CLASS}
+                              style={actionButtonStyles.apply}
                             >
                               Apply
                             </button>
@@ -10187,7 +10637,7 @@ export default function AdminSettingsPage() {
                       value={customThemePresetName}
                       onChange={(e) => setCustomThemePresetName(e.target.value)}
                       disabled={saving}
-                      className="h-10 w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                      className="h-10 w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-900 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
                       placeholder="Име (напр. light-bee + dark-bee)"
                     />
                     <input
@@ -10196,7 +10646,7 @@ export default function AdminSettingsPage() {
                         setCustomThemePresetDescription(e.target.value)
                       }
                       disabled={saving}
-                      className="h-10 w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                      className="h-10 w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-900 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
                       placeholder="Описание (по желание)"
                     />
                   </div>
@@ -10207,7 +10657,7 @@ export default function AdminSettingsPage() {
                     className="inline-flex h-10 items-center justify-center rounded-md px-4 text-sm font-semibold shadow-sm hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
                     style={{
                       backgroundColor: "var(--primary)",
-                      color: "var(--foreground)",
+                      color: "var(--on-primary)",
                     }}
                   >
                     {editingCustomThemePresetId
@@ -10234,10 +10684,13 @@ export default function AdminSettingsPage() {
                         const darkForSwatches = isEditing
                           ? themeDark
                           : preset.dark;
-                        const activePalette =
-                          themePreviewVariant === "light"
-                            ? themeLight
-                            : themeDark;
+                        const customApplyTarget = themePresetTargetRef.current;
+                        const actionPalette =
+                          customApplyTarget === "dark"
+                            ? darkForSwatches
+                            : lightForSwatches;
+                        const actionButtonStyles =
+                          buildPresetActionButtonStyles(actionPalette);
 
                         return (
                           <div
@@ -10275,7 +10728,8 @@ export default function AdminSettingsPage() {
                                     }
                                   }}
                                   disabled={saving}
-                                  className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                                  className={PRESET_ACTION_BUTTON_CLASS}
+                                  style={actionButtonStyles.edit}
                                 >
                                   {isEditing ? "Save new style" : "Edit"}
                                 </button>
@@ -10283,11 +10737,8 @@ export default function AdminSettingsPage() {
                                   type="button"
                                   onClick={() => applyCustomThemePreset(preset)}
                                   disabled={saving}
-                                  className="inline-flex items-center justify-center rounded-md border bg-white px-3 py-1.5 text-xs font-semibold hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
-                                  style={{
-                                    borderColor: activePalette.primary,
-                                    color: activePalette.primary,
-                                  }}
+                                  className={PRESET_ACTION_BUTTON_CLASS}
+                                  style={actionButtonStyles.apply}
                                 >
                                   Apply
                                 </button>
@@ -10297,7 +10748,7 @@ export default function AdminSettingsPage() {
                                     void handleDeleteCustomThemePreset(preset)
                                   }
                                   disabled={saving}
-                                  className="inline-flex items-center justify-center rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                                  className="inline-flex items-center justify-center rounded-md border border-[color:var(--error)] bg-white px-3 py-1.5 text-xs font-semibold text-[color:var(--error)] hover:bg-[color:color-mix(in srgb, var(--error) 10%, white)] disabled:cursor-not-allowed disabled:opacity-60"
                                 >
                                   Delete
                                 </button>
@@ -10349,8 +10800,8 @@ export default function AdminSettingsPage() {
               </div>
 
               <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
-                <div className="space-y-4">
-                  <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm lg:sticky lg:top-4 lg:z-20">
+                <div className="grid gap-4 lg:grid-cols-2">
+                  <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm lg:sticky lg:top-4 lg:z-20 lg:max-h-[calc(100vh-2rem)] lg:overflow-auto">
                     <div className="flex items-center justify-between gap-3">
                       <div>
                         <p className="text-xs uppercase tracking-wide text-gray-500">
@@ -10395,7 +10846,7 @@ export default function AdminSettingsPage() {
                       />
                     </div>
                   </div>
-                  <div className="grid gap-4 md:grid-cols-2">
+                  <div className="grid gap-4 lg:grid-cols-1">
                     <ThemeFieldControls
                       title="Light palette"
                       palette={themeLight}
@@ -10447,7 +10898,7 @@ export default function AdminSettingsPage() {
                   type="button"
                   onClick={handleBrandingFaviconUploadClick}
                   disabled={saving}
-                  className="inline-flex items-center rounded-md border border-green-600 px-3 py-1.5 text-xs font-semibold text-green-700 hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex items-center rounded-md border border-[color:var(--primary)] px-3 py-1.5 text-xs font-semibold text-[color:var(--primary)] hover:bg-[color:color-mix(in srgb, var(--primary) 10%, white)] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   Upload favicon
                 </button>
@@ -10460,7 +10911,7 @@ export default function AdminSettingsPage() {
                     );
                   }}
                   disabled={saving || faviconUrl.trim().length === 0}
-                  className="inline-flex items-center rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex items-center rounded-md border border-[color:var(--error)] bg-white px-3 py-1.5 text-xs font-semibold text-[color:var(--error)] hover:bg-[color:color-mix(in srgb, var(--error) 10%, white)] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   Remove
                 </button>
@@ -10514,7 +10965,7 @@ export default function AdminSettingsPage() {
                   type="button"
                   onClick={handleBrandingLogoUploadClick}
                   disabled={saving}
-                  className="inline-flex items-center rounded-md border border-green-600 px-3 py-1.5 text-xs font-semibold text-green-700 hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex items-center rounded-md border border-[color:var(--primary)] px-3 py-1.5 text-xs font-semibold text-[color:var(--primary)] hover:bg-[color:color-mix(in srgb, var(--primary) 10%, white)] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   Upload logo
                 </button>
@@ -10527,7 +10978,7 @@ export default function AdminSettingsPage() {
                     );
                   }}
                   disabled={saving || logoUrl.trim().length === 0}
-                  className="inline-flex items-center rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex items-center rounded-md border border-[color:var(--error)] bg-white px-3 py-1.5 text-xs font-semibold text-[color:var(--error)] hover:bg-[color:color-mix(in srgb, var(--error) 10%, white)] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   Remove
                 </button>
@@ -10581,7 +11032,7 @@ export default function AdminSettingsPage() {
                   type="button"
                   onClick={handleBrandingLogoLightUploadClick}
                   disabled={saving}
-                  className="inline-flex items-center rounded-md border border-green-600 px-3 py-1.5 text-xs font-semibold text-green-700 hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex items-center rounded-md border border-[color:var(--primary)] px-3 py-1.5 text-xs font-semibold text-[color:var(--primary)] hover:bg-[color:color-mix(in srgb, var(--primary) 10%, white)] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   Upload logo (light)
                 </button>
@@ -10594,7 +11045,7 @@ export default function AdminSettingsPage() {
                     );
                   }}
                   disabled={saving || logoLightUrl.trim().length === 0}
-                  className="inline-flex items-center rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex items-center rounded-md border border-[color:var(--error)] bg-white px-3 py-1.5 text-xs font-semibold text-[color:var(--error)] hover:bg-[color:color-mix(in srgb, var(--error) 10%, white)] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   Remove
                 </button>
@@ -10648,7 +11099,7 @@ export default function AdminSettingsPage() {
                   type="button"
                   onClick={handleBrandingLogoDarkUploadClick}
                   disabled={saving}
-                  className="inline-flex items-center rounded-md border border-green-600 px-3 py-1.5 text-xs font-semibold text-green-700 hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex items-center rounded-md border border-[color:var(--primary)] px-3 py-1.5 text-xs font-semibold text-[color:var(--primary)] hover:bg-[color:color-mix(in srgb, var(--primary) 10%, white)] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   Upload logo (dark)
                 </button>
@@ -10661,7 +11112,7 @@ export default function AdminSettingsPage() {
                     );
                   }}
                   disabled={saving || logoDarkUrl.trim().length === 0}
-                  className="inline-flex items-center rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex items-center rounded-md border border-[color:var(--error)] bg-white px-3 py-1.5 text-xs font-semibold text-[color:var(--error)] hover:bg-[color:color-mix(in srgb, var(--error) 10%, white)] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   Remove
                 </button>
@@ -10715,10 +11166,20 @@ export default function AdminSettingsPage() {
                   type="button"
                   onClick={handleBrandingFontUploadClick}
                   disabled={saving}
-                  className="inline-flex items-center rounded-md border border-green-600 px-3 py-1.5 text-xs font-semibold text-green-700 hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex items-center rounded-md border border-[color:var(--primary)] px-3 py-1.5 text-xs font-semibold text-[color:var(--primary)] hover:bg-[color:color-mix(in srgb, var(--primary) 10%, white)] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   Upload font
                 </button>
+                {pendingFontRetry ? (
+                  <button
+                    type="button"
+                    onClick={() => void retryLastFontUpload()}
+                    disabled={saving}
+                    className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    Retry upload
+                  </button>
+                ) : null}
                 <button
                   type="button"
                   onClick={() => {
@@ -10728,7 +11189,7 @@ export default function AdminSettingsPage() {
                     );
                   }}
                   disabled={saving || fontUrl.trim().length === 0}
-                  className="inline-flex items-center rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex items-center rounded-md border border-[color:var(--error)] bg-white px-3 py-1.5 text-xs font-semibold text-[color:var(--error)] hover:bg-[color:color-mix(in srgb, var(--error) 10%, white)] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   Remove
                 </button>
@@ -10736,6 +11197,7 @@ export default function AdminSettingsPage() {
                   ref={fontFileInputRef}
                   type="file"
                   accept=".woff2,.woff,.ttf,.otf"
+                  aria-label="Branding font file input"
                   className="hidden"
                   onChange={handleBrandingFontFileSelected}
                 />
@@ -10744,7 +11206,7 @@ export default function AdminSettingsPage() {
                     href={fontUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-xs font-semibold text-green-700 hover:underline"
+                    className="text-xs font-semibold text-[color:var(--primary)] hover:underline"
                   >
                     Font file
                   </a>
@@ -10776,7 +11238,7 @@ export default function AdminSettingsPage() {
                     type="button"
                     onClick={handleBrandingFontLicenseUploadClick}
                     disabled={saving}
-                    className="inline-flex items-center rounded-md border border-green-600 px-3 py-1.5 text-xs font-semibold text-green-700 hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="inline-flex items-center rounded-md border border-[color:var(--primary)] px-3 py-1.5 text-xs font-semibold text-[color:var(--primary)] hover:bg-[color:color-mix(in srgb, var(--primary) 10%, white)] disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     Upload license
                   </button>
@@ -10790,7 +11252,7 @@ export default function AdminSettingsPage() {
                       setFontLicenseUrl("");
                     }}
                     disabled={saving || fontLicenseUrl.trim().length === 0}
-                    className="inline-flex items-center rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="inline-flex items-center rounded-md border border-[color:var(--error)] bg-white px-3 py-1.5 text-xs font-semibold text-[color:var(--error)] hover:bg-[color:color-mix(in srgb, var(--error) 10%, white)] disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     Remove
                   </button>
@@ -10798,6 +11260,7 @@ export default function AdminSettingsPage() {
                     ref={fontLicenseFileInputRef}
                     type="file"
                     accept=".pdf,.txt,.md,.rtf,.doc,.docx,.odt,image/*,.zip"
+                    aria-label="Branding font license file input"
                     className="hidden"
                     onChange={handleBrandingFontLicenseFileSelected}
                   />
@@ -10806,7 +11269,7 @@ export default function AdminSettingsPage() {
                       href={fontLicenseUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-xs font-semibold text-green-700 hover:underline"
+                      className="text-xs font-semibold text-[color:var(--primary)] hover:underline"
                     >
                       License file
                     </a>
@@ -10859,11 +11322,20 @@ export default function AdminSettingsPage() {
                   <p className="text-xs font-semibold text-gray-700">
                     Преглед:
                   </p>
+                  {fontUrl.trim().length > 0 ? (
+                    <style>{`@font-face{font-family:"__beelms_custom_font_preview__";src:url(${fontUrl});font-display:swap;}`}</style>
+                  ) : null}
                   <p
                     className="mt-2 text-base text-gray-900"
+                    data-testid="branding-font-preview"
                     style={
-                      GOOGLE_FONTS.find((f) => f.value === googleFont)
-                        ?.sampleStyle
+                      fontUrl.trim().length > 0
+                        ? {
+                            fontFamily:
+                              '"__beelms_custom_font_preview__", sans-serif',
+                          }
+                        : GOOGLE_FONTS.find((f) => f.value === googleFont)
+                            ?.sampleStyle
                     }
                   >
                     Пример: Табло, Курсове, Потребители, Метрики, Активност.
@@ -10948,7 +11420,7 @@ export default function AdminSettingsPage() {
                                 handleBrandingFontUploadClickForLang(langCode)
                               }
                               disabled={saving}
-                              className="inline-flex items-center rounded-md border border-green-600 px-3 py-1.5 text-xs font-semibold text-green-700 hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-60"
+                              className="inline-flex items-center rounded-md border border-[color:var(--primary)] px-3 py-1.5 text-xs font-semibold text-[color:var(--primary)] hover:bg-[color:color-mix(in srgb, var(--primary) 10%, white)] disabled:cursor-not-allowed disabled:opacity-60"
                             >
                               Upload font
                             </button>
@@ -10967,7 +11439,7 @@ export default function AdminSettingsPage() {
                               disabled={
                                 saving || perLangFontUrl.trim().length === 0
                               }
-                              className="inline-flex items-center rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                              className="inline-flex items-center rounded-md border border-[color:var(--error)] bg-white px-3 py-1.5 text-xs font-semibold text-[color:var(--error)] hover:bg-[color:color-mix(in srgb, var(--error) 10%, white)] disabled:cursor-not-allowed disabled:opacity-60"
                             >
                               Remove
                             </button>
@@ -10977,7 +11449,7 @@ export default function AdminSettingsPage() {
                                 href={perLangFontUrl}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="text-xs font-semibold text-green-700 hover:underline"
+                                className="text-xs font-semibold text-[color:var(--primary)] hover:underline"
                               >
                                 Font file
                               </a>
@@ -10995,7 +11467,7 @@ export default function AdminSettingsPage() {
                                 )
                               }
                               disabled={saving}
-                              className="inline-flex items-center rounded-md border border-green-600 px-3 py-1.5 text-xs font-semibold text-green-700 hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-60"
+                              className="inline-flex items-center rounded-md border border-[color:var(--primary)] px-3 py-1.5 text-xs font-semibold text-[color:var(--primary)] hover:bg-[color:color-mix(in srgb, var(--primary) 10%, white)] disabled:cursor-not-allowed disabled:opacity-60"
                             >
                               Upload license
                             </button>
@@ -11016,7 +11488,7 @@ export default function AdminSettingsPage() {
                               disabled={
                                 saving || perLangLicenseUrl.trim().length === 0
                               }
-                              className="inline-flex items-center rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                              className="inline-flex items-center rounded-md border border-[color:var(--error)] bg-white px-3 py-1.5 text-xs font-semibold text-[color:var(--error)] hover:bg-[color:color-mix(in srgb, var(--error) 10%, white)] disabled:cursor-not-allowed disabled:opacity-60"
                             >
                               Remove
                             </button>
@@ -11026,7 +11498,7 @@ export default function AdminSettingsPage() {
                                 href={perLangLicenseUrl}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="text-xs font-semibold text-green-700 hover:underline"
+                                className="text-xs font-semibold text-[color:var(--primary)] hover:underline"
                               >
                                 License file
                               </a>
@@ -11045,6 +11517,7 @@ export default function AdminSettingsPage() {
                     ref={perLangFontFileInputRef}
                     type="file"
                     accept=".woff2,.woff,.ttf,.otf"
+                    aria-label="Branding per-language font file input"
                     className="hidden"
                     onChange={handleBrandingFontFileSelectedForLang}
                   />
@@ -11052,6 +11525,7 @@ export default function AdminSettingsPage() {
                     ref={perLangFontLicenseFileInputRef}
                     type="file"
                     accept=".pdf,.txt,.md,.rtf,.doc,.docx,.odt,image/*,.zip"
+                    aria-label="Branding per-language font license file input"
                     className="hidden"
                     onChange={handleBrandingFontLicenseFileSelectedForLang}
                   />
@@ -11073,7 +11547,7 @@ export default function AdminSettingsPage() {
                   type="button"
                   onClick={handleCursorUploadClick}
                   disabled={saving}
-                  className="inline-flex items-center rounded-md border border-green-600 px-3 py-1.5 text-xs font-semibold text-green-700 hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex items-center rounded-md border border-[color:var(--primary)] px-3 py-1.5 text-xs font-semibold text-[color:var(--primary)] hover:bg-[color:color-mix(in srgb, var(--primary) 10%, white)] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   Upload cursor icon
                 </button>
@@ -11086,7 +11560,7 @@ export default function AdminSettingsPage() {
                     );
                   }}
                   disabled={saving || cursorUrl.trim().length === 0}
-                  className="inline-flex items-center rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex items-center rounded-md border border-[color:var(--error)] bg-white px-3 py-1.5 text-xs font-semibold text-[color:var(--error)] hover:bg-[color:color-mix(in srgb, var(--error) 10%, white)] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   Remove
                 </button>
@@ -11139,7 +11613,7 @@ export default function AdminSettingsPage() {
                     type="button"
                     onClick={handleCursorLightUploadClick}
                     disabled={saving}
-                    className="inline-flex items-center rounded-md border border-green-600 px-3 py-1.5 text-xs font-semibold text-green-700 hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="inline-flex items-center rounded-md border border-[color:var(--primary)] px-3 py-1.5 text-xs font-semibold text-[color:var(--primary)] hover:bg-[color:color-mix(in srgb, var(--primary) 10%, white)] disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     Upload cursor (light)
                   </button>
@@ -11152,7 +11626,7 @@ export default function AdminSettingsPage() {
                       );
                     }}
                     disabled={saving || cursorLightUrl.trim().length === 0}
-                    className="inline-flex items-center rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="inline-flex items-center rounded-md border border-[color:var(--error)] bg-white px-3 py-1.5 text-xs font-semibold text-[color:var(--error)] hover:bg-[color:color-mix(in srgb, var(--error) 10%, white)] disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     Remove
                   </button>
@@ -11202,7 +11676,7 @@ export default function AdminSettingsPage() {
                     type="button"
                     onClick={handleCursorDarkUploadClick}
                     disabled={saving}
-                    className="inline-flex items-center rounded-md border border-green-600 px-3 py-1.5 text-xs font-semibold text-green-700 hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="inline-flex items-center rounded-md border border-[color:var(--primary)] px-3 py-1.5 text-xs font-semibold text-[color:var(--primary)] hover:bg-[color:color-mix(in srgb, var(--primary) 10%, white)] disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     Upload cursor (dark)
                   </button>
@@ -11215,7 +11689,7 @@ export default function AdminSettingsPage() {
                       );
                     }}
                     disabled={saving || cursorDarkUrl.trim().length === 0}
-                    className="inline-flex items-center rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="inline-flex items-center rounded-md border border-[color:var(--error)] bg-white px-3 py-1.5 text-xs font-semibold text-[color:var(--error)] hover:bg-[color:color-mix(in srgb, var(--error) 10%, white)] disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     Remove
                   </button>
@@ -11265,7 +11739,7 @@ export default function AdminSettingsPage() {
                     type="button"
                     onClick={handleCursorPointerUploadClick}
                     disabled={saving}
-                    className="inline-flex items-center rounded-md border border-green-600 px-3 py-1.5 text-xs font-semibold text-green-700 hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="inline-flex items-center rounded-md border border-[color:var(--primary)] px-3 py-1.5 text-xs font-semibold text-[color:var(--primary)] hover:bg-[color:color-mix(in srgb, var(--primary) 10%, white)] disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     Upload hover cursor
                   </button>
@@ -11278,7 +11752,7 @@ export default function AdminSettingsPage() {
                       );
                     }}
                     disabled={saving || cursorPointerUrl.trim().length === 0}
-                    className="inline-flex items-center rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="inline-flex items-center rounded-md border border-[color:var(--error)] bg-white px-3 py-1.5 text-xs font-semibold text-[color:var(--error)] hover:bg-[color:color-mix(in srgb, var(--error) 10%, white)] disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     Remove
                   </button>
@@ -11327,7 +11801,7 @@ export default function AdminSettingsPage() {
                       type="button"
                       onClick={handleCursorPointerLightUploadClick}
                       disabled={saving}
-                      className="inline-flex items-center rounded-md border border-green-600 px-3 py-1.5 text-xs font-semibold text-green-700 hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="inline-flex items-center rounded-md border border-[color:var(--primary)] px-3 py-1.5 text-xs font-semibold text-[color:var(--primary)] hover:bg-[color:color-mix(in srgb, var(--primary) 10%, white)] disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       Upload hover cursor (light)
                     </button>
@@ -11342,7 +11816,7 @@ export default function AdminSettingsPage() {
                       disabled={
                         saving || cursorPointerLightUrl.trim().length === 0
                       }
-                      className="inline-flex items-center rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="inline-flex items-center rounded-md border border-[color:var(--error)] bg-white px-3 py-1.5 text-xs font-semibold text-[color:var(--error)] hover:bg-[color:color-mix(in srgb, var(--error) 10%, white)] disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       Remove
                     </button>
@@ -11392,7 +11866,7 @@ export default function AdminSettingsPage() {
                       type="button"
                       onClick={handleCursorPointerDarkUploadClick}
                       disabled={saving}
-                      className="inline-flex items-center rounded-md border border-green-600 px-3 py-1.5 text-xs font-semibold text-green-700 hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="inline-flex items-center rounded-md border border-[color:var(--primary)] px-3 py-1.5 text-xs font-semibold text-[color:var(--primary)] hover:bg-[color:color-mix(in srgb, var(--primary) 10%, white)] disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       Upload hover cursor (dark)
                     </button>
@@ -11407,7 +11881,7 @@ export default function AdminSettingsPage() {
                       disabled={
                         saving || cursorPointerDarkUrl.trim().length === 0
                       }
-                      className="inline-flex items-center rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="inline-flex items-center rounded-md border border-[color:var(--error)] bg-white px-3 py-1.5 text-xs font-semibold text-[color:var(--error)] hover:bg-[color:color-mix(in srgb, var(--error) 10%, white)] disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       Remove
                     </button>
@@ -11460,7 +11934,7 @@ export default function AdminSettingsPage() {
                     onBlur={() => {
                       void persistCursorHotspot();
                     }}
-                    className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                    className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
                     placeholder="напр. 8"
                     disabled={saving}
                     inputMode="numeric"
@@ -11481,7 +11955,7 @@ export default function AdminSettingsPage() {
                     onBlur={() => {
                       void persistCursorHotspot();
                     }}
-                    className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                    className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
                     placeholder="напр. 8"
                     disabled={saving}
                     inputMode="numeric"
@@ -11493,9 +11967,11 @@ export default function AdminSettingsPage() {
                 {cursorHotspotPersistStatus === "saving" ? (
                   <span>Saving…</span>
                 ) : cursorHotspotPersistStatus === "saved" ? (
-                  <span className="font-semibold text-green-700">Saved</span>
+                  <span className="font-semibold text-[color:var(--primary)]">
+                    Saved
+                  </span>
                 ) : cursorHotspotPersistStatus === "error" ? (
-                  <span className="font-semibold text-red-700">
+                  <span className="font-semibold text-[color:var(--error)]">
                     Save failed
                   </span>
                 ) : (
@@ -11559,7 +12035,7 @@ export default function AdminSettingsPage() {
                       return (
                         <>
                           <div
-                            className="pointer-events-none absolute z-20 h-2 w-2 rounded-full bg-red-600"
+                            className="pointer-events-none absolute z-20 h-2 w-2 rounded-full bg-[color:var(--error)]"
                             style={{
                               left: cursorHotspotTestPos.x,
                               top: cursorHotspotTestPos.y,
@@ -11635,7 +12111,10 @@ export default function AdminSettingsPage() {
                     />
                   </div>
                   {poweredByBeeLmsToggleError ? (
-                    <p className="mt-2 text-xs text-red-600" role="alert">
+                    <p
+                      className="mt-2 text-xs text-[color:var(--error)]"
+                      role="alert"
+                    >
                       {poweredByBeeLmsToggleError}
                     </p>
                   ) : null}
@@ -11656,14 +12135,14 @@ export default function AdminSettingsPage() {
                       className={`mt-2 w-full rounded-md border bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:outline-none focus:ring-1 disabled:cursor-not-allowed disabled:opacity-60 ${
                         poweredByBeeLmsUrl.trim().length > 0 &&
                         !isValidOptionalHttpUrl(poweredByBeeLmsUrl)
-                          ? "border-red-300 focus:border-red-500 focus:ring-red-500"
-                          : "border-gray-300 focus:border-green-500 focus:ring-green-500"
+                          ? "border-[color:var(--error)] focus:border-[color:var(--error)] focus:ring-[color:var(--error)]"
+                          : "border-gray-300 focus:border-[color:var(--primary)] focus:ring-[color:var(--primary)]"
                       }`}
                       placeholder="https://beelms.com"
                     />
                     {poweredByBeeLmsUrl.trim().length > 0 &&
                     !isValidOptionalHttpUrl(poweredByBeeLmsUrl) ? (
-                      <p className="mt-1 text-xs text-red-600">
+                      <p className="mt-1 text-xs text-[color:var(--error)]">
                         Невалиден URL. Използвай http:// или https://
                       </p>
                     ) : null}
@@ -11721,7 +12200,7 @@ export default function AdminSettingsPage() {
                                     prev.filter((l) => l.id !== link.id),
                                   );
                                 }}
-                                className="inline-flex items-center rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                                className="inline-flex items-center rounded-md border border-[color:var(--error)] bg-white px-3 py-1.5 text-xs font-semibold text-[color:var(--error)] hover:bg-[color:color-mix(in srgb, var(--error) 10%, white)] disabled:cursor-not-allowed disabled:opacity-60"
                               >
                                 Delete
                               </button>
@@ -11759,7 +12238,7 @@ export default function AdminSettingsPage() {
                                   );
                                 });
                               }}
-                              className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 disabled:bg-gray-50"
+                              className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)] disabled:bg-gray-50"
                             />
                             {!isCustom ? (
                               <p className="mt-1 text-xs text-gray-500">
@@ -11790,7 +12269,7 @@ export default function AdminSettingsPage() {
                                   ),
                                 );
                               }}
-                              className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                              className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
                               placeholder={resolvedLabel}
                             />
                           </div>
@@ -11811,7 +12290,7 @@ export default function AdminSettingsPage() {
                                 trimmed.length > 0 &&
                                 !isValidFooterSocialUrl(link.type, trimmed);
                               return invalid ? (
-                                <p className="mt-1 text-xs text-red-600">
+                                <p className="mt-1 text-xs text-[color:var(--error)]">
                                   {footerSocialUrlErrorMessage(link.type)}
                                 </p>
                               ) : null;
@@ -11838,12 +12317,12 @@ export default function AdminSettingsPage() {
                                   ),
                                 );
                               }}
-                              className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                              className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
                               placeholder="https://..."
                             />
                             {footerSocialToggleErrors[link.id] ? (
                               <p
-                                className="mt-1 text-xs text-red-600"
+                                className="mt-1 text-xs text-[color:var(--error)]"
                                 role="alert"
                               >
                                 {footerSocialToggleErrors[link.id]}
@@ -11898,7 +12377,7 @@ export default function AdminSettingsPage() {
                                   )
                                 }
                                 disabled={saving}
-                                className="inline-flex items-center rounded-md border border-green-600 px-3 py-1.5 text-xs font-semibold text-green-700 hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-60"
+                                className="inline-flex items-center rounded-md border border-[color:var(--primary)] px-3 py-1.5 text-xs font-semibold text-[color:var(--primary)] hover:bg-[color:color-mix(in srgb, var(--primary) 10%, white)] disabled:cursor-not-allowed disabled:opacity-60"
                               >
                                 Upload
                               </button>
@@ -11919,7 +12398,7 @@ export default function AdminSettingsPage() {
                                 disabled={
                                   saving || !(link.iconLightUrl ?? "").trim()
                                 }
-                                className="inline-flex items-center rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                                className="inline-flex items-center rounded-md border border-[color:var(--error)] bg-white px-3 py-1.5 text-xs font-semibold text-[color:var(--error)] hover:bg-[color:color-mix(in srgb, var(--error) 10%, white)] disabled:cursor-not-allowed disabled:opacity-60"
                               >
                                 Remove
                               </button>
@@ -11969,7 +12448,7 @@ export default function AdminSettingsPage() {
                                   )
                                 }
                                 disabled={saving}
-                                className="inline-flex items-center rounded-md border border-green-600 px-3 py-1.5 text-xs font-semibold text-green-700 hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-60"
+                                className="inline-flex items-center rounded-md border border-[color:var(--primary)] px-3 py-1.5 text-xs font-semibold text-[color:var(--primary)] hover:bg-[color:color-mix(in srgb, var(--primary) 10%, white)] disabled:cursor-not-allowed disabled:opacity-60"
                               >
                                 Upload
                               </button>
@@ -11990,7 +12469,7 @@ export default function AdminSettingsPage() {
                                 disabled={
                                   saving || !(link.iconDarkUrl ?? "").trim()
                                 }
-                                className="inline-flex items-center rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                                className="inline-flex items-center rounded-md border border-[color:var(--error)] bg-white px-3 py-1.5 text-xs font-semibold text-[color:var(--error)] hover:bg-[color:color-mix(in srgb, var(--error) 10%, white)] disabled:cursor-not-allowed disabled:opacity-60"
                               >
                                 Remove
                               </button>
@@ -12144,7 +12623,7 @@ export default function AdminSettingsPage() {
                         onChange={(e) => setSeoBaseUrl(e.target.value)}
                         disabled={saving}
                         placeholder="https://example.com"
-                        className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                        className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
                       />
                     </div>
 
@@ -12162,7 +12641,7 @@ export default function AdminSettingsPage() {
                         onChange={(e) => setSeoTitleTemplate(e.target.value)}
                         disabled={saving}
                         placeholder="{page} | {site}"
-                        className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                        className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
                       />
                       <p className="mt-1 text-xs text-gray-500">
                         Разрешени placeholders: {"{page}"} и {"{site}"}.
@@ -12182,7 +12661,7 @@ export default function AdminSettingsPage() {
                         value={seoDefaultTitle}
                         onChange={(e) => setSeoDefaultTitle(e.target.value)}
                         disabled={saving}
-                        className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                        className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
                       />
                     </div>
 
@@ -12201,7 +12680,7 @@ export default function AdminSettingsPage() {
                           setSeoDefaultDescription(e.target.value)
                         }
                         disabled={saving}
-                        className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                        className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
                       />
                     </div>
                   </div>
@@ -12393,7 +12872,7 @@ export default function AdminSettingsPage() {
                   <input
                     value={browserTitle}
                     onChange={(e) => setBrowserTitle(e.target.value)}
-                    className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                    className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
                     placeholder="BeeLMS"
                     disabled={saving}
                   />
@@ -12422,7 +12901,7 @@ export default function AdminSettingsPage() {
                     <input
                       value={socialImageUrl}
                       onChange={(e) => setSocialImageUrl(e.target.value)}
-                      className="w-full flex-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                      className="w-full flex-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
                       placeholder="https://..."
                       disabled={saving}
                     />
@@ -12431,7 +12910,7 @@ export default function AdminSettingsPage() {
                         type="button"
                         onClick={() => handleSocialImageUploadClick("shared")}
                         disabled={saving || isUploadingSharedImage}
-                        className="inline-flex items-center rounded-md border border-green-600 px-3 py-1.5 text-xs font-semibold text-green-700 hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="inline-flex items-center rounded-md border border-[color:var(--primary)] px-3 py-1.5 text-xs font-semibold text-[color:var(--primary)] hover:bg-[color:color-mix(in srgb, var(--primary) 10%, white)] disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         {isUploadingSharedImage ? "Качване..." : "Upload image"}
                       </button>
@@ -12439,7 +12918,7 @@ export default function AdminSettingsPage() {
                         type="button"
                         onClick={() => setSocialImageUrl("")}
                         disabled={saving || socialImageUrl.length === 0}
-                        className="inline-flex items-center rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="inline-flex items-center rounded-md border border-[color:var(--error)] bg-white px-3 py-1.5 text-xs font-semibold text-[color:var(--error)] hover:bg-[color:color-mix(in srgb, var(--error) 10%, white)] disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         Remove
                       </button>
@@ -12482,7 +12961,7 @@ export default function AdminSettingsPage() {
                   value={socialDescription}
                   onChange={(e) => setSocialDescription(e.target.value)}
                   rows={3}
-                  className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                  className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
                   placeholder="Използва се, когато OG/Twitter description са празни."
                   disabled={saving}
                 />
@@ -12528,7 +13007,7 @@ export default function AdminSettingsPage() {
                     <input
                       value={openGraphTitle}
                       onChange={(e) => setOpenGraphTitle(e.target.value)}
-                      className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                      className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
                       placeholder="(по желание)"
                       disabled={saving}
                     />
@@ -12564,7 +13043,7 @@ export default function AdminSettingsPage() {
                       <input
                         value={openGraphImageUrl}
                         onChange={(e) => setOpenGraphImageUrl(e.target.value)}
-                        className="w-full flex-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                        className="w-full flex-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
                         placeholder="https://..."
                         disabled={saving}
                       />
@@ -12575,7 +13054,7 @@ export default function AdminSettingsPage() {
                             handleSocialImageUploadClick("open-graph")
                           }
                           disabled={saving || isUploadingOgImage}
-                          className="inline-flex items-center rounded-md border border-green-600 px-3 py-1.5 text-xs font-semibold text-green-700 hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-60"
+                          className="inline-flex items-center rounded-md border border-[color:var(--primary)] px-3 py-1.5 text-xs font-semibold text-[color:var(--primary)] hover:bg-[color:color-mix(in srgb, var(--primary) 10%, white)] disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           {isUploadingOgImage ? "Качване..." : "Upload image"}
                         </button>
@@ -12583,7 +13062,7 @@ export default function AdminSettingsPage() {
                           type="button"
                           onClick={() => setOpenGraphImageUrl("")}
                           disabled={saving || openGraphImageUrl.length === 0}
-                          className="inline-flex items-center rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                          className="inline-flex items-center rounded-md border border-[color:var(--error)] bg-white px-3 py-1.5 text-xs font-semibold text-[color:var(--error)] hover:bg-[color:color-mix(in srgb, var(--error) 10%, white)] disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           Remove
                         </button>
@@ -12632,7 +13111,7 @@ export default function AdminSettingsPage() {
                       value={openGraphDescription}
                       onChange={(e) => setOpenGraphDescription(e.target.value)}
                       rows={3}
-                      className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                      className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
                       placeholder="(по желание)"
                       disabled={saving}
                     />
@@ -12682,7 +13161,7 @@ export default function AdminSettingsPage() {
                     <input
                       value={twitterTitle}
                       onChange={(e) => setTwitterTitle(e.target.value)}
-                      className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                      className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
                       placeholder="(по желание)"
                       disabled={saving}
                     />
@@ -12718,7 +13197,7 @@ export default function AdminSettingsPage() {
                       <input
                         value={twitterImageUrl}
                         onChange={(e) => setTwitterImageUrl(e.target.value)}
-                        className="w-full flex-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                        className="w-full flex-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
                         placeholder="https://..."
                         disabled={saving}
                       />
@@ -12729,7 +13208,7 @@ export default function AdminSettingsPage() {
                             handleSocialImageUploadClick("twitter")
                           }
                           disabled={saving || isUploadingTwitterImage}
-                          className="inline-flex items-center rounded-md border border-green-600 px-3 py-1.5 text-xs font-semibold text-green-700 hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-60"
+                          className="inline-flex items-center rounded-md border border-[color:var(--primary)] px-3 py-1.5 text-xs font-semibold text-[color:var(--primary)] hover:bg-[color:color-mix(in srgb, var(--primary) 10%, white)] disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           {isUploadingTwitterImage
                             ? "Качване..."
@@ -12739,7 +13218,7 @@ export default function AdminSettingsPage() {
                           type="button"
                           onClick={() => setTwitterImageUrl("")}
                           disabled={saving || twitterImageUrl.length === 0}
-                          className="inline-flex items-center rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                          className="inline-flex items-center rounded-md border border-[color:var(--error)] bg-white px-3 py-1.5 text-xs font-semibold text-[color:var(--error)] hover:bg-[color:color-mix(in srgb, var(--error) 10%, white)] disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           Remove
                         </button>
@@ -12791,7 +13270,7 @@ export default function AdminSettingsPage() {
                       value={twitterDescription}
                       onChange={(e) => setTwitterDescription(e.target.value)}
                       rows={3}
-                      className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                      className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
                       placeholder="(по желание)"
                       disabled={saving}
                     />
@@ -12868,7 +13347,7 @@ export default function AdminSettingsPage() {
                         Twitter App card
                       </p>
                       {twitterAppMissingFields.length > 0 ? (
-                        <div className="mt-1 text-xs text-red-700">
+                        <div className="mt-1 text-xs text-[color:var(--error)]">
                           <p className="font-semibold">
                             Липсващи задължителни полета:
                           </p>
@@ -12928,7 +13407,7 @@ export default function AdminSettingsPage() {
                             onChange={(e) =>
                               setTwitterAppIdIpad(e.target.value)
                             }
-                            className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                            className={socialInputClassOk}
                             placeholder="twitter_app://ipad"
                             disabled={saving}
                           />
@@ -12942,7 +13421,7 @@ export default function AdminSettingsPage() {
                             onChange={(e) =>
                               setTwitterAppIdGooglePlay(e.target.value)
                             }
-                            className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                            className={socialInputClassOk}
                             placeholder="twitter_app://googleplay"
                             disabled={saving}
                           />
@@ -12956,7 +13435,7 @@ export default function AdminSettingsPage() {
                             onChange={(e) =>
                               setTwitterAppUrlIphone(e.target.value)
                             }
-                            className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                            className={socialInputClassOk}
                             placeholder="https://iphone_url"
                             disabled={saving}
                           />
@@ -12970,7 +13449,7 @@ export default function AdminSettingsPage() {
                             onChange={(e) =>
                               setTwitterAppUrlIpad(e.target.value)
                             }
-                            className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                            className={socialInputClassOk}
                             placeholder="https://ipad_url"
                             disabled={saving}
                           />
@@ -12984,7 +13463,7 @@ export default function AdminSettingsPage() {
                             onChange={(e) =>
                               setTwitterAppUrlGooglePlay(e.target.value)
                             }
-                            className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                            className={socialInputClassOk}
                             placeholder="https://googleplay_url"
                             disabled={saving}
                           />
@@ -12999,7 +13478,7 @@ export default function AdminSettingsPage() {
                         Twitter Player card
                       </p>
                       {twitterPlayerMissingFields.length > 0 ? (
-                        <div className="mt-1 text-xs text-red-700">
+                        <div className="mt-1 text-xs text-[color:var(--error)]">
                           <p className="font-semibold">
                             Липсващи задължителни полета:
                           </p>
@@ -13079,7 +13558,7 @@ export default function AdminSettingsPage() {
                             onChange={(e) =>
                               setTwitterPlayerStream(e.target.value)
                             }
-                            className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                            className={socialInputClassOk}
                             placeholder="https://stream_url"
                             disabled={saving}
                           />
@@ -13093,7 +13572,7 @@ export default function AdminSettingsPage() {
                             onChange={(e) =>
                               setTwitterPlayerStreamContentType(e.target.value)
                             }
-                            className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                            className={socialInputClassOk}
                             placeholder="video/mp4"
                             disabled={saving}
                           />
@@ -13178,7 +13657,7 @@ export default function AdminSettingsPage() {
                         <button
                           type="button"
                           onClick={handleCopyMetaTags}
-                          className="inline-flex items-center rounded border border-green-600 px-3 py-1.5 text-xs font-semibold text-green-700 hover:bg-green-50"
+                          className="inline-flex items-center rounded border border-[color:var(--primary)] px-3 py-1.5 text-xs font-semibold text-[color:var(--primary)] hover:bg-[color:color-mix(in srgb, var(--primary) 10%, white)]"
                         >
                           Copy meta tags
                         </button>
@@ -13227,7 +13706,7 @@ export default function AdminSettingsPage() {
                     <input
                       value={previewOrigin}
                       onChange={(e) => setPreviewOrigin(e.target.value)}
-                      className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                      className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
                       placeholder="https://example.com/страница"
                     />
                     {showMetaTagsSnippet ? (
@@ -13273,7 +13752,7 @@ export default function AdminSettingsPage() {
                           value={socialMetaTagsSnippet}
                           readOnly
                           rows={10}
-                          className="mt-2 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 font-mono text-xs text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                          className="mt-2 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 font-mono text-xs text-gray-900 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
                         />
                         <p className="mt-1 text-xs text-gray-500">
                           Това е ориентировъчен snippet за debug/validator-и.
@@ -13286,9 +13765,9 @@ export default function AdminSettingsPage() {
                       <p
                         className={`mt-2 text-xs ${
                           metaFetchStatus === "error"
-                            ? "text-red-700"
+                            ? "text-[color:var(--error)]"
                             : metaFetchStatus === "success"
-                              ? "text-green-700"
+                              ? "text-[color:var(--primary)]"
                               : "text-gray-600"
                         }`}
                       >
@@ -13379,8 +13858,8 @@ export default function AdminSettingsPage() {
               <div
                 className={`flex items-center gap-3 rounded-md border px-3 py-2 ${
                   accessibilityWidget
-                    ? "border-green-100 bg-green-50"
-                    : "border-red-100 bg-red-50"
+                    ? "border-[color:color-mix(in srgb, var(--primary) 25%, white)] bg-[color:color-mix(in srgb, var(--primary) 10%, white)]"
+                    : "border-[color:color-mix(in srgb, var(--error) 25%, white)] bg-[color:color-mix(in srgb, var(--error) 10%, white)]"
                 }`}
               >
                 <FeatureToggleLabel
@@ -13398,8 +13877,8 @@ export default function AdminSettingsPage() {
               <div
                 className={`flex items-center gap-3 rounded-md border px-3 py-2 ${
                   themeLightEnabled
-                    ? "border-green-100 bg-green-50"
-                    : "border-red-100 bg-red-50"
+                    ? "border-[color:color-mix(in srgb, var(--primary) 25%, white)] bg-[color:color-mix(in srgb, var(--primary) 10%, white)]"
+                    : "border-[color:color-mix(in srgb, var(--error) 25%, white)] bg-[color:color-mix(in srgb, var(--error) 10%, white)]"
                 }`}
               >
                 <FeatureToggleLabel
@@ -13422,8 +13901,8 @@ export default function AdminSettingsPage() {
               <div
                 className={`flex items-center gap-3 rounded-md border px-3 py-2 ${
                   themeDarkEnabled
-                    ? "border-green-100 bg-green-50"
-                    : "border-red-100 bg-red-50"
+                    ? "border-[color:color-mix(in srgb, var(--primary) 25%, white)] bg-[color:color-mix(in srgb, var(--primary) 10%, white)]"
+                    : "border-[color:color-mix(in srgb, var(--error) 25%, white)] bg-[color:color-mix(in srgb, var(--error) 10%, white)]"
                 }`}
               >
                 <FeatureToggleLabel
@@ -13446,8 +13925,8 @@ export default function AdminSettingsPage() {
               <div
                 className={`flex items-center gap-3 rounded-md border px-3 py-2 ${
                   themeModeSelectorEnabled
-                    ? "border-green-100 bg-green-50"
-                    : "border-red-100 bg-red-50"
+                    ? "border-[color:color-mix(in srgb, var(--primary) 25%, white)] bg-[color:color-mix(in srgb, var(--primary) 10%, white)]"
+                    : "border-[color:color-mix(in srgb, var(--error) 25%, white)] bg-[color:color-mix(in srgb, var(--error) 10%, white)]"
                 }`}
               >
                 <FeatureToggleLabel
@@ -13464,8 +13943,8 @@ export default function AdminSettingsPage() {
               <div
                 className={`flex items-center gap-3 rounded-md border px-3 py-2 ${
                   wiki
-                    ? "border-green-100 bg-green-50"
-                    : "border-red-100 bg-red-50"
+                    ? "border-[color:color-mix(in srgb, var(--primary) 25%, white)] bg-[color:color-mix(in srgb, var(--primary) 10%, white)]"
+                    : "border-[color:color-mix(in srgb, var(--error) 25%, white)] bg-[color:color-mix(in srgb, var(--error) 10%, white)]"
                 }`}
               >
                 <FeatureToggleLabel label="Wiki" featureKey="wiki" />
@@ -13485,8 +13964,8 @@ export default function AdminSettingsPage() {
               <div
                 className={`flex items-center gap-3 rounded-md border px-3 py-2 ${
                   wikiPublic
-                    ? "border-green-100 bg-green-50"
-                    : "border-red-100 bg-red-50"
+                    ? "border-[color:color-mix(in srgb, var(--primary) 25%, white)] bg-[color:color-mix(in srgb, var(--primary) 10%, white)]"
+                    : "border-[color:color-mix(in srgb, var(--error) 25%, white)] bg-[color:color-mix(in srgb, var(--error) 10%, white)]"
                 }`}
               >
                 <FeatureToggleLabel
@@ -13504,8 +13983,8 @@ export default function AdminSettingsPage() {
               <div
                 className={`flex items-center gap-3 rounded-md border px-3 py-2 ${
                   courses
-                    ? "border-green-100 bg-green-50"
-                    : "border-red-100 bg-red-50"
+                    ? "border-[color:color-mix(in srgb, var(--primary) 25%, white)] bg-[color:color-mix(in srgb, var(--primary) 10%, white)]"
+                    : "border-[color:color-mix(in srgb, var(--error) 25%, white)] bg-[color:color-mix(in srgb, var(--error) 10%, white)]"
                 }`}
               >
                 <FeatureToggleLabel label="Courses" featureKey="courses" />
@@ -13526,8 +14005,8 @@ export default function AdminSettingsPage() {
               <div
                 className={`flex items-center gap-3 rounded-md border px-3 py-2 ${
                   coursesPublic
-                    ? "border-green-100 bg-green-50"
-                    : "border-red-100 bg-red-50"
+                    ? "border-[color:color-mix(in srgb, var(--primary) 25%, white)] bg-[color:color-mix(in srgb, var(--primary) 10%, white)]"
+                    : "border-[color:color-mix(in srgb, var(--error) 25%, white)] bg-[color:color-mix(in srgb, var(--error) 10%, white)]"
                 }`}
               >
                 <FeatureToggleLabel
@@ -13545,8 +14024,8 @@ export default function AdminSettingsPage() {
               <div
                 className={`flex items-center gap-3 rounded-md border px-3 py-2 ${
                   myCourses
-                    ? "border-green-100 bg-green-50"
-                    : "border-red-100 bg-red-50"
+                    ? "border-[color:color-mix(in srgb, var(--primary) 25%, white)] bg-[color:color-mix(in srgb, var(--primary) 10%, white)]"
+                    : "border-[color:color-mix(in srgb, var(--error) 25%, white)] bg-[color:color-mix(in srgb, var(--error) 10%, white)]"
                 }`}
               >
                 <FeatureToggleLabel label="My Courses" featureKey="myCourses" />
@@ -13561,8 +14040,8 @@ export default function AdminSettingsPage() {
               <div
                 className={`flex items-center gap-3 rounded-md border px-3 py-2 ${
                   profile
-                    ? "border-green-100 bg-green-50"
-                    : "border-red-100 bg-red-50"
+                    ? "border-[color:color-mix(in srgb, var(--primary) 25%, white)] bg-[color:color-mix(in srgb, var(--primary) 10%, white)]"
+                    : "border-[color:color-mix(in srgb, var(--error) 25%, white)] bg-[color:color-mix(in srgb, var(--error) 10%, white)]"
                 }`}
               >
                 <FeatureToggleLabel label="Profile" featureKey="profile" />
@@ -13577,8 +14056,8 @@ export default function AdminSettingsPage() {
               <div
                 className={`flex items-center gap-3 rounded-md border px-3 py-2 ${
                   auth
-                    ? "border-green-100 bg-green-50"
-                    : "border-red-100 bg-red-50"
+                    ? "border-[color:color-mix(in srgb, var(--primary) 25%, white)] bg-[color:color-mix(in srgb, var(--primary) 10%, white)]"
+                    : "border-[color:color-mix(in srgb, var(--error) 25%, white)] bg-[color:color-mix(in srgb, var(--error) 10%, white)]"
                 }`}
               >
                 <FeatureToggleLabel label="Auth (risk)" featureKey="auth" />
@@ -13600,8 +14079,8 @@ export default function AdminSettingsPage() {
               <div
                 className={`flex items-center gap-3 rounded-md border px-3 py-2 ${
                   authLogin
-                    ? "border-green-100 bg-green-50"
-                    : "border-red-100 bg-red-50"
+                    ? "border-[color:color-mix(in srgb, var(--primary) 25%, white)] bg-[color:color-mix(in srgb, var(--primary) 10%, white)]"
+                    : "border-[color:color-mix(in srgb, var(--error) 25%, white)] bg-[color:color-mix(in srgb, var(--error) 10%, white)]"
                 }`}
               >
                 <FeatureToggleLabel
@@ -13619,8 +14098,8 @@ export default function AdminSettingsPage() {
               <div
                 className={`flex items-center gap-3 rounded-md border px-3 py-2 ${
                   authRegister
-                    ? "border-green-100 bg-green-50"
-                    : "border-red-100 bg-red-50"
+                    ? "border-[color:color-mix(in srgb, var(--primary) 25%, white)] bg-[color:color-mix(in srgb, var(--primary) 10%, white)]"
+                    : "border-[color:color-mix(in srgb, var(--error) 25%, white)] bg-[color:color-mix(in srgb, var(--error) 10%, white)]"
                 }`}
               >
                 <FeatureToggleLabel
@@ -13638,8 +14117,8 @@ export default function AdminSettingsPage() {
               <div
                 className={`flex items-center gap-3 rounded-md border px-3 py-2 ${
                   auth2fa
-                    ? "border-green-100 bg-green-50"
-                    : "border-red-100 bg-red-50"
+                    ? "border-[color:color-mix(in srgb, var(--primary) 25%, white)] bg-[color:color-mix(in srgb, var(--primary) 10%, white)]"
+                    : "border-[color:color-mix(in srgb, var(--error) 25%, white)] bg-[color:color-mix(in srgb, var(--error) 10%, white)]"
                 }`}
               >
                 <FeatureToggleLabel
@@ -13657,8 +14136,8 @@ export default function AdminSettingsPage() {
               <div
                 className={`flex items-center gap-3 rounded-md border px-3 py-2 ${
                   captcha
-                    ? "border-green-100 bg-green-50"
-                    : "border-red-100 bg-red-50"
+                    ? "border-[color:color-mix(in srgb, var(--primary) 25%, white)] bg-[color:color-mix(in srgb, var(--primary) 10%, white)]"
+                    : "border-[color:color-mix(in srgb, var(--error) 25%, white)] bg-[color:color-mix(in srgb, var(--error) 10%, white)]"
                 }`}
               >
                 <FeatureToggleLabel
@@ -13684,8 +14163,8 @@ export default function AdminSettingsPage() {
               <div
                 className={`flex items-center gap-3 rounded-md border px-3 py-2 ${
                   captchaLogin
-                    ? "border-green-100 bg-green-50"
-                    : "border-red-100 bg-red-50"
+                    ? "border-[color:color-mix(in srgb, var(--primary) 25%, white)] bg-[color:color-mix(in srgb, var(--primary) 10%, white)]"
+                    : "border-[color:color-mix(in srgb, var(--error) 25%, white)] bg-[color:color-mix(in srgb, var(--error) 10%, white)]"
                 }`}
               >
                 <FeatureToggleLabel
@@ -13703,8 +14182,8 @@ export default function AdminSettingsPage() {
               <div
                 className={`flex items-center gap-3 rounded-md border px-3 py-2 ${
                   captchaRegister
-                    ? "border-green-100 bg-green-50"
-                    : "border-red-100 bg-red-50"
+                    ? "border-[color:color-mix(in srgb, var(--primary) 25%, white)] bg-[color:color-mix(in srgb, var(--primary) 10%, white)]"
+                    : "border-[color:color-mix(in srgb, var(--error) 25%, white)] bg-[color:color-mix(in srgb, var(--error) 10%, white)]"
                 }`}
               >
                 <FeatureToggleLabel
@@ -13722,8 +14201,8 @@ export default function AdminSettingsPage() {
               <div
                 className={`flex items-center gap-3 rounded-md border px-3 py-2 ${
                   captchaForgotPassword
-                    ? "border-green-100 bg-green-50"
-                    : "border-red-100 bg-red-50"
+                    ? "border-[color:color-mix(in srgb, var(--primary) 25%, white)] bg-[color:color-mix(in srgb, var(--primary) 10%, white)]"
+                    : "border-[color:color-mix(in srgb, var(--error) 25%, white)] bg-[color:color-mix(in srgb, var(--error) 10%, white)]"
                 }`}
               >
                 <FeatureToggleLabel
@@ -13741,8 +14220,8 @@ export default function AdminSettingsPage() {
               <div
                 className={`flex items-center gap-3 rounded-md border px-3 py-2 ${
                   captchaChangePassword
-                    ? "border-green-100 bg-green-50"
-                    : "border-red-100 bg-red-50"
+                    ? "border-[color:color-mix(in srgb, var(--primary) 25%, white)] bg-[color:color-mix(in srgb, var(--primary) 10%, white)]"
+                    : "border-[color:color-mix(in srgb, var(--error) 25%, white)] bg-[color:color-mix(in srgb, var(--error) 10%, white)]"
                 }`}
               >
                 <FeatureToggleLabel
@@ -13760,8 +14239,8 @@ export default function AdminSettingsPage() {
               <div
                 className={`flex items-center gap-3 rounded-md border px-3 py-2 ${
                   paidCourses
-                    ? "border-green-100 bg-green-50"
-                    : "border-red-100 bg-red-50"
+                    ? "border-[color:color-mix(in srgb, var(--primary) 25%, white)] bg-[color:color-mix(in srgb, var(--primary) 10%, white)]"
+                    : "border-[color:color-mix(in srgb, var(--error) 25%, white)] bg-[color:color-mix(in srgb, var(--error) 10%, white)]"
                 }`}
               >
                 <FeatureToggleLabel
@@ -13779,8 +14258,8 @@ export default function AdminSettingsPage() {
               <div
                 className={`flex items-center gap-3 rounded-md border px-3 py-2 ${
                   infraMonitoring
-                    ? "border-green-100 bg-green-50"
-                    : "border-red-100 bg-red-50"
+                    ? "border-[color:color-mix(in srgb, var(--primary) 25%, white)] bg-[color:color-mix(in srgb, var(--primary) 10%, white)]"
+                    : "border-[color:color-mix(in srgb, var(--error) 25%, white)] bg-[color:color-mix(in srgb, var(--error) 10%, white)]"
                 }`}
               >
                 <FeatureToggleLabel
@@ -13803,8 +14282,8 @@ export default function AdminSettingsPage() {
                   placeholder="https://..."
                   className={`ml-auto w-72 rounded-md border bg-white px-2 py-1 text-xs text-gray-900 shadow-sm focus:outline-none focus:ring-1 ${
                     infraToggleErrors.infraMonitoring
-                      ? "border-red-300 focus:border-red-500 focus:ring-red-500"
-                      : "border-gray-300 focus:border-green-500 focus:ring-green-500"
+                      ? "border-[color:var(--error)] focus:border-[color:var(--error)] focus:ring-[color:var(--error)]"
+                      : "border-gray-300 focus:border-[color:var(--primary)] focus:ring-[color:var(--primary)]"
                   }`}
                 />
                 <ToggleSwitch
@@ -13817,7 +14296,10 @@ export default function AdminSettingsPage() {
                 />
               </div>
               {infraToggleErrors.infraMonitoring ? (
-                <p className="-mt-2 text-xs text-red-600" role="alert">
+                <p
+                  className="-mt-2 text-xs text-[color:var(--error)]"
+                  role="alert"
+                >
                   {infraToggleErrors.infraMonitoring}
                 </p>
               ) : null}
@@ -13825,8 +14307,8 @@ export default function AdminSettingsPage() {
               <div
                 className={`flex items-center gap-3 rounded-md border px-3 py-2 ${
                   infraRedis
-                    ? "border-green-100 bg-green-50"
-                    : "border-red-100 bg-red-50"
+                    ? "border-[color:color-mix(in srgb, var(--primary) 25%, white)] bg-[color:color-mix(in srgb, var(--primary) 10%, white)]"
+                    : "border-[color:color-mix(in srgb, var(--error) 25%, white)] bg-[color:color-mix(in srgb, var(--error) 10%, white)]"
                 }`}
               >
                 <FeatureToggleLabel
@@ -13849,8 +14331,8 @@ export default function AdminSettingsPage() {
                   placeholder="redis://... или host:port"
                   className={`ml-auto w-72 rounded-md border bg-white px-2 py-1 text-xs text-gray-900 shadow-sm focus:outline-none focus:ring-1 ${
                     infraToggleErrors.infraRedis
-                      ? "border-red-300 focus:border-red-500 focus:ring-red-500"
-                      : "border-gray-300 focus:border-green-500 focus:ring-green-500"
+                      ? "border-[color:var(--error)] focus:border-[color:var(--error)] focus:ring-[color:var(--error)]"
+                      : "border-gray-300 focus:border-[color:var(--primary)] focus:ring-[color:var(--primary)]"
                   }`}
                 />
                 <ToggleSwitch
@@ -13861,7 +14343,10 @@ export default function AdminSettingsPage() {
                 />
               </div>
               {infraToggleErrors.infraRedis ? (
-                <p className="-mt-2 text-xs text-red-600" role="alert">
+                <p
+                  className="-mt-2 text-xs text-[color:var(--error)]"
+                  role="alert"
+                >
                   {infraToggleErrors.infraRedis}
                 </p>
               ) : null}
@@ -13869,8 +14354,8 @@ export default function AdminSettingsPage() {
               <div
                 className={`flex items-center gap-3 rounded-md border px-3 py-2 ${
                   infraRabbitmq
-                    ? "border-green-100 bg-green-50"
-                    : "border-red-100 bg-red-50"
+                    ? "border-[color:color-mix(in srgb, var(--primary) 25%, white)] bg-[color:color-mix(in srgb, var(--primary) 10%, white)]"
+                    : "border-[color:color-mix(in srgb, var(--error) 25%, white)] bg-[color:color-mix(in srgb, var(--error) 10%, white)]"
                 }`}
               >
                 <FeatureToggleLabel
@@ -13893,8 +14378,8 @@ export default function AdminSettingsPage() {
                   placeholder="amqp://..."
                   className={`ml-auto w-72 rounded-md border bg-white px-2 py-1 text-xs text-gray-900 shadow-sm focus:outline-none focus:ring-1 ${
                     infraToggleErrors.infraRabbitmq
-                      ? "border-red-300 focus:border-red-500 focus:ring-red-500"
-                      : "border-gray-300 focus:border-green-500 focus:ring-green-500"
+                      ? "border-[color:var(--error)] focus:border-[color:var(--error)] focus:ring-[color:var(--error)]"
+                      : "border-gray-300 focus:border-[color:var(--primary)] focus:ring-[color:var(--primary)]"
                   }`}
                 />
                 <ToggleSwitch
@@ -13905,7 +14390,10 @@ export default function AdminSettingsPage() {
                 />
               </div>
               {infraToggleErrors.infraRabbitmq ? (
-                <p className="-mt-2 text-xs text-red-600" role="alert">
+                <p
+                  className="-mt-2 text-xs text-[color:var(--error)]"
+                  role="alert"
+                >
                   {infraToggleErrors.infraRabbitmq}
                 </p>
               ) : null}
@@ -13913,8 +14401,8 @@ export default function AdminSettingsPage() {
               <div
                 className={`flex items-center gap-3 rounded-md border px-3 py-2 ${
                   infraErrorTracking
-                    ? "border-green-100 bg-green-50"
-                    : "border-red-100 bg-red-50"
+                    ? "border-[color:color-mix(in srgb, var(--primary) 25%, white)] bg-[color:color-mix(in srgb, var(--primary) 10%, white)]"
+                    : "border-[color:color-mix(in srgb, var(--error) 25%, white)] bg-[color:color-mix(in srgb, var(--error) 10%, white)]"
                 }`}
               >
                 <FeatureToggleLabel
@@ -13937,8 +14425,8 @@ export default function AdminSettingsPage() {
                   placeholder="https://..."
                   className={`ml-auto w-72 rounded-md border bg-white px-2 py-1 text-xs text-gray-900 shadow-sm focus:outline-none focus:ring-1 ${
                     infraToggleErrors.infraErrorTracking
-                      ? "border-red-300 focus:border-red-500 focus:ring-red-500"
-                      : "border-gray-300 focus:border-green-500 focus:ring-green-500"
+                      ? "border-[color:var(--error)] focus:border-[color:var(--error)] focus:ring-[color:var(--error)]"
+                      : "border-gray-300 focus:border-[color:var(--primary)] focus:ring-[color:var(--primary)]"
                   }`}
                 />
                 <ToggleSwitch
@@ -13951,7 +14439,10 @@ export default function AdminSettingsPage() {
                 />
               </div>
               {infraToggleErrors.infraErrorTracking ? (
-                <p className="-mt-2 text-xs text-red-600" role="alert">
+                <p
+                  className="-mt-2 text-xs text-[color:var(--error)]"
+                  role="alert"
+                >
                   {infraToggleErrors.infraErrorTracking}
                 </p>
               ) : null}
@@ -14122,8 +14613,8 @@ export default function AdminSettingsPage() {
                   : "⚠ Не е конфигуриран – ще се използват env fallback-и ако има";
                 const testState = socialTestStates[provider];
                 const cardColorClasses = enabled
-                  ? "border-green-200 bg-green-50"
-                  : "border-red-200 bg-red-50";
+                  ? "border-[color:color-mix(in srgb, var(--primary) 35%, white)] bg-[color:color-mix(in srgb, var(--primary) 10%, white)]"
+                  : "border-[color:color-mix(in srgb, var(--error) 35%, white)] bg-[color:color-mix(in srgb, var(--error) 10%, white)]";
                 return (
                   <div
                     key={provider}
@@ -14227,7 +14718,7 @@ export default function AdminSettingsPage() {
                                     `Social login icon (${provider}, light) е премахнат.`,
                                   );
                                 }}
-                                className="inline-flex items-center rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                                className="inline-flex items-center rounded-md border border-[color:var(--error)] bg-white px-3 py-1.5 text-xs font-semibold text-[color:var(--error)] hover:bg-[color:color-mix(in srgb, var(--error) 10%, white)] disabled:cursor-not-allowed disabled:opacity-60"
                               >
                                 Remove
                               </button>
@@ -14307,7 +14798,7 @@ export default function AdminSettingsPage() {
                           type="button"
                           onClick={() => handleResetProviderFields(provider)}
                           disabled={saving}
-                          className="inline-flex items-center rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                          className="inline-flex items-center rounded-md border border-[color:var(--error)] bg-white px-3 py-1.5 text-xs font-semibold text-[color:var(--error)] hover:bg-[color:color-mix(in srgb, var(--error) 10%, white)] disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           Изчисти всички стойности
                         </button>
@@ -14319,7 +14810,7 @@ export default function AdminSettingsPage() {
                           type="button"
                           onClick={() => handleTestConnection(provider)}
                           disabled={testState.status === "loading"}
-                          className="inline-flex items-center rounded-md border border-green-600 px-3 py-1.5 text-xs font-semibold text-green-700 hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-60"
+                          className="inline-flex items-center rounded-md border border-[color:var(--primary)] px-3 py-1.5 text-xs font-semibold text-[color:var(--primary)] hover:bg-[color:color-mix(in srgb, var(--primary) 10%, white)] disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           {testState.status === "loading"
                             ? "Тествам..."
@@ -14329,9 +14820,9 @@ export default function AdminSettingsPage() {
                           <span
                             className={`text-xs ${
                               testState.status === "success"
-                                ? "text-green-700"
+                                ? "text-[color:var(--primary)]"
                                 : testState.status === "error"
-                                  ? "text-red-600"
+                                  ? "text-[color:var(--error)]"
                                   : "text-gray-600"
                             }`}
                           >
@@ -14344,7 +14835,7 @@ export default function AdminSettingsPage() {
                         ) : null}
                         {testState.status === "error" &&
                         testState.errorDetails ? (
-                          <pre className="w-full whitespace-pre-wrap rounded-md bg-red-50 p-2 text-xs text-red-700">
+                          <pre className="w-full whitespace-pre-wrap rounded-md border border-[color:color-mix(in srgb, var(--error) 30%, white)] bg-[color:color-mix(in srgb, var(--error) 10%, white)] p-2 text-xs text-[color:var(--error)]">
                             {testState.errorDetails}
                           </pre>
                         ) : null}
@@ -14360,7 +14851,7 @@ export default function AdminSettingsPage() {
                       </p>
                     ) : null}
                     {socialInlineWarnings[provider]?.length ? (
-                      <div className="mt-3 space-y-1 rounded-md border border-yellow-200 bg-yellow-50 px-3 py-2 text-xs text-yellow-900">
+                      <div className="mt-3 space-y-1 rounded-md border border-[color:color-mix(in srgb, var(--attention) 35%, white)] bg-[color:color-mix(in srgb, var(--attention) 12%, white)] px-3 py-2 text-xs text-[color:var(--attention)]">
                         {socialInlineWarnings[provider].map((warning, idx) => (
                           <p key={`${provider}-warning-${idx}`}>{warning}</p>
                         ))}
@@ -14391,7 +14882,7 @@ export default function AdminSettingsPage() {
                         }
                         onInput={() => setSocialCredentialsDirty(true)}
                         rows={3}
-                        className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                        className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
                         placeholder="Пример: Креденшъли в 1Password → BeeLMS Social creds. Или инструкции за запитване към IT."
                         disabled={saving}
                       />
@@ -14439,13 +14930,13 @@ export default function AdminSettingsPage() {
                           onBlur={() =>
                             clearSocialFieldError(provider, "clientId")
                           }
-                          className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                          className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
                           placeholder="например 123.apps.googleusercontent.com"
                           spellCheck={false}
                           disabled={saving}
                         />
                         {socialFieldErrors[provider]?.clientId && (
-                          <p className="mt-1 text-xs text-red-600">
+                          <p className="mt-1 text-xs text-[color:var(--error)]">
                             {socialFieldErrors[provider]?.clientId}
                           </p>
                         )}
@@ -14486,7 +14977,7 @@ export default function AdminSettingsPage() {
                           onBlur={() =>
                             validateRedirectUri(provider, form.redirectUri)
                           }
-                          className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                          className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
                           placeholder={SOCIAL_PROVIDER_REDIRECT_HINTS[provider]}
                           spellCheck={false}
                           disabled={saving}
@@ -14495,7 +14986,7 @@ export default function AdminSettingsPage() {
                           Пример: {SOCIAL_PROVIDER_REDIRECT_HINTS[provider]}
                         </p>
                         {socialFieldErrors[provider]?.redirectUri && (
-                          <p className="mt-1 text-xs text-red-600">
+                          <p className="mt-1 text-xs text-[color:var(--error)]">
                             {socialFieldErrors[provider]?.redirectUri}
                           </p>
                         )}
@@ -14538,7 +15029,7 @@ export default function AdminSettingsPage() {
                           setSocialCredentialsDirty(true);
                           clearSocialFieldError(provider, "clientSecret");
                         }}
-                        className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                        className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
                         placeholder={
                           form.hasClientSecret
                             ? "•••••• (въведи нов secret, за да го замениш)"
@@ -14547,7 +15038,7 @@ export default function AdminSettingsPage() {
                         autoComplete="new-password"
                       />
                       {socialFieldErrors[provider]?.clientSecret && (
-                        <p className="mt-1 text-xs text-red-600">
+                        <p className="mt-1 text-xs text-[color:var(--error)]">
                           {socialFieldErrors[provider]?.clientSecret}
                         </p>
                       )}
@@ -14564,14 +15055,14 @@ export default function AdminSettingsPage() {
                             type="button"
                             onClick={() => confirmDeleteStoredSecret(provider)}
                             disabled={saving}
-                            className="inline-flex items-center rounded-md border border-red-300 px-2 py-1 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                            className="inline-flex items-center rounded-md border border-[color:var(--error)] px-2 py-1 text-xs font-semibold text-[color:var(--error)] hover:bg-[color:color-mix(in srgb, var(--error) 10%, white)] disabled:cursor-not-allowed disabled:opacity-60"
                           >
                             Изтрий запазения secret
                           </button>
                         </div>
                       ) : null}
                       {form.clearSecret ? (
-                        <div className="mt-3 flex flex-wrap items-center gap-2 rounded-md border border-yellow-200 bg-yellow-50 px-3 py-2 text-xs text-yellow-900">
+                        <div className="mt-3 flex flex-wrap items-center gap-2 rounded-md border border-[color:color-mix(in srgb, var(--attention) 35%, white)] bg-[color:color-mix(in srgb, var(--attention) 12%, white)] px-3 py-2 text-xs text-[color:var(--attention)]">
                           <span>
                             Secret ще бъде изтрит при запазване на настройките.
                           </span>
@@ -14579,7 +15070,7 @@ export default function AdminSettingsPage() {
                             type="button"
                             onClick={() => cancelSecretDeletion(provider)}
                             disabled={saving}
-                            className="inline-flex items-center rounded-md border border-yellow-300 px-2 py-1 text-xs font-semibold text-yellow-900 hover:bg-yellow-100 disabled:cursor-not-allowed disabled:opacity-60"
+                            className="inline-flex items-center rounded-md border border-[color:color-mix(in srgb, var(--attention) 60%, var(--border))] px-2 py-1 text-xs font-semibold text-[color:var(--attention)] hover:bg-[color:color-mix(in srgb, var(--attention) 15%, white)] disabled:cursor-not-allowed disabled:opacity-60"
                           >
                             Отмени
                           </button>
@@ -14700,7 +15191,7 @@ export default function AdminSettingsPage() {
                       });
                       setLanguageDraft("");
                     }}
-                    className="mt-2 inline-flex items-center justify-center rounded-md bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-70"
+                    className="mt-2 inline-flex items-center justify-center rounded-md bg-[color:var(--primary)] px-4 py-2 text-sm font-semibold text-[color:var(--on-primary)] shadow-sm hover:bg-[color:color-mix(in srgb, var(--primary) 92%, black)] disabled:cursor-not-allowed disabled:opacity-70"
                   >
                     Добави
                   </button>
@@ -14709,14 +15200,14 @@ export default function AdminSettingsPage() {
 
               <div className="space-y-2">
                 {supportedLangs.length < 1 ? (
-                  <p className="text-sm text-red-700">
+                  <p className="text-sm text-[color:var(--error)]">
                     Трябва да има поне 1 език.
                   </p>
                 ) : null}
                 {supportedLangs.map((code) => (
                   <div
                     key={code}
-                    className={`flex items-center gap-3 rounded-md border px-3 py-2 ${"border-green-100 bg-green-50"}`}
+                    className={`flex items-center gap-3 rounded-md border px-3 py-2 ${"border-[color:color-mix(in srgb, var(--primary) 25%, white)] bg-[color:color-mix(in srgb, var(--primary) 10%, white)]"}`}
                   >
                     <span className="text-sm font-medium text-gray-800">
                       {code}
@@ -14935,6 +15426,8 @@ export default function AdminSettingsPage() {
             <div
               className="rounded-md border px-4 py-3 text-sm"
               style={ERROR_NOTICE_STYLE}
+              role="alert"
+              aria-live="assertive"
             >
               {error}
             </div>
@@ -14944,6 +15437,8 @@ export default function AdminSettingsPage() {
             <div
               className="rounded-md border px-4 py-3 text-sm"
               style={SUCCESS_NOTICE_STYLE}
+              role="status"
+              aria-live="polite"
             >
               {success}
             </div>
@@ -14962,7 +15457,7 @@ export default function AdminSettingsPage() {
                 className="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold shadow-sm hover:opacity-90 disabled:opacity-70"
                 style={{
                   backgroundColor: "var(--primary)",
-                  color: "var(--foreground)",
+                  color: "var(--on-primary)",
                 }}
               >
                 {saving ? "Запазване..." : "Запази"}
@@ -14991,7 +15486,14 @@ export default function AdminSettingsPage() {
           setAuthRiskAcknowledged(false);
         }}
       >
-        <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+        <div
+          className="rounded-md border px-4 py-3 text-sm"
+          style={{
+            borderColor: "var(--error)",
+            backgroundColor: "color-mix(in srgb, var(--error) 10%, white)",
+            color: "var(--error)",
+          }}
+        >
           <p className="font-semibold">Риск:</p>
           <p className="mt-1">
             {FEATURE_TOGGLE_INFO.auth?.risk ??

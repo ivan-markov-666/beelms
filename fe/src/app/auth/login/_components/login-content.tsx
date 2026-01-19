@@ -676,7 +676,7 @@ export function LoginContent() {
                 type="email"
                 autoComplete="email"
                 placeholder="your@email.com"
-                className="block w-full rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-green-600 focus:outline-none focus:ring-1 focus:ring-green-600"
+                className="block w-full rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={submitting}
@@ -700,7 +700,7 @@ export function LoginContent() {
                   type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
                   placeholder="********"
-                  className="block w-full rounded-lg border border-gray-300 px-4 py-2 pr-12 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-green-600 focus:outline-none focus:ring-1 focus:ring-green-600"
+                  className="block w-full rounded-lg border border-gray-300 px-4 py-2 pr-12 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={submitting}
@@ -728,7 +728,8 @@ export function LoginContent() {
               <input
                 id="remember"
                 type="checkbox"
-                className="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500"
+                className="h-4 w-4 rounded border-gray-300"
+                style={{ accentColor: "var(--primary)" }}
                 checked={rememberMe}
                 onChange={(event) => setRememberMe(event.target.checked)}
                 disabled={submitting}
@@ -763,7 +764,12 @@ export function LoginContent() {
 
             <button
               type="submit"
-              className="w-full rounded-lg bg-green-600 py-3 text-sm font-semibold text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-70"
+              className="w-full rounded-lg border py-3 text-sm font-semibold shadow-sm hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-70"
+              style={{
+                backgroundColor: "var(--primary)",
+                borderColor: "var(--primary)",
+                color: "var(--on-primary)",
+              }}
               disabled={submitting}
             >
               {submitting
@@ -773,11 +779,11 @@ export function LoginContent() {
           </form>
         </div>
 
-        <div className="mt-6 flex items-center justify-between text-xs text-green-700">
+        <div className="mt-6 flex items-center justify-between text-xs text-[color:var(--primary)]">
           {authRegisterEnabled ? (
             <button
               type="button"
-              className="cursor-pointer hover:text-green-800"
+              className="cursor-pointer hover:opacity-90"
               onClick={() => router.push("/auth/forgot-password")}
               disabled={submitting}
             >
@@ -792,11 +798,11 @@ export function LoginContent() {
               {t(lang, "auth", "loginRegisterLink")}{" "}
               <button
                 type="button"
-                className="cursor-pointer font-semibold text-green-700 hover:text-green-800"
+                className="cursor-pointer font-semibold text-[color:var(--primary)] hover:opacity-90"
                 onClick={() => router.push("/auth/register")}
                 disabled={submitting}
               >
-                {t(lang, "auth", "registerSubmit")}
+                {t(lang, "auth", "loginRegisterLinkCta")}
               </button>
             </p>
           ) : null}

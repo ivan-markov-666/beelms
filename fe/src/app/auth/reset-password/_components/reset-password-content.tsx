@@ -119,7 +119,12 @@ export function ResetPasswordContent() {
           <section className="rounded-lg border border-gray-200 bg-white p-8 shadow-sm">
             <button
               type="button"
-              className="w-full rounded-lg bg-green-600 py-3 text-sm font-semibold text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1"
+              className="w-full rounded-lg border py-3 text-sm font-semibold shadow-sm hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-1"
+              style={{
+                backgroundColor: "var(--primary)",
+                borderColor: "var(--primary)",
+                color: "var(--on-primary)",
+              }}
               onClick={() => router.push("/auth/login")}
             >
               {t(lang, "auth", "resetDisabledLoginCta")}
@@ -163,7 +168,7 @@ export function ResetPasswordContent() {
                 type="password"
                 autoComplete="new-password"
                 placeholder="********"
-                className="block w-full rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-green-600 focus:outline-none focus:ring-1 focus:ring-green-600"
+                className="block w-full rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 disabled={submitting || completed}
@@ -191,7 +196,7 @@ export function ResetPasswordContent() {
                 type="password"
                 autoComplete="new-password"
                 placeholder="********"
-                className="block w-full rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-green-600 focus:outline-none focus:ring-1 focus:ring-green-600"
+                className="block w-full rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
                 value={confirmNewPassword}
                 onChange={(e) => setConfirmNewPassword(e.target.value)}
                 disabled={submitting}
@@ -247,7 +252,10 @@ export function ResetPasswordContent() {
             )}
             {formSuccess && (
               <div className="space-y-2" aria-live="polite">
-                <p className="text-sm text-green-600" role="status">
+                <p
+                  className="text-sm text-[color:var(--primary)]"
+                  role="status"
+                >
                   {formSuccess}
                 </p>
                 <button
@@ -263,7 +271,12 @@ export function ResetPasswordContent() {
 
             <button
               type="submit"
-              className="w-full rounded-lg bg-green-600 py-3 text-sm font-semibold text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-70"
+              className="w-full rounded-lg border py-3 text-sm font-semibold shadow-sm hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-70"
+              style={{
+                backgroundColor: "var(--primary)",
+                borderColor: "var(--primary)",
+                color: "var(--on-primary)",
+              }}
               disabled={submitting || completed}
             >
               {submitting
@@ -273,10 +286,10 @@ export function ResetPasswordContent() {
           </form>
         </section>
 
-        <div className="mt-6 flex items-center justify-center text-xs text-green-700">
+        <div className="mt-6 flex items-center justify-center text-xs text-[color:var(--primary)]">
           <button
             type="button"
-            className="inline-flex cursor-pointer items-center gap-1 hover:text-green-800"
+            className="inline-flex cursor-pointer items-center gap-1 hover:opacity-90"
             onClick={() => router.push("/auth/login")}
             disabled={submitting}
           >

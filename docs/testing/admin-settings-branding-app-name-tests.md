@@ -518,13 +518,13 @@ Includes base font file and optional per-language variants.
 #### Backend tests (Cursor uploads)
 | ID | Scenario | Status | Notes |
 | --- | --- | --- | --- |
-| CS-B1 | Accepts PNG/WebP files up to defined size (e.g., 128KB) | ⬜️ Not started | |
-| CS-B2 | Validates cursor hotspot coordinates if provided (0–255) | ⬜️ Not started | |
-| CS-B3 | Stores separate URLs for default/light/dark/pointer variants | ⬜️ Not started | |
-| CS-B4 | Removing specific cursor variant leaves others intact | ⬜️ Not started | |
-| CS-B5 | Prevents invalid hotspot data from crashing (defaults to null) | ⬜️ Not started | |
-| CS-B6 | Security: rejects attempts to upload animated files if not supported | ⬜️ Not started | |
-| CS-B7 | Audit logs include variant name | ⬜️ Not started | |
+| CS-B1 | Accepts PNG/WebP files up to defined size (e.g., 128KB) | ✅ Implemented | Added to admin-settings.controller.spec.ts |
+| CS-B2 | Validates cursor hotspot coordinates if provided (0–255) | ✅ Implemented | Added to admin-update-instance-settings.dto(.spec).ts |
+| CS-B3 | Stores separate URLs for default/light/dark/pointer variants | ✅ Implemented | Added to admin-settings.controller.spec.ts |
+| CS-B4 | Removing specific cursor variant leaves others intact | ✅ Implemented | Added to settings.service.spec.ts |
+| CS-B5 | Prevents invalid hotspot data from crashing (defaults to null) | ✅ Implemented | Added to settings.service.spec.ts |
+| CS-B6 | Security: rejects attempts to upload animated files if not supported | ✅ Implemented | Added to admin-settings.controller.spec.ts |
+| CS-B7 | Audit logs include variant name | ✅ Implemented | Added to settings.service.spec.ts |
 
 #### Frontend tests (Cursor uploads)
 | ID | Scenario | Status | Notes |

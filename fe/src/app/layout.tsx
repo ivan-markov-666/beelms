@@ -95,6 +95,7 @@ async function fetchPublicSettingsForMetadata(): Promise<{
         foreground?: string | null;
         primary?: string | null;
         secondary?: string | null;
+        attention?: string | null;
         error?: string | null;
         card?: string | null;
         border?: string | null;
@@ -112,6 +113,7 @@ async function fetchPublicSettingsForMetadata(): Promise<{
         foreground?: string | null;
         primary?: string | null;
         secondary?: string | null;
+        attention?: string | null;
         error?: string | null;
         card?: string | null;
         border?: string | null;
@@ -193,6 +195,7 @@ async function fetchPublicSettingsForMetadata(): Promise<{
             foreground?: string | null;
             primary?: string | null;
             secondary?: string | null;
+            attention?: string | null;
             error?: string | null;
             card?: string | null;
             border?: string | null;
@@ -208,6 +211,7 @@ async function fetchPublicSettingsForMetadata(): Promise<{
             foreground?: string | null;
             primary?: string | null;
             secondary?: string | null;
+            attention?: string | null;
             error?: string | null;
             card?: string | null;
             border?: string | null;
@@ -586,11 +590,64 @@ export default async function RootLayout({
     return trimmed.length > 0 ? trimmed : fallback;
   };
 
+  const hexToRgb = (hex: string) => {
+    const normalized = (hex ?? "").trim().replace(/^#/, "");
+    if (normalized.length === 3) {
+      const r = parseInt(normalized[0] + normalized[0], 16);
+      const g = parseInt(normalized[1] + normalized[1], 16);
+      const b = parseInt(normalized[2] + normalized[2], 16);
+      if ([r, g, b].some((value) => Number.isNaN(value))) return null;
+      return { r, g, b };
+    }
+    if (normalized.length === 6) {
+      const r = parseInt(normalized.slice(0, 2), 16);
+      const g = parseInt(normalized.slice(2, 4), 16);
+      const b = parseInt(normalized.slice(4, 6), 16);
+      if ([r, g, b].some((value) => Number.isNaN(value))) return null;
+      return { r, g, b };
+    }
+    return null;
+  };
+
+  const relativeLuminance = (rgb: { r: number; g: number; b: number }) => {
+    const channel = (value: number) => {
+      const srgb = value / 255;
+      return srgb <= 0.03928
+        ? srgb / 12.92
+        : Math.pow((srgb + 0.055) / 1.055, 2.4);
+    };
+    return (
+      0.2126 * channel(rgb.r) +
+      0.7152 * channel(rgb.g) +
+      0.0722 * channel(rgb.b)
+    );
+  };
+
+  const contrastRatio = (hexA: string, hexB: string) => {
+    const rgbA = hexToRgb(hexA);
+    const rgbB = hexToRgb(hexB);
+    if (!rgbA || !rgbB) return 0;
+    const lumA = relativeLuminance(rgbA);
+    const lumB = relativeLuminance(rgbB);
+    const brightest = Math.max(lumA, lumB);
+    const darkest = Math.min(lumA, lumB);
+    return (brightest + 0.05) / (darkest + 0.05);
+  };
+
+  const pickOnColor = (background: string) => {
+    const white = "#ffffff";
+    const black = "#000000";
+    const cWhite = contrastRatio(background, white);
+    const cBlack = contrastRatio(background, black);
+    return cWhite >= cBlack ? white : black;
+  };
+
   const themeLight = {
     background: themeValue(lightPalette?.background, "#ffffff"),
     foreground: themeValue(lightPalette?.foreground, "#171717"),
     primary: themeValue(lightPalette?.primary, "#16a34a"),
     secondary: themeValue(lightPalette?.secondary, "#2563eb"),
+    attention: themeValue(lightPalette?.attention, "#f59e0b"),
     error: themeValue(lightPalette?.error, "#dc2626"),
     card: themeValue(lightPalette?.card, "#ffffff"),
     border: themeValue(lightPalette?.border, "#e5e7eb"),
@@ -609,6 +666,7 @@ export default async function RootLayout({
     foreground: themeValue(darkPalette?.foreground, "#ededed"),
     primary: themeValue(darkPalette?.primary, "#22c55e"),
     secondary: themeValue(darkPalette?.secondary, "#60a5fa"),
+    attention: themeValue(darkPalette?.attention, "#fbbf24"),
     error: themeValue(darkPalette?.error, "#f87171"),
     card: themeValue(darkPalette?.card, "#111827"),
     border: themeValue(darkPalette?.border, "#374151"),
@@ -622,13 +680,32 @@ export default async function RootLayout({
     fieldErrorBorder: themeValue(darkPalette?.fieldErrorBorder, "#7f1d1d"),
   };
 
+  const onLight = {
+    primary: pickOnColor(themeLight.primary),
+    secondary: pickOnColor(themeLight.secondary),
+    attention: pickOnColor(themeLight.attention),
+    error: pickOnColor(themeLight.error),
+  };
+
+  const onDark = {
+    primary: pickOnColor(themeDark.primary),
+    secondary: pickOnColor(themeDark.secondary),
+    attention: pickOnColor(themeDark.attention),
+    error: pickOnColor(themeDark.error),
+  };
+
   const themeCss = `
   :root {
     --theme-light-background: ${themeLight.background};
     --theme-light-foreground: ${themeLight.foreground};
     --theme-light-primary: ${themeLight.primary};
     --theme-light-secondary: ${themeLight.secondary};
+    --theme-light-attention: ${themeLight.attention};
     --theme-light-error: ${themeLight.error};
+    --theme-light-on-primary: ${onLight.primary};
+    --theme-light-on-secondary: ${onLight.secondary};
+    --theme-light-on-attention: ${onLight.attention};
+    --theme-light-on-error: ${onLight.error};
     --theme-light-card: ${themeLight.card};
     --theme-light-border: ${themeLight.border};
     --theme-light-scroll-thumb: ${themeLight.scrollThumb};
@@ -644,7 +721,12 @@ export default async function RootLayout({
     --theme-dark-foreground: ${themeDark.foreground};
     --theme-dark-primary: ${themeDark.primary};
     --theme-dark-secondary: ${themeDark.secondary};
+    --theme-dark-attention: ${themeDark.attention};
     --theme-dark-error: ${themeDark.error};
+    --theme-dark-on-primary: ${onDark.primary};
+    --theme-dark-on-secondary: ${onDark.secondary};
+    --theme-dark-on-attention: ${onDark.attention};
+    --theme-dark-on-error: ${onDark.error};
     --theme-dark-card: ${themeDark.card};
     --theme-dark-border: ${themeDark.border};
     --theme-dark-scroll-thumb: ${themeDark.scrollThumb};
@@ -663,7 +745,12 @@ export default async function RootLayout({
     --foreground: var(--theme-light-foreground);
     --primary: var(--theme-light-primary);
     --secondary: var(--theme-light-secondary);
+    --attention: var(--theme-light-attention);
     --error: var(--theme-light-error);
+    --on-primary: var(--theme-light-on-primary);
+    --on-secondary: var(--theme-light-on-secondary);
+    --on-attention: var(--theme-light-on-attention);
+    --on-error: var(--theme-light-on-error);
     --card: var(--theme-light-card);
     --border: var(--theme-light-border);
     --scroll-thumb: var(--theme-light-scroll-thumb);
@@ -682,7 +769,12 @@ export default async function RootLayout({
     --foreground: var(--theme-dark-foreground);
     --primary: var(--theme-dark-primary);
     --secondary: var(--theme-dark-secondary);
+    --attention: var(--theme-dark-attention);
     --error: var(--theme-dark-error);
+    --on-primary: var(--theme-dark-on-primary);
+    --on-secondary: var(--theme-dark-on-secondary);
+    --on-attention: var(--theme-dark-on-attention);
+    --on-error: var(--theme-dark-on-error);
     --card: var(--theme-dark-card);
     --border: var(--theme-dark-border);
     --scroll-thumb: var(--theme-dark-scroll-thumb);
@@ -701,7 +793,12 @@ export default async function RootLayout({
     --foreground: var(--theme-light-foreground);
     --primary: var(--theme-light-primary);
     --secondary: var(--theme-light-secondary);
+    --attention: var(--theme-light-attention);
     --error: var(--theme-light-error);
+    --on-primary: var(--theme-light-on-primary);
+    --on-secondary: var(--theme-light-on-secondary);
+    --on-attention: var(--theme-light-on-attention);
+    --on-error: var(--theme-light-on-error);
     --card: var(--theme-light-card);
     --border: var(--theme-light-border);
     --scroll-thumb: var(--theme-light-scroll-thumb);
@@ -721,7 +818,12 @@ export default async function RootLayout({
       --foreground: var(--theme-dark-foreground);
       --primary: var(--theme-dark-primary);
       --secondary: var(--theme-dark-secondary);
+      --attention: var(--theme-dark-attention);
       --error: var(--theme-dark-error);
+      --on-primary: var(--theme-dark-on-primary);
+      --on-secondary: var(--theme-dark-on-secondary);
+      --on-attention: var(--theme-dark-on-attention);
+      --on-error: var(--theme-dark-on-error);
       --card: var(--theme-dark-card);
       --border: var(--theme-dark-border);
       --scroll-thumb: var(--theme-dark-scroll-thumb);

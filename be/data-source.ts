@@ -25,6 +25,8 @@ import { AnalyticsPageViewDaily } from './src/analytics/analytics-page-view-dail
 import { InstanceConfig } from './src/settings/instance-config.entity';
 import { LegalPage } from './src/legal/legal-page.entity';
 import { CustomPage } from './src/custom-pages/custom-page.entity';
+import { Backup } from './src/backups/backup.entity';
+import { BackupLog } from './src/backups/backup-log.entity';
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -59,6 +61,8 @@ export const AppDataSource = new DataSource({
     InstanceConfig,
     LegalPage,
     CustomPage,
+    Backup,
+    BackupLog,
   ],
   migrations: ['src/migrations/*.ts'],
   synchronize: false,

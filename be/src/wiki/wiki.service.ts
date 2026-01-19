@@ -579,6 +579,14 @@ export class WikiService {
         continue;
       }
 
+      const availableLanguages = Array.from(
+        new Set(
+          published
+            .map((version) => (version.language ?? '').trim())
+            .filter((lng) => lng.length > 0),
+        ),
+      );
+
       candidates.sort((a, b) => {
         const aTime = a.createdAt ? a.createdAt.getTime() : 0;
         const bTime = b.createdAt ? b.createdAt.getTime() : 0;
@@ -596,6 +604,10 @@ export class WikiService {
         id: article.id,
         slug: article.slug,
         language: latest.language,
+        languages:
+          availableLanguages.length > 0
+            ? availableLanguages
+            : [latest.language],
         title: latest.title,
         updatedAt: updatedAt.toISOString(),
       });

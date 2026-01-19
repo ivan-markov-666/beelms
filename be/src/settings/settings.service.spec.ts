@@ -5258,6 +5258,238 @@ describe('SettingsService – branding asset upload (logo variants)', () => {
   });
 });
 
+describe('SettingsService – branding asset upload (cursor variants)', () => {
+  let repo: {
+    find: jest.Mock;
+    save: jest.Mock;
+    create: jest.Mock;
+  };
+  let service: SettingsService;
+
+  const defaultBranding: InstanceBranding = {
+    appName: 'BeeLMS',
+    browserTitle: 'BeeLMS',
+    loginSocialUnavailableMessageEnabled: true,
+    loginSocialResetPasswordHintEnabled: true,
+    registerSocialUnavailableMessageEnabled: true,
+    pageLinks: {
+      enabled: true,
+      bySlug: {
+        terms: { footer: true },
+        privacy: { footer: true },
+        'cookie-policy': { footer: true },
+        imprint: { footer: true },
+        accessibility: { footer: true },
+        contact: { footer: true },
+        faq: { footer: true },
+        support: { footer: true },
+      },
+    },
+    poweredByBeeLms: { enabled: false, url: null },
+    cursorUrl: null,
+    cursorLightUrl: null,
+    cursorDarkUrl: null,
+    cursorPointerUrl: null,
+    cursorPointerLightUrl: null,
+    cursorPointerDarkUrl: null,
+    cursorHotspot: { x: 8, y: 8 },
+    faviconUrl: null,
+    logoUrl: null,
+    logoLightUrl: null,
+    logoDarkUrl: null,
+    fontUrl: null,
+    fontUrlByLang: {},
+    fontLicenseUrl: null,
+    fontLicenseUrlByLang: {},
+    theme: {
+      mode: 'system',
+      light: { background: '#ffffff', foreground: '#000000' },
+      dark: { background: '#000000', foreground: '#ffffff' },
+    },
+  };
+
+  const defaultFeatures: InstanceFeatures = {
+    wiki: true,
+    wikiPublic: true,
+    courses: true,
+    coursesPublic: true,
+    myCourses: true,
+    profile: true,
+    accessibilityWidget: true,
+    seo: true,
+    themeLight: true,
+    themeDark: true,
+    themeModeSelector: true,
+    auth: true,
+    authLogin: true,
+    authRegister: true,
+    auth2fa: true,
+    captcha: true,
+    captchaLogin: true,
+    captchaRegister: true,
+    captchaForgotPassword: true,
+    captchaChangePassword: true,
+    paidCourses: true,
+    paymentsStripe: true,
+    paymentsPaypal: true,
+    paymentsMypos: true,
+    paymentsRevolut: true,
+    gdprLegal: true,
+    pageTerms: true,
+    pagePrivacy: true,
+    pageCookiePolicy: true,
+    pageImprint: true,
+    pageAccessibility: true,
+    pageContact: true,
+    pageFaq: true,
+    pageSupport: true,
+    pageNotFound: true,
+    socialGoogle: true,
+    socialFacebook: true,
+    socialGithub: true,
+    socialLinkedin: true,
+    infraRedis: false,
+    infraRabbitmq: false,
+    infraMonitoring: false,
+    infraErrorTracking: false,
+  };
+
+  const buildConfig = (
+    overrides: Partial<InstanceConfig> = {},
+  ): InstanceConfig => ({
+    id: 'test-id',
+    branding: {
+      ...defaultBranding,
+      ...overrides.branding,
+    },
+    features: { ...defaultFeatures },
+    languages: {
+      default: 'bg',
+      supported: ['bg', 'en'],
+    },
+    seo: {},
+    socialCredentials: {},
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    ...overrides,
+  });
+
+  beforeEach(() => {
+    repo = {
+      find: jest.fn().mockResolvedValue([buildConfig()]),
+      save: jest.fn(async (value) => value),
+      create: jest.fn((value) => value),
+    };
+    service = new SettingsService(repo as any);
+  });
+
+  it('(CS-B4) Removing a cursor variant leaves other variants intact', async () => {
+    const existing = buildConfig({
+      branding: {
+        ...defaultBranding,
+        cursorUrl: '/branding/media/cursor.png',
+        cursorLightUrl: '/branding/media/cursor-light.png',
+        cursorDarkUrl: '/branding/media/cursor-dark.png',
+        cursorPointerUrl: '/branding/media/cursor-pointer.png',
+        cursorPointerLightUrl: '/branding/media/cursor-pointer-light.png',
+        cursorPointerDarkUrl: '/branding/media/cursor-pointer-dark.png',
+      },
+    });
+    repo.find.mockResolvedValue([existing]);
+
+    const payload = {
+      branding: {
+        cursorLightUrl: null,
+      },
+    };
+
+    await service.updateInstanceConfig(
+      payload as AdminUpdateInstanceSettingsDto,
+    );
+
+    const saveMock = repo.save as jest.MockedFunction<
+      (config: InstanceConfig) => Promise<InstanceConfig>
+    >;
+    const savedConfig = saveMock.mock.calls[0][0];
+
+    expect(savedConfig.branding.cursorLightUrl).toBeNull();
+    expect(savedConfig.branding.cursorUrl).toBe('/branding/media/cursor.png');
+    expect(savedConfig.branding.cursorDarkUrl).toBe(
+      '/branding/media/cursor-dark.png',
+    );
+    expect(savedConfig.branding.cursorPointerUrl).toBe(
+      '/branding/media/cursor-pointer.png',
+    );
+    expect(savedConfig.branding.cursorPointerLightUrl).toBe(
+      '/branding/media/cursor-pointer-light.png',
+    );
+    expect(savedConfig.branding.cursorPointerDarkUrl).toBe(
+      '/branding/media/cursor-pointer-dark.png',
+    );
+  });
+
+  it('(CS-B5) Invalid hotspot payload normalizes to null without crashing', async () => {
+    const existing = buildConfig({
+      branding: {
+        ...defaultBranding,
+        cursorHotspot: { x: 12, y: 14 },
+      },
+    });
+    repo.find.mockResolvedValue([existing]);
+
+    const payload = {
+      branding: {
+        cursorHotspot: {
+          x: 'bad' as unknown as number,
+          y: 'data' as unknown as number,
+        },
+      },
+    };
+
+    await service.updateInstanceConfig(
+      payload as AdminUpdateInstanceSettingsDto,
+    );
+
+    const saveMock = repo.save as jest.MockedFunction<
+      (config: InstanceConfig) => Promise<InstanceConfig>
+    >;
+    const savedConfig = saveMock.mock.calls[0][0];
+
+    expect(savedConfig.branding.cursorHotspot).toBeNull();
+  });
+
+  it('(CS-B7) Audit placeholder updates timestamp when cursor variants change', async () => {
+    const existing = buildConfig({
+      branding: {
+        ...defaultBranding,
+        cursorDarkUrl: '/branding/media/cursor-dark.png',
+      },
+    });
+    repo.find.mockResolvedValue([existing]);
+
+    const payload = {
+      branding: {
+        cursorDarkUrl: '/branding/media/cursor-dark-updated.png',
+      },
+    };
+
+    await service.updateInstanceConfig(
+      payload as AdminUpdateInstanceSettingsDto,
+      { updatedBy: 'admin@example.com' },
+    );
+
+    const saveMock = repo.save as jest.MockedFunction<
+      (config: InstanceConfig) => Promise<InstanceConfig>
+    >;
+    const savedConfig = saveMock.mock.calls[0][0];
+
+    expect(savedConfig.branding.cursorDarkUrl).toBe(
+      '/branding/media/cursor-dark-updated.png',
+    );
+    expect(savedConfig.updatedAt).toBeInstanceOf(Date);
+  });
+});
+
 describe('SettingsService – branding asset upload (fonts)', () => {
   let repo: {
     find: jest.Mock;

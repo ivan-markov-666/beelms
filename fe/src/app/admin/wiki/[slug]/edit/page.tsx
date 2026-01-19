@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 import { diffWords, type Change } from "diff";
 import type { Editor as TipTapEditor } from "@tiptap/core";
 import Link from "next/link";
@@ -13,6 +19,7 @@ import { getApiBaseUrl } from "../../../../api-url";
 import { AdminBreadcrumbs } from "../../../_components/admin-breadcrumbs";
 import { Pagination } from "../../../../_components/pagination";
 import { ListboxSelect } from "../../../../_components/listbox-select";
+import { useAdminSupportedLanguages } from "../../../_hooks/use-admin-supported-languages";
 
 const WikiRichEditor = dynamic(
   () =>
@@ -192,6 +199,16 @@ export default function AdminWikiEditPage() {
   const [form, setForm] = useState<FormState | null>(null);
   const [lastSavedForm, setLastSavedForm] = useState<FormState | null>(null);
   const [currentLanguage, setCurrentLanguage] = useState<string | null>(null);
+  const { languages: supportedAdminLangs } = useAdminSupportedLanguages();
+  const [versionsSectionHighlight, setVersionsSectionHighlight] =
+    useState(false);
+  const languageOptions = useMemo(() => {
+    const codes = new Set(supportedAdminLangs);
+    if (form?.language && !codes.has(form.language)) {
+      codes.add(form.language);
+    }
+    return Array.from(codes);
+  }, [supportedAdminLangs, form?.language]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -239,6 +256,13 @@ export default function AdminWikiEditPage() {
   const [mediaError, setMediaError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [copyMessage, setCopyMessage] = useState<string | null>(null);
+  const [saveHintVisible, setSaveHintVisible] = useState(false);
+
+  const successBannerStyle: CSSProperties = {
+    backgroundColor: "var(--field-ok-bg, #dcfce7)",
+    borderColor: "var(--field-ok-border, #bbf7d0)",
+    color: "var(--primary, #0f766e)",
+  };
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -344,6 +368,37 @@ export default function AdminWikiEditPage() {
       cancelled = true;
     };
   }, [slug, currentLanguage]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    if (loading) {
+      return;
+    }
+
+    if (window.location.hash !== "#versions") {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      const el = window.document.getElementById("versions");
+      if (!el) return;
+
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      setVersionsSectionHighlight(true);
+    }, 0);
+
+    const clearTimer = window.setTimeout(() => {
+      setVersionsSectionHighlight(false);
+    }, 4000);
+
+    return () => {
+      window.clearTimeout(timer);
+      window.clearTimeout(clearTimer);
+    };
+  }, [loading]);
 
   useEffect(() => {
     if (!articleId) {
@@ -520,6 +575,44 @@ export default function AdminWikiEditPage() {
   const isContentDirty =
     !!form && (!lastSavedForm || form.content !== lastSavedForm.content);
 
+  const requiredFieldsState = useMemo(() => {
+    if (!form) {
+      return {
+        missingFields: [] as string[],
+        titleMissing: false,
+        contentMissing: false,
+      };
+    }
+
+    const missingFields: string[] = [];
+    const titleMissing = !form.title.trim();
+    const contentMissing = !form.content.trim();
+
+    if (titleMissing) {
+      missingFields.push("Заглавие");
+    }
+
+    if (contentMissing) {
+      missingFields.push("Съдържание");
+    }
+
+    return { missingFields, titleMissing, contentMissing };
+  }, [form]);
+
+  const { missingFields, titleMissing, contentMissing } = requiredFieldsState;
+
+  const saveDisabledReason = useMemo(() => {
+    if (!isDirty) {
+      return "Бутонът „Запази“ се активира, когато направите промяна по някое поле.";
+    }
+
+    if (missingFields.length > 0) {
+      return `Попълнете задължителните полета (${missingFields.join(", ")}), за да запазите.`;
+    }
+
+    return null;
+  }, [isDirty, missingFields]);
+
   useEffect(() => {
     if (typeof window === "undefined") {
       return;
@@ -584,7 +677,9 @@ export default function AdminWikiEditPage() {
           return;
         }
 
-        setLastSavedForm(form);
+        // Autosave keeps remote draft in sync, but we intentionally do NOT
+        // reset lastSavedForm so the UI continues to show that there are
+        // unsaved changes until the author clicks "Запази".
       } catch {
         return;
       }
@@ -1213,7 +1308,10 @@ export default function AdminWikiEditPage() {
         )}
 
         {!loading && success && (
-          <div className="mb-4 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
+          <div
+            className="mb-4 rounded-md border px-4 py-3 text-sm"
+            style={successBannerStyle}
+          >
             {success}
           </div>
         )}
@@ -1231,11 +1329,10 @@ export default function AdminWikiEditPage() {
                     value={form.language}
                     onChange={(next) => handleChangeLanguage(next)}
                     buttonClassName="flex w-full items-center justify-between gap-2 rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
-                    options={[
-                      { value: "bg", label: "bg" },
-                      { value: "en", label: "en" },
-                      { value: "de", label: "de" },
-                    ]}
+                    options={languageOptions.map((code) => ({
+                      value: code,
+                      label: code,
+                    }))}
                   />
                   <p className="text-xs text-zinc-500">
                     Смяната на езика зарежда или създава отделна версия на
@@ -1275,6 +1372,10 @@ export default function AdminWikiEditPage() {
                   className="block text-sm font-medium text-zinc-800"
                 >
                   Заглавие
+                  <span className="ml-1 text-red-600" aria-hidden="true">
+                    *
+                  </span>
+                  <span className="sr-only">(задължително поле)</span>
                 </label>
                 <input
                   id="title"
@@ -1283,6 +1384,11 @@ export default function AdminWikiEditPage() {
                   value={form.title}
                   onChange={handleChange("title")}
                 />
+                {titleMissing && (
+                  <p className="text-sm text-red-600">
+                    Заглавието е задължително. Моля, въведете текст.
+                  </p>
+                )}
               </div>
 
               <div className="space-y-1">
@@ -1326,6 +1432,10 @@ export default function AdminWikiEditPage() {
                   className="block text-sm font-medium text-zinc-800"
                 >
                   Съдържание
+                  <span className="ml-1 text-red-600" aria-hidden="true">
+                    *
+                  </span>
+                  <span className="sr-only">(задължително поле)</span>
                 </label>
                 <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
                   <p className="text-xs text-zinc-500">Режим на редакция:</p>
@@ -1333,10 +1443,10 @@ export default function AdminWikiEditPage() {
                     <button
                       type="button"
                       onClick={() => setContentEditorMode("markdown")}
-                      className={`rounded-md border px-3 py-1.5 text-xs font-semibold ${
+                      className={`rounded-md border px-3 py-1.5 text-xs font-semibold transition ${
                         contentEditorMode === "markdown"
-                          ? "border-green-600 bg-green-600 text-white"
-                          : "border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50"
+                          ? "border-[color:var(--primary)] bg-[color:var(--primary)] text-[color:var(--on-primary)] shadow-sm"
+                          : "border-[color:var(--border)] bg-white text-[color:var(--foreground)] hover:border-[color:var(--primary)] hover:text-[color:var(--primary)]"
                       }`}
                     >
                       Markdown
@@ -1344,10 +1454,10 @@ export default function AdminWikiEditPage() {
                     <button
                       type="button"
                       onClick={() => setContentEditorMode("rich")}
-                      className={`rounded-md border px-3 py-1.5 text-xs font-semibold ${
+                      className={`rounded-md border px-3 py-1.5 text-xs font-semibold transition ${
                         contentEditorMode === "rich"
-                          ? "border-green-600 bg-green-600 text-white"
-                          : "border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50"
+                          ? "border-[color:var(--primary)] bg-[color:var(--primary)] text-[color:var(--on-primary)] shadow-sm"
+                          : "border-[color:var(--border)] bg-white text-[color:var(--foreground)] hover:border-[color:var(--primary)] hover:text-[color:var(--primary)]"
                       }`}
                     >
                       Rich text
@@ -1376,6 +1486,12 @@ export default function AdminWikiEditPage() {
                       )
                     }
                   />
+                )}
+                {contentMissing && (
+                  <p className="text-sm text-red-600">
+                    Съдържанието е задължително. Добавете текст преди да
+                    запазите.
+                  </p>
                 )}
                 <p className="text-xs text-zinc-500">
                   За диаграми използвайте fenced code block с език{" "}
@@ -1425,38 +1541,85 @@ export default function AdminWikiEditPage() {
                 )}
               </section>
 
-              <div className="flex items-center justify-end gap-3 pt-2">
-                <Link
-                  href="/admin/wiki"
-                  className="text-sm font-medium text-zinc-700 hover:text-zinc-900"
-                  onClick={(event) => {
-                    if (!isDirty) {
-                      return;
-                    }
+              <div className="flex flex-col items-end gap-2 pt-2">
+                <div className="flex flex-col items-end gap-1 text-right">
+                  {missingFields.length > 0 && (
+                    <p
+                      className="max-w-md text-sm text-red-600"
+                      role="alert"
+                      aria-live="polite"
+                    >
+                      Липсват задължителни полета: {missingFields.join(", ")}.
+                      Попълнете ги, за да активирате бутона &quot;Запази&quot;.
+                    </p>
+                  )}
+                  {isDirty && (
+                    <p className="text-sm font-semibold text-orange-600">
+                      Има незапазени промени.
+                    </p>
+                  )}
+                </div>
+                <div className="flex flex-wrap items-center justify-end gap-3">
+                  <Link
+                    href="/admin/wiki"
+                    className="inline-flex items-center rounded-md border border-transparent bg-[color:var(--attention)] px-4 py-2 text-sm font-medium text-[color:var(--on-attention)] shadow-sm transition hover:opacity-90"
+                    onClick={(event) => {
+                      if (!isDirty) {
+                        return;
+                      }
 
-                    const confirmed = window.confirm(
-                      "Имате незапазени промени. Сигурни ли сте, че искате да напуснете страницата?",
-                    );
-                    if (!confirmed) {
-                      event.preventDefault();
-                    }
-                  }}
-                >
-                  Отказ
-                </Link>
-                <button
-                  type="submit"
-                  disabled={saving || !isDirty}
-                  className="inline-flex items-center rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-70"
-                >
-                  {saving ? "Запазване..." : "Запази"}
-                </button>
+                      const confirmed = window.confirm(
+                        "Имате незапазени промени. Сигурни ли сте, че искате да напуснете страницата?",
+                      );
+                      if (!confirmed) {
+                        event.preventDefault();
+                      }
+                    }}
+                  >
+                    Отказ
+                  </Link>
+                  <div
+                    className="relative inline-flex"
+                    onMouseEnter={() => {
+                      if (saveDisabledReason) {
+                        setSaveHintVisible(true);
+                      }
+                    }}
+                    onMouseLeave={() => setSaveHintVisible(false)}
+                    onFocus={() => {
+                      if (saveDisabledReason) {
+                        setSaveHintVisible(true);
+                      }
+                    }}
+                    onBlur={() => setSaveHintVisible(false)}
+                  >
+                    <button
+                      type="submit"
+                      disabled={saving || !isDirty || missingFields.length > 0}
+                      aria-describedby={
+                        saveDisabledReason ? "save-disabled-hint" : undefined
+                      }
+                      className="inline-flex items-center rounded-md border border-transparent bg-[color:var(--primary)] px-4 py-2 text-sm font-medium text-[color:var(--on-primary)] shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
+                    >
+                      {saving ? "Запазване..." : "Запази"}
+                    </button>
+
+                    {saveHintVisible && saveDisabledReason && (
+                      <div
+                        id="save-disabled-hint"
+                        role="status"
+                        className="pointer-events-none absolute left-1/2 top-full mt-2 w-72 -translate-x-1/2 rounded-lg border border-zinc-200 bg-white px-4 py-3 text-xs text-zinc-800 shadow-xl"
+                      >
+                        <div className="flex items-start gap-2">
+                          <span className="mt-0.5 text-green-600">ℹ️</span>
+                          <p>{saveDisabledReason}</p>
+                        </div>
+                        <span className="absolute -top-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 border-l border-t border-zinc-200 bg-white" />
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
-              {isDirty && (
-                <p className="pt-2 text-right text-sm font-semibold text-orange-600">
-                  Има незапазени промени.
-                </p>
-              )}
             </form>
 
             <section
@@ -1477,7 +1640,7 @@ export default function AdminWikiEditPage() {
                   type="button"
                   onClick={handleUploadClick}
                   disabled={uploading || !articleId}
-                  className="inline-flex items-center rounded-md bg-zinc-800 px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-zinc-900 disabled:cursor-not-allowed disabled:opacity-70"
+                  className="inline-flex items-center rounded-md border border-transparent bg-[color:var(--primary)] px-3 py-1.5 text-xs font-medium text-[color:var(--on-primary)] shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   {uploading ? "Качване..." : "Upload image"}
                 </button>
@@ -1574,13 +1737,39 @@ export default function AdminWikiEditPage() {
             </section>
 
             <section
+              id="versions"
+              tabIndex={-1}
               aria-label="Версии на статията"
               className="border-t border-zinc-200 pt-4"
+              style={
+                versionsSectionHighlight
+                  ? {
+                      outline: "2px solid var(--primary)",
+                      outlineOffset: "6px",
+                      borderRadius: 10,
+                      background:
+                        "color-mix(in srgb, var(--primary) 6%, transparent)",
+                    }
+                  : undefined
+              }
             >
               <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-                <h3 className="text-sm font-semibold text-zinc-900">
-                  Версии на статията
-                </h3>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-semibold text-zinc-900">
+                    Версии на статията
+                  </h3>
+                  {versionsSectionHighlight && (
+                    <span
+                      className="rounded border px-2 py-0.5 text-xs font-semibold"
+                      style={{
+                        color: "var(--primary)",
+                        borderColor: "var(--primary)",
+                      }}
+                    >
+                      Погледнете тук
+                    </span>
+                  )}
+                </div>
               </div>
 
               {versionsLoading && (
@@ -1798,7 +1987,7 @@ export default function AdminWikiEditPage() {
                           type="button"
                           onClick={exportVisibleVersionsCsv}
                           disabled={visibleVersions.length === 0}
-                          className="rounded-md border border-zinc-300 bg-white px-2 py-1 text-xs font-medium text-zinc-700 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60"
+                          className="inline-flex items-center rounded-md border border-transparent bg-[color:var(--primary)] px-3 py-1 text-xs font-medium text-[color:var(--on-primary)] shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
                         >
                           Export CSV
                         </button>
@@ -1816,7 +2005,7 @@ export default function AdminWikiEditPage() {
                           type="button"
                           onClick={handleCompareSelected}
                           disabled={compareSelectionIds.length !== 2}
-                          className="inline-flex items-center rounded-md bg-green-600 px-4 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-70"
+                          className="inline-flex items-center rounded-md border border-transparent bg-[color:var(--primary)] px-4 py-1.5 text-xs font-medium text-[color:var(--on-primary)] shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
                         >
                           Сравни избраните версии
                         </button>
@@ -1830,7 +2019,7 @@ export default function AdminWikiEditPage() {
                             setBulkDeleteStep1Open(true);
                           }}
                           disabled={!hasAnySelectedForDelete}
-                          className="inline-flex items-center rounded-md bg-red-600 px-4 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-70"
+                          className="inline-flex items-center rounded-md border border-transparent bg-[color:var(--error)] px-4 py-1.5 text-xs font-medium text-[color:var(--on-error)] shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
                         >
                           Изтрий избраните
                         </button>

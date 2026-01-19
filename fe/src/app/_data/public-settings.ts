@@ -65,6 +65,7 @@ export type PublicSettings = {
         foreground?: string | null;
         primary?: string | null;
         secondary?: string | null;
+        attention?: string | null;
         error?: string | null;
         card?: string | null;
         border?: string | null;
@@ -82,6 +83,7 @@ export type PublicSettings = {
         foreground?: string | null;
         primary?: string | null;
         secondary?: string | null;
+        attention?: string | null;
         error?: string | null;
         card?: string | null;
         border?: string | null;

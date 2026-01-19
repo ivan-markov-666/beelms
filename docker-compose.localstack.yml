@@ -1,0 +1,16 @@
+services:
+  localstack:
+    image: localstack/localstack:3.0
+    container_name: beelms-localstack
+    environment:
+      SERVICES: s3
+      DEFAULT_REGION: eu-west-1
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+    ports:
+      - "4566:4566"
+    volumes:
+      - localstack-data:/var/lib/localstack
+
+volumes:
+  localstack-data:

@@ -450,6 +450,7 @@ export class AdminSettingsController {
     const url = await this.handleBrandingImageUpload(file, {
       prefix: 'cursor',
       maxBytes: 256 * 1024,
+      allowedMimeTypes: ['image/png', 'image/webp'],
     });
     return { url };
   }
@@ -463,6 +464,7 @@ export class AdminSettingsController {
     const url = await this.handleBrandingImageUpload(file, {
       prefix: 'cursor-light',
       maxBytes: 256 * 1024,
+      allowedMimeTypes: ['image/png', 'image/webp'],
     });
     this.deletePreviousBrandingFile(previousUrl);
     return { url };
@@ -477,6 +479,7 @@ export class AdminSettingsController {
     const url = await this.handleBrandingImageUpload(file, {
       prefix: 'cursor-dark',
       maxBytes: 256 * 1024,
+      allowedMimeTypes: ['image/png', 'image/webp'],
     });
     this.deletePreviousBrandingFile(previousUrl);
     return { url };
@@ -491,6 +494,7 @@ export class AdminSettingsController {
     const url = await this.handleBrandingImageUpload(file, {
       prefix: 'cursor-pointer',
       maxBytes: 256 * 1024,
+      allowedMimeTypes: ['image/png', 'image/webp'],
     });
     this.deletePreviousBrandingFile(previousUrl);
     return { url };
@@ -505,6 +509,7 @@ export class AdminSettingsController {
     const url = await this.handleBrandingImageUpload(file, {
       prefix: 'cursor-pointer-light',
       maxBytes: 256 * 1024,
+      allowedMimeTypes: ['image/png', 'image/webp'],
     });
     this.deletePreviousBrandingFile(previousUrl);
     return { url };
@@ -519,6 +524,7 @@ export class AdminSettingsController {
     const url = await this.handleBrandingImageUpload(file, {
       prefix: 'cursor-pointer-dark',
       maxBytes: 256 * 1024,
+      allowedMimeTypes: ['image/png', 'image/webp'],
     });
     this.deletePreviousBrandingFile(previousUrl);
     return { url };

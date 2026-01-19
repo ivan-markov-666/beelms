@@ -7,6 +7,7 @@ import {
   InstanceFeatures,
   InstanceLanguages,
   InstanceSeo,
+  InstanceBackupConfig,
   InstanceSocialCredentials,
   SocialProviderCredentials,
   type SocialProviderName,
@@ -114,6 +115,7 @@ export class SettingsService {
           foreground: '#171717',
           primary: '#16a34a',
           secondary: '#2563eb',
+          attention: '#f59e0b',
           error: '#dc2626',
           card: '#ffffff',
           border: '#e5e7eb',
@@ -131,6 +133,7 @@ export class SettingsService {
           foreground: '#ededed',
           primary: '#22c55e',
           secondary: '#60a5fa',
+          attention: '#fbbf24',
           error: '#f87171',
           card: '#111827',
           border: '#374151',
@@ -271,6 +274,41 @@ export class SettingsService {
       | undefined = this.buildEnvSocialCredentialEntries();
 
     return entries && Object.keys(entries).length > 0 ? entries : null;
+  }
+
+  private buildDefaultBackupConfig(): InstanceBackupConfig | null {
+    return {
+      remote: {
+        enabled: false,
+        provider: 's3',
+        s3: {
+          accessKeyId: null,
+          secretAccessKey: null,
+          bucket: null,
+          region: null,
+          prefix: 'backups',
+        },
+      },
+      schedule: {
+        enabled: false,
+        timezone: 'Europe/Sofia',
+        timeOfDay: '03:00',
+        timesOfDay: ['03:00'],
+        lastRunAt: null,
+        lastRunKey: null,
+        encryptionPassword: null,
+      },
+      retention: {
+        time: {
+          enabled: false,
+          period: 'monthly',
+        },
+        count: {
+          enabled: false,
+          keepLast: 100,
+        },
+      },
+    };
   }
 
   async getOrCreateInstanceConfig(): Promise<InstanceConfig> {
@@ -501,6 +539,46 @@ export class SettingsService {
         changed = true;
       }
 
+      if (!existing.backupConfig) {
+        existing.backupConfig = this.buildDefaultBackupConfig();
+        changed = true;
+      } else {
+        const defaultBackup = this.buildDefaultBackupConfig();
+        const next = {
+          ...(defaultBackup ?? {}),
+          ...(existing.backupConfig ?? {}),
+          remote: {
+            ...(defaultBackup?.remote ?? {}),
+            ...(existing.backupConfig?.remote ?? {}),
+            s3: {
+              ...(defaultBackup?.remote?.s3 ?? {}),
+              ...(existing.backupConfig?.remote?.s3 ?? {}),
+            },
+          },
+          schedule: {
+            ...(defaultBackup?.schedule ?? {}),
+            ...(existing.backupConfig?.schedule ?? {}),
+          },
+          retention: {
+            ...(defaultBackup?.retention ?? {}),
+            ...(existing.backupConfig?.retention ?? {}),
+            time: {
+              ...(defaultBackup?.retention?.time ?? {}),
+              ...(existing.backupConfig?.retention?.time ?? {}),
+            },
+            count: {
+              ...(defaultBackup?.retention?.count ?? {}),
+              ...(existing.backupConfig?.retention?.count ?? {}),
+            },
+          },
+        };
+
+        if (JSON.stringify(next) !== JSON.stringify(existing.backupConfig)) {
+          existing.backupConfig = next;
+          changed = true;
+        }
+      }
+
       // IMPORTANT: avoid persisting implicit backfills from a getter.
       // The next explicit write (e.g. updateInstanceConfig) will persist the
       // normalized/full shape anyway, and this prevents double-saves in tests.
@@ -513,6 +591,7 @@ export class SettingsService {
       languages: this.buildDefaultLanguages(),
       seo: this.buildDefaultSeo(),
       socialCredentials: this.buildDefaultSocialCredentials(),
+      backupConfig: this.buildDefaultBackupConfig(),
     });
 
     return this.instanceConfigRepo.save(created);
@@ -1755,6 +1834,7 @@ export class SettingsService {
             foreground: normalizeColor(asString(obj.foreground) ?? undefined),
             primary: normalizeColor(asString(obj.primary) ?? undefined),
             secondary: normalizeColor(asString(obj.secondary) ?? undefined),
+            attention: normalizeColor(asString(obj.attention) ?? undefined),
             error: normalizeColor(asString(obj.error) ?? undefined),
             card: normalizeColor(asString(obj.card) ?? undefined),
             border: normalizeColor(asString(obj.border) ?? undefined),
@@ -1859,6 +1939,7 @@ export class SettingsService {
             foreground: normalizeColor(obj.foreground),
             primary: normalizeColor(obj.primary),
             secondary: normalizeColor(obj.secondary),
+            attention: normalizeColor(obj.attention),
             error: normalizeColor(obj.error),
             card: normalizeColor(obj.card),
             border: normalizeColor(obj.border),

@@ -40,6 +40,9 @@ import { LegalModule } from './legal/legal.module';
 import { LegalPage } from './legal/legal-page.entity';
 import { CustomPagesModule } from './custom-pages/custom-pages.module';
 import { CustomPage } from './custom-pages/custom-page.entity';
+import { BackupsModule } from './backups/backups.module';
+import { Backup } from './backups/backup.entity';
+import { BackupLog } from './backups/backup-log.entity';
 
 @Module({
   imports: [
@@ -76,6 +79,8 @@ import { CustomPage } from './custom-pages/custom-page.entity';
         InstanceConfig,
         LegalPage,
         CustomPage,
+        Backup,
+        BackupLog,
       ],
       synchronize: false,
     }),
@@ -89,6 +94,7 @@ import { CustomPage } from './custom-pages/custom-page.entity';
     SettingsModule,
     LegalModule,
     CustomPagesModule,
+    BackupsModule,
   ],
   controllers: [AppController],
   providers: [

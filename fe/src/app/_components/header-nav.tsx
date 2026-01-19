@@ -406,7 +406,7 @@ export function HeaderNav({
     className?: string,
     newTab?: boolean,
   ) => {
-    const effectiveClass = className ?? "hover:text-green-600";
+    const effectiveClass = className ?? "hover:text-[color:var(--primary)]";
     const shouldOpenInNewTab = newTab === true;
     if (isExternalHref(href)) {
       return (
@@ -497,7 +497,7 @@ export function HeaderNav({
     if (!hasChildren) {
       const className =
         depth > 0
-          ? "rounded-md px-2 py-1 hover:bg-gray-50 hover:text-green-600"
+          ? "rounded-md px-2 py-1 hover:bg-gray-50 hover:text-[color:var(--primary)]"
           : undefined;
       return renderHref(item.href, label, id, className, item.newTab === true);
     }
@@ -508,8 +508,8 @@ export function HeaderNav({
 
     const triggerClass =
       depth === 0
-        ? "cursor-pointer hover:text-green-600"
-        : "cursor-pointer rounded-md px-2 py-1 hover:bg-gray-50 hover:text-green-600";
+        ? "cursor-pointer hover:text-[color:var(--primary)]"
+        : "cursor-pointer rounded-md px-2 py-1 hover:bg-gray-50 hover:text-[color:var(--primary)]";
 
     const clickable = item.clickable !== false;
     const trigger = clickable ? (
@@ -566,7 +566,7 @@ export function HeaderNav({
                 priority
               />
             ) : (
-              <span className="text-2xl font-bold text-green-600">
+              <span className="text-2xl font-bold text-[color:var(--primary)]">
                 {appName}
               </span>
             )}
@@ -584,7 +584,10 @@ export function HeaderNav({
                 .slice(0, 12)
                 .map((item) => renderHeaderMenuItem(item, 0))}
               {isAdmin === true && (
-                <Link href="/admin" className="hover:text-green-600">
+                <Link
+                  href="/admin"
+                  className="hover:text-[color:var(--primary)]"
+                >
                   {t(lang, "nav", "admin")}
                 </Link>
               )}
@@ -592,58 +595,79 @@ export function HeaderNav({
           ) : (
             <>
               {showWiki && (
-                <Link href="/wiki" className="hover:text-green-600">
+                <Link
+                  href="/wiki"
+                  className="hover:text-[color:var(--primary)]"
+                >
                   {t(lang, "nav", "wiki")}
                 </Link>
               )}
               {showCourses && (
-                <Link href="/courses" className="hover:text-green-600">
+                <Link
+                  href="/courses"
+                  className="hover:text-[color:var(--primary)]"
+                >
                   {t(lang, "nav", "courses")}
                 </Link>
               )}
               {showFaq && (
-                <Link href="/faq" className="hover:text-green-600">
+                <Link href="/faq" className="hover:text-[color:var(--primary)]">
                   FAQ
                 </Link>
               )}
               {showSupport && (
-                <Link href="/support" className="hover:text-green-600">
+                <Link
+                  href="/support"
+                  className="hover:text-[color:var(--primary)]"
+                >
                   Support
                 </Link>
               )}
               {showTerms && (
-                <Link href="/legal/terms" className="hover:text-green-600">
+                <Link
+                  href="/legal/terms"
+                  className="hover:text-[color:var(--primary)]"
+                >
                   {t(lang, "common", "legalFooterTermsLink")}
                 </Link>
               )}
               {showPrivacy && (
-                <Link href="/legal/privacy" className="hover:text-green-600">
+                <Link
+                  href="/legal/privacy"
+                  className="hover:text-[color:var(--primary)]"
+                >
                   {t(lang, "common", "legalFooterPrivacyLink")}
                 </Link>
               )}
               {showCookiePolicy && (
                 <Link
                   href="/legal/cookie-policy"
-                  className="hover:text-green-600"
+                  className="hover:text-[color:var(--primary)]"
                 >
                   Cookie policy
                 </Link>
               )}
               {showImprint && (
-                <Link href="/legal/imprint" className="hover:text-green-600">
+                <Link
+                  href="/legal/imprint"
+                  className="hover:text-[color:var(--primary)]"
+                >
                   Imprint
                 </Link>
               )}
               {showAccessibility && (
                 <Link
                   href="/legal/accessibility"
-                  className="hover:text-green-600"
+                  className="hover:text-[color:var(--primary)]"
                 >
                   Accessibility
                 </Link>
               )}
               {showContact && (
-                <Link href="/contact" className="hover:text-green-600">
+                <Link
+                  href="/contact"
+                  className="hover:text-[color:var(--primary)]"
+                >
                   {t(lang, "common", "footerContactLink")}
                 </Link>
               )}
@@ -651,19 +675,25 @@ export function HeaderNav({
                 <Link
                   key={p.slug}
                   href={`/p/${p.slug}`}
-                  className="hover:text-green-600"
+                  className="hover:text-[color:var(--primary)]"
                   prefetch={false}
                 >
                   {p.title || p.slug}
                 </Link>
               ))}
               {showMyCourses && (
-                <Link href="/my-courses" className="hover:text-green-600">
+                <Link
+                  href="/my-courses"
+                  className="hover:text-[color:var(--primary)]"
+                >
                   {t(lang, "nav", "myCourses")}
                 </Link>
               )}
               {isAdmin === true && (
-                <Link href="/admin" className="hover:text-green-600">
+                <Link
+                  href="/admin"
+                  className="hover:text-[color:var(--primary)]"
+                >
                   {t(lang, "nav", "admin")}
                 </Link>
               )}
@@ -697,7 +727,7 @@ export function HeaderNav({
                     setThemeModeOpen(true);
                   }
                 }}
-                className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-2 py-1 text-sm font-medium text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-2 py-1 text-sm font-medium text-gray-900 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
                 aria-label="Theme"
               >
                 <span className="capitalize">{themeMode}</span>
@@ -790,12 +820,18 @@ export function HeaderNav({
           {hasToken === false && showAuth && (
             <>
               {showAuthLogin ? (
-                <Link href="/auth/login" className="hover:text-green-600">
+                <Link
+                  href="/auth/login"
+                  className="hover:text-[color:var(--primary)]"
+                >
                   {t(lang, "nav", "login")}
                 </Link>
               ) : null}
               {showAuthRegister ? (
-                <Link href="/auth/register" className="hover:text-green-600">
+                <Link
+                  href="/auth/register"
+                  className="hover:text-[color:var(--primary)]"
+                >
                   {t(lang, "nav", "register")}
                 </Link>
               ) : null}
@@ -804,13 +840,16 @@ export function HeaderNav({
           {hasToken === true && (
             <>
               {showProfile ? (
-                <Link href="/profile" className="hover:text-green-600">
+                <Link
+                  href="/profile"
+                  className="hover:text-[color:var(--primary)]"
+                >
                   {t(lang, "nav", "profile")}
                 </Link>
               ) : null}
               <button
                 type="button"
-                className="hover:text-green-600"
+                className="hover:text-[color:var(--primary)]"
                 onClick={handleLogout}
               >
                 {t(lang, "nav", "logout")}

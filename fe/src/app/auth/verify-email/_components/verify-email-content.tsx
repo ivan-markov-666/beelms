@@ -170,7 +170,7 @@ export function VerifyEmailContent() {
           <p
             className={`text-sm ${
               status === "success"
-                ? "text-green-600"
+                ? "text-[color:var(--primary)]"
                 : status === "invalid_or_expired" || status === "missing_token"
                   ? "text-amber-700"
                   : "text-red-600"
@@ -185,7 +185,12 @@ export function VerifyEmailContent() {
           {status === "success" && (
             <button
               type="button"
-              className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:ring-offset-1"
+              className="rounded-md border px-4 py-2 text-sm font-medium shadow-sm hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-1"
+              style={{
+                backgroundColor: "var(--primary)",
+                borderColor: "var(--primary)",
+                color: "var(--on-primary)",
+              }}
               onClick={hasAccessToken ? goToProfile : goToLogin}
             >
               {hasAccessToken ? "Към профила" : "Към страницата за вход"}
@@ -195,7 +200,12 @@ export function VerifyEmailContent() {
           {(status === "invalid_or_expired" || status === "missing_token") && (
             <button
               type="button"
-              className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:ring-offset-1"
+              className="rounded-md border px-4 py-2 text-sm font-medium shadow-sm hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-1"
+              style={{
+                backgroundColor: "var(--primary)",
+                borderColor: "var(--primary)",
+                color: "var(--on-primary)",
+              }}
               onClick={goToLogin}
             >
               Към страницата за вход
@@ -205,7 +215,12 @@ export function VerifyEmailContent() {
           {status === "error" && (
             <button
               type="button"
-              className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:ring-offset-1"
+              className="rounded-md border px-4 py-2 text-sm font-medium shadow-sm hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-1"
+              style={{
+                backgroundColor: "var(--primary)",
+                borderColor: "var(--primary)",
+                color: "var(--on-primary)",
+              }}
               onClick={goHome}
             >
               Към началната страница

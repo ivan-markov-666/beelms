@@ -38,25 +38,53 @@ The README explains how to run the project locally (dev mode and Docker). Stage/
 
 ## 1.1. DB migrations & seed (quick commands)
 
-Run from repository root (wrappers to scripts in `be/`):
+> **Reminder:** Database schema changes are always applied via CLI (locally or inside Docker). The admin panel cannot run migrations; it only manages application data. If the DB schema differs from the current code, run the migrations before starting the API.
+
+### 1.1.1. Local TypeORM migrations (host machine)
+
+Run from repository root using `npm --prefix be ...` helpers:
 
 ```bash
-# Migration run/check/show/revert
-npm run be:migration:run
-npm run be:migration:check
-npm run be:migration:show
-npm run be:migration:revert
+# Apply / validate / inspect / revert
+npm --prefix be run migration:run
+npm --prefix be run migration:check
+npm --prefix be run migration:show
+npm --prefix be run migration:revert
 
-# OpenAPI lint
-npm run docs:openapi:lint
+# Generate a new migration after editing entities
+npm --prefix be run typeorm -- migration:generate src/migrations/AddSomethingDescriptive
 
-# Seed (dev, no build)
-npm run be:seed:dev
+# Run seeds (compiled output)
+npm --prefix be run seed:wiki
+npm --prefix be run seed:courses
 
-# Seed (compiled; requires `npm --prefix be run build` if triggered from host)
-npm run be:seed:wiki
-npm run be:seed:courses
+# Dev-only seeds (ts-node)
+npm --prefix be run seed:instance-config:dev
+npm --prefix be run seed:wiki:dev
+npm --prefix be run seed:courses:dev
 ```
+
+### 1.1.2. Dockerized migrations
+
+When using Docker Compose, migrations can run in two places:
+
+1. **`migrate` service (automatic):** `docker compose up -d` builds the API image, waits for Postgres (`db`) to be healthy, then runs `npm run migration:run && npm run migration:check` in a throwaway container. The `api` service only starts after migrations succeed.
+2. **Manual execution inside Docker:** useful when you need to re-run migrations without restarting everything:
+
+   ```bash
+   # One-off container that uses the same image as api
+   docker compose run --rm migrate
+   ```
+
+3. **Manual commands inside the running API container:**
+
+   ```bash
+   docker compose exec api npm run migration:run
+   docker compose exec api npm run migration:revert
+   docker compose exec api npm run migration:show
+   ```
+
+> **Tip:** if you expose the DB port with `docker-compose.db-host.yml`, you can also run `npm --prefix be run migration:*` from the host against the Docker Postgres instance.
 
 ---
 

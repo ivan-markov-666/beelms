@@ -144,7 +144,14 @@ export function MarkTaskCompletedButton({
   if (completed) {
     return (
       <div className="space-y-3">
-        <div className="flex items-center gap-2 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+        <div
+          className="flex items-center gap-2 rounded-lg border px-4 py-3 text-sm"
+          style={{
+            borderColor: "var(--primary)",
+            backgroundColor: "color-mix(in srgb, var(--primary) 10%, white)",
+            color: "var(--primary)",
+          }}
+        >
           <svg
             className="h-5 w-5"
             fill="none"
@@ -165,7 +172,12 @@ export function MarkTaskCompletedButton({
         {typeof progressPercent === "number" && progressPercent >= 100 && (
           <Link
             href={`/my-courses/${encodeURIComponent(courseId)}/certificate`}
-            className="inline-flex items-center justify-center rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-700"
+            className="inline-flex items-center justify-center rounded-lg border px-4 py-2 text-sm font-semibold shadow-sm hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-1"
+            style={{
+              backgroundColor: "var(--primary)",
+              borderColor: "var(--primary)",
+              color: "var(--on-primary)",
+            }}
           >
             Certificate
           </Link>
@@ -180,7 +192,12 @@ export function MarkTaskCompletedButton({
         type="button"
         onClick={handleMarkCompleted}
         disabled={marking}
-        className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70"
+        className="inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium shadow-sm hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70"
+        style={{
+          backgroundColor: "var(--primary)",
+          borderColor: "var(--primary)",
+          color: "var(--on-primary)",
+        }}
       >
         {marking ? (
           <>
@@ -226,7 +243,7 @@ export function MarkTaskCompletedButton({
           </>
         )}
       </button>
-      {error && <p className="text-xs text-red-600">{error}</p>}
+      {error && <p className="text-xs text-[color:var(--error)]">{error}</p>}
     </div>
   );
 }

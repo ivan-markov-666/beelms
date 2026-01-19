@@ -6,7 +6,9 @@ import {
   IsObject,
   IsOptional,
   IsString,
+  Max,
   Matches,
+  Min,
   ArrayMinSize,
   Validate,
   ValidateIf,
@@ -20,10 +22,14 @@ import { Type } from 'class-transformer';
 export class AdminUpdateCursorHotspotDto {
   @IsOptional()
   @IsInt()
+  @Min(0)
+  @Max(255)
   x?: number | null;
 
   @IsOptional()
   @IsInt()
+  @Min(0)
+  @Max(255)
   y?: number | null;
 }
 
@@ -194,6 +200,11 @@ export class AdminUpdateThemePaletteDto {
   @IsOptional()
   @IsString()
   @Matches(ThemeHexColorConstraint.REGEX)
+  attention?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @Matches(ThemeHexColorConstraint.REGEX)
   error?: string | null;
 
   @IsOptional()
@@ -284,6 +295,11 @@ export class AdminUpdateThemePresetPaletteDto {
   @IsString()
   @Matches(ThemeHexColorConstraint.REGEX)
   secondary?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @Matches(ThemeHexColorConstraint.REGEX)
+  attention?: string | null;
 
   @IsOptional()
   @IsString()
