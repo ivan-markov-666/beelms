@@ -39,7 +39,11 @@ function normalizeDefaultLang(
   supported: string[],
 ): string {
   const normalized = (raw ?? "").trim().toLowerCase();
-  if (normalized && LANG_CODE_REGEX.test(normalized) && supported.includes(normalized)) {
+  if (
+    normalized &&
+    LANG_CODE_REGEX.test(normalized) &&
+    supported.includes(normalized)
+  ) {
     return normalized;
   }
   return supported[0] ?? "bg";
@@ -70,7 +74,9 @@ export function useAdminSupportedLanguages(): {
       }
 
       const data = (await res.json()) as PublicSettingsResponse;
-      const supported = normalizeSupportedLanguages(data.languages?.supported ?? []);
+      const supported = normalizeSupportedLanguages(
+        data.languages?.supported ?? [],
+      );
       const normalizedSupported = supported.length > 0 ? supported : ["bg"];
       setLanguages(normalizedSupported);
       setDefaultLanguage(

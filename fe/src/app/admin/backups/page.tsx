@@ -170,7 +170,8 @@ export default function AdminBackupsPage() {
     null,
   );
 
-  const [newBackupEncryptionPassword, setNewBackupEncryptionPassword] = useState("");
+  const [newBackupEncryptionPassword, setNewBackupEncryptionPassword] =
+    useState("");
   const [encryptionWarningOpen, setEncryptionWarningOpen] = useState(false);
 
   const [createSubmitting, setCreateSubmitting] = useState(false);
@@ -190,9 +191,12 @@ export default function AdminBackupsPage() {
   const [downloadOpen, setDownloadOpen] = useState(false);
   const [downloadSubmitting, setDownloadSubmitting] = useState(false);
   const [downloadError, setDownloadError] = useState<string | null>(null);
-  const [downloadPasswordDraft, setDownloadPasswordDraft] = useState<string>("");
+  const [downloadPasswordDraft, setDownloadPasswordDraft] =
+    useState<string>("");
 
-  const [remoteConfig, setRemoteConfig] = useState<RemoteBackupConfig | null>(null);
+  const [remoteConfig, setRemoteConfig] = useState<RemoteBackupConfig | null>(
+    null,
+  );
   const [initialRemoteConfig, setInitialRemoteConfig] =
     useState<RemoteBackupConfig | null>(null);
   const [remoteLoading, setRemoteLoading] = useState(false);
@@ -202,12 +206,13 @@ export default function AdminBackupsPage() {
   const [remoteTestOk, setRemoteTestOk] = useState<boolean | null>(null);
   const [remoteSecretDraft, setRemoteSecretDraft] = useState<string>("");
   const [remoteAccessKeyDraft, setRemoteAccessKeyDraft] = useState<string>("");
-  const [remoteToggleError, setRemoteToggleError] = useState<string | null>(null);
-  const [showDeleted, setShowDeleted] = useState(false);
-
-  const [scheduleConfig, setScheduleConfig] = useState<BackupScheduleConfig | null>(
+  const [remoteToggleError, setRemoteToggleError] = useState<string | null>(
     null,
   );
+  const [showDeleted, setShowDeleted] = useState(false);
+
+  const [scheduleConfig, setScheduleConfig] =
+    useState<BackupScheduleConfig | null>(null);
   const [initialScheduleConfig, setInitialScheduleConfig] =
     useState<BackupScheduleConfig | null>(null);
   const [scheduleLoading, setScheduleLoading] = useState(false);
@@ -223,9 +228,8 @@ export default function AdminBackupsPage() {
   const timezoneCloseTimer = useRef<number | null>(null);
   const timezoneInputRef = useRef<HTMLInputElement | null>(null);
 
-  const [retentionConfig, setRetentionConfig] = useState<BackupRetentionConfig | null>(
-    null,
-  );
+  const [retentionConfig, setRetentionConfig] =
+    useState<BackupRetentionConfig | null>(null);
   const [initialRetentionConfig, setInitialRetentionConfig] =
     useState<BackupRetentionConfig | null>(null);
   const [retentionLoading, setRetentionLoading] = useState(false);
@@ -238,17 +242,14 @@ export default function AdminBackupsPage() {
     Partial<Record<SaveOutcome["section"], SaveOutcome>>
   >({});
 
-  const clearSectionMessage = useCallback(
-    (section: SaveOutcome["section"]) => {
-      setSectionMessages((prev) => {
-        if (!prev[section]) return prev;
-        const next = { ...prev };
-        delete next[section];
-        return next;
-      });
-    },
-    [],
-  );
+  const clearSectionMessage = useCallback((section: SaveOutcome["section"]) => {
+    setSectionMessages((prev) => {
+      if (!prev[section]) return prev;
+      const next = { ...prev };
+      delete next[section];
+      return next;
+    });
+  }, []);
 
   const scheduleDirty = useMemo(() => {
     if (!scheduleConfig && !initialScheduleConfig) return false;
@@ -280,7 +281,8 @@ export default function AdminBackupsPage() {
     if (!retentionConfig && !initialRetentionConfig) return false;
     if (!retentionConfig || !initialRetentionConfig) return true;
     const sameConfig =
-      JSON.stringify(retentionConfig) === JSON.stringify(initialRetentionConfig);
+      JSON.stringify(retentionConfig) ===
+      JSON.stringify(initialRetentionConfig);
     if (!sameConfig) return true;
     const normalizedKeepLast = String(retentionConfig.count.keepLast ?? "");
     if (keepLastDraft.trim() !== normalizedKeepLast) return true;
@@ -306,12 +308,18 @@ export default function AdminBackupsPage() {
   }, [retentionDirty, clearSectionMessage]);
 
   const hasActiveJob = useMemo(() => {
-    return job && !job.finishedAt && job.stage !== "done" && job.stage !== "failed";
+    return (
+      job && !job.finishedAt && job.stage !== "done" && job.stage !== "failed"
+    );
   }, [job]);
 
   const hasDirtyChanges = scheduleDirty || remoteDirty || retentionDirty;
   const saveButtonDisabled =
-    globalSaving || scheduleSaving || remoteSaving || retentionSaving || !hasDirtyChanges;
+    globalSaving ||
+    scheduleSaving ||
+    remoteSaving ||
+    retentionSaving ||
+    !hasDirtyChanges;
 
   const visibleItems = useMemo(() => {
     if (showDeleted) {
@@ -321,7 +329,8 @@ export default function AdminBackupsPage() {
   }, [items, showDeleted]);
 
   const totalBackups = visibleItems.length;
-  const totalPages = totalBackups > 0 ? Math.max(1, Math.ceil(totalBackups / pageSize)) : 1;
+  const totalPages =
+    totalBackups > 0 ? Math.max(1, Math.ceil(totalBackups / pageSize)) : 1;
   const safeCurrentPage = Math.min(Math.max(currentPage, 1), totalPages);
   const pageStartIndex = (safeCurrentPage - 1) * pageSize;
   const pageEndIndex = pageStartIndex + pageSize;
@@ -335,7 +344,9 @@ export default function AdminBackupsPage() {
     const times = Array.isArray(scheduleConfig.timesOfDay)
       ? scheduleConfig.timesOfDay
       : [];
-    const normalized = times.map((t) => (t ?? "").trim()).filter((t) => t.length > 0);
+    const normalized = times
+      .map((t) => (t ?? "").trim())
+      .filter((t) => t.length > 0);
 
     const unique = new Set(normalized);
     if (unique.size !== normalized.length) {
@@ -351,7 +362,10 @@ export default function AdminBackupsPage() {
 
   const timezoneOptions = useMemo(() => {
     try {
-      if (typeof Intl !== "undefined" && typeof Intl.supportedValuesOf === "function") {
+      if (
+        typeof Intl !== "undefined" &&
+        typeof Intl.supportedValuesOf === "function"
+      ) {
         return Intl.supportedValuesOf("timeZone");
       }
     } catch {
@@ -395,13 +409,17 @@ export default function AdminBackupsPage() {
     const groups = new Map<string, string[]>();
     for (const tz of filteredTimezones) {
       const raw = tz.split("/")[0]?.toLowerCase() ?? "other";
-      const label = continentLabels[raw] ?? raw.charAt(0).toUpperCase() + raw.slice(1);
+      const label =
+        continentLabels[raw] ?? raw.charAt(0).toUpperCase() + raw.slice(1);
       if (!groups.has(label)) {
         groups.set(label, []);
       }
       groups.get(label)?.push(tz);
     }
-    return Array.from(groups.entries()).map(([group, items]) => ({ group, items }));
+    return Array.from(groups.entries()).map(([group, items]) => ({
+      group,
+      items,
+    }));
   }, [filteredTimezones]);
 
   useEffect(() => {
@@ -479,7 +497,9 @@ export default function AdminBackupsPage() {
       });
 
       if (!res.ok) {
-        setRemoteError("Възникна грешка при зареждане на remote backup настройките.");
+        setRemoteError(
+          "Възникна грешка при зареждане на remote backup настройките.",
+        );
         setRemoteLoading(false);
         return;
       }
@@ -489,7 +509,9 @@ export default function AdminBackupsPage() {
       setInitialRemoteConfig(cloneConfig(data));
       setRemoteLoading(false);
     } catch {
-      setRemoteError("Възникна грешка при зареждане на remote backup настройките.");
+      setRemoteError(
+        "Възникна грешка при зареждане на remote backup настройките.",
+      );
       setRemoteLoading(false);
     }
   }, []);
@@ -514,7 +536,9 @@ export default function AdminBackupsPage() {
       });
 
       if (!res.ok) {
-        setRetentionError("Възникна грешка при зареждане на retention настройките.");
+        setRetentionError(
+          "Възникна грешка при зареждане на retention настройките.",
+        );
         setRetentionLoading(false);
         return;
       }
@@ -525,7 +549,9 @@ export default function AdminBackupsPage() {
       setInitialRetentionConfig(cloneConfig(data));
       setRetentionLoading(false);
     } catch {
-      setRetentionError("Възникна грешка при зареждане на retention настройките.");
+      setRetentionError(
+        "Възникна грешка при зареждане на retention настройките.",
+      );
       setRetentionLoading(false);
     }
   }, []);
@@ -759,7 +785,14 @@ export default function AdminBackupsPage() {
       setScheduleHasEncryptionPassword(next.hasEncryptionPassword === true);
       setScheduleEncryptionDraft("");
       setScheduleEncryptionClear(false);
-      setSectionMessages((prev) => ({ ...prev, schedule: { section: "schedule", ok: true, message: "Automatic backup schedule saved." } }));
+      setSectionMessages((prev) => ({
+        ...prev,
+        schedule: {
+          section: "schedule",
+          ok: true,
+          message: "Automatic backup schedule saved.",
+        },
+      }));
       return {
         section: "schedule",
         ok: true,
@@ -774,7 +807,13 @@ export default function AdminBackupsPage() {
     } finally {
       setScheduleSaving(false);
     }
-  }, [scheduleConfig, scheduleSaving, scheduleEncryptionDraft, scheduleEncryptionClear, scheduleValidationError]);
+  }, [
+    scheduleConfig,
+    scheduleSaving,
+    scheduleEncryptionDraft,
+    scheduleEncryptionClear,
+    scheduleValidationError,
+  ]);
 
   const saveRetention = useCallback(async (): Promise<SaveOutcome | null> => {
     if (!retentionConfig || retentionSaving) return null;
@@ -815,7 +854,9 @@ export default function AdminBackupsPage() {
         },
         count: {
           enabled: retentionConfig.count.enabled,
-          keepLast: retentionConfig.count.enabled ? parsedKeepLast : retentionConfig.count.keepLast,
+          keepLast: retentionConfig.count.enabled
+            ? parsedKeepLast
+            : retentionConfig.count.keepLast,
         },
       };
 
@@ -847,7 +888,14 @@ export default function AdminBackupsPage() {
       setRetentionConfig(next);
       setKeepLastDraft(String(next?.count?.keepLast ?? 100));
       setInitialRetentionConfig(cloneConfig(next));
-      setSectionMessages((prev) => ({ ...prev, retention: { section: "retention", ok: true, message: "Retention policy saved." } }));
+      setSectionMessages((prev) => ({
+        ...prev,
+        retention: {
+          section: "retention",
+          ok: true,
+          message: "Retention policy saved.",
+        },
+      }));
       return {
         section: "retention",
         ok: true,
@@ -924,7 +972,9 @@ export default function AdminBackupsPage() {
   const addScheduleTime = useCallback(() => {
     if (!scheduleConfig) return;
     const existing = Array.isArray(scheduleConfig.timesOfDay)
-      ? scheduleConfig.timesOfDay.map((t) => (t ?? "").trim()).filter((t) => t.length > 0)
+      ? scheduleConfig.timesOfDay
+          .map((t) => (t ?? "").trim())
+          .filter((t) => t.length > 0)
       : [];
     const used = new Set(existing);
 
@@ -938,7 +988,8 @@ export default function AdminBackupsPage() {
       return `${hh}:${mm}`;
     };
 
-    const start = existing.length > 0 ? toMinutes(existing[existing.length - 1]!) : 180;
+    const start =
+      existing.length > 0 ? toMinutes(existing[existing.length - 1]!) : 180;
     let next = "03:00";
     for (let i = 0; i < 24 * 60; i += 1) {
       const cand = fromMinutes((start + i) % (24 * 60));
@@ -981,12 +1032,15 @@ export default function AdminBackupsPage() {
       const token = getAccessToken();
       if (!token) throw new Error("missing-token");
 
-      const res = await fetch(`${API_BASE_URL}/admin/backups/remote-config/test`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
+      const res = await fetch(
+        `${API_BASE_URL}/admin/backups/remote-config/test`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         },
-      });
+      );
 
       if (!res.ok) {
         const data = await readJsonSafe<{ message?: string | string[] }>(res);
@@ -1029,11 +1083,14 @@ export default function AdminBackupsPage() {
           const token = getAccessToken();
           if (!token) throw new Error("missing-token");
 
-          const res = await fetch(`${API_BASE_URL}/admin/backups/jobs/${jobId}`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
+          const res = await fetch(
+            `${API_BASE_URL}/admin/backups/jobs/${jobId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
             },
-          });
+          );
 
           if (!res.ok) {
             throw new Error(`failed-${res.status}`);
@@ -1046,7 +1103,8 @@ export default function AdminBackupsPage() {
 
           setJob(data);
 
-          const finished = !!data.finishedAt ||
+          const finished =
+            !!data.finishedAt ||
             data.stage === "done" ||
             data.stage === "failed";
 
@@ -1077,12 +1135,15 @@ export default function AdminBackupsPage() {
       const token = getAccessToken();
       if (!token) throw new Error("missing-token");
 
-      const res = await fetch(`${API_BASE_URL}/admin/backups/schedule/run-now`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
+      const res = await fetch(
+        `${API_BASE_URL}/admin/backups/schedule/run-now`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         },
-      });
+      );
 
       if (!res.ok) {
         const data = await readJsonSafe<{ message?: string | string[] }>(res);
@@ -1148,7 +1209,12 @@ export default function AdminBackupsPage() {
         setCreateSubmitting(false);
       }
     })();
-  }, [createSubmitting, hasActiveJob, newBackupEncryptionPassword, startPollingJob]);
+  }, [
+    createSubmitting,
+    hasActiveJob,
+    newBackupEncryptionPassword,
+    startPollingJob,
+  ]);
 
   const handleCreateBackupClick = useCallback(() => {
     if (newBackupEncryptionPassword.trim().length > 0) {
@@ -1339,12 +1405,15 @@ export default function AdminBackupsPage() {
     })();
   }, [downloadPasswordDraft, downloadSubmitting, downloadTarget]);
 
-  const openDelete = useCallback((b: BackupItem) => {
-    if (deleteSubmitting) return;
-    setDeleteTarget(b);
-    setDeleteError(null);
-    setDeleteOpen(true);
-  }, [deleteSubmitting]);
+  const openDelete = useCallback(
+    (b: BackupItem) => {
+      if (deleteSubmitting) return;
+      setDeleteTarget(b);
+      setDeleteError(null);
+      setDeleteOpen(true);
+    },
+    [deleteSubmitting],
+  );
 
   const confirmDelete = useCallback(() => {
     if (!deleteTarget || deleteSubmitting) return;
@@ -1356,12 +1425,15 @@ export default function AdminBackupsPage() {
         const token = getAccessToken();
         if (!token) throw new Error("missing-token");
 
-        const res = await fetch(`${API_BASE_URL}/admin/backups/${deleteTarget.id}`, {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
+        const res = await fetch(
+          `${API_BASE_URL}/admin/backups/${deleteTarget.id}`,
+          {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           },
-        });
+        );
 
         if (!res.ok) {
           throw new Error(`failed-${res.status}`);
@@ -1371,9 +1443,7 @@ export default function AdminBackupsPage() {
         setDeleteTarget(null);
         setItems((prev) =>
           prev.map((item) =>
-            item.id === deleteTarget.id
-              ? { ...item, status: "deleted" }
-              : item,
+            item.id === deleteTarget.id ? { ...item, status: "deleted" } : item,
           ),
         );
         void load();
@@ -1385,13 +1455,16 @@ export default function AdminBackupsPage() {
     })();
   }, [deleteTarget, deleteSubmitting, load]);
 
-  const openRestore = useCallback((b: BackupItem) => {
-    if (restoreSubmitting || hasActiveJob) return;
-    setRestoreTarget(b);
-    setRestoreError(null);
-    setRestorePasswordDraft("");
-    setRestoreStep(1);
-  }, [restoreSubmitting, hasActiveJob]);
+  const openRestore = useCallback(
+    (b: BackupItem) => {
+      if (restoreSubmitting || hasActiveJob) return;
+      setRestoreTarget(b);
+      setRestoreError(null);
+      setRestorePasswordDraft("");
+      setRestoreStep(1);
+    },
+    [restoreSubmitting, hasActiveJob],
+  );
 
   const closeRestore = useCallback(() => {
     if (restoreSubmitting) return;
@@ -1487,9 +1560,15 @@ export default function AdminBackupsPage() {
       {encryptionWarningOpen ? (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 px-4">
           <div className="w-full max-w-md rounded-lg border border-amber-200 bg-white p-5 shadow-2xl">
-            <h2 className="text-lg font-semibold text-amber-900">Backup ще бъде криптиран</h2>
+            <h2 className="text-lg font-semibold text-amber-900">
+              Backup ще бъде криптиран
+            </h2>
             <p className="mt-2 text-sm text-amber-800">
-              Попълнил си <strong>Encryption password</strong>. Това означава, че резервното копие ще бъде криптирано и ще може да бъде възстановено само с тази парола. Запиши я на сигурно място, защото не се съхранява никъде в системата и няма как да бъде възстановена.
+              Попълнил си <strong>Encryption password</strong>. Това означава,
+              че резервното копие ще бъде криптирано и ще може да бъде
+              възстановено само с тази парола. Запиши я на сигурно място, защото
+              не се съхранява никъде в системата и няма как да бъде
+              възстановена.
             </p>
             <div className="mt-4 flex justify-end gap-2 text-sm">
               <button
@@ -1538,8 +1617,9 @@ export default function AdminBackupsPage() {
                 title="Encryption password"
                 description={
                   <p>
-                    Тази парола се използва само за текущото backup качване/създаване.
-                    Не се съхранява в системата и ще е необходима при restore и download.
+                    Тази парола се използва само за текущото backup
+                    качване/създаване. Не се съхранява в системата и ще е
+                    необходима при restore и download.
                   </p>
                 }
               />
@@ -1585,8 +1665,8 @@ export default function AdminBackupsPage() {
                 description={
                   <p>
                     Scheduler-ът ще създава backup всеки ден в зададения час и
-                    timezone. Ако имате няколко инстанции, има защитен lock срещу
-                    двойно изпълнение.
+                    timezone. Ако имате няколко инстанции, има защитен lock
+                    срещу двойно изпълнение.
                   </p>
                 }
               />
@@ -1659,8 +1739,8 @@ export default function AdminBackupsPage() {
                       value={t}
                       onChange={(e) => {
                         const value = e.target.value;
-                        const updated = scheduleConfig.timesOfDay.map((item, i) =>
-                          i === idx ? value : item,
+                        const updated = scheduleConfig.timesOfDay.map(
+                          (item, i) => (i === idx ? value : item),
                         );
                         setScheduleConfig({
                           ...scheduleConfig,
@@ -1765,7 +1845,9 @@ export default function AdminBackupsPage() {
                           >
                             <span>{tz}</span>
                             {scheduleConfig.timezone === tz ? (
-                              <span className="text-[10px] font-semibold uppercase text-green-600">Selected</span>
+                              <span className="text-[10px] font-semibold uppercase text-green-600">
+                                Selected
+                              </span>
                             ) : null}
                           </button>
                         ))}
@@ -1802,7 +1884,8 @@ export default function AdminBackupsPage() {
                     }
                     value={scheduleEncryptionDraft}
                     onChange={(e) => {
-                      if (scheduleEncryptionClear) setScheduleEncryptionClear(false);
+                      if (scheduleEncryptionClear)
+                        setScheduleEncryptionClear(false);
                       setScheduleEncryptionDraft(e.target.value);
                     }}
                   />
@@ -1818,7 +1901,9 @@ export default function AdminBackupsPage() {
                   <button
                     type="button"
                     className="rounded-md border border-gray-300 px-3 py-1 text-gray-700 hover:bg-gray-100 disabled:opacity-40"
-                    disabled={!scheduleHasEncryptionPassword && !scheduleEncryptionDraft}
+                    disabled={
+                      !scheduleHasEncryptionPassword && !scheduleEncryptionDraft
+                    }
                     onClick={() => {
                       setScheduleEncryptionDraft("");
                       setScheduleEncryptionClear(true);
@@ -1852,14 +1937,17 @@ export default function AdminBackupsPage() {
         <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
           <div>
             <div className="flex items-center gap-2">
-              <p className="text-sm font-semibold text-gray-900">Retention policy</p>
+              <p className="text-sm font-semibold text-gray-900">
+                Retention policy
+              </p>
               <InfoTooltip
                 label="Как работи retention"
                 title="Retention policy"
                 description={
                   <p>
-                    Автоматично изтриване на стари backups по възраст и/или по лимит
-                    “keep last N”. Двата механизма могат да работят едновременно.
+                    Автоматично изтриване на стари backups по възраст и/или по
+                    лимит “keep last N”. Двата механизма могат да работят
+                    едновременно.
                   </p>
                 }
               />
@@ -1925,10 +2013,12 @@ export default function AdminBackupsPage() {
                 className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                 value={retentionConfig.time.period}
                 onChange={(e) => {
-                  const nextPeriod = e.target.value as BackupRetentionTimePeriod;
+                  const nextPeriod = e.target
+                    .value as BackupRetentionTimePeriod;
                   setRetentionConfig((prev) => {
                     if (!prev) return prev;
-                    const nextEnabled = nextPeriod !== "never" ? true : prev.time.enabled;
+                    const nextEnabled =
+                      nextPeriod !== "never" ? true : prev.time.enabled;
                     return {
                       ...prev,
                       time: {
@@ -2031,7 +2121,9 @@ export default function AdminBackupsPage() {
       <div className="mt-4 rounded-md border border-gray-200 bg-white p-4">
         <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="text-sm font-semibold text-gray-900">Remote backup storage (S3)</p>
+            <p className="text-sm font-semibold text-gray-900">
+              Remote backup storage (S3)
+            </p>
             <p className="mt-0.5 text-xs text-gray-600">
               Автоматичен sync на backups към S3 при създаване.
             </p>
@@ -2050,7 +2142,9 @@ export default function AdminBackupsPage() {
         </div>
 
         {remoteLoading ? (
-          <p className="mt-3 text-sm text-gray-500">Loading remote settings...</p>
+          <p className="mt-3 text-sm text-gray-500">
+            Loading remote settings...
+          </p>
         ) : null}
 
         {remoteConfig ? (
@@ -2079,7 +2173,10 @@ export default function AdminBackupsPage() {
 
             <label className="text-sm text-gray-900">
               <div className="flex items-center gap-1 text-xs text-gray-600">
-                Access Key ID <span className="text-red-500" aria-hidden="true">*</span>
+                Access Key ID{" "}
+                <span className="text-red-500" aria-hidden="true">
+                  *
+                </span>
                 <InfoTooltip
                   label="Какво означава Access Key ID"
                   title="Access Key ID"
@@ -2104,9 +2201,12 @@ export default function AdminBackupsPage() {
             <label className="text-sm text-gray-900">
               <div className="flex items-center gap-1 text-xs text-gray-600">
                 <span>
-                  Secret Access Key {remoteConfig.s3.hasSecretAccessKey ? "(saved)" : ""}
+                  Secret Access Key{" "}
+                  {remoteConfig.s3.hasSecretAccessKey ? "(saved)" : ""}
                 </span>
-                <span className="text-red-500" aria-hidden="true">*</span>
+                <span className="text-red-500" aria-hidden="true">
+                  *
+                </span>
                 <InfoTooltip
                   label="Какво означава Secret Access Key"
                   title="Secret Access Key"
@@ -2115,7 +2215,9 @@ export default function AdminBackupsPage() {
               </div>
               <input
                 type="password"
-                placeholder={remoteConfig.s3.hasSecretAccessKey ? "••••••••" : ""}
+                placeholder={
+                  remoteConfig.s3.hasSecretAccessKey ? "••••••••" : ""
+                }
                 className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                 value={remoteSecretDraft}
                 onChange={(e) => {
@@ -2127,7 +2229,10 @@ export default function AdminBackupsPage() {
 
             <label className="text-sm text-gray-900">
               <div className="flex items-center gap-1 text-xs text-gray-600">
-                Bucket <span className="text-red-500" aria-hidden="true">*</span>
+                Bucket{" "}
+                <span className="text-red-500" aria-hidden="true">
+                  *
+                </span>
                 <InfoTooltip
                   label="Какво означава Bucket"
                   title="Bucket"
@@ -2149,7 +2254,10 @@ export default function AdminBackupsPage() {
 
             <label className="text-sm text-gray-900">
               <div className="flex items-center gap-1 text-xs text-gray-600">
-                Region <span className="text-red-500" aria-hidden="true">*</span>
+                Region{" "}
+                <span className="text-red-500" aria-hidden="true">
+                  *
+                </span>
                 <InfoTooltip
                   label="Какво означава Region"
                   title="Region"
@@ -2301,9 +2409,7 @@ export default function AdminBackupsPage() {
           >
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-sm font-semibold">
-                  Upload successful
-                </p>
+                <p className="text-sm font-semibold">Upload successful</p>
                 <p className="mt-0.5 text-xs">
                   {uploadResult.preview.originalFilename}
                 </p>
@@ -2319,29 +2425,47 @@ export default function AdminBackupsPage() {
 
             <div className="mt-2 grid gap-1 text-xs">
               <div>
-                Stored as: <span className="font-semibold">{uploadResult.backup.filename}</span>
+                Stored as:{" "}
+                <span className="font-semibold">
+                  {uploadResult.backup.filename}
+                </span>
               </div>
 
               <div>
-                Size: <span className="font-semibold">{formatBytes(uploadResult.backup.sizeBytes)}</span>
+                Size:{" "}
+                <span className="font-semibold">
+                  {formatBytes(uploadResult.backup.sizeBytes)}
+                </span>
               </div>
 
               <div className="break-all">
-                SHA256: <span className="font-semibold">{uploadResult.backup.sha256}</span>
+                SHA256:{" "}
+                <span className="font-semibold">
+                  {uploadResult.backup.sha256}
+                </span>
               </div>
               {uploadResult.preview.detectedDbVersion ? (
                 <div>
-                  DB: <span className="font-semibold">{uploadResult.preview.detectedDbVersion}</span>
+                  DB:{" "}
+                  <span className="font-semibold">
+                    {uploadResult.preview.detectedDbVersion}
+                  </span>
                 </div>
               ) : null}
               {uploadResult.preview.detectedPgDumpVersion ? (
                 <div>
-                  pg_dump: <span className="font-semibold">{uploadResult.preview.detectedPgDumpVersion}</span>
+                  pg_dump:{" "}
+                  <span className="font-semibold">
+                    {uploadResult.preview.detectedPgDumpVersion}
+                  </span>
                 </div>
               ) : null}
               {uploadResult.preview.detectedDumpedOn ? (
                 <div>
-                  Dumped on: <span className="font-semibold">{uploadResult.preview.detectedDumpedOn}</span>
+                  Dumped on:{" "}
+                  <span className="font-semibold">
+                    {uploadResult.preview.detectedDumpedOn}
+                  </span>
                 </div>
               ) : null}
             </div>
@@ -2378,7 +2502,9 @@ export default function AdminBackupsPage() {
             <div className="h-2 w-full overflow-hidden rounded bg-gray-100">
               <div
                 className="h-full bg-[color:var(--primary)] transition-all"
-                style={{ width: `${Math.max(0, Math.min(100, job?.percent ?? 0))}%` }}
+                style={{
+                  width: `${Math.max(0, Math.min(100, job?.percent ?? 0))}%`,
+                }}
               />
             </div>
             <div className="mt-1 flex justify-between text-[11px] text-gray-500">
@@ -2406,9 +2532,12 @@ export default function AdminBackupsPage() {
       <div className="mt-6 rounded-md border border-gray-200 bg-white p-4">
         <div className="flex flex-col gap-3">
           <div>
-            <p className="text-sm font-semibold text-gray-900">Запази настройките</p>
+            <p className="text-sm font-semibold text-gray-900">
+              Запази настройките
+            </p>
             <p className="text-xs text-gray-600">
-              Съхранява автоматичните backups, retention и remote sync конфигурациите.
+              Съхранява автоматичните backups, retention и remote sync
+              конфигурациите.
             </p>
           </div>
 
@@ -2448,7 +2577,9 @@ export default function AdminBackupsPage() {
       <div className="mt-6 flex flex-col gap-2 border-t border-gray-100 pt-4 md:flex-row md:items-center md:justify-between">
         <div>
           <p className="text-sm font-semibold text-gray-900">Backups</p>
-          <p className="text-xs text-gray-500">Последните създадени и качени архиви.</p>
+          <p className="text-xs text-gray-500">
+            Последните създадени и качени архиви.
+          </p>
         </div>
         <div className="flex items-center gap-3 text-xs text-gray-600">
           <span>Показвай изтритите backup-и</span>
@@ -2498,7 +2629,9 @@ export default function AdminBackupsPage() {
                 <tr key={b.id} className="hover:bg-gray-50">
                   <td className="px-2 py-2">
                     <div className="flex flex-wrap items-center gap-2">
-                      <div className="font-medium text-gray-900">{b.filename}</div>
+                      <div className="font-medium text-gray-900">
+                        {b.filename}
+                      </div>
                       {b.isEncrypted ? (
                         <span className="rounded border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-800">
                           Encrypted
@@ -2528,10 +2661,12 @@ export default function AdminBackupsPage() {
                         <span className="font-medium text-gray-900">
                           {b.deletedReason === "retention"
                             ? "Auto (retention)"
-                            : b.deletedByEmail ?? "Manual"}
+                            : (b.deletedByEmail ?? "Manual")}
                         </span>
                         {b.deletedAt ? (
-                          <span className="text-xs text-gray-500">{formatDateTime(b.deletedAt)}</span>
+                          <span className="text-xs text-gray-500">
+                            {formatDateTime(b.deletedAt)}
+                          </span>
                         ) : null}
                       </div>
                     ) : (
@@ -2608,7 +2743,8 @@ export default function AdminBackupsPage() {
         description="Файлът ще бъде премахнат от диска и backup записът ще бъде маркиран като deleted. Това действие е необратимо."
         details={
           <div>
-            Backup: <span className="font-semibold">{deleteTarget?.filename}</span>
+            Backup:{" "}
+            <span className="font-semibold">{deleteTarget?.filename}</span>
           </div>
         }
         confirmLabel="Delete"
@@ -2627,7 +2763,9 @@ export default function AdminBackupsPage() {
 
       <ConfirmDialog
         open={restoreStep === 1}
-        title={restoreTarget?.type === "uploaded" ? "Apply backup" : "Restore backup"}
+        title={
+          restoreTarget?.type === "uploaded" ? "Apply backup" : "Restore backup"
+        }
         description={
           restoreTarget?.type === "uploaded"
             ? "Ще приложите качения backup и ще презапишете текущата база данни. Препоръчително е да го правите само в контролирана среда."
@@ -2635,7 +2773,8 @@ export default function AdminBackupsPage() {
         }
         details={
           <div>
-            Backup: <span className="font-semibold">{restoreTarget?.filename}</span>
+            Backup:{" "}
+            <span className="font-semibold">{restoreTarget?.filename}</span>
           </div>
         }
         confirmLabel="Continue"
@@ -2649,7 +2788,11 @@ export default function AdminBackupsPage() {
 
       <ConfirmDialog
         open={restoreStep === 2}
-        title={restoreTarget?.type === "uploaded" ? "Confirm apply" : "Confirm restore"}
+        title={
+          restoreTarget?.type === "uploaded"
+            ? "Confirm apply"
+            : "Confirm restore"
+        }
         description={
           restoreTarget?.type === "uploaded"
             ? "Последно потвърждение: apply е необратимо и ще замени данните в базата. Системата ще направи pre-restore backup, но пак има риск."
@@ -2657,7 +2800,8 @@ export default function AdminBackupsPage() {
         }
         details={
           <div>
-            Backup: <span className="font-semibold">{restoreTarget?.filename}</span>
+            Backup:{" "}
+            <span className="font-semibold">{restoreTarget?.filename}</span>
             <div className="mt-3">
               <div className="text-xs text-gray-600">
                 Encryption password (optional; required for encrypted backups)
@@ -2686,7 +2830,8 @@ export default function AdminBackupsPage() {
         description="Ако backup-ът е криптиран, трябва да въведете паролата."
         details={
           <div>
-            Backup: <span className="font-semibold">{downloadTarget?.filename}</span>
+            Backup:{" "}
+            <span className="font-semibold">{downloadTarget?.filename}</span>
             <div className="mt-3">
               <div className="text-xs text-gray-600">Encryption password</div>
               <input

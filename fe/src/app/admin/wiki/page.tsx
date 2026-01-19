@@ -1029,7 +1029,8 @@ export default function AdminWikiPage() {
                                 key={lng}
                                 className="rounded border px-2 py-1 text-xs font-semibold"
                                 style={{
-                                  borderColor: "color-mix(in srgb, var(--primary) 35%, transparent)",
+                                  borderColor:
+                                    "color-mix(in srgb, var(--primary) 35%, transparent)",
                                   background:
                                     "color-mix(in srgb, var(--primary) 10%, transparent)",
                                   color: "var(--foreground)",

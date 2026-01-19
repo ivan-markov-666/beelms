@@ -71,11 +71,17 @@ async function fetchWikiArticles(
     ? data.map((item) => {
         const fallbackLanguages = item.language ? [item.language] : [];
         const normalizedLanguages = Array.isArray(item.languages)
-          ? item.languages.filter((lng): lng is string => typeof lng === "string" && lng.trim().length > 0)
+          ? item.languages.filter(
+              (lng): lng is string =>
+                typeof lng === "string" && lng.trim().length > 0,
+            )
           : fallbackLanguages;
         return {
           ...item,
-          languages: normalizedLanguages.length > 0 ? normalizedLanguages : fallbackLanguages,
+          languages:
+            normalizedLanguages.length > 0
+              ? normalizedLanguages
+              : fallbackLanguages,
         };
       })
     : [];

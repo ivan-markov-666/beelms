@@ -6,7 +6,11 @@ type WikiArticleMetaProps = {
   updatedAt: string;
 };
 
-export function WikiArticleMeta({ language, languages, updatedAt }: WikiArticleMetaProps) {
+export function WikiArticleMeta({
+  language,
+  languages,
+  updatedAt,
+}: WikiArticleMetaProps) {
   const updatedDate = new Date(updatedAt);
 
   const formattedDate = Number.isNaN(updatedDate.getTime())
