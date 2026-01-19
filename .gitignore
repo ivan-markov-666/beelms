@@ -19,7 +19,7 @@ yarn-error.log*
 coverage/
 
 # Environment variables
-# .env
+ .env
 
 # IDE / Editor folders
 .idea/
