@@ -87,7 +87,6 @@ function formatDateTime(locale: string, dateIso: string): string {
   } catch {
     return dateIso;
   }
-
 }
 
 function getStatusBadgeForLang(
@@ -269,9 +268,7 @@ export default function AdminWikiPage() {
         const token = getAccessToken();
         if (!token) {
           if (!cancelled) {
-            setError(
-              t(headerLang, "common", "adminErrorMissingApiAccess"),
-            );
+            setError(t(headerLang, "common", "adminErrorMissingApiAccess"));
             setLoading(false);
           }
           return;
@@ -637,7 +634,10 @@ export default function AdminWikiPage() {
       <section className="space-y-4">
         <AdminBreadcrumbs
           items={[
-            { label: t(headerLang, "common", "adminDashboardTitle"), href: "/admin" },
+            {
+              label: t(headerLang, "common", "adminDashboardTitle"),
+              href: "/admin",
+            },
             { label: t(headerLang, "common", "adminWikiManagementTitle") },
           ]}
         />
@@ -900,7 +900,10 @@ export default function AdminWikiPage() {
               value={statusFilter}
               onChange={(next) => setStatusFilter(next)}
               options={[
-                { value: "", label: t(headerLang, "common", "adminWikiAllStatus") },
+                {
+                  value: "",
+                  label: t(headerLang, "common", "adminWikiAllStatus"),
+                },
                 {
                   value: "draft",
                   label: t(headerLang, "common", "adminWikiStatsDraft"),
@@ -982,7 +985,11 @@ export default function AdminWikiPage() {
                   options={[
                     {
                       value: "",
-                      label: t(headerLang, "common", "adminWikiBulkStatusPlaceholder"),
+                      label: t(
+                        headerLang,
+                        "common",
+                        "adminWikiBulkStatusPlaceholder",
+                      ),
                     },
                     {
                       value: "draft",
@@ -1022,7 +1029,8 @@ export default function AdminWikiPage() {
                   setPurgeAllOpen(true);
                 }}
               >
-                {t(headerLang, "common", "adminWikiDeleteAll")} ({purgeTotalCount})
+                {t(headerLang, "common", "adminWikiDeleteAll")} (
+                {purgeTotalCount})
               </button>
             )}
           </div>
@@ -1054,7 +1062,11 @@ export default function AdminWikiPage() {
                           clearAllVisible();
                         }
                       }}
-                      ariaLabel={t(headerLang, "common", "adminWikiSelectAllVisible")}
+                      ariaLabel={t(
+                        headerLang,
+                        "common",
+                        "adminWikiSelectAllVisible",
+                      )}
                     />
                   </th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
@@ -1079,7 +1091,10 @@ export default function AdminWikiPage() {
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {pageArticles.map((article) => {
-                  const badge = getStatusBadgeForLang(headerLang, article.status);
+                  const badge = getStatusBadgeForLang(
+                    headerLang,
+                    article.status,
+                  );
                   const langs = languagesByArticleId[article.id] ?? [];
                   const isUpdating = statusUpdatingId === article.id;
                   const normalizedStatus = article.status.toLowerCase();
@@ -1094,7 +1109,11 @@ export default function AdminWikiPage() {
                         <StyledCheckbox
                           checked={selectedSet.has(article.id)}
                           onChange={() => toggleSelected(article.id)}
-                          ariaLabel={t(headerLang, "common", "adminWikiSelectArticle")}
+                          ariaLabel={t(
+                            headerLang,
+                            "common",
+                            "adminWikiSelectArticle",
+                          )}
                         />
                       </td>
                       <td className="px-6 py-4 align-top">
@@ -1102,7 +1121,8 @@ export default function AdminWikiPage() {
                           {article.title}
                         </div>
                         <div className="text-xs text-gray-500">
-                          {t(headerLang, "common", "adminWikiIdPrefix")}: {article.id}
+                          {t(headerLang, "common", "adminWikiIdPrefix")}:{" "}
+                          {article.id}
                         </div>
                       </td>
                       <td className="px-6 py-4 align-middle text-sm text-gray-600">
@@ -1139,7 +1159,10 @@ export default function AdminWikiPage() {
                         </span>
                       </td>
                       <td className="px-6 py-4 align-middle text-sm text-gray-600">
-                        {formatDateTime(langToLocale(headerLang), article.updatedAt)}
+                        {formatDateTime(
+                          langToLocale(headerLang),
+                          article.updatedAt,
+                        )}
                       </td>
                       <td className="px-6 py-4 align-middle text-right text-sm">
                         <Link
@@ -1168,10 +1191,22 @@ export default function AdminWikiPage() {
                             } ${isUpdating ? "cursor-not-allowed opacity-60" : ""}`}
                           >
                             {isUpdating
-                              ? t(headerLang, "common", "adminWikiStatusUpdating")
+                              ? t(
+                                  headerLang,
+                                  "common",
+                                  "adminWikiStatusUpdating",
+                                )
                               : isInactive
-                                ? t(headerLang, "common", "adminWikiActionActivate")
-                                : t(headerLang, "common", "adminWikiActionDeactivate")}
+                                ? t(
+                                    headerLang,
+                                    "common",
+                                    "adminWikiActionActivate",
+                                  )
+                                : t(
+                                    headerLang,
+                                    "common",
+                                    "adminWikiActionDeactivate",
+                                  )}
                           </button>
                         )}
                       </td>
@@ -1184,9 +1219,10 @@ export default function AdminWikiPage() {
 
           <div className="flex items-center justify-between border-t border-gray-200 px-6 py-4">
             <p className="text-sm text-gray-600">
-              {t(headerLang, "common", "adminWikiFooterShowingPrefix")} {" "}
-              <span className="font-semibold">{showingFrom}</span>-<span className="font-semibold">{showingTo}</span>{" "}
-              {t(headerLang, "common", "adminWikiFooterOf")} {" "}
+              {t(headerLang, "common", "adminWikiFooterShowingPrefix")}{" "}
+              <span className="font-semibold">{showingFrom}</span>-
+              <span className="font-semibold">{showingTo}</span>{" "}
+              {t(headerLang, "common", "adminWikiFooterOf")}{" "}
               <span className="font-semibold">{totalArticles}</span>{" "}
               {t(headerLang, "common", "adminWikiFooterArticlesSuffix")}
             </p>
@@ -1209,7 +1245,7 @@ export default function AdminWikiPage() {
         description={t(headerLang, "common", "adminWikiBulkDeleteDescription")}
         details={
           <div>
-            {t(headerLang, "common", "adminWikiSelectedCountLabel")}: {" "}
+            {t(headerLang, "common", "adminWikiSelectedCountLabel")}:{" "}
             <span className="font-semibold">{selectedArticleIds.length}</span>
           </div>
         }
@@ -1277,10 +1313,10 @@ export default function AdminWikiPage() {
         description={t(headerLang, "common", "adminWikiBulkStatusDescription")}
         details={
           <div>
-            {t(headerLang, "common", "adminWikiBulkStatusNewStatusLabel")}: {" "}
+            {t(headerLang, "common", "adminWikiBulkStatusNewStatusLabel")}:{" "}
             <span className="font-semibold">{bulkStatus}</span>
             <br />
-            {t(headerLang, "common", "adminWikiSelectedCountLabel")}: {" "}
+            {t(headerLang, "common", "adminWikiSelectedCountLabel")}:{" "}
             <span className="font-semibold">{selectedArticleIds.length}</span>
           </div>
         }

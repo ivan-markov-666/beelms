@@ -440,9 +440,9 @@ export function WikiRichEditor({
   const [tocHelpOpen, setTocHelpOpen] = useState(false);
   const [findQuery, setFindQuery] = useState("");
   const [replaceQuery, setReplaceQuery] = useState("");
-  const [findMatches, setFindMatches] = useState<Array<{ from: number; to: number }>>(
-    [],
-  );
+  const [findMatches, setFindMatches] = useState<
+    Array<{ from: number; to: number }>
+  >([]);
   const [activeFindMatchIndex, setActiveFindMatchIndex] = useState(0);
   const findInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -1149,9 +1149,9 @@ export function WikiRichEditor({
                 <p className="font-semibold text-gray-900">Какво е TOC?</p>
                 <p className="mt-1">
                   Бутонът TOC вмъква маркер <code>[[toc]]</code>. При публичното
-                  рендериране този маркер се заменя с автоматично съдържание (линкове към
-                  всички H1–H4 заглавия). Постави маркера където искаш да се появи блокът
-                  „Table of Contents“.
+                  рендериране този маркер се заменя с автоматично съдържание
+                  (линкове към всички H1–H4 заглавия). Постави маркера където
+                  искаш да се появи блокът „Table of Contents“.
                 </p>
                 <button
                   type="button"

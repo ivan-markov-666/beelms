@@ -352,7 +352,11 @@ export default function AdminActivityPage() {
             <InfoTooltip
               label={t(lang, "common", "adminActivityInfoTooltipLabel")}
               title={t(lang, "common", "adminActivityInfoTooltipTitle")}
-              description={t(lang, "common", "adminActivityInfoTooltipDescription")}
+              description={t(
+                lang,
+                "common",
+                "adminActivityInfoTooltipDescription",
+              )}
             />
           </div>
           <p className="text-gray-600">
@@ -369,7 +373,11 @@ export default function AdminActivityPage() {
           <InfoTooltip
             label={t(lang, "common", "adminActivityFiltersTooltipLabel")}
             title={t(lang, "common", "adminActivityFiltersTooltipTitle")}
-            description={t(lang, "common", "adminActivityFiltersTooltipDescription")}
+            description={t(
+              lang,
+              "common",
+              "adminActivityFiltersTooltipDescription",
+            )}
           />
         </div>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
@@ -661,9 +669,10 @@ export default function AdminActivityPage() {
           </div>
           <div className="flex flex-col gap-3 border-t border-gray-100 bg-gray-50 px-6 py-3 text-xs text-gray-600 md:flex-row md:items-center md:justify-between">
             <span>
-              {t(lang, "common", "adminActivityFooterCountPrefix")} {" "}
-              <span className="font-semibold">{showingFrom}</span>-<span className="font-semibold">{showingTo}</span>{" "}
-              {t(lang, "common", "adminActivityFooterCountOf")} {" "}
+              {t(lang, "common", "adminActivityFooterCountPrefix")}{" "}
+              <span className="font-semibold">{showingFrom}</span>-
+              <span className="font-semibold">{showingTo}</span>{" "}
+              {t(lang, "common", "adminActivityFooterCountOf")}{" "}
               <span className="font-semibold">{totalCount}</span>{" "}
               {t(lang, "common", "adminActivityFooterCountSuffix")}
             </span>

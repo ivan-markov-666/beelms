@@ -155,7 +155,8 @@ function parsePriceToCents(raw: string): number {
   if (!Number.isFinite(whole) || whole < 0) return NaN;
   const padded = (decimals + "00").slice(0, 2);
   const fractional = Number.parseInt(padded, 10);
-  if (!Number.isFinite(fractional) || fractional < 0 || fractional > 99) return NaN;
+  if (!Number.isFinite(fractional) || fractional < 0 || fractional > 99)
+    return NaN;
 
   return whole * 100 + fractional;
 }
@@ -439,13 +440,16 @@ export default function AdminCoursesPage() {
   const toggleCreateAllLanguages = useCallback(() => {
     setForm((prev) => {
       const valid = Array.from(
-        new Set(languageOptions.map((l) => l.trim().toLowerCase()).filter(Boolean)),
+        new Set(
+          languageOptions.map((l) => l.trim().toLowerCase()).filter(Boolean),
+        ),
       );
       if (valid.length === 0) return prev;
 
       if (createAllLanguagesSelected) {
         const fallback = (prev.language ?? "").trim().toLowerCase();
-        const primary = fallback && valid.includes(fallback) ? fallback : valid[0]!;
+        const primary =
+          fallback && valid.includes(fallback) ? fallback : valid[0]!;
         return { ...prev, language: primary, languages: [primary] };
       }
 
@@ -629,11 +633,19 @@ export default function AdminCoursesPage() {
       const fieldErrors: CategoryCreateFieldErrors = {};
 
       if (!slug) {
-        fieldErrors.slug = t(lang, "common", "adminCoursesCategoriesSlugRequired");
+        fieldErrors.slug = t(
+          lang,
+          "common",
+          "adminCoursesCategoriesSlugRequired",
+        );
       }
 
       if (!title) {
-        fieldErrors.title = t(lang, "common", "adminCoursesCategoriesTitleRequired");
+        fieldErrors.title = t(
+          lang,
+          "common",
+          "adminCoursesCategoriesTitleRequired",
+        );
       }
 
       if (Object.keys(fieldErrors).length > 0) {
@@ -646,11 +658,12 @@ export default function AdminCoursesPage() {
       }
 
       if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
-        setCategoryCreateError(t(lang, "common", "adminCoursesCategoriesSlugFormatInvalid"));
+        setCategoryCreateError(
+          t(lang, "common", "adminCoursesCategoriesSlugFormatInvalid"),
+        );
         setCategoryCreateFieldErrors((prev) => ({
           ...prev,
-          slug:
-            t(lang, "common", "adminCoursesCategoriesSlugFormatInvalid"),
+          slug: t(lang, "common", "adminCoursesCategoriesSlugFormatInvalid"),
         }));
         setCategoryCreating(false);
         return;
@@ -682,7 +695,9 @@ export default function AdminCoursesPage() {
       });
 
       if (!res.ok) {
-        setCategoryCreateError(t(lang, "common", "adminCoursesCategoriesCreateError"));
+        setCategoryCreateError(
+          t(lang, "common", "adminCoursesCategoriesCreateError"),
+        );
         setCategoryCreating(false);
         return;
       }
@@ -691,7 +706,9 @@ export default function AdminCoursesPage() {
       const id = (created?.id ?? "").trim();
       const createdTitle = (created?.title ?? "").trim();
       if (!id || !createdTitle) {
-        setCategoryCreateError(t(lang, "common", "adminCoursesCategoriesCreateError"));
+        setCategoryCreateError(
+          t(lang, "common", "adminCoursesCategoriesCreateError"),
+        );
         setCategoryCreating(false);
         return;
       }
@@ -703,7 +720,9 @@ export default function AdminCoursesPage() {
       );
       setCategoryCreating(false);
     } catch {
-      setCategoryCreateError(t(lang, "common", "adminCoursesCategoriesCreateError"));
+      setCategoryCreateError(
+        t(lang, "common", "adminCoursesCategoriesCreateError"),
+      );
       setCategoryCreating(false);
     }
   };
@@ -1072,7 +1091,11 @@ export default function AdminCoursesPage() {
       const fieldErrors: CreateCourseFieldErrors = {};
 
       if (!form.title.trim()) {
-        fieldErrors.title = t(lang, "common", "adminCoursesCreateTitleRequired");
+        fieldErrors.title = t(
+          lang,
+          "common",
+          "adminCoursesCreateTitleRequired",
+        );
       }
 
       if (!form.description.trim()) {
@@ -1116,9 +1139,7 @@ export default function AdminCoursesPage() {
           return;
         }
         if (!Number.isFinite(priceCents) || priceCents <= 0) {
-          setCreateError(
-            t(lang, "common", "adminCoursesPriceInvalid"),
-          );
+          setCreateError(t(lang, "common", "adminCoursesPriceInvalid"));
           setCreateFieldErrors((prev) => ({
             ...prev,
             priceCents: t(lang, "common", "adminCoursesPriceInvalid"),
@@ -1194,7 +1215,11 @@ export default function AdminCoursesPage() {
             <InfoTooltip
               label={t(lang, "common", "adminCoursesInfoTooltipLabel")}
               title={t(lang, "common", "adminCoursesInfoTooltipTitle")}
-              description={t(lang, "common", "adminCoursesInfoTooltipDescription")}
+              description={t(
+                lang,
+                "common",
+                "adminCoursesInfoTooltipDescription",
+              )}
             />
           </div>
           <p className="text-[color:var(--foreground)] opacity-80">
@@ -1210,8 +1235,16 @@ export default function AdminCoursesPage() {
               {t(lang, "common", "adminCoursesCategoriesCardTitle")}
             </h2>
             <InfoTooltip
-              label={t(lang, "common", "adminCoursesCategoriesInfoTooltipLabel")}
-              title={t(lang, "common", "adminCoursesCategoriesInfoTooltipTitle")}
+              label={t(
+                lang,
+                "common",
+                "adminCoursesCategoriesInfoTooltipLabel",
+              )}
+              title={t(
+                lang,
+                "common",
+                "adminCoursesCategoriesInfoTooltipTitle",
+              )}
               description={t(
                 lang,
                 "common",
@@ -1236,12 +1269,20 @@ export default function AdminCoursesPage() {
             <label className="space-y-1">
               <span className="flex items-center gap-2 text-xs font-medium text-[color:var(--foreground)] opacity-80">
                 <span>
-                  {t(lang, "common", "adminCoursesCategoriesSlugLabel")} {" "}
+                  {t(lang, "common", "adminCoursesCategoriesSlugLabel")}{" "}
                   <span style={{ color: "var(--error)" }}>*</span>
                 </span>
                 <InfoTooltip
-                  label={t(lang, "common", "adminCoursesCategoriesInfoTooltipLabel")}
-                  title={t(lang, "common", "adminCoursesCategoriesSlugHelpTitle")}
+                  label={t(
+                    lang,
+                    "common",
+                    "adminCoursesCategoriesInfoTooltipLabel",
+                  )}
+                  title={t(
+                    lang,
+                    "common",
+                    "adminCoursesCategoriesSlugHelpTitle",
+                  )}
                   description={t(
                     lang,
                     "common",
@@ -1265,7 +1306,11 @@ export default function AdminCoursesPage() {
                     slug: undefined,
                   }))
                 }
-                placeholder={t(lang, "common", "adminCoursesCategoriesSlugPlaceholder")}
+                placeholder={t(
+                  lang,
+                  "common",
+                  "adminCoursesCategoriesSlugPlaceholder",
+                )}
                 disabled={categoryCreating}
                 aria-invalid={Boolean(categoryCreateFieldErrors.slug)}
               />
@@ -1279,12 +1324,20 @@ export default function AdminCoursesPage() {
             <label className="space-y-1 md:col-span-2">
               <span className="flex items-center gap-2 text-xs font-medium text-[color:var(--foreground)] opacity-80">
                 <span>
-                  {t(lang, "common", "adminCoursesCategoriesNameLabel")} {" "}
+                  {t(lang, "common", "adminCoursesCategoriesNameLabel")}{" "}
                   <span style={{ color: "var(--error)" }}>*</span>
                 </span>
                 <InfoTooltip
-                  label={t(lang, "common", "adminCoursesCategoriesInfoTooltipLabel")}
-                  title={t(lang, "common", "adminCoursesCategoriesTitleHelpTitle")}
+                  label={t(
+                    lang,
+                    "common",
+                    "adminCoursesCategoriesInfoTooltipLabel",
+                  )}
+                  title={t(
+                    lang,
+                    "common",
+                    "adminCoursesCategoriesTitleHelpTitle",
+                  )}
                   description={t(
                     lang,
                     "common",
@@ -1308,7 +1361,11 @@ export default function AdminCoursesPage() {
                     title: undefined,
                   }))
                 }
-                placeholder={t(lang, "common", "adminCoursesCategoriesNamePlaceholder")}
+                placeholder={t(
+                  lang,
+                  "common",
+                  "adminCoursesCategoriesNamePlaceholder",
+                )}
                 disabled={categoryCreating}
                 aria-invalid={Boolean(categoryCreateFieldErrors.title)}
               />
@@ -1321,10 +1378,20 @@ export default function AdminCoursesPage() {
 
             <label className="space-y-1">
               <span className="flex items-center gap-2 text-xs font-medium text-[color:var(--foreground)] opacity-80">
-                <span>{t(lang, "common", "adminCoursesCategoriesOrderLabel")}</span>
+                <span>
+                  {t(lang, "common", "adminCoursesCategoriesOrderLabel")}
+                </span>
                 <InfoTooltip
-                  label={t(lang, "common", "adminCoursesCategoriesInfoTooltipLabel")}
-                  title={t(lang, "common", "adminCoursesCategoriesOrderHelpTitle")}
+                  label={t(
+                    lang,
+                    "common",
+                    "adminCoursesCategoriesInfoTooltipLabel",
+                  )}
+                  title={t(
+                    lang,
+                    "common",
+                    "adminCoursesCategoriesOrderHelpTitle",
+                  )}
                   description={t(
                     lang,
                     "common",
@@ -1407,7 +1474,7 @@ export default function AdminCoursesPage() {
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <label className="space-y-1">
               <span className="text-xs font-medium text-[color:var(--foreground)] opacity-80">
-                {t(lang, "common", "adminCoursesCreateCourseTitleLabel")} {" "}
+                {t(lang, "common", "adminCoursesCreateCourseTitleLabel")}{" "}
                 <span className="text-red-500">*</span>
               </span>
               <input
@@ -1421,7 +1488,10 @@ export default function AdminCoursesPage() {
                   setForm((p) => ({ ...p, title: e.target.value }))
                 }
                 onInput={() =>
-                  setCreateFieldErrors((prev) => ({ ...prev, title: undefined }))
+                  setCreateFieldErrors((prev) => ({
+                    ...prev,
+                    title: undefined,
+                  }))
                 }
                 aria-invalid={Boolean(createFieldErrors.title)}
               />
@@ -1434,7 +1504,7 @@ export default function AdminCoursesPage() {
 
             <label className="space-y-1">
               <span className="text-xs font-medium text-[color:var(--foreground)] opacity-80">
-                {t(lang, "common", "adminCoursesCreateCourseLanguageLabel")} {" "}
+                {t(lang, "common", "adminCoursesCreateCourseLanguageLabel")}{" "}
                 <span className="text-red-500">*</span>
               </span>
               <div className="relative" ref={createLanguageDropdownRef}>
@@ -1464,7 +1534,9 @@ export default function AdminCoursesPage() {
                         checked={createAllLanguagesSelected}
                         onChange={toggleCreateAllLanguages}
                       />
-                      <span>{t(lang, "common", "adminCoursesLanguagesAll")}</span>
+                      <span>
+                        {t(lang, "common", "adminCoursesLanguagesAll")}
+                      </span>
                     </label>
 
                     <div className="max-h-60 overflow-y-auto border-t border-[color:var(--border)]">
@@ -1500,7 +1572,11 @@ export default function AdminCoursesPage() {
                 {t(lang, "common", "adminCoursesCreateCourseStatusLabel")}
               </span>
               <ListboxSelect
-                ariaLabel={t(lang, "common", "adminCoursesCreateCourseStatusAria")}
+                ariaLabel={t(
+                  lang,
+                  "common",
+                  "adminCoursesCreateCourseStatusAria",
+                )}
                 value={form.status}
                 onChange={(next) => setForm((p) => ({ ...p, status: next }))}
                 buttonClassName="flex w-full items-center justify-between gap-2 rounded-md border border-[color:var(--border)] bg-[color:var(--card)] px-3 py-2 text-sm text-[color:var(--foreground)] shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-1 focus:ring-offset-[color:var(--card)]"
@@ -1516,11 +1592,19 @@ export default function AdminCoursesPage() {
                 className="mb-2 w-full rounded-md border border-[color:var(--border)] bg-[color:var(--card)] px-3 py-2 text-sm text-[color:var(--foreground)] placeholder:text-[color:var(--foreground)] placeholder:opacity-50 focus:border-[color:var(--primary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)]"
                 value={categorySearch}
                 onChange={(e) => setCategorySearch(e.target.value)}
-                placeholder={t(lang, "common", "adminCoursesCategorySearchPlaceholder")}
+                placeholder={t(
+                  lang,
+                  "common",
+                  "adminCoursesCategorySearchPlaceholder",
+                )}
                 disabled={creating}
               />
               <ListboxSelect
-                ariaLabel={t(lang, "common", "adminCoursesCreateCourseCategoryAria")}
+                ariaLabel={t(
+                  lang,
+                  "common",
+                  "adminCoursesCreateCourseCategoryAria",
+                )}
                 value={form.categoryId}
                 disabled={creating}
                 onChange={(next) =>
@@ -1566,8 +1650,16 @@ export default function AdminCoursesPage() {
               </label>
               {paidCourseDisabled ? (
                 <InfoTooltip
-                  label={t(lang, "common", "adminCoursesPaidDisabledTooltipLabel")}
-                  title={t(lang, "common", "adminCoursesPaidDisabledTooltipTitle")}
+                  label={t(
+                    lang,
+                    "common",
+                    "adminCoursesPaidDisabledTooltipLabel",
+                  )}
+                  title={t(
+                    lang,
+                    "common",
+                    "adminCoursesPaidDisabledTooltipTitle",
+                  )}
                   description={t(
                     lang,
                     "common",
@@ -1581,7 +1673,7 @@ export default function AdminCoursesPage() {
               <>
                 <label className="space-y-1">
                   <span className="text-xs font-medium text-[color:var(--foreground)] opacity-80">
-                    {t(lang, "common", "adminCoursesCurrencyLabel")} {" "}
+                    {t(lang, "common", "adminCoursesCurrencyLabel")}{" "}
                     <span className="text-red-500">*</span>
                   </span>
                   <input
@@ -1612,7 +1704,7 @@ export default function AdminCoursesPage() {
 
                 <label className="space-y-1">
                   <span className="text-xs font-medium text-[color:var(--foreground)] opacity-80">
-                    {t(lang, "common", "adminCoursesPriceLabel")} {" "}
+                    {t(lang, "common", "adminCoursesPriceLabel")}{" "}
                     <span className="text-red-500">*</span>
                   </span>
                   <input
@@ -1631,7 +1723,11 @@ export default function AdminCoursesPage() {
                         priceCents: undefined,
                       }))
                     }
-                    placeholder={t(lang, "common", "adminCoursesPricePlaceholder")}
+                    placeholder={t(
+                      lang,
+                      "common",
+                      "adminCoursesPricePlaceholder",
+                    )}
                     inputMode="decimal"
                     aria-invalid={Boolean(createFieldErrors.priceCents)}
                     required
@@ -1651,7 +1747,7 @@ export default function AdminCoursesPage() {
 
           <label className="space-y-1">
             <span className="text-xs font-medium text-[color:var(--foreground)] opacity-80">
-              {t(lang, "common", "adminCoursesDescriptionLabel")} {" "}
+              {t(lang, "common", "adminCoursesDescriptionLabel")}{" "}
               <span className="text-red-500">*</span>
             </span>
             <textarea
@@ -1783,7 +1879,11 @@ export default function AdminCoursesPage() {
                 </svg>
                 <input
                   type="search"
-                  placeholder={t(lang, "common", "adminCoursesSearchPlaceholder")}
+                  placeholder={t(
+                    lang,
+                    "common",
+                    "adminCoursesSearchPlaceholder",
+                  )}
                   className="w-full rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] py-2 pl-9 pr-3 text-sm text-[color:var(--foreground)] shadow-sm placeholder:text-[color:var(--foreground)] placeholder:opacity-50 focus:border-[color:var(--primary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)]"
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
@@ -1826,7 +1926,9 @@ export default function AdminCoursesPage() {
                   aria-expanded={languageDropdownOpen}
                 >
                   <span>{languageFiltersLabel}</span>
-                  <span className="text-[color:var(--foreground)] opacity-60">▾</span>
+                  <span className="text-[color:var(--foreground)] opacity-60">
+                    ▾
+                  </span>
                 </button>
 
                 {languageDropdownOpen && (
@@ -1838,7 +1940,9 @@ export default function AdminCoursesPage() {
                         checked={languageFilters.length === 0}
                         onChange={() => toggleAllLanguages()}
                       />
-                      <span>{t(lang, "common", "adminCoursesLanguagesAll")}</span>
+                      <span>
+                        {t(lang, "common", "adminCoursesLanguagesAll")}
+                      </span>
                     </label>
 
                     <div className="max-h-60 overflow-y-auto border-t border-[color:var(--border)]">
@@ -1943,7 +2047,8 @@ export default function AdminCoursesPage() {
             <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-md border border-[color:var(--border)] bg-[color:color-mix(in_srgb,var(--foreground)_3%,var(--card))] px-3 py-2">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-xs font-medium text-[color:var(--foreground)] opacity-80">
-                  {t(lang, "common", "adminCoursesSelectedCountLabel")}: {selectedCourseIds.length}
+                  {t(lang, "common", "adminCoursesSelectedCountLabel")}:{" "}
+                  {selectedCourseIds.length}
                 </span>
                 <button
                   type="button"
@@ -1999,7 +2104,8 @@ export default function AdminCoursesPage() {
                     setPurgeAllOpen(true);
                   }}
                 >
-                  {t(lang, "common", "adminCoursesBulkDeleteAllPrefix")} ({purgeTotalCount})
+                  {t(lang, "common", "adminCoursesBulkDeleteAllPrefix")} (
+                  {purgeTotalCount})
                 </button>
               )}
             </div>
@@ -2045,7 +2151,7 @@ export default function AdminCoursesPage() {
                         onClick={() => toggleSort("createdAt")}
                         className="inline-flex items-center gap-2 text-[color:var(--foreground)] hover:text-[color:var(--primary)]"
                       >
-                        {t(lang, "common", "adminCoursesColCreated")} {" "}
+                        {t(lang, "common", "adminCoursesColCreated")}{" "}
                         {buildSortIndicator("createdAt")}
                       </button>
                     </th>
@@ -2055,7 +2161,7 @@ export default function AdminCoursesPage() {
                         onClick={() => toggleSort("title")}
                         className="inline-flex items-center gap-2 text-[color:var(--foreground)] hover:text-[color:var(--primary)]"
                       >
-                        {t(lang, "common", "adminCoursesColTitle")} {" "}
+                        {t(lang, "common", "adminCoursesColTitle")}{" "}
                         {buildSortIndicator("title")}
                       </button>
                     </th>
@@ -2065,7 +2171,7 @@ export default function AdminCoursesPage() {
                         onClick={() => toggleSort("updatedAt")}
                         className="inline-flex items-center gap-2 text-[color:var(--foreground)] hover:text-[color:var(--primary)]"
                       >
-                        {t(lang, "common", "adminCoursesColUpdated")} {" "}
+                        {t(lang, "common", "adminCoursesColUpdated")}{" "}
                         {buildSortIndicator("updatedAt")}
                       </button>
                     </th>
@@ -2075,7 +2181,7 @@ export default function AdminCoursesPage() {
                         onClick={() => toggleSort("category")}
                         className="inline-flex items-center gap-2 text-[color:var(--foreground)] hover:text-[color:var(--primary)]"
                       >
-                        {t(lang, "common", "adminCoursesColCategory")} {" "}
+                        {t(lang, "common", "adminCoursesColCategory")}{" "}
                         {buildSortIndicator("category")}
                       </button>
                     </th>
@@ -2085,7 +2191,7 @@ export default function AdminCoursesPage() {
                         onClick={() => toggleSort("language")}
                         className="inline-flex items-center gap-2 text-[color:var(--foreground)] hover:text-[color:var(--primary)]"
                       >
-                        {t(lang, "common", "adminCoursesColLanguage")} {" "}
+                        {t(lang, "common", "adminCoursesColLanguage")}{" "}
                         {buildSortIndicator("language")}
                       </button>
                     </th>
@@ -2095,7 +2201,7 @@ export default function AdminCoursesPage() {
                         onClick={() => toggleSort("status")}
                         className="inline-flex items-center gap-2 text-[color:var(--foreground)] hover:text-[color:var(--primary)]"
                       >
-                        {t(lang, "common", "adminCoursesColStatus")} {" "}
+                        {t(lang, "common", "adminCoursesColStatus")}{" "}
                         {buildSortIndicator("status")}
                       </button>
                     </th>
@@ -2105,7 +2211,7 @@ export default function AdminCoursesPage() {
                         onClick={() => toggleSort("paid")}
                         className="inline-flex items-center gap-2 text-[color:var(--foreground)] hover:text-[color:var(--primary)]"
                       >
-                        {t(lang, "common", "adminCoursesColPaid")} {" "}
+                        {t(lang, "common", "adminCoursesColPaid")}{" "}
                         {buildSortIndicator("paid")}
                       </button>
                     </th>
@@ -2115,7 +2221,7 @@ export default function AdminCoursesPage() {
                         onClick={() => toggleSort("price")}
                         className="inline-flex items-center gap-2 text-[color:var(--foreground)] hover:text-[color:var(--primary)]"
                       >
-                        {t(lang, "common", "adminCoursesColPrice")} {" "}
+                        {t(lang, "common", "adminCoursesColPrice")}{" "}
                         {buildSortIndicator("price")}
                       </button>
                     </th>
@@ -2156,7 +2262,8 @@ export default function AdminCoursesPage() {
                             {course.title}
                           </Link>
                           <div className="text-[11px] text-[color:var(--foreground)] opacity-60">
-                            {t(lang, "common", "adminCoursesIdPrefix")}: {course.id}
+                            {t(lang, "common", "adminCoursesIdPrefix")}:{" "}
+                            {course.id}
                           </div>
                           <div className="mt-0.5 line-clamp-1 text-xs text-[color:var(--foreground)] opacity-60">
                             {course.description}
@@ -2247,7 +2354,11 @@ export default function AdminCoursesPage() {
         <ConfirmDialog
           open={bulkDeleteOpen}
           title={t(lang, "common", "adminCoursesBulkDeleteDialogTitle")}
-          description={t(lang, "common", "adminCoursesBulkDeleteDialogDescription")}
+          description={t(
+            lang,
+            "common",
+            "adminCoursesBulkDeleteDialogDescription",
+          )}
           details={
             <div>
               {t(lang, "common", "adminCoursesSelectedCountLabel")}:{" "}
@@ -2299,7 +2410,9 @@ export default function AdminCoursesPage() {
                   setPurgeTotalCount((p) => Math.max(0, p - deleted));
                 }
               } catch {
-                setBulkActionError(t(lang, "common", "adminCoursesBulkDeleteError"));
+                setBulkActionError(
+                  t(lang, "common", "adminCoursesBulkDeleteError"),
+                );
               } finally {
                 setBulkDeleteSubmitting(false);
               }
@@ -2310,11 +2423,17 @@ export default function AdminCoursesPage() {
         <ConfirmDialog
           open={bulkStatusOpen}
           title={t(lang, "common", "adminCoursesBulkStatusDialogTitle")}
-          description={t(lang, "common", "adminCoursesBulkStatusDialogDescription")}
+          description={t(
+            lang,
+            "common",
+            "adminCoursesBulkStatusDialogDescription",
+          )}
           details={
             <div>
-              {t(lang, "common", "adminCoursesBulkStatusNewStatusLabel")}: {" "}
-              <span className="font-semibold">{getStatusLabel(bulkStatus)}</span>
+              {t(lang, "common", "adminCoursesBulkStatusNewStatusLabel")}:{" "}
+              <span className="font-semibold">
+                {getStatusLabel(bulkStatus)}
+              </span>
               <br />
               {t(lang, "common", "adminCoursesSelectedCountLabel")}:{" "}
               <span className="font-semibold">{selectedCourseIds.length}</span>

@@ -493,7 +493,10 @@ export function LoginContent() {
                     disabled={submitting || anySocialLoading}
                     className="be-social-button inline-flex w-full items-center justify-center gap-3 rounded-xl border px-4 py-3 text-sm font-semibold shadow-sm transition focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-1 focus:ring-offset-[color:var(--card)] disabled:cursor-not-allowed disabled:opacity-70"
                   >
-                    <SocialIcon provider="google" iconUrl={socialIconUrls.google} />
+                    <SocialIcon
+                      provider="google"
+                      iconUrl={socialIconUrls.google}
+                    />
                     {googleLoading
                       ? t(lang, "auth", "loginGoogleLoading")
                       : t(lang, "auth", "loginGoogleCta")}
@@ -506,7 +509,10 @@ export function LoginContent() {
                     disabled={submitting || anySocialLoading}
                     className="be-social-button inline-flex w-full items-center justify-center gap-3 rounded-xl border px-4 py-3 text-sm font-semibold shadow-sm transition focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-1 focus:ring-offset-[color:var(--card)] disabled:cursor-not-allowed disabled:opacity-70"
                   >
-                    <SocialIcon provider="facebook" iconUrl={socialIconUrls.facebook} />
+                    <SocialIcon
+                      provider="facebook"
+                      iconUrl={socialIconUrls.facebook}
+                    />
                     {facebookLoading
                       ? t(lang, "auth", "loginFacebookLoading")
                       : t(lang, "auth", "loginFacebookCta")}
@@ -519,7 +525,10 @@ export function LoginContent() {
                     disabled={submitting || anySocialLoading}
                     className="be-social-button inline-flex w-full items-center justify-center gap-3 rounded-xl border px-4 py-3 text-sm font-semibold shadow-sm transition focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-1 focus:ring-offset-[color:var(--card)] disabled:cursor-not-allowed disabled:opacity-70"
                   >
-                    <SocialIcon provider="github" iconUrl={socialIconUrls.github} />
+                    <SocialIcon
+                      provider="github"
+                      iconUrl={socialIconUrls.github}
+                    />
                     {githubLoading
                       ? t(lang, "auth", "loginGithubLoading")
                       : t(lang, "auth", "loginGithubCta")}
@@ -532,7 +541,10 @@ export function LoginContent() {
                     disabled={submitting || anySocialLoading}
                     className="be-social-button inline-flex w-full items-center justify-center gap-3 rounded-xl border px-4 py-3 text-sm font-semibold shadow-sm transition focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-1 focus:ring-offset-[color:var(--card)] disabled:cursor-not-allowed disabled:opacity-70"
                   >
-                    <SocialIcon provider="linkedin" iconUrl={socialIconUrls.linkedin} />
+                    <SocialIcon
+                      provider="linkedin"
+                      iconUrl={socialIconUrls.linkedin}
+                    />
                     {linkedinLoading
                       ? t(lang, "auth", "loginLinkedinLoading")
                       : t(lang, "auth", "loginLinkedinCta")}
@@ -576,7 +588,7 @@ export function LoginContent() {
                 htmlFor="email"
                 className="block text-sm font-medium text-gray-800"
               >
-                {t(lang, "auth", "loginEmailLabel")} {" "}
+                {t(lang, "auth", "loginEmailLabel")}{" "}
                 <span className="text-red-500" aria-hidden="true">
                   *
                 </span>
@@ -631,7 +643,10 @@ export function LoginContent() {
                   value={password}
                   onChange={(e) => {
                     setPassword(e.target.value);
-                    setFieldErrors((prev) => ({ ...prev, password: undefined }));
+                    setFieldErrors((prev) => ({
+                      ...prev,
+                      password: undefined,
+                    }));
                   }}
                   aria-invalid={Boolean(fieldErrors.password)}
                   aria-describedby={

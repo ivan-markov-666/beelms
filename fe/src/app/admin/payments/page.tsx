@@ -1293,7 +1293,16 @@ export default function AdminPaymentsPage() {
                           disabled={saving}
                           onChange={(next) => setCurrency(next.toLowerCase())}
                           buttonClassName="flex w-full items-center justify-between gap-2 rounded-md border border-[color:var(--border)] bg-[color:var(--card)] px-3 py-2 text-sm text-[color:var(--foreground)] shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-1 focus:ring-offset-[color:var(--card)] disabled:opacity-60"
-                          options={currencySelectOptions.length > 0 ? currencySelectOptions : [{ value: currency.toLowerCase(), label: currency.toUpperCase() || "---" }]}
+                          options={
+                            currencySelectOptions.length > 0
+                              ? currencySelectOptions
+                              : [
+                                  {
+                                    value: currency.toLowerCase(),
+                                    label: currency.toUpperCase() || "---",
+                                  },
+                                ]
+                          }
                         />
                       </div>
                       <p className="mt-2 text-xs text-[color:var(--foreground)] opacity-70">

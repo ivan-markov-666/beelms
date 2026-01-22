@@ -1592,7 +1592,9 @@ export default function AdminBackupsPage() {
 
       <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[color:var(--foreground)]">Backups</h1>
+          <h1 className="text-2xl font-bold text-[color:var(--foreground)]">
+            Backups
+          </h1>
           <p className="mt-1 text-sm text-[color:var(--foreground)] opacity-80">
             Ръчно създаване и restore на PostgreSQL backup файлове.
           </p>
@@ -2018,7 +2020,9 @@ export default function AdminBackupsPage() {
               >
                 <span
                   className={`inline-block h-5 w-5 transform rounded-full bg-[color:var(--card)] shadow transition ${
-                    retentionConfig.time.enabled ? "translate-x-6" : "translate-x-1"
+                    retentionConfig.time.enabled
+                      ? "translate-x-6"
+                      : "translate-x-1"
                   }`}
                 />
               </button>
@@ -2097,7 +2101,9 @@ export default function AdminBackupsPage() {
               >
                 <span
                   className={`inline-block h-5 w-5 transform rounded-full bg-[color:var(--card)] shadow transition ${
-                    retentionConfig.count.enabled ? "translate-x-6" : "translate-x-1"
+                    retentionConfig.count.enabled
+                      ? "translate-x-6"
+                      : "translate-x-1"
                   }`}
                 />
               </button>
@@ -2620,7 +2626,9 @@ export default function AdminBackupsPage() {
 
       <div className="mt-6 flex flex-col gap-2 border-t border-[color:var(--border)] pt-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <p className="text-sm font-semibold text-[color:var(--foreground)]">Backups</p>
+          <p className="text-sm font-semibold text-[color:var(--foreground)]">
+            Backups
+          </p>
           <p className="text-xs text-[color:var(--foreground)] opacity-80">
             Последните създадени и качени архиви.
           </p>
@@ -2653,7 +2661,8 @@ export default function AdminBackupsPage() {
           className="mt-4 rounded-md border px-4 py-3 text-sm"
           role="alert"
           style={{
-            backgroundColor: "color-mix(in srgb, var(--error) 14%, var(--card))",
+            backgroundColor:
+              "color-mix(in srgb, var(--error) 14%, var(--card))",
             borderColor: "var(--border)",
             color: "var(--error)",
           }}

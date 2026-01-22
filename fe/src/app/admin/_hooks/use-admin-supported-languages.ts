@@ -79,7 +79,9 @@ export function useAdminSupportedLanguages(): {
         data.languages?.supported ?? [],
       );
       const normalizedSupported =
-        supported.length > 0 ? supported : (SUPPORTED_LANGS as unknown as string[]);
+        supported.length > 0
+          ? supported
+          : (SUPPORTED_LANGS as unknown as string[]);
       setLanguages(normalizedSupported);
       setDefaultLanguage(
         normalizeDefaultLang(data.languages?.default, normalizedSupported),

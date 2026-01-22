@@ -586,7 +586,10 @@ export function RegisterContent() {
                     disabled={submitting || anySocialLoading}
                     className="be-social-button inline-flex w-full items-center justify-center gap-3 rounded-xl border px-4 py-3 text-sm font-semibold shadow-sm transition focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-1 focus:ring-offset-[color:var(--card)] disabled:cursor-not-allowed disabled:opacity-70"
                   >
-                    <SocialIcon provider="google" iconUrl={socialIconUrls.google} />
+                    <SocialIcon
+                      provider="google"
+                      iconUrl={socialIconUrls.google}
+                    />
                     {googleLoading
                       ? t(lang, "auth", "registerGoogleLoading")
                       : t(lang, "auth", "registerGoogleCta")}
@@ -599,7 +602,10 @@ export function RegisterContent() {
                     disabled={submitting || anySocialLoading}
                     className="be-social-button inline-flex w-full items-center justify-center gap-3 rounded-xl border px-4 py-3 text-sm font-semibold shadow-sm transition focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-1 focus:ring-offset-[color:var(--card)] disabled:cursor-not-allowed disabled:opacity-70"
                   >
-                    <SocialIcon provider="facebook" iconUrl={socialIconUrls.facebook} />
+                    <SocialIcon
+                      provider="facebook"
+                      iconUrl={socialIconUrls.facebook}
+                    />
                     {facebookLoading
                       ? t(lang, "auth", "registerFacebookLoading")
                       : t(lang, "auth", "registerFacebookCta")}
@@ -612,7 +618,10 @@ export function RegisterContent() {
                     disabled={submitting || anySocialLoading}
                     className="be-social-button inline-flex w-full items-center justify-center gap-3 rounded-xl border px-4 py-3 text-sm font-semibold shadow-sm transition focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-1 focus:ring-offset-[color:var(--card)] disabled:cursor-not-allowed disabled:opacity-70"
                   >
-                    <SocialIcon provider="github" iconUrl={socialIconUrls.github} />
+                    <SocialIcon
+                      provider="github"
+                      iconUrl={socialIconUrls.github}
+                    />
                     {githubLoading
                       ? t(lang, "auth", "registerGithubLoading")
                       : t(lang, "auth", "registerGithubCta")}
@@ -625,7 +634,10 @@ export function RegisterContent() {
                     disabled={submitting || anySocialLoading}
                     className="be-social-button inline-flex w-full items-center justify-center gap-3 rounded-xl border px-4 py-3 text-sm font-semibold shadow-sm transition focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-1 focus:ring-offset-[color:var(--card)] disabled:cursor-not-allowed disabled:opacity-70"
                   >
-                    <SocialIcon provider="linkedin" iconUrl={socialIconUrls.linkedin} />
+                    <SocialIcon
+                      provider="linkedin"
+                      iconUrl={socialIconUrls.linkedin}
+                    />
                     {linkedinLoading
                       ? t(lang, "auth", "registerLinkedinLoading")
                       : t(lang, "auth", "registerLinkedinCta")}
@@ -959,7 +971,9 @@ export function RegisterContent() {
                 <button
                   type="button"
                   className="cursor-pointer text-[color:var(--primary)] underline-offset-2 hover:underline"
-                  onClick={() => router.push(appendLangToPath("/legal/privacy"))}
+                  onClick={() =>
+                    router.push(appendLangToPath("/legal/privacy"))
+                  }
                   disabled={submitting}
                 >
                   {t(lang, "common", "legalFooterPrivacyLink")}

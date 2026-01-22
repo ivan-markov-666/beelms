@@ -315,9 +315,7 @@ export default function AdminWikiEditPage() {
         const token = getAccessToken();
         if (!token) {
           if (!cancelled) {
-            setError(
-              t(lang, "common", "adminErrorMissingApiAccess"),
-            );
+            setError(t(lang, "common", "adminErrorMissingApiAccess"));
             setLoading(false);
           }
           return;
@@ -511,9 +509,7 @@ export default function AdminWikiEditPage() {
         const token = getAccessToken();
         if (!token) {
           if (!cancelled) {
-            setVersionsError(
-              t(lang, "common", "adminErrorMissingApiAccess"),
-            );
+            setVersionsError(t(lang, "common", "adminErrorMissingApiAccess"));
             setVersionsLoading(false);
           }
           return;
@@ -532,7 +528,9 @@ export default function AdminWikiEditPage() {
 
         if (!res.ok) {
           if (!cancelled) {
-            setVersionsError(t(lang, "common", "adminWikiEditVersionsLoadError"));
+            setVersionsError(
+              t(lang, "common", "adminWikiEditVersionsLoadError"),
+            );
             setVersionsLoading(false);
           }
           return;
@@ -624,7 +622,9 @@ export default function AdminWikiEditPage() {
     }
 
     if (contentMissing) {
-      missingFields.push(t(lang, "common", "adminWikiEditRequiredFieldContent"));
+      missingFields.push(
+        t(lang, "common", "adminWikiEditRequiredFieldContent"),
+      );
     }
 
     return { missingFields, titleMissing, contentMissing };
@@ -735,9 +735,7 @@ export default function AdminWikiEditPage() {
     try {
       const token = getAccessToken();
       if (!token) {
-        setError(
-          t(lang, "common", "adminErrorMissingApiAccess"),
-        );
+        setError(t(lang, "common", "adminErrorMissingApiAccess"));
         setSaving(false);
         return;
       }
@@ -839,7 +837,9 @@ export default function AdminWikiEditPage() {
 
     const token = getAccessToken();
     if (!token) {
-      setImportTranslationsError(t(lang, "common", "adminErrorMissingApiAccess"));
+      setImportTranslationsError(
+        t(lang, "common", "adminErrorMissingApiAccess"),
+      );
       return;
     }
 
@@ -909,7 +909,9 @@ export default function AdminWikiEditPage() {
       setArticleReloadKey((v) => v + 1);
       setImportingTranslations(false);
     } catch {
-      setImportTranslationsError(t(lang, "common", "adminWikiEditImportMarkdownError"));
+      setImportTranslationsError(
+        t(lang, "common", "adminWikiEditImportMarkdownError"),
+      );
       setImportingTranslations(false);
     }
   };
@@ -972,9 +974,7 @@ export default function AdminWikiEditPage() {
 
     const token = getAccessToken();
     if (!token) {
-      setError(
-        t(lang, "common", "adminErrorMissingApiAccess"),
-      );
+      setError(t(lang, "common", "adminErrorMissingApiAccess"));
       return;
     }
 
@@ -1077,9 +1077,7 @@ export default function AdminWikiEditPage() {
 
     const token = getAccessToken();
     if (!token) {
-      setError(
-        t(lang, "common", "adminErrorMissingApiAccess"),
-      );
+      setError(t(lang, "common", "adminErrorMissingApiAccess"));
       return;
     }
 
@@ -1168,9 +1166,7 @@ export default function AdminWikiEditPage() {
     try {
       const token = getAccessToken();
       if (!token) {
-        setError(
-          t(lang, "common", "adminErrorMissingApiAccess"),
-        );
+        setError(t(lang, "common", "adminErrorMissingApiAccess"));
         setRollbackVersionId(null);
         return;
       }
@@ -1195,9 +1191,7 @@ export default function AdminWikiEditPage() {
       }
 
       if (res.status === 400) {
-        setError(
-          t(lang, "common", "adminWikiEditRollbackInvalidRequest"),
-        );
+        setError(t(lang, "common", "adminWikiEditRollbackInvalidRequest"));
         setRollbackVersionId(null);
         return;
       }
@@ -1484,11 +1478,17 @@ export default function AdminWikiEditPage() {
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-1">
                   <label className="flex items-center gap-2 text-sm font-medium text-zinc-800">
-                    <span>{t(lang, "common", "adminWikiEditLanguageLabel")}</span>
+                    <span>
+                      {t(lang, "common", "adminWikiEditLanguageLabel")}
+                    </span>
                     <InfoTooltip
                       label={t(lang, "common", "adminMetricsInfoTooltipLabel")}
                       title={t(lang, "common", "adminWikiEditLanguageLabel")}
-                      description={t(lang, "common", "adminWikiEditLanguageHelp")}
+                      description={t(
+                        lang,
+                        "common",
+                        "adminWikiEditLanguageHelp",
+                      )}
                     />
                   </label>
                   <ListboxSelect
@@ -1521,7 +1521,11 @@ export default function AdminWikiEditPage() {
                     <InfoTooltip
                       label={t(lang, "common", "adminMetricsInfoTooltipLabel")}
                       title={t(lang, "common", "adminWikiEditStatusLabel")}
-                      description={t(lang, "common", "adminWikiEditStatusLabel")}
+                      description={t(
+                        lang,
+                        "common",
+                        "adminWikiEditStatusLabel",
+                      )}
                     />
                   </label>
                   <ListboxSelect
@@ -1595,7 +1599,11 @@ export default function AdminWikiEditPage() {
                   <InfoTooltip
                     label={t(lang, "common", "adminMetricsInfoTooltipLabel")}
                     title={t(lang, "common", "adminWikiEditSubtitleLabel")}
-                    description={t(lang, "common", "adminWikiEditSubtitleLabel")}
+                    description={t(
+                      lang,
+                      "common",
+                      "adminWikiEditSubtitleLabel",
+                    )}
                   />
                 </label>
                 <input
@@ -1627,7 +1635,7 @@ export default function AdminWikiEditPage() {
                   onChange={handleChange("tags")}
                 />
                 <p className="text-xs text-zinc-500">
-                  {t(lang, "common", "adminWikiEditTagsExamplePrefix")}: {" "}
+                  {t(lang, "common", "adminWikiEditTagsExamplePrefix")}:{" "}
                   <code>intro, basics, setup</code>
                 </p>
               </div>
@@ -1638,7 +1646,9 @@ export default function AdminWikiEditPage() {
                   className="flex items-center gap-2 text-sm font-medium text-zinc-800"
                 >
                   <span className="flex items-center">
-                    <span>{t(lang, "common", "adminWikiEditContentLabel")}</span>
+                    <span>
+                      {t(lang, "common", "adminWikiEditContentLabel")}
+                    </span>
                     <span className="ml-1 text-red-600" aria-hidden="true">
                       *
                     </span>
@@ -1763,12 +1773,9 @@ export default function AdminWikiEditPage() {
                       role="alert"
                       aria-live="polite"
                     >
-                      {t(lang, "common", "adminWikiEditMissingFieldsPrefix")} {" "}
-                      {missingFields.join(", ")}. {t(
-                        lang,
-                        "common",
-                        "adminWikiEditMissingFieldsSuffix",
-                      )}
+                      {t(lang, "common", "adminWikiEditMissingFieldsPrefix")}{" "}
+                      {missingFields.join(", ")}.{" "}
+                      {t(lang, "common", "adminWikiEditMissingFieldsSuffix")}
                     </p>
                   )}
                   {isDirty && (
@@ -1866,7 +1873,11 @@ export default function AdminWikiEditPage() {
                 </span>
               </p>
               <p className="mb-3 text-xs text-zinc-600">
-                {t(lang, "common", "adminWikiEditImportMarkdownFilenameSuffixHint")}{" "}
+                {t(
+                  lang,
+                  "common",
+                  "adminWikiEditImportMarkdownFilenameSuffixHint",
+                )}{" "}
                 <span className="font-mono">article-&lt;lang&gt;.md</span>
               </p>
 
@@ -1903,7 +1914,11 @@ export default function AdminWikiEditPage() {
               {importTranslationsResults.length > 0 && (
                 <div className="mt-3 rounded-md border border-zinc-200 bg-zinc-50 p-3">
                   <div className="mb-2 text-xs font-semibold text-zinc-900">
-                    {t(lang, "common", "adminWikiEditImportMarkdownResultsTitle")}
+                    {t(
+                      lang,
+                      "common",
+                      "adminWikiEditImportMarkdownResultsTitle",
+                    )}
                   </div>
                   <ul className="space-y-1 text-[11px] font-mono text-zinc-700">
                     {importTranslationsResults.map((r, idx) => (
@@ -1998,7 +2013,11 @@ export default function AdminWikiEditPage() {
                 </div>
                 {articleId == null ? (
                   <p className="text-xs text-zinc-500">
-                    {t(lang, "common", "adminWikiEditUploadedImagesNoArticleId")}
+                    {t(
+                      lang,
+                      "common",
+                      "adminWikiEditUploadedImagesNoArticleId",
+                    )}
                   </p>
                 ) : mediaItems.length === 0 ? (
                   <p className="text-xs text-zinc-500">
@@ -2036,7 +2055,11 @@ export default function AdminWikiEditPage() {
                             onClick={() => handleCopyMarkdown(item)}
                             className="text-[11px] font-semibold text-zinc-700 hover:text-zinc-900"
                           >
-                            {t(lang, "common", "adminWikiEditMediaCopyMarkdown")}
+                            {t(
+                              lang,
+                              "common",
+                              "adminWikiEditMediaCopyMarkdown",
+                            )}
                           </button>
                           <button
                             type="button"
@@ -2117,7 +2140,11 @@ export default function AdminWikiEditPage() {
                       <thead>
                         <tr className="border-b border-zinc-200 bg-zinc-50 text-left text-xs font-medium uppercase tracking-wide text-zinc-500">
                           <th className="px-3 py-2 align-middle text-center">
-                            {t(lang, "common", "adminWikiEditVersionsCompareHeader")}
+                            {t(
+                              lang,
+                              "common",
+                              "adminWikiEditVersionsCompareHeader",
+                            )}
                           </th>
                           <th className="px-3 py-2 align-middle text-center">
                             <div className="relative flex items-center justify-center">
@@ -2126,17 +2153,21 @@ export default function AdminWikiEditPage() {
                                 type="checkbox"
                                 className="h-4 w-4 rounded border-zinc-300 text-red-600 focus:ring-red-500 disabled:cursor-not-allowed disabled:opacity-60"
                                 checked={isAllPageSelectedForDelete}
-                                disabled={deletablePaginatedVersions.length === 0}
+                                disabled={
+                                  deletablePaginatedVersions.length === 0
+                                }
                                 onChange={(event) => {
                                   const checked = event.target.checked;
                                   if (checked) {
-                                    setSelectedVersionIdsForDelete((current) => {
-                                      const next = new Set(current);
-                                      for (const v of deletablePaginatedVersions) {
-                                        next.add(v.id);
-                                      }
-                                      return Array.from(next);
-                                    });
+                                    setSelectedVersionIdsForDelete(
+                                      (current) => {
+                                        const next = new Set(current);
+                                        for (const v of deletablePaginatedVersions) {
+                                          next.add(v.id);
+                                        }
+                                        return Array.from(next);
+                                      },
+                                    );
                                   } else {
                                     setSelectedVersionIdsForDelete((current) =>
                                       current.filter(
@@ -2153,30 +2184,58 @@ export default function AdminWikiEditPage() {
                                 htmlFor="versions-delete-all"
                                 className="pointer-events-auto absolute left-full ml-2 cursor-pointer text-xs font-semibold uppercase tracking-wide text-zinc-500"
                               >
-                                {t(lang, "common", "adminWikiEditVersionsSelectLabel")}
+                                {t(
+                                  lang,
+                                  "common",
+                                  "adminWikiEditVersionsSelectLabel",
+                                )}
                               </label>
                             </div>
                           </th>
                           <th className="px-3 py-2 align-middle">
-                            {t(lang, "common", "adminWikiEditVersionsColVersion")}
+                            {t(
+                              lang,
+                              "common",
+                              "adminWikiEditVersionsColVersion",
+                            )}
                           </th>
                           <th className="px-3 py-2 align-middle">
-                            {t(lang, "common", "adminWikiEditVersionsColLanguage")}
+                            {t(
+                              lang,
+                              "common",
+                              "adminWikiEditVersionsColLanguage",
+                            )}
                           </th>
                           <th className="px-3 py-2 align-middle">
                             {t(lang, "common", "adminWikiEditVersionsColTitle")}
                           </th>
                           <th className="px-3 py-2 align-middle">
-                            {t(lang, "common", "adminWikiEditVersionsColSubtitle")}
+                            {t(
+                              lang,
+                              "common",
+                              "adminWikiEditVersionsColSubtitle",
+                            )}
                           </th>
                           <th className="px-3 py-2 align-middle">
-                            {t(lang, "common", "adminWikiEditVersionsColCreatedAt")}
+                            {t(
+                              lang,
+                              "common",
+                              "adminWikiEditVersionsColCreatedAt",
+                            )}
                           </th>
                           <th className="px-3 py-2 align-middle">
-                            {t(lang, "common", "adminWikiEditVersionsColCreatedBy")}
+                            {t(
+                              lang,
+                              "common",
+                              "adminWikiEditVersionsColCreatedBy",
+                            )}
                           </th>
                           <th className="px-3 py-2 align-middle text-right">
-                            {t(lang, "common", "adminWikiEditVersionsColActions")}
+                            {t(
+                              lang,
+                              "common",
+                              "adminWikiEditVersionsColActions",
+                            )}
                           </th>
                         </tr>
                       </thead>
@@ -2258,12 +2317,20 @@ export default function AdminWikiEditPage() {
                                     onClick={() => setViewVersionId(version.id)}
                                     className="text-xs font-medium text-zinc-700 hover:text-zinc-900"
                                   >
-                                    {t(lang, "common", "adminWikiEditVersionsActionPreview")}
+                                    {t(
+                                      lang,
+                                      "common",
+                                      "adminWikiEditVersionsActionPreview",
+                                    )}
                                   </button>
                                   {latestVersionIdsByLang[version.language] ===
                                   version.id ? (
                                     <span className="text-xs font-semibold text-zinc-500">
-                                      {t(lang, "common", "adminWikiEditVersionsCurrent")}
+                                      {t(
+                                        lang,
+                                        "common",
+                                        "adminWikiEditVersionsCurrent",
+                                      )}
                                     </span>
                                   ) : (
                                     <button
@@ -2299,7 +2366,11 @@ export default function AdminWikiEditPage() {
                                     disabled={isLatestForLanguage}
                                     className="text-xs font-medium text-red-600 hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-60"
                                   >
-                                    {t(lang, "common", "adminWikiEditVersionsDelete")}
+                                    {t(
+                                      lang,
+                                      "common",
+                                      "adminWikiEditVersionsDelete",
+                                    )}
                                   </button>
                                 </div>
                               </td>
@@ -2311,7 +2382,11 @@ export default function AdminWikiEditPage() {
                     <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
                       <div className="flex flex-col text-xs text-zinc-500">
                         <span>
-                          {t(lang, "common", "adminWikiEditVersionsCompareHelp")}
+                          {t(
+                            lang,
+                            "common",
+                            "adminWikiEditVersionsCompareHelp",
+                          )}
                         </span>
                         {compareError && (
                           <span className="text-red-600">{compareError}</span>
@@ -2319,9 +2394,12 @@ export default function AdminWikiEditPage() {
                       </div>
                       <div className="flex flex-wrap items-center gap-2 text-xs">
                         <span className="text-zinc-500">
-                          {t(lang, "common", "adminWikiEditPageLabel")} {currentVersionsPage}{" "}
-                          {t(lang, "common", "adminWikiEditOfLabel")} {totalVersionsPages} ({totalVisibleVersions}{" "}
-                          {t(lang, "common", "adminWikiEditVersionsCountLabel")})
+                          {t(lang, "common", "adminWikiEditPageLabel")}{" "}
+                          {currentVersionsPage}{" "}
+                          {t(lang, "common", "adminWikiEditOfLabel")}{" "}
+                          {totalVersionsPages} ({totalVisibleVersions}{" "}
+                          {t(lang, "common", "adminWikiEditVersionsCountLabel")}
+                          )
                         </span>
                         <button
                           type="button"
@@ -2347,7 +2425,11 @@ export default function AdminWikiEditPage() {
                           disabled={compareSelectionIds.length !== 2}
                           className="inline-flex items-center rounded-md border border-transparent bg-[color:var(--primary)] px-4 py-1.5 text-xs font-medium text-[color:var(--on-primary)] shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
                         >
-                          {t(lang, "common", "adminWikiEditVersionsCompareSelected")}
+                          {t(
+                            lang,
+                            "common",
+                            "adminWikiEditVersionsCompareSelected",
+                          )}
                         </button>
                         <button
                           type="button"
@@ -2361,7 +2443,11 @@ export default function AdminWikiEditPage() {
                           disabled={!hasAnySelectedForDelete}
                           className="inline-flex items-center rounded-md border border-transparent bg-[color:var(--error)] px-4 py-1.5 text-xs font-medium text-[color:var(--on-error)] shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
                         >
-                          {t(lang, "common", "adminWikiEditVersionsDeleteSelected")}
+                          {t(
+                            lang,
+                            "common",
+                            "adminWikiEditVersionsDeleteSelected",
+                          )}
                         </button>
                       </div>
                     </div>
@@ -2396,7 +2482,12 @@ export default function AdminWikiEditPage() {
                     <div className="mb-2 flex items-center justify-between gap-2">
                       <div>
                         <p className="font-semibold text-red-700">
-                          {t(lang, "common", "adminWikiEditCompareVersionLabel")} v{comparison.left.version}
+                          {t(
+                            lang,
+                            "common",
+                            "adminWikiEditCompareVersionLabel",
+                          )}{" "}
+                          v{comparison.left.version}
                         </p>
                         <p className="text-[11px] text-red-700">
                           {formatDateTime(comparison.left.createdAt)}
@@ -2430,7 +2521,12 @@ export default function AdminWikiEditPage() {
                     <div className="mb-2 flex items-center justify-between gap-2">
                       <div>
                         <p className="font-semibold text-green-700">
-                          {t(lang, "common", "adminWikiEditCompareVersionLabel")} v{comparison.right.version}
+                          {t(
+                            lang,
+                            "common",
+                            "adminWikiEditCompareVersionLabel",
+                          )}{" "}
+                          v{comparison.right.version}
                         </p>
                         <p className="text-[11px] text-green-700">
                           {formatDateTime(comparison.right.createdAt)}
@@ -2488,11 +2584,17 @@ export default function AdminWikiEditPage() {
                   <div className="mb-3 flex items-start justify-between gap-4">
                     <div>
                       <h3 className="mb-1 text-base font-semibold text-zinc-900">
-                        {t(lang, "common", "adminWikiEditViewVersionTitlePrefix")} v{viewVersionTarget.version} (
+                        {t(
+                          lang,
+                          "common",
+                          "adminWikiEditViewVersionTitlePrefix",
+                        )}{" "}
+                        v{viewVersionTarget.version} (
                         {viewVersionTarget.language})
                       </h3>
                       <p className="text-xs text-zinc-600">
-                        {t(lang, "common", "adminWikiEditViewVersionCreatedAt")} {formatDateTime(viewVersionTarget.createdAt)}
+                        {t(lang, "common", "adminWikiEditViewVersionCreatedAt")}{" "}
+                        {formatDateTime(viewVersionTarget.createdAt)}
                         {viewVersionTarget.createdBy
                           ? ` ${t(lang, "common", "adminWikiEditViewVersionBy")} ${viewVersionTarget.createdBy}`
                           : ""}
@@ -2566,13 +2668,33 @@ export default function AdminWikiEditPage() {
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
                 <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
                   <h3 className="mb-2 text-base font-semibold text-zinc-900">
-                    {t(lang, "common", "adminWikiEditDeleteVersionConfirmTitle")}
+                    {t(
+                      lang,
+                      "common",
+                      "adminWikiEditDeleteVersionConfirmTitle",
+                    )}
                   </h3>
                   <p className="mb-3 text-sm text-zinc-700">
-                    {t(lang, "common", "adminWikiEditDeleteVersionConfirmDescription")}
+                    {t(
+                      lang,
+                      "common",
+                      "adminWikiEditDeleteVersionConfirmDescription",
+                    )}
                   </p>
                   <p className="mb-3 text-xs text-zinc-600">
-                    {t(lang, "common", "adminWikiEditDeleteVersionConfirmMetaPrefix")} v{deleteVersionTarget.version} ({deleteVersionTarget.language}), {t(lang, "common", "adminWikiEditDeleteVersionConfirmMetaCreatedAt")} {formatDateTime(deleteVersionTarget.createdAt)}.
+                    {t(
+                      lang,
+                      "common",
+                      "adminWikiEditDeleteVersionConfirmMetaPrefix",
+                    )}{" "}
+                    v{deleteVersionTarget.version} (
+                    {deleteVersionTarget.language}),{" "}
+                    {t(
+                      lang,
+                      "common",
+                      "adminWikiEditDeleteVersionConfirmMetaCreatedAt",
+                    )}{" "}
+                    {formatDateTime(deleteVersionTarget.createdAt)}.
                   </p>
                   {deleteVersionError && (
                     <p className="mb-3 text-xs text-red-600" role="alert">
@@ -2606,7 +2728,11 @@ export default function AdminWikiEditPage() {
                           ] === deleteVersionTarget.id
                         ) {
                           setDeleteVersionError(
-                            t(lang, "common", "adminWikiEditDeleteVersionCurrentActiveError"),
+                            t(
+                              lang,
+                              "common",
+                              "adminWikiEditDeleteVersionCurrentActiveError",
+                            ),
                           );
                           return;
                         }
@@ -2662,20 +2788,36 @@ export default function AdminWikiEditPage() {
                                 messageText.includes("current active version")
                               ) {
                                 setDeleteVersionError(
-                                  t(lang, "common", "adminWikiEditDeleteVersionCurrentActiveError"),
+                                  t(
+                                    lang,
+                                    "common",
+                                    "adminWikiEditDeleteVersionCurrentActiveError",
+                                  ),
                                 );
                               } else {
                                 setDeleteVersionError(
-                                  t(lang, "common", "adminWikiEditDeleteVersionLastVersionError"),
+                                  t(
+                                    lang,
+                                    "common",
+                                    "adminWikiEditDeleteVersionLastVersionError",
+                                  ),
                                 );
                               }
                             } else if (res.status === 404) {
                               setDeleteVersionError(
-                                t(lang, "common", "adminWikiEditDeleteVersionNotFound"),
+                                t(
+                                  lang,
+                                  "common",
+                                  "adminWikiEditDeleteVersionNotFound",
+                                ),
                               );
                             } else {
                               setDeleteVersionError(
-                                t(lang, "common", "adminWikiEditDeleteVersionError"),
+                                t(
+                                  lang,
+                                  "common",
+                                  "adminWikiEditDeleteVersionError",
+                                ),
                               );
                             }
                             setDeleteVersionSubmitting(false);
@@ -2705,7 +2847,11 @@ export default function AdminWikiEditPage() {
                           setDeleteVersionStep2Id(null);
                         } catch {
                           setDeleteVersionError(
-                            t(lang, "common", "adminWikiEditDeleteVersionError"),
+                            t(
+                              lang,
+                              "common",
+                              "adminWikiEditDeleteVersionError",
+                            ),
                           );
                         } finally {
                           setDeleteVersionSubmitting(false);
@@ -2713,7 +2859,11 @@ export default function AdminWikiEditPage() {
                       }}
                       disabled={deleteVersionSubmitting}
                     >
-                      {t(lang, "common", "adminWikiEditDeleteVersionConfirmButton")}
+                      {t(
+                        lang,
+                        "common",
+                        "adminWikiEditDeleteVersionConfirmButton",
+                      )}
                     </button>
                   </div>
                 </div>
@@ -2726,7 +2876,17 @@ export default function AdminWikiEditPage() {
                     {t(lang, "common", "adminWikiEditBulkDeleteTitle")}
                   </h3>
                   <p className="mb-4 text-sm text-zinc-700">
-                    {t(lang, "common", "adminWikiEditBulkDeleteDescriptionPrefix")} {selectedVersionIdsForDelete.length} {t(lang, "common", "adminWikiEditBulkDeleteDescriptionSuffix")}
+                    {t(
+                      lang,
+                      "common",
+                      "adminWikiEditBulkDeleteDescriptionPrefix",
+                    )}{" "}
+                    {selectedVersionIdsForDelete.length}{" "}
+                    {t(
+                      lang,
+                      "common",
+                      "adminWikiEditBulkDeleteDescriptionSuffix",
+                    )}
                   </p>
                   <div className="flex justify-end gap-2">
                     <button
@@ -2758,7 +2918,11 @@ export default function AdminWikiEditPage() {
                     {t(lang, "common", "adminWikiEditBulkDeleteConfirmTitle")}
                   </h3>
                   <p className="mb-3 text-sm text-zinc-700">
-                    {t(lang, "common", "adminWikiEditBulkDeleteConfirmDescription")}
+                    {t(
+                      lang,
+                      "common",
+                      "adminWikiEditBulkDeleteConfirmDescription",
+                    )}
                   </p>
                   {bulkDeleteError && (
                     <p className="mb-3 text-xs text-red-600" role="alert">
@@ -2834,7 +2998,11 @@ export default function AdminWikiEditPage() {
 
                           if (failedCount > 0) {
                             setBulkDeleteError(
-                              t(lang, "common", "adminWikiEditBulkDeletePartialError"),
+                              t(
+                                lang,
+                                "common",
+                                "adminWikiEditBulkDeletePartialError",
+                              ),
                             );
                           } else {
                             setBulkDeleteError(null);
@@ -2856,7 +3024,11 @@ export default function AdminWikiEditPage() {
                       }}
                       disabled={bulkDeleteSubmitting}
                     >
-                      {t(lang, "common", "adminWikiEditBulkDeleteConfirmButton")}
+                      {t(
+                        lang,
+                        "common",
+                        "adminWikiEditBulkDeleteConfirmButton",
+                      )}
                     </button>
                   </div>
                 </div>

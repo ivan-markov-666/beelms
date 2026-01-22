@@ -65,13 +65,13 @@ export function InfoTooltip({
         >
           <p
             className="text-[13px] font-semibold uppercase tracking-wide"
-            style={{ color: "color-mix(in srgb, var(--foreground) 65%, var(--card))" }}
+            style={{
+              color: "color-mix(in srgb, var(--foreground) 65%, var(--card))",
+            }}
           >
             {title}
           </p>
-          <div className="mt-2 text-sm leading-relaxed">
-            {description}
-          </div>
+          <div className="mt-2 text-sm leading-relaxed">{description}</div>
         </div>
       ) : null}
     </button>

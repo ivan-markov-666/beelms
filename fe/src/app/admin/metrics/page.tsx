@@ -837,7 +837,11 @@ export default function AdminMetricsPage() {
           <InfoTooltip
             label={t(lang, "common", "adminMetricsInfoTooltipLabel")}
             title={t(lang, "common", "adminMetricsInfoTooltipTitle")}
-            description={t(lang, "common", "adminMetricsInfoTooltipDescription")}
+            description={t(
+              lang,
+              "common",
+              "adminMetricsInfoTooltipDescription",
+            )}
           />
         </div>
         <p className="text-[color:var(--foreground)] opacity-80">
@@ -892,7 +896,9 @@ export default function AdminMetricsPage() {
               {!loading && !error && (
                 <>
                   <p className="text-3xl font-bold text-[color:var(--foreground)]">
-                    {hasMetrics ? totalUsers.toLocaleString(langToLocale(lang)) : "—"}
+                    {hasMetrics
+                      ? totalUsers.toLocaleString(langToLocale(lang))
+                      : "—"}
                   </p>
                   <p className="mt-1 text-sm text-[color:var(--primary)]">
                     {usersTrendText}
@@ -1067,7 +1073,11 @@ export default function AdminMetricsPage() {
             </h2>
             <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-3">
               <ListboxSelect
-                ariaLabel={t(lang, "common", "adminMetricsWikiInsightsViewAria")}
+                ariaLabel={t(
+                  lang,
+                  "common",
+                  "adminMetricsWikiInsightsViewAria",
+                )}
                 value={wikiInsightsView}
                 onChange={(next) =>
                   setWikiInsightsView(next as WikiInsightsView)
@@ -1644,7 +1654,9 @@ export default function AdminMetricsPage() {
                 {t(lang, "common", "adminWikiViewsTopArticles")}
               </p>
               {wikiViews.topArticles.length === 0 ? (
-                <p className="mt-2 text-sm text-[color:var(--foreground)] opacity-60">-</p>
+                <p className="mt-2 text-sm text-[color:var(--foreground)] opacity-60">
+                  -
+                </p>
               ) : (
                 <ul className="mt-2 space-y-1">
                   {wikiViews.topArticles.map((row) => (
@@ -1673,7 +1685,9 @@ export default function AdminMetricsPage() {
               {t(lang, "common", "adminWikiViewsTopArticlesUniqueVisitors")}
             </p>
             {wikiViews.topArticlesByUniqueVisitors.length === 0 ? (
-              <p className="mt-2 text-sm text-[color:var(--foreground)] opacity-60">-</p>
+              <p className="mt-2 text-sm text-[color:var(--foreground)] opacity-60">
+                -
+              </p>
             ) : (
               <ul className="mt-2 space-y-1">
                 {wikiViews.topArticlesByUniqueVisitors.map((row) => (
@@ -1704,7 +1718,11 @@ export default function AdminMetricsPage() {
               {(() => {
                 const points = wikiViews.daily ?? [];
                 if (!points.length) {
-                  return <p className="mt-2 text-sm text-[color:var(--foreground)] opacity-60">-</p>;
+                  return (
+                    <p className="mt-2 text-sm text-[color:var(--foreground)] opacity-60">
+                      -
+                    </p>
+                  );
                 }
 
                 const max = points.reduce(
@@ -1753,7 +1771,11 @@ export default function AdminMetricsPage() {
               {(() => {
                 const points = wikiViews.dailyUniqueVisitors ?? [];
                 if (!points.length) {
-                  return <p className="mt-2 text-sm text-[color:var(--foreground)] opacity-60">-</p>;
+                  return (
+                    <p className="mt-2 text-sm text-[color:var(--foreground)] opacity-60">
+                      -
+                    </p>
+                  );
                 }
 
                 const max = points.reduce(
@@ -1852,7 +1874,9 @@ export default function AdminMetricsPage() {
               {t(lang, "common", "adminWikiFeedbackTopNotHelpful")}
             </p>
             {wikiFeedback.topArticlesByNotHelpful.length === 0 ? (
-              <p className="mt-2 text-sm text-[color:var(--foreground)] opacity-60">-</p>
+              <p className="mt-2 text-sm text-[color:var(--foreground)] opacity-60">
+                -
+              </p>
             ) : (
               <ul className="mt-2 space-y-1">
                 {wikiFeedback.topArticlesByNotHelpful.map((row) => (
@@ -1894,7 +1918,11 @@ export default function AdminMetricsPage() {
               {(() => {
                 const points = wikiFeedback.daily ?? [];
                 if (!points.length) {
-                  return <p className="mt-2 text-sm text-[color:var(--foreground)] opacity-60">-</p>;
+                  return (
+                    <p className="mt-2 text-sm text-[color:var(--foreground)] opacity-60">
+                      -
+                    </p>
+                  );
                 }
 
                 const max = points.reduce(
@@ -1944,7 +1972,11 @@ export default function AdminMetricsPage() {
               {(() => {
                 const points = wikiFeedback.daily ?? [];
                 if (!points.length) {
-                  return <p className="mt-2 text-sm text-[color:var(--foreground)] opacity-60">-</p>;
+                  return (
+                    <p className="mt-2 text-sm text-[color:var(--foreground)] opacity-60">
+                      -
+                    </p>
+                  );
                 }
 
                 const max = points.reduce(
@@ -2068,8 +2100,8 @@ export default function AdminMetricsPage() {
 
             <div className="mt-3 flex flex-col justify-between gap-3 md:flex-row md:items-center">
               <p className="text-xs text-[color:var(--foreground)] opacity-80">
-                {t(lang, "common", "adminWikiAttentionFilterShowingPrefix")} {" "}
-                {filteredSortedWikiAttentionRows.length} / {" "}
+                {t(lang, "common", "adminWikiAttentionFilterShowingPrefix")}{" "}
+                {filteredSortedWikiAttentionRows.length} /{" "}
                 {wikiAttentionRows.length}
               </p>
               <button
@@ -2302,7 +2334,9 @@ export default function AdminMetricsPage() {
                     {t(lang, "common", "adminAdvancedMetricsSessionSources")}
                   </p>
                   {advancedMetrics.sessionSources.length === 0 ? (
-                    <p className="mt-2 text-sm text-[color:var(--foreground)] opacity-60">-</p>
+                    <p className="mt-2 text-sm text-[color:var(--foreground)] opacity-60">
+                      -
+                    </p>
                   ) : (
                     <ul className="mt-2 space-y-1">
                       {advancedMetrics.sessionSources.map((row) => (
@@ -2327,7 +2361,9 @@ export default function AdminMetricsPage() {
                     {t(lang, "common", "adminAdvancedMetricsPageViewSources")}
                   </p>
                   {advancedMetrics.pageViewSources.length === 0 ? (
-                    <p className="mt-2 text-sm text-[color:var(--foreground)] opacity-60">-</p>
+                    <p className="mt-2 text-sm text-[color:var(--foreground)] opacity-60">
+                      -
+                    </p>
                   ) : (
                     <ul className="mt-2 space-y-1">
                       {advancedMetrics.pageViewSources.map((row) => (
@@ -2352,7 +2388,9 @@ export default function AdminMetricsPage() {
                     {t(lang, "common", "adminAdvancedMetricsTopPages")}
                   </p>
                   {advancedMetrics.topPages.length === 0 ? (
-                    <p className="mt-2 text-sm text-[color:var(--foreground)] opacity-60">-</p>
+                    <p className="mt-2 text-sm text-[color:var(--foreground)] opacity-60">
+                      -
+                    </p>
                   ) : (
                     <ul className="mt-2 space-y-1">
                       {advancedMetrics.topPages.map((row) => (
@@ -2381,7 +2419,11 @@ export default function AdminMetricsPage() {
                   {(() => {
                     const points = advancedMetrics.dailySessions ?? [];
                     if (!points.length) {
-                      return <p className="mt-2 text-sm text-[color:var(--foreground)] opacity-60">-</p>;
+                      return (
+                        <p className="mt-2 text-sm text-[color:var(--foreground)] opacity-60">
+                          -
+                        </p>
+                      );
                     }
 
                     const max = points.reduce(
@@ -2433,7 +2475,11 @@ export default function AdminMetricsPage() {
                   {(() => {
                     const points = advancedMetrics.dailyPageViews ?? [];
                     if (!points.length) {
-                      return <p className="mt-2 text-sm text-[color:var(--foreground)] opacity-60">-</p>;
+                      return (
+                        <p className="mt-2 text-sm text-[color:var(--foreground)] opacity-60">
+                          -
+                        </p>
+                      );
                     }
 
                     const max = points.reduce(

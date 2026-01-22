@@ -90,12 +90,6 @@ const DEFAULT_FORM: CreateCurriculumItemForm = {
   order: "",
 };
 
-const CURRICULUM_ITEM_TYPES: CourseModuleItem["itemType"][] = [
-  "wiki",
-  "task",
-  "quiz",
-];
-
 type AdminQuizListItem = {
   id: string;
   title: string;
@@ -114,84 +108,7 @@ export default function AdminCourseDetailPage() {
   const params = useParams<{ courseId: string }>();
   const courseId = params?.courseId;
   const lang = useCurrentLang();
-  const { languages: supportedAdminLangs } = useAdminSupportedLanguages();
-
-  const languageOptions = useMemo(
-    () => (supportedAdminLangs.length > 0 ? supportedAdminLangs : ["bg"]),
-    [supportedAdminLangs],
-  );
-
-  const languageListboxOptions = useMemo(
-    () =>
-      languageOptions.map((code) => ({
-        value: code,
-        label: code.toUpperCase(),
-      })),
-    [languageOptions],
-  );
-
-  const courseStatusOptions = useMemo(
-    () => [
-      {
-        value: "draft",
-        label: t(lang, "common", "adminCoursesStatusDraft"),
-      },
-      {
-        value: "active",
-        label: t(lang, "common", "adminCoursesStatusActive"),
-      },
-      {
-        value: "inactive",
-        label: t(lang, "common", "adminCoursesStatusInactive"),
-      },
-    ],
-    [lang],
-  );
-
-  const courseStatusLabels = useMemo(() => {
-    return courseStatusOptions.reduce<Record<string, string>>((acc, option) => {
-      acc[option.value] = option.label;
-      return acc;
-    }, {});
-  }, [courseStatusOptions]);
-
-  const getStatusLabel = useCallback(
-    (status: string) => courseStatusLabels[status] ?? status,
-    [courseStatusLabels],
-  );
-
-  const curriculumTypeLabels = useMemo(
-    () => ({
-      wiki: t(lang, "common", "adminCoursesDetailCurriculumTypeWiki"),
-      task: t(lang, "common", "adminCoursesDetailCurriculumTypeTask"),
-      quiz: t(lang, "common", "adminCoursesDetailCurriculumTypeQuiz"),
-    }),
-    [lang],
-  );
-
-  const getCurriculumTypeLabel = useCallback(
-    (type: CourseModuleItem["itemType"]) => curriculumTypeLabels[type] ?? type,
-    [curriculumTypeLabels],
-  );
-
-  const languageLabelByCode = useMemo(() => {
-    return languageListboxOptions.reduce<Record<string, string>>(
-      (acc, option) => {
-        acc[option.value] = option.label;
-        return acc;
-      },
-      {},
-    );
-  }, [languageListboxOptions]);
-
-  const curriculumTypeOptions = useMemo(
-    () =>
-      CURRICULUM_ITEM_TYPES.map((type) => ({
-        value: type,
-        label: curriculumTypeLabels[type] ?? type,
-      })),
-    [curriculumTypeLabels],
-  );
+  useAdminSupportedLanguages();
 
   const [course, setCourse] = useState<CourseDetail | null>(null);
   const [curriculum, setCurriculum] = useState<CourseModuleItem[]>([]);
@@ -422,9 +339,7 @@ export default function AdminCourseDetailPage() {
       setQuizzes(Array.isArray(data) ? data : []);
       setQuizzesLoading(false);
     } catch {
-      setQuizzesError(
-        t(lang, "common", "adminCoursesDetailQuizzesLoadError"),
-      );
+      setQuizzesError(t(lang, "common", "adminCoursesDetailQuizzesLoadError"));
       setQuizzesLoading(false);
     }
   }, [lang]);
@@ -471,9 +386,7 @@ export default function AdminCourseDetailPage() {
       });
 
       if (!res.ok) {
-        setTasksError(
-          t(lang, "common", "adminCoursesDetailTasksLoadError"),
-        );
+        setTasksError(t(lang, "common", "adminCoursesDetailTasksLoadError"));
         setTasksLoading(false);
         return;
       }
@@ -571,9 +484,7 @@ export default function AdminCourseDetailPage() {
 
       const title = form.title.trim();
       if (!title) {
-        setSaveError(
-          t(lang, "common", "adminCoursesDetailItemTitleRequired"),
-        );
+        setSaveError(t(lang, "common", "adminCoursesDetailItemTitleRequired"));
         setSaving(false);
         return;
       }
@@ -586,9 +497,7 @@ export default function AdminCourseDetailPage() {
       if (form.itemType === "wiki") {
         const wikiSlug = form.wikiSlug.trim();
         if (!wikiSlug) {
-          setSaveError(
-            t(lang, "common", "adminCoursesDetailWikiSlugRequired"),
-          );
+          setSaveError(t(lang, "common", "adminCoursesDetailWikiSlugRequired"));
           setSaving(false);
           return;
         }
@@ -598,9 +507,7 @@ export default function AdminCourseDetailPage() {
       if (form.itemType === "task") {
         const taskId = form.taskId.trim();
         if (!taskId) {
-          setSaveError(
-            t(lang, "common", "adminCoursesDetailTaskIdRequired"),
-          );
+          setSaveError(t(lang, "common", "adminCoursesDetailTaskIdRequired"));
           setSaving(false);
           return;
         }
@@ -610,9 +517,7 @@ export default function AdminCourseDetailPage() {
       if (form.itemType === "quiz") {
         const quizId = form.quizId.trim();
         if (!quizId) {
-          setSaveError(
-            t(lang, "common", "adminCoursesDetailQuizIdRequired"),
-          );
+          setSaveError(t(lang, "common", "adminCoursesDetailQuizIdRequired"));
           setSaving(false);
           return;
         }
@@ -648,7 +553,9 @@ export default function AdminCourseDetailPage() {
       const created = (await res.json()) as CourseModuleItem;
       setCurriculum((prev) => [...prev, created]);
       setForm(DEFAULT_FORM);
-      setSaveSuccess(t(lang, "common", "adminCoursesDetailCurriculumAddSuccess"));
+      setSaveSuccess(
+        t(lang, "common", "adminCoursesDetailCurriculumAddSuccess"),
+      );
       setSaving(false);
     } catch {
       setSaveError(t(lang, "common", "adminCoursesDetailCurriculumAddError"));
@@ -698,11 +605,7 @@ export default function AdminCourseDetailPage() {
       if (courseForm.isPaid !== course.isPaid) {
         if (courseForm.isPaid && paidCourseDisabled) {
           setCourseSaveError(
-            t(
-              lang,
-              "common",
-              "adminCoursesDetailPaidCourseDisabledError",
-            ),
+            t(lang, "common", "adminCoursesDetailPaidCourseDisabledError"),
           );
           setCourseSaving(false);
           return;
@@ -716,9 +619,7 @@ export default function AdminCourseDetailPage() {
 
       if (courseForm.isPaid) {
         if (!/^[a-z]{3}$/.test(nextCurrency)) {
-          setCourseSaveError(
-            t(lang, "common", "adminCoursesCurrencyInvalid"),
-          );
+          setCourseSaveError(t(lang, "common", "adminCoursesCurrencyInvalid"));
           setCourseSaving(false);
           return;
         }
@@ -728,9 +629,7 @@ export default function AdminCourseDetailPage() {
           !Number.isFinite(nextPriceCents) ||
           nextPriceCents <= 0
         ) {
-          setCourseSaveError(
-            t(lang, "common", "adminCoursesPriceInvalid"),
-          );
+          setCourseSaveError(t(lang, "common", "adminCoursesPriceInvalid"));
           setCourseSaving(false);
           return;
         }
@@ -752,9 +651,7 @@ export default function AdminCourseDetailPage() {
       }
 
       if (Object.keys(payload).length === 0) {
-        setCourseSaveSuccess(
-          t(lang, "common", "adminCoursesNoChanges"),
-        );
+        setCourseSaveSuccess(t(lang, "common", "adminCoursesNoChanges"));
         setCourseSaving(false);
         return;
       }

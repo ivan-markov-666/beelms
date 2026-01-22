@@ -782,7 +782,7 @@ export function WikiMarkdown({ content }: { content: string }) {
     used: Set<string>;
     counts: Map<string, number>;
   } | null>(null);
-  
+
   const headingIndexRef = useRef(0);
 
   useEffect(() => {
@@ -912,7 +912,9 @@ export function WikiMarkdown({ content }: { content: string }) {
                 <li
                   key={entry.id}
                   className="wiki-toc-item"
-                  style={{ marginLeft: `${Math.max(0, entry.level - 1) * 12}px` }}
+                  style={{
+                    marginLeft: `${Math.max(0, entry.level - 1) * 12}px`,
+                  }}
                 >
                   <a href={`#${entry.id}`}>{entry.text}</a>
                 </li>

@@ -151,9 +151,7 @@ export default function AdminCourseCategoriesPage() {
     try {
       const token = getAccessToken();
       if (!token) {
-        setError(
-          t(lang, "common", "adminErrorMissingApiAccess"),
-        );
+        setError(t(lang, "common", "adminErrorMissingApiAccess"));
         setLoading(false);
         return;
       }
@@ -216,7 +214,9 @@ export default function AdminCourseCategoriesPage() {
       }
 
       if (!title) {
-        setCreateError(t(lang, "common", "adminCoursesCategoriesTitleRequired"));
+        setCreateError(
+          t(lang, "common", "adminCoursesCategoriesTitleRequired"),
+        );
         setCreating(false);
         return;
       }
@@ -258,7 +258,9 @@ export default function AdminCourseCategoriesPage() {
       const created = (await res.json()) as CourseCategory;
       setCategories((prev) => [created, ...prev]);
       setForm(DEFAULT_FORM);
-      setCreateSuccess(t(lang, "common", "adminCoursesCategoriesCreateSuccess"));
+      setCreateSuccess(
+        t(lang, "common", "adminCoursesCategoriesCreateSuccess"),
+      );
       setCreating(false);
     } catch {
       setCreateError(t(lang, "common", "adminCoursesCategoriesCreateError"));
@@ -354,7 +356,9 @@ export default function AdminCourseCategoriesPage() {
 
       if (!res.ok) {
         const msg = await readErrorMessage(res);
-        setSaveError(msg || t(lang, "common", "adminCoursesCategoriesSaveError"));
+        setSaveError(
+          msg || t(lang, "common", "adminCoursesCategoriesSaveError"),
+        );
         setSavingId(null);
         return;
       }
@@ -463,10 +467,20 @@ export default function AdminCourseCategoriesPage() {
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <label className="space-y-1">
               <span className="flex items-center gap-2 text-xs font-medium text-[color:var(--foreground)] opacity-80">
-                <span>{t(lang, "common", "adminCoursesCategoriesSlugLabel")}</span>
+                <span>
+                  {t(lang, "common", "adminCoursesCategoriesSlugLabel")}
+                </span>
                 <InfoTooltip
-                  label={t(lang, "common", "adminCoursesCategoriesInfoTooltipLabel")}
-                  title={t(lang, "common", "adminCoursesCategoriesSlugHelpTitle")}
+                  label={t(
+                    lang,
+                    "common",
+                    "adminCoursesCategoriesInfoTooltipLabel",
+                  )}
+                  title={t(
+                    lang,
+                    "common",
+                    "adminCoursesCategoriesSlugHelpTitle",
+                  )}
                   description={t(
                     lang,
                     "common",
@@ -480,17 +494,31 @@ export default function AdminCourseCategoriesPage() {
                 onChange={(e) =>
                   setForm((p) => ({ ...p, slug: e.target.value }))
                 }
-                placeholder={t(lang, "common", "adminCoursesCategoriesSlugPlaceholder")}
+                placeholder={t(
+                  lang,
+                  "common",
+                  "adminCoursesCategoriesSlugPlaceholder",
+                )}
                 required
               />
             </label>
 
             <label className="space-y-1">
               <span className="flex items-center gap-2 text-xs font-medium text-[color:var(--foreground)] opacity-80">
-                <span>{t(lang, "common", "adminCoursesCategoriesNameLabel")}</span>
+                <span>
+                  {t(lang, "common", "adminCoursesCategoriesNameLabel")}
+                </span>
                 <InfoTooltip
-                  label={t(lang, "common", "adminCoursesCategoriesInfoTooltipLabel")}
-                  title={t(lang, "common", "adminCoursesCategoriesTitleHelpTitle")}
+                  label={t(
+                    lang,
+                    "common",
+                    "adminCoursesCategoriesInfoTooltipLabel",
+                  )}
+                  title={t(
+                    lang,
+                    "common",
+                    "adminCoursesCategoriesTitleHelpTitle",
+                  )}
                   description={t(
                     lang,
                     "common",
@@ -504,17 +532,31 @@ export default function AdminCourseCategoriesPage() {
                 onChange={(e) =>
                   setForm((p) => ({ ...p, title: e.target.value }))
                 }
-                placeholder={t(lang, "common", "adminCoursesCategoriesNamePlaceholder")}
+                placeholder={t(
+                  lang,
+                  "common",
+                  "adminCoursesCategoriesNamePlaceholder",
+                )}
                 required
               />
             </label>
 
             <label className="space-y-1">
               <span className="flex items-center gap-2 text-xs font-medium text-[color:var(--foreground)] opacity-80">
-                <span>{t(lang, "common", "adminCoursesCategoriesOrderLabel")}</span>
+                <span>
+                  {t(lang, "common", "adminCoursesCategoriesOrderLabel")}
+                </span>
                 <InfoTooltip
-                  label={t(lang, "common", "adminCoursesCategoriesInfoTooltipLabel")}
-                  title={t(lang, "common", "adminCoursesCategoriesOrderHelpTitle")}
+                  label={t(
+                    lang,
+                    "common",
+                    "adminCoursesCategoriesInfoTooltipLabel",
+                  )}
+                  title={t(
+                    lang,
+                    "common",
+                    "adminCoursesCategoriesOrderHelpTitle",
+                  )}
                   description={t(
                     lang,
                     "common",
@@ -536,8 +578,14 @@ export default function AdminCourseCategoriesPage() {
             <label className="flex items-center gap-2 rounded-md border border-[color:var(--border)] px-3 py-2">
               <StyledCheckbox
                 checked={form.active}
-                ariaLabel={t(lang, "common", "adminCoursesCategoriesActiveLabel")}
-                onChange={(checked) => setForm((p) => ({ ...p, active: checked }))}
+                ariaLabel={t(
+                  lang,
+                  "common",
+                  "adminCoursesCategoriesActiveLabel",
+                )}
+                onChange={(checked) =>
+                  setForm((p) => ({ ...p, active: checked }))
+                }
                 size="lg"
               />
               <span className="text-sm text-[color:var(--foreground)] opacity-80">
@@ -773,8 +821,16 @@ export default function AdminCourseCategoriesPage() {
                               onClick={() => void saveEdit(c)}
                             >
                               {savingId === c.id
-                                ? t(lang, "common", "adminCoursesCategoriesSaving")
-                                : t(lang, "common", "adminCoursesCategoriesSave")}
+                                ? t(
+                                    lang,
+                                    "common",
+                                    "adminCoursesCategoriesSaving",
+                                  )
+                                : t(
+                                    lang,
+                                    "common",
+                                    "adminCoursesCategoriesSave",
+                                  )}
                             </button>
                             <button
                               type="button"
@@ -782,7 +838,11 @@ export default function AdminCourseCategoriesPage() {
                               disabled={savingId === c.id}
                               onClick={() => cancelEdit()}
                             >
-                              {t(lang, "common", "adminCoursesCategoriesCancel")}
+                              {t(
+                                lang,
+                                "common",
+                                "adminCoursesCategoriesCancel",
+                              )}
                             </button>
                           </div>
                         ) : (
@@ -802,8 +862,16 @@ export default function AdminCourseCategoriesPage() {
                               onClick={() => void deleteCategory(c)}
                             >
                               {deletingId === c.id
-                                ? t(lang, "common", "adminCoursesCategoriesDeleting")
-                                : t(lang, "common", "adminCoursesCategoriesDelete")}
+                                ? t(
+                                    lang,
+                                    "common",
+                                    "adminCoursesCategoriesDeleting",
+                                  )
+                                : t(
+                                    lang,
+                                    "common",
+                                    "adminCoursesCategoriesDelete",
+                                  )}
                             </button>
                           </div>
                         )}

@@ -4343,10 +4343,16 @@ function ThemePreviewCard({
         borderColor: palette.border,
       }}
     >
-      <div className="rounded-xl border p-4 shadow-sm" style={{ ...baseCard, ...previewVars }}>
+      <div
+        className="rounded-xl border p-4 shadow-sm"
+        style={{ ...baseCard, ...previewVars }}
+      >
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs uppercase tracking-wide" style={previewMutedText}>
+            <p
+              className="text-xs uppercase tracking-wide"
+              style={previewMutedText}
+            >
               {variant === "light" ? "Light preview" : "Dark preview"}
             </p>
             <h3 className="text-lg font-semibold">UI sample headline</h3>
@@ -4364,9 +4370,15 @@ function ThemePreviewCard({
           <div className="flex flex-col items-center gap-2">
             <div
               className="h-12 w-2 rounded-full border"
-              style={{ borderColor: palette.border, backgroundColor: palette.scrollTrack }}
+              style={{
+                borderColor: palette.border,
+                backgroundColor: palette.scrollTrack,
+              }}
             >
-              <div className="mx-auto mt-1 h-4 w-1 rounded-full" style={{ backgroundColor: palette.scrollThumb }} />
+              <div
+                className="mx-auto mt-1 h-4 w-1 rounded-full"
+                style={{ backgroundColor: palette.scrollThumb }}
+              />
             </div>
             <span className="text-[10px] font-medium" style={previewMutedText}>
               Scroll
@@ -4376,12 +4388,20 @@ function ThemePreviewCard({
 
         <div className="mt-4 space-y-5">
           <section className="space-y-2">
-            <p className="text-[11px] font-semibold uppercase tracking-wide" style={previewMutedText}>
+            <p
+              className="text-[11px] font-semibold uppercase tracking-wide"
+              style={previewMutedText}
+            >
               Buttons (default / hover / disabled)
             </p>
             <div className="flex flex-wrap gap-2">
               {buttonPreviewConfigs.map(({ key, label, base }) => (
-                <button key={`${key}-default`} type="button" className={sharedButtonClass} style={base}>
+                <button
+                  key={`${key}-default`}
+                  type="button"
+                  className={sharedButtonClass}
+                  style={base}
+                >
                   {label}
                 </button>
               ))}
@@ -4416,14 +4436,25 @@ function ThemePreviewCard({
           </section>
 
           <section className="space-y-2">
-            <p className="text-[11px] font-semibold uppercase tracking-wide" style={previewMutedText}>
+            <p
+              className="text-[11px] font-semibold uppercase tracking-wide"
+              style={previewMutedText}
+            >
               Admin actions
             </p>
             <div className="flex flex-wrap gap-2">
-              <button type="button" className={PRESET_ACTION_BUTTON_CLASS} style={presetActionStyles.edit}>
+              <button
+                type="button"
+                className={PRESET_ACTION_BUTTON_CLASS}
+                style={presetActionStyles.edit}
+              >
                 Edit
               </button>
-              <button type="button" className={PRESET_ACTION_BUTTON_CLASS} style={presetActionStyles.apply}>
+              <button
+                type="button"
+                className={PRESET_ACTION_BUTTON_CLASS}
+                style={presetActionStyles.apply}
+              >
                 Apply
               </button>
             </div>
@@ -4468,18 +4499,33 @@ function ThemePreviewCard({
           </section>
 
           <section className="space-y-2">
-            <p className="text-[11px] font-semibold uppercase tracking-wide" style={previewMutedText}>
+            <p
+              className="text-[11px] font-semibold uppercase tracking-wide"
+              style={previewMutedText}
+            >
               Destructive flow
             </p>
             <div className="space-y-2">
               <div className="flex flex-wrap gap-2">
-                <button type="button" className={sharedButtonClass} style={destructiveButton}>
+                <button
+                  type="button"
+                  className={sharedButtonClass}
+                  style={destructiveButton}
+                >
                   Delete all
                 </button>
-                <button type="button" className={sharedButtonClass} style={destructiveOutlineButton}>
+                <button
+                  type="button"
+                  className={sharedButtonClass}
+                  style={destructiveOutlineButton}
+                >
                   Delete (ghost)
                 </button>
-                <button type="button" className={sharedButtonClass} style={destructiveTextButton}>
+                <button
+                  type="button"
+                  className={sharedButtonClass}
+                  style={destructiveTextButton}
+                >
                   Delete
                 </button>
               </div>
@@ -4592,7 +4638,10 @@ function ThemePreviewCard({
           </section>
 
           <section className="space-y-2">
-            <p className="text-[11px] font-semibold uppercase tracking-wide" style={previewMutedText}>
+            <p
+              className="text-[11px] font-semibold uppercase tracking-wide"
+              style={previewMutedText}
+            >
               Chips & notices
             </p>
             <div className="flex flex-wrap gap-2 text-xs font-semibold">
@@ -4606,12 +4655,18 @@ function ThemePreviewCard({
           </section>
 
           <section className="space-y-2">
-            <p className="text-[11px] font-semibold uppercase tracking-wide" style={previewMutedText}>
+            <p
+              className="text-[11px] font-semibold uppercase tracking-wide"
+              style={previewMutedText}
+            >
               Form fields
             </p>
             <div className="grid gap-3 md:grid-cols-2">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-wide" style={{ ...previewMutedText, minHeight: "28px" }}>
+                <p
+                  className="text-[11px] font-semibold uppercase tracking-wide"
+                  style={{ ...previewMutedText, minHeight: "28px" }}
+                >
                   Field (default)
                 </p>
                 <input
@@ -4621,27 +4676,45 @@ function ThemePreviewCard({
                 />
               </div>
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-wide" style={{ ...previewMutedText, minHeight: "28px" }}>
+                <p
+                  className="text-[11px] font-semibold uppercase tracking-wide"
+                  style={{ ...previewMutedText, minHeight: "28px" }}
+                >
                   Field (OK)
                 </p>
-                <div className="mt-2 rounded-md border px-3 py-2 text-sm shadow-sm" style={inputOk}>
+                <div
+                  className="mt-2 rounded-md border px-3 py-2 text-sm shadow-sm"
+                  style={inputOk}
+                >
                   Valid value
                 </div>
               </div>
             </div>
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-wide" style={{ ...previewMutedText, minHeight: "28px" }}>
+              <p
+                className="text-[11px] font-semibold uppercase tracking-wide"
+                style={{ ...previewMutedText, minHeight: "28px" }}
+              >
                 Alert value
               </p>
-              <div className="mt-2 rounded-md border px-3 py-2 text-sm shadow-sm" style={inputAlert}>
+              <div
+                className="mt-2 rounded-md border px-3 py-2 text-sm shadow-sm"
+                style={inputAlert}
+              >
                 Needs attention
               </div>
             </div>
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-wide" style={{ ...previewMutedText, minHeight: "28px" }}>
+              <p
+                className="text-[11px] font-semibold uppercase tracking-wide"
+                style={{ ...previewMutedText, minHeight: "28px" }}
+              >
                 Field (error)
               </p>
-              <div className="mt-2 rounded-md border px-3 py-2 text-sm shadow-sm" style={inputError}>
+              <div
+                className="mt-2 rounded-md border px-3 py-2 text-sm shadow-sm"
+                style={inputError}
+              >
                 Invalid value
               </div>
               <p className="mt-1 text-xs" style={{ color: palette.error }}>
@@ -8814,9 +8887,10 @@ export default function AdminSettingsPage() {
 
       const updated = (await res.json()) as AdminSettingsResponse;
       const l = updated.languages;
-      const nextSupported = Array.isArray(l?.supported) && l.supported.length
-        ? Array.from(new Set(l.supported.map((lang) => lang.toLowerCase())))
-        : [...SUPPORTED_LANGS];
+      const nextSupported =
+        Array.isArray(l?.supported) && l.supported.length
+          ? Array.from(new Set(l.supported.map((lang) => lang.toLowerCase())))
+          : [...SUPPORTED_LANGS];
       setSupportedLangs(nextSupported);
       setDefaultLang(l?.default ?? "bg");
       setLanguageIcons(
@@ -9208,9 +9282,10 @@ export default function AdminSettingsPage() {
         }
 
         const l = data.languages;
-        const nextSupported = Array.isArray(l?.supported) && l.supported.length
-          ? Array.from(new Set(l.supported.map((lang) => lang.toLowerCase())))
-          : [...SUPPORTED_LANGS];
+        const nextSupported =
+          Array.isArray(l?.supported) && l.supported.length
+            ? Array.from(new Set(l.supported.map((lang) => lang.toLowerCase())))
+            : [...SUPPORTED_LANGS];
         setSupportedLangs(nextSupported);
         setDefaultLang(l?.default ?? "bg");
         setLanguageIcons(
@@ -10613,8 +10688,9 @@ export default function AdminSettingsPage() {
                       themePreviewVariant === "dark"
                         ? darkForSwatches
                         : lightForSwatches;
-                    const actionButtonStyles =
-                      buildPresetActionButtonStyles(previewPaletteVariant);
+                    const actionButtonStyles = buildPresetActionButtonStyles(
+                      previewPaletteVariant,
+                    );
 
                     return (
                       <div
@@ -10851,9 +10927,7 @@ export default function AdminSettingsPage() {
                             ? darkForSwatches
                             : lightForSwatches;
                         const actionButtonStyles =
-                          buildPresetActionButtonStyles(
-                            previewPaletteVariant,
-                          );
+                          buildPresetActionButtonStyles(previewPaletteVariant);
 
                         return (
                           <div

@@ -71,7 +71,9 @@ select:disabled,
   background-color: var(--primary);
   border: 1px solid var(--primary);
   color: var(--on-primary);
-  transition: background-color 120ms ease, opacity 120ms ease,
+  transition:
+    background-color 120ms ease,
+    opacity 120ms ease,
     transform 120ms ease;
 }
 
@@ -93,7 +95,9 @@ select:disabled,
   background-color: var(--error);
   border: 1px solid var(--error);
   color: var(--on-error);
-  transition: background-color 120ms ease, opacity 120ms ease,
+  transition:
+    background-color 120ms ease,
+    opacity 120ms ease,
     transform 120ms ease;
 }
 

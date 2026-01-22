@@ -597,7 +597,11 @@ export default function AdminUsersPage() {
             <InfoTooltip
               label={t(lang, "common", "adminUsersInfoTooltipLabel")}
               title={t(lang, "common", "adminUsersInfoTooltipTitle")}
-              description={t(lang, "common", "adminUsersInfoTooltipDescription")}
+              description={t(
+                lang,
+                "common",
+                "adminUsersInfoTooltipDescription",
+              )}
             />
           </div>
           <p className="text-sm text-zinc-600">
@@ -923,8 +927,16 @@ export default function AdminUsersPage() {
                   {t(lang, "common", "adminUsersExportCsv")}
                 </button>
                 <InfoTooltip
-                  label={t(lang, "common", "adminUsersTableControlsTooltipLabel")}
-                  title={t(lang, "common", "adminUsersTableControlsTooltipTitle")}
+                  label={t(
+                    lang,
+                    "common",
+                    "adminUsersTableControlsTooltipLabel",
+                  )}
+                  title={t(
+                    lang,
+                    "common",
+                    "adminUsersTableControlsTooltipTitle",
+                  )}
                   description={t(
                     lang,
                     "common",
@@ -935,7 +947,8 @@ export default function AdminUsersPage() {
 
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-xs font-medium text-zinc-700 md:text-sm">
-                  {t(lang, "common", "adminUsersSelectedCountLabel")}: {selectedUserIds.length}
+                  {t(lang, "common", "adminUsersSelectedCountLabel")}:{" "}
+                  {selectedUserIds.length}
                 </span>
                 <button
                   type="button"
@@ -958,7 +971,8 @@ export default function AdminUsersPage() {
                     setPurgeAllOpen(true);
                   }}
                 >
-                  {t(lang, "common", "adminUsersBulkDeleteAllPrefix")} ({purgeTotalCount})
+                  {t(lang, "common", "adminUsersBulkDeleteAllPrefix")} (
+                  {purgeTotalCount})
                 </button>
               </div>
             </div>
@@ -976,7 +990,11 @@ export default function AdminUsersPage() {
                             clearAllVisible();
                           }
                         }}
-                        ariaLabel={t(lang, "common", "adminUsersSelectAllVisible")}
+                        ariaLabel={t(
+                          lang,
+                          "common",
+                          "adminUsersSelectAllVisible",
+                        )}
                         disabled={selectableUsers.length === 0}
                       />
                     </th>
@@ -1031,7 +1049,8 @@ export default function AdminUsersPage() {
                                 {user.email}
                               </div>
                               <div className="text-[11px] text-zinc-500">
-                                {t(lang, "common", "adminUsersIdPrefix")}: {user.id}
+                                {t(lang, "common", "adminUsersIdPrefix")}:{" "}
+                                {user.id}
                               </div>
                             </div>
                           </div>
@@ -1151,7 +1170,7 @@ export default function AdminUsersPage() {
               )}
               details={
                 <div>
-                  {t(lang, "common", "adminUsersSelectedCountLabel")}: {" "}
+                  {t(lang, "common", "adminUsersSelectedCountLabel")}:{" "}
                   <span className="font-semibold">
                     {selectedUserIds.length}
                   </span>
