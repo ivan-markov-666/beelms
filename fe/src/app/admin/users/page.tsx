@@ -10,6 +10,7 @@ import {
 import { useSearchParams } from "next/navigation";
 import { useCurrentLang } from "../../../i18n/useCurrentLang";
 import { t } from "../../../i18n/t";
+import type { SupportedLang } from "../../../i18n/config";
 import { getAccessToken } from "../../auth-token";
 import { getApiBaseUrl } from "../../api-url";
 import { AdminBreadcrumbs } from "../_components/admin-breadcrumbs";
@@ -48,11 +49,58 @@ type AdminUsersStats = {
   adminUsers: number;
 };
 
-function formatDateTime(dateIso: string): string {
+function langToLocale(lang: SupportedLang): string {
+  switch (lang) {
+    case "bg":
+      return "bg-BG";
+    case "en":
+      return "en-US";
+    case "de":
+      return "de-DE";
+    case "es":
+      return "es-ES";
+    case "pt":
+      return "pt-PT";
+    case "pl":
+      return "pl-PL";
+    case "ua":
+      return "uk-UA";
+    case "ru":
+      return "ru-RU";
+    case "fr":
+      return "fr-FR";
+    case "tr":
+      return "tr-TR";
+    case "ro":
+      return "ro-RO";
+    case "hi":
+      return "hi-IN";
+    case "vi":
+      return "vi-VN";
+    case "id":
+      return "id-ID";
+    case "it":
+      return "it-IT";
+    case "ko":
+      return "ko-KR";
+    case "ja":
+      return "ja-JP";
+    case "nl":
+      return "nl-NL";
+    case "cs":
+      return "cs-CZ";
+    case "ar":
+      return "ar";
+    default:
+      return lang;
+  }
+}
+
+function formatDateTime(locale: string, dateIso: string): string {
   try {
     const d = new Date(dateIso);
     if (Number.isNaN(d.getTime())) return dateIso;
-    return d.toLocaleString("bg-BG", {
+    return d.toLocaleString(locale, {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -84,6 +132,7 @@ function getUserInitials(email: string): string {
 
 export default function AdminUsersPage() {
   const lang = useCurrentLang();
+  const locale = useMemo(() => langToLocale(lang), [lang]);
   const searchParams = useSearchParams();
   const [myUserId, setMyUserId] = useState<string | null>(null);
   const [users, setUsers] = useState<AdminUser[]>([]);
@@ -116,6 +165,8 @@ export default function AdminUsersPage() {
   const [purgeTotalCount, setPurgeTotalCount] = useState<number>(0);
   const [purgeAllOpen, setPurgeAllOpen] = useState(false);
   const [purgeAllSubmitting, setPurgeAllSubmitting] = useState(false);
+
+  const [viewUser, setViewUser] = useState<AdminUser | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -532,21 +583,25 @@ export default function AdminUsersPage() {
     <div className="space-y-4">
       <AdminBreadcrumbs
         items={[
-          { label: "Админ табло", href: "/admin" },
-          { label: "Users Management" },
+          { label: t(lang, "common", "adminDashboardTitle"), href: "/admin" },
+          { label: t(lang, "common", "adminUsersBreadcrumbTitle") },
         ]}
       />
 
-      <div className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
+      <div className="rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-6 shadow-sm">
         <div className="mb-6 flex flex-col gap-1">
           <div className="flex items-center gap-2">
-            <h2 className="text-xl font-semibold text-zinc-900">
+            <h2 className="text-xl font-semibold text-[color:var(--foreground)]">
               {t(lang, "common", "adminUsersTitle")}
             </h2>
             <InfoTooltip
-              label="Users management info"
-              title="Users Management"
-              description="Управление на потребители: търсене, филтри, промяна на роля, деактивиране/активиране и export на резултатите."
+              label={t(lang, "common", "adminUsersInfoTooltipLabel")}
+              title={t(lang, "common", "adminUsersInfoTooltipTitle")}
+              description={t(
+                lang,
+                "common",
+                "adminUsersInfoTooltipDescription",
+              )}
             />
           </div>
           <p className="text-sm text-zinc-600">
@@ -569,19 +624,26 @@ export default function AdminUsersPage() {
 
           {stats && !statsError && (
             <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-              <div className="rounded-lg border border-zinc-200 bg-white p-4">
+              <div className="rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
                       {t(lang, "common", "adminUsersStatsTotal")}
                     </p>
-                    <p className="mt-1 text-2xl font-semibold text-zinc-900">
+                    <p className="mt-1 text-2xl font-semibold text-[color:var(--foreground)]">
                       {stats.totalUsers}
                     </p>
                   </div>
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50">
+                  <div
+                    className="flex h-10 w-10 items-center justify-center rounded-lg"
+                    style={{
+                      backgroundColor:
+                        "color-mix(in srgb, var(--foreground) 6%, var(--card))",
+                    }}
+                  >
                     <svg
-                      className="h-5 w-5 text-blue-600"
+                      className="h-5 w-5"
+                      style={{ color: "var(--foreground)" }}
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -597,7 +659,7 @@ export default function AdminUsersPage() {
                   </div>
                 </div>
               </div>
-              <div className="rounded-lg border border-zinc-200 bg-white p-4">
+              <div className="rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
@@ -607,9 +669,16 @@ export default function AdminUsersPage() {
                       {stats.activeUsers}
                     </p>
                   </div>
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-zinc-50">
+                  <div
+                    className="flex h-10 w-10 items-center justify-center rounded-lg"
+                    style={{
+                      backgroundColor:
+                        "color-mix(in srgb, var(--primary) 12%, var(--card))",
+                    }}
+                  >
                     <svg
-                      className="h-5 w-5 text-[color:var(--primary)]"
+                      className="h-5 w-5"
+                      style={{ color: "var(--primary)" }}
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -625,19 +694,26 @@ export default function AdminUsersPage() {
                   </div>
                 </div>
               </div>
-              <div className="rounded-lg border border-zinc-200 bg-white p-4">
+              <div className="rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
                       {t(lang, "common", "adminUsersStatsDeactivated")}
                     </p>
-                    <p className="mt-1 text-2xl font-semibold text-orange-600">
+                    <p className="mt-1 text-2xl font-semibold text-[color:var(--attention)]">
                       {stats.deactivatedUsers}
                     </p>
                   </div>
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-50">
+                  <div
+                    className="flex h-10 w-10 items-center justify-center rounded-lg"
+                    style={{
+                      backgroundColor:
+                        "color-mix(in srgb, var(--attention) 12%, var(--card))",
+                    }}
+                  >
                     <svg
-                      className="h-5 w-5 text-orange-500"
+                      className="h-5 w-5"
+                      style={{ color: "var(--attention)" }}
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -653,19 +729,26 @@ export default function AdminUsersPage() {
                   </div>
                 </div>
               </div>
-              <div className="rounded-lg border border-zinc-200 bg-white p-4">
+              <div className="rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
                       {t(lang, "common", "adminUsersStatsAdmins")}
                     </p>
-                    <p className="mt-1 text-2xl font-semibold text-purple-700">
+                    <p className="mt-1 text-2xl font-semibold text-[color:var(--secondary)]">
                       {stats.adminUsers}
                     </p>
                   </div>
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-50">
+                  <div
+                    className="flex h-10 w-10 items-center justify-center rounded-lg"
+                    style={{
+                      backgroundColor:
+                        "color-mix(in srgb, var(--secondary) 12%, var(--card))",
+                    }}
+                  >
                     <svg
-                      className="h-5 w-5 text-purple-600"
+                      className="h-5 w-5"
+                      style={{ color: "var(--secondary)" }}
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -685,7 +768,7 @@ export default function AdminUsersPage() {
           )}
         </div>
 
-        <section className="mb-6 rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+        <section className="mb-6 rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-4 shadow-sm">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <form
               className="md:col-span-1 flex items-center gap-3"
@@ -709,15 +792,14 @@ export default function AdminUsersPage() {
                 <input
                   type="search"
                   placeholder={t(lang, "common", "adminUsersSearchPlaceholder")}
-                  className="w-full rounded-lg border border-[color:var(--border)] bg-white py-2 pl-9 pr-3 text-sm text-[color:var(--foreground)] shadow-sm placeholder:text-zinc-400 focus:border-[color:var(--primary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)]"
+                  className="w-full rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] py-2 pl-9 pr-3 text-sm text-[color:var(--foreground)] shadow-sm placeholder:text-zinc-400 focus:border-[color:var(--primary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-1 focus:ring-offset-[color:var(--card)]"
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
                 />
               </div>
               <button
                 type="submit"
-                className="inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium text-white shadow-sm hover:opacity-90"
-                style={{ backgroundColor: "var(--primary)" }}
+                className="be-btn-primary inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium shadow-sm"
               >
                 {t(lang, "common", "adminUsersSearchButton")}
               </button>
@@ -725,35 +807,66 @@ export default function AdminUsersPage() {
 
             <div>
               <ListboxSelect
-                ariaLabel="Users status"
+                ariaLabel={t(lang, "common", "adminUsersStatusFilterAria")}
                 value={statusFilter}
                 onChange={(next) => {
                   setCurrentPage(1);
                   setStatusFilter(next);
                 }}
                 options={[
-                  { value: "", label: "All Status" },
-                  { value: "active", label: "Active" },
-                  { value: "deactivated", label: "Deactivated" },
+                  {
+                    value: "",
+                    label: t(lang, "common", "adminUsersFilterAllStatus"),
+                  },
+                  {
+                    value: "active",
+                    label: t(lang, "common", "adminUsersFilterStatusActive"),
+                  },
+                  {
+                    value: "deactivated",
+                    label: t(
+                      lang,
+                      "common",
+                      "adminUsersFilterStatusDeactivated",
+                    ),
+                  },
                 ]}
               />
             </div>
 
             <div>
               <ListboxSelect
-                ariaLabel="Users role"
+                ariaLabel={t(lang, "common", "adminUsersRoleFilterAria")}
                 value={roleFilter}
                 onChange={(next) => {
                   setCurrentPage(1);
                   setRoleFilter(next);
                 }}
                 options={[
-                  { value: "", label: "All Roles" },
-                  { value: "user", label: "User" },
-                  { value: "admin", label: "Admin" },
-                  { value: "monitoring", label: "Monitoring" },
-                  { value: "teacher", label: "Teacher" },
-                  { value: "author", label: "Author" },
+                  {
+                    value: "",
+                    label: t(lang, "common", "adminUsersFilterAllRoles"),
+                  },
+                  {
+                    value: "user",
+                    label: t(lang, "common", "adminUsersRoleUser"),
+                  },
+                  {
+                    value: "admin",
+                    label: t(lang, "common", "adminUsersRoleAdmin"),
+                  },
+                  {
+                    value: "monitoring",
+                    label: t(lang, "common", "adminUsersRoleMonitoring"),
+                  },
+                  {
+                    value: "teacher",
+                    label: t(lang, "common", "adminUsersRoleTeacher"),
+                  },
+                  {
+                    value: "author",
+                    label: t(lang, "common", "adminUsersRoleAuthor"),
+                  },
                 ]}
               />
             </div>
@@ -808,36 +921,49 @@ export default function AdminUsersPage() {
                 <button
                   type="button"
                   onClick={() => void exportCsv()}
-                  className="rounded-md border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60 md:text-sm"
+                  className="be-btn-ghost rounded-md border px-3 py-2 text-xs font-medium shadow-sm disabled:cursor-not-allowed disabled:opacity-60 md:text-sm"
                   disabled={totalUsers <= 0}
                 >
-                  Export CSV
+                  {t(lang, "common", "adminUsersExportCsv")}
                 </button>
                 <InfoTooltip
-                  label="Users table controls info"
-                  title="Users table"
-                  description="Използвай Rows per page за 10/20/50/100. Export CSV генерира файл от текущите филтри (server-side)."
+                  label={t(
+                    lang,
+                    "common",
+                    "adminUsersTableControlsTooltipLabel",
+                  )}
+                  title={t(
+                    lang,
+                    "common",
+                    "adminUsersTableControlsTooltipTitle",
+                  )}
+                  description={t(
+                    lang,
+                    "common",
+                    "adminUsersTableControlsTooltipDescription",
+                  )}
                 />
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-xs font-medium text-zinc-700 md:text-sm">
-                  Selected: {selectedUserIds.length}
+                  {t(lang, "common", "adminUsersSelectedCountLabel")}:{" "}
+                  {selectedUserIds.length}
                 </span>
                 <button
                   type="button"
-                  className="rounded-md border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60 md:text-sm"
+                  className="be-btn-ghost rounded-md border px-3 py-2 text-xs font-medium shadow-sm disabled:cursor-not-allowed disabled:opacity-60 md:text-sm"
                   disabled={!hasAnySelected}
                   onClick={() => {
                     setBulkActionError(null);
                     setBulkDeleteOpen(true);
                   }}
                 >
-                  Delete selected
+                  {t(lang, "common", "adminUsersBulkDeleteSelected")}
                 </button>
                 <button
                   type="button"
-                  className="rounded-md border border-[color:var(--field-error-border)] bg-white px-3 py-2 text-xs font-semibold shadow-sm hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60 md:text-sm"
+                  className="rounded-md border border-[color:var(--field-error-border)] bg-[color:var(--card)] px-3 py-2 text-xs font-semibold shadow-sm hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 md:text-sm"
                   style={{ color: "var(--error)" }}
                   disabled={purgeTotalCount <= 0}
                   onClick={() => {
@@ -845,7 +971,8 @@ export default function AdminUsersPage() {
                     setPurgeAllOpen(true);
                   }}
                 >
-                  Delete all ({purgeTotalCount})
+                  {t(lang, "common", "adminUsersBulkDeleteAllPrefix")} (
+                  {purgeTotalCount})
                 </button>
               </div>
             </div>
@@ -863,7 +990,11 @@ export default function AdminUsersPage() {
                             clearAllVisible();
                           }
                         }}
-                        ariaLabel="Select all visible"
+                        ariaLabel={t(
+                          lang,
+                          "common",
+                          "adminUsersSelectAllVisible",
+                        )}
                         disabled={selectableUsers.length === 0}
                       />
                     </th>
@@ -880,7 +1011,7 @@ export default function AdminUsersPage() {
                       {t(lang, "common", "adminUsersColRole")}
                     </th>
                     <th className="px-3 py-2 align-middle text-right">
-                      Actions
+                      {t(lang, "common", "adminUsersTableActions")}
                     </th>
                   </tr>
                 </thead>
@@ -898,7 +1029,11 @@ export default function AdminUsersPage() {
                           <StyledCheckbox
                             checked={selectedSet.has(user.id)}
                             onChange={() => toggleSelected(user.id)}
-                            ariaLabel={`Select ${user.email}`}
+                            ariaLabel={`${t(
+                              lang,
+                              "common",
+                              "adminUsersSelectUserPrefix",
+                            )} ${user.email}`}
                             disabled={!!myUserId && user.id === myUserId}
                           />
                         </td>
@@ -914,7 +1049,8 @@ export default function AdminUsersPage() {
                                 {user.email}
                               </div>
                               <div className="text-[11px] text-zinc-500">
-                                ID: {user.id}
+                                {t(lang, "common", "adminUsersIdPrefix")}:{" "}
+                                {user.id}
                               </div>
                             </div>
                           </div>
@@ -928,7 +1064,7 @@ export default function AdminUsersPage() {
                             }
                             className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${
                               user.active
-                                ? "border-[color:var(--primary)] bg-white text-[color:var(--primary)]"
+                                ? "border-[color:var(--primary)] bg-[color:var(--card)] text-[color:var(--primary)]"
                                 : "border-zinc-200 bg-zinc-50 text-zinc-600"
                             } ${isTogglingThis ? "opacity-70" : ""}`}
                           >
@@ -940,36 +1076,59 @@ export default function AdminUsersPage() {
                           </button>
                         </td>
                         <td className="px-3 py-2 align-middle text-zinc-700">
-                          {formatDateTime(user.createdAt)}
+                          {formatDateTime(locale, user.createdAt)}
                         </td>
                         <td className="px-3 py-2 align-middle">
                           <ListboxSelect
-                            ariaLabel={`Role for ${user.email}`}
+                            ariaLabel={`${t(
+                              lang,
+                              "common",
+                              "adminUsersRoleForPrefix",
+                            )} ${user.email}`}
                             value={user.role}
                             disabled={isUpdatingRoleThis}
                             onChange={(next) =>
                               void handleChangeRole(user.id, next as UserRole)
                             }
-                            buttonClassName="flex w-full items-center justify-between gap-2 rounded-lg border border-[color:var(--border)] bg-white px-3 py-2 text-sm text-[color:var(--foreground)] shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] disabled:opacity-70"
+                            buttonClassName="flex w-full items-center justify-between gap-2 rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] px-3 py-2 text-sm text-[color:var(--foreground)] shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-1 focus:ring-offset-[color:var(--card)] disabled:opacity-70"
                             options={USER_ROLES.map((role) => ({
                               value: role,
-                              label: role,
+                              label:
+                                role === "user"
+                                  ? t(lang, "common", "adminUsersRoleUser")
+                                  : role === "admin"
+                                    ? t(lang, "common", "adminUsersRoleAdmin")
+                                    : role === "monitoring"
+                                      ? t(
+                                          lang,
+                                          "common",
+                                          "adminUsersRoleMonitoring",
+                                        )
+                                      : role === "teacher"
+                                        ? t(
+                                            lang,
+                                            "common",
+                                            "adminUsersRoleTeacher",
+                                          )
+                                        : role === "author"
+                                          ? t(
+                                              lang,
+                                              "common",
+                                              "adminUsersRoleAuthor",
+                                            )
+                                          : role,
                             }))}
                           />
                         </td>
                         <td className="px-3 py-2 align-middle text-right text-sm">
                           <button
                             type="button"
-                            className="font-medium text-blue-600 hover:text-blue-700"
+                            className="font-medium text-[color:var(--primary)] hover:opacity-80"
                             onClick={() => {
-                              if (typeof window === "undefined") return;
-                              // Placeholder for a future real user details modal.
-                              window.alert(
-                                `User details (demo only)\nEmail: ${user.email}\nRole: ${user.role}\nStatus: ${user.active ? "Active" : "Inactive"}`,
-                              );
+                              setViewUser(user);
                             }}
                           >
-                            View
+                            {t(lang, "common", "adminUsersView")}
                           </button>
                         </td>
                       </tr>
@@ -981,9 +1140,12 @@ export default function AdminUsersPage() {
             {totalUsers > 0 && (
               <div className="mt-4 flex flex-col gap-3 border-t border-zinc-200 px-3 py-3 text-xs text-zinc-600 md:flex-row md:items-center md:justify-between md:text-sm">
                 <p>
-                  Showing <span className="font-semibold">{showingFrom}</span>-
-                  <span className="font-semibold">{showingTo}</span> of{" "}
-                  <span className="font-semibold">{totalUsers}</span> users
+                  {t(lang, "common", "adminUsersPaginationShowingPrefix")}{" "}
+                  <span className="font-semibold">{showingFrom}</span>-
+                  <span className="font-semibold">{showingTo}</span>{" "}
+                  {t(lang, "common", "adminUsersPaginationOf")}{" "}
+                  <span className="font-semibold">{totalUsers}</span>{" "}
+                  {t(lang, "common", "adminUsersPaginationUsersSuffix")}
                 </p>
                 <Pagination
                   currentPage={currentPage}
@@ -1000,18 +1162,22 @@ export default function AdminUsersPage() {
 
             <ConfirmDialog
               open={bulkDeleteOpen}
-              title="Изтриване на избраните потребители"
-              description="Избраните потребители ще бъдат физически изтрити. Това действие е необратимо. Вашият акаунт няма да бъде изтрит."
+              title={t(lang, "common", "adminUsersBulkDeleteDialogTitle")}
+              description={t(
+                lang,
+                "common",
+                "adminUsersBulkDeleteDialogDescription",
+              )}
               details={
                 <div>
-                  Брой избрани:{" "}
+                  {t(lang, "common", "adminUsersSelectedCountLabel")}:{" "}
                   <span className="font-semibold">
                     {selectedUserIds.length}
                   </span>
                 </div>
               }
-              confirmLabel="Изтрий"
-              cancelLabel="Отказ"
+              confirmLabel={t(lang, "common", "adminUsersDelete")}
+              cancelLabel={t(lang, "common", "adminUsersCancel")}
               danger
               submitting={bulkDeleteSubmitting}
               error={bulkActionError}
@@ -1069,7 +1235,7 @@ export default function AdminUsersPage() {
                     }
                   } catch {
                     setBulkActionError(
-                      "Възникна грешка при bulk изтриването на потребители.",
+                      t(lang, "common", "adminUsersBulkDeleteError"),
                     );
                   } finally {
                     setBulkDeleteSubmitting(false);
@@ -1080,10 +1246,18 @@ export default function AdminUsersPage() {
 
             <ConfirmDialog
               open={purgeAllOpen}
-              title="Изтриване на всички потребители"
-              description={`Ще изтриете абсолютно всички потребители (${purgeTotalCount}). Това действие е необратимо. Вашият акаунт няма да бъде изтрит.`}
-              confirmLabel="Изтрий всички"
-              cancelLabel="Отказ"
+              title={t(lang, "common", "adminUsersPurgeAllDialogTitle")}
+              description={`${t(
+                lang,
+                "common",
+                "adminUsersPurgeAllDialogDescriptionPrefix",
+              )} (${purgeTotalCount}). ${t(
+                lang,
+                "common",
+                "adminUsersPurgeAllDialogDescriptionSuffix",
+              )}`}
+              confirmLabel={t(lang, "common", "adminUsersDeleteAll")}
+              cancelLabel={t(lang, "common", "adminUsersCancel")}
               danger
               submitting={purgeAllSubmitting}
               error={bulkActionError}
@@ -1126,7 +1300,7 @@ export default function AdminUsersPage() {
                     void loadPurgeCount();
                   } catch {
                     setBulkActionError(
-                      "Възникна грешка при изтриване на всички потребители.",
+                      t(lang, "common", "adminUsersPurgeAllError"),
                     );
                   } finally {
                     setPurgeAllSubmitting(false);
@@ -1134,6 +1308,108 @@ export default function AdminUsersPage() {
                 })();
               }}
             />
+
+            {viewUser ? (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+                <div
+                  className="w-full max-w-md rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-6 shadow-xl"
+                  role="dialog"
+                  aria-modal="true"
+                >
+                  <div className="mb-4 flex items-start justify-between gap-3">
+                    <div>
+                      <h3 className="text-base font-semibold text-[color:var(--foreground)]">
+                        {t(lang, "common", "adminUsersViewDialogTitle")}
+                      </h3>
+                      <p className="mt-1 text-xs text-zinc-600">
+                        {t(lang, "common", "adminUsersViewDialogSubtitle")}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      className="be-btn-ghost rounded-md border px-2 py-1 text-xs font-medium"
+                      onClick={() => setViewUser(null)}
+                    >
+                      {t(lang, "common", "adminUsersClose")}
+                    </button>
+                  </div>
+
+                  <div className="space-y-2 text-sm text-[color:var(--foreground)]">
+                    <div className="rounded-md border border-[color:var(--border)] bg-[color:var(--card)] px-3 py-2">
+                      <div className="text-xs text-zinc-500">
+                        {t(lang, "common", "adminUsersEmailLabel")}
+                      </div>
+                      <div className="font-medium">{viewUser.email}</div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="rounded-md border border-[color:var(--border)] bg-[color:var(--card)] px-3 py-2">
+                        <div className="text-xs text-zinc-500">
+                          {t(lang, "common", "adminUsersRoleLabel")}
+                        </div>
+                        <div className="font-medium">
+                          {viewUser.role === "user"
+                            ? t(lang, "common", "adminUsersRoleUser")
+                            : viewUser.role === "admin"
+                              ? t(lang, "common", "adminUsersRoleAdmin")
+                              : viewUser.role === "monitoring"
+                                ? t(lang, "common", "adminUsersRoleMonitoring")
+                                : viewUser.role === "teacher"
+                                  ? t(lang, "common", "adminUsersRoleTeacher")
+                                  : viewUser.role === "author"
+                                    ? t(lang, "common", "adminUsersRoleAuthor")
+                                    : viewUser.role}
+                        </div>
+                      </div>
+                      <div className="rounded-md border border-[color:var(--border)] bg-[color:var(--card)] px-3 py-2">
+                        <div className="text-xs text-zinc-500">
+                          {t(lang, "common", "adminUsersStatusLabel")}
+                        </div>
+                        <div className="font-medium">
+                          {viewUser.active
+                            ? t(lang, "common", "adminUsersStatusActive")
+                            : t(lang, "common", "adminUsersStatusInactive")}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="rounded-md border border-[color:var(--border)] bg-[color:var(--card)] px-3 py-2">
+                        <div className="text-xs text-zinc-500">
+                          {t(lang, "common", "adminUsersUserIdLabel")}
+                        </div>
+                        <div className="font-medium">{viewUser.id}</div>
+                      </div>
+                      <div className="rounded-md border border-[color:var(--border)] bg-[color:var(--card)] px-3 py-2">
+                        <div className="text-xs text-zinc-500">
+                          {t(lang, "common", "adminUsersCreatedLabel")}
+                        </div>
+                        <div className="font-medium">
+                          {formatDateTime(locale, viewUser.createdAt)}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-5 flex items-center justify-between">
+                    <button
+                      type="button"
+                      className="be-btn-ghost rounded-md border px-3 py-1.5 text-xs font-medium"
+                      onClick={() => setViewUser(null)}
+                    >
+                      {t(lang, "common", "adminUsersClose")}
+                    </button>
+                    <button
+                      type="button"
+                      className="be-btn-primary rounded-md px-3 py-1.5 text-xs font-medium"
+                      onClick={() => setViewUser(null)}
+                    >
+                      {t(lang, "common", "adminUsersOk")}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : null}
           </>
         )}
       </div>

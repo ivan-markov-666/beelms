@@ -67,6 +67,63 @@ select:disabled,
   border-color: color-mix(in srgb, var(--foreground) 18%, var(--border));
 }
 
+.be-btn-primary {
+  background-color: var(--primary);
+  border: 1px solid var(--primary);
+  color: var(--on-primary);
+  transition:
+    background-color 120ms ease,
+    opacity 120ms ease,
+    transform 120ms ease;
+}
+
+.be-btn-primary:hover {
+  background-color: color-mix(in srgb, var(--primary) 92%, var(--foreground));
+}
+
+.be-btn-primary:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--primary) 70%, #ffffff);
+  outline-offset: 2px;
+}
+
+.be-btn-primary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.be-btn-danger {
+  background-color: var(--error);
+  border: 1px solid var(--error);
+  color: var(--on-error);
+  transition:
+    background-color 120ms ease,
+    opacity 120ms ease,
+    transform 120ms ease;
+}
+
+.be-btn-danger:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--error) 70%, #ffffff);
+  outline-offset: 2px;
+}
+
+.be-btn-danger:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+html[data-theme="light"] .be-btn-danger:hover {
+  background-color: color-mix(in srgb, var(--error) 92%, #ffffff);
+}
+
+html[data-theme="dark"] .be-btn-danger:hover {
+  background-color: color-mix(in srgb, var(--error) 88%, #000000);
+}
+
+html[data-theme="dark"] .be-btn-danger:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--error) 60%, #000000);
+  outline-offset: 2px;
+}
+
 .be-btn-link {
   background-color: transparent;
   border-color: transparent;
@@ -587,6 +644,66 @@ html[data-theme] .focus\:ring-rose-500:focus {
   font-size: 0.9rem;
 }
 
+.wiki-markdown ul[data-type="taskList"],
+.tiptap-content ul[data-type="taskList"] {
+  list-style: none;
+  padding-left: 0;
+  margin: 0.6rem 0;
+}
+
+.wiki-markdown li[data-type="taskItem"],
+.tiptap-content li[data-type="taskItem"] {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin: 0.25rem 0;
+}
+
+.wiki-markdown li[data-type="taskItem"] > label,
+.tiptap-content li[data-type="taskItem"] > label {
+  margin-top: 0.15rem;
+}
+
+.wiki-markdown li[data-type="taskItem"] > label input[type="checkbox"],
+.tiptap-content li[data-type="taskItem"] > label input[type="checkbox"] {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--primary);
+}
+
+.wiki-markdown li[data-type="taskItem"] > div,
+.tiptap-content li[data-type="taskItem"] > div {
+  flex: 1;
+  min-width: 0;
+}
+
+.wiki-markdown .callout,
+.tiptap-content .callout {
+  border: 1px solid var(--border);
+  border-left-width: 4px;
+  border-radius: 0.5rem;
+  padding: 0.75rem 0.9rem;
+  margin: 0.8rem 0;
+  background: color-mix(in srgb, var(--foreground) 3%, var(--card));
+}
+
+.wiki-markdown .callout.callout-info,
+.tiptap-content .callout.callout-info {
+  border-left-color: color-mix(in srgb, var(--primary) 70%, #3b82f6);
+}
+
+.wiki-markdown .callout.callout-warning,
+.tiptap-content .callout.callout-warning {
+  border-left-color: #f59e0b;
+  background: color-mix(in srgb, #f59e0b 10%, var(--card));
+}
+
+.wiki-markdown .callout.callout-success,
+.tiptap-content .callout.callout-success {
+  border-left-color: #22c55e;
+  background: color-mix(in srgb, #22c55e 10%, var(--card));
+}
+
 .wiki-markdown th,
 .wiki-markdown td {
   border: 1px solid var(--border);
@@ -638,6 +755,45 @@ html[data-theme] .focus\:ring-rose-500:focus {
 
 .wiki-markdown a:hover {
   text-decoration: underline;
+}
+
+.wiki-markdown .wiki-toc {
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--foreground) 3%, var(--card));
+  border-radius: 0.75rem;
+  padding: 0.75rem 0.9rem;
+  margin: 1rem 0;
+}
+
+.wiki-markdown .wiki-toc-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+}
+
+.wiki-markdown .wiki-toc-list {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+.wiki-markdown .wiki-toc-item {
+  margin: 0.25rem 0;
+}
+
+.wiki-markdown .wiki-heading-anchor {
+  opacity: 0;
+  margin-right: 0.4rem;
+  font-weight: 600;
+  color: color-mix(in srgb, var(--secondary) 90%, var(--foreground));
+  text-decoration: none;
+}
+
+.wiki-markdown h1:hover .wiki-heading-anchor,
+.wiki-markdown h2:hover .wiki-heading-anchor,
+.wiki-markdown h3:hover .wiki-heading-anchor,
+.wiki-markdown h4:hover .wiki-heading-anchor {
+  opacity: 1;
 }
 
 .tiptap-content ul,

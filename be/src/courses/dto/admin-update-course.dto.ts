@@ -3,6 +3,7 @@ import {
   IsIn,
   IsInt,
   IsOptional,
+  IsArray,
   IsString,
   IsUUID,
   Length,
@@ -21,6 +22,11 @@ export class AdminUpdateCourseDto {
   @IsString()
   @IsOptional()
   language?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  languages?: string[];
 
   @IsString()
   @IsOptional()

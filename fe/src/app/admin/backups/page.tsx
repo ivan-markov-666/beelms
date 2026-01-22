@@ -1559,11 +1559,11 @@ export default function AdminBackupsPage() {
     <div className="p-6">
       {encryptionWarningOpen ? (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 px-4">
-          <div className="w-full max-w-md rounded-lg border border-amber-200 bg-white p-5 shadow-2xl">
-            <h2 className="text-lg font-semibold text-amber-900">
+          <div className="w-full max-w-md rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-5 shadow-2xl">
+            <h2 className="text-lg font-semibold text-[color:var(--foreground)]">
               Backup ще бъде криптиран
             </h2>
-            <p className="mt-2 text-sm text-amber-800">
+            <p className="mt-2 text-sm text-[color:var(--foreground)] opacity-80">
               Попълнил си <strong>Encryption password</strong>. Това означава,
               че резервното копие ще бъде криптирано и ще може да бъде
               възстановено само с тази парола. Запиши я на сигурно място, защото
@@ -1573,14 +1573,14 @@ export default function AdminBackupsPage() {
             <div className="mt-4 flex justify-end gap-2 text-sm">
               <button
                 type="button"
-                className="rounded-md border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50"
+                className="be-btn-ghost rounded-md border px-4 py-2 text-sm font-medium"
                 onClick={() => setEncryptionWarningOpen(false)}
               >
                 Отказ
               </button>
               <button
                 type="button"
-                className="rounded-md border border-amber-600 bg-amber-600 px-4 py-2 font-semibold text-white hover:bg-amber-700"
+                className="be-btn-primary rounded-md border px-4 py-2 text-sm font-semibold"
                 onClick={confirmEncryptionWarning}
               >
                 Разбирам, създай backup
@@ -1592,8 +1592,10 @@ export default function AdminBackupsPage() {
 
       <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Backups</h1>
-          <p className="mt-1 text-sm text-gray-600">
+          <h1 className="text-2xl font-bold text-[color:var(--foreground)]">
+            Backups
+          </h1>
+          <p className="mt-1 text-sm text-[color:var(--foreground)] opacity-80">
             Ръчно създаване и restore на PostgreSQL backup файлове.
           </p>
         </div>
@@ -1610,7 +1612,7 @@ export default function AdminBackupsPage() {
             }}
           />
           <div className="flex w-60 flex-col gap-1">
-            <div className="flex items-center gap-1 text-xs font-medium text-gray-700">
+            <div className="flex items-center gap-1 text-xs font-medium text-[color:var(--foreground)] opacity-80">
               <span>Encryption password</span>
               <InfoTooltip
                 label="Какво е encryption password"
@@ -1626,7 +1628,7 @@ export default function AdminBackupsPage() {
             </div>
             <input
               type="password"
-              className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs"
+              className="rounded-md border border-[color:var(--border)] bg-[color:var(--card)] px-3 py-1.5 text-xs text-[color:var(--foreground)]"
               placeholder="Optional"
               value={newBackupEncryptionPassword}
               onChange={(e) => setNewBackupEncryptionPassword(e.target.value)}
@@ -1643,7 +1645,7 @@ export default function AdminBackupsPage() {
           </button>
           <button
             type="button"
-            className="text-sm font-medium text-green-700 hover:text-green-900"
+            className="text-sm font-medium text-[color:var(--primary)] hover:opacity-90 hover:underline"
             onClick={() => void handleReloadAll()}
             disabled={globalReloading}
           >
@@ -1652,11 +1654,11 @@ export default function AdminBackupsPage() {
         </div>
       </div>
 
-      <div className="mt-4 rounded-md border border-gray-200 bg-white p-4">
+      <div className="mt-4 rounded-md border border-[color:var(--border)] bg-[color:var(--card)] p-4">
         <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
           <div>
             <div className="flex items-center gap-2">
-              <p className="text-sm font-semibold text-gray-900">
+              <p className="text-sm font-semibold text-[color:var(--foreground)]">
                 Automatic backups (Schedule)
               </p>
               <InfoTooltip
@@ -1671,7 +1673,7 @@ export default function AdminBackupsPage() {
                 }
               />
             </div>
-            <p className="mt-0.5 text-xs text-gray-600">
+            <p className="mt-0.5 text-xs text-[color:var(--foreground)] opacity-80">
               Настройки за автоматично създаване на backup веднъж дневно.
             </p>
           </div>
@@ -1679,7 +1681,7 @@ export default function AdminBackupsPage() {
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
-              className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-900 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-70"
+              className="be-btn-ghost rounded-md border px-3 py-1.5 text-xs font-medium disabled:cursor-not-allowed disabled:opacity-70"
               onClick={() => void runScheduleNow()}
               disabled={scheduleRunning || !!hasActiveJob}
             >
@@ -1689,12 +1691,14 @@ export default function AdminBackupsPage() {
         </div>
 
         {scheduleLoading ? (
-          <p className="mt-3 text-sm text-gray-500">Loading schedule...</p>
+          <p className="mt-3 text-sm text-[color:var(--foreground)] opacity-60">
+            Loading schedule...
+          </p>
         ) : null}
 
         {scheduleConfig ? (
           <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
-            <div className="flex items-center justify-between gap-2 rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-900">
+            <div className="flex items-center justify-between gap-2 rounded-md border border-[color:var(--border)] bg-[color:color-mix(in_srgb,var(--foreground)_4%,var(--card))] px-3 py-2 text-sm text-[color:var(--foreground)]">
               <span className="flex items-center gap-1">
                 Enable daily backups
                 <InfoTooltip
@@ -1705,7 +1709,15 @@ export default function AdminBackupsPage() {
               </span>
               <button
                 type="button"
-                className={`relative inline-flex h-6 w-12 flex-shrink-0 items-center rounded-full transition ${scheduleConfig.enabled ? "bg-green-500" : "bg-gray-300"}`}
+                className="relative inline-flex h-6 w-12 flex-shrink-0 items-center rounded-full border transition-colors focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-2"
+                style={{
+                  backgroundColor: scheduleConfig.enabled
+                    ? "var(--primary)"
+                    : "color-mix(in srgb, var(--foreground) 10%, var(--card))",
+                  borderColor: scheduleConfig.enabled
+                    ? "var(--primary)"
+                    : "var(--border)",
+                }}
                 onClick={() =>
                   setScheduleConfig({
                     ...scheduleConfig,
@@ -1714,15 +1726,17 @@ export default function AdminBackupsPage() {
                 }
               >
                 <span
-                  className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition ${scheduleConfig.enabled ? "translate-x-6" : "translate-x-1"}`}
+                  className={`inline-block h-5 w-5 transform rounded-full bg-[color:var(--card)] shadow transition ${
+                    scheduleConfig.enabled ? "translate-x-6" : "translate-x-1"
+                  }`}
                 />
               </button>
             </div>
 
             <div />
 
-            <label className="text-sm text-gray-900">
-              <div className="flex items-center gap-2 text-xs text-gray-600">
+            <label className="text-sm text-[color:var(--foreground)]">
+              <div className="flex items-center gap-2 text-xs text-[color:var(--foreground)] opacity-80">
                 Times of day (HH:MM)
                 <InfoTooltip
                   label="Какво означава Time of day"
@@ -1735,7 +1749,7 @@ export default function AdminBackupsPage() {
                   <div key={`${idx}-${t}`} className="flex items-center gap-2">
                     <input
                       type="time"
-                      className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                      className="w-full rounded-md border border-[color:var(--border)] bg-[color:var(--card)] px-3 py-2 text-sm text-[color:var(--foreground)]"
                       value={t}
                       onChange={(e) => {
                         const value = e.target.value;
@@ -1753,7 +1767,7 @@ export default function AdminBackupsPage() {
                     />
                     <button
                       type="button"
-                      className="rounded-md border border-gray-300 bg-white px-2 py-2 text-xs text-gray-700 hover:bg-gray-50"
+                      className="be-btn-ghost rounded-md border px-2 py-2 text-xs"
                       onClick={() => removeScheduleTime(idx)}
                       disabled={scheduleConfig.timesOfDay.length === 0}
                       aria-label="Remove time"
@@ -1766,7 +1780,7 @@ export default function AdminBackupsPage() {
 
                 <button
                   type="button"
-                  className="rounded-md border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-gray-900 hover:bg-gray-50"
+                  className="be-btn-ghost rounded-md border px-3 py-2 text-xs font-medium"
                   onClick={addScheduleTime}
                 >
                   Add time
@@ -1788,8 +1802,8 @@ export default function AdminBackupsPage() {
               </div>
             </label>
 
-            <label className="text-sm text-gray-900">
-              <div className="flex items-center gap-2 text-xs text-gray-600">
+            <label className="text-sm text-[color:var(--foreground)]">
+              <div className="flex items-center gap-2 text-xs text-[color:var(--foreground)] opacity-80">
                 Timezone
                 <InfoTooltip
                   label="Какво означава Timezone"
@@ -1800,7 +1814,7 @@ export default function AdminBackupsPage() {
               <div className="relative mt-1">
                 <input
                   ref={timezoneInputRef}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-[color:var(--primary)] focus:ring-1 focus:ring-[color:var(--primary)]"
+                  className="w-full rounded-md border border-[color:var(--border)] bg-[color:var(--card)] px-3 py-2 text-sm text-[color:var(--foreground)] shadow-sm focus:border-[color:var(--primary)] focus:ring-1 focus:ring-[color:var(--primary)]"
                   placeholder="Europe/Sofia"
                   value={timezoneDraft}
                   onFocus={() => setTimezoneDropdownOpen(true)}
@@ -1821,17 +1835,17 @@ export default function AdminBackupsPage() {
                   }}
                 />
                 {timezoneDropdownOpen && filteredTimezones.length > 0 ? (
-                  <div className="absolute left-0 right-0 z-30 mt-1 max-h-64 overflow-y-auto rounded-md border border-gray-200 bg-white shadow-xl">
+                  <div className="absolute left-0 right-0 z-30 mt-1 max-h-64 overflow-y-auto rounded-md border border-[color:var(--border)] bg-[color:var(--card)] shadow-xl">
                     {groupedTimezones.map(({ group, items }) => (
                       <div key={group}>
-                        <div className="border-b border-gray-100 bg-gray-50 px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-gray-500">
+                        <div className="border-b border-[color:var(--border)] bg-[color:color-mix(in_srgb,var(--foreground)_3%,var(--card))] px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-[color:var(--foreground)] opacity-70">
                           {group}
                         </div>
                         {items.map((tz) => (
                           <button
                             key={tz}
                             type="button"
-                            className="flex w-full items-center justify-between px-3 py-2 text-left text-xs text-gray-800 hover:bg-[color:color-mix(in srgb, var(--primary) 15%, white)]"
+                            className="flex w-full items-center justify-between px-3 py-2 text-left text-xs text-[color:var(--foreground)] hover:bg-[color:color-mix(in_srgb,var(--primary)_12%,var(--card))]"
                             onMouseDown={(e) => e.preventDefault()}
                             onClick={() => {
                               setTimezoneDraft(tz);
@@ -1845,7 +1859,7 @@ export default function AdminBackupsPage() {
                           >
                             <span>{tz}</span>
                             {scheduleConfig.timezone === tz ? (
-                              <span className="text-[10px] font-semibold uppercase text-green-600">
+                              <span className="text-[10px] font-semibold uppercase text-[color:var(--primary)]">
                                 Selected
                               </span>
                             ) : null}
@@ -1854,7 +1868,7 @@ export default function AdminBackupsPage() {
                       </div>
                     ))}
                     {filteredTimezones.length === 0 ? (
-                      <div className="px-3 py-2 text-center text-[11px] text-gray-500">
+                      <div className="px-3 py-2 text-center text-[11px] text-[color:var(--foreground)] opacity-70">
                         Няма съвпадения.
                       </div>
                     ) : null}
@@ -1863,10 +1877,10 @@ export default function AdminBackupsPage() {
               </div>
             </label>
 
-            <div className="md:col-span-2 rounded-md border border-gray-100 bg-gray-50 px-3 py-3 text-sm text-gray-900">
+            <div className="md:col-span-2 rounded-md border border-[color:var(--border)] bg-[color:color-mix(in_srgb,var(--foreground)_4%,var(--card))] px-3 py-3 text-sm text-[color:var(--foreground)]">
               <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                 <div>
-                  <div className="flex items-center gap-1 text-xs text-gray-600">
+                  <div className="flex items-center gap-1 text-xs text-[color:var(--foreground)] opacity-80">
                     Encryption password for automatic backups
                     <InfoTooltip
                       label="Какво означава encryption password"
@@ -1876,7 +1890,7 @@ export default function AdminBackupsPage() {
                   </div>
                   <input
                     type="password"
-                    className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                    className="mt-1 w-full rounded-md border border-[color:var(--border)] bg-[color:var(--card)] px-3 py-2 text-sm text-[color:var(--foreground)]"
                     placeholder={
                       scheduleHasEncryptionPassword
                         ? "Въведи нова парола, за да я смениш"
@@ -1889,7 +1903,7 @@ export default function AdminBackupsPage() {
                       setScheduleEncryptionDraft(e.target.value);
                     }}
                   />
-                  <p className="mt-1 text-xs text-gray-600">
+                  <p className="mt-1 text-xs text-[color:var(--foreground)] opacity-80">
                     {scheduleEncryptionClear
                       ? "Паролата ще бъде премахната при запазване."
                       : scheduleHasEncryptionPassword
@@ -1900,7 +1914,7 @@ export default function AdminBackupsPage() {
                 <div className="flex flex-col gap-2 text-xs">
                   <button
                     type="button"
-                    className="rounded-md border border-gray-300 px-3 py-1 text-gray-700 hover:bg-gray-100 disabled:opacity-40"
+                    className="be-btn-ghost rounded-md border px-3 py-1 text-xs disabled:opacity-40"
                     disabled={
                       !scheduleHasEncryptionPassword && !scheduleEncryptionDraft
                     }
@@ -1933,11 +1947,11 @@ export default function AdminBackupsPage() {
         ) : null}
       </div>
 
-      <div className="mt-4 rounded-md border border-gray-200 bg-white p-4">
+      <div className="mt-4 rounded-md border border-[color:var(--border)] bg-[color:var(--card)] p-4">
         <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
           <div>
             <div className="flex items-center gap-2">
-              <p className="text-sm font-semibold text-gray-900">
+              <p className="text-sm font-semibold text-[color:var(--foreground)]">
                 Retention policy
               </p>
               <InfoTooltip
@@ -1952,19 +1966,21 @@ export default function AdminBackupsPage() {
                 }
               />
             </div>
-            <p className="mt-0.5 text-xs text-gray-600">
+            <p className="mt-0.5 text-xs text-[color:var(--foreground)] opacity-80">
               Настройки за автоматично почистване на стари архиви.
             </p>
           </div>
         </div>
 
         {retentionLoading ? (
-          <p className="mt-3 text-sm text-gray-500">Loading retention...</p>
+          <p className="mt-3 text-sm text-[color:var(--foreground)] opacity-60">
+            Loading retention...
+          </p>
         ) : null}
 
         {retentionConfig ? (
           <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
-            <div className="flex items-center justify-between gap-2 rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-900">
+            <div className="flex items-center justify-between gap-2 rounded-md border border-[color:var(--border)] bg-[color:color-mix(in_srgb,var(--foreground)_4%,var(--card))] px-3 py-2 text-sm text-[color:var(--foreground)]">
               <span className="flex items-center gap-1">
                 Enable time-based cleanup
                 <InfoTooltip
@@ -1975,7 +1991,15 @@ export default function AdminBackupsPage() {
               </span>
               <button
                 type="button"
-                className={`relative inline-flex h-6 w-12 flex-shrink-0 items-center rounded-full transition ${retentionConfig.time.enabled ? "bg-green-500" : "bg-gray-300"}`}
+                className="relative inline-flex h-6 w-12 flex-shrink-0 items-center rounded-full border transition-colors focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-2"
+                style={{
+                  backgroundColor: retentionConfig.time.enabled
+                    ? "var(--primary)"
+                    : "color-mix(in srgb, var(--foreground) 10%, var(--card))",
+                  borderColor: retentionConfig.time.enabled
+                    ? "var(--primary)"
+                    : "var(--border)",
+                }}
                 onClick={() =>
                   setRetentionConfig((prev) => {
                     if (!prev) return prev;
@@ -1995,13 +2019,17 @@ export default function AdminBackupsPage() {
                 }
               >
                 <span
-                  className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition ${retentionConfig.time.enabled ? "translate-x-6" : "translate-x-1"}`}
+                  className={`inline-block h-5 w-5 transform rounded-full bg-[color:var(--card)] shadow transition ${
+                    retentionConfig.time.enabled
+                      ? "translate-x-6"
+                      : "translate-x-1"
+                  }`}
                 />
               </button>
             </div>
 
-            <label className="text-sm text-gray-900">
-              <div className="flex items-center gap-2 text-xs text-gray-600">
+            <label className="text-sm text-[color:var(--foreground)]">
+              <div className="flex items-center gap-2 text-xs text-[color:var(--foreground)] opacity-80">
                 Delete backups older than
                 <InfoTooltip
                   label="Период за изтриване"
@@ -2010,7 +2038,7 @@ export default function AdminBackupsPage() {
                 />
               </div>
               <select
-                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                className="mt-1 w-full rounded-md border border-[color:var(--border)] bg-[color:var(--card)] px-3 py-2 text-sm text-[color:var(--foreground)]"
                 value={retentionConfig.time.period}
                 onChange={(e) => {
                   const nextPeriod = e.target
@@ -2041,7 +2069,7 @@ export default function AdminBackupsPage() {
               </select>
             </label>
 
-            <div className="flex items-center justify-between gap-2 rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-900">
+            <div className="flex items-center justify-between gap-2 rounded-md border border-[color:var(--border)] bg-[color:color-mix(in_srgb,var(--foreground)_4%,var(--card))] px-3 py-2 text-sm text-[color:var(--foreground)]">
               <span className="flex items-center gap-1">
                 Enable keep-last-N
                 <InfoTooltip
@@ -2052,7 +2080,15 @@ export default function AdminBackupsPage() {
               </span>
               <button
                 type="button"
-                className={`relative inline-flex h-6 w-12 flex-shrink-0 items-center rounded-full transition ${retentionConfig.count.enabled ? "bg-green-500" : "bg-gray-300"}`}
+                className="relative inline-flex h-6 w-12 flex-shrink-0 items-center rounded-full border transition-colors focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-2"
+                style={{
+                  backgroundColor: retentionConfig.count.enabled
+                    ? "var(--primary)"
+                    : "color-mix(in srgb, var(--foreground) 10%, var(--card))",
+                  borderColor: retentionConfig.count.enabled
+                    ? "var(--primary)"
+                    : "var(--border)",
+                }}
                 onClick={() =>
                   setRetentionConfig({
                     ...retentionConfig,
@@ -2064,13 +2100,17 @@ export default function AdminBackupsPage() {
                 }
               >
                 <span
-                  className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition ${retentionConfig.count.enabled ? "translate-x-6" : "translate-x-1"}`}
+                  className={`inline-block h-5 w-5 transform rounded-full bg-[color:var(--card)] shadow transition ${
+                    retentionConfig.count.enabled
+                      ? "translate-x-6"
+                      : "translate-x-1"
+                  }`}
                 />
               </button>
             </div>
 
-            <label className="text-sm text-gray-900">
-              <div className="flex items-center gap-2 text-xs text-gray-600">
+            <label className="text-sm text-[color:var(--foreground)]">
+              <div className="flex items-center gap-2 text-xs text-[color:var(--foreground)] opacity-80">
                 Keep last N backups
                 <InfoTooltip
                   label="Keep last"
@@ -2081,7 +2121,7 @@ export default function AdminBackupsPage() {
               <input
                 inputMode="numeric"
                 pattern="[0-9]*"
-                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                className="mt-1 w-full rounded-md border border-[color:var(--border)] bg-[color:var(--card)] px-3 py-2 text-sm text-[color:var(--foreground)]"
                 value={keepLastDraft}
                 onChange={(e) => {
                   const v = e.target.value;
@@ -2118,13 +2158,13 @@ export default function AdminBackupsPage() {
         ) : null}
       </div>
 
-      <div className="mt-4 rounded-md border border-gray-200 bg-white p-4">
+      <div className="mt-4 rounded-md border border-[color:var(--border)] bg-[color:var(--card)] p-4">
         <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="text-sm font-semibold text-gray-900">
+            <p className="text-sm font-semibold text-[color:var(--foreground)]">
               Remote backup storage (S3)
             </p>
-            <p className="mt-0.5 text-xs text-gray-600">
+            <p className="mt-0.5 text-xs text-[color:var(--foreground)] opacity-80">
               Автоматичен sync на backups към S3 при създаване.
             </p>
           </div>
@@ -2132,7 +2172,7 @@ export default function AdminBackupsPage() {
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
-              className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-900 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-70"
+              className="be-btn-ghost rounded-md border px-3 py-1.5 text-xs font-medium disabled:cursor-not-allowed disabled:opacity-70"
               onClick={() => void testRemote()}
               disabled={remoteTesting || remoteLoading}
             >
@@ -2142,14 +2182,14 @@ export default function AdminBackupsPage() {
         </div>
 
         {remoteLoading ? (
-          <p className="mt-3 text-sm text-gray-500">
+          <p className="mt-3 text-sm text-[color:var(--foreground)] opacity-60">
             Loading remote settings...
           </p>
         ) : null}
 
         {remoteConfig ? (
           <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
-            <div className="flex items-center gap-2 rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-900">
+            <div className="flex items-center gap-2 rounded-md border border-[color:var(--border)] bg-[color:color-mix(in_srgb,var(--foreground)_4%,var(--card))] px-3 py-2 text-sm text-[color:var(--foreground)]">
               <span className="flex items-center gap-1">
                 Enable automatic sync
                 <InfoTooltip
@@ -2160,19 +2200,29 @@ export default function AdminBackupsPage() {
               </span>
               <button
                 type="button"
-                className={`relative inline-flex h-6 w-12 flex-shrink-0 items-center rounded-full transition ${remoteConfig.enabled ? "bg-green-500" : "bg-gray-300"}`}
+                className="relative inline-flex h-6 w-12 flex-shrink-0 items-center rounded-full border transition-colors focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-2"
+                style={{
+                  backgroundColor: remoteConfig.enabled
+                    ? "var(--primary)"
+                    : "color-mix(in srgb, var(--foreground) 10%, var(--card))",
+                  borderColor: remoteConfig.enabled
+                    ? "var(--primary)"
+                    : "var(--border)",
+                }}
                 onClick={handleToggleRemoteSync}
               >
                 <span
-                  className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition ${remoteConfig.enabled ? "translate-x-6" : "translate-x-1"}`}
+                  className={`inline-block h-5 w-5 transform rounded-full bg-[color:var(--card)] shadow transition ${
+                    remoteConfig.enabled ? "translate-x-6" : "translate-x-1"
+                  }`}
                 />
               </button>
             </div>
 
             <div />
 
-            <label className="text-sm text-gray-900">
-              <div className="flex items-center gap-1 text-xs text-gray-600">
+            <label className="text-sm text-[color:var(--foreground)]">
+              <div className="flex items-center gap-1 text-xs text-[color:var(--foreground)] opacity-80">
                 Access Key ID{" "}
                 <span className="text-red-500" aria-hidden="true">
                   *
@@ -2184,7 +2234,7 @@ export default function AdminBackupsPage() {
                 />
               </div>
               <input
-                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                className="mt-1 w-full rounded-md border border-[color:var(--border)] bg-[color:var(--card)] px-3 py-2 text-sm text-[color:var(--foreground)]"
                 placeholder={remoteConfig.s3.accessKeyId ? "(saved)" : ""}
                 value={remoteAccessKeyDraft}
                 onChange={(e) => {
@@ -2198,8 +2248,8 @@ export default function AdminBackupsPage() {
               />
             </label>
 
-            <label className="text-sm text-gray-900">
-              <div className="flex items-center gap-1 text-xs text-gray-600">
+            <label className="text-sm text-[color:var(--foreground)]">
+              <div className="flex items-center gap-1 text-xs text-[color:var(--foreground)] opacity-80">
                 <span>
                   Secret Access Key{" "}
                   {remoteConfig.s3.hasSecretAccessKey ? "(saved)" : ""}
@@ -2218,7 +2268,7 @@ export default function AdminBackupsPage() {
                 placeholder={
                   remoteConfig.s3.hasSecretAccessKey ? "••••••••" : ""
                 }
-                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                className="mt-1 w-full rounded-md border border-[color:var(--border)] bg-[color:var(--card)] px-3 py-2 text-sm text-[color:var(--foreground)]"
                 value={remoteSecretDraft}
                 onChange={(e) => {
                   if (remoteToggleError) setRemoteToggleError(null);
@@ -2227,8 +2277,8 @@ export default function AdminBackupsPage() {
               />
             </label>
 
-            <label className="text-sm text-gray-900">
-              <div className="flex items-center gap-1 text-xs text-gray-600">
+            <label className="text-sm text-[color:var(--foreground)]">
+              <div className="flex items-center gap-1 text-xs text-[color:var(--foreground)] opacity-80">
                 Bucket{" "}
                 <span className="text-red-500" aria-hidden="true">
                   *
@@ -2240,7 +2290,7 @@ export default function AdminBackupsPage() {
                 />
               </div>
               <input
-                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                className="mt-1 w-full rounded-md border border-[color:var(--border)] bg-[color:var(--card)] px-3 py-2 text-sm text-[color:var(--foreground)]"
                 value={remoteConfig.s3.bucket ?? ""}
                 onChange={(e) => {
                   if (remoteToggleError) setRemoteToggleError(null);
@@ -2252,8 +2302,8 @@ export default function AdminBackupsPage() {
               />
             </label>
 
-            <label className="text-sm text-gray-900">
-              <div className="flex items-center gap-1 text-xs text-gray-600">
+            <label className="text-sm text-[color:var(--foreground)]">
+              <div className="flex items-center gap-1 text-xs text-[color:var(--foreground)] opacity-80">
                 Region{" "}
                 <span className="text-red-500" aria-hidden="true">
                   *
@@ -2265,7 +2315,7 @@ export default function AdminBackupsPage() {
                 />
               </div>
               <input
-                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                className="mt-1 w-full rounded-md border border-[color:var(--border)] bg-[color:var(--card)] px-3 py-2 text-sm text-[color:var(--foreground)]"
                 value={remoteConfig.s3.region ?? ""}
                 onChange={(e) => {
                   if (remoteToggleError) setRemoteToggleError(null);
@@ -2277,8 +2327,8 @@ export default function AdminBackupsPage() {
               />
             </label>
 
-            <label className="text-sm text-gray-900 md:col-span-2">
-              <div className="flex items-center gap-1 text-xs text-gray-600">
+            <label className="text-sm text-[color:var(--foreground)] md:col-span-2">
+              <div className="flex items-center gap-1 text-xs text-[color:var(--foreground)] opacity-80">
                 Prefix (folder)
                 <InfoTooltip
                   label="Какво означава Prefix"
@@ -2287,7 +2337,7 @@ export default function AdminBackupsPage() {
                 />
               </div>
               <input
-                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                className="mt-1 w-full rounded-md border border-[color:var(--border)] bg-[color:var(--card)] px-3 py-2 text-sm text-[color:var(--foreground)]"
                 value={remoteConfig.s3.prefix ?? ""}
                 onChange={(e) =>
                   setRemoteConfig({
@@ -2298,7 +2348,7 @@ export default function AdminBackupsPage() {
               />
             </label>
             {remoteToggleError ? (
-              <div className="md:col-span-2 rounded-md border border-[color:var(--error)] bg-[color:color-mix(in srgb, var(--error) 10%, white)] px-3 py-2 text-xs text-[color:var(--error)]">
+              <div className="md:col-span-2 rounded-md border border-[color:var(--error)] bg-[color:color-mix(in srgb, var(--error) 12%, var(--card))] px-3 py-2 text-xs text-[color:var(--error)]">
                 {remoteToggleError}
               </div>
             ) : null}
@@ -2309,9 +2359,9 @@ export default function AdminBackupsPage() {
           <div
             className="mt-3 rounded-md border px-4 py-3 text-sm"
             style={{
-              backgroundColor: "var(--field-ok-bg, #f0fdf4)",
-              borderColor: "var(--field-ok-border, #dcfce7)",
-              color: "var(--foreground, #111827)",
+              backgroundColor: "var(--field-ok-bg)",
+              borderColor: "var(--field-ok-border)",
+              color: "var(--foreground)",
             }}
           >
             Connection OK.
@@ -2347,7 +2397,7 @@ export default function AdminBackupsPage() {
       </div>
 
       <div
-        className="mt-4 rounded-md border border-dashed border-gray-300 bg-white px-4 py-4"
+        className="mt-4 rounded-md border border-dashed border-[color:var(--border)] bg-[color:var(--card)] px-4 py-4"
         onDragOver={(e) => {
           e.preventDefault();
           e.stopPropagation();
@@ -2362,7 +2412,7 @@ export default function AdminBackupsPage() {
       >
         <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
           <div>
-            <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+            <div className="flex items-center gap-2 text-sm font-semibold text-[color:var(--foreground)]">
               Upload backup (.sql)
               <InfoTooltip
                 label="Как работи upload"
@@ -2370,13 +2420,13 @@ export default function AdminBackupsPage() {
                 description="Може да качите .sql файл чрез drag & drop върху панела или чрез бутона “Choose file”. Файлът ще бъде хеширан, криптиран (ако сте задали парола) и добавен към списъка."
               />
             </div>
-            <p className="mt-0.5 text-xs text-gray-600">
+            <p className="mt-0.5 text-xs text-[color:var(--foreground)] opacity-80">
               Drag & drop SQL файл тук или използвайте бутона “Upload backup”.
             </p>
           </div>
           <button
             type="button"
-            className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-900 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-70"
+            className="be-btn-ghost rounded-md border px-3 py-1.5 text-xs font-medium disabled:cursor-not-allowed disabled:opacity-70"
             onClick={openUploadPicker}
             disabled={uploadSubmitting || !!hasActiveJob}
           >
@@ -2416,7 +2466,7 @@ export default function AdminBackupsPage() {
               </div>
               <button
                 type="button"
-                className="text-xs text-green-800 hover:text-green-950"
+                className="text-xs text-[color:var(--primary)] hover:opacity-90"
                 onClick={() => setUploadResult(null)}
               >
                 Dismiss
@@ -2474,20 +2524,20 @@ export default function AdminBackupsPage() {
       </div>
 
       {(job || jobError) && (
-        <div className="mt-4 rounded-md border border-gray-200 bg-white p-4">
+        <div className="mt-4 rounded-md border border-[color:var(--border)] bg-[color:var(--card)] p-4">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-sm font-semibold text-gray-900">
+              <p className="text-sm font-semibold text-[color:var(--foreground)]">
                 {job?.type === "restore" ? "Restore" : "Backup"} job
               </p>
-              <p className="mt-0.5 text-xs text-gray-600">
+              <p className="mt-0.5 text-xs text-[color:var(--foreground)] opacity-80">
                 {job?.message || ""}
                 {job?.error ? ` (${job.error})` : ""}
               </p>
             </div>
             <button
               type="button"
-              className="text-xs text-gray-500 hover:text-gray-800"
+              className="text-xs text-[color:var(--foreground)] opacity-80 hover:text-[color:var(--foreground)]"
               onClick={() => {
                 if (hasActiveJob) return;
                 setJob(null);
@@ -2499,7 +2549,7 @@ export default function AdminBackupsPage() {
           </div>
 
           <div className="mt-3">
-            <div className="h-2 w-full overflow-hidden rounded bg-gray-100">
+            <div className="h-2 w-full overflow-hidden rounded bg-[color:var(--border)]">
               <div
                 className="h-full bg-[color:var(--primary)] transition-all"
                 style={{
@@ -2507,7 +2557,7 @@ export default function AdminBackupsPage() {
                 }}
               />
             </div>
-            <div className="mt-1 flex justify-between text-[11px] text-gray-500">
+            <div className="mt-1 flex justify-between text-[11px] text-[color:var(--foreground)] opacity-80">
               <span>{job?.stage ?? ""}</span>
               <span>{`${job?.percent ?? 0}%`}</span>
             </div>
@@ -2529,13 +2579,13 @@ export default function AdminBackupsPage() {
         </div>
       )}
 
-      <div className="mt-6 rounded-md border border-gray-200 bg-white p-4">
+      <div className="mt-6 rounded-md border border-[color:var(--border)] bg-[color:var(--card)] p-4">
         <div className="flex flex-col gap-3">
           <div>
-            <p className="text-sm font-semibold text-gray-900">
+            <p className="text-sm font-semibold text-[color:var(--foreground)]">
               Запази настройките
             </p>
-            <p className="text-xs text-gray-600">
+            <p className="text-xs text-[color:var(--foreground)] opacity-80">
               Съхранява автоматичните backups, retention и remote sync
               конфигурациите.
             </p>
@@ -2555,7 +2605,7 @@ export default function AdminBackupsPage() {
                 className="rounded-md border px-4 py-3 text-sm"
                 style={outcome.ok ? successBoxStyle : errorBoxStyle}
               >
-                <p className="text-xs font-semibold uppercase tracking-wide text-gray-600">
+                <p className="text-xs font-semibold uppercase tracking-wide text-[color:var(--foreground)] opacity-80">
                   {labelMap[section]}
                 </p>
                 <p className="mt-1 text-sm">{outcome.message}</p>
@@ -2574,23 +2624,33 @@ export default function AdminBackupsPage() {
         </div>
       </div>
 
-      <div className="mt-6 flex flex-col gap-2 border-t border-gray-100 pt-4 md:flex-row md:items-center md:justify-between">
+      <div className="mt-6 flex flex-col gap-2 border-t border-[color:var(--border)] pt-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <p className="text-sm font-semibold text-gray-900">Backups</p>
-          <p className="text-xs text-gray-500">
+          <p className="text-sm font-semibold text-[color:var(--foreground)]">
+            Backups
+          </p>
+          <p className="text-xs text-[color:var(--foreground)] opacity-80">
             Последните създадени и качени архиви.
           </p>
         </div>
-        <div className="flex items-center gap-3 text-xs text-gray-600">
+        <div className="flex items-center gap-3 text-xs text-[color:var(--foreground)] opacity-80">
           <span>Показвай изтритите backup-и</span>
           <button
             type="button"
-            className={`relative inline-flex h-5 w-10 flex-shrink-0 items-center rounded-full transition ${showDeleted ? "bg-green-500" : "bg-gray-300"}`}
+            className="relative inline-flex h-5 w-10 flex-shrink-0 items-center rounded-full border transition-colors focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-2"
+            style={{
+              backgroundColor: showDeleted
+                ? "var(--primary)"
+                : "color-mix(in srgb, var(--foreground) 10%, var(--card))",
+              borderColor: showDeleted ? "var(--primary)" : "var(--border)",
+            }}
             onClick={() => setShowDeleted((prev) => !prev)}
             aria-pressed={showDeleted}
           >
             <span
-              className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition ${showDeleted ? "translate-x-5" : "translate-x-1"}`}
+              className={`inline-block h-4 w-4 transform rounded-full bg-[color:var(--card)] shadow transition ${
+                showDeleted ? "translate-x-5" : "translate-x-1"
+              }`}
             />
           </button>
         </div>
@@ -2598,21 +2658,29 @@ export default function AdminBackupsPage() {
 
       {!loading && error && (
         <div
-          className="mt-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+          className="mt-4 rounded-md border px-4 py-3 text-sm"
           role="alert"
+          style={{
+            backgroundColor:
+              "color-mix(in srgb, var(--error) 14%, var(--card))",
+            borderColor: "var(--border)",
+            color: "var(--error)",
+          }}
         >
           {error}
         </div>
       )}
 
       {!loading && !error && visibleItems.length === 0 && (
-        <p className="mt-4 text-sm text-gray-600">No backups found.</p>
+        <p className="mt-4 text-sm text-[color:var(--foreground)] opacity-80">
+          No backups found.
+        </p>
       )}
 
       {!loading && !error && visibleItems.length > 0 && (
         <div className="mt-4 overflow-x-auto">
           <table className="min-w-full text-left text-sm">
-            <thead className="border-b border-gray-200 text-xs uppercase tracking-wide text-gray-500">
+            <thead className="border-b border-[color:var(--border)] text-xs uppercase tracking-wide text-[color:var(--foreground)] opacity-80">
               <tr>
                 <th className="px-2 py-2">Filename</th>
                 <th className="px-2 py-2">Type</th>
@@ -2624,47 +2692,54 @@ export default function AdminBackupsPage() {
                 <th className="px-2 py-2">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-[color:var(--border)]">
               {pagedBackups.map((b) => (
-                <tr key={b.id} className="hover:bg-gray-50">
+                <tr
+                  key={b.id}
+                  className="hover:bg-[color:color-mix(in srgb, var(--foreground) 3%, var(--card))]"
+                >
                   <td className="px-2 py-2">
                     <div className="flex flex-wrap items-center gap-2">
-                      <div className="font-medium text-gray-900">
+                      <div className="font-medium text-[color:var(--foreground)]">
                         {b.filename}
                       </div>
                       {b.isEncrypted ? (
-                        <span className="rounded border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-800">
+                        <span className="rounded border border-[color:var(--border)] bg-[color:color-mix(in srgb, var(--attention) 14%, var(--card))] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[color:var(--attention)]">
                           Encrypted
                         </span>
                       ) : null}
                     </div>
                     {b.errorMessage ? (
-                      <div className="mt-0.5 text-xs text-red-700">
+                      <div className="mt-0.5 text-xs text-[color:var(--error)]">
                         {b.errorMessage}
                       </div>
                     ) : null}
                   </td>
-                  <td className="px-2 py-2 text-gray-700">{b.type}</td>
-                  <td className="px-2 py-2 text-gray-700">{b.status}</td>
-                  <td className="px-2 py-2 text-gray-700">
+                  <td className="px-2 py-2 text-[color:var(--foreground)] opacity-80">
+                    {b.type}
+                  </td>
+                  <td className="px-2 py-2 text-[color:var(--foreground)] opacity-80">
+                    {b.status}
+                  </td>
+                  <td className="px-2 py-2 text-[color:var(--foreground)] opacity-80">
                     {formatBytes(b.sizeBytes)}
                   </td>
-                  <td className="px-2 py-2 text-gray-700">
+                  <td className="px-2 py-2 text-[color:var(--foreground)] opacity-80">
                     {formatDateTime(b.createdAt)}
                   </td>
-                  <td className="px-2 py-2 text-gray-700">
+                  <td className="px-2 py-2 text-[color:var(--foreground)] opacity-80">
                     {b.createdByEmail ?? "-"}
                   </td>
-                  <td className="px-2 py-2 text-gray-700">
+                  <td className="px-2 py-2 text-[color:var(--foreground)] opacity-80">
                     {b.status === "deleted" ? (
                       <div className="flex flex-col">
-                        <span className="font-medium text-gray-900">
+                        <span className="font-medium text-[color:var(--foreground)]">
                           {b.deletedReason === "retention"
                             ? "Auto (retention)"
                             : (b.deletedByEmail ?? "Manual")}
                         </span>
                         {b.deletedAt ? (
-                          <span className="text-xs text-gray-500">
+                          <span className="text-xs text-[color:var(--foreground)] opacity-60">
                             {formatDateTime(b.deletedAt)}
                           </span>
                         ) : null}
@@ -2678,7 +2753,7 @@ export default function AdminBackupsPage() {
                       {b.status === "deleted" ? (
                         <button
                           type="button"
-                          className="cursor-not-allowed rounded border border-gray-200 bg-gray-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-gray-500"
+                          className="cursor-not-allowed rounded border border-[color:var(--border)] bg-[color:color-mix(in srgb, var(--foreground) 4%, var(--card))] px-3 py-1 text-xs font-semibold uppercase tracking-wide text-[color:var(--foreground)] opacity-70"
                           disabled
                         >
                           Deleted
@@ -2687,7 +2762,7 @@ export default function AdminBackupsPage() {
                         <>
                           <button
                             type="button"
-                            className="text-xs font-medium text-green-700 hover:text-green-900"
+                            className="text-xs font-medium text-[color:var(--primary)] hover:opacity-90"
                             onClick={() => openDownload(b)}
                             disabled={!!hasActiveJob}
                           >
@@ -2695,7 +2770,7 @@ export default function AdminBackupsPage() {
                           </button>
                           <button
                             type="button"
-                            className="text-xs font-medium text-amber-700 hover:text-amber-900 disabled:opacity-60"
+                            className="text-xs font-medium text-[color:var(--attention)] hover:opacity-90 disabled:opacity-50"
                             onClick={() => openRestore(b)}
                             disabled={!!hasActiveJob || b.status !== "ready"}
                           >
@@ -2703,7 +2778,7 @@ export default function AdminBackupsPage() {
                           </button>
                           <button
                             type="button"
-                            className="text-xs font-medium text-red-700 hover:text-red-900"
+                            className="text-xs font-medium text-[color:var(--error)] hover:opacity-90"
                             onClick={() => openDelete(b)}
                             disabled={deleteSubmitting || !!hasActiveJob}
                           >
@@ -2717,7 +2792,7 @@ export default function AdminBackupsPage() {
               ))}
             </tbody>
           </table>
-          <div className="mt-4 flex flex-col gap-3 border-t border-gray-200 px-3 py-3 text-xs text-gray-600 md:flex-row md:items-center md:justify-between md:text-sm">
+          <div className="mt-4 flex flex-col gap-3 border-t border-[color:var(--border)] px-3 py-3 text-xs text-[color:var(--foreground)] opacity-80 md:flex-row md:items-center md:justify-between md:text-sm">
             <p>
               Showing <span className="font-semibold">{showingFrom}</span>-
               <span className="font-semibold">{showingTo}</span> of{" "}
@@ -2803,12 +2878,12 @@ export default function AdminBackupsPage() {
             Backup:{" "}
             <span className="font-semibold">{restoreTarget?.filename}</span>
             <div className="mt-3">
-              <div className="text-xs text-gray-600">
+              <div className="text-xs text-[color:var(--foreground)] opacity-80">
                 Encryption password (optional; required for encrypted backups)
               </div>
               <input
                 type="password"
-                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                className="mt-1 w-full rounded-md border border-[color:var(--border)] bg-[color:var(--card)] px-3 py-2 text-sm text-[color:var(--foreground)]"
                 value={restorePasswordDraft}
                 onChange={(e) => setRestorePasswordDraft(e.target.value)}
               />
@@ -2833,10 +2908,12 @@ export default function AdminBackupsPage() {
             Backup:{" "}
             <span className="font-semibold">{downloadTarget?.filename}</span>
             <div className="mt-3">
-              <div className="text-xs text-gray-600">Encryption password</div>
+              <div className="text-xs text-[color:var(--foreground)] opacity-80">
+                Encryption password
+              </div>
               <input
                 type="password"
-                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                className="mt-1 w-full rounded-md border border-[color:var(--border)] bg-[color:var(--card)] px-3 py-2 text-sm text-[color:var(--foreground)]"
                 value={downloadPasswordDraft}
                 onChange={(e) => setDownloadPasswordDraft(e.target.value)}
               />

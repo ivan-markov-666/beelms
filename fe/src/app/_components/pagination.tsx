@@ -3,6 +3,8 @@
 import { useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ListboxSelect } from "./listbox-select";
+import { useCurrentLang } from "../../i18n/useCurrentLang";
+import { t } from "../../i18n/t";
 
 type PaginationItem = number | "ellipsis";
 
@@ -25,6 +27,7 @@ export function Pagination({
   pageSizeParam?: string;
   pageSizeOptions?: number[];
 }) {
+  const lang = useCurrentLang();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -144,7 +147,7 @@ export function Pagination({
       normalized > safeTotalPages
     ) {
       setError(
-        `Моля, въведете валиден номер на страница (1 - ${safeTotalPages}).`,
+        `${t(lang, "common", "paginationInvalidPagePrefix")} (1 - ${safeTotalPages}).`,
       );
       return;
     }
@@ -184,16 +187,18 @@ export function Pagination({
       <div className="flex flex-wrap items-center gap-2">
         {showPageSizeSelector && (
           <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-600 md:text-sm">Per page</span>
+            <span className="text-xs text-gray-600 md:text-sm">
+              {t(lang, "common", "paginationPerPage")}
+            </span>
             <div className="w-[140px]">
               <ListboxSelect
-                ariaLabel="Rows per page"
+                ariaLabel={t(lang, "common", "paginationRowsPerPageAria")}
                 value={String(currentPageSize)}
                 onChange={(next) => {
                   const parsed = Number.parseInt(next, 10);
                   setPageSizeAndReset(parsed);
                 }}
-                buttonClassName="flex w-full items-center justify-between gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs text-gray-700 shadow-sm focus:outline-none md:text-sm"
+                buttonClassName="flex w-full items-center justify-between gap-2 rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] px-3 py-2 text-xs text-[color:var(--foreground)] shadow-sm transition focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-1 focus:ring-offset-[color:var(--card)] md:text-sm"
                 options={safePageSizeOptions.map((n) => ({
                   value: String(n),
                   label: String(n),
@@ -211,7 +216,7 @@ export function Pagination({
               className="be-btn-ghost rounded-lg border px-3 py-2 text-xs disabled:cursor-not-allowed disabled:opacity-60 md:text-sm"
               disabled={prevDisabled}
             >
-              First
+              {t(lang, "common", "paginationFirst")}
             </button>
 
             <button
@@ -220,7 +225,7 @@ export function Pagination({
               className="be-btn-ghost rounded-lg border px-3 py-2 text-xs disabled:cursor-not-allowed disabled:opacity-60 md:text-sm"
               disabled={prevDisabled}
             >
-              Previous
+              {t(lang, "common", "paginationPrevious")}
             </button>
 
             {items.map((item, index) => {
@@ -270,7 +275,7 @@ export function Pagination({
               className="be-btn-ghost rounded-lg border px-3 py-2 text-xs disabled:cursor-not-allowed disabled:opacity-60 md:text-sm"
               disabled={nextDisabled}
             >
-              Next
+              {t(lang, "common", "paginationNext")}
             </button>
 
             <button
@@ -279,7 +284,7 @@ export function Pagination({
               className="be-btn-ghost rounded-lg border px-3 py-2 text-xs disabled:cursor-not-allowed disabled:opacity-60 md:text-sm"
               disabled={nextDisabled}
             >
-              Last
+              {t(lang, "common", "paginationLast")}
             </button>
 
             <div className="flex items-center gap-2">
@@ -321,7 +326,7 @@ export function Pagination({
                 type="text"
                 pattern="\\d*"
                 className="w-20 rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs text-gray-700 shadow-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500 md:text-sm"
-                aria-label="Go to page"
+                aria-label={t(lang, "common", "paginationGoToPageAria")}
                 placeholder="#"
               />
               <button
@@ -333,7 +338,7 @@ export function Pagination({
                 className="rounded-lg bg-green-600 px-3 py-2 text-xs font-medium text-white shadow-sm hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-60 md:text-sm"
                 disabled={!goToRaw.trim()}
               >
-                Go
+                {t(lang, "common", "paginationGo")}
               </button>
             </div>
           </>

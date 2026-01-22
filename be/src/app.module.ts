@@ -44,15 +44,20 @@ import { BackupsModule } from './backups/backups.module';
 import { Backup } from './backups/backup.entity';
 import { BackupLog } from './backups/backup-log.entity';
 
+const resolvedDbHost = process.env.DB_HOST ?? 'localhost';
+const resolvedDbPort = Number(process.env.DB_PORT ?? 5432);
+const resolvedDbUser = process.env.DB_USER ?? 'beelms';
+const resolvedDbName = process.env.DB_NAME ?? 'beelms';
+
 @Module({
   imports: [
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: process.env.DB_HOST ?? 'localhost',
-      port: Number(process.env.DB_PORT ?? 5432),
-      username: process.env.DB_USER ?? 'beelms',
+      host: resolvedDbHost,
+      port: resolvedDbPort,
+      username: resolvedDbUser,
       password: process.env.DB_PASSWORD ?? 'beelms',
-      database: process.env.DB_NAME ?? 'beelms',
+      database: resolvedDbName,
       entities: [
         WikiArticle,
         WikiArticleVersion,

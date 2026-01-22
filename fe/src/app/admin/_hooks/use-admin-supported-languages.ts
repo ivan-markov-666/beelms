@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { getApiBaseUrl } from "../../api-url";
+import { SUPPORTED_LANGS } from "../../../i18n/config";
 
 const API_BASE_URL = getApiBaseUrl();
 
@@ -77,7 +78,10 @@ export function useAdminSupportedLanguages(): {
       const supported = normalizeSupportedLanguages(
         data.languages?.supported ?? [],
       );
-      const normalizedSupported = supported.length > 0 ? supported : ["bg"];
+      const normalizedSupported =
+        supported.length > 0
+          ? supported
+          : (SUPPORTED_LANGS as unknown as string[]);
       setLanguages(normalizedSupported);
       setDefaultLanguage(
         normalizeDefaultLang(data.languages?.default, normalizedSupported),
@@ -85,7 +89,9 @@ export function useAdminSupportedLanguages(): {
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load languages");
-      setLanguages((prev) => (prev.length > 0 ? prev : ["bg"]));
+      setLanguages((prev) =>
+        prev.length > 0 ? prev : (SUPPORTED_LANGS as unknown as string[]),
+      );
       setDefaultLanguage((prev) => prev || "bg");
     } finally {
       setLoading(false);

@@ -12,11 +12,12 @@ import {
   Req,
   UnauthorizedException,
   UploadedFile,
+  UploadedFiles,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import type { Request } from 'express';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { WikiService } from './wiki.service';
 import type { WikiUploadedFile } from './wiki.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -276,6 +277,34 @@ export class AdminWikiController {
     }
 
     return this.wikiService.adminListArticleMedia(userId, id);
+  }
+
+  @Post('articles/:id/translations/import-markdown')
+  @UseInterceptors(FilesInterceptor('files'))
+  @HttpCode(200)
+  async importArticleTranslationsFromMarkdown(
+    @Param('id') id: string,
+    @UploadedFiles() files: WikiUploadedFile[] | undefined,
+    @Req() req: AuthenticatedRequest,
+  ): Promise<{
+    results: Array<{
+      filename: string;
+      language: string | null;
+      status: 'created' | 'skipped' | 'error';
+      versionNumber?: number;
+      error?: string;
+    }>;
+  }> {
+    const userId = req.user?.userId;
+    if (!userId) {
+      throw new UnauthorizedException('Authenticated user not found');
+    }
+
+    return this.wikiService.adminImportArticleTranslationsFromMarkdownFiles(
+      userId,
+      id,
+      files,
+    );
   }
 
   @Post('articles/:id/media')

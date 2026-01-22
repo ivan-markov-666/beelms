@@ -51,6 +51,153 @@ export class SettingsService {
     private readonly instanceConfigRepo: Repository<InstanceConfig>,
   ) {}
 
+  private normalizeLanguageCode(raw: unknown): string {
+    if (typeof raw !== 'string') return '';
+    const normalized = raw.trim().toLowerCase();
+    if (!normalized) return '';
+    return normalized === 'uk' ? 'ua' : normalized;
+  }
+
+  private normalizeLanguagesShape(
+    languages: InstanceLanguages,
+  ): InstanceLanguages {
+    const supportedRaw = Array.isArray(languages.supported)
+      ? languages.supported
+      : [];
+    const supported = Array.from(
+      new Set(
+        supportedRaw
+          .map((code) => this.normalizeLanguageCode(code))
+          .filter(Boolean),
+      ),
+    );
+
+    const normalizedDefault = this.normalizeLanguageCode(languages.default);
+    const defaultLang = supported.includes(normalizedDefault)
+      ? normalizedDefault
+      : (supported[0] ?? 'bg');
+
+    const normalizeIconRecord = (
+      icons: InstanceLanguages['icons'],
+    ): InstanceLanguages['icons'] => {
+      if (!icons) return null;
+      const next: NonNullable<InstanceLanguages['icons']> = {};
+      for (const [k, v] of Object.entries(icons)) {
+        const key = this.normalizeLanguageCode(k);
+        if (!key) continue;
+        if (typeof next[key] === 'undefined') {
+          next[key] = v;
+          continue;
+        }
+        const current = next[key] ?? null;
+        const incoming = v ?? null;
+        if (!current) {
+          next[key] = incoming;
+          continue;
+        }
+        if (!incoming) {
+          continue;
+        }
+        next[key] = {
+          ...(current ?? {}),
+          ...(incoming ?? {}),
+        };
+      }
+
+      if (supported.length > 0) {
+        const filtered: NonNullable<InstanceLanguages['icons']> = {};
+        for (const code of supported) {
+          const entry = next[code];
+          if (typeof entry !== 'undefined') {
+            filtered[code] = entry;
+          }
+        }
+        return Object.keys(filtered).length > 0 ? filtered : null;
+      }
+
+      return Object.keys(next).length > 0 ? next : null;
+    };
+
+    const normalizeFlagPicker = (
+      flagPicker: InstanceLanguages['flagPicker'],
+    ): InstanceLanguages['flagPicker'] => {
+      if (!flagPicker) return null;
+      const byLang = flagPicker.byLang ?? null;
+      const global =
+        typeof flagPicker.global === 'string' ? flagPicker.global : null;
+
+      const nextByLang: NonNullable<
+        NonNullable<InstanceLanguages['flagPicker']>['byLang']
+      > = {};
+      if (byLang && typeof byLang === 'object') {
+        for (const [k, v] of Object.entries(byLang)) {
+          const key = this.normalizeLanguageCode(k);
+          if (!key) continue;
+          if (typeof v === 'undefined') continue;
+          if (v === null || typeof v === 'string') {
+            nextByLang[key] = v;
+          }
+        }
+      }
+
+      if (supported.length > 0) {
+        const filtered: NonNullable<
+          NonNullable<InstanceLanguages['flagPicker']>['byLang']
+        > = {};
+        for (const code of supported) {
+          const entry = nextByLang[code];
+          if (typeof entry !== 'undefined') {
+            filtered[code] = entry;
+          }
+        }
+        const normalized = {
+          global,
+          byLang: Object.keys(filtered).length > 0 ? filtered : null,
+        };
+        if (!normalized.global && !normalized.byLang) return null;
+        return normalized;
+      }
+
+      const normalized = {
+        global,
+        byLang: Object.keys(nextByLang).length > 0 ? nextByLang : null,
+      };
+      if (!normalized.global && !normalized.byLang) return null;
+      return normalized;
+    };
+
+    return {
+      ...languages,
+      supported,
+      default: defaultLang,
+      icons: normalizeIconRecord(languages.icons ?? null),
+      flagPicker: normalizeFlagPicker(languages.flagPicker ?? null),
+    };
+  }
+
+  private readonly DEFAULT_SUPPORTED_LANGS: InstanceLanguages['supported'] = [
+    'bg',
+    'en',
+    'de',
+    'es',
+    'pt',
+    'pl',
+    'ua',
+    'ru',
+    'fr',
+    'tr',
+    'ro',
+    'hi',
+    'vi',
+    'id',
+    'it',
+    'ko',
+    'ja',
+    'nl',
+    'cs',
+    'ar',
+  ];
+
   async isBrandingPageUrlEnabled(slug: string): Promise<boolean> {
     const normalizedSlug = (slug ?? '').trim().toLowerCase();
     if (!normalizedSlug) {
@@ -261,7 +408,7 @@ export class SettingsService {
 
   private buildDefaultLanguages(): InstanceLanguages {
     return {
-      supported: ['bg', 'en', 'de'],
+      supported: [...this.DEFAULT_SUPPORTED_LANGS],
       default: 'bg',
       icons: null,
       flagPicker: null,
@@ -319,6 +466,34 @@ export class SettingsService {
 
     if (existing) {
       let changed = false;
+
+      if (
+        existing.languages &&
+        Array.isArray(existing.languages.supported) &&
+        existing.languages.supported.length > 0
+      ) {
+        const normalized = Array.from(
+          new Set(
+            existing.languages.supported
+              .map((l) => (l ?? '').trim().toLowerCase())
+              .filter(Boolean),
+          ),
+        );
+
+        const isLegacyDefault =
+          normalized.length === 3 &&
+          normalized.includes('bg') &&
+          normalized.includes('en') &&
+          normalized.includes('de');
+
+        if (isLegacyDefault) {
+          existing.languages = {
+            ...(existing.languages ?? ({} as InstanceLanguages)),
+            supported: [...this.DEFAULT_SUPPORTED_LANGS],
+          };
+          changed = true;
+        }
+      }
 
       if (typeof existing.branding.footerSocialLinks === 'undefined') {
         existing.branding = {
@@ -442,6 +617,14 @@ export class SettingsService {
           flagPicker: null,
         };
         changed = true;
+      }
+
+      {
+        const normalized = this.normalizeLanguagesShape(existing.languages);
+        if (JSON.stringify(normalized) !== JSON.stringify(existing.languages)) {
+          existing.languages = normalized;
+          changed = true;
+        }
       }
 
       const mergedFeatures = {
@@ -818,6 +1001,13 @@ export class SettingsService {
             ...dto.languages,
           } as InstanceLanguages;
 
+          merged.supported = Array.isArray(merged.supported)
+            ? merged.supported
+                .map((code) => this.normalizeLanguageCode(code))
+                .filter(Boolean)
+            : merged.supported;
+          merged.default = this.normalizeLanguageCode(merged.default);
+
           if (dto.languages && typeof dto.languages.icons !== 'undefined') {
             const existingIcons = cfg.languages.icons ?? null;
             const incomingIcons: InstanceLanguages['icons'] =
@@ -826,13 +1016,36 @@ export class SettingsService {
               existingIcons ?? {};
             const incomingIconsObj: NonNullable<InstanceLanguages['icons']> =
               incomingIcons ?? {};
-            merged.icons =
-              existingIcons || incomingIcons
-                ? {
-                    ...existingIconsObj,
-                    ...incomingIconsObj,
-                  }
-                : null;
+            if (existingIcons || incomingIcons) {
+              const combined = {
+                ...existingIconsObj,
+                ...incomingIconsObj,
+              };
+              const nextIcons: NonNullable<InstanceLanguages['icons']> = {};
+              for (const [k, v] of Object.entries(combined)) {
+                const key = this.normalizeLanguageCode(k);
+                if (!key) continue;
+                if (typeof nextIcons[key] === 'undefined') {
+                  nextIcons[key] = v;
+                  continue;
+                }
+                const current = nextIcons[key] ?? null;
+                const incoming = v ?? null;
+                if (!current) {
+                  nextIcons[key] = incoming;
+                  continue;
+                }
+                if (!incoming) continue;
+                nextIcons[key] = {
+                  ...(current ?? {}),
+                  ...(incoming ?? {}),
+                };
+              }
+              merged.icons =
+                Object.keys(nextIcons).length > 0 ? nextIcons : null;
+            } else {
+              merged.icons = null;
+            }
           }
 
           if (merged.icons && Array.isArray(merged.supported)) {
@@ -856,13 +1069,25 @@ export class SettingsService {
             const incomingPicker = dto.languages.flagPicker ?? null;
             const existingByLang = existingPicker?.byLang ?? null;
             const incomingByLang = incomingPicker?.byLang ?? null;
-            const mergedByLang =
+            const mergedByLangRaw =
               existingByLang || incomingByLang
                 ? {
                     ...(existingByLang ?? {}),
                     ...(incomingByLang ?? {}),
                   }
                 : null;
+            const mergedByLang = (() => {
+              if (!mergedByLangRaw) return null;
+              const next: Record<string, string | null> = {};
+              for (const [k, v] of Object.entries(mergedByLangRaw)) {
+                const key = this.normalizeLanguageCode(k);
+                if (!key) continue;
+                if (v === null || typeof v === 'string') {
+                  next[key] = v;
+                }
+              }
+              return Object.keys(next).length > 0 ? next : null;
+            })();
 
             merged.flagPicker =
               existingPicker || incomingPicker
@@ -902,7 +1127,7 @@ export class SettingsService {
             merged.flagPicker = null;
           }
 
-          return merged;
+          return this.normalizeLanguagesShape(merged);
         })()
       : cfg.languages;
 

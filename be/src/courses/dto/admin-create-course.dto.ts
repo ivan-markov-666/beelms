@@ -4,6 +4,7 @@ import {
   IsInt,
   IsNotEmpty,
   IsOptional,
+  IsArray,
   IsString,
   IsUUID,
   Length,
@@ -22,6 +23,11 @@ export class AdminCreateCourseDto {
   @IsString()
   @IsNotEmpty()
   language: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  languages?: string[];
 
   @IsString()
   @IsIn(['draft', 'active', 'inactive'])

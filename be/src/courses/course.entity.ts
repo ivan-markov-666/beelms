@@ -23,6 +23,9 @@ export class Course {
   @Column({ type: 'varchar', length: 8 })
   language: string;
 
+  @Column({ type: 'text', array: true, default: () => 'ARRAY[]::text[]' })
+  languages: string[];
+
   @Column({ type: 'varchar', length: 20 })
   status: string;
 

@@ -2,15 +2,21 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useCurrentLang } from "../../../../i18n/useCurrentLang";
+import { t } from "../../../../i18n/t";
 import { getAccessToken } from "../../../auth-token";
 import { getApiBaseUrl } from "../../../api-url";
 import { AdminBreadcrumbs } from "../../_components/admin-breadcrumbs";
+import { InfoTooltip } from "../../_components/info-tooltip";
 import Link from "next/link";
 
 const API_BASE_URL = getApiBaseUrl();
 
+const WIKI_SLUG_ALLOWED_REGEX = /^[a-z0-9-]+$/;
+
 export default function AdminWikiCreatePage() {
   const router = useRouter();
+  const lang = useCurrentLang();
   const [slug, setSlug] = useState("");
   const [tags, setTags] = useState("");
   const [saving, setSaving] = useState(false);
@@ -47,8 +53,13 @@ export default function AdminWikiCreatePage() {
 
     const trimmedSlug = slug.trim();
 
+    if (trimmedSlug && !WIKI_SLUG_ALLOWED_REGEX.test(trimmedSlug)) {
+      setError(t(lang, "common", "adminCoursesCategoriesSlugFormatInvalid"));
+      return;
+    }
+
     if (!trimmedSlug) {
-      setError("Моля, въведете slug за статията.");
+      setError(t(lang, "common", "adminWikiCreateSlugRequired"));
       return;
     }
 
@@ -56,15 +67,13 @@ export default function AdminWikiCreatePage() {
 
     const token = getAccessToken();
     if (!token) {
-      setError(
-        "Липсва достъп до Admin API. Моля, влезте отново като администратор.",
-      );
+      setError(t(lang, "common", "adminErrorMissingApiAccess"));
       return;
     }
 
     const contents = [
       {
-        language: "bg",
+        language: lang,
         title: trimmedSlug,
         content: `# ${trimmedSlug}`,
       },
@@ -88,13 +97,13 @@ export default function AdminWikiCreatePage() {
       });
 
       if (res.status === 400) {
-        setError("Невалидни данни или slug вече съществува.");
+        setError(t(lang, "common", "adminWikiCreateInvalidOrExists"));
         setSaving(false);
         return;
       }
 
       if (!res.ok) {
-        setError("Възникна грешка при създаване на статията.");
+        setError(t(lang, "common", "adminWikiCreateError"));
         setSaving(false);
         return;
       }
@@ -107,14 +116,14 @@ export default function AdminWikiCreatePage() {
       const newSlug = (data.slug ?? slug).trim();
 
       setArticleId(newId);
-      setSuccess("Статията беше създадена успешно.");
+      setSuccess(t(lang, "common", "adminWikiCreateSuccess"));
 
       if (newSlug) {
         router.push(`/admin/wiki/${encodeURIComponent(newSlug)}/edit`);
         return;
       }
     } catch {
-      setError("Възникна грешка при създаване на статията.");
+      setError(t(lang, "common", "adminWikiCreateError"));
     } finally {
       setSaving(false);
     }
@@ -124,9 +133,12 @@ export default function AdminWikiCreatePage() {
     <div className="space-y-6">
       <AdminBreadcrumbs
         items={[
-          { label: "Админ табло", href: "/admin" },
-          { label: "Wiki Management", href: "/admin/wiki" },
-          { label: "Create New Article" },
+          { label: t(lang, "common", "adminDashboardTitle"), href: "/admin" },
+          {
+            label: t(lang, "common", "adminWikiManagementTitle"),
+            href: "/admin/wiki",
+          },
+          { label: t(lang, "common", "adminWikiCreateNewArticle") },
         ]}
       />
 
@@ -134,11 +146,10 @@ export default function AdminWikiCreatePage() {
       <section className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
         <div>
           <h1 className="mb-2 text-3xl font-bold text-gray-900 md:text-4xl">
-            Create New Article
+            {t(lang, "common", "adminWikiCreateNewArticle")}
           </h1>
           <p className="text-gray-600">
-            Въведете само slug за нова Wiki статия. Език, статус и съдържание се
-            настройват по-късно в страницата за редакция.
+            {t(lang, "common", "adminWikiCreateIntro")}
           </p>
         </div>
         <Link
@@ -159,7 +170,7 @@ export default function AdminWikiCreatePage() {
               d="M10 19l-7-7m0 0 7-7M3 12h18"
             />
           </svg>
-          Back to list
+          {t(lang, "common", "adminWikiBackToList")}
         </Link>
       </section>
 
@@ -179,22 +190,42 @@ export default function AdminWikiCreatePage() {
           {/* Basic Information */}
           <div>
             <h2 className="mb-4 text-lg font-semibold text-gray-900">
-              Basic Information
+              {t(lang, "common", "adminWikiCreateBasicInformation")}
             </h2>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               <div className="md:col-span-2">
                 <label
                   htmlFor="wiki-slug"
-                  className="mb-1 block text-sm font-medium text-gray-700"
+                  className="mb-1 flex items-center gap-2 text-sm font-medium text-gray-700"
                 >
-                  Slug
+                  <span>{t(lang, "common", "adminWikiCreateSlugLabel")}</span>
+                  <InfoTooltip
+                    label={t(lang, "common", "adminMetricsInfoTooltipLabel")}
+                    title={t(lang, "common", "adminWikiCreateSlugLabel")}
+                    description={t(
+                      lang,
+                      "common",
+                      "adminWikiCreateSlugPlaceholder",
+                    )}
+                  />
                 </label>
                 <input
                   id="wiki-slug"
                   type="text"
                   value={slug}
-                  onChange={(event) => setSlug(event.target.value)}
-                  placeholder="manual-testing-intro"
+                  onChange={(event) => {
+                    const raw = event.target.value ?? "";
+                    const normalized = raw.toLowerCase();
+                    const sanitized = normalized.replace(/[^a-z0-9-]/g, "");
+                    setSlug(sanitized);
+                  }}
+                  placeholder={t(
+                    lang,
+                    "common",
+                    "adminWikiCreateSlugPlaceholder",
+                  )}
+                  inputMode="text"
+                  pattern="[a-z0-9-]*"
                   className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
                 />
               </div>
@@ -203,16 +234,29 @@ export default function AdminWikiCreatePage() {
               <div className="md:col-span-2">
                 <label
                   htmlFor="wiki-tags"
-                  className="mb-1 block text-sm font-medium text-gray-700"
+                  className="mb-1 flex items-center gap-2 text-sm font-medium text-gray-700"
                 >
-                  Tags (comma-separated)
+                  <span>{t(lang, "common", "adminWikiCreateTagsLabel")}</span>
+                  <InfoTooltip
+                    label={t(lang, "common", "adminMetricsInfoTooltipLabel")}
+                    title={t(lang, "common", "adminWikiCreateTagsLabel")}
+                    description={t(
+                      lang,
+                      "common",
+                      "adminWikiCreateTagsPlaceholder",
+                    )}
+                  />
                 </label>
                 <input
                   id="wiki-tags"
                   type="text"
                   value={tags}
                   onChange={(event) => setTags(event.target.value)}
-                  placeholder="intro, basics, setup"
+                  placeholder={t(
+                    lang,
+                    "common",
+                    "adminWikiCreateTagsPlaceholder",
+                  )}
                   className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
                 />
               </div>
@@ -221,15 +265,30 @@ export default function AdminWikiCreatePage() {
               <div className="md:col-span-3 md:max-w-xs">
                 <label
                   htmlFor="wiki-id"
-                  className="mb-1 block text-sm font-medium text-gray-700"
+                  className="mb-1 flex items-center gap-2 text-sm font-medium text-gray-700"
                 >
-                  Article ID (read-only)
+                  <span>
+                    {t(lang, "common", "adminWikiCreateArticleIdLabel")}
+                  </span>
+                  <InfoTooltip
+                    label={t(lang, "common", "adminMetricsInfoTooltipLabel")}
+                    title={t(lang, "common", "adminWikiCreateArticleIdLabel")}
+                    description={t(
+                      lang,
+                      "common",
+                      "adminWikiCreateArticleIdPlaceholder",
+                    )}
+                  />
                 </label>
                 <input
                   id="wiki-id"
                   type="text"
                   disabled
-                  placeholder="Auto-generated on save"
+                  placeholder={t(
+                    lang,
+                    "common",
+                    "adminWikiCreateArticleIdPlaceholder",
+                  )}
                   value={articleId ?? ""}
                   className="w-full cursor-not-allowed rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-500"
                 />
@@ -239,34 +298,29 @@ export default function AdminWikiCreatePage() {
           {/* Actions */}
           <div className="mt-4 flex items-center justify-between gap-4 border-t border-gray-200 pt-6">
             <div className="flex flex-col text-sm text-gray-500">
-              <p>
-                Articles created here are stored in the BeeLMS database
-                (development environment). Use this form for admin Wiki
-                management and automation exercises.
-              </p>
+              <p>{t(lang, "common", "adminWikiCreateFooterNote")}</p>
               <Link
                 href="/admin/wiki"
                 className="mt-2 w-max rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
               >
-                Cancel
+                {t(lang, "common", "adminWikiCancel")}
               </Link>
             </div>
             <div className="flex flex-col items-end space-y-2 text-right">
               <button
                 type="submit"
                 disabled={saving || articleId !== null}
-                className="rounded-lg bg-green-600 px-6 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-70"
+                className="rounded-lg border border-[color:var(--primary)] bg-[color:var(--primary)] px-6 py-2 text-sm font-semibold text-[color:var(--on-primary)] shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {saving
-                  ? "Saving..."
+                  ? t(lang, "common", "adminWikiCreateSaving")
                   : articleId
-                    ? "Article saved"
-                    : "Save Article"}
+                    ? t(lang, "common", "adminWikiCreateArticleSaved")
+                    : t(lang, "common", "adminWikiCreateSaveArticle")}
               </button>
               {articleId !== null && (
                 <p className="text-xs text-gray-500">
-                  Статията вече е създадена. За промени използвайте страницата
-                  за редакция (Edit).
+                  {t(lang, "common", "adminWikiCreateAlreadyCreatedNote")}
                 </p>
               )}
             </div>

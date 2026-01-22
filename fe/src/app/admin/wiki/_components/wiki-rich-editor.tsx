@@ -11,10 +11,71 @@ import { TableRow } from "@tiptap/extension-table-row";
 import { TableHeader } from "@tiptap/extension-table-header";
 import { TableCell } from "@tiptap/extension-table-cell";
 import { CodeBlock } from "@tiptap/extension-code-block";
+import TaskList from "@tiptap/extension-task-list";
+import TaskItem from "@tiptap/extension-task-item";
 import TurndownService from "turndown";
 import * as turndownGfm from "turndown-plugin-gfm";
 import DOMPurify from "dompurify";
 import { marked } from "marked";
+
+function normalizeHtmlTaskLists(html: string): string {
+  try {
+    if (typeof window === "undefined") {
+      return html;
+    }
+
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, "text/html");
+
+    const listItems = Array.from(doc.querySelectorAll("li"));
+    for (const li of listItems) {
+      const directCheckbox = li.querySelector(
+        ":scope > input[type='checkbox'], :scope > p > input[type='checkbox']",
+      ) as HTMLInputElement | null;
+
+      if (!directCheckbox) {
+        continue;
+      }
+
+      const checked = directCheckbox.checked;
+      const ul = li.closest("ul");
+      if (ul) {
+        ul.setAttribute("data-type", "taskList");
+      }
+
+      li.setAttribute("data-type", "taskItem");
+      li.setAttribute("data-checked", checked ? "true" : "false");
+
+      const label = doc.createElement("label");
+      const input = doc.createElement("input");
+      input.type = "checkbox";
+      input.disabled = true;
+      input.checked = checked;
+      label.appendChild(input);
+
+      const contentWrap = doc.createElement("div");
+
+      const parent = directCheckbox.parentElement;
+      if (parent && parent.tagName.toLowerCase() === "p") {
+        parent.removeChild(directCheckbox);
+        while (parent.firstChild) {
+          contentWrap.appendChild(parent.firstChild);
+        }
+      } else {
+        directCheckbox.remove();
+        while (li.firstChild) {
+          contentWrap.appendChild(li.firstChild);
+        }
+      }
+
+      li.replaceChildren(label, contentWrap);
+    }
+
+    return doc.body.innerHTML;
+  } catch {
+    return html;
+  }
+}
 
 function normalizeMarkdownForEditor(markdown: string): string {
   if (!markdown) {
@@ -23,9 +84,12 @@ function normalizeMarkdownForEditor(markdown: string): string {
 
   try {
     const html = marked.parse(markdown) as string;
-    return DOMPurify.sanitize(html, {
+    const normalized = normalizeHtmlTaskLists(html);
+    return DOMPurify.sanitize(normalized, {
       USE_PROFILES: { html: true },
       ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto|tel):|\/|#)/i,
+      ADD_TAGS: ["input", "label"],
+      ADD_ATTR: ["data-type", "data-checked", "checked", "disabled", "type"],
     });
   } catch {
     return "";
@@ -114,6 +178,49 @@ function createTurndown(): TurndownService {
     },
   });
 
+  service.addRule("calloutBlock", {
+    filter(node) {
+      if (!node || node.nodeName !== "DIV") {
+        return false;
+      }
+
+      const el = node as HTMLElement;
+      const className = (el.getAttribute("class") ?? "").toLowerCase();
+      return className.includes("callout");
+    },
+    replacement(_content, node) {
+      const el = node as HTMLElement;
+      const classNameRaw = el.getAttribute("class") ?? "";
+      const classNameLower = classNameRaw.toLowerCase();
+
+      let variant: "info" | "warning" | "success" = "info";
+      if (classNameLower.includes("callout-warning")) {
+        variant = "warning";
+      } else if (classNameLower.includes("callout-success")) {
+        variant = "success";
+      }
+
+      const normalizedClass = `callout callout-${variant}`;
+      const innerHtml = el.innerHTML ?? "";
+      return `\n\n<div class="${normalizedClass}">\n${innerHtml}\n</div>\n\n`;
+    },
+  });
+
+  service.addRule("taskListCheckbox", {
+    filter(node) {
+      if (!node || node.nodeName !== "INPUT") {
+        return false;
+      }
+
+      const input = node as HTMLInputElement;
+      return (input.getAttribute("type") ?? "").toLowerCase() === "checkbox";
+    },
+    replacement(_content, node) {
+      const input = node as HTMLInputElement;
+      return input.checked ? "[x] " : "[ ] ";
+    },
+  });
+
   service.addRule("superscript", {
     filter(node) {
       return node.nodeName === "SUP";
@@ -162,6 +269,45 @@ const UnderlineMark = Mark.create({
   },
   renderHTML({ HTMLAttributes }) {
     return ["u", mergeAttributes(HTMLAttributes), 0];
+  },
+});
+
+const CalloutNode = Node.create({
+  name: "callout",
+  group: "block",
+  content: "block+",
+  defining: true,
+
+  addAttributes() {
+    return {
+      variant: {
+        default: "info",
+        parseHTML: (element: HTMLElement) => {
+          const className = (element.getAttribute("class") ?? "").toLowerCase();
+          if (className.includes("callout-warning")) return "warning";
+          if (className.includes("callout-success")) return "success";
+          return "info";
+        },
+        renderHTML: (attributes: Record<string, unknown>) => {
+          const variant = String(attributes.variant ?? "info");
+          return {
+            class: `callout callout-${variant}`,
+          };
+        },
+      },
+    };
+  },
+
+  parseHTML() {
+    return [
+      {
+        tag: "div.callout",
+      },
+    ];
+  },
+
+  renderHTML({ HTMLAttributes }) {
+    return ["div", mergeAttributes(HTMLAttributes), 0];
   },
 });
 
@@ -290,6 +436,16 @@ export function WikiRichEditor({
   const [tableMessage, setTableMessage] = useState<string | null>(null);
   const tableMessageTimeoutRef = useRef<number | null>(null);
 
+  const [findReplaceOpen, setFindReplaceOpen] = useState(false);
+  const [tocHelpOpen, setTocHelpOpen] = useState(false);
+  const [findQuery, setFindQuery] = useState("");
+  const [replaceQuery, setReplaceQuery] = useState("");
+  const [findMatches, setFindMatches] = useState<
+    Array<{ from: number; to: number }>
+  >([]);
+  const [activeFindMatchIndex, setActiveFindMatchIndex] = useState(0);
+  const findInputRef = useRef<HTMLInputElement | null>(null);
+
   const lastEmittedMarkdownRef = useRef<string>(markdown);
   const pendingEmitTimeoutRef = useRef<number | null>(null);
 
@@ -309,12 +465,17 @@ export function WikiRichEditor({
       LinkMark,
       ImageNode,
       CodeBlockWithLanguage,
+      TaskList,
+      TaskItem.configure({
+        nested: true,
+      }),
       Table.configure({
         resizable: true,
       }),
       TableRow,
       TableHeader,
       TableCell,
+      CalloutNode,
     ],
     content: normalizeMarkdownForEditor(markdown),
     editorProps: {
@@ -357,6 +518,188 @@ export function WikiRichEditor({
       onEditorReadyRef.current?.(null);
     };
   }, [editor]);
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "f") {
+        e.preventDefault();
+        setFindReplaceOpen(true);
+        return;
+      }
+
+      if (e.key === "Escape" && findReplaceOpen) {
+        e.preventDefault();
+        setFindReplaceOpen(false);
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [findReplaceOpen]);
+
+  useEffect(() => {
+    if (!findReplaceOpen) {
+      return;
+    }
+
+    window.setTimeout(() => {
+      findInputRef.current?.focus();
+      findInputRef.current?.select();
+    }, 0);
+  }, [findReplaceOpen]);
+
+  const computeFindMatches = (query: string) => {
+    if (!editor) {
+      return [] as Array<{ from: number; to: number }>;
+    }
+
+    const needle = query.trim();
+    if (!needle) {
+      return [] as Array<{ from: number; to: number }>;
+    }
+
+    const matches: Array<{ from: number; to: number }> = [];
+    const hayNeedle = needle.toLowerCase();
+
+    editor.state.doc.descendants((node, pos) => {
+      if (!node.isText) {
+        return true;
+      }
+
+      const text = node.text ?? "";
+      const hay = text.toLowerCase();
+
+      let idx = 0;
+      while (idx <= hay.length - hayNeedle.length) {
+        const found = hay.indexOf(hayNeedle, idx);
+        if (found === -1) {
+          break;
+        }
+
+        matches.push({
+          from: pos + found,
+          to: pos + found + hayNeedle.length,
+        });
+
+        idx = found + Math.max(1, hayNeedle.length);
+      }
+
+      return true;
+    });
+
+    return matches;
+  };
+
+  const focusFindMatch = (index: number, matches = findMatches) => {
+    if (!editor) {
+      return;
+    }
+
+    const next = matches[index];
+    if (!next) {
+      return;
+    }
+
+    editor.commands.setTextSelection({ from: next.from, to: next.to });
+  };
+
+  useEffect(() => {
+    if (!editor || !findReplaceOpen) {
+      return;
+    }
+
+    const nextMatches = computeFindMatches(findQuery);
+    setFindMatches(nextMatches);
+
+    const nextIndex = nextMatches.length
+      ? Math.min(activeFindMatchIndex, nextMatches.length - 1)
+      : 0;
+    setActiveFindMatchIndex(nextIndex);
+
+    if (nextMatches.length) {
+      focusFindMatch(nextIndex, nextMatches);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editor, findReplaceOpen, findQuery, markdown]);
+
+  const goToNextFindMatch = () => {
+    if (!findMatches.length) {
+      return;
+    }
+
+    const next = (activeFindMatchIndex + 1) % findMatches.length;
+    setActiveFindMatchIndex(next);
+    focusFindMatch(next);
+  };
+
+  const goToPrevFindMatch = () => {
+    if (!findMatches.length) {
+      return;
+    }
+
+    const next =
+      (activeFindMatchIndex - 1 + findMatches.length) % findMatches.length;
+    setActiveFindMatchIndex(next);
+    focusFindMatch(next);
+  };
+
+  const replaceCurrentMatch = () => {
+    if (!editor || !findMatches.length) {
+      return;
+    }
+
+    const current = findMatches[activeFindMatchIndex];
+    if (!current) {
+      return;
+    }
+
+    const { state, view } = editor;
+    const tr = state.tr.insertText(replaceQuery, current.from, current.to);
+    view.dispatch(tr);
+
+    const nextMatches = computeFindMatches(findQuery);
+    setFindMatches(nextMatches);
+    const nextIndex = nextMatches.length
+      ? Math.min(activeFindMatchIndex, nextMatches.length - 1)
+      : 0;
+    setActiveFindMatchIndex(nextIndex);
+    if (nextMatches.length) {
+      focusFindMatch(nextIndex, nextMatches);
+    }
+  };
+
+  const replaceAllMatches = () => {
+    if (!editor) {
+      return;
+    }
+
+    const query = findQuery.trim();
+    if (!query) {
+      return;
+    }
+
+    const matches = computeFindMatches(query);
+    if (!matches.length) {
+      return;
+    }
+
+    const { state, view } = editor;
+    let tr = state.tr;
+    for (let i = matches.length - 1; i >= 0; i--) {
+      const m = matches[i];
+      tr = tr.insertText(replaceQuery, m.from, m.to);
+    }
+    view.dispatch(tr);
+
+    const nextMatches = computeFindMatches(query);
+    setFindMatches(nextMatches);
+    setActiveFindMatchIndex(0);
+    if (nextMatches.length) {
+      focusFindMatch(0, nextMatches);
+    }
+  };
 
   useEffect(() => {
     if (!editor) {
@@ -540,8 +883,202 @@ export function WikiRichEditor({
     editor.chain().focus().insertContent(`\n\n$$\n${trimmed}\n$$\n\n`).run();
   };
 
+  const setCalloutVariant = (variant: "info" | "warning" | "success") => {
+    editor.commands.focus();
+
+    if (editor.isActive("callout")) {
+      const { state, view } = editor;
+      const { $from } = state.selection;
+
+      for (let d = $from.depth; d > 0; d--) {
+        const node = $from.node(d);
+        if (node.type.name === "callout") {
+          const pos = $from.before(d);
+          const nextAttrs = {
+            ...(node.attrs as Record<string, unknown>),
+            variant,
+          };
+          const tr = state.tr.setNodeMarkup(pos, undefined, nextAttrs);
+          view.dispatch(tr);
+          return;
+        }
+      }
+    }
+
+    try {
+      editor.chain().focus().wrapIn("callout", { variant }).run();
+      return;
+    } catch {
+      // ignore
+    }
+
+    editor
+      .chain()
+      .focus()
+      .insertContent({
+        type: "callout",
+        attrs: { variant },
+        content: [{ type: "paragraph" }],
+      })
+      .run();
+  };
+
+  const upsertCodeBlock = (language: string | null) => {
+    editor.commands.focus();
+
+    if (editor.isActive("codeBlock")) {
+      const { state, view } = editor;
+      const { $from } = state.selection;
+
+      for (let d = $from.depth; d > 0; d--) {
+        const node = $from.node(d);
+        if (node.type.name === "codeBlock") {
+          const pos = $from.before(d);
+          const nextAttrs = {
+            ...(node.attrs as Record<string, unknown>),
+            language,
+          };
+          const tr = state.tr.setNodeMarkup(pos, undefined, nextAttrs);
+          view.dispatch(tr);
+          return;
+        }
+      }
+    }
+
+    editor
+      .chain()
+      .focus()
+      .insertContent({
+        type: "codeBlock",
+        attrs: { language },
+        content: [{ type: "text", text: "" }],
+      })
+      .run();
+  };
+
+  const insertCodeBlockWithLanguage = () => {
+    const currentLanguage = editor.getAttributes("codeBlock").language as
+      | string
+      | null
+      | undefined;
+    const input = window.prompt(
+      "Code language (optional). Examples: js, ts, json, html, css, bash, sql, python",
+      currentLanguage ?? "",
+    );
+    if (input === null) {
+      return;
+    }
+
+    const trimmed = input.trim();
+    upsertCodeBlock(trimmed ? trimmed : null);
+  };
+
+  const insertTocMarker = () => {
+    editor.chain().focus().insertContent("\n\n[[toc]]\n\n").run();
+  };
+
   return (
     <div className="space-y-2">
+      {findReplaceOpen ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div
+            className="w-full max-w-lg rounded-lg border border-gray-200 bg-white p-5 shadow-xl"
+            role="dialog"
+            aria-modal="true"
+          >
+            <div className="mb-3 flex items-start justify-between gap-3">
+              <div>
+                <h3 className="text-base font-semibold text-gray-900">
+                  Find &amp; Replace
+                </h3>
+                <p className="mt-1 text-xs text-gray-600">
+                  Ctrl+F (или Cmd+F) за отваряне, Esc за затваряне.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                className="be-btn-ghost rounded-md border px-3 py-1.5 text-xs font-medium"
+                onClick={() => setFindReplaceOpen(false)}
+              >
+                Close
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-gray-700">
+                  Find
+                </label>
+                <input
+                  ref={findInputRef}
+                  value={findQuery}
+                  onChange={(e) => {
+                    setFindQuery(e.target.value);
+                    setActiveFindMatchIndex(0);
+                  }}
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-gray-700">
+                  Replace
+                </label>
+                <input
+                  value={replaceQuery}
+                  onChange={(e) => setReplaceQuery(e.target.value)}
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                />
+              </div>
+
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="text-xs text-gray-700">
+                  {findMatches.length
+                    ? `${activeFindMatchIndex + 1} / ${findMatches.length}`
+                    : "0 / 0"}
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    className={`${btnBase} ${btnIdle}`}
+                    onClick={goToPrevFindMatch}
+                    disabled={!findMatches.length}
+                  >
+                    Prev
+                  </button>
+                  <button
+                    type="button"
+                    className={`${btnBase} ${btnIdle}`}
+                    onClick={goToNextFindMatch}
+                    disabled={!findMatches.length}
+                  >
+                    Next
+                  </button>
+                  <button
+                    type="button"
+                    className={`${btnBase} ${btnIdle}`}
+                    onClick={replaceCurrentMatch}
+                    disabled={!findMatches.length}
+                  >
+                    Replace
+                  </button>
+                  <button
+                    type="button"
+                    className={`${btnBase} ${btnIdle}`}
+                    onClick={replaceAllMatches}
+                    disabled={!findMatches.length}
+                  >
+                    Replace all
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       <div className="flex flex-wrap gap-2 rounded-md border border-zinc-200 bg-zinc-50 p-2">
         <div className="flex flex-wrap items-center gap-2 rounded-md border border-gray-200 bg-gray-50 p-2">
           <span className="px-1 text-[10px] font-bold uppercase tracking-wide text-gray-600">
@@ -589,17 +1126,108 @@ export function WikiRichEditor({
             Export .md
           </button>
 
+          <div className="relative flex items-center gap-1">
+            <button
+              type="button"
+              className={`${btnBase} ${btnIdle}`}
+              onClick={insertTocMarker}
+            >
+              TOC
+            </button>
+
+            <button
+              type="button"
+              aria-label="Как работи TOC"
+              className={`${btnBase} ${btnIdle} h-8 w-8 rounded-full px-0 py-0 text-base`}
+              onClick={() => setTocHelpOpen((prev) => !prev)}
+            >
+              ?
+            </button>
+
+            {tocHelpOpen ? (
+              <div className="absolute right-0 top-[calc(100%+0.5rem)] z-30 w-64 rounded-md border border-gray-200 bg-white p-3 text-xs text-gray-700 shadow-lg">
+                <p className="font-semibold text-gray-900">Какво е TOC?</p>
+                <p className="mt-1">
+                  Бутонът TOC вмъква маркер <code>[[toc]]</code>. При публичното
+                  рендериране този маркер се заменя с автоматично съдържание
+                  (линкове към всички H1–H4 заглавия). Постави маркера където
+                  искаш да се появи блокът „Table of Contents“.
+                </p>
+                <button
+                  type="button"
+                  className="mt-3 text-[11px] font-semibold text-green-600"
+                  onClick={() => setTocHelpOpen(false)}
+                >
+                  Разбрах
+                </button>
+              </div>
+            ) : null}
+          </div>
+
+          <button
+            type="button"
+            className={`${btnBase} ${btnIdle}`}
+            onClick={() => setFindReplaceOpen(true)}
+          >
+            Find/Replace
+          </button>
           <div className="mx-1 h-5 w-px bg-gray-200" />
 
           <button
             type="button"
             className={`${btnBase} ${
-              editor.isActive("paragraph") ? btnActive : btnIdle
+              editor.isActive("blockquote") ? btnActive : btnIdle
             }`}
-            onClick={() => editor.chain().focus().setParagraph().run()}
+            onClick={() => editor.chain().focus().toggleBlockquote().run()}
           >
-            P
+            Quote
           </button>
+          <button
+            type="button"
+            className={`${btnBase} ${
+              editor.isActive("callout", { variant: "info" })
+                ? btnActive
+                : btnIdle
+            }`}
+            onClick={() => setCalloutVariant("info")}
+          >
+            Info
+          </button>
+          <button
+            type="button"
+            className={`${btnBase} ${
+              editor.isActive("callout", { variant: "warning" })
+                ? btnActive
+                : btnIdle
+            }`}
+            onClick={() => setCalloutVariant("warning")}
+          >
+            Warning
+          </button>
+          <button
+            type="button"
+            className={`${btnBase} ${
+              editor.isActive("callout", { variant: "success" })
+                ? btnActive
+                : btnIdle
+            }`}
+            onClick={() => setCalloutVariant("success")}
+          >
+            Success
+          </button>
+
+          <button
+            type="button"
+            className={`${btnBase} ${
+              editor.isActive("codeBlock") ? btnActive : btnIdle
+            }`}
+            onClick={insertCodeBlockWithLanguage}
+          >
+            Code block
+          </button>
+
+          <div className="mx-1 h-5 w-px bg-gray-200" />
+
           <button
             type="button"
             className={`${btnBase} ${
@@ -965,6 +1593,15 @@ export function WikiRichEditor({
           >
             Numbered
           </button>
+          <button
+            type="button"
+            className={`${btnBase} ${
+              editor.isActive("taskList") ? btnActive : btnIdle
+            }`}
+            onClick={() => editor.chain().focus().toggleTaskList().run()}
+          >
+            Checklist
+          </button>
         </div>
 
         <div className="flex flex-wrap items-center gap-2 rounded-md border border-gray-200 bg-gray-50 p-2">
@@ -1067,8 +1704,8 @@ export function WikiRichEditor({
           </button>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 rounded-md border border-emerald-300 bg-emerald-100 p-2">
-          <span className="px-1 text-[10px] font-bold uppercase tracking-wide text-emerald-700">
+        <div className="flex flex-wrap items-center gap-2 rounded-md border border-gray-200 bg-gray-50 p-2">
+          <span className="px-1 text-[10px] font-bold uppercase tracking-wide text-gray-600">
             Mermaid
           </span>
 

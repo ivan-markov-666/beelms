@@ -5,6 +5,7 @@ import {
   useMemo,
   useRef,
   useState,
+  useId,
   type CSSProperties,
 } from "react";
 import { diffWords, type Change } from "diff";
@@ -13,24 +14,34 @@ import Link from "next/link";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import { useParams } from "next/navigation";
+import { useCurrentLang } from "../../../../../i18n/useCurrentLang";
+import { t } from "../../../../../i18n/t";
+import { DEFAULT_LANGUAGE_FLAG_BY_LANG } from "../../../../../i18n/config";
 import { WikiMarkdown } from "../../../../wiki/_components/wiki-markdown";
 import { getAccessToken } from "../../../../auth-token";
 import { getApiBaseUrl } from "../../../../api-url";
 import { AdminBreadcrumbs } from "../../../_components/admin-breadcrumbs";
+import { InfoTooltip } from "../../../_components/info-tooltip";
 import { Pagination } from "../../../../_components/pagination";
 import { ListboxSelect } from "../../../../_components/listbox-select";
 import { useAdminSupportedLanguages } from "../../../_hooks/use-admin-supported-languages";
+
+function RichEditorLoading() {
+  const lang = useCurrentLang();
+
+  return (
+    <div className="rounded-md border border-zinc-200 bg-zinc-50 p-3 text-sm text-zinc-600">
+      {t(lang, "common", "adminWikiEditRichEditorLoading")}
+    </div>
+  );
+}
 
 const WikiRichEditor = dynamic(
   () =>
     import("../../_components/wiki-rich-editor").then((m) => m.WikiRichEditor),
   {
     ssr: false,
-    loading: () => (
-      <div className="rounded-md border border-zinc-200 bg-zinc-50 p-3 text-sm text-zinc-600">
-        Зареждане на rich editor...
-      </div>
-    ),
+    loading: () => <RichEditorLoading />,
   },
 );
 
@@ -74,6 +85,14 @@ type AdminWikiArticleVersion = {
 type MediaItem = {
   filename: string;
   url: string;
+};
+
+type TranslationImportResult = {
+  filename: string;
+  language: string | null;
+  status: "created" | "skipped" | "error";
+  versionNumber?: number;
+  error?: string;
 };
 
 function deriveAltFromFilename(filename: string): string {
@@ -185,11 +204,13 @@ function renderDiff(oldText: string, newText: string) {
 }
 
 export default function AdminWikiEditPage() {
+  const lang = useCurrentLang();
   const params = useParams<{ slug: string }>();
   const rawSlug = params?.slug;
   const slug = Array.isArray(rawSlug) ? rawSlug[0] : rawSlug;
 
   const richEditorRef = useRef<TipTapEditor | null>(null);
+  const publicLinkTooltipId = useId();
 
   const [contentEditorMode, setContentEditorMode] = useState<
     "markdown" | "rich"
@@ -258,13 +279,23 @@ export default function AdminWikiEditPage() {
   const [copyMessage, setCopyMessage] = useState<string | null>(null);
   const [saveHintVisible, setSaveHintVisible] = useState(false);
 
+  const [importingTranslations, setImportingTranslations] = useState(false);
+  const [importTranslationsError, setImportTranslationsError] = useState<
+    string | null
+  >(null);
+  const [importTranslationsResults, setImportTranslationsResults] = useState<
+    TranslationImportResult[]
+  >([]);
+  const [articleReloadKey, setArticleReloadKey] = useState(0);
+
   const successBannerStyle: CSSProperties = {
     backgroundColor: "var(--field-ok-bg, #dcfce7)",
     borderColor: "var(--field-ok-border, #bbf7d0)",
-    color: "var(--primary, #0f766e)",
+    color: "#ffffff",
   };
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const translationFilesInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (!slug) return;
@@ -284,9 +315,7 @@ export default function AdminWikiEditPage() {
         const token = getAccessToken();
         if (!token) {
           if (!cancelled) {
-            setError(
-              "Липсва достъп до Admin API. Моля, влезте отново като администратор.",
-            );
+            setError(t(lang, "common", "adminErrorMissingApiAccess"));
             setLoading(false);
           }
           return;
@@ -328,13 +357,13 @@ export default function AdminWikiEditPage() {
             return;
           }
 
-          setError("Статията не е намерена.");
+          setError(t(lang, "common", "adminWikiEditArticleNotFound"));
           setLoading(false);
           return;
         }
 
         if (!res.ok) {
-          setError("Възникна грешка при зареждане на статията за редакция.");
+          setError(t(lang, "common", "adminWikiEditLoadError"));
           setLoading(false);
           return;
         }
@@ -356,7 +385,7 @@ export default function AdminWikiEditPage() {
         setLoading(false);
       } catch {
         if (!cancelled) {
-          setError("Възникна грешка при зареждане на статията за редакция.");
+          setError(t(lang, "common", "adminWikiEditLoadError"));
           setLoading(false);
         }
       }
@@ -367,7 +396,7 @@ export default function AdminWikiEditPage() {
     return () => {
       cancelled = true;
     };
-  }, [slug, currentLanguage]);
+  }, [slug, currentLanguage, lang, articleReloadKey]);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -436,7 +465,7 @@ export default function AdminWikiEditPage() {
 
         if (!res.ok) {
           if (!cancelled) {
-            setMediaError("Възникна грешка при зареждане на изображенията.");
+            setMediaError(t(lang, "common", "adminWikiEditMediaLoadError"));
             setMediaLoading(false);
           }
           return;
@@ -452,7 +481,7 @@ export default function AdminWikiEditPage() {
         setMediaLoading(false);
       } catch {
         if (!cancelled) {
-          setMediaError("Възникна грешка при зареждане на изображенията.");
+          setMediaError(t(lang, "common", "adminWikiEditMediaLoadError"));
           setMediaLoading(false);
         }
       }
@@ -463,7 +492,7 @@ export default function AdminWikiEditPage() {
     return () => {
       cancelled = true;
     };
-  }, [articleId]);
+  }, [articleId, lang]);
 
   useEffect(() => {
     if (!articleId) {
@@ -480,9 +509,7 @@ export default function AdminWikiEditPage() {
         const token = getAccessToken();
         if (!token) {
           if (!cancelled) {
-            setVersionsError(
-              "Липсва достъп до Admin API. Моля, влезте отново като администратор.",
-            );
+            setVersionsError(t(lang, "common", "adminErrorMissingApiAccess"));
             setVersionsLoading(false);
           }
           return;
@@ -501,7 +528,9 @@ export default function AdminWikiEditPage() {
 
         if (!res.ok) {
           if (!cancelled) {
-            setVersionsError("Възникна грешка при зареждане на версиите.");
+            setVersionsError(
+              t(lang, "common", "adminWikiEditVersionsLoadError"),
+            );
             setVersionsLoading(false);
           }
           return;
@@ -517,7 +546,7 @@ export default function AdminWikiEditPage() {
         setVersionsLoading(false);
       } catch {
         if (!cancelled) {
-          setVersionsError("Възникна грешка при зареждане на версиите.");
+          setVersionsError(t(lang, "common", "adminWikiEditVersionsLoadError"));
           setVersionsLoading(false);
         }
       }
@@ -528,7 +557,7 @@ export default function AdminWikiEditPage() {
     return () => {
       cancelled = true;
     };
-  }, [articleId, versionsReloadKey]);
+  }, [articleId, versionsReloadKey, versionsPage, versionsPageSize, lang]);
 
   const handleChangeLanguage = (newLang: string) => {
     setForm((current) =>
@@ -589,29 +618,31 @@ export default function AdminWikiEditPage() {
     const contentMissing = !form.content.trim();
 
     if (titleMissing) {
-      missingFields.push("Заглавие");
+      missingFields.push(t(lang, "common", "adminWikiEditRequiredFieldTitle"));
     }
 
     if (contentMissing) {
-      missingFields.push("Съдържание");
+      missingFields.push(
+        t(lang, "common", "adminWikiEditRequiredFieldContent"),
+      );
     }
 
     return { missingFields, titleMissing, contentMissing };
-  }, [form]);
+  }, [form, lang]);
 
   const { missingFields, titleMissing, contentMissing } = requiredFieldsState;
 
   const saveDisabledReason = useMemo(() => {
     if (!isDirty) {
-      return "Бутонът „Запази“ се активира, когато направите промяна по някое поле.";
+      return t(lang, "common", "adminWikiEditSaveDisabledNoChanges");
     }
 
     if (missingFields.length > 0) {
-      return `Попълнете задължителните полета (${missingFields.join(", ")}), за да запазите.`;
+      return t(lang, "common", "adminWikiEditSaveDisabledMissingFields");
     }
 
     return null;
-  }, [isDirty, missingFields]);
+  }, [isDirty, missingFields, lang]);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -704,9 +735,7 @@ export default function AdminWikiEditPage() {
     try {
       const token = getAccessToken();
       if (!token) {
-        setError(
-          "Липсва достъп до Admin API. Моля, влезте отново като администратор.",
-        );
+        setError(t(lang, "common", "adminErrorMissingApiAccess"));
         setSaving(false);
         return;
       }
@@ -733,19 +762,19 @@ export default function AdminWikiEditPage() {
       );
 
       if (res.status === 404) {
-        setError("Статията не е намерена.");
+        setError(t(lang, "common", "adminWikiEditArticleNotFound"));
         setSaving(false);
         return;
       }
 
       if (res.status === 400) {
-        setError("Невалидни данни за статията. Моля, проверете полетата.");
+        setError(t(lang, "common", "adminWikiEditInvalidData"));
         setSaving(false);
         return;
       }
 
       if (!res.ok) {
-        setError("Възникна грешка при запис на промените.");
+        setError(t(lang, "common", "adminWikiEditSaveError"));
         setSaving(false);
         return;
       }
@@ -766,12 +795,124 @@ export default function AdminWikiEditPage() {
 
       setForm(savedForm);
       setLastSavedForm(savedForm);
-      setSuccess("Промените са запазени успешно.");
+      setSuccess(t(lang, "common", "adminWikiEditSaveSuccess"));
       setVersionsReloadKey((value) => value + 1);
       setSaving(false);
     } catch {
-      setError("Възникна грешка при запис на промените.");
+      setError(t(lang, "common", "adminWikiEditSaveError"));
       setSaving(false);
+    }
+  };
+
+  const handleImportTranslationsClick = () => {
+    if (!articleId) {
+      setError(t(lang, "common", "adminWikiEditMissingArticleId"));
+      return;
+    }
+
+    setImportTranslationsError(null);
+
+    if (translationFilesInputRef.current) {
+      translationFilesInputRef.current.value = "";
+      translationFilesInputRef.current.click();
+    }
+  };
+
+  const handleTranslationFilesSelected: React.ChangeEventHandler<
+    HTMLInputElement
+  > = async (event) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) {
+      return;
+    }
+
+    if (!articleId) {
+      setError(t(lang, "common", "adminWikiEditMissingArticleId"));
+      return;
+    }
+
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const token = getAccessToken();
+    if (!token) {
+      setImportTranslationsError(
+        t(lang, "common", "adminErrorMissingApiAccess"),
+      );
+      return;
+    }
+
+    setImportingTranslations(true);
+    setImportTranslationsError(null);
+    setImportTranslationsResults([]);
+
+    try {
+      const formData = new FormData();
+      Array.from(files).forEach((file) => {
+        formData.append("files", file);
+      });
+
+      const res = await fetch(
+        `${ADMIN_API_BASE_URL}/admin/wiki/articles/${encodeURIComponent(
+          articleId,
+        )}/translations/import-markdown`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        },
+      );
+
+      if (!res.ok) {
+        try {
+          const errorData: unknown = await res.json();
+          let backendMessage: string | null = null;
+
+          if (
+            errorData &&
+            typeof errorData === "object" &&
+            "message" in errorData
+          ) {
+            const message = (errorData as { message?: unknown }).message;
+            if (typeof message === "string") {
+              backendMessage = message;
+            } else if (Array.isArray(message)) {
+              backendMessage = message
+                .filter((part): part is string => typeof part === "string")
+                .join(" ");
+            }
+          }
+
+          setImportTranslationsError(
+            backendMessage ??
+              t(lang, "common", "adminWikiEditImportMarkdownError"),
+          );
+        } catch {
+          setImportTranslationsError(
+            t(lang, "common", "adminWikiEditImportMarkdownError"),
+          );
+        }
+        setImportingTranslations(false);
+        return;
+      }
+
+      const data = (await res.json()) as {
+        results?: TranslationImportResult[];
+      };
+      const results = Array.isArray(data.results) ? data.results : [];
+      setImportTranslationsResults(results);
+
+      setVersionsReloadKey((v) => v + 1);
+      setArticleReloadKey((v) => v + 1);
+      setImportingTranslations(false);
+    } catch {
+      setImportTranslationsError(
+        t(lang, "common", "adminWikiEditImportMarkdownError"),
+      );
+      setImportingTranslations(false);
     }
   };
 
@@ -804,7 +945,7 @@ export default function AdminWikiEditPage() {
 
   const handleUploadClick = () => {
     if (!articleId) {
-      setError("Липсва Article ID. Моля, заредете отново страницата.");
+      setError(t(lang, "common", "adminWikiEditMissingArticleId"));
       return;
     }
 
@@ -823,7 +964,7 @@ export default function AdminWikiEditPage() {
     }
 
     if (!articleId) {
-      setError("Липсва Article ID. Моля, заредете отново страницата.");
+      setError(t(lang, "common", "adminWikiEditMissingArticleId"));
       return;
     }
 
@@ -833,9 +974,7 @@ export default function AdminWikiEditPage() {
 
     const token = getAccessToken();
     if (!token) {
-      setError(
-        "Липсва достъп до Admin API. Моля, влезте отново като администратор.",
-      );
+      setError(t(lang, "common", "adminErrorMissingApiAccess"));
       return;
     }
 
@@ -883,10 +1022,11 @@ export default function AdminWikiEditPage() {
           }
 
           setMediaError(
-            backendMessage ?? "Възникна грешка при качване на изображението.",
+            backendMessage ??
+              t(lang, "common", "adminWikiEditUploadImageError"),
           );
         } catch {
-          setMediaError("Възникна грешка при качване на изображението.");
+          setMediaError(t(lang, "common", "adminWikiEditUploadImageError"));
         }
         setUploading(false);
         return;
@@ -913,7 +1053,7 @@ export default function AdminWikiEditPage() {
       }
       setUploading(false);
     } catch {
-      setMediaError("Възникна грешка при качване на изображението.");
+      setMediaError(t(lang, "common", "adminWikiEditUploadImageError"));
       setUploading(false);
     }
   };
@@ -928,7 +1068,7 @@ export default function AdminWikiEditPage() {
     }
 
     const confirmed = window.confirm(
-      "Сигурни ли сте, че искате да изтриете това изображение?",
+      t(lang, "common", "adminWikiEditDeleteMediaConfirm"),
     );
 
     if (!confirmed) {
@@ -937,9 +1077,7 @@ export default function AdminWikiEditPage() {
 
     const token = getAccessToken();
     if (!token) {
-      setError(
-        "Липсва достъп до Admin API. Моля, влезте отново като администратор.",
-      );
+      setError(t(lang, "common", "adminErrorMissingApiAccess"));
       return;
     }
 
@@ -960,7 +1098,7 @@ export default function AdminWikiEditPage() {
       );
 
       if (!res.ok && res.status !== 404) {
-        setMediaError("Възникна грешка при изтриване на изображението.");
+        setMediaError(t(lang, "common", "adminWikiEditDeleteMediaError"));
         return;
       }
       try {
@@ -984,7 +1122,7 @@ export default function AdminWikiEditPage() {
         // ignore reload errors here
       }
     } catch {
-      setMediaError("Възникна грешка при изтриване на изображението.");
+      setMediaError(t(lang, "common", "adminWikiEditDeleteMediaError"));
     }
   };
 
@@ -998,14 +1136,14 @@ export default function AdminWikiEditPage() {
         !navigator.clipboard ||
         typeof navigator.clipboard.writeText !== "function"
       ) {
-        setCopyMessage("Clipboard API не е наличен в този браузър.");
+        setCopyMessage(t(lang, "common", "adminWikiEditClipboardUnavailable"));
         return;
       }
 
       await navigator.clipboard.writeText(markdownSnippet);
-      setCopyMessage("Markdown snippet е копиран в клипборда.");
+      setCopyMessage(t(lang, "common", "adminWikiEditMarkdownCopied"));
     } catch {
-      setCopyMessage("Неуспешно копиране на markdown snippet.");
+      setCopyMessage(t(lang, "common", "adminWikiEditMarkdownCopyFailed"));
     }
   };
 
@@ -1015,7 +1153,7 @@ export default function AdminWikiEditPage() {
     }
 
     const confirmed = window.confirm(
-      "Сигурни ли сте, че искате да върнете статията към тази версия?",
+      t(lang, "common", "adminWikiEditRollbackConfirm"),
     );
     if (!confirmed) {
       return;
@@ -1028,9 +1166,7 @@ export default function AdminWikiEditPage() {
     try {
       const token = getAccessToken();
       if (!token) {
-        setError(
-          "Липсва достъп до Admin API. Моля, влезте отново като администратор.",
-        );
+        setError(t(lang, "common", "adminErrorMissingApiAccess"));
         setRollbackVersionId(null);
         return;
       }
@@ -1049,21 +1185,19 @@ export default function AdminWikiEditPage() {
       );
 
       if (res.status === 404) {
-        setError("Избраната версия или статия не беше намерена.");
+        setError(t(lang, "common", "adminWikiEditRollbackNotFound"));
         setRollbackVersionId(null);
         return;
       }
 
       if (res.status === 400) {
-        setError(
-          "Невалидна заявка за връщане към версия. Моля, опитайте отново.",
-        );
+        setError(t(lang, "common", "adminWikiEditRollbackInvalidRequest"));
         setRollbackVersionId(null);
         return;
       }
 
       if (!res.ok) {
-        setError("Възникна грешка при връщане към избраната версия.");
+        setError(t(lang, "common", "adminWikiEditRollbackError"));
         setRollbackVersionId(null);
         return;
       }
@@ -1088,11 +1222,11 @@ export default function AdminWikiEditPage() {
         setLastSavedForm(restoredForm);
         return restoredForm;
       });
-      setSuccess("Статията беше върната към избраната версия.");
+      setSuccess(t(lang, "common", "adminWikiEditRollbackSuccess"));
       setRollbackVersionId(null);
       setVersionsReloadKey((value) => value + 1);
     } catch {
-      setError("Възникна грешка при връщане към избраната версия.");
+      setError(t(lang, "common", "adminWikiEditRollbackError"));
       setRollbackVersionId(null);
     }
   };
@@ -1113,7 +1247,7 @@ export default function AdminWikiEditPage() {
 
       const firstSelected = versions.find((v) => v.id === current[0]);
       if (firstSelected && firstSelected.language !== version.language) {
-        setCompareError("Може да сравнявате само версии на един и същи език.");
+        setCompareError(t(lang, "common", "adminWikiEditCompareSameLangError"));
         return current;
       }
 
@@ -1259,13 +1393,19 @@ export default function AdminWikiEditPage() {
 
   const breadcrumbItems = useMemo(
     () => [
-      { label: "Админ табло", href: "/admin" },
-      { label: "Wiki Management", href: "/admin/wiki" },
+      { label: t(lang, "common", "adminDashboardTitle"), href: "/admin" },
       {
-        label: form?.title?.trim() || slug || "Edit Article",
+        label: t(lang, "common", "adminWikiManagementTitle"),
+        href: "/admin/wiki",
+      },
+      {
+        label:
+          form?.title?.trim() ||
+          slug ||
+          t(lang, "common", "adminWikiEditBreadcrumbFallback"),
       },
     ],
-    [form?.title, slug],
+    [form?.title, slug, lang],
   );
 
   return (
@@ -1275,29 +1415,45 @@ export default function AdminWikiEditPage() {
         <div className="mb-4 flex items-center justify-between gap-4">
           <div>
             <h2 className="mb-1 text-xl font-semibold text-zinc-900">
-              Редакция на Wiki статия
+              {t(lang, "common", "adminWikiEditTitle")}
             </h2>
             <p className="text-sm text-zinc-600">
-              Преглед и редакция на съдържанието на избрана Wiki статия.
+              {t(lang, "common", "adminWikiEditSubtitle")}
             </p>
           </div>
           <div className="flex flex-col items-end gap-1 text-right">
             {publicWikiHref && (
-              <Link
-                href={publicWikiHref}
-                className="text-xs font-medium text-blue-700 hover:text-blue-900 hover:underline"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Отвори публичната страница
-              </Link>
+              <div className="group relative inline-flex flex-col items-end">
+                <Link
+                  href={publicWikiHref}
+                  className="text-xs font-medium text-blue-700 hover:text-blue-900 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--secondary)]"
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-describedby={publicLinkTooltipId}
+                >
+                  {t(lang, "common", "adminWikiEditOpenPublicPage")}
+                </Link>
+                <div
+                  id={publicLinkTooltipId}
+                  role="tooltip"
+                  className="pointer-events-none absolute right-0 top-full z-20 mt-2 w-64 rounded-md border border-zinc-200 bg-white px-4 py-3 text-left text-sm font-medium text-zinc-800 shadow-2xl opacity-0 translate-y-1 scale-95 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-y-0 group-hover:scale-100 group-focus-within:opacity-100 group-focus-within:translate-y-0 group-focus-within:scale-100"
+                >
+                  <p className="leading-relaxed text-zinc-700">
+                    {t(lang, "common", "adminWikiEditPublicVisibleHintPrefix")}
+                    <span className="font-semibold text-green-700">
+                      &quot;active&quot;
+                    </span>
+                    {t(lang, "common", "adminWikiEditPublicVisibleHintSuffix")}
+                  </p>
+                </div>
+              </div>
             )}
           </div>
         </div>
 
         {loading && (
           <p className="text-sm text-zinc-600">
-            Зареждане на статията за редакция...
+            {t(lang, "common", "adminWikiEditLoading")}
           </p>
         )}
 
@@ -1321,35 +1477,60 @@ export default function AdminWikiEditPage() {
             <form className="space-y-4" onSubmit={handleSubmit}>
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-1">
-                  <label className="block text-sm font-medium text-zinc-800">
-                    Език
+                  <label className="flex items-center gap-2 text-sm font-medium text-zinc-800">
+                    <span>
+                      {t(lang, "common", "adminWikiEditLanguageLabel")}
+                    </span>
+                    <InfoTooltip
+                      label={t(lang, "common", "adminMetricsInfoTooltipLabel")}
+                      title={t(lang, "common", "adminWikiEditLanguageLabel")}
+                      description={t(
+                        lang,
+                        "common",
+                        "adminWikiEditLanguageHelp",
+                      )}
+                    />
                   </label>
                   <ListboxSelect
-                    ariaLabel="Wiki article language"
+                    ariaLabel={t(lang, "common", "adminWikiEditLanguageAria")}
                     value={form.language}
                     onChange={(next) => handleChangeLanguage(next)}
                     buttonClassName="flex w-full items-center justify-between gap-2 rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
                     options={languageOptions.map((code) => ({
                       value: code,
-                      label: code,
+                      label: code.toUpperCase(),
+                      leftAdornment: DEFAULT_LANGUAGE_FLAG_BY_LANG[code] ? (
+                        <span
+                          aria-hidden="true"
+                          className={`fi fi-${DEFAULT_LANGUAGE_FLAG_BY_LANG[code]} h-4 w-4 shrink-0 rounded-sm`}
+                        />
+                      ) : null,
                     }))}
                   />
                   <p className="text-xs text-zinc-500">
-                    Смяната на езика зарежда или създава отделна версия на
-                    съдържанието за избрания език.
+                    {t(lang, "common", "adminWikiEditLanguageHelp")}
                   </p>
                 </div>
 
                 <div className="space-y-1">
                   <label
                     htmlFor="status"
-                    className="block text-sm font-medium text-zinc-800"
+                    className="flex items-center gap-2 text-sm font-medium text-zinc-800"
                   >
-                    Статус
+                    <span>{t(lang, "common", "adminWikiEditStatusLabel")}</span>
+                    <InfoTooltip
+                      label={t(lang, "common", "adminMetricsInfoTooltipLabel")}
+                      title={t(lang, "common", "adminWikiEditStatusLabel")}
+                      description={t(
+                        lang,
+                        "common",
+                        "adminWikiEditStatusLabel",
+                      )}
+                    />
                   </label>
                   <ListboxSelect
                     id="status"
-                    ariaLabel="Wiki article status"
+                    ariaLabel={t(lang, "common", "adminWikiEditStatusAria")}
                     value={form.status}
                     onChange={(next) =>
                       setForm((prev) =>
@@ -1358,9 +1539,18 @@ export default function AdminWikiEditPage() {
                     }
                     buttonClassName="flex w-full items-center justify-between gap-2 rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
                     options={[
-                      { value: "draft", label: "draft" },
-                      { value: "active", label: "active" },
-                      { value: "inactive", label: "inactive" },
+                      {
+                        value: "draft",
+                        label: t(lang, "common", "adminWikiStatsDraft"),
+                      },
+                      {
+                        value: "active",
+                        label: t(lang, "common", "adminWikiStatsActive"),
+                      },
+                      {
+                        value: "inactive",
+                        label: t(lang, "common", "adminWikiStatsInactive"),
+                      },
                     ]}
                   />
                 </div>
@@ -1369,13 +1559,22 @@ export default function AdminWikiEditPage() {
               <div className="space-y-1">
                 <label
                   htmlFor="title"
-                  className="block text-sm font-medium text-zinc-800"
+                  className="flex items-center gap-2 text-sm font-medium text-zinc-800"
                 >
-                  Заглавие
-                  <span className="ml-1 text-red-600" aria-hidden="true">
-                    *
+                  <span className="flex items-center">
+                    <span>{t(lang, "common", "adminWikiEditTitleLabel")}</span>
+                    <span className="ml-1 text-red-600" aria-hidden="true">
+                      *
+                    </span>
                   </span>
-                  <span className="sr-only">(задължително поле)</span>
+                  <InfoTooltip
+                    label={t(lang, "common", "adminMetricsInfoTooltipLabel")}
+                    title={t(lang, "common", "adminWikiEditTitleLabel")}
+                    description={t(lang, "common", "adminWikiEditTitleLabel")}
+                  />
+                  <span className="sr-only">
+                    {t(lang, "common", "adminWikiEditRequiredFieldSrOnly")}
+                  </span>
                 </label>
                 <input
                   id="title"
@@ -1386,7 +1585,7 @@ export default function AdminWikiEditPage() {
                 />
                 {titleMissing && (
                   <p className="text-sm text-red-600">
-                    Заглавието е задължително. Моля, въведете текст.
+                    {t(lang, "common", "adminWikiEditTitleRequiredError")}
                   </p>
                 )}
               </div>
@@ -1394,9 +1593,18 @@ export default function AdminWikiEditPage() {
               <div className="space-y-1">
                 <label
                   htmlFor="subtitle"
-                  className="block text-sm font-medium text-zinc-800"
+                  className="flex items-center gap-2 text-sm font-medium text-zinc-800"
                 >
-                  Подзаглавие (по избор)
+                  <span>{t(lang, "common", "adminWikiEditSubtitleLabel")}</span>
+                  <InfoTooltip
+                    label={t(lang, "common", "adminMetricsInfoTooltipLabel")}
+                    title={t(lang, "common", "adminWikiEditSubtitleLabel")}
+                    description={t(
+                      lang,
+                      "common",
+                      "adminWikiEditSubtitleLabel",
+                    )}
+                  />
                 </label>
                 <input
                   id="subtitle"
@@ -1410,9 +1618,14 @@ export default function AdminWikiEditPage() {
               <div className="space-y-1">
                 <label
                   htmlFor="tags"
-                  className="block text-sm font-medium text-zinc-800"
+                  className="flex items-center gap-2 text-sm font-medium text-zinc-800"
                 >
-                  Тагове (разделени със запетая)
+                  <span>{t(lang, "common", "adminWikiEditTagsLabel")}</span>
+                  <InfoTooltip
+                    label={t(lang, "common", "adminMetricsInfoTooltipLabel")}
+                    title={t(lang, "common", "adminWikiEditTagsLabel")}
+                    description={t(lang, "common", "adminWikiEditTagsLabel")}
+                  />
                 </label>
                 <input
                   id="tags"
@@ -1422,23 +1635,37 @@ export default function AdminWikiEditPage() {
                   onChange={handleChange("tags")}
                 />
                 <p className="text-xs text-zinc-500">
-                  Пример: <code>intro, basics, setup</code>
+                  {t(lang, "common", "adminWikiEditTagsExamplePrefix")}:{" "}
+                  <code>intro, basics, setup</code>
                 </p>
               </div>
 
               <div className="space-y-1">
                 <label
                   htmlFor="content"
-                  className="block text-sm font-medium text-zinc-800"
+                  className="flex items-center gap-2 text-sm font-medium text-zinc-800"
                 >
-                  Съдържание
-                  <span className="ml-1 text-red-600" aria-hidden="true">
-                    *
+                  <span className="flex items-center">
+                    <span>
+                      {t(lang, "common", "adminWikiEditContentLabel")}
+                    </span>
+                    <span className="ml-1 text-red-600" aria-hidden="true">
+                      *
+                    </span>
                   </span>
-                  <span className="sr-only">(задължително поле)</span>
+                  <InfoTooltip
+                    label={t(lang, "common", "adminMetricsInfoTooltipLabel")}
+                    title={t(lang, "common", "adminWikiEditContentLabel")}
+                    description={t(lang, "common", "adminWikiEditContentLabel")}
+                  />
+                  <span className="sr-only">
+                    {t(lang, "common", "adminWikiEditRequiredFieldSrOnly")}
+                  </span>
                 </label>
                 <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-                  <p className="text-xs text-zinc-500">Режим на редакция:</p>
+                  <p className="text-xs text-zinc-500">
+                    {t(lang, "common", "adminWikiEditEditorModeLabel")}
+                  </p>
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
@@ -1449,7 +1676,7 @@ export default function AdminWikiEditPage() {
                           : "border-[color:var(--border)] bg-white text-[color:var(--foreground)] hover:border-[color:var(--primary)] hover:text-[color:var(--primary)]"
                       }`}
                     >
-                      Markdown
+                      {t(lang, "common", "adminWikiEditEditorModeMarkdown")}
                     </button>
                     <button
                       type="button"
@@ -1460,7 +1687,7 @@ export default function AdminWikiEditPage() {
                           : "border-[color:var(--border)] bg-white text-[color:var(--foreground)] hover:border-[color:var(--primary)] hover:text-[color:var(--primary)]"
                       }`}
                     >
-                      Rich text
+                      {t(lang, "common", "adminWikiEditEditorModeRichText")}
                     </button>
                   </div>
                 </div>
@@ -1489,25 +1716,19 @@ export default function AdminWikiEditPage() {
                 )}
                 {contentMissing && (
                   <p className="text-sm text-red-600">
-                    Съдържанието е задължително. Добавете текст преди да
-                    запазите.
+                    {t(lang, "common", "adminWikiEditContentRequiredError")}
                   </p>
                 )}
                 <p className="text-xs text-zinc-500">
-                  За диаграми използвайте fenced code block с език{" "}
-                  <code>mermaid</code>, напр.:{" "}
-                  <code>{"```mermaid ... ```"}</code>. Диаграмите ще се виждат в
-                  прегледа и в публичната Wiki.
+                  {t(lang, "common", "adminWikiEditMermaidHelp")}
                 </p>
                 <p className="text-xs text-zinc-500">
-                  За caption под изображение: поставете изображението, а на
-                  следващия ред напишете текста (по желание в italic), напр.:{" "}
-                  <code>{"![Alt](url)\n*Caption*"}</code>.
+                  {t(lang, "common", "adminWikiEditCaptionHelp")}
                 </p>
               </div>
 
               <section
-                aria-label="Преглед на съдържанието"
+                aria-label={t(lang, "common", "adminWikiEditPreviewAria")}
                 className="space-y-2 rounded-md border border-zinc-200 bg-zinc-50 p-3"
               >
                 <button
@@ -1516,17 +1737,20 @@ export default function AdminWikiEditPage() {
                   onClick={() => setPreviewExpanded((value) => !value)}
                 >
                   <h3 className="text-sm font-semibold text-zinc-900">
-                    Преглед (както в публичната Wiki)
+                    {t(lang, "common", "adminWikiEditPreviewTitle")}
                   </h3>
                   <span className="text-xs font-medium text-zinc-700 hover:text-zinc-900">
-                    {previewExpanded ? "Скрий прегледа" : "Покажи прегледа"}
+                    {previewExpanded
+                      ? t(lang, "common", "adminWikiEditPreviewHide")
+                      : t(lang, "common", "adminWikiEditPreviewShow")}
                   </span>
                 </button>
                 {previewExpanded && (
                   <div className="rounded-md bg-zinc-50 px-4 py-3">
                     <header className="space-y-1 border-b border-zinc-100 pb-3">
                       <h1 className="text-2xl font-bold">
-                        {form.title.trim() || "(Без заглавие)"}
+                        {form.title.trim() ||
+                          t(lang, "common", "adminWikiEditPreviewUntitled")}
                       </h1>
                       {form.subtitle.trim().length > 0 && (
                         <p className="text-sm">{form.subtitle}</p>
@@ -1549,13 +1773,14 @@ export default function AdminWikiEditPage() {
                       role="alert"
                       aria-live="polite"
                     >
-                      Липсват задължителни полета: {missingFields.join(", ")}.
-                      Попълнете ги, за да активирате бутона &quot;Запази&quot;.
+                      {t(lang, "common", "adminWikiEditMissingFieldsPrefix")}{" "}
+                      {missingFields.join(", ")}.{" "}
+                      {t(lang, "common", "adminWikiEditMissingFieldsSuffix")}
                     </p>
                   )}
                   {isDirty && (
                     <p className="text-sm font-semibold text-orange-600">
-                      Има незапазени промени.
+                      {t(lang, "common", "adminWikiEditUnsavedChangesWarning")}
                     </p>
                   )}
                 </div>
@@ -1569,14 +1794,14 @@ export default function AdminWikiEditPage() {
                       }
 
                       const confirmed = window.confirm(
-                        "Имате незапазени промени. Сигурни ли сте, че искате да напуснете страницата?",
+                        t(lang, "common", "adminWikiEditUnsavedChangesConfirm"),
                       );
                       if (!confirmed) {
                         event.preventDefault();
                       }
                     }}
                   >
-                    Отказ
+                    {t(lang, "common", "adminWikiCancel")}
                   </Link>
                   <div
                     className="relative inline-flex"
@@ -1601,7 +1826,9 @@ export default function AdminWikiEditPage() {
                       }
                       className="inline-flex items-center rounded-md border border-transparent bg-[color:var(--primary)] px-4 py-2 text-sm font-medium text-[color:var(--on-primary)] shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
                     >
-                      {saving ? "Запазване..." : "Запази"}
+                      {saving
+                        ? t(lang, "common", "adminWikiEditSaving")
+                        : t(lang, "common", "adminWikiEditSave")}
                     </button>
 
                     {saveHintVisible && saveDisabledReason && (
@@ -1623,16 +1850,120 @@ export default function AdminWikiEditPage() {
             </form>
 
             <section
-              aria-label="Изображения към статията"
+              aria-label={t(lang, "common", "adminWikiEditImportMarkdownAria")}
               className="border-t border-zinc-200 pt-4"
             >
               <h3 className="mb-2 text-sm font-semibold text-zinc-900">
-                Изображения към статията
+                {t(lang, "common", "adminWikiEditImportMarkdownTitle")}
               </h3>
               <p className="mb-3 text-xs text-zinc-600">
-                Качете изображения, които искате да реферирате от markdown
-                съдържанието по-горе. След качване ще видите готов URL, който
-                може да поставите директно в текста.
+                {t(lang, "common", "adminWikiEditImportMarkdownDescription")}
+              </p>
+
+              <p className="mb-2 text-xs text-zinc-600">
+                {t(
+                  lang,
+                  "common",
+                  "adminWikiEditImportMarkdownSupportedLangSuffixes",
+                )}{" "}
+                <span className="font-mono">
+                  {supportedAdminLangs.length > 0
+                    ? supportedAdminLangs.join(", ")
+                    : "bg"}
+                </span>
+              </p>
+              <p className="mb-3 text-xs text-zinc-600">
+                {t(
+                  lang,
+                  "common",
+                  "adminWikiEditImportMarkdownFilenameSuffixHint",
+                )}{" "}
+                <span className="font-mono">article-&lt;lang&gt;.md</span>
+              </p>
+
+              <div className="mb-3 flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={handleImportTranslationsClick}
+                  disabled={importingTranslations || !articleId}
+                  className="inline-flex items-center rounded-md border border-transparent bg-[color:var(--primary)] px-3 py-1.5 text-xs font-medium text-[color:var(--on-primary)] shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
+                >
+                  {importingTranslations
+                    ? t(lang, "common", "adminWikiEditImportMarkdownUploading")
+                    : t(lang, "common", "adminWikiEditImportMarkdownButton")}
+                </button>
+                <input
+                  ref={translationFilesInputRef}
+                  type="file"
+                  multiple
+                  accept=".md,text/markdown"
+                  className="hidden"
+                  onChange={handleTranslationFilesSelected}
+                />
+                <span className="text-xs text-zinc-500">
+                  {t(lang, "common", "adminWikiEditNeedArticleIdHint")}
+                </span>
+              </div>
+
+              {importTranslationsError && (
+                <p className="text-xs text-red-600" role="alert">
+                  {importTranslationsError}
+                </p>
+              )}
+
+              {importTranslationsResults.length > 0 && (
+                <div className="mt-3 rounded-md border border-zinc-200 bg-zinc-50 p-3">
+                  <div className="mb-2 text-xs font-semibold text-zinc-900">
+                    {t(
+                      lang,
+                      "common",
+                      "adminWikiEditImportMarkdownResultsTitle",
+                    )}
+                  </div>
+                  <ul className="space-y-1 text-[11px] font-mono text-zinc-700">
+                    {importTranslationsResults.map((r, idx) => (
+                      <li
+                        key={`${r.filename}-${r.language ?? "unknown"}-${idx}`}
+                        className="flex flex-col gap-0.5"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="break-all">
+                            {r.filename} ({r.language ?? "?"})
+                          </span>
+                          <span
+                            className={
+                              r.status === "error"
+                                ? "text-red-700"
+                                : r.status === "created"
+                                  ? "text-green-700"
+                                  : "text-zinc-600"
+                            }
+                          >
+                            {r.status}
+                            {typeof r.versionNumber === "number"
+                              ? ` v${r.versionNumber}`
+                              : ""}
+                          </span>
+                        </div>
+                        {r.error && (
+                          <div className="text-red-700">{r.error}</div>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </section>
+
+            <section
+              aria-label={t(lang, "common", "adminWikiEditMediaSectionAria")}
+              className="border-t border-zinc-200 pt-4"
+            >
+              <h3 className="mb-2 text-sm font-semibold text-zinc-900">
+                {t(lang, "common", "adminWikiEditMediaSectionTitle")}
+              </h3>
+              <p className="mb-3 text-xs text-zinc-600">
+                {t(lang, "common", "adminWikiEditMediaSectionDescription")}
               </p>
 
               <div className="mb-3 flex items-center gap-3">
@@ -1642,7 +1973,9 @@ export default function AdminWikiEditPage() {
                   disabled={uploading || !articleId}
                   className="inline-flex items-center rounded-md border border-transparent bg-[color:var(--primary)] px-3 py-1.5 text-xs font-medium text-[color:var(--on-primary)] shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
                 >
-                  {uploading ? "Качване..." : "Upload image"}
+                  {uploading
+                    ? t(lang, "common", "adminWikiEditUploading")
+                    : t(lang, "common", "adminWikiEditUploadImage")}
                 </button>
                 <input
                   ref={fileInputRef}
@@ -1652,13 +1985,13 @@ export default function AdminWikiEditPage() {
                   onChange={handleFileSelected}
                 />
                 <span className="text-xs text-zinc-500">
-                  Първо се уверете, че статията е запазена и има Article ID.
+                  {t(lang, "common", "adminWikiEditNeedArticleIdHint")}
                 </span>
               </div>
 
               {mediaLoading && (
                 <p className="text-xs text-zinc-600">
-                  Зареждане на изображения...
+                  {t(lang, "common", "adminWikiEditMediaLoading")}
                 </p>
               )}
               {mediaError && !mediaLoading && (
@@ -1675,17 +2008,20 @@ export default function AdminWikiEditPage() {
               <div className="mt-3 rounded-md border border-zinc-200 bg-zinc-50 p-3">
                 <div className="mb-2 flex items-center justify-between">
                   <span className="text-xs font-semibold text-zinc-900">
-                    Uploaded images
+                    {t(lang, "common", "adminWikiEditUploadedImagesTitle")}
                   </span>
                 </div>
                 {articleId == null ? (
                   <p className="text-xs text-zinc-500">
-                    Все още няма Article ID. Заредете статията отново или
-                    изчакайте да се зареди напълно.
+                    {t(
+                      lang,
+                      "common",
+                      "adminWikiEditUploadedImagesNoArticleId",
+                    )}
                   </p>
                 ) : mediaItems.length === 0 ? (
                   <p className="text-xs text-zinc-500">
-                    Все още няма качени изображения за тази статия.
+                    {t(lang, "common", "adminWikiEditUploadedImagesEmpty")}
                   </p>
                 ) : (
                   <ul className="space-y-1 text-[11px] font-mono text-zinc-700">
@@ -1712,21 +2048,25 @@ export default function AdminWikiEditPage() {
                             onClick={() => handleInsertImage(item)}
                             className="text-[11px] font-semibold text-zinc-700 hover:text-zinc-900"
                           >
-                            Insert
+                            {t(lang, "common", "adminWikiEditMediaInsert")}
                           </button>
                           <button
                             type="button"
                             onClick={() => handleCopyMarkdown(item)}
                             className="text-[11px] font-semibold text-zinc-700 hover:text-zinc-900"
                           >
-                            Copy markdown
+                            {t(
+                              lang,
+                              "common",
+                              "adminWikiEditMediaCopyMarkdown",
+                            )}
                           </button>
                           <button
                             type="button"
                             onClick={() => handleDeleteMedia(item.filename)}
                             className="text-[11px] font-semibold text-red-600 hover:text-red-700"
                           >
-                            Delete
+                            {t(lang, "common", "adminWikiEditMediaDelete")}
                           </button>
                         </div>
                       </li>
@@ -1739,7 +2079,7 @@ export default function AdminWikiEditPage() {
             <section
               id="versions"
               tabIndex={-1}
-              aria-label="Версии на статията"
+              aria-label={t(lang, "common", "adminWikiEditVersionsAria")}
               className="border-t border-zinc-200 pt-4"
               style={
                 versionsSectionHighlight
@@ -1756,7 +2096,7 @@ export default function AdminWikiEditPage() {
               <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                   <h3 className="text-sm font-semibold text-zinc-900">
-                    Версии на статията
+                    {t(lang, "common", "adminWikiEditVersionsTitle")}
                   </h3>
                   {versionsSectionHighlight && (
                     <span
@@ -1766,7 +2106,7 @@ export default function AdminWikiEditPage() {
                         borderColor: "var(--primary)",
                       }}
                     >
-                      Погледнете тук
+                      {t(lang, "common", "adminWikiEditVersionsHighlight")}
                     </span>
                   )}
                 </div>
@@ -1774,7 +2114,7 @@ export default function AdminWikiEditPage() {
 
               {versionsLoading && (
                 <p className="text-sm text-zinc-600">
-                  Зареждане на версиите...
+                  {t(lang, "common", "adminWikiEditVersionsLoading")}
                 </p>
               )}
 
@@ -1788,7 +2128,7 @@ export default function AdminWikiEditPage() {
                 !versionsError &&
                 totalVisibleVersions === 0 && (
                   <p className="text-sm text-zinc-600">
-                    Няма налични версии за този език.
+                    {t(lang, "common", "adminWikiEditVersionsEmpty")}
                   </p>
                 )}
 
@@ -1800,51 +2140,102 @@ export default function AdminWikiEditPage() {
                       <thead>
                         <tr className="border-b border-zinc-200 bg-zinc-50 text-left text-xs font-medium uppercase tracking-wide text-zinc-500">
                           <th className="px-3 py-2 align-middle text-center">
-                            Сравни
+                            {t(
+                              lang,
+                              "common",
+                              "adminWikiEditVersionsCompareHeader",
+                            )}
                           </th>
                           <th className="px-3 py-2 align-middle text-center">
-                            <input
-                              type="checkbox"
-                              className="h-4 w-4 rounded border-zinc-300 text-red-600 focus:ring-red-500 disabled:cursor-not-allowed disabled:opacity-60"
-                              checked={isAllPageSelectedForDelete}
-                              disabled={deletablePaginatedVersions.length === 0}
-                              onChange={(event) => {
-                                const checked = event.target.checked;
-                                if (checked) {
-                                  setSelectedVersionIdsForDelete((current) => {
-                                    const next = new Set(current);
-                                    for (const v of deletablePaginatedVersions) {
-                                      next.add(v.id);
-                                    }
-                                    return Array.from(next);
-                                  });
-                                } else {
-                                  setSelectedVersionIdsForDelete((current) =>
-                                    current.filter(
-                                      (id) =>
-                                        !paginatedVersions.some(
-                                          (v) => v.id === id,
-                                        ),
-                                    ),
-                                  );
+                            <div className="relative flex items-center justify-center">
+                              <input
+                                id="versions-delete-all"
+                                type="checkbox"
+                                className="h-4 w-4 rounded border-zinc-300 text-red-600 focus:ring-red-500 disabled:cursor-not-allowed disabled:opacity-60"
+                                checked={isAllPageSelectedForDelete}
+                                disabled={
+                                  deletablePaginatedVersions.length === 0
                                 }
-                              }}
-                            />
+                                onChange={(event) => {
+                                  const checked = event.target.checked;
+                                  if (checked) {
+                                    setSelectedVersionIdsForDelete(
+                                      (current) => {
+                                        const next = new Set(current);
+                                        for (const v of deletablePaginatedVersions) {
+                                          next.add(v.id);
+                                        }
+                                        return Array.from(next);
+                                      },
+                                    );
+                                  } else {
+                                    setSelectedVersionIdsForDelete((current) =>
+                                      current.filter(
+                                        (id) =>
+                                          !paginatedVersions.some(
+                                            (v) => v.id === id,
+                                          ),
+                                      ),
+                                    );
+                                  }
+                                }}
+                              />
+                              <label
+                                htmlFor="versions-delete-all"
+                                className="pointer-events-auto absolute left-full ml-2 cursor-pointer text-xs font-semibold uppercase tracking-wide text-zinc-500"
+                              >
+                                {t(
+                                  lang,
+                                  "common",
+                                  "adminWikiEditVersionsSelectLabel",
+                                )}
+                              </label>
+                            </div>
                           </th>
-                          <th className="px-3 py-2 align-middle">Версия</th>
-                          <th className="px-3 py-2 align-middle">Език</th>
-                          <th className="px-3 py-2 align-middle">Заглавие</th>
                           <th className="px-3 py-2 align-middle">
-                            Подзаглавие
+                            {t(
+                              lang,
+                              "common",
+                              "adminWikiEditVersionsColVersion",
+                            )}
                           </th>
                           <th className="px-3 py-2 align-middle">
-                            Създадена на
+                            {t(
+                              lang,
+                              "common",
+                              "adminWikiEditVersionsColLanguage",
+                            )}
                           </th>
                           <th className="px-3 py-2 align-middle">
-                            Създадена от
+                            {t(lang, "common", "adminWikiEditVersionsColTitle")}
+                          </th>
+                          <th className="px-3 py-2 align-middle">
+                            {t(
+                              lang,
+                              "common",
+                              "adminWikiEditVersionsColSubtitle",
+                            )}
+                          </th>
+                          <th className="px-3 py-2 align-middle">
+                            {t(
+                              lang,
+                              "common",
+                              "adminWikiEditVersionsColCreatedAt",
+                            )}
+                          </th>
+                          <th className="px-3 py-2 align-middle">
+                            {t(
+                              lang,
+                              "common",
+                              "adminWikiEditVersionsColCreatedBy",
+                            )}
                           </th>
                           <th className="px-3 py-2 align-middle text-right">
-                            Действия
+                            {t(
+                              lang,
+                              "common",
+                              "adminWikiEditVersionsColActions",
+                            )}
                           </th>
                         </tr>
                       </thead>
@@ -1926,12 +2317,20 @@ export default function AdminWikiEditPage() {
                                     onClick={() => setViewVersionId(version.id)}
                                     className="text-xs font-medium text-zinc-700 hover:text-zinc-900"
                                   >
-                                    Преглед
+                                    {t(
+                                      lang,
+                                      "common",
+                                      "adminWikiEditVersionsActionPreview",
+                                    )}
                                   </button>
                                   {latestVersionIdsByLang[version.language] ===
                                   version.id ? (
                                     <span className="text-xs font-semibold text-zinc-500">
-                                      Текуща версия
+                                      {t(
+                                        lang,
+                                        "common",
+                                        "adminWikiEditVersionsCurrent",
+                                      )}
                                     </span>
                                   ) : (
                                     <button
@@ -1943,8 +2342,16 @@ export default function AdminWikiEditPage() {
                                       className="text-sm font-medium text-green-700 hover:text-green-900 disabled:cursor-not-allowed disabled:opacity-70"
                                     >
                                       {rollbackVersionId === version.id
-                                        ? "Връщане..."
-                                        : "Върни"}
+                                        ? t(
+                                            lang,
+                                            "common",
+                                            "adminWikiEditVersionsRollbacking",
+                                          )
+                                        : t(
+                                            lang,
+                                            "common",
+                                            "adminWikiEditVersionsRollback",
+                                          )}
                                     </button>
                                   )}
                                   <button
@@ -1959,7 +2366,11 @@ export default function AdminWikiEditPage() {
                                     disabled={isLatestForLanguage}
                                     className="text-xs font-medium text-red-600 hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-60"
                                   >
-                                    Изтрий
+                                    {t(
+                                      lang,
+                                      "common",
+                                      "adminWikiEditVersionsDelete",
+                                    )}
                                   </button>
                                 </div>
                               </td>
@@ -1971,8 +2382,11 @@ export default function AdminWikiEditPage() {
                     <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
                       <div className="flex flex-col text-xs text-zinc-500">
                         <span>
-                          Изберете две версии (един и същи език), за да ги
-                          сравните.
+                          {t(
+                            lang,
+                            "common",
+                            "adminWikiEditVersionsCompareHelp",
+                          )}
                         </span>
                         {compareError && (
                           <span className="text-red-600">{compareError}</span>
@@ -1980,8 +2394,12 @@ export default function AdminWikiEditPage() {
                       </div>
                       <div className="flex flex-wrap items-center gap-2 text-xs">
                         <span className="text-zinc-500">
-                          Страница {currentVersionsPage} от {totalVersionsPages}{" "}
-                          ({totalVisibleVersions} версии)
+                          {t(lang, "common", "adminWikiEditPageLabel")}{" "}
+                          {currentVersionsPage}{" "}
+                          {t(lang, "common", "adminWikiEditOfLabel")}{" "}
+                          {totalVersionsPages} ({totalVisibleVersions}{" "}
+                          {t(lang, "common", "adminWikiEditVersionsCountLabel")}
+                          )
                         </span>
                         <button
                           type="button"
@@ -1989,7 +2407,7 @@ export default function AdminWikiEditPage() {
                           disabled={visibleVersions.length === 0}
                           className="inline-flex items-center rounded-md border border-transparent bg-[color:var(--primary)] px-3 py-1 text-xs font-medium text-[color:var(--on-primary)] shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
                         >
-                          Export CSV
+                          {t(lang, "common", "adminWikiExportCsv")}
                         </button>
                         <Pagination
                           currentPage={currentVersionsPage}
@@ -2007,7 +2425,11 @@ export default function AdminWikiEditPage() {
                           disabled={compareSelectionIds.length !== 2}
                           className="inline-flex items-center rounded-md border border-transparent bg-[color:var(--primary)] px-4 py-1.5 text-xs font-medium text-[color:var(--on-primary)] shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
                         >
-                          Сравни избраните версии
+                          {t(
+                            lang,
+                            "common",
+                            "adminWikiEditVersionsCompareSelected",
+                          )}
                         </button>
                         <button
                           type="button"
@@ -2021,7 +2443,11 @@ export default function AdminWikiEditPage() {
                           disabled={!hasAnySelectedForDelete}
                           className="inline-flex items-center rounded-md border border-transparent bg-[color:var(--error)] px-4 py-1.5 text-xs font-medium text-[color:var(--on-error)] shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
                         >
-                          Изтрий избраните
+                          {t(
+                            lang,
+                            "common",
+                            "adminWikiEditVersionsDeleteSelected",
+                          )}
                         </button>
                       </div>
                     </div>
@@ -2030,16 +2456,16 @@ export default function AdminWikiEditPage() {
             </section>
             {comparison && (
               <section
-                aria-label="Сравнение на версии"
+                aria-label={t(lang, "common", "adminWikiEditCompareAria")}
                 className="mt-4 border-t border-zinc-200 pt-4"
               >
                 <div className="mb-3 flex items-center justify-between gap-2">
                   <div>
                     <h3 className="text-sm font-semibold text-zinc-900">
-                      Сравнение на версии
+                      {t(lang, "common", "adminWikiEditCompareTitle")}
                     </h3>
                     <p className="text-xs text-zinc-600">
-                      Ляво: по-стара версия. Дясно: по-нова версия.
+                      {t(lang, "common", "adminWikiEditCompareSubtitle")}
                     </p>
                   </div>
                   <button
@@ -2047,7 +2473,7 @@ export default function AdminWikiEditPage() {
                     className="text-xs font-medium text-zinc-600 hover:text-zinc-900"
                     onClick={() => setComparison(null)}
                   >
-                    Изчисти сравнението
+                    {t(lang, "common", "adminWikiEditCompareClear")}
                   </button>
                 </div>
 
@@ -2056,19 +2482,24 @@ export default function AdminWikiEditPage() {
                     <div className="mb-2 flex items-center justify-between gap-2">
                       <div>
                         <p className="font-semibold text-red-700">
-                          Версия v{comparison.left.version}
+                          {t(
+                            lang,
+                            "common",
+                            "adminWikiEditCompareVersionLabel",
+                          )}{" "}
+                          v{comparison.left.version}
                         </p>
                         <p className="text-[11px] text-red-700">
                           {formatDateTime(comparison.left.createdAt)}
                         </p>
                       </div>
                       <span className="rounded-full bg-red-100 px-2 py-0.5 text-[11px] font-medium text-red-700">
-                        По-стара
+                        {t(lang, "common", "adminWikiEditCompareOlder")}
                       </span>
                     </div>
                     <div className="mb-1 text-[11px]">
                       <span className="font-semibold text-red-700">
-                        Заглавие:
+                        {t(lang, "common", "adminWikiEditCompareFieldTitle")}
                       </span>{" "}
                       <span className="whitespace-pre-wrap break-words">
                         {comparison.left.title}
@@ -2076,7 +2507,7 @@ export default function AdminWikiEditPage() {
                     </div>
                     <div className="mb-1 text-[11px]">
                       <span className="font-semibold text-red-700">
-                        Подзаглавие:
+                        {t(lang, "common", "adminWikiEditCompareFieldSubtitle")}
                       </span>{" "}
                       <span className="whitespace-pre-wrap break-words">
                         {comparison.left.subtitle ?? "—"}
@@ -2090,19 +2521,24 @@ export default function AdminWikiEditPage() {
                     <div className="mb-2 flex items-center justify-between gap-2">
                       <div>
                         <p className="font-semibold text-green-700">
-                          Версия v{comparison.right.version}
+                          {t(
+                            lang,
+                            "common",
+                            "adminWikiEditCompareVersionLabel",
+                          )}{" "}
+                          v{comparison.right.version}
                         </p>
                         <p className="text-[11px] text-green-700">
                           {formatDateTime(comparison.right.createdAt)}
                         </p>
                       </div>
                       <span className="rounded-full bg-green-100 px-2 py-0.5 text-[11px] font-medium text-green-700">
-                        По-нова
+                        {t(lang, "common", "adminWikiEditCompareNewer")}
                       </span>
                     </div>
                     <div className="mb-1 text-[11px]">
                       <span className="font-semibold text-green-700">
-                        Заглавие:
+                        {t(lang, "common", "adminWikiEditCompareFieldTitle")}
                       </span>{" "}
                       <span className="whitespace-pre-wrap break-words">
                         {renderDiff(
@@ -2113,7 +2549,7 @@ export default function AdminWikiEditPage() {
                     </div>
                     <div className="mb-1 text-[11px]">
                       <span className="font-semibold text-green-700">
-                        Подзаглавие:
+                        {t(lang, "common", "adminWikiEditCompareFieldSubtitle")}
                       </span>{" "}
                       <span className="whitespace-pre-wrap break-words">
                         {renderDiff(
@@ -2132,13 +2568,13 @@ export default function AdminWikiEditPage() {
                 </div>
                 <p className="mt-3 text-[11px] text-zinc-500">
                   <span className="rounded-sm bg-red-100 px-1 text-red-800 line-through">
-                    текст
+                    {t(lang, "common", "adminWikiEditCompareLegendToken")}
                   </span>{" "}
-                  = премахнат текст,
+                  {t(lang, "common", "adminWikiEditCompareLegendRemoved")}
                   <span className="rounded-sm bg-green-100 px-1 text-green-800">
-                    текст
+                    {t(lang, "common", "adminWikiEditCompareLegendToken")}
                   </span>{" "}
-                  = добавен текст.
+                  {t(lang, "common", "adminWikiEditCompareLegendAdded")}
                 </p>
               </section>
             )}
@@ -2148,14 +2584,19 @@ export default function AdminWikiEditPage() {
                   <div className="mb-3 flex items-start justify-between gap-4">
                     <div>
                       <h3 className="mb-1 text-base font-semibold text-zinc-900">
-                        Преглед на версия v{viewVersionTarget.version} (
+                        {t(
+                          lang,
+                          "common",
+                          "adminWikiEditViewVersionTitlePrefix",
+                        )}{" "}
+                        v{viewVersionTarget.version} (
                         {viewVersionTarget.language})
                       </h3>
                       <p className="text-xs text-zinc-600">
-                        Създадена на{" "}
+                        {t(lang, "common", "adminWikiEditViewVersionCreatedAt")}{" "}
                         {formatDateTime(viewVersionTarget.createdAt)}
                         {viewVersionTarget.createdBy
-                          ? ` от ${viewVersionTarget.createdBy}`
+                          ? ` ${t(lang, "common", "adminWikiEditViewVersionBy")} ${viewVersionTarget.createdBy}`
                           : ""}
                       </p>
                     </div>
@@ -2164,7 +2605,7 @@ export default function AdminWikiEditPage() {
                       onClick={() => setViewVersionId(null)}
                       className="text-xs font-medium text-zinc-600 hover:text-zinc-900"
                     >
-                      Затвори
+                      {t(lang, "common", "adminWikiClose")}
                     </button>
                   </div>
                   <div className="rounded-md border border-zinc-200 bg-zinc-50 px-4 py-3">
@@ -2172,7 +2613,7 @@ export default function AdminWikiEditPage() {
                       <h1 className="text-xl font-bold text-zinc-900">
                         {viewVersionTarget.title.trim().length > 0
                           ? viewVersionTarget.title
-                          : "(без заглавие)"}
+                          : t(lang, "common", "adminWikiEditPreviewUntitled")}
                       </h1>
                       {viewVersionTarget.subtitle &&
                         viewVersionTarget.subtitle.trim().length > 0 && (
@@ -2196,12 +2637,10 @@ export default function AdminWikiEditPage() {
               <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 px-4">
                 <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
                   <h3 className="mb-2 text-base font-semibold text-zinc-900">
-                    Изтриване на версия
+                    {t(lang, "common", "adminWikiEditDeleteVersionTitle")}
                   </h3>
                   <p className="mb-4 text-sm text-zinc-700">
-                    Тази версия ще бъде завинаги премахната от историята на
-                    статията. Това действие е необратимо и може да повлияе на
-                    проследимостта на промените.
+                    {t(lang, "common", "adminWikiEditDeleteVersionDescription")}
                   </p>
                   <div className="flex justify-end gap-2">
                     <button
@@ -2209,7 +2648,7 @@ export default function AdminWikiEditPage() {
                       className="rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-800 hover:bg-zinc-50"
                       onClick={() => setDeleteVersionStep1Id(null)}
                     >
-                      Затвори
+                      {t(lang, "common", "adminWikiClose")}
                     </button>
                     <button
                       type="button"
@@ -2219,7 +2658,7 @@ export default function AdminWikiEditPage() {
                         setDeleteVersionStep1Id(null);
                       }}
                     >
-                      OK
+                      {t(lang, "common", "adminWikiOk")}
                     </button>
                   </div>
                 </div>
@@ -2229,15 +2668,32 @@ export default function AdminWikiEditPage() {
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
                 <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
                   <h3 className="mb-2 text-base font-semibold text-zinc-900">
-                    Потвърдете изтриването на версията
+                    {t(
+                      lang,
+                      "common",
+                      "adminWikiEditDeleteVersionConfirmTitle",
+                    )}
                   </h3>
                   <p className="mb-3 text-sm text-zinc-700">
-                    Наистина ли искате да изтриете тази версия? Това действие е
-                    окончателно и не може да бъде отменено.
+                    {t(
+                      lang,
+                      "common",
+                      "adminWikiEditDeleteVersionConfirmDescription",
+                    )}
                   </p>
                   <p className="mb-3 text-xs text-zinc-600">
-                    Версия v{deleteVersionTarget.version} (
-                    {deleteVersionTarget.language}) , създадена на{" "}
+                    {t(
+                      lang,
+                      "common",
+                      "adminWikiEditDeleteVersionConfirmMetaPrefix",
+                    )}{" "}
+                    v{deleteVersionTarget.version} (
+                    {deleteVersionTarget.language}),{" "}
+                    {t(
+                      lang,
+                      "common",
+                      "adminWikiEditDeleteVersionConfirmMetaCreatedAt",
+                    )}{" "}
                     {formatDateTime(deleteVersionTarget.createdAt)}.
                   </p>
                   {deleteVersionError && (
@@ -2252,7 +2708,7 @@ export default function AdminWikiEditPage() {
                       onClick={() => setDeleteVersionStep2Id(null)}
                       disabled={deleteVersionSubmitting}
                     >
-                      Отказ
+                      {t(lang, "common", "adminWikiCancel")}
                     </button>
                     <button
                       type="button"
@@ -2272,7 +2728,11 @@ export default function AdminWikiEditPage() {
                           ] === deleteVersionTarget.id
                         ) {
                           setDeleteVersionError(
-                            "Текущата активна версия не може да бъде изтрита.",
+                            t(
+                              lang,
+                              "common",
+                              "adminWikiEditDeleteVersionCurrentActiveError",
+                            ),
                           );
                           return;
                         }
@@ -2288,7 +2748,7 @@ export default function AdminWikiEditPage() {
                           const token = getAccessToken();
                           if (!token) {
                             setDeleteVersionError(
-                              "Липсва достъп до Admin API. Моля, влезте отново като администратор.",
+                              t(lang, "common", "adminErrorMissingApiAccess"),
                             );
                             setDeleteVersionSubmitting(false);
                             return;
@@ -2328,20 +2788,36 @@ export default function AdminWikiEditPage() {
                                 messageText.includes("current active version")
                               ) {
                                 setDeleteVersionError(
-                                  "Текущата активна версия не може да бъде изтрита.",
+                                  t(
+                                    lang,
+                                    "common",
+                                    "adminWikiEditDeleteVersionCurrentActiveError",
+                                  ),
                                 );
                               } else {
                                 setDeleteVersionError(
-                                  "Тази версия не може да бъде изтрита, защото е последната версия на статията.",
+                                  t(
+                                    lang,
+                                    "common",
+                                    "adminWikiEditDeleteVersionLastVersionError",
+                                  ),
                                 );
                               }
                             } else if (res.status === 404) {
                               setDeleteVersionError(
-                                "Версията или статията не бяха намерени.",
+                                t(
+                                  lang,
+                                  "common",
+                                  "adminWikiEditDeleteVersionNotFound",
+                                ),
                               );
                             } else {
                               setDeleteVersionError(
-                                "Възникна грешка при изтриване на версията.",
+                                t(
+                                  lang,
+                                  "common",
+                                  "adminWikiEditDeleteVersionError",
+                                ),
                               );
                             }
                             setDeleteVersionSubmitting(false);
@@ -2371,7 +2847,11 @@ export default function AdminWikiEditPage() {
                           setDeleteVersionStep2Id(null);
                         } catch {
                           setDeleteVersionError(
-                            "Възникна грешка при изтриване на версията.",
+                            t(
+                              lang,
+                              "common",
+                              "adminWikiEditDeleteVersionError",
+                            ),
                           );
                         } finally {
                           setDeleteVersionSubmitting(false);
@@ -2379,7 +2859,11 @@ export default function AdminWikiEditPage() {
                       }}
                       disabled={deleteVersionSubmitting}
                     >
-                      Да, изтрий версията
+                      {t(
+                        lang,
+                        "common",
+                        "adminWikiEditDeleteVersionConfirmButton",
+                      )}
                     </button>
                   </div>
                 </div>
@@ -2389,13 +2873,20 @@ export default function AdminWikiEditPage() {
               <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 px-4">
                 <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
                   <h3 className="mb-2 text-base font-semibold text-zinc-900">
-                    Изтриване на избрани версии
+                    {t(lang, "common", "adminWikiEditBulkDeleteTitle")}
                   </h3>
                   <p className="mb-4 text-sm text-zinc-700">
-                    Ще бъдат завинаги премахнати{" "}
-                    {selectedVersionIdsForDelete.length} версии от историята на
-                    статията. Това действие е необратимо и може да повлияе на
-                    проследимостта на промените.
+                    {t(
+                      lang,
+                      "common",
+                      "adminWikiEditBulkDeleteDescriptionPrefix",
+                    )}{" "}
+                    {selectedVersionIdsForDelete.length}{" "}
+                    {t(
+                      lang,
+                      "common",
+                      "adminWikiEditBulkDeleteDescriptionSuffix",
+                    )}
                   </p>
                   <div className="flex justify-end gap-2">
                     <button
@@ -2403,7 +2894,7 @@ export default function AdminWikiEditPage() {
                       className="rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-800 hover:bg-zinc-50"
                       onClick={() => setBulkDeleteStep1Open(false)}
                     >
-                      Затвори
+                      {t(lang, "common", "adminWikiClose")}
                     </button>
                     <button
                       type="button"
@@ -2414,7 +2905,7 @@ export default function AdminWikiEditPage() {
                         setBulkDeleteStep2Open(true);
                       }}
                     >
-                      OK
+                      {t(lang, "common", "adminWikiOk")}
                     </button>
                   </div>
                 </div>
@@ -2424,11 +2915,14 @@ export default function AdminWikiEditPage() {
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
                 <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
                   <h3 className="mb-2 text-base font-semibold text-zinc-900">
-                    Потвърдете изтриването на избраните версии
+                    {t(lang, "common", "adminWikiEditBulkDeleteConfirmTitle")}
                   </h3>
                   <p className="mb-3 text-sm text-zinc-700">
-                    Наистина ли искате да изтриете избраните версии? Това
-                    действие е окончателно и не може да бъде отменено.
+                    {t(
+                      lang,
+                      "common",
+                      "adminWikiEditBulkDeleteConfirmDescription",
+                    )}
                   </p>
                   {bulkDeleteError && (
                     <p className="mb-3 text-xs text-red-600" role="alert">
@@ -2448,7 +2942,7 @@ export default function AdminWikiEditPage() {
                       }}
                       disabled={bulkDeleteSubmitting}
                     >
-                      Отказ
+                      {t(lang, "common", "adminWikiCancel")}
                     </button>
                     <button
                       type="button"
@@ -2472,7 +2966,7 @@ export default function AdminWikiEditPage() {
                           const token = getAccessToken();
                           if (!token) {
                             setBulkDeleteError(
-                              "Липсва достъп до Admin API. Моля, влезте отново като администратор.",
+                              t(lang, "common", "adminErrorMissingApiAccess"),
                             );
                             setBulkDeleteSubmitting(false);
                             return;
@@ -2504,7 +2998,11 @@ export default function AdminWikiEditPage() {
 
                           if (failedCount > 0) {
                             setBulkDeleteError(
-                              "Някои версии не можаха да бъдат изтрити. Списъкът с версии ще бъде обновен.",
+                              t(
+                                lang,
+                                "common",
+                                "adminWikiEditBulkDeletePartialError",
+                              ),
                             );
                           } else {
                             setBulkDeleteError(null);
@@ -2518,7 +3016,7 @@ export default function AdminWikiEditPage() {
                           setVersionsReloadKey((value) => value + 1);
                         } catch {
                           setBulkDeleteError(
-                            "Възникна грешка при изтриване на избраните версии.",
+                            t(lang, "common", "adminWikiEditBulkDeleteError"),
                           );
                         } finally {
                           setBulkDeleteSubmitting(false);
@@ -2526,7 +3024,11 @@ export default function AdminWikiEditPage() {
                       }}
                       disabled={bulkDeleteSubmitting}
                     >
-                      Да, изтрий избраните версии
+                      {t(
+                        lang,
+                        "common",
+                        "adminWikiEditBulkDeleteConfirmButton",
+                      )}
                     </button>
                   </div>
                 </div>

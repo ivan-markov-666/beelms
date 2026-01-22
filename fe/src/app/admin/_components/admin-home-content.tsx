@@ -236,8 +236,8 @@ export function AdminHomeContent() {
           </h1>
           <InfoTooltip
             label="Admin dashboard info"
-            title="Admin dashboard"
-            description="Начално табло за администратори: бърз преглед на основни метрики и последни активности."
+            title={t(lang, "common", "adminDashboardInfoTitle")}
+            description={t(lang, "common", "adminDashboardInfoDescription")}
           />
         </div>
         <p className="text-gray-600">
@@ -501,7 +501,7 @@ export function AdminHomeContent() {
 
         {activityLoading && !activityError && (
           <p className="text-sm text-gray-500">
-            Задържане на последните събития...
+            {t(lang, "common", "adminDashboardRecentActivityLoading")}
           </p>
         )}
 
@@ -513,7 +513,7 @@ export function AdminHomeContent() {
 
         {!activityLoading && !activityError && activity.length === 0 && (
           <p className="text-sm text-gray-500">
-            Няма записана активност за показване.
+            {t(lang, "common", "adminDashboardRecentActivityEmpty")}
           </p>
         )}
 

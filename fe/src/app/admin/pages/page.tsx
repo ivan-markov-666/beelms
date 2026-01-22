@@ -248,6 +248,15 @@ export default function AdminPagesPage() {
   const [notFoundEditingLang, setNotFoundEditingLang] =
     useState<string>("__global");
 
+  const navItemBaseClass =
+    "w-full rounded-md border px-3 py-2 text-sm transition";
+  const navItemActiveClass =
+    "border-[color:var(--primary)] bg-[color:color-mix(in_srgb,var(--primary)_12%,var(--card))] text-[color:var(--foreground)] shadow-sm";
+  const navItemDefaultClass =
+    "border-[color:var(--border)] bg-[color:var(--card)] text-[color:var(--foreground)] hover:bg-[color:color-mix(in_srgb,var(--foreground)_4%,var(--card))]";
+  const navItemUnpublishedClass =
+    "border-[color:var(--error)] bg-[color:color-mix(in_srgb,var(--error)_18%,var(--card))] text-[color:var(--error)]";
+
   const legalMarkdownValue =
     editingLang === "__global"
       ? contentMarkdown
@@ -922,12 +931,7 @@ export default function AdminPagesPage() {
                   return (
                     <div
                       key={p.slug}
-                      className={
-                        "w-full rounded-md border px-3 py-2 text-sm " +
-                        (active
-                          ? "border-green-300 bg-green-50 text-green-800"
-                          : "border-gray-200 bg-white text-gray-800 hover:bg-gray-50")
-                      }
+                      className={`${navItemBaseClass} ${active ? navItemActiveClass : navItemDefaultClass}`}
                     >
                       <button
                         type="button"
@@ -950,12 +954,7 @@ export default function AdminPagesPage() {
                 return (
                   <div
                     key={p.slug}
-                    className={
-                      "w-full rounded-md border px-3 py-2 text-sm " +
-                      (active
-                        ? "border-green-300 bg-green-50 text-green-800"
-                        : "border-gray-200 bg-white text-gray-800 hover:bg-gray-50")
-                    }
+                    className={`${navItemBaseClass} ${active ? navItemActiveClass : navItemDefaultClass}`}
                   >
                     <button
                       type="button"
@@ -977,7 +976,7 @@ export default function AdminPagesPage() {
                 type="button"
                 onClick={() => setSelectedKey(CUSTOM_NEW_PAGE_KEY)}
                 disabled={saving}
-                className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-left text-sm hover:bg-gray-50 disabled:opacity-70"
+                className={`${navItemBaseClass} ${navItemDefaultClass} text-left disabled:opacity-70`}
               >
                 <div className="font-medium">+ New custom page</div>
                 <div className="text-xs text-gray-500">
@@ -991,17 +990,15 @@ export default function AdminPagesPage() {
                 customPages.map((p) => {
                   const key = `${CUSTOM_PAGE_PREFIX}${p.id}`;
                   const active = key === selectedKey;
+                  const statusClass = active
+                    ? navItemActiveClass
+                    : p.isPublished
+                      ? navItemDefaultClass
+                      : navItemUnpublishedClass;
                   return (
                     <div
                       key={p.id}
-                      className={
-                        "w-full rounded-md border px-3 py-2 text-sm " +
-                        (active
-                          ? "border-green-300 bg-green-50 text-green-800"
-                          : p.isPublished
-                            ? "border-gray-200 bg-white text-gray-800 hover:bg-gray-50"
-                            : "border-red-200 bg-red-50 text-red-800")
-                      }
+                      className={`${navItemBaseClass} ${statusClass}`}
                     >
                       <button
                         type="button"
@@ -1017,12 +1014,7 @@ export default function AdminPagesPage() {
               )}
 
               <div
-                className={
-                  "w-full rounded-md border px-3 py-2 text-sm " +
-                  (isNotFoundSelected
-                    ? "border-green-300 bg-green-50 text-green-800"
-                    : "border-gray-200 bg-white text-gray-800 hover:bg-gray-50")
-                }
+                className={`${navItemBaseClass} ${isNotFoundSelected ? navItemActiveClass : navItemDefaultClass}`}
               >
                 <button
                   type="button"

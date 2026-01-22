@@ -93,18 +93,45 @@ function WikiFiltersForm({
   supportedLangs,
   initialQ,
   initialLang,
+  flagByLang,
 }: {
   supportedLangs: string[];
   initialQ: string;
   initialLang: string;
+  flagByLang: Record<string, string>;
 }) {
   return (
     <WikiSearchFormClient
       supportedLangs={supportedLangs}
       initialQ={initialQ}
       initialLang={initialLang}
+      flagByLang={flagByLang}
     />
   );
+}
+
+function buildFlagByLang(
+  raw: {
+    global?: string | null;
+    byLang?: Record<string, string | null> | null;
+  } | null,
+  langs: string[],
+): Record<string, string> {
+  const result: Record<string, string> = {};
+  const globalCode = (raw?.global ?? "").trim().toLowerCase();
+  const byLang = raw?.byLang ?? null;
+
+  for (const lang of langs) {
+    const normalized = (lang ?? "").trim().toLowerCase();
+    if (!normalized) continue;
+    const specific = (byLang?.[normalized] ?? "").trim().toLowerCase();
+    const code = specific || globalCode;
+    if (code) {
+      result[normalized] = code;
+    }
+  }
+
+  return result;
 }
 
 type WikiPageSearchParams = {
@@ -130,6 +157,10 @@ export default async function WikiPage({
     normalizedSupported.length > 0
       ? normalizedSupported
       : Array.from(SUPPORTED_LANGS);
+  const flagByLang = buildFlagByLang(
+    publicSettings?.languages?.flagPicker ?? null,
+    supportedLangs,
+  );
 
   const resolvedSearchParams = ((await searchParams) ??
     {}) as WikiPageSearchParams;
@@ -215,6 +246,7 @@ export default async function WikiPage({
             initialQ={rawQ}
             initialLang={normalizedLang}
             supportedLangs={supportedLangs}
+            flagByLang={flagByLang}
           />
         </section>
 
@@ -254,6 +286,7 @@ export default async function WikiPage({
           initialQ={rawQ}
           initialLang={normalizedLang}
           supportedLangs={supportedLangs}
+          flagByLang={flagByLang}
         />
       </section>
 

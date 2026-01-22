@@ -7,13 +7,27 @@ export function StyledCheckbox({
   onChange,
   disabled,
   ariaLabel,
+  size,
 }: {
   checked: boolean;
   onChange: (checked: boolean) => void;
   disabled?: boolean;
   ariaLabel: string;
+  size?: "sm" | "md" | "lg";
 }) {
   const id = useId();
+
+  const sizeClassName = (() => {
+    if (size === "lg") return "h-8 w-8";
+    if (size === "sm") return "h-5 w-5";
+    return "h-6 w-6";
+  })();
+
+  const iconClassName = (() => {
+    if (size === "lg") return "h-5 w-5";
+    if (size === "sm") return "h-3.5 w-3.5";
+    return "h-4 w-4";
+  })();
 
   return (
     <div className="inline-flex items-center">
@@ -29,9 +43,9 @@ export function StyledCheckbox({
       <label
         htmlFor={id}
         className={
-          "relative inline-flex h-5 w-5 cursor-pointer items-center justify-center rounded-[6px] border bg-white shadow-sm transition " +
-          "focus-within:outline-none focus-within:ring-2 focus-within:ring-[color:var(--primary)] focus-within:ring-offset-2 " +
-          "hover:bg-zinc-50 " +
+          `relative inline-flex ${sizeClassName} cursor-pointer items-center justify-center rounded-[8px] border bg-[color:var(--card)] shadow-sm transition ` +
+          "focus-within:outline-none focus-within:ring-2 focus-within:ring-[color:var(--primary)] focus-within:ring-offset-2 focus-within:ring-offset-[color:var(--card)] " +
+          "hover:bg-[color:color-mix(in_srgb,var(--foreground)_3%,var(--card))] " +
           (disabled ? "cursor-not-allowed opacity-60 " : "") +
           (checked
             ? "border-[color:var(--primary)] bg-[color:var(--primary)] "
@@ -40,7 +54,7 @@ export function StyledCheckbox({
       >
         <svg
           className={
-            "h-3.5 w-3.5 text-white transition " +
+            `${iconClassName} text-white transition ` +
             (checked ? "opacity-100" : "opacity-0")
           }
           viewBox="0 0 20 20"

@@ -47,14 +47,24 @@ export function WikiArticleActions({ title, lang }: WikiArticleActionsProps) {
       <div className="flex flex-wrap gap-2">
         <button
           type="button"
-          className="inline-flex items-center rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-xs font-medium text-zinc-800 shadow-sm hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:ring-offset-1"
+          className="inline-flex items-center rounded-md border px-3 py-1.5 text-xs font-semibold shadow-sm transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-1 focus:ring-offset-[color:var(--card)]"
+          style={{
+            backgroundColor: "var(--card)",
+            borderColor: "var(--border)",
+            color: "var(--foreground)",
+          }}
           onClick={handleShare}
         >
           {t(lang, "wiki", "articleShareButton")}
         </button>
         <button
           type="button"
-          className="inline-flex items-center rounded-md bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:ring-offset-1 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200"
+          className="inline-flex items-center rounded-md border px-3 py-1.5 text-xs font-semibold shadow-sm transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-1 focus:ring-offset-[color:var(--card)]"
+          style={{
+            backgroundColor: "var(--primary)",
+            borderColor: "var(--primary)",
+            color: "var(--on-primary)",
+          }}
           onClick={handlePrint}
         >
           {t(lang, "wiki", "articlePrintButton")}

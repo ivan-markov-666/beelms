@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useCurrentLang } from "../../../i18n/useCurrentLang";
 import { t } from "../../../i18n/t";
+import type { SupportedLang } from "../../../i18n/config";
 import { getAccessToken } from "../../auth-token";
 import { getApiBaseUrl } from "../../api-url";
 import { AdminBreadcrumbs } from "../_components/admin-breadcrumbs";
@@ -136,6 +137,53 @@ type AdminAdvancedMetrics = {
   dailyPageViews: AdminAdvancedMetricsDailyPoint[];
 };
 
+function langToLocale(lang: SupportedLang): string {
+  switch (lang) {
+    case "bg":
+      return "bg-BG";
+    case "en":
+      return "en-US";
+    case "de":
+      return "de-DE";
+    case "es":
+      return "es-ES";
+    case "pt":
+      return "pt-PT";
+    case "pl":
+      return "pl-PL";
+    case "ua":
+      return "uk-UA";
+    case "ru":
+      return "ru-RU";
+    case "fr":
+      return "fr-FR";
+    case "tr":
+      return "tr-TR";
+    case "ro":
+      return "ro-RO";
+    case "hi":
+      return "hi-IN";
+    case "vi":
+      return "vi-VN";
+    case "id":
+      return "id-ID";
+    case "it":
+      return "it-IT";
+    case "ko":
+      return "ko-KR";
+    case "ja":
+      return "ja-JP";
+    case "nl":
+      return "nl-NL";
+    case "cs":
+      return "cs-CZ";
+    case "ar":
+      return "ar";
+    default:
+      return "en-US";
+  }
+}
+
 export default function AdminMetricsPage() {
   const lang = useCurrentLang();
   const [metrics, setMetrics] = useState<MetricsOverview | null>(null);
@@ -190,8 +238,7 @@ export default function AdminMetricsPage() {
     const date = new Date(year, month - 1, 1);
     if (Number.isNaN(date.getTime())) return key;
 
-    const locale = lang === "bg" ? "bg-BG" : lang === "de" ? "de-DE" : "en-US";
-    return date.toLocaleDateString(locale, {
+    return date.toLocaleDateString(langToLocale(lang), {
       year: "numeric",
       month: "short",
     });
@@ -776,7 +823,7 @@ export default function AdminMetricsPage() {
       {/* Breadcrumbs */}
       <AdminBreadcrumbs
         items={[
-          { label: "Админ табло", href: "/admin" },
+          { label: t(lang, "common", "adminDashboardTitle"), href: "/admin" },
           { label: t(lang, "common", "adminMetricsTitle") },
         ]}
       />
@@ -784,32 +831,36 @@ export default function AdminMetricsPage() {
       {/* Page header */}
       <header className="space-y-2">
         <div className="flex items-center gap-2">
-          <h1 className="text-3xl font-bold text-gray-900 md:text-4xl">
+          <h1 className="text-3xl font-bold text-[color:var(--foreground)] md:text-4xl">
             {t(lang, "common", "adminMetricsTitle")}
           </h1>
           <InfoTooltip
-            label="Admin metrics info"
-            title="Metrics"
-            description="Статистика за платформата: потребители, wiki, activity summary, wiki attention и advanced metrics export."
+            label={t(lang, "common", "adminMetricsInfoTooltipLabel")}
+            title={t(lang, "common", "adminMetricsInfoTooltipTitle")}
+            description={t(
+              lang,
+              "common",
+              "adminMetricsInfoTooltipDescription",
+            )}
           />
         </div>
-        <p className="text-gray-600">
+        <p className="text-[color:var(--foreground)] opacity-80">
           {t(lang, "common", "adminMetricsSubtitle")}
         </p>
       </header>
 
       {/* Overview metrics card */}
       <section className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-6 shadow-sm">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-sm font-medium text-gray-600">
+            <h2 className="text-sm font-medium text-[color:var(--foreground)] opacity-70">
               {t(lang, "common", "adminDashboardCardUsersTitle")}
             </h2>
             <div
               className="flex h-10 w-10 items-center justify-center rounded-lg"
               style={{
                 backgroundColor:
-                  "color-mix(in srgb, var(--primary) 15%, white)",
+                  "color-mix(in srgb, var(--primary) 15%, var(--card))",
               }}
             >
               <svg
@@ -832,7 +883,7 @@ export default function AdminMetricsPage() {
           <div className="flex items-end justify-between">
             <div>
               {loading && (
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-[color:var(--foreground)] opacity-60">
                   {t(lang, "common", "adminDashboardMetricsLoading")}
                 </p>
               )}
@@ -844,13 +895,15 @@ export default function AdminMetricsPage() {
               )}
               {!loading && !error && (
                 <>
-                  <p className="text-3xl font-bold text-gray-900">
-                    {hasMetrics ? totalUsers.toLocaleString("bg-BG") : "—"}
+                  <p className="text-3xl font-bold text-[color:var(--foreground)]">
+                    {hasMetrics
+                      ? totalUsers.toLocaleString(langToLocale(lang))
+                      : "—"}
                   </p>
                   <p className="mt-1 text-sm text-[color:var(--primary)]">
                     {usersTrendText}
                   </p>
-                  <p className="mt-0.5 text-xs text-gray-500">
+                  <p className="mt-0.5 text-xs text-[color:var(--foreground)] opacity-60">
                     {t(lang, "common", "adminDashboardCardUsersTrendHelp")}
                   </p>
                 </>
@@ -863,17 +916,17 @@ export default function AdminMetricsPage() {
       {/* User statistics */}
       {userStats && !loading && !error && (
         <section className="space-y-3">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-[color:var(--foreground)] opacity-60">
             {t(lang, "common", "adminDashboardCardUsersTitle")}
           </h2>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-            <div className="rounded-lg border border-gray-200 bg-white p-4">
+            <div className="rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                  <p className="text-xs font-medium uppercase tracking-wide text-[color:var(--foreground)] opacity-60">
                     {t(lang, "common", "adminUsersStatsTotal")}
                   </p>
-                  <p className="mt-1 text-2xl font-semibold text-gray-900">
+                  <p className="mt-1 text-2xl font-semibold text-[color:var(--foreground)]">
                     {userStats.totalUsers}
                   </p>
                 </div>
@@ -881,7 +934,7 @@ export default function AdminMetricsPage() {
                   className="flex h-10 w-10 items-center justify-center rounded-lg"
                   style={{
                     backgroundColor:
-                      "color-mix(in srgb, var(--primary) 12%, white)",
+                      "color-mix(in srgb, var(--primary) 12%, var(--card))",
                   }}
                 >
                   <svg
@@ -902,10 +955,10 @@ export default function AdminMetricsPage() {
                 </div>
               </div>
             </div>
-            <div className="rounded-lg border border-gray-200 bg-white p-4">
+            <div className="rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                  <p className="text-xs font-medium uppercase tracking-wide text-[color:var(--foreground)] opacity-60">
                     {t(lang, "common", "adminUsersStatsActive")}
                   </p>
                   <p className="mt-1 text-2xl font-semibold text-[color:var(--primary)]">
@@ -916,7 +969,7 @@ export default function AdminMetricsPage() {
                   className="flex h-10 w-10 items-center justify-center rounded-lg"
                   style={{
                     backgroundColor:
-                      "color-mix(in srgb, var(--primary) 12%, white)",
+                      "color-mix(in srgb, var(--primary) 12%, var(--card))",
                   }}
                 >
                   <svg
@@ -937,10 +990,10 @@ export default function AdminMetricsPage() {
                 </div>
               </div>
             </div>
-            <div className="rounded-lg border border-gray-200 bg-white p-4">
+            <div className="rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                  <p className="text-xs font-medium uppercase tracking-wide text-[color:var(--foreground)] opacity-60">
                     {t(lang, "common", "adminUsersStatsDeactivated")}
                   </p>
                   <p className="mt-1 text-2xl font-semibold text-[color:var(--attention)]">
@@ -951,7 +1004,7 @@ export default function AdminMetricsPage() {
                   className="flex h-10 w-10 items-center justify-center rounded-lg"
                   style={{
                     backgroundColor:
-                      "color-mix(in srgb, var(--attention) 12%, white)",
+                      "color-mix(in srgb, var(--attention) 12%, var(--card))",
                   }}
                 >
                   <svg
@@ -972,10 +1025,10 @@ export default function AdminMetricsPage() {
                 </div>
               </div>
             </div>
-            <div className="rounded-lg border border-gray-200 bg-white p-4">
+            <div className="rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                  <p className="text-xs font-medium uppercase tracking-wide text-[color:var(--foreground)] opacity-60">
                     {t(lang, "common", "adminUsersStatsAdmins")}
                   </p>
                   <p className="mt-1 text-2xl font-semibold text-[color:var(--secondary)]">
@@ -986,7 +1039,7 @@ export default function AdminMetricsPage() {
                   className="flex h-10 w-10 items-center justify-center rounded-lg"
                   style={{
                     backgroundColor:
-                      "color-mix(in srgb, var(--secondary) 12%, white)",
+                      "color-mix(in srgb, var(--secondary) 12%, var(--card))",
                   }}
                 >
                   <svg
@@ -1015,12 +1068,16 @@ export default function AdminMetricsPage() {
       {!loading && !error && (
         <section className="space-y-3">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-[color:var(--foreground)] opacity-60">
               {t(lang, "common", "adminMetricsUserActivityTitle")}
             </h2>
             <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-3">
               <ListboxSelect
-                ariaLabel="Wiki insights view"
+                ariaLabel={t(
+                  lang,
+                  "common",
+                  "adminMetricsWikiInsightsViewAria",
+                )}
                 value={wikiInsightsView}
                 onChange={(next) =>
                   setWikiInsightsView(next as WikiInsightsView)
@@ -1046,7 +1103,7 @@ export default function AdminMetricsPage() {
               />
 
               <ListboxSelect
-                ariaLabel="Metrics period"
+                ariaLabel={t(lang, "common", "adminMetricsPeriodAria")}
                 value={periodPreset}
                 onChange={(value) => {
                   setPeriodPreset(value);
@@ -1097,7 +1154,7 @@ export default function AdminMetricsPage() {
 
               {periodPreset === "custom" && (
                 <div className="flex flex-col gap-2 md:flex-row md:items-center">
-                  <label className="flex flex-col text-xs text-gray-600 md:flex-row md:items-center md:gap-2">
+                  <label className="flex flex-col text-xs text-[color:var(--foreground)] opacity-80 md:flex-row md:items-center md:gap-2">
                     <span>
                       {t(lang, "common", "adminActivityFilterRangeFrom")}
                     </span>
@@ -1106,10 +1163,10 @@ export default function AdminMetricsPage() {
                       value={periodFrom}
                       onChange={(event) => setPeriodFrom(event.target.value)}
                       max={todayIso}
-                      className="mt-1 rounded-md border border-gray-300 px-2 py-1 text-xs text-gray-900 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] md:mt-0"
+                      className="mt-1 rounded-md border border-[color:var(--border)] bg-[color:var(--card)] px-2 py-1 text-xs text-[color:var(--foreground)] shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] md:mt-0"
                     />
                   </label>
-                  <label className="flex flex-col text-xs text-gray-600 md:flex-row md:items-center md:gap-2">
+                  <label className="flex flex-col text-xs text-[color:var(--foreground)] opacity-80 md:flex-row md:items-center md:gap-2">
                     <span>
                       {t(lang, "common", "adminActivityFilterRangeTo")}
                     </span>
@@ -1118,7 +1175,7 @@ export default function AdminMetricsPage() {
                       value={periodTo}
                       onChange={(event) => setPeriodTo(event.target.value)}
                       max={todayIso}
-                      className="mt-1 rounded-md border border-gray-300 px-2 py-1 text-xs text-gray-900 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] md:mt-0"
+                      className="mt-1 rounded-md border border-[color:var(--border)] bg-[color:var(--card)] px-2 py-1 text-xs text-[color:var(--foreground)] shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] md:mt-0"
                     />
                   </label>
                 </div>
@@ -1127,16 +1184,16 @@ export default function AdminMetricsPage() {
           </div>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-            <div className="rounded-lg border border-gray-200 bg-white p-4">
+            <div className="rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                  <p className="text-xs font-medium uppercase tracking-wide text-[color:var(--foreground)] opacity-60">
                     {t(lang, "common", "adminActivityActionUserRegistered")}
                   </p>
                   <p className="mt-1 text-2xl font-semibold text-[color:var(--primary)]">
                     {effectiveActivityStats.userRegistered}
                   </p>
-                  <p className="mt-1 text-[11px] text-gray-500">
+                  <p className="mt-1 text-[11px] text-[color:var(--foreground)] opacity-60">
                     <Link
                       href="/admin/users?status=active"
                       className="text-[color:var(--primary)] hover:opacity-90 hover:underline"
@@ -1153,7 +1210,7 @@ export default function AdminMetricsPage() {
                   className="flex h-10 w-10 items-center justify-center rounded-lg"
                   style={{
                     backgroundColor:
-                      "color-mix(in srgb, var(--primary) 12%, white)",
+                      "color-mix(in srgb, var(--primary) 12%, var(--card))",
                   }}
                 >
                   <svg
@@ -1174,16 +1231,16 @@ export default function AdminMetricsPage() {
                 </div>
               </div>
             </div>
-            <div className="rounded-lg border border-gray-200 bg-white p-4">
+            <div className="rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                  <p className="text-xs font-medium uppercase tracking-wide text-[color:var(--foreground)] opacity-60">
                     {t(lang, "common", "adminActivityActionUserDeactivated")}
                   </p>
                   <p className="mt-1 text-2xl font-semibold text-[color:var(--error)]">
                     {effectiveActivityStats.userDeactivated}
                   </p>
-                  <p className="mt-1 text-[11px] text-gray-500">
+                  <p className="mt-1 text-[11px] text-[color:var(--foreground)] opacity-60">
                     <Link
                       href="/admin/users"
                       className="text-[color:var(--error)] hover:opacity-90 hover:underline"
@@ -1200,7 +1257,7 @@ export default function AdminMetricsPage() {
                   className="flex h-10 w-10 items-center justify-center rounded-lg"
                   style={{
                     backgroundColor:
-                      "color-mix(in srgb, var(--error) 12%, white)",
+                      "color-mix(in srgb, var(--error) 12%, var(--card))",
                   }}
                 >
                   <svg
@@ -1221,16 +1278,16 @@ export default function AdminMetricsPage() {
                 </div>
               </div>
             </div>
-            <div className="rounded-lg border border-gray-200 bg-white p-4">
+            <div className="rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                  <p className="text-xs font-medium uppercase tracking-wide text-[color:var(--foreground)] opacity-60">
                     {t(lang, "common", "adminActivityActionArticleCreated")}
                   </p>
                   <p className="mt-1 text-2xl font-semibold text-[color:var(--primary)]">
                     {effectiveActivityStats.articleCreated}
                   </p>
-                  <p className="mt-1 text-[11px] text-gray-500">
+                  <p className="mt-1 text-[11px] text-[color:var(--foreground)] opacity-60">
                     <Link
                       href="/admin/wiki?status=draft"
                       className="text-[color:var(--primary)] hover:opacity-90 hover:underline"
@@ -1247,7 +1304,7 @@ export default function AdminMetricsPage() {
                   className="flex h-10 w-10 items-center justify-center rounded-lg"
                   style={{
                     backgroundColor:
-                      "color-mix(in srgb, var(--primary) 12%, white)",
+                      "color-mix(in srgb, var(--primary) 12%, var(--card))",
                   }}
                 >
                   <svg
@@ -1268,16 +1325,16 @@ export default function AdminMetricsPage() {
                 </div>
               </div>
             </div>
-            <div className="rounded-lg border border-gray-200 bg-white p-4">
+            <div className="rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                  <p className="text-xs font-medium uppercase tracking-wide text-[color:var(--foreground)] opacity-60">
                     {t(lang, "common", "adminActivityActionArticleUpdated")}
                   </p>
                   <p className="mt-1 text-2xl font-semibold text-[color:var(--attention)]">
                     {effectiveActivityStats.articleUpdated}
                   </p>
-                  <p className="mt-1 text-[11px] text-gray-500">
+                  <p className="mt-1 text-[11px] text-[color:var(--foreground)] opacity-60">
                     <Link
                       href="/admin/wiki"
                       className="text-[color:var(--attention)] hover:opacity-90 hover:underline"
@@ -1294,7 +1351,7 @@ export default function AdminMetricsPage() {
                   className="flex h-10 w-10 items-center justify-center rounded-lg"
                   style={{
                     backgroundColor:
-                      "color-mix(in srgb, var(--attention) 12%, white)",
+                      "color-mix(in srgb, var(--attention) 12%, var(--card))",
                   }}
                 >
                   <svg
@@ -1322,10 +1379,10 @@ export default function AdminMetricsPage() {
       {/* Users monthly trend */}
       {userTrend.length > 0 && !loading && !error && (
         <section className="space-y-3">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-[color:var(--foreground)] opacity-60">
             {t(lang, "common", "adminMetricsUsersTrendTitle")}
           </h2>
-          <p className="text-xs text-gray-600">
+          <p className="text-xs text-[color:var(--foreground)] opacity-80">
             {netUserChange === 0 && (
               <>{t(lang, "common", "adminMetricsNetUsersChangeZero")}</>
             )}
@@ -1342,7 +1399,7 @@ export default function AdminMetricsPage() {
               </span>
             )}
           </p>
-          <div className="space-y-3 rounded-lg border border-gray-200 bg-white p-4">
+          <div className="space-y-3 rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-4">
             {(() => {
               const maxCount = userTrend.reduce((max, point) => {
                 const localMax =
@@ -1364,14 +1421,14 @@ export default function AdminMetricsPage() {
 
                 return (
                   <div key={point.month} className="space-y-1">
-                    <div className="text-xs font-medium text-gray-600">
+                    <div className="text-xs font-medium text-[color:var(--foreground)] opacity-80">
                       {formatMonthLabel(point.month)}
                     </div>
                     <div className="flex items-center space-x-3">
                       <div className="w-24 text-[11px] text-[color:var(--primary)]">
                         {t(lang, "common", "adminActivityActionUserRegistered")}
                       </div>
-                      <div className="flex-1 h-2 rounded-full bg-gray-100">
+                      <div className="flex-1 h-2 rounded-full bg-[color:color-mix(in_srgb,var(--foreground)_10%,var(--card))]">
                         {widthRegistered > 0 && (
                           <div
                             className="h-2 rounded-full"
@@ -1382,7 +1439,7 @@ export default function AdminMetricsPage() {
                           />
                         )}
                       </div>
-                      <div className="w-8 text-right text-xs text-gray-700">
+                      <div className="w-8 text-right text-xs text-[color:var(--foreground)] opacity-80">
                         {point.registered}
                       </div>
                     </div>
@@ -1394,7 +1451,7 @@ export default function AdminMetricsPage() {
                           "adminActivityActionUserDeactivated",
                         )}
                       </div>
-                      <div className="flex-1 h-2 rounded-full bg-gray-100">
+                      <div className="flex-1 h-2 rounded-full bg-[color:color-mix(in_srgb,var(--foreground)_10%,var(--card))]">
                         {widthDeactivated > 0 && (
                           <div
                             className="h-2 rounded-full"
@@ -1405,7 +1462,7 @@ export default function AdminMetricsPage() {
                           />
                         )}
                       </div>
-                      <div className="w-8 text-right text-xs text-gray-700">
+                      <div className="w-8 text-right text-xs text-[color:var(--foreground)] opacity-80">
                         {point.deactivated}
                       </div>
                     </div>
@@ -1420,17 +1477,17 @@ export default function AdminMetricsPage() {
       {/* Wiki article statistics */}
       {wikiStats && !loading && !error && wikiStats.totalArticles > 0 && (
         <section className="space-y-3">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-[color:var(--foreground)] opacity-60">
             {t(lang, "common", "adminDashboardCardArticlesTitle")}
           </h2>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-            <div className="rounded-lg border border-gray-200 bg-white p-4">
+            <div className="rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                  <p className="text-xs font-medium uppercase tracking-wide text-[color:var(--foreground)] opacity-60">
                     {t(lang, "common", "adminWikiStatsTotal")}
                   </p>
-                  <p className="mt-1 text-2xl font-semibold text-gray-900">
+                  <p className="mt-1 text-2xl font-semibold text-[color:var(--foreground)]">
                     {wikiStats.totalArticles}
                   </p>
                 </div>
@@ -1438,7 +1495,7 @@ export default function AdminMetricsPage() {
                   className="flex h-10 w-10 items-center justify-center rounded-lg"
                   style={{
                     backgroundColor:
-                      "color-mix(in srgb, var(--primary) 12%, white)",
+                      "color-mix(in srgb, var(--primary) 12%, var(--card))",
                   }}
                 >
                   <svg
@@ -1459,10 +1516,10 @@ export default function AdminMetricsPage() {
                 </div>
               </div>
             </div>
-            <div className="rounded-lg border border-gray-200 bg-white p-4">
+            <div className="rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                  <p className="text-xs font-medium uppercase tracking-wide text-[color:var(--foreground)] opacity-60">
                     {t(lang, "common", "adminWikiStatsActive")}
                   </p>
                   <p className="mt-1 text-2xl font-semibold text-[color:var(--primary)]">
@@ -1473,7 +1530,7 @@ export default function AdminMetricsPage() {
                   className="flex h-10 w-10 items-center justify-center rounded-lg"
                   style={{
                     backgroundColor:
-                      "color-mix(in srgb, var(--primary) 12%, white)",
+                      "color-mix(in srgb, var(--primary) 12%, var(--card))",
                   }}
                 >
                   <svg
@@ -1494,10 +1551,10 @@ export default function AdminMetricsPage() {
                 </div>
               </div>
             </div>
-            <div className="rounded-lg border border-gray-200 bg-white p-4">
+            <div className="rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                  <p className="text-xs font-medium uppercase tracking-wide text-[color:var(--foreground)] opacity-60">
                     {t(lang, "common", "adminWikiStatsDraft")}
                   </p>
                   <p className="mt-1 text-2xl font-semibold text-[color:var(--attention)]">
@@ -1508,7 +1565,7 @@ export default function AdminMetricsPage() {
                   className="flex h-10 w-10 items-center justify-center rounded-lg"
                   style={{
                     backgroundColor:
-                      "color-mix(in srgb, var(--attention) 12%, white)",
+                      "color-mix(in srgb, var(--attention) 12%, var(--card))",
                   }}
                 >
                   <svg
@@ -1529,19 +1586,19 @@ export default function AdminMetricsPage() {
                 </div>
               </div>
             </div>
-            <div className="rounded-lg border border-gray-200 bg-white p-4">
+            <div className="rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                  <p className="text-xs font-medium uppercase tracking-wide text-[color:var(--foreground)] opacity-60">
                     {t(lang, "common", "adminWikiStatsInactive")}
                   </p>
-                  <p className="mt-1 text-2xl font-semibold text-gray-700">
+                  <p className="mt-1 text-2xl font-semibold text-[color:var(--foreground)] opacity-80">
                     {wikiStats.inactiveArticles}
                   </p>
                 </div>
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[color:color-mix(in_srgb,var(--foreground)_10%,var(--card))]">
                   <svg
-                    className="h-5 w-5 text-gray-600"
+                    className="h-5 w-5 text-[color:var(--foreground)] opacity-70"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -1565,39 +1622,41 @@ export default function AdminMetricsPage() {
       {wikiViews && !loading && !error && showWikiViews && (
         <section className="space-y-3">
           <header className="space-y-1">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-[color:var(--foreground)] opacity-60">
               {t(lang, "common", "adminWikiViewsTitle")}
             </h2>
-            <p className="text-xs text-gray-600">
+            <p className="text-xs text-[color:var(--foreground)] opacity-80">
               {t(lang, "common", "adminWikiViewsSubtitle")}
             </p>
           </header>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            <div className="rounded-lg border border-gray-200 bg-white p-4">
-              <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+            <div className="rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-4">
+              <p className="text-xs font-medium uppercase tracking-wide text-[color:var(--foreground)] opacity-60">
                 {t(lang, "common", "adminWikiViewsTotal")}
               </p>
-              <p className="mt-1 text-2xl font-semibold text-gray-900">
+              <p className="mt-1 text-2xl font-semibold text-[color:var(--foreground)]">
                 {wikiViews.totalViews}
               </p>
             </div>
 
-            <div className="rounded-lg border border-gray-200 bg-white p-4">
-              <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+            <div className="rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-4">
+              <p className="text-xs font-medium uppercase tracking-wide text-[color:var(--foreground)] opacity-60">
                 {t(lang, "common", "adminWikiViewsTotalUniqueVisitors")}
               </p>
-              <p className="mt-1 text-2xl font-semibold text-gray-900">
+              <p className="mt-1 text-2xl font-semibold text-[color:var(--foreground)]">
                 {wikiViews.totalUniqueVisitors}
               </p>
             </div>
 
-            <div className="rounded-lg border border-gray-200 bg-white p-4 md:col-span-2">
-              <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+            <div className="rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-4 md:col-span-2">
+              <p className="text-xs font-medium uppercase tracking-wide text-[color:var(--foreground)] opacity-60">
                 {t(lang, "common", "adminWikiViewsTopArticles")}
               </p>
               {wikiViews.topArticles.length === 0 ? (
-                <p className="mt-2 text-sm text-gray-500">-</p>
+                <p className="mt-2 text-sm text-[color:var(--foreground)] opacity-60">
+                  -
+                </p>
               ) : (
                 <ul className="mt-2 space-y-1">
                   {wikiViews.topArticles.map((row) => (
@@ -1611,7 +1670,9 @@ export default function AdminMetricsPage() {
                       >
                         {row.slug}
                       </Link>
-                      <span className="text-sm text-gray-700">{row.views}</span>
+                      <span className="text-sm text-[color:var(--foreground)] opacity-80">
+                        {row.views}
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -1619,12 +1680,14 @@ export default function AdminMetricsPage() {
             </div>
           </div>
 
-          <div className="rounded-lg border border-gray-200 bg-white p-4">
-            <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+          <div className="rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-4">
+            <p className="text-xs font-medium uppercase tracking-wide text-[color:var(--foreground)] opacity-60">
               {t(lang, "common", "adminWikiViewsTopArticlesUniqueVisitors")}
             </p>
             {wikiViews.topArticlesByUniqueVisitors.length === 0 ? (
-              <p className="mt-2 text-sm text-gray-500">-</p>
+              <p className="mt-2 text-sm text-[color:var(--foreground)] opacity-60">
+                -
+              </p>
             ) : (
               <ul className="mt-2 space-y-1">
                 {wikiViews.topArticlesByUniqueVisitors.map((row) => (
@@ -1638,7 +1701,7 @@ export default function AdminMetricsPage() {
                     >
                       {row.slug}
                     </Link>
-                    <span className="text-sm text-gray-700">
+                    <span className="text-sm text-[color:var(--foreground)] opacity-80">
                       {row.uniqueVisitors}
                     </span>
                   </li>
@@ -1648,14 +1711,18 @@ export default function AdminMetricsPage() {
           </div>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div className="rounded-lg border border-gray-200 bg-white p-4">
-              <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+            <div className="rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-4">
+              <p className="text-xs font-medium uppercase tracking-wide text-[color:var(--foreground)] opacity-60">
                 {t(lang, "common", "adminWikiViewsDaily")}
               </p>
               {(() => {
                 const points = wikiViews.daily ?? [];
                 if (!points.length) {
-                  return <p className="mt-2 text-sm text-gray-500">-</p>;
+                  return (
+                    <p className="mt-2 text-sm text-[color:var(--foreground)] opacity-60">
+                      -
+                    </p>
+                  );
                 }
 
                 const max = points.reduce(
@@ -1674,10 +1741,10 @@ export default function AdminMetricsPage() {
 
                       return (
                         <div key={p.date} className="flex items-center gap-3">
-                          <div className="w-24 text-xs text-gray-600">
+                          <div className="w-24 text-xs text-[color:var(--foreground)] opacity-80">
                             {p.date}
                           </div>
-                          <div className="flex-1 h-2 rounded-full bg-gray-100">
+                          <div className="flex-1 h-2 rounded-full bg-[color:color-mix(in_srgb,var(--foreground)_10%,var(--card))]">
                             <div
                               className="h-2 rounded-full"
                               style={{
@@ -1686,7 +1753,7 @@ export default function AdminMetricsPage() {
                               }}
                             />
                           </div>
-                          <div className="w-10 text-right text-xs text-gray-700">
+                          <div className="w-10 text-right text-xs text-[color:var(--foreground)] opacity-80">
                             {p.views}
                           </div>
                         </div>
@@ -1697,14 +1764,18 @@ export default function AdminMetricsPage() {
               })()}
             </div>
 
-            <div className="rounded-lg border border-gray-200 bg-white p-4">
-              <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+            <div className="rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-4">
+              <p className="text-xs font-medium uppercase tracking-wide text-[color:var(--foreground)] opacity-60">
                 {t(lang, "common", "adminWikiViewsDailyUniqueVisitors")}
               </p>
               {(() => {
                 const points = wikiViews.dailyUniqueVisitors ?? [];
                 if (!points.length) {
-                  return <p className="mt-2 text-sm text-gray-500">-</p>;
+                  return (
+                    <p className="mt-2 text-sm text-[color:var(--foreground)] opacity-60">
+                      -
+                    </p>
+                  );
                 }
 
                 const max = points.reduce(
@@ -1723,10 +1794,10 @@ export default function AdminMetricsPage() {
 
                       return (
                         <div key={p.date} className="flex items-center gap-3">
-                          <div className="w-24 text-xs text-gray-600">
+                          <div className="w-24 text-xs text-[color:var(--foreground)] opacity-80">
                             {p.date}
                           </div>
-                          <div className="flex-1 h-2 rounded-full bg-gray-100">
+                          <div className="flex-1 h-2 rounded-full bg-[color:color-mix(in_srgb,var(--foreground)_10%,var(--card))]">
                             <div
                               className="h-2 rounded-full"
                               style={{
@@ -1735,7 +1806,7 @@ export default function AdminMetricsPage() {
                               }}
                             />
                           </div>
-                          <div className="w-10 text-right text-xs text-gray-700">
+                          <div className="w-10 text-right text-xs text-[color:var(--foreground)] opacity-80">
                             {p.uniqueVisitors}
                           </div>
                         </div>
@@ -1752,64 +1823,66 @@ export default function AdminMetricsPage() {
       {wikiFeedback && !loading && !error && showWikiFeedback && (
         <section className="space-y-3">
           <header className="space-y-1">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-[color:var(--foreground)] opacity-60">
               {t(lang, "common", "adminWikiFeedbackTitle")}
             </h2>
-            <p className="text-xs text-gray-600">
+            <p className="text-xs text-[color:var(--foreground)] opacity-80">
               {t(lang, "common", "adminWikiFeedbackSubtitle")}
             </p>
           </header>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-            <div className="rounded-lg border border-gray-200 bg-white p-4">
-              <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+            <div className="rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-4">
+              <p className="text-xs font-medium uppercase tracking-wide text-[color:var(--foreground)] opacity-60">
                 {t(lang, "common", "adminWikiFeedbackTotal")}
               </p>
-              <p className="mt-1 text-2xl font-semibold text-gray-900">
+              <p className="mt-1 text-2xl font-semibold text-[color:var(--foreground)]">
                 {wikiFeedback.total}
               </p>
             </div>
 
-            <div className="rounded-lg border border-gray-200 bg-white p-4">
-              <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+            <div className="rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-4">
+              <p className="text-xs font-medium uppercase tracking-wide text-[color:var(--foreground)] opacity-60">
                 {t(lang, "common", "adminWikiFeedbackTotalYes")}
               </p>
-              <p className="mt-1 text-2xl font-semibold text-gray-900">
+              <p className="mt-1 text-2xl font-semibold text-[color:var(--foreground)]">
                 {wikiFeedback.totalHelpfulYes}
               </p>
             </div>
 
-            <div className="rounded-lg border border-gray-200 bg-white p-4">
-              <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+            <div className="rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-4">
+              <p className="text-xs font-medium uppercase tracking-wide text-[color:var(--foreground)] opacity-60">
                 {t(lang, "common", "adminWikiFeedbackTotalNo")}
               </p>
-              <p className="mt-1 text-2xl font-semibold text-gray-900">
+              <p className="mt-1 text-2xl font-semibold text-[color:var(--foreground)]">
                 {wikiFeedback.totalHelpfulNo}
               </p>
             </div>
 
-            <div className="rounded-lg border border-gray-200 bg-white p-4">
-              <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+            <div className="rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-4">
+              <p className="text-xs font-medium uppercase tracking-wide text-[color:var(--foreground)] opacity-60">
                 {t(lang, "common", "adminWikiFeedbackHelpfulRate")}
               </p>
-              <p className="mt-1 text-2xl font-semibold text-gray-900">
+              <p className="mt-1 text-2xl font-semibold text-[color:var(--foreground)]">
                 {Math.round(wikiFeedback.helpfulRate)}%
               </p>
             </div>
           </div>
 
-          <div className="rounded-lg border border-gray-200 bg-white p-4">
-            <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+          <div className="rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-4">
+            <p className="text-xs font-medium uppercase tracking-wide text-[color:var(--foreground)] opacity-60">
               {t(lang, "common", "adminWikiFeedbackTopNotHelpful")}
             </p>
             {wikiFeedback.topArticlesByNotHelpful.length === 0 ? (
-              <p className="mt-2 text-sm text-gray-500">-</p>
+              <p className="mt-2 text-sm text-[color:var(--foreground)] opacity-60">
+                -
+              </p>
             ) : (
               <ul className="mt-2 space-y-1">
                 {wikiFeedback.topArticlesByNotHelpful.map((row) => (
                   <li
                     key={row.slug}
-                    className="flex flex-col gap-1 border-b border-gray-100 pb-2 last:border-b-0 last:pb-0 md:flex-row md:items-center md:justify-between"
+                    className="flex flex-col gap-1 border-b border-[color:color-mix(in_srgb,var(--foreground)_10%,var(--card))] pb-2 last:border-b-0 last:pb-0 md:flex-row md:items-center md:justify-between"
                   >
                     <Link
                       href={`/wiki/${encodeURIComponent(row.slug)}`}
@@ -1817,7 +1890,7 @@ export default function AdminMetricsPage() {
                     >
                       {row.slug}
                     </Link>
-                    <div className="flex flex-wrap items-center gap-3 text-xs text-gray-700">
+                    <div className="flex flex-wrap items-center gap-3 text-xs text-[color:var(--foreground)] opacity-80">
                       <span>
                         {t(lang, "common", "adminWikiFeedbackNotHelpful")}:{" "}
                         {row.helpfulNo}
@@ -1838,14 +1911,18 @@ export default function AdminMetricsPage() {
           </div>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div className="rounded-lg border border-gray-200 bg-white p-4">
-              <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+            <div className="rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-4">
+              <p className="text-xs font-medium uppercase tracking-wide text-[color:var(--foreground)] opacity-60">
                 {t(lang, "common", "adminWikiFeedbackDailyTotal")}
               </p>
               {(() => {
                 const points = wikiFeedback.daily ?? [];
                 if (!points.length) {
-                  return <p className="mt-2 text-sm text-gray-500">-</p>;
+                  return (
+                    <p className="mt-2 text-sm text-[color:var(--foreground)] opacity-60">
+                      -
+                    </p>
+                  );
                 }
 
                 const max = points.reduce(
@@ -1864,16 +1941,20 @@ export default function AdminMetricsPage() {
 
                       return (
                         <div key={p.date} className="flex items-center gap-3">
-                          <div className="w-24 text-xs text-gray-600">
+                          <div className="w-24 text-xs text-[color:var(--foreground)] opacity-80">
                             {p.date}
                           </div>
-                          <div className="flex-1 h-2 rounded-full bg-gray-100">
+                          <div className="flex-1 h-2 rounded-full bg-[color:color-mix(in_srgb,var(--foreground)_10%,var(--card))]">
                             <div
-                              className="h-2 rounded-full bg-gray-500"
-                              style={{ width: `${width}%` }}
+                              className="h-2 rounded-full"
+                              style={{
+                                backgroundColor:
+                                  "color-mix(in srgb, var(--foreground) 55%, var(--card))",
+                                width: `${width}%`,
+                              }}
                             />
                           </div>
-                          <div className="w-10 text-right text-xs text-gray-700">
+                          <div className="w-10 text-right text-xs text-[color:var(--foreground)] opacity-80">
                             {p.total}
                           </div>
                         </div>
@@ -1884,14 +1965,18 @@ export default function AdminMetricsPage() {
               })()}
             </div>
 
-            <div className="rounded-lg border border-gray-200 bg-white p-4">
-              <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+            <div className="rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-4">
+              <p className="text-xs font-medium uppercase tracking-wide text-[color:var(--foreground)] opacity-60">
                 {t(lang, "common", "adminWikiFeedbackDailyNotHelpful")}
               </p>
               {(() => {
                 const points = wikiFeedback.daily ?? [];
                 if (!points.length) {
-                  return <p className="mt-2 text-sm text-gray-500">-</p>;
+                  return (
+                    <p className="mt-2 text-sm text-[color:var(--foreground)] opacity-60">
+                      -
+                    </p>
+                  );
                 }
 
                 const max = points.reduce(
@@ -1910,10 +1995,10 @@ export default function AdminMetricsPage() {
 
                       return (
                         <div key={p.date} className="flex items-center gap-3">
-                          <div className="w-24 text-xs text-gray-600">
+                          <div className="w-24 text-xs text-[color:var(--foreground)] opacity-80">
                             {p.date}
                           </div>
-                          <div className="flex-1 h-2 rounded-full bg-gray-100">
+                          <div className="flex-1 h-2 rounded-full bg-[color:color-mix(in_srgb,var(--foreground)_10%,var(--card))]">
                             <div
                               className="h-2 rounded-full"
                               style={{
@@ -1922,7 +2007,7 @@ export default function AdminMetricsPage() {
                               }}
                             />
                           </div>
-                          <div className="w-10 text-right text-xs text-gray-700">
+                          <div className="w-10 text-right text-xs text-[color:var(--foreground)] opacity-80">
                             {p.helpfulNo}
                           </div>
                         </div>
@@ -1939,24 +2024,24 @@ export default function AdminMetricsPage() {
       {wikiAttention && !loading && !error && showWikiAttention && (
         <section className="space-y-3">
           <header className="space-y-1">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-[color:var(--foreground)] opacity-60">
               {t(lang, "common", "adminWikiAttentionTitle")}
             </h2>
-            <p className="text-xs text-gray-600">
+            <p className="text-xs text-[color:var(--foreground)] opacity-80">
               {t(lang, "common", "adminWikiAttentionSubtitle")}
             </p>
           </header>
 
-          <div className="rounded-lg border border-gray-200 bg-white p-4">
+          <div className="rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-4">
             <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
-              <label className="flex flex-col gap-1 text-xs text-gray-600">
+              <label className="flex flex-col gap-1 text-xs text-[color:var(--foreground)] opacity-80">
                 <span>
                   {t(lang, "common", "adminWikiAttentionFilterSearch")}
                 </span>
                 <input
                   value={wikiAttentionSearch}
                   onChange={(e) => setWikiAttentionSearch(e.target.value)}
-                  className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-[color:var(--primary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)]"
+                  className="rounded-md border border-[color:var(--border)] bg-[color:var(--card)] px-3 py-2 text-sm text-[color:var(--foreground)] shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)]"
                   placeholder={t(
                     lang,
                     "common",
@@ -1965,7 +2050,7 @@ export default function AdminMetricsPage() {
                 />
               </label>
 
-              <label className="flex flex-col gap-1 text-xs text-gray-600">
+              <label className="flex flex-col gap-1 text-xs text-[color:var(--foreground)] opacity-80">
                 <span>
                   {t(lang, "common", "adminWikiAttentionFilterMinViews")}
                 </span>
@@ -1973,12 +2058,12 @@ export default function AdminMetricsPage() {
                   type="number"
                   value={wikiAttentionMinViews}
                   onChange={(e) => setWikiAttentionMinViews(e.target.value)}
-                  className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-[color:var(--primary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)]"
+                  className="rounded-md border border-[color:var(--border)] bg-[color:var(--card)] px-3 py-2 text-sm text-[color:var(--foreground)] shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)]"
                   min={0}
                 />
               </label>
 
-              <label className="flex flex-col gap-1 text-xs text-gray-600">
+              <label className="flex flex-col gap-1 text-xs text-[color:var(--foreground)] opacity-80">
                 <span>
                   {t(lang, "common", "adminWikiAttentionFilterMinVotes")}
                 </span>
@@ -1986,12 +2071,12 @@ export default function AdminMetricsPage() {
                   type="number"
                   value={wikiAttentionMinVotes}
                   onChange={(e) => setWikiAttentionMinVotes(e.target.value)}
-                  className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-[color:var(--primary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)]"
+                  className="rounded-md border border-[color:var(--border)] bg-[color:var(--card)] px-3 py-2 text-sm text-[color:var(--foreground)] shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)]"
                   min={0}
                 />
               </label>
 
-              <label className="flex flex-col gap-1 text-xs text-gray-600">
+              <label className="flex flex-col gap-1 text-xs text-[color:var(--foreground)] opacity-80">
                 <span>
                   {t(
                     lang,
@@ -2005,7 +2090,7 @@ export default function AdminMetricsPage() {
                   onChange={(e) =>
                     setWikiAttentionMinNotHelpfulRate(e.target.value)
                   }
-                  className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-[color:var(--primary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)]"
+                  className="rounded-md border border-[color:var(--border)] bg-[color:var(--card)] px-3 py-2 text-sm text-[color:var(--foreground)] shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)]"
                   min={0}
                   max={100}
                   step={1}
@@ -2014,7 +2099,7 @@ export default function AdminMetricsPage() {
             </div>
 
             <div className="mt-3 flex flex-col justify-between gap-3 md:flex-row md:items-center">
-              <p className="text-xs text-gray-600">
+              <p className="text-xs text-[color:var(--foreground)] opacity-80">
                 {t(lang, "common", "adminWikiAttentionFilterShowingPrefix")}{" "}
                 {filteredSortedWikiAttentionRows.length} /{" "}
                 {wikiAttentionRows.length}
@@ -2022,22 +2107,22 @@ export default function AdminMetricsPage() {
               <button
                 type="button"
                 onClick={exportWikiAttentionCsv}
-                className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-1"
+                className="inline-flex items-center justify-center rounded-md border border-[color:var(--border)] bg-[color:var(--card)] px-3 py-2 text-xs font-medium text-[color:var(--foreground)] shadow-sm transition hover:bg-[color:color-mix(in_srgb,var(--foreground)_6%,var(--card))] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-1"
               >
                 {t(lang, "common", "adminWikiAttentionExportCsv")}
               </button>
             </div>
           </div>
 
-          <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+          <div className="overflow-x-auto rounded-lg border border-[color:var(--border)] bg-[color:var(--card)]">
+            <table className="min-w-full divide-y divide-[color:var(--border)]">
+              <thead className="bg-[color:color-mix(in_srgb,var(--foreground)_4%,var(--card))]">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[color:var(--foreground)] opacity-70">
                     <button
                       type="button"
                       onClick={() => toggleWikiAttentionSort("slug")}
-                      className="inline-flex items-center gap-1 hover:text-gray-800"
+                      className="inline-flex items-center gap-1 hover:opacity-90"
                     >
                       {t(lang, "common", "adminWikiAttentionArticle")}
                       {wikiAttentionSortKey === "slug" && (
@@ -2047,11 +2132,11 @@ export default function AdminMetricsPage() {
                       )}
                     </button>
                   </th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-600">
+                  <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-[color:var(--foreground)] opacity-70">
                     <button
                       type="button"
                       onClick={() => toggleWikiAttentionSort("score")}
-                      className="inline-flex items-center gap-1 hover:text-gray-800"
+                      className="inline-flex items-center gap-1 hover:opacity-90"
                     >
                       {t(lang, "common", "adminWikiAttentionScore")}
                       {wikiAttentionSortKey === "score" && (
@@ -2061,11 +2146,11 @@ export default function AdminMetricsPage() {
                       )}
                     </button>
                   </th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-600">
+                  <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-[color:var(--foreground)] opacity-70">
                     <button
                       type="button"
                       onClick={() => toggleWikiAttentionSort("views")}
-                      className="inline-flex items-center gap-1 hover:text-gray-800"
+                      className="inline-flex items-center gap-1 hover:opacity-90"
                     >
                       {t(lang, "common", "adminWikiAttentionViews")}
                       {wikiAttentionSortKey === "views" && (
@@ -2075,11 +2160,11 @@ export default function AdminMetricsPage() {
                       )}
                     </button>
                   </th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-600">
+                  <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-[color:var(--foreground)] opacity-70">
                     <button
                       type="button"
                       onClick={() => toggleWikiAttentionSort("notHelpfulRate")}
-                      className="inline-flex items-center gap-1 hover:text-gray-800"
+                      className="inline-flex items-center gap-1 hover:opacity-90"
                     >
                       {t(lang, "common", "adminWikiAttentionNotHelpfulRate")}
                       {wikiAttentionSortKey === "notHelpfulRate" && (
@@ -2089,11 +2174,11 @@ export default function AdminMetricsPage() {
                       )}
                     </button>
                   </th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-600">
+                  <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-[color:var(--foreground)] opacity-70">
                     <button
                       type="button"
                       onClick={() => toggleWikiAttentionSort("totalFeedback")}
-                      className="inline-flex items-center gap-1 hover:text-gray-800"
+                      className="inline-flex items-center gap-1 hover:opacity-90"
                     >
                       {t(lang, "common", "adminWikiAttentionVotes")}
                       {wikiAttentionSortKey === "totalFeedback" && (
@@ -2105,19 +2190,22 @@ export default function AdminMetricsPage() {
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100 bg-white">
+              <tbody className="divide-y divide-[color:color-mix(in_srgb,var(--foreground)_10%,var(--card))] bg-[color:var(--card)]">
                 {filteredSortedWikiAttentionRows.length === 0 ? (
                   <tr>
                     <td
                       colSpan={5}
-                      className="px-4 py-6 text-center text-sm text-gray-500"
+                      className="px-4 py-6 text-center text-sm text-[color:var(--foreground)] opacity-60"
                     >
                       -
                     </td>
                   </tr>
                 ) : (
                   wikiAttentionPageRows.map((row) => (
-                    <tr key={row.slug} className="hover:bg-gray-50">
+                    <tr
+                      key={row.slug}
+                      className="hover:bg-[color:color-mix(in_srgb,var(--foreground)_6%,var(--card))]"
+                    >
                       <td className="px-4 py-3 text-sm">
                         <div className="flex flex-col gap-1">
                           <Link
@@ -2134,16 +2222,16 @@ export default function AdminMetricsPage() {
                           </Link>
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-right text-sm text-gray-700">
+                      <td className="px-4 py-3 text-right text-sm text-[color:var(--foreground)] opacity-80">
                         {row.score.toFixed(1)}
                       </td>
-                      <td className="px-4 py-3 text-right text-sm text-gray-700">
+                      <td className="px-4 py-3 text-right text-sm text-[color:var(--foreground)] opacity-80">
                         {row.views}
                       </td>
-                      <td className="px-4 py-3 text-right text-sm text-gray-700">
+                      <td className="px-4 py-3 text-right text-sm text-[color:var(--foreground)] opacity-80">
                         {Math.round(row.notHelpfulRate)}%
                       </td>
-                      <td className="px-4 py-3 text-right text-sm text-gray-700">
+                      <td className="px-4 py-3 text-right text-sm text-[color:var(--foreground)] opacity-80">
                         {row.totalFeedback}
                       </td>
                     </tr>
@@ -2153,7 +2241,7 @@ export default function AdminMetricsPage() {
             </table>
           </div>
 
-          <div className="mt-3 flex items-center justify-between border-t border-gray-200 px-3 py-3 text-xs text-gray-600 md:text-sm">
+          <div className="mt-3 flex items-center justify-between border-t border-[color:var(--border)] px-3 py-3 text-xs text-[color:var(--foreground)] opacity-80 md:text-sm">
             <p>
               Showing{" "}
               <span className="font-semibold">{wikiAttentionShowingFrom}</span>-
@@ -2178,10 +2266,10 @@ export default function AdminMetricsPage() {
         <section className="space-y-3">
           <header className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div className="space-y-1">
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
+              <h2 className="text-sm font-semibold uppercase tracking-wide text-[color:var(--foreground)] opacity-60">
                 {t(lang, "common", "adminAdvancedMetricsTitle")}
               </h2>
-              <p className="text-xs text-gray-600">
+              <p className="text-xs text-[color:var(--foreground)] opacity-80">
                 {t(lang, "common", "adminAdvancedMetricsSubtitle")}
               </p>
             </div>
@@ -2189,7 +2277,7 @@ export default function AdminMetricsPage() {
             <div className="flex flex-col gap-2 sm:flex-row">
               <button
                 type="button"
-                className="rounded-md border border-gray-300 bg-white px-4 py-2 text-xs font-semibold text-gray-800 hover:bg-gray-50 disabled:opacity-60"
+                className="rounded-md border border-[color:var(--border)] bg-[color:var(--card)] px-4 py-2 text-xs font-semibold text-[color:var(--foreground)] hover:bg-[color:color-mix(in_srgb,var(--foreground)_6%,var(--card))] disabled:opacity-60"
                 onClick={() => void downloadAdvancedCsv()}
                 disabled={exportingAdvanced}
               >
@@ -2214,39 +2302,41 @@ export default function AdminMetricsPage() {
           {advancedMetrics && (
             <>
               <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                <div className="rounded-lg border border-gray-200 bg-white p-4">
-                  <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                <div className="rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-4">
+                  <p className="text-xs font-medium uppercase tracking-wide text-[color:var(--foreground)] opacity-60">
                     {t(lang, "common", "adminAdvancedMetricsTotalSessions")}
                   </p>
-                  <p className="mt-1 text-2xl font-semibold text-gray-900">
+                  <p className="mt-1 text-2xl font-semibold text-[color:var(--foreground)]">
                     {advancedMetrics.totalSessions}
                   </p>
                 </div>
-                <div className="rounded-lg border border-gray-200 bg-white p-4">
-                  <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                <div className="rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-4">
+                  <p className="text-xs font-medium uppercase tracking-wide text-[color:var(--foreground)] opacity-60">
                     {t(lang, "common", "adminAdvancedMetricsAvgDuration")}
                   </p>
-                  <p className="mt-1 text-2xl font-semibold text-gray-900">
+                  <p className="mt-1 text-2xl font-semibold text-[color:var(--foreground)]">
                     {formatDuration(advancedMetrics.avgSessionDurationSeconds)}
                   </p>
                 </div>
-                <div className="rounded-lg border border-gray-200 bg-white p-4">
-                  <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                <div className="rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-4">
+                  <p className="text-xs font-medium uppercase tracking-wide text-[color:var(--foreground)] opacity-60">
                     {t(lang, "common", "adminAdvancedMetricsTotalPageViews")}
                   </p>
-                  <p className="mt-1 text-2xl font-semibold text-gray-900">
+                  <p className="mt-1 text-2xl font-semibold text-[color:var(--foreground)]">
                     {totalPageViews}
                   </p>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                <div className="rounded-lg border border-gray-200 bg-white p-4">
-                  <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                <div className="rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-4">
+                  <p className="text-xs font-medium uppercase tracking-wide text-[color:var(--foreground)] opacity-60">
                     {t(lang, "common", "adminAdvancedMetricsSessionSources")}
                   </p>
                   {advancedMetrics.sessionSources.length === 0 ? (
-                    <p className="mt-2 text-sm text-gray-500">-</p>
+                    <p className="mt-2 text-sm text-[color:var(--foreground)] opacity-60">
+                      -
+                    </p>
                   ) : (
                     <ul className="mt-2 space-y-1">
                       {advancedMetrics.sessionSources.map((row) => (
@@ -2254,10 +2344,10 @@ export default function AdminMetricsPage() {
                           key={row.source}
                           className="flex items-center justify-between"
                         >
-                          <span className="text-sm text-gray-700">
+                          <span className="text-sm text-[color:var(--foreground)] opacity-80">
                             {row.source}
                           </span>
-                          <span className="text-sm text-gray-700">
+                          <span className="text-sm text-[color:var(--foreground)] opacity-80">
                             {row.sessions}
                           </span>
                         </li>
@@ -2266,12 +2356,14 @@ export default function AdminMetricsPage() {
                   )}
                 </div>
 
-                <div className="rounded-lg border border-gray-200 bg-white p-4">
-                  <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                <div className="rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-4">
+                  <p className="text-xs font-medium uppercase tracking-wide text-[color:var(--foreground)] opacity-60">
                     {t(lang, "common", "adminAdvancedMetricsPageViewSources")}
                   </p>
                   {advancedMetrics.pageViewSources.length === 0 ? (
-                    <p className="mt-2 text-sm text-gray-500">-</p>
+                    <p className="mt-2 text-sm text-[color:var(--foreground)] opacity-60">
+                      -
+                    </p>
                   ) : (
                     <ul className="mt-2 space-y-1">
                       {advancedMetrics.pageViewSources.map((row) => (
@@ -2279,10 +2371,10 @@ export default function AdminMetricsPage() {
                           key={row.source}
                           className="flex items-center justify-between"
                         >
-                          <span className="text-sm text-gray-700">
+                          <span className="text-sm text-[color:var(--foreground)] opacity-80">
                             {row.source}
                           </span>
-                          <span className="text-sm text-gray-700">
+                          <span className="text-sm text-[color:var(--foreground)] opacity-80">
                             {row.views}
                           </span>
                         </li>
@@ -2291,12 +2383,14 @@ export default function AdminMetricsPage() {
                   )}
                 </div>
 
-                <div className="rounded-lg border border-gray-200 bg-white p-4">
-                  <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                <div className="rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-4">
+                  <p className="text-xs font-medium uppercase tracking-wide text-[color:var(--foreground)] opacity-60">
                     {t(lang, "common", "adminAdvancedMetricsTopPages")}
                   </p>
                   {advancedMetrics.topPages.length === 0 ? (
-                    <p className="mt-2 text-sm text-gray-500">-</p>
+                    <p className="mt-2 text-sm text-[color:var(--foreground)] opacity-60">
+                      -
+                    </p>
                   ) : (
                     <ul className="mt-2 space-y-1">
                       {advancedMetrics.topPages.map((row) => (
@@ -2304,10 +2398,10 @@ export default function AdminMetricsPage() {
                           key={row.path}
                           className="flex items-center justify-between"
                         >
-                          <span className="text-sm text-gray-700">
+                          <span className="text-sm text-[color:var(--foreground)] opacity-80">
                             {row.path}
                           </span>
-                          <span className="text-sm text-gray-700">
+                          <span className="text-sm text-[color:var(--foreground)] opacity-80">
                             {row.views}
                           </span>
                         </li>
@@ -2318,14 +2412,18 @@ export default function AdminMetricsPage() {
               </div>
 
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div className="rounded-lg border border-gray-200 bg-white p-4">
-                  <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                <div className="rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-4">
+                  <p className="text-xs font-medium uppercase tracking-wide text-[color:var(--foreground)] opacity-60">
                     {t(lang, "common", "adminAdvancedMetricsDailySessions")}
                   </p>
                   {(() => {
                     const points = advancedMetrics.dailySessions ?? [];
                     if (!points.length) {
-                      return <p className="mt-2 text-sm text-gray-500">-</p>;
+                      return (
+                        <p className="mt-2 text-sm text-[color:var(--foreground)] opacity-60">
+                          -
+                        </p>
+                      );
                     }
 
                     const max = points.reduce(
@@ -2347,10 +2445,10 @@ export default function AdminMetricsPage() {
                               key={p.date}
                               className="flex items-center gap-3"
                             >
-                              <div className="w-24 text-xs text-gray-600">
+                              <div className="w-24 text-xs text-[color:var(--foreground)] opacity-80">
                                 {p.date}
                               </div>
-                              <div className="flex-1 h-2 rounded-full bg-gray-100">
+                              <div className="flex-1 h-2 rounded-full bg-[color:color-mix(in_srgb,var(--foreground)_10%,var(--card))]">
                                 <div
                                   className="h-2 rounded-full"
                                   style={{
@@ -2359,7 +2457,7 @@ export default function AdminMetricsPage() {
                                   }}
                                 />
                               </div>
-                              <div className="w-10 text-right text-xs text-gray-700">
+                              <div className="w-10 text-right text-xs text-[color:var(--foreground)] opacity-80">
                                 {p.value}
                               </div>
                             </div>
@@ -2370,14 +2468,18 @@ export default function AdminMetricsPage() {
                   })()}
                 </div>
 
-                <div className="rounded-lg border border-gray-200 bg-white p-4">
-                  <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                <div className="rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-4">
+                  <p className="text-xs font-medium uppercase tracking-wide text-[color:var(--foreground)] opacity-60">
                     {t(lang, "common", "adminAdvancedMetricsDailyPageViews")}
                   </p>
                   {(() => {
                     const points = advancedMetrics.dailyPageViews ?? [];
                     if (!points.length) {
-                      return <p className="mt-2 text-sm text-gray-500">-</p>;
+                      return (
+                        <p className="mt-2 text-sm text-[color:var(--foreground)] opacity-60">
+                          -
+                        </p>
+                      );
                     }
 
                     const max = points.reduce(
@@ -2399,10 +2501,10 @@ export default function AdminMetricsPage() {
                               key={p.date}
                               className="flex items-center gap-3"
                             >
-                              <div className="w-24 text-xs text-gray-600">
+                              <div className="w-24 text-xs text-[color:var(--foreground)] opacity-80">
                                 {p.date}
                               </div>
-                              <div className="flex-1 h-2 rounded-full bg-gray-100">
+                              <div className="flex-1 h-2 rounded-full bg-[color:color-mix(in_srgb,var(--foreground)_10%,var(--card))]">
                                 <div
                                   className="h-2 rounded-full"
                                   style={{
@@ -2411,7 +2513,7 @@ export default function AdminMetricsPage() {
                                   }}
                                 />
                               </div>
-                              <div className="w-10 text-right text-xs text-gray-700">
+                              <div className="w-10 text-right text-xs text-[color:var(--foreground)] opacity-80">
                                 {p.value}
                               </div>
                             </div>

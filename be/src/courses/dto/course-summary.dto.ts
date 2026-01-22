@@ -3,6 +3,7 @@ export class CourseSummaryDto {
   title: string;
   description: string;
   language: string;
+  languages: string[];
   status: string;
   isPaid: boolean;
   currency: string | null;

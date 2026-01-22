@@ -135,6 +135,27 @@ describe("LoginPage", () => {
     expect(
       await screen.findByText("Моля, въведете валиден имейл адрес."),
     ).toBeInTheDocument();
+    expect(emailInput).toHaveAttribute("aria-invalid", "true");
+    expect(passwordInput).toHaveAttribute("aria-invalid", "false");
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it("highlights missing required fields", async () => {
+    global.fetch = jest.fn();
+    render(<LoginPage />);
+
+    const emailInput = await screen.findByLabelText("Имейл");
+    const passwordInput = await screen.findByLabelText(/Парола/);
+    const submitButton = await screen.findByRole("button", { name: "Вход" });
+
+    fireEvent.change(emailInput, { target: { value: "user@example.com" } });
+    fireEvent.click(submitButton);
+
+    expect(
+      await screen.findByText("Моля, въведете парола."),
+    ).toBeInTheDocument();
+    expect(emailInput).toHaveAttribute("aria-invalid", "false");
+    expect(passwordInput).toHaveAttribute("aria-invalid", "true");
     expect(global.fetch).not.toHaveBeenCalled();
   });
 

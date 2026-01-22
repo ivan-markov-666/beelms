@@ -399,6 +399,21 @@ export function HeaderNav({
     return last;
   };
 
+  const appendLangToHref = (href: string): string => {
+    if (!lang) return href;
+    try {
+      const url = new URL(href, "http://localhost");
+      url.searchParams.set("lang", lang);
+      return `${url.pathname}${url.search}${url.hash}`;
+    } catch {
+      const [base, query] = href.split("?");
+      const params = new URLSearchParams(query ?? "");
+      params.set("lang", lang);
+      const queryString = params.toString();
+      return queryString ? `${base}?${queryString}` : `${base}?lang=${lang}`;
+    }
+  };
+
   const renderHref = (
     href: string,
     label: string,
@@ -422,10 +437,12 @@ export function HeaderNav({
       );
     }
 
+    const localizedHref = appendLangToHref(href);
+
     return (
       <Link
         key={key}
-        href={href}
+        href={localizedHref}
         className={effectiveClass}
         prefetch={false}
         target={shouldOpenInNewTab ? "_blank" : undefined}
@@ -554,7 +571,7 @@ export function HeaderNav({
     <header className="bg-white border-b border-gray-200">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4">
         <div className="flex items-center">
-          <Link href="/" className="flex items-center">
+          <Link href={appendLangToHref("/")} className="flex items-center">
             {resolvedLogoUrl ? (
               <Image
                 src={resolvedLogoUrl}
@@ -585,7 +602,7 @@ export function HeaderNav({
                 .map((item) => renderHeaderMenuItem(item, 0))}
               {isAdmin === true && (
                 <Link
-                  href="/admin"
+                  href={appendLangToHref("/admin")}
                   className="hover:text-[color:var(--primary)]"
                 >
                   {t(lang, "nav", "admin")}
@@ -596,7 +613,7 @@ export function HeaderNav({
             <>
               {showWiki && (
                 <Link
-                  href="/wiki"
+                  href={appendLangToHref("/wiki")}
                   className="hover:text-[color:var(--primary)]"
                 >
                   {t(lang, "nav", "wiki")}
@@ -604,20 +621,23 @@ export function HeaderNav({
               )}
               {showCourses && (
                 <Link
-                  href="/courses"
+                  href={appendLangToHref("/courses")}
                   className="hover:text-[color:var(--primary)]"
                 >
                   {t(lang, "nav", "courses")}
                 </Link>
               )}
               {showFaq && (
-                <Link href="/faq" className="hover:text-[color:var(--primary)]">
+                <Link
+                  href={appendLangToHref("/faq")}
+                  className="hover:text-[color:var(--primary)]"
+                >
                   FAQ
                 </Link>
               )}
               {showSupport && (
                 <Link
-                  href="/support"
+                  href={appendLangToHref("/support")}
                   className="hover:text-[color:var(--primary)]"
                 >
                   Support
@@ -625,7 +645,7 @@ export function HeaderNav({
               )}
               {showTerms && (
                 <Link
-                  href="/legal/terms"
+                  href={appendLangToHref("/legal/terms")}
                   className="hover:text-[color:var(--primary)]"
                 >
                   {t(lang, "common", "legalFooterTermsLink")}
@@ -633,7 +653,7 @@ export function HeaderNav({
               )}
               {showPrivacy && (
                 <Link
-                  href="/legal/privacy"
+                  href={appendLangToHref("/legal/privacy")}
                   className="hover:text-[color:var(--primary)]"
                 >
                   {t(lang, "common", "legalFooterPrivacyLink")}
@@ -641,7 +661,7 @@ export function HeaderNav({
               )}
               {showCookiePolicy && (
                 <Link
-                  href="/legal/cookie-policy"
+                  href={appendLangToHref("/legal/cookie-policy")}
                   className="hover:text-[color:var(--primary)]"
                 >
                   Cookie policy
@@ -649,7 +669,7 @@ export function HeaderNav({
               )}
               {showImprint && (
                 <Link
-                  href="/legal/imprint"
+                  href={appendLangToHref("/legal/imprint")}
                   className="hover:text-[color:var(--primary)]"
                 >
                   Imprint
@@ -657,7 +677,7 @@ export function HeaderNav({
               )}
               {showAccessibility && (
                 <Link
-                  href="/legal/accessibility"
+                  href={appendLangToHref("/legal/accessibility")}
                   className="hover:text-[color:var(--primary)]"
                 >
                   Accessibility
@@ -665,7 +685,7 @@ export function HeaderNav({
               )}
               {showContact && (
                 <Link
-                  href="/contact"
+                  href={appendLangToHref("/contact")}
                   className="hover:text-[color:var(--primary)]"
                 >
                   {t(lang, "common", "footerContactLink")}
@@ -674,7 +694,7 @@ export function HeaderNav({
               {customHeaderLinks.map((p) => (
                 <Link
                   key={p.slug}
-                  href={`/p/${p.slug}`}
+                  href={appendLangToHref(`/p/${p.slug}`)}
                   className="hover:text-[color:var(--primary)]"
                   prefetch={false}
                 >
@@ -683,7 +703,7 @@ export function HeaderNav({
               ))}
               {showMyCourses && (
                 <Link
-                  href="/my-courses"
+                  href={appendLangToHref("/my-courses")}
                   className="hover:text-[color:var(--primary)]"
                 >
                   {t(lang, "nav", "myCourses")}
@@ -691,7 +711,7 @@ export function HeaderNav({
               )}
               {isAdmin === true && (
                 <Link
-                  href="/admin"
+                  href={appendLangToHref("/admin")}
                   className="hover:text-[color:var(--primary)]"
                 >
                   {t(lang, "nav", "admin")}
@@ -821,7 +841,7 @@ export function HeaderNav({
             <>
               {showAuthLogin ? (
                 <Link
-                  href="/auth/login"
+                  href={appendLangToHref("/auth/login")}
                   className="hover:text-[color:var(--primary)]"
                 >
                   {t(lang, "nav", "login")}
@@ -829,7 +849,7 @@ export function HeaderNav({
               ) : null}
               {showAuthRegister ? (
                 <Link
-                  href="/auth/register"
+                  href={appendLangToHref("/auth/register")}
                   className="hover:text-[color:var(--primary)]"
                 >
                   {t(lang, "nav", "register")}
@@ -841,7 +861,7 @@ export function HeaderNav({
             <>
               {showProfile ? (
                 <Link
-                  href="/profile"
+                  href={appendLangToHref("/profile")}
                   className="hover:text-[color:var(--primary)]"
                 >
                   {t(lang, "nav", "profile")}

@@ -27,10 +27,17 @@ export function InfoTooltip({
   const hide = useCallback(() => setOpen(false), []);
 
   const baseClasses =
-    "relative inline-flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border bg-white text-[11px] font-semibold transition focus:outline-none focus:ring-2 focus:ring-green-500";
-  const palette = open
-    ? "border-green-500 text-green-600"
-    : "border-gray-300 text-gray-600";
+    "relative inline-flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border bg-[color:var(--card)] text-[11px] font-semibold transition focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-1 focus:ring-offset-[color:var(--card)]";
+  const paletteStyle = open
+    ? {
+        borderColor: "var(--primary)",
+        color: "var(--on-primary)",
+        backgroundColor: "color-mix(in srgb, var(--primary) 18%, var(--card))",
+      }
+    : {
+        borderColor: "var(--border)",
+        color: "color-mix(in srgb, var(--foreground) 70%, var(--card))",
+      };
 
   return (
     <button
@@ -42,18 +49,29 @@ export function InfoTooltip({
       onMouseLeave={hide}
       onFocus={show}
       onBlur={hide}
-      className={`${baseClasses} ${palette}`}
+      className={baseClasses}
+      style={paletteStyle}
       aria-label={label}
     >
       ?
       {open ? (
-        <div className="pointer-events-none absolute right-0 top-6 z-20 w-80 rounded-md border border-gray-200 bg-white p-3 text-sm text-gray-700 shadow-xl">
-          <p className="text-[13px] font-semibold uppercase tracking-wide text-gray-500">
+        <div
+          className="pointer-events-none absolute right-0 top-6 z-20 w-80 rounded-md border p-3 text-sm shadow-xl"
+          style={{
+            backgroundColor: "var(--card)",
+            borderColor: "var(--border)",
+            color: "var(--foreground)",
+          }}
+        >
+          <p
+            className="text-[13px] font-semibold uppercase tracking-wide"
+            style={{
+              color: "color-mix(in srgb, var(--foreground) 65%, var(--card))",
+            }}
+          >
             {title}
           </p>
-          <div className="mt-2 text-sm leading-relaxed text-gray-800">
-            {description}
-          </div>
+          <div className="mt-2 text-sm leading-relaxed">{description}</div>
         </div>
       ) : null}
     </button>
