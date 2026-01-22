@@ -6,11 +6,21 @@ import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import type { NextFunction, Request, Response } from 'express';
 import helmet from 'helmet';
-import { AppModule } from './app.module';
 
-dotenv.config();
+const dotenvResult = dotenv.config({
+  path: path.join(__dirname, '..', '.env'),
+});
+
+if (
+  process.env.DB_HOST === 'localhost' &&
+  dotenvResult.parsed?.DB_HOST &&
+  dotenvResult.parsed.DB_HOST !== 'localhost'
+) {
+  process.env.DB_HOST = dotenvResult.parsed.DB_HOST;
+}
 
 export async function createApp(): Promise<NestExpressApplication> {
+  const { AppModule } = await import('./app.module');
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const logger = new Logger('HTTP');
   const defaultMediaRoot = path.join(process.cwd(), 'media');

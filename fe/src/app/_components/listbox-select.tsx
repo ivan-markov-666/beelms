@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 
 export type ListboxSelectOption<T extends string> = {
   value: T;
   label: string;
+  leftAdornment?: ReactNode;
 };
 
 export function ListboxSelect<T extends string>({
@@ -102,6 +103,7 @@ export function ListboxSelect<T extends string>({
   }, [open, options.length]);
 
   const label = selected?.label ?? placeholder ?? "—";
+  const selectedAdornment = selected?.leftAdornment ?? null;
   const hiddenInputId = id ? `${id}__hidden` : undefined;
   const listboxId = id ? `${id}__listbox` : undefined;
 
@@ -139,12 +141,17 @@ export function ListboxSelect<T extends string>({
         }}
         className={
           buttonClassName ??
-          "flex w-full items-center justify-between gap-2 rounded-lg border border-[color:var(--border)] bg-white px-4 py-2 text-sm text-[color:var(--foreground)] shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] disabled:cursor-not-allowed disabled:opacity-60"
+          "flex w-full items-center justify-between gap-2 rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] px-4 py-2 text-sm text-[color:var(--foreground)] shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-1 focus:ring-offset-[color:var(--card)] disabled:cursor-not-allowed disabled:opacity-60"
         }
       >
-        <span className="truncate">{label}</span>
+        <span className="flex min-w-0 items-center gap-2">
+          {selectedAdornment ? (
+            <span className="shrink-0">{selectedAdornment}</span>
+          ) : null}
+          <span className="truncate">{label}</span>
+        </span>
         <svg
-          className={`h-4 w-4 shrink-0 text-zinc-500 transition ${open ? "rotate-180" : ""}`}
+          className={`h-4 w-4 shrink-0 text-[color:var(--foreground)] opacity-60 transition ${open ? "rotate-180" : ""}`}
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -166,7 +173,7 @@ export function ListboxSelect<T extends string>({
               aria-label={ariaLabel}
               className={
                 listClassName ??
-                "z-[9999] max-h-60 overflow-auto rounded-lg border border-[color:var(--border)] bg-white py-1 shadow-lg"
+                "z-[9999] max-h-60 overflow-auto rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] py-1 shadow-lg"
               }
               style={{
                 position: "fixed",
@@ -190,13 +197,16 @@ export function ListboxSelect<T extends string>({
                       setOpen(false);
                     }}
                     disabled={disabled}
-                    className={`flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60 ${
-                      isSelected
-                        ? "font-semibold text-[color:var(--foreground)]"
-                        : "text-zinc-700"
+                    className={`flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm text-[color:var(--foreground)] hover:bg-[color:color-mix(in_srgb,var(--foreground)_3%,var(--card))] disabled:cursor-not-allowed disabled:opacity-60 ${
+                      isSelected ? "font-semibold" : "opacity-80"
                     }`}
                   >
-                    <span className="truncate">{opt.label}</span>
+                    <span className="flex min-w-0 items-center gap-2">
+                      {opt.leftAdornment ? (
+                        <span className="shrink-0">{opt.leftAdornment}</span>
+                      ) : null}
+                      <span className="truncate">{opt.label}</span>
+                    </span>
                     {isSelected ? <span aria-hidden="true">✓</span> : null}
                   </button>
                 );

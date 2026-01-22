@@ -6,8 +6,8 @@ import { usePathname, useSearchParams } from "next/navigation";
 import {
   DEFAULT_LANG,
   SUPPORTED_LANGS,
-  type SupportedLang,
   normalizeLang,
+  type SupportedLang,
 } from "../../../i18n/config";
 
 type LanguageSwitcherProps = {
@@ -51,8 +51,24 @@ export function LanguageSwitcher({
     fallbackSupported[0] ||
     DEFAULT_LANG;
 
+  const langFromUrl = searchParams.get("lang");
+  const langFromCookie = (() => {
+    if (typeof document === "undefined") return null;
+    try {
+      const match = document.cookie
+        .split(";")
+        .map((p) => p.trim())
+        .find((p) => p.startsWith("ui_lang="));
+      if (!match) return null;
+      const raw = match.substring("ui_lang=".length);
+      return decodeURIComponent(raw || "").trim() || null;
+    } catch {
+      return null;
+    }
+  })();
+
   const currentLang = normalizeLang(
-    searchParams.get("lang"),
+    langFromUrl ?? langFromCookie,
     fallbackSupported,
     fallbackDefaultLang,
   );
@@ -241,29 +257,45 @@ export function LanguageSwitcher({
                   setOpen(false);
                   handleChange(value);
                 }}
-                className={`flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left font-semibold transition ${
+                className={`flex w-full items-center justify-between gap-2 rounded-sm px-2 py-1.5 text-left font-semibold transition ${
                   selected
                     ? "bg-gray-100 text-gray-900"
                     : "text-gray-700 hover:bg-gray-50"
                 }`}
               >
-                {optionShowIcon ? (
-                  <Image
-                    alt=""
+                <span className="flex items-center gap-2">
+                  {optionShowIcon ? (
+                    <Image
+                      alt=""
+                      aria-hidden="true"
+                      src={optionIconUrl ?? ""}
+                      width={16}
+                      height={16}
+                      className="h-4 w-4 shrink-0 rounded-sm object-cover"
+                      unoptimized
+                    />
+                  ) : optionShowFlag ? (
+                    <span
+                      aria-hidden="true"
+                      className={`fi fi-${optionFlagCode} h-4 w-4 shrink-0 rounded-sm`}
+                    />
+                  ) : null}
+                  <span>{value.toUpperCase()}</span>
+                </span>
+                {selected ? (
+                  <svg
+                    className="h-4 w-4 shrink-0 text-emerald-600"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                     aria-hidden="true"
-                    src={optionIconUrl ?? ""}
-                    width={16}
-                    height={16}
-                    className="h-4 w-4 shrink-0 rounded-sm object-cover"
-                    unoptimized
-                  />
-                ) : optionShowFlag ? (
-                  <span
-                    aria-hidden="true"
-                    className={`fi fi-${optionFlagCode} h-4 w-4 shrink-0 rounded-sm`}
-                  />
+                  >
+                    <path d="m5 13 4 4L19 7" />
+                  </svg>
                 ) : null}
-                <span>{value.toUpperCase()}</span>
               </button>
             );
           })}

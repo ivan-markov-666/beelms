@@ -83,7 +83,7 @@ function AdminNavigationTabs({
     },
     {
       href: "/admin/pages",
-      label: "Pages",
+      label: t(lang, "common", "adminDashboardTabPages"),
       active:
         pathname.startsWith("/admin/pages") ||
         pathname.startsWith("/admin/legal"),
@@ -91,13 +91,13 @@ function AdminNavigationTabs({
     },
     {
       href: "/admin/navigation",
-      label: "Navigation",
+      label: t(lang, "common", "adminDashboardTabNavigation"),
       active: pathname.startsWith("/admin/navigation"),
       visible: role === "admin",
     },
     {
       href: "/admin/settings",
-      label: "Settings",
+      label: t(lang, "common", "adminDashboardTabSettings"),
       active: pathname.startsWith("/admin/settings"),
       visible: role === "admin",
     },
@@ -141,6 +141,7 @@ export default function AdminLayout({
 }) {
   const router = useRouter();
   const pathname = usePathname();
+  const lang = useCurrentLang();
   const [status, setStatus] = useState<AdminStatus>("loading");
   const [role, setRole] = useState<UserRole | null>(null);
 
@@ -248,7 +249,7 @@ export default function AdminLayout({
       <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-8">
         <main className="w-full max-w-md rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
           <p className="text-sm text-zinc-600 nav-font">
-            Зареждане на Admin зоната...
+            {t(lang, "common", "adminAreaLoading")}
           </p>
         </main>
       </div>
@@ -260,10 +261,10 @@ export default function AdminLayout({
       <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-8">
         <main className="w-full max-w-md rounded-lg border border-red-200 bg-white p-6 shadow-sm">
           <h1 className="mb-2 text-xl font-semibold text-zinc-900">
-            Нямате достъп до Admin зоната
+            {t(lang, "common", "adminAreaForbiddenTitle")}
           </h1>
           <p className="text-sm text-zinc-700 nav-font">
-            Този раздел е достъпен само за администратори.
+            {t(lang, "common", "adminAreaForbiddenBody")}
           </p>
         </main>
       </div>

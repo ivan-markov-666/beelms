@@ -137,15 +137,21 @@ describe("RegisterPage", () => {
     expect(
       await screen.findByText("Моля, въведете валиден имейл адрес."),
     ).toBeInTheDocument();
+    expect(emailInput).toHaveAttribute("aria-invalid", "true");
     expect(
       screen.getByText(
         "Паролата трябва да е поне 8 символа дълга и да съдържа поне една главна буква, една малка буква, една цифра и един специален символ.",
       ),
     ).toBeInTheDocument();
+    expect(passwordInput).toHaveAttribute("aria-invalid", "true");
     expect(screen.getByText("Паролите не съвпадат.")).toBeInTheDocument();
+    expect(confirmPasswordInput).toHaveAttribute("aria-invalid", "true");
     expect(
       screen.getByText("Необходимо е да приемете условията."),
     ).toBeInTheDocument();
+    expect(
+      await screen.findByRole("checkbox", { name: /Съгласен съм с/i }),
+    ).toHaveAttribute("aria-invalid", "true");
 
     expect(global.fetch).not.toHaveBeenCalled();
   });
@@ -1202,7 +1208,7 @@ describe("RegisterPage", () => {
       jest.advanceTimersByTime(13000);
     });
 
-    expect(mockPush).toHaveBeenCalledWith("/auth/login");
+    expect(mockPush).toHaveBeenCalledWith("/auth/login?lang=bg");
     jest.useRealTimers();
   });
 

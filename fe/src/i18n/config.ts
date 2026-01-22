@@ -1,4 +1,48 @@
-export const SUPPORTED_LANGS = ["bg", "en", "de"] as const;
+export const SUPPORTED_LANGS = [
+  "bg",
+  "en",
+  "de",
+  "es",
+  "pt",
+  "pl",
+  "ua",
+  "ru",
+  "fr",
+  "tr",
+  "ro",
+  "hi",
+  "vi",
+  "id",
+  "it",
+  "ko",
+  "ja",
+  "nl",
+  "cs",
+  "ar",
+] as const;
+
+export const DEFAULT_LANGUAGE_FLAG_BY_LANG: Record<string, string> = {
+  bg: "bg",
+  en: "gb",
+  de: "de",
+  es: "es",
+  pt: "pt",
+  pl: "pl",
+  ua: "ua",
+  ru: "ru",
+  fr: "fr",
+  tr: "tr",
+  ro: "ro",
+  hi: "in",
+  vi: "vn",
+  id: "id",
+  it: "it",
+  ko: "kr",
+  ja: "jp",
+  nl: "nl",
+  cs: "cz",
+  ar: "sa",
+};
 
 export type SupportedLang = string;
 
@@ -27,12 +71,14 @@ export function normalizeLang(
     return fallback;
   }
 
+  const normalized = normalizedLower === "uk" ? "ua" : normalizedLower;
+
   if (!supportedLangs || supportedLangs.length === 0) {
-    return normalizedLower;
+    return normalized;
   }
 
-  if (supportedLangs.some((lang) => lang.toLowerCase() === normalizedLower)) {
-    return normalizedLower;
+  if (supportedLangs.some((lang) => lang.toLowerCase() === normalized)) {
+    return normalized;
   }
 
   return fallback;

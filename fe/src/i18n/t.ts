@@ -8,12 +8,17 @@ export function t(
   dicts: Messages = messages,
 ): string {
   const dict = dicts[lang]?.[domain] as Record<string, string> | undefined;
+  const enDict = dicts.en?.[domain] as Record<string, string> | undefined;
   const fallbackDict = dicts[DEFAULT_LANG]?.[domain] as
     | Record<string, string>
     | undefined;
 
   if (dict && key in dict) {
     return dict[key];
+  }
+
+  if (enDict && key in enDict) {
+    return enDict[key];
   }
 
   if (fallbackDict && key in fallbackDict) {

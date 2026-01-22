@@ -3,6 +3,8 @@
 import { Fragment } from "react";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { useCurrentLang } from "../../../i18n/useCurrentLang";
+import { t } from "../../../i18n/t";
 
 type BreadcrumbItem = {
   label: ReactNode;
@@ -15,6 +17,8 @@ type AdminBreadcrumbsProps = {
 };
 
 export function AdminBreadcrumbs({ items, className }: AdminBreadcrumbsProps) {
+  const lang = useCurrentLang();
+
   if (!items || items.length === 0) {
     return null;
   }
@@ -24,7 +28,7 @@ export function AdminBreadcrumbs({ items, className }: AdminBreadcrumbsProps) {
   } as const;
 
   const homeItem: BreadcrumbItem = {
-    label: "Начало",
+    label: t(lang, "common", "adminDashboardBreadcrumbHome"),
     href: "/",
   };
 
@@ -34,7 +38,8 @@ export function AdminBreadcrumbs({ items, className }: AdminBreadcrumbsProps) {
 
   const normalizedItems = hasHome ? items : [homeItem, ...items];
 
-  const baseClassName = "flex items-center text-sm text-gray-500 nav-font";
+  const baseClassName =
+    "flex items-center text-sm nav-font text-[color:var(--foreground)] opacity-70";
   const composedClassName = className
     ? `${baseClassName} ${className}`
     : baseClassName;
@@ -47,7 +52,7 @@ export function AdminBreadcrumbs({ items, className }: AdminBreadcrumbsProps) {
         >
           {index > 0 && (
             <svg
-              className="mx-2 h-4 w-4 text-gray-400"
+              className="mx-2 h-4 w-4 text-[color:var(--foreground)] opacity-50"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -64,13 +69,13 @@ export function AdminBreadcrumbs({ items, className }: AdminBreadcrumbsProps) {
           {item.href ? (
             <Link
               href={item.href}
-              className="hover:text-green-600"
+              className="hover:text-[color:var(--primary)] hover:underline"
               prefetch={false}
             >
               {item.label}
             </Link>
           ) : (
-            <span className="text-gray-900">{item.label}</span>
+            <span className="text-[color:var(--foreground)]">{item.label}</span>
           )}
         </Fragment>
       ))}

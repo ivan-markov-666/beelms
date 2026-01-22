@@ -16,6 +16,10 @@ import { getApiBaseUrl } from "../../api-url";
 import { AdminBreadcrumbs } from "../_components/admin-breadcrumbs";
 import { InfoTooltip } from "../_components/info-tooltip";
 import { ListboxSelect } from "../../_components/listbox-select";
+import {
+  DEFAULT_LANGUAGE_FLAG_BY_LANG,
+  SUPPORTED_LANGS,
+} from "../../../i18n/config";
 
 const API_BASE_URL = getApiBaseUrl();
 
@@ -3365,7 +3369,7 @@ function FlagCodeAutocomplete(props: {
           }}
           placeholder="bg"
           aria-label={ariaLabel}
-          className="w-[88px] rounded-md border border-gray-300 bg-white px-2 py-1 text-xs text-gray-900 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)] disabled:cursor-not-allowed disabled:opacity-60"
+          className="w-[88px] rounded-md border border-[color:var(--border)] bg-[color:var(--card)] px-2 py-1 text-xs text-[color:var(--foreground)] shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)] disabled:cursor-not-allowed disabled:opacity-60"
         />
         {(value ?? "").trim().length ? (
           <span
@@ -3376,7 +3380,7 @@ function FlagCodeAutocomplete(props: {
       </div>
 
       {open ? (
-        <div className="absolute left-0 z-20 mt-1 w-[160px] overflow-hidden rounded-md border border-gray-200 bg-white shadow-lg">
+        <div className="absolute left-0 z-20 mt-1 w-[160px] overflow-hidden rounded-md border border-[color:var(--border)] bg-[color:var(--card)] shadow-lg">
           <div className="max-h-64 overflow-auto py-1">
             <button
               type="button"
@@ -3386,10 +3390,12 @@ function FlagCodeAutocomplete(props: {
                 onSelect("");
                 setOpen(false);
               }}
-              className="flex w-full items-center justify-between gap-2 px-2 py-1 text-left text-xs text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+              className="flex w-full items-center justify-between gap-2 px-2 py-1 text-left text-xs text-[color:var(--foreground)] opacity-80 hover:bg-[color:color-mix(in_srgb,var(--foreground)_3%,var(--card))] disabled:cursor-not-allowed disabled:opacity-60"
             >
               <span>—</span>
-              <span className="text-[11px] text-gray-400">clear</span>
+              <span className="text-[11px] text-[color:var(--foreground)] opacity-60">
+                clear
+              </span>
             </button>
 
             {options.map((cc) => (
@@ -3402,7 +3408,7 @@ function FlagCodeAutocomplete(props: {
                   onSelect(cc);
                   setOpen(false);
                 }}
-                className="flex w-full items-center justify-between gap-2 px-2 py-1 text-left text-xs text-gray-900 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                className="flex w-full items-center justify-between gap-2 px-2 py-1 text-left text-xs text-[color:var(--foreground)] hover:bg-[color:color-mix(in_srgb,var(--foreground)_3%,var(--card))] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <span className="font-medium">{cc.toUpperCase()}</span>
                 <span
@@ -3612,7 +3618,7 @@ const GOOGLE_FONTS: {
   },
 ];
 
-const CYRILLIC_LANGS = new Set(["bg", "ru", "uk", "sr", "mk"]);
+const CYRILLIC_LANGS = new Set(["bg", "ru", "ua", "sr", "mk"]);
 
 const SOCIAL_PROVIDERS: SocialProvider[] = [
   "google",
@@ -4228,6 +4234,79 @@ function ThemePreviewCard({
     color: palette.error,
   };
 
+  const destructiveOutlineButton: CSSProperties = {
+    backgroundColor: "transparent",
+    borderColor: palette.error,
+    color: palette.error,
+  };
+  const destructiveOutlineHover: CSSProperties = {
+    ...destructiveOutlineButton,
+    backgroundColor: hoverMix(palette.error, subtleHoverWeight),
+  };
+  const destructiveButtonDisabled: CSSProperties = {
+    ...destructiveButton,
+    opacity: 0.5,
+  };
+  const destructiveOutlineDisabled: CSSProperties = {
+    ...destructiveOutlineButton,
+    opacity: 0.5,
+  };
+  const destructiveTextButton: CSSProperties = {
+    backgroundColor: "transparent",
+    borderColor: "transparent",
+    color: palette.error,
+    boxShadow: "none",
+  };
+  const destructiveTextHover: CSSProperties = {
+    ...destructiveTextButton,
+    color: hoverMix(palette.error, fillHoverWeight),
+    backgroundColor: hoverMix(palette.error, subtleHoverWeight),
+  };
+  const destructiveTextDisabled: CSSProperties = {
+    ...destructiveTextButton,
+    opacity: 0.5,
+  };
+  const toggleTrackBase: CSSProperties = {
+    minWidth: 48,
+    height: 24,
+    borderRadius: 999,
+    border: `1px solid ${palette.border}`,
+    backgroundColor: palette.card,
+    display: "inline-flex",
+    alignItems: "center",
+    padding: "0 4px",
+  };
+  const toggleThumbBase: CSSProperties = {
+    width: 18,
+    height: 18,
+    borderRadius: "50%",
+    transition: "transform 120ms ease",
+  };
+  const toggleOnStyles: CSSProperties = {
+    ...toggleTrackBase,
+    borderColor: palette.primary,
+    backgroundColor: palette.primary,
+    justifyContent: "flex-end",
+  };
+  const toggleOffStyles: CSSProperties = {
+    ...toggleTrackBase,
+    justifyContent: "flex-start",
+  };
+  const toggleThumbOn: CSSProperties = {
+    ...toggleThumbBase,
+    backgroundColor: pickOnColor(palette.primary, palette.card),
+    transform: "translateX(0)",
+  };
+  const toggleThumbOff: CSSProperties = {
+    ...toggleThumbBase,
+    backgroundColor: palette.border,
+  };
+  const checkboxStyle: CSSProperties = {
+    accentColor: palette.primary,
+    width: 16,
+    height: 16,
+  } as CSSProperties;
+
   const inputBase: CSSProperties = {
     backgroundColor: palette.card,
     color: palette.foreground,
@@ -4264,16 +4343,10 @@ function ThemePreviewCard({
         borderColor: palette.border,
       }}
     >
-      <div
-        className="rounded-xl border p-4 shadow-sm"
-        style={{ ...baseCard, ...previewVars }}
-      >
+      <div className="rounded-xl border p-4 shadow-sm" style={{ ...baseCard, ...previewVars }}>
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p
-              className="text-xs uppercase tracking-wide"
-              style={previewMutedText}
-            >
+            <p className="text-xs uppercase tracking-wide" style={previewMutedText}>
               {variant === "light" ? "Light preview" : "Dark preview"}
             </p>
             <h3 className="text-lg font-semibold">UI sample headline</h3>
@@ -4291,237 +4364,291 @@ function ThemePreviewCard({
           <div className="flex flex-col items-center gap-2">
             <div
               className="h-12 w-2 rounded-full border"
-              style={{
-                borderColor: palette.border,
-                backgroundColor: palette.scrollTrack,
-              }}
+              style={{ borderColor: palette.border, backgroundColor: palette.scrollTrack }}
             >
-              <div
-                className="mx-auto mt-1 h-4 w-1 rounded-full"
-                style={{ backgroundColor: palette.scrollThumb }}
-              />
+              <div className="mx-auto mt-1 h-4 w-1 rounded-full" style={{ backgroundColor: palette.scrollThumb }} />
             </div>
             <span className="text-[10px] font-medium" style={previewMutedText}>
               Scroll
             </span>
           </div>
         </div>
-        <div className="mt-4 space-y-2">
-          <p
-            className="text-[11px] font-semibold uppercase tracking-wide"
-            style={previewMutedText}
-          >
-            Buttons (default)
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {buttonPreviewConfigs.map(({ key, label, base }) => (
-              <button
-                key={`${key}-default`}
-                type="button"
-                className={sharedButtonClass}
-                style={base}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-          <p
-            className="text-[11px] font-semibold uppercase tracking-wide"
-            style={previewMutedText}
-          >
-            Buttons (hover)
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {buttonPreviewConfigs.map(({ key, label, hover }) => (
-              <button
-                key={`${key}-hover`}
-                type="button"
-                className={sharedButtonClass}
-                style={hover}
-                aria-label={`${label} hover state`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-          <p
-            className="text-[11px] font-semibold uppercase tracking-wide"
-            style={previewMutedText}
-          >
-            Buttons (disabled)
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {buttonPreviewConfigs.map(({ key, label, base }) => (
-              <button
-                key={`${key}-disabled`}
-                type="button"
-                className={sharedButtonClass}
-                style={base}
-                disabled
-                aria-label={`${label} disabled state`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-          <p
-            className="text-[11px] font-semibold uppercase tracking-wide"
-            style={previewMutedText}
-          >
-            Admin actions (Presets)
-          </p>
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              className={PRESET_ACTION_BUTTON_CLASS}
-              style={presetActionStyles.edit}
-            >
-              Edit
-            </button>
-            <button
-              type="button"
-              className={PRESET_ACTION_BUTTON_CLASS}
-              style={presetActionStyles.apply}
-            >
-              Apply
-            </button>
-          </div>
-          <p
-            className="text-[11px] font-semibold uppercase tracking-wide"
-            style={previewMutedText}
-          >
-            Admin actions (hover)
-          </p>
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              className={PRESET_ACTION_BUTTON_CLASS}
-              style={{ ...presetActionStyles.edit, opacity: 0.9 }}
-              aria-label="Edit hover state"
-            >
-              Edit
-            </button>
-            <button
-              type="button"
-              className={PRESET_ACTION_BUTTON_CLASS}
-              style={{ ...presetActionStyles.apply, opacity: 0.9 }}
-              aria-label="Apply hover state"
-            >
-              Apply
-            </button>
-          </div>
-          <p
-            className="text-[11px] font-semibold uppercase tracking-wide"
-            style={previewMutedText}
-          >
-            Admin actions (disabled)
-          </p>
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              className={PRESET_ACTION_BUTTON_CLASS}
-              style={presetActionStyles.edit}
-              disabled
-              aria-label="Edit disabled state"
-            >
-              Edit
-            </button>
-            <button
-              type="button"
-              className={PRESET_ACTION_BUTTON_CLASS}
-              style={presetActionStyles.apply}
-              disabled
-              aria-label="Apply disabled state"
-            >
-              Apply
-            </button>
-          </div>
-        </div>
-      </div>
-      <div className="mt-3 flex flex-wrap items-center gap-3 text-xs font-medium">
-        <span
-          className="inline-flex items-center rounded-full border px-2 py-0.5"
-          style={okChip}
-        >
-          ✓ Success state
-        </span>
-        <span
-          className="inline-flex items-center rounded-full border px-2 py-0.5"
-          style={{
-            backgroundColor: palette.fieldAlertBg,
-            borderColor: palette.fieldAlertBorder,
-            color: palette.foreground,
-          }}
-        >
-          ⚑ Alert state
-        </span>
-        <span
-          className="inline-flex items-center rounded-full border px-2 py-0.5"
-          style={errorChip}
-        >
-          ⚠ Error state
-        </span>
-      </div>
 
-      <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="flex flex-col gap-2">
-          <p
-            className="text-[11px] font-semibold uppercase tracking-wide"
-            style={{ ...previewMutedText, minHeight: "28px" }}
-          >
-            Field (normal)
-          </p>
-          <div
-            className="mt-2 rounded-md border px-3 py-2 text-sm shadow-sm"
-            style={inputBase}
-          >
-            Example input
-          </div>
-        </div>
-        <div className="flex flex-col gap-2">
-          <p
-            className="text-[11px] font-semibold uppercase tracking-wide"
-            style={{ ...previewMutedText, minHeight: "28px" }}
-          >
-            Field (OK)
-          </p>
-          <div
-            className="mt-2 rounded-md border px-3 py-2 text-sm shadow-sm"
-            style={inputOk}
-          >
-            Valid value
-          </div>
-        </div>
-        <div className="flex flex-col gap-2">
-          <p
-            className="text-[11px] font-semibold uppercase tracking-wide"
-            style={{ ...previewMutedText, minHeight: "28px" }}
-          >
-            Alert value
-          </p>
-          <div
-            className="mt-2 rounded-md border px-3 py-2 text-sm shadow-sm"
-            style={inputAlert}
-          >
-            Needs attention
-          </div>
-        </div>
-        <div className="flex flex-col gap-2">
-          <p
-            className="text-[11px] font-semibold uppercase tracking-wide"
-            style={{ ...previewMutedText, minHeight: "28px" }}
-          >
-            Field (error)
-          </p>
-          <div
-            className="mt-2 rounded-md border px-3 py-2 text-sm shadow-sm"
-            style={inputError}
-          >
-            Invalid value
-          </div>
-          <p className="mt-1 text-xs" style={{ color: palette.error }}>
-            Example error message
-          </p>
+        <div className="mt-4 space-y-5">
+          <section className="space-y-2">
+            <p className="text-[11px] font-semibold uppercase tracking-wide" style={previewMutedText}>
+              Buttons (default / hover / disabled)
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {buttonPreviewConfigs.map(({ key, label, base }) => (
+                <button key={`${key}-default`} type="button" className={sharedButtonClass} style={base}>
+                  {label}
+                </button>
+              ))}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {buttonPreviewConfigs.map(({ key, label, hover }) => (
+                <button
+                  key={`${key}-hover`}
+                  type="button"
+                  className={sharedButtonClass}
+                  style={hover}
+                  aria-label={`${label} hover state`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {buttonPreviewConfigs.map(({ key, label, base }) => (
+                <button
+                  key={`${key}-disabled`}
+                  type="button"
+                  className={sharedButtonClass}
+                  style={base}
+                  disabled
+                  aria-label={`${label} disabled state`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </section>
+
+          <section className="space-y-2">
+            <p className="text-[11px] font-semibold uppercase tracking-wide" style={previewMutedText}>
+              Admin actions
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <button type="button" className={PRESET_ACTION_BUTTON_CLASS} style={presetActionStyles.edit}>
+                Edit
+              </button>
+              <button type="button" className={PRESET_ACTION_BUTTON_CLASS} style={presetActionStyles.apply}>
+                Apply
+              </button>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                className={PRESET_ACTION_BUTTON_CLASS}
+                style={{ ...presetActionStyles.edit, opacity: 0.9 }}
+                aria-label="Edit hover state"
+              >
+                Edit
+              </button>
+              <button
+                type="button"
+                className={PRESET_ACTION_BUTTON_CLASS}
+                style={{ ...presetActionStyles.apply, opacity: 0.9 }}
+                aria-label="Apply hover state"
+              >
+                Apply
+              </button>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                className={PRESET_ACTION_BUTTON_CLASS}
+                style={presetActionStyles.edit}
+                disabled
+                aria-label="Edit disabled state"
+              >
+                Edit
+              </button>
+              <button
+                type="button"
+                className={PRESET_ACTION_BUTTON_CLASS}
+                style={presetActionStyles.apply}
+                disabled
+                aria-label="Apply disabled state"
+              >
+                Apply
+              </button>
+            </div>
+          </section>
+
+          <section className="space-y-2">
+            <p className="text-[11px] font-semibold uppercase tracking-wide" style={previewMutedText}>
+              Destructive flow
+            </p>
+            <div className="space-y-2">
+              <div className="flex flex-wrap gap-2">
+                <button type="button" className={sharedButtonClass} style={destructiveButton}>
+                  Delete all
+                </button>
+                <button type="button" className={sharedButtonClass} style={destructiveOutlineButton}>
+                  Delete (ghost)
+                </button>
+                <button type="button" className={sharedButtonClass} style={destructiveTextButton}>
+                  Delete
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  className={sharedButtonClass}
+                  style={destructiveButtonHover}
+                  aria-label="Delete all hover state"
+                >
+                  Delete all
+                </button>
+                <button
+                  type="button"
+                  className={sharedButtonClass}
+                  style={destructiveOutlineHover}
+                  aria-label="Delete ghost hover state"
+                >
+                  Delete (ghost)
+                </button>
+                <button
+                  type="button"
+                  className={sharedButtonClass}
+                  style={destructiveTextHover}
+                  aria-label="Delete hover state"
+                >
+                  Delete
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  className={sharedButtonClass}
+                  style={destructiveButtonDisabled}
+                  disabled
+                  aria-label="Delete all disabled state"
+                >
+                  Delete all
+                </button>
+                <button
+                  type="button"
+                  className={sharedButtonClass}
+                  style={destructiveOutlineDisabled}
+                  disabled
+                  aria-label="Delete ghost disabled state"
+                >
+                  Delete (ghost)
+                </button>
+                <button
+                  type="button"
+                  className={sharedButtonClass}
+                  style={destructiveTextDisabled}
+                  disabled
+                  aria-label="Delete disabled state"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <section className="grid gap-3 md:grid-cols-2">
+            <label className="text-xs font-semibold" style={previewMutedText}>
+              Toggle
+              <div className="mt-1 flex items-center gap-3">
+                <span style={toggleOnStyles}>
+                  <span style={toggleThumbOn} />
+                </span>
+                <span style={toggleOffStyles}>
+                  <span style={toggleThumbOff} />
+                </span>
+              </div>
+            </label>
+            <label className="text-xs font-semibold" style={previewMutedText}>
+              Dropdown example
+              <select
+                className="mt-1 w-full rounded-md border px-3 py-2 text-sm shadow-sm transition focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-1"
+                style={inputBase}
+                defaultValue="option-a"
+              >
+                <option value="option-a">Option A</option>
+                <option value="option-b">Option B</option>
+                <option value="option-c">Option C</option>
+              </select>
+            </label>
+          </section>
+
+          <section className="grid gap-3 md:grid-cols-2">
+            <label className="text-xs font-semibold" style={previewMutedText}>
+              Checkbox
+              <div className="mt-2 flex flex-col gap-1 text-sm">
+                <label className="inline-flex items-center gap-2">
+                  <input type="checkbox" defaultChecked style={checkboxStyle} />
+                  <span>Checked</span>
+                </label>
+                <label className="inline-flex items-center gap-2">
+                  <input type="checkbox" style={checkboxStyle} />
+                  <span>Unchecked</span>
+                </label>
+              </div>
+            </label>
+            <label className="text-xs font-semibold" style={previewMutedText}>
+              Text input
+              <input
+                className="mt-1 w-full rounded-md border px-3 py-2 text-sm shadow-sm transition focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-1"
+                style={inputBase}
+                defaultValue="Text value"
+              />
+            </label>
+          </section>
+
+          <section className="space-y-2">
+            <p className="text-[11px] font-semibold uppercase tracking-wide" style={previewMutedText}>
+              Chips & notices
+            </p>
+            <div className="flex flex-wrap gap-2 text-xs font-semibold">
+              <span className="rounded-full border px-3 py-1" style={okChip}>
+                OK
+              </span>
+              <span className="rounded-full border px-3 py-1" style={errorChip}>
+                Error
+              </span>
+            </div>
+          </section>
+
+          <section className="space-y-2">
+            <p className="text-[11px] font-semibold uppercase tracking-wide" style={previewMutedText}>
+              Form fields
+            </p>
+            <div className="grid gap-3 md:grid-cols-2">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-wide" style={{ ...previewMutedText, minHeight: "28px" }}>
+                  Field (default)
+                </p>
+                <input
+                  className="mt-2 w-full rounded-md border px-3 py-2 text-sm shadow-sm transition focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-1"
+                  placeholder="Placeholder text"
+                  style={inputBase}
+                />
+              </div>
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-wide" style={{ ...previewMutedText, minHeight: "28px" }}>
+                  Field (OK)
+                </p>
+                <div className="mt-2 rounded-md border px-3 py-2 text-sm shadow-sm" style={inputOk}>
+                  Valid value
+                </div>
+              </div>
+            </div>
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-wide" style={{ ...previewMutedText, minHeight: "28px" }}>
+                Alert value
+              </p>
+              <div className="mt-2 rounded-md border px-3 py-2 text-sm shadow-sm" style={inputAlert}>
+                Needs attention
+              </div>
+            </div>
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-wide" style={{ ...previewMutedText, minHeight: "28px" }}>
+                Field (error)
+              </p>
+              <div className="mt-2 rounded-md border px-3 py-2 text-sm shadow-sm" style={inputError}>
+                Invalid value
+              </div>
+              <p className="mt-1 text-xs" style={{ color: palette.error }}>
+                Example error message
+              </p>
+            </div>
+          </section>
         </div>
       </div>
     </div>
@@ -5156,7 +5283,7 @@ const KNOWN_LANGUAGE_CODES = [
   "tw",
   "ty",
   "ug",
-  "uk",
+  "ua",
   "ur",
   "uz",
   "ve",
@@ -5173,6 +5300,37 @@ const KNOWN_LANGUAGE_CODES = [
 ] as const;
 
 const KNOWN_LANGUAGE_CODE_SET = new Set<string>(KNOWN_LANGUAGE_CODES);
+
+function buildLanguageFlagPickerState(
+  raw: unknown,
+  supported: string[],
+): Record<string, string> {
+  const next: Record<string, string> = {};
+  if (raw && typeof raw === "object") {
+    for (const [k, v] of Object.entries(raw as Record<string, unknown>)) {
+      if (typeof v === "string" && v.trim().length > 0) {
+        const key = (k ?? "").trim().toLowerCase();
+        const value = v.trim().toLowerCase();
+        if (key && value) {
+          next[key] = value;
+        }
+      }
+    }
+  }
+
+  for (const lang of supported) {
+    const normalized = (lang ?? "").trim().toLowerCase();
+    if (
+      normalized &&
+      !next[normalized] &&
+      typeof DEFAULT_LANGUAGE_FLAG_BY_LANG[normalized] === "string"
+    ) {
+      next[normalized] = DEFAULT_LANGUAGE_FLAG_BY_LANG[normalized];
+    }
+  }
+
+  return next;
+}
 
 function analyzeLanguageDraft(raw: string): {
   incoming: string[];
@@ -5263,6 +5421,10 @@ function LanguageDraftAutocomplete(props: {
     const lc = (langCode ?? "").trim().toLowerCase();
     const fromMap = normalizeFlagCode(flagByLang?.[lc] ?? "");
     if (fromMap) return fromMap;
+    const defaultFlag = normalizeFlagCode(
+      DEFAULT_LANGUAGE_FLAG_BY_LANG[lc] ?? "",
+    );
+    if (defaultFlag) return defaultFlag;
     if (lc === "en") return "gb";
 
     try {
@@ -5318,12 +5480,12 @@ function LanguageDraftAutocomplete(props: {
           setOpen(true);
         }}
         aria-label={ariaLabel}
-        className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)] disabled:cursor-not-allowed disabled:opacity-70"
+        className="mt-2 w-full rounded-md border border-[color:var(--border)] bg-[color:var(--card)] px-3 py-2 text-sm text-[color:var(--foreground)] placeholder:text-[color:var(--foreground)] placeholder:opacity-50 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)] disabled:cursor-not-allowed disabled:opacity-70"
         placeholder={placeholder}
       />
 
       {open ? (
-        <div className="absolute left-0 z-20 mt-1 w-full max-w-[520px] overflow-hidden rounded-md border border-gray-200 bg-white shadow-lg">
+        <div className="absolute left-0 z-20 mt-1 w-full max-w-[520px] overflow-hidden rounded-md border border-[color:var(--border)] bg-[color:var(--card)] shadow-lg">
           <div className="max-h-64 overflow-auto py-1">
             {options.map((code) => {
               const flagCode = getFlagCodeForLang(code);
@@ -5337,7 +5499,7 @@ function LanguageDraftAutocomplete(props: {
                     applySuggestion(code);
                     setOpen(false);
                   }}
-                  className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm text-gray-900 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm text-[color:var(--foreground)] hover:bg-[color:color-mix(in_srgb,var(--foreground)_3%,var(--card))] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   <span className="font-medium">{code}</span>
                   {flagCode ? (
@@ -5380,16 +5542,19 @@ function DefaultLanguageDropdown(props: {
             setOpen(false);
           }, 120);
         }}
-        className="mt-2 flex w-full items-center justify-between gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-left text-sm text-gray-900 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)] disabled:cursor-not-allowed disabled:opacity-60"
+        className="mt-2 flex w-full items-center justify-between gap-2 rounded-md border border-[color:var(--border)] bg-[color:var(--card)] px-3 py-2 text-left text-sm text-[color:var(--foreground)] shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)] disabled:cursor-not-allowed disabled:opacity-60"
       >
         <span className="font-medium">{selected || "—"}</span>
-        <span aria-hidden="true" className="text-xs text-gray-500">
+        <span
+          aria-hidden="true"
+          className="text-xs text-[color:var(--foreground)] opacity-70"
+        >
           ▾
         </span>
       </button>
 
       {open ? (
-        <div className="absolute left-0 z-20 mt-1 w-full overflow-hidden rounded-md border border-gray-200 bg-white shadow-lg">
+        <div className="absolute left-0 z-20 mt-1 w-full overflow-hidden rounded-md border border-[color:var(--border)] bg-[color:var(--card)] shadow-lg">
           <div className="max-h-64 overflow-auto py-1">
             <button
               type="button"
@@ -5399,10 +5564,12 @@ function DefaultLanguageDropdown(props: {
                 onSelect("");
                 setOpen(false);
               }}
-              className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+              className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm text-[color:var(--foreground)] opacity-80 hover:bg-[color:color-mix(in_srgb,var(--foreground)_3%,var(--card))] disabled:cursor-not-allowed disabled:opacity-60"
             >
               <span>—</span>
-              <span className="text-[11px] text-gray-400">clear</span>
+              <span className="text-[11px] text-[color:var(--foreground)] opacity-60">
+                clear
+              </span>
             </button>
 
             {options.map((code) => (
@@ -5415,11 +5582,13 @@ function DefaultLanguageDropdown(props: {
                   onSelect(code);
                   setOpen(false);
                 }}
-                className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm text-gray-900 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm text-[color:var(--foreground)] hover:bg-[color:color-mix(in_srgb,var(--foreground)_3%,var(--card))] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <span className="font-medium">{code}</span>
                 {selected === code ? (
-                  <span className="text-[11px] text-gray-400">selected</span>
+                  <span className="text-[11px] text-[color:var(--foreground)] opacity-60">
+                    selected
+                  </span>
                 ) : null}
               </button>
             ))}
@@ -5746,6 +5915,10 @@ export default function AdminSettingsPage() {
   useEffect(() => {
     themePresetTargetRef.current = themePresetTarget;
   }, [themePresetTarget]);
+
+  useEffect(() => {
+    setThemePreviewVariant(effectiveUiTheme);
+  }, [effectiveUiTheme]);
 
   useEffect(() => {
     if (!editingBuiltInThemePresetId || builtInThemePresetsExpanded) {
@@ -8577,10 +8750,8 @@ export default function AdminSettingsPage() {
     socialFeatureSetters[provider](true);
   };
 
-  const [supportedLangs, setSupportedLangs] = useState<string[]>([
-    "bg",
-    "en",
-    "de",
+  const [supportedLangs, setSupportedLangs] = useState<string[]>(() => [
+    ...SUPPORTED_LANGS,
   ]);
   const [languageDraft, setLanguageDraft] = useState<string>("");
   const [defaultLang, setDefaultLang] = useState<string>("bg");
@@ -8643,24 +8814,21 @@ export default function AdminSettingsPage() {
 
       const updated = (await res.json()) as AdminSettingsResponse;
       const l = updated.languages;
-      setSupportedLangs(Array.isArray(l?.supported) ? l.supported : ["bg"]);
+      const nextSupported = Array.isArray(l?.supported) && l.supported.length
+        ? Array.from(new Set(l.supported.map((lang) => lang.toLowerCase())))
+        : [...SUPPORTED_LANGS];
+      setSupportedLangs(nextSupported);
       setDefaultLang(l?.default ?? "bg");
       setLanguageIcons(
         l?.icons && typeof l.icons === "object" ? (l.icons as never) : {},
       );
       setLanguageFlagPickerGlobal((l?.flagPicker?.global ?? "").trim());
-      setLanguageFlagPickerByLang(() => {
-        const raw = l?.flagPicker?.byLang;
-        const next: Record<string, string> = {};
-        if (raw && typeof raw === "object") {
-          for (const [k, v] of Object.entries(raw)) {
-            if (typeof v === "string" && v.trim().length > 0) {
-              next[(k ?? "").trim().toLowerCase()] = v.trim().toLowerCase();
-            }
-          }
-        }
-        return next;
-      });
+      setLanguageFlagPickerByLang(
+        buildLanguageFlagPickerState(
+          l?.flagPicker?.byLang ?? null,
+          nextSupported,
+        ),
+      );
       setSuccess(successMessage);
     } catch (err) {
       setError(
@@ -9040,24 +9208,21 @@ export default function AdminSettingsPage() {
         }
 
         const l = data.languages;
-        setSupportedLangs(Array.isArray(l?.supported) ? l.supported : ["bg"]);
+        const nextSupported = Array.isArray(l?.supported) && l.supported.length
+          ? Array.from(new Set(l.supported.map((lang) => lang.toLowerCase())))
+          : [...SUPPORTED_LANGS];
+        setSupportedLangs(nextSupported);
         setDefaultLang(l?.default ?? "bg");
         setLanguageIcons(
           l?.icons && typeof l.icons === "object" ? (l.icons as never) : {},
         );
         setLanguageFlagPickerGlobal((l?.flagPicker?.global ?? "").trim());
-        setLanguageFlagPickerByLang(() => {
-          const raw = l?.flagPicker?.byLang;
-          const next: Record<string, string> = {};
-          if (raw && typeof raw === "object") {
-            for (const [k, v] of Object.entries(raw)) {
-              if (typeof v === "string" && v.trim().length > 0) {
-                next[(k ?? "").trim().toLowerCase()] = v.trim().toLowerCase();
-              }
-            }
-          }
-          return next;
-        });
+        setLanguageFlagPickerByLang(
+          buildLanguageFlagPickerState(
+            l?.flagPicker?.byLang ?? null,
+            nextSupported,
+          ),
+        );
       } catch {
         if (!cancelled) {
           setError("Възникна грешка при връзката със сървъра.");
@@ -9333,16 +9498,14 @@ export default function AdminSettingsPage() {
 
     if (supportedLangs.length < 1) {
       saveInFlightRef.current = false;
-      setError(
-        "languages.supported трябва да съдържа поне 1 език (напр. bg, en).",
-      );
+      setError("Добави поне един поддържан език (напр. bg, en).");
       return;
     }
 
     const nextDefaultLang = (defaultLang ?? "").trim().toLowerCase();
     if (!supportedLangs.includes(nextDefaultLang)) {
       saveInFlightRef.current = false;
-      setError("languages.default трябва да е включен в languages.supported.");
+      setError("Default езикът трябва да е сред поддържаните езици.");
       return;
     }
 
@@ -10446,13 +10609,12 @@ export default function AdminSettingsPage() {
                       ? themeLight
                       : preset.light;
                     const darkForSwatches = isEditing ? themeDark : preset.dark;
-                    const applyPaletteTarget = themePresetTargetRef.current;
-                    const actionPalette =
-                      applyPaletteTarget === "dark"
+                    const previewPaletteVariant =
+                      themePreviewVariant === "dark"
                         ? darkForSwatches
                         : lightForSwatches;
                     const actionButtonStyles =
-                      buildPresetActionButtonStyles(actionPalette);
+                      buildPresetActionButtonStyles(previewPaletteVariant);
 
                     return (
                       <div
@@ -10684,13 +10846,14 @@ export default function AdminSettingsPage() {
                         const darkForSwatches = isEditing
                           ? themeDark
                           : preset.dark;
-                        const customApplyTarget = themePresetTargetRef.current;
-                        const actionPalette =
-                          customApplyTarget === "dark"
+                        const previewPaletteVariant =
+                          themePreviewVariant === "dark"
                             ? darkForSwatches
                             : lightForSwatches;
                         const actionButtonStyles =
-                          buildPresetActionButtonStyles(actionPalette);
+                          buildPresetActionButtonStyles(
+                            previewPaletteVariant,
+                          );
 
                         return (
                           <div
@@ -15104,7 +15267,7 @@ export default function AdminSettingsPage() {
                       Управлява списъка с поддържани езикови кодове и кой е
                       default за системата.
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-[color:var(--foreground)] opacity-60">
                       Default трябва да е сред поддържаните езици.
                     </p>
                   </div>
@@ -15126,7 +15289,7 @@ export default function AdminSettingsPage() {
 
               <div className="max-w-2xl">
                 <div className="min-w-[240px]">
-                  <label className="flex items-center justify-between gap-2 text-sm font-medium text-gray-700">
+                  <label className="flex items-center justify-between gap-2 text-sm font-medium text-[color:var(--foreground)] opacity-80">
                     <span className="flex items-center gap-2">
                       <span>
                         Добави language code (можеш и няколко: bg, en, de)
@@ -15148,12 +15311,12 @@ export default function AdminSettingsPage() {
                     onChange={(next) => setLanguageDraft(next)}
                   />
                   {languageDraftAnalysis.invalid.length > 0 ? (
-                    <p className="mt-1 text-sm text-red-600">
+                    <p className="mt-1 text-sm text-[color:var(--error)]">
                       Невалидни кодове:{" "}
                       {languageDraftAnalysis.invalid.join(", ")}
                     </p>
                   ) : (
-                    <p className="mt-1 text-xs text-gray-500">
+                    <p className="mt-1 text-xs text-[color:var(--foreground)] opacity-60">
                       {languageDraft.trim().length} знака
                     </p>
                   )}
@@ -15191,7 +15354,7 @@ export default function AdminSettingsPage() {
                       });
                       setLanguageDraft("");
                     }}
-                    className="mt-2 inline-flex items-center justify-center rounded-md bg-[color:var(--primary)] px-4 py-2 text-sm font-semibold text-[color:var(--on-primary)] shadow-sm hover:bg-[color:color-mix(in srgb, var(--primary) 92%, black)] disabled:cursor-not-allowed disabled:opacity-70"
+                    className="mt-2 inline-flex items-center justify-center rounded-md bg-[color:var(--primary)] px-4 py-2 text-sm font-semibold text-[color:var(--on-primary)] shadow-sm hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
                   >
                     Добави
                   </button>
@@ -15207,14 +15370,16 @@ export default function AdminSettingsPage() {
                 {supportedLangs.map((code) => (
                   <div
                     key={code}
-                    className={`flex items-center gap-3 rounded-md border px-3 py-2 ${"border-[color:color-mix(in srgb, var(--primary) 25%, white)] bg-[color:color-mix(in srgb, var(--primary) 10%, white)]"}`}
+                    className={`flex items-center gap-3 rounded-md border px-3 py-2 ${"border-[color:color-mix(in srgb, var(--primary) 25%, var(--card))] bg-[color:color-mix(in srgb, var(--primary) 10%, var(--card))]"}`}
                   >
-                    <span className="text-sm font-medium text-gray-800">
+                    <span className="text-sm font-medium text-[color:var(--foreground)]">
                       {code}
                     </span>
 
                     <div className="flex items-center gap-2">
-                      <span className="text-[11px] text-gray-600">flag</span>
+                      <span className="text-[11px] text-[color:var(--foreground)] opacity-70">
+                        flag
+                      </span>
                       <FlagCodeAutocomplete
                         value={languageFlagPickerByLang?.[code] ?? ""}
                         disabled={saving}
@@ -15264,7 +15429,7 @@ export default function AdminSettingsPage() {
                               "Flag (en) е настроен на GB.",
                             );
                           }}
-                          className="inline-flex items-center rounded-md border border-gray-300 bg-white px-2 py-1 text-xs font-semibold text-gray-800 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                          className="inline-flex items-center rounded-md border border-[color:var(--border)] bg-[color:var(--card)] px-2 py-1 text-xs font-semibold text-[color:var(--foreground)] hover:bg-[color:color-mix(in_srgb,var(--foreground)_3%,var(--card))] disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           GB
                         </button>
@@ -15273,18 +15438,22 @@ export default function AdminSettingsPage() {
 
                     <div className="flex flex-wrap items-center gap-2">
                       <div className="flex items-center gap-2">
-                        <span className="text-[11px] text-gray-600">light</span>
+                        <span className="text-[11px] text-[color:var(--foreground)] opacity-70">
+                          light
+                        </span>
                         {languageIcons?.[code]?.lightUrl ? (
                           <Image
                             alt={`Lang ${code} light icon`}
                             src={languageIcons[code].lightUrl}
-                            className="h-6 w-6 rounded border border-gray-200 bg-white object-contain"
+                            className="h-6 w-6 rounded border border-[color:var(--border)] bg-[color:var(--card)] object-contain"
                             width={24}
                             height={24}
                             unoptimized
                           />
                         ) : (
-                          <span className="text-[11px] text-gray-500">—</span>
+                          <span className="text-[11px] text-[color:var(--foreground)] opacity-60">
+                            —
+                          </span>
                         )}
                         <button
                           type="button"
@@ -15292,7 +15461,7 @@ export default function AdminSettingsPage() {
                           onClick={() =>
                             handleLanguageIconUploadClick(code, "light")
                           }
-                          className="inline-flex items-center rounded-md border border-gray-300 bg-white px-2 py-1 text-xs font-semibold text-gray-800 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                          className="inline-flex items-center rounded-md border border-[color:var(--border)] bg-[color:var(--card)] px-2 py-1 text-xs font-semibold text-[color:var(--foreground)] hover:bg-[color:color-mix(in_srgb,var(--foreground)_3%,var(--card))] disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           Upload
                         </button>
@@ -15316,25 +15485,29 @@ export default function AdminSettingsPage() {
                               `Language icon (${code}, light) е премахнат.`,
                             );
                           }}
-                          className="inline-flex items-center rounded-md border border-gray-200 bg-white px-2 py-1 text-xs font-semibold text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                          className="inline-flex items-center rounded-md border border-[color:var(--border)] bg-[color:var(--card)] px-2 py-1 text-xs font-semibold text-[color:var(--foreground)] opacity-70 hover:bg-[color:color-mix(in_srgb,var(--foreground)_3%,var(--card))] disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           Remove
                         </button>
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <span className="text-[11px] text-gray-600">dark</span>
+                        <span className="text-[11px] text-[color:var(--foreground)] opacity-70">
+                          dark
+                        </span>
                         {languageIcons?.[code]?.darkUrl ? (
                           <Image
                             alt={`Lang ${code} dark icon`}
                             src={languageIcons[code].darkUrl}
-                            className="h-6 w-6 rounded border border-gray-200 bg-white object-contain"
+                            className="h-6 w-6 rounded border border-[color:var(--border)] bg-[color:var(--card)] object-contain"
                             width={24}
                             height={24}
                             unoptimized
                           />
                         ) : (
-                          <span className="text-[11px] text-gray-500">—</span>
+                          <span className="text-[11px] text-[color:var(--foreground)] opacity-60">
+                            —
+                          </span>
                         )}
                         <button
                           type="button"
@@ -15342,7 +15515,7 @@ export default function AdminSettingsPage() {
                           onClick={() =>
                             handleLanguageIconUploadClick(code, "dark")
                           }
-                          className="inline-flex items-center rounded-md border border-gray-300 bg-white px-2 py-1 text-xs font-semibold text-gray-800 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                          className="inline-flex items-center rounded-md border border-[color:var(--border)] bg-[color:var(--card)] px-2 py-1 text-xs font-semibold text-[color:var(--foreground)] hover:bg-[color:color-mix(in_srgb,var(--foreground)_3%,var(--card))] disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           Upload
                         </button>
@@ -15366,14 +15539,14 @@ export default function AdminSettingsPage() {
                               `Language icon (${code}, dark) е премахнат.`,
                             );
                           }}
-                          className="inline-flex items-center rounded-md border border-gray-200 bg-white px-2 py-1 text-xs font-semibold text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                          className="inline-flex items-center rounded-md border border-[color:var(--border)] bg-[color:var(--card)] px-2 py-1 text-xs font-semibold text-[color:var(--foreground)] opacity-70 hover:bg-[color:color-mix(in_srgb,var(--foreground)_3%,var(--card))] disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           Remove
                         </button>
                       </div>
                     </div>
 
-                    <span className="ml-auto text-xs text-gray-500">
+                    <span className="ml-auto text-xs text-[color:var(--foreground)] opacity-60">
                       {code === defaultLang ? "default" : ""}
                     </span>
                     <ToggleSwitch
@@ -15398,7 +15571,7 @@ export default function AdminSettingsPage() {
               </div>
 
               <div className="max-w-md">
-                <label className="flex items-center justify-between gap-2 text-sm font-medium text-gray-700">
+                <label className="flex items-center justify-between gap-2 text-sm font-medium text-[color:var(--foreground)] opacity-80">
                   <span className="flex items-center gap-2">
                     <span>Default</span>
                     <InfoTooltip
@@ -15415,7 +15588,7 @@ export default function AdminSettingsPage() {
                   options={supportedLangs}
                   onSelect={(next) => setDefaultLang(next)}
                 />
-                <p className="mt-2 text-xs text-gray-500">
+                <p className="mt-2 text-xs text-[color:var(--foreground)] opacity-60">
                   Default трябва да е един от поддържаните езици.
                 </p>
               </div>
@@ -15445,7 +15618,7 @@ export default function AdminSettingsPage() {
           )}
 
           <div className="space-y-2">
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-[color:var(--foreground)] opacity-60">
               Някои промени (напр. favicon, meta preview/cache) може да се видят
               коректно след refresh.
             </p>

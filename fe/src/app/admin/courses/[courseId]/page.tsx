@@ -8,6 +8,9 @@ import { AdminBreadcrumbs } from "../../_components/admin-breadcrumbs";
 import { InfoTooltip } from "../../_components/info-tooltip";
 import Link from "next/link";
 import { ListboxSelect } from "../../../_components/listbox-select";
+import { useCurrentLang } from "../../../../i18n/useCurrentLang";
+import { t } from "../../../../i18n/t";
+import { useAdminSupportedLanguages } from "../../_hooks/use-admin-supported-languages";
 
 const API_BASE_URL = getApiBaseUrl();
 
@@ -87,6 +90,12 @@ const DEFAULT_FORM: CreateCurriculumItemForm = {
   order: "",
 };
 
+const CURRICULUM_ITEM_TYPES: CourseModuleItem["itemType"][] = [
+  "wiki",
+  "task",
+  "quiz",
+];
+
 type AdminQuizListItem = {
   id: string;
   title: string;
@@ -104,6 +113,85 @@ type AdminTaskListItem = {
 export default function AdminCourseDetailPage() {
   const params = useParams<{ courseId: string }>();
   const courseId = params?.courseId;
+  const lang = useCurrentLang();
+  const { languages: supportedAdminLangs } = useAdminSupportedLanguages();
+
+  const languageOptions = useMemo(
+    () => (supportedAdminLangs.length > 0 ? supportedAdminLangs : ["bg"]),
+    [supportedAdminLangs],
+  );
+
+  const languageListboxOptions = useMemo(
+    () =>
+      languageOptions.map((code) => ({
+        value: code,
+        label: code.toUpperCase(),
+      })),
+    [languageOptions],
+  );
+
+  const courseStatusOptions = useMemo(
+    () => [
+      {
+        value: "draft",
+        label: t(lang, "common", "adminCoursesStatusDraft"),
+      },
+      {
+        value: "active",
+        label: t(lang, "common", "adminCoursesStatusActive"),
+      },
+      {
+        value: "inactive",
+        label: t(lang, "common", "adminCoursesStatusInactive"),
+      },
+    ],
+    [lang],
+  );
+
+  const courseStatusLabels = useMemo(() => {
+    return courseStatusOptions.reduce<Record<string, string>>((acc, option) => {
+      acc[option.value] = option.label;
+      return acc;
+    }, {});
+  }, [courseStatusOptions]);
+
+  const getStatusLabel = useCallback(
+    (status: string) => courseStatusLabels[status] ?? status,
+    [courseStatusLabels],
+  );
+
+  const curriculumTypeLabels = useMemo(
+    () => ({
+      wiki: t(lang, "common", "adminCoursesDetailCurriculumTypeWiki"),
+      task: t(lang, "common", "adminCoursesDetailCurriculumTypeTask"),
+      quiz: t(lang, "common", "adminCoursesDetailCurriculumTypeQuiz"),
+    }),
+    [lang],
+  );
+
+  const getCurriculumTypeLabel = useCallback(
+    (type: CourseModuleItem["itemType"]) => curriculumTypeLabels[type] ?? type,
+    [curriculumTypeLabels],
+  );
+
+  const languageLabelByCode = useMemo(() => {
+    return languageListboxOptions.reduce<Record<string, string>>(
+      (acc, option) => {
+        acc[option.value] = option.label;
+        return acc;
+      },
+      {},
+    );
+  }, [languageListboxOptions]);
+
+  const curriculumTypeOptions = useMemo(
+    () =>
+      CURRICULUM_ITEM_TYPES.map((type) => ({
+        value: type,
+        label: curriculumTypeLabels[type] ?? type,
+      })),
+    [curriculumTypeLabels],
+  );
 
   const [course, setCourse] = useState<CourseDetail | null>(null);
   const [curriculum, setCurriculum] = useState<CourseModuleItem[]>([]);
@@ -168,11 +256,18 @@ export default function AdminCourseDetailPage() {
 
   const breadcrumbItems = useMemo(
     () => [
-      { label: "Админ табло", href: "/admin" },
-      { label: "Courses", href: "/admin/courses" },
-      { label: course?.title ?? "Course details" },
+      { label: t(lang, "common", "adminDashboardTitle"), href: "/admin" },
+      {
+        label: t(lang, "common", "adminDashboardTabCourses"),
+        href: "/admin/courses",
+      },
+      {
+        label:
+          course?.title ??
+          t(lang, "common", "adminCoursesDetailBreadcrumbFallback"),
+      },
     ],
-    [course?.title],
+    [course?.title, lang],
   );
 
   const isCourseDirty = useMemo(() => {
@@ -199,9 +294,9 @@ export default function AdminCourseDetailPage() {
         }
       } catch {}
 
-      return "Request failed";
+      return t(lang, "common", "adminCoursesRequestFailed");
     },
-    [],
+    [lang],
   );
 
   const quizById = useMemo(() => {
@@ -225,15 +320,13 @@ export default function AdminCourseDetailPage() {
     try {
       const token = getAccessToken();
       if (!token) {
-        setError(
-          "Липсва достъп до Admin API. Моля, влезте отново като администратор.",
-        );
+        setError(t(lang, "common", "adminErrorMissingApiAccess"));
         setLoading(false);
         return;
       }
 
       if (!courseId) {
-        setError("Missing courseId");
+        setError(t(lang, "common", "adminCoursesDetailMissingCourseId"));
         setLoading(false);
         return;
       }
@@ -251,7 +344,7 @@ export default function AdminCourseDetailPage() {
       ]);
 
       if (!detailRes.ok) {
-        setError("Възникна грешка при зареждане на курса.");
+        setError(t(lang, "common", "adminCoursesDetailLoadError"));
         setLoading(false);
         return;
       }
@@ -282,10 +375,10 @@ export default function AdminCourseDetailPage() {
       setCurriculum(Array.isArray(items) ? items : []);
       setLoading(false);
     } catch {
-      setError("Възникна грешка при зареждане на курса.");
+      setError(t(lang, "common", "adminCoursesDetailLoadError"));
       setLoading(false);
     }
-  }, [courseId]);
+  }, [courseId, lang]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -306,7 +399,7 @@ export default function AdminCourseDetailPage() {
     try {
       const token = getAccessToken();
       if (!token) {
-        setQuizzesError("Липсва достъп до Admin API.");
+        setQuizzesError(t(lang, "common", "adminErrorMissingApiAccess"));
         setQuizzesLoading(false);
         return;
       }
@@ -318,7 +411,9 @@ export default function AdminCourseDetailPage() {
       });
 
       if (!res.ok) {
-        setQuizzesError("Възникна грешка при зареждане на quizzes.");
+        setQuizzesError(
+          t(lang, "common", "adminCoursesDetailQuizzesLoadError"),
+        );
         setQuizzesLoading(false);
         return;
       }
@@ -327,10 +422,12 @@ export default function AdminCourseDetailPage() {
       setQuizzes(Array.isArray(data) ? data : []);
       setQuizzesLoading(false);
     } catch {
-      setQuizzesError("Възникна грешка при зареждане на quizzes.");
+      setQuizzesError(
+        t(lang, "common", "adminCoursesDetailQuizzesLoadError"),
+      );
       setQuizzesLoading(false);
     }
-  }, []);
+  }, [lang]);
 
   const loadCategories = useCallback(async () => {
     if (typeof window === "undefined") return;
@@ -362,7 +459,7 @@ export default function AdminCourseDetailPage() {
     try {
       const token = getAccessToken();
       if (!token) {
-        setTasksError("Липсва достъп до Admin API.");
+        setTasksError(t(lang, "common", "adminErrorMissingApiAccess"));
         setTasksLoading(false);
         return;
       }
@@ -374,7 +471,9 @@ export default function AdminCourseDetailPage() {
       });
 
       if (!res.ok) {
-        setTasksError("Възникна грешка при зареждане на tasks.");
+        setTasksError(
+          t(lang, "common", "adminCoursesDetailTasksLoadError"),
+        );
         setTasksLoading(false);
         return;
       }
@@ -383,10 +482,10 @@ export default function AdminCourseDetailPage() {
       setTasks(Array.isArray(data) ? data : []);
       setTasksLoading(false);
     } catch {
-      setTasksError("Възникна грешка при зареждане на tasks.");
+      setTasksError(t(lang, "common", "adminCoursesDetailTasksLoadError"));
       setTasksLoading(false);
     }
-  }, []);
+  }, [lang]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -465,14 +564,16 @@ export default function AdminCourseDetailPage() {
     try {
       const token = getAccessToken();
       if (!token) {
-        setSaveError("Липсва достъп до Admin API.");
+        setSaveError(t(lang, "common", "adminErrorMissingApiAccess"));
         setSaving(false);
         return;
       }
 
       const title = form.title.trim();
       if (!title) {
-        setSaveError("Title is required");
+        setSaveError(
+          t(lang, "common", "adminCoursesDetailItemTitleRequired"),
+        );
         setSaving(false);
         return;
       }
@@ -485,7 +586,9 @@ export default function AdminCourseDetailPage() {
       if (form.itemType === "wiki") {
         const wikiSlug = form.wikiSlug.trim();
         if (!wikiSlug) {
-          setSaveError("wikiSlug is required for wiki items");
+          setSaveError(
+            t(lang, "common", "adminCoursesDetailWikiSlugRequired"),
+          );
           setSaving(false);
           return;
         }
@@ -495,7 +598,9 @@ export default function AdminCourseDetailPage() {
       if (form.itemType === "task") {
         const taskId = form.taskId.trim();
         if (!taskId) {
-          setSaveError("taskId is required for task items");
+          setSaveError(
+            t(lang, "common", "adminCoursesDetailTaskIdRequired"),
+          );
           setSaving(false);
           return;
         }
@@ -505,7 +610,9 @@ export default function AdminCourseDetailPage() {
       if (form.itemType === "quiz") {
         const quizId = form.quizId.trim();
         if (!quizId) {
-          setSaveError("quizId is required for quiz items");
+          setSaveError(
+            t(lang, "common", "adminCoursesDetailQuizIdRequired"),
+          );
           setSaving(false);
           return;
         }
@@ -531,7 +638,9 @@ export default function AdminCourseDetailPage() {
 
       if (!res.ok) {
         const msg = await readErrorMessage(res);
-        setSaveError(msg || "Неуспешно добавяне на curriculum item.");
+        setSaveError(
+          msg || t(lang, "common", "adminCoursesDetailCurriculumAddError"),
+        );
         setSaving(false);
         return;
       }
@@ -539,10 +648,10 @@ export default function AdminCourseDetailPage() {
       const created = (await res.json()) as CourseModuleItem;
       setCurriculum((prev) => [...prev, created]);
       setForm(DEFAULT_FORM);
-      setSaveSuccess("Добавено.");
+      setSaveSuccess(t(lang, "common", "adminCoursesDetailCurriculumAddSuccess"));
       setSaving(false);
     } catch {
-      setSaveError("Неуспешно добавяне на curriculum item.");
+      setSaveError(t(lang, "common", "adminCoursesDetailCurriculumAddError"));
       setSaving(false);
     }
   };
@@ -558,7 +667,7 @@ export default function AdminCourseDetailPage() {
     try {
       const token = getAccessToken();
       if (!token) {
-        setCourseSaveError("Липсва достъп до Admin API.");
+        setCourseSaveError(t(lang, "common", "adminErrorMissingApiAccess"));
         setCourseSaving(false);
         return;
       }
@@ -589,7 +698,11 @@ export default function AdminCourseDetailPage() {
       if (courseForm.isPaid !== course.isPaid) {
         if (courseForm.isPaid && paidCourseDisabled) {
           setCourseSaveError(
-            "Paid course опцията е изключена, защото няма активен метод за плащане. Активирай поне един payment provider от Admin → Payments.",
+            t(
+              lang,
+              "common",
+              "adminCoursesDetailPaidCourseDisabledError",
+            ),
           );
           setCourseSaving(false);
           return;
@@ -604,7 +717,7 @@ export default function AdminCourseDetailPage() {
       if (courseForm.isPaid) {
         if (!/^[a-z]{3}$/.test(nextCurrency)) {
           setCourseSaveError(
-            "Paid course изисква валидна валута (напр. EUR). ",
+            t(lang, "common", "adminCoursesCurrencyInvalid"),
           );
           setCourseSaving(false);
           return;
@@ -616,7 +729,7 @@ export default function AdminCourseDetailPage() {
           nextPriceCents <= 0
         ) {
           setCourseSaveError(
-            "Paid course изисква валидна цена в cents (напр. 999).",
+            t(lang, "common", "adminCoursesPriceInvalid"),
           );
           setCourseSaving(false);
           return;
@@ -639,7 +752,9 @@ export default function AdminCourseDetailPage() {
       }
 
       if (Object.keys(payload).length === 0) {
-        setCourseSaveSuccess("Няма промени за запис.");
+        setCourseSaveSuccess(
+          t(lang, "common", "adminCoursesNoChanges"),
+        );
         setCourseSaving(false);
         return;
       }
@@ -658,7 +773,7 @@ export default function AdminCourseDetailPage() {
 
       if (!res.ok) {
         const msg = await readErrorMessage(res);
-        setCourseSaveError(msg || "Неуспешен запис.");
+        setCourseSaveError(msg || t(lang, "common", "adminCoursesSaveError"));
         setCourseSaving(false);
         return;
       }
@@ -681,10 +796,10 @@ export default function AdminCourseDetailPage() {
             ? String(updated.priceCents)
             : "",
       });
-      setCourseSaveSuccess("Записано.");
+      setCourseSaveSuccess(t(lang, "common", "adminCoursesSaved"));
       setCourseSaving(false);
     } catch {
-      setCourseSaveError("Неуспешен запис.");
+      setCourseSaveError(t(lang, "common", "adminCoursesSaveError"));
       setCourseSaving(false);
     }
   };
@@ -719,7 +834,7 @@ export default function AdminCourseDetailPage() {
     try {
       const token = getAccessToken();
       if (!token) {
-        setActionError("Липсва достъп до Admin API.");
+        setActionError(t(lang, "common", "adminErrorMissingApiAccess"));
         setActionBusyId(null);
         return;
       }
@@ -763,7 +878,7 @@ export default function AdminCourseDetailPage() {
       }
 
       if (Object.keys(payload).length === 0) {
-        setActionSuccess("Няма промени за запис.");
+        setActionSuccess(t(lang, "common", "adminCoursesNoChanges"));
         setActionBusyId(null);
         cancelEditItem();
         return;
@@ -785,17 +900,19 @@ export default function AdminCourseDetailPage() {
 
       if (!res.ok) {
         const msg = await readErrorMessage(res);
-        setActionError(msg || "Неуспешно записване.");
+        setActionError(
+          msg || t(lang, "common", "adminCoursesDetailSaveItemError"),
+        );
         setActionBusyId(null);
         return;
       }
 
       await load();
-      setActionSuccess("Записано.");
+      setActionSuccess(t(lang, "common", "adminCoursesSaved"));
       setActionBusyId(null);
       cancelEditItem();
     } catch {
-      setActionError("Неуспешно записване.");
+      setActionError(t(lang, "common", "adminCoursesDetailSaveItemError"));
       setActionBusyId(null);
     }
   };
@@ -817,7 +934,7 @@ export default function AdminCourseDetailPage() {
     try {
       const token = getAccessToken();
       if (!token) {
-        setActionError("Липсва достъп до Admin API.");
+        setActionError(t(lang, "common", "adminErrorMissingApiAccess"));
         setActionBusyId(null);
         return;
       }
@@ -838,16 +955,18 @@ export default function AdminCourseDetailPage() {
 
       if (!res.ok) {
         const msg = await readErrorMessage(res);
-        setActionError(msg || "Неуспешно пренареждане.");
+        setActionError(
+          msg || t(lang, "common", "adminCoursesDetailReorderError"),
+        );
         setActionBusyId(null);
         return;
       }
 
       await load();
-      setActionSuccess("Пренаредено.");
+      setActionSuccess(t(lang, "common", "adminCoursesDetailReordered"));
       setActionBusyId(null);
     } catch {
-      setActionError("Неуспешно пренареждане.");
+      setActionError(t(lang, "common", "adminCoursesDetailReorderError"));
       setActionBusyId(null);
     }
   };
@@ -857,7 +976,7 @@ export default function AdminCourseDetailPage() {
     if (!courseId) return;
 
     const ok = window.confirm(
-      `Сигурен ли си, че искаш да изтриеш "${item.title}"?`,
+      `${t(lang, "common", "adminCoursesDetailDeleteConfirmPrefix")} "${item.title}"?`,
     );
     if (!ok) {
       return;
@@ -889,16 +1008,18 @@ export default function AdminCourseDetailPage() {
 
       if (!res.ok && res.status !== 204) {
         const msg = await readErrorMessage(res);
-        setActionError(msg || "Неуспешно изтриване.");
+        setActionError(
+          msg || t(lang, "common", "adminCoursesDetailDeleteError"),
+        );
         setActionBusyId(null);
         return;
       }
 
       await load();
-      setActionSuccess("Изтрито.");
+      setActionSuccess(t(lang, "common", "adminCoursesDetailDeleted"));
       setActionBusyId(null);
     } catch {
-      setActionError("Неуспешно изтриване.");
+      setActionError(t(lang, "common", "adminCoursesDetailDeleteError"));
       setActionBusyId(null);
     }
   };

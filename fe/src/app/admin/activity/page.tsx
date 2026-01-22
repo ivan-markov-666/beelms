@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useCurrentLang } from "../../../i18n/useCurrentLang";
 import { t } from "../../../i18n/t";
+import type { SupportedLang } from "../../../i18n/config";
 import { getAccessToken } from "../../auth-token";
 import { getApiBaseUrl } from "../../api-url";
 import { AdminBreadcrumbs } from "../_components/admin-breadcrumbs";
@@ -30,11 +31,58 @@ type AdminActivityItem = {
   actorLabel: string | null;
 };
 
-function formatDateTime(value: string): string {
+function langToLocale(lang: SupportedLang): string {
+  switch (lang) {
+    case "bg":
+      return "bg-BG";
+    case "en":
+      return "en-US";
+    case "de":
+      return "de-DE";
+    case "es":
+      return "es-ES";
+    case "pt":
+      return "pt-PT";
+    case "pl":
+      return "pl-PL";
+    case "ua":
+      return "uk-UA";
+    case "ru":
+      return "ru-RU";
+    case "fr":
+      return "fr-FR";
+    case "tr":
+      return "tr-TR";
+    case "ro":
+      return "ro-RO";
+    case "hi":
+      return "hi-IN";
+    case "vi":
+      return "vi-VN";
+    case "id":
+      return "id-ID";
+    case "it":
+      return "it-IT";
+    case "ko":
+      return "ko-KR";
+    case "ja":
+      return "ja-JP";
+    case "nl":
+      return "nl-NL";
+    case "cs":
+      return "cs-CZ";
+    case "ar":
+      return "ar";
+    default:
+      return lang;
+  }
+}
+
+function formatDateTime(locale: string, value: string): string {
   try {
     const d = new Date(value);
     if (Number.isNaN(d.getTime())) return value;
-    return d.toLocaleString("bg-BG", {
+    return d.toLocaleString(locale, {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -48,6 +96,7 @@ function formatDateTime(value: string): string {
 
 export default function AdminActivityPage() {
   const lang = useCurrentLang();
+  const locale = useMemo(() => langToLocale(lang), [lang]);
   const [items, setItems] = useState<AdminActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -98,7 +147,7 @@ export default function AdminActivityPage() {
       const subject = `${item.entityLabel} (ID: ${item.entityId})`;
 
       return [
-        formatDateTime(item.occurredAt),
+        formatDateTime(locale, item.occurredAt),
         typeLabel,
         actionLabel,
         subject,
@@ -286,11 +335,11 @@ export default function AdminActivityPage() {
   const noItems = !loading && !error && pageItems.length === 0;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-16 lg:pb-24">
       <section className="space-y-4">
         <AdminBreadcrumbs
           items={[
-            { label: "Админ табло", href: "/admin" },
+            { label: t(lang, "common", "adminDashboardTitle"), href: "/admin" },
             { label: t(lang, "common", "adminActivityTitle") },
           ]}
         />
@@ -301,9 +350,9 @@ export default function AdminActivityPage() {
               {t(lang, "common", "adminActivityTitle")}
             </h1>
             <InfoTooltip
-              label="Activity overview info"
-              title="Активност"
-              description="Прегледай последните wiki и user действия. Използвай филтрите и диапазоните по-долу за да стесниш резултатите."
+              label={t(lang, "common", "adminActivityInfoTooltipLabel")}
+              title={t(lang, "common", "adminActivityInfoTooltipTitle")}
+              description={t(lang, "common", "adminActivityInfoTooltipDescription")}
             />
           </div>
           <p className="text-gray-600">
@@ -315,12 +364,12 @@ export default function AdminActivityPage() {
       <section className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-base font-semibold text-gray-900">
-            Филтри и диапазон
+            {t(lang, "common", "adminActivityFiltersTitle")}
           </h2>
           <InfoTooltip
-            label="Activity filters info"
-            title="Филтри"
-            description='Комбинирай търсене, тип, действие и времеви диапазон. "Custom" ти позволява да избереш From/To дати.'
+            label={t(lang, "common", "adminActivityFiltersTooltipLabel")}
+            title={t(lang, "common", "adminActivityFiltersTooltipTitle")}
+            description={t(lang, "common", "adminActivityFiltersTooltipDescription")}
           />
         </div>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
@@ -354,7 +403,7 @@ export default function AdminActivityPage() {
             </div>
             <div className="mt-2">
               <ListboxSelect
-                ariaLabel="Activity range"
+                ariaLabel={t(lang, "common", "adminActivityRangeAria")}
                 value={rangePreset}
                 onChange={(value) => {
                   setRangePreset(value);
@@ -407,7 +456,7 @@ export default function AdminActivityPage() {
 
           <div>
             <ListboxSelect
-              ariaLabel="Activity type"
+              ariaLabel={t(lang, "common", "adminActivityTypeAria")}
               value={typeFilter}
               onChange={(next) => setTypeFilter(next)}
               options={[
@@ -429,7 +478,7 @@ export default function AdminActivityPage() {
 
           <div className="flex flex-col">
             <ListboxSelect
-              ariaLabel="Activity action"
+              ariaLabel={t(lang, "common", "adminActivityActionAria")}
               value={actionFilter}
               onChange={(next) => setActionFilter(next)}
               options={[
@@ -480,9 +529,13 @@ export default function AdminActivityPage() {
                 {t(lang, "common", "adminActivityExportButton")}
               </button>
               <InfoTooltip
-                label="Activity export info"
-                title="Export CSV"
-                description="Експортът генерира CSV на базата на текущите филтри и видимия времеви диапазон."
+                label={t(lang, "common", "adminActivityExportTooltipLabel")}
+                title={t(lang, "common", "adminActivityExportTooltipTitle")}
+                description={t(
+                  lang,
+                  "common",
+                  "adminActivityExportTooltipDescription",
+                )}
               />
             </div>
           </div>
@@ -562,7 +615,7 @@ export default function AdminActivityPage() {
                     className="hover:bg-gray-50"
                   >
                     <td className="px-6 py-3 align-middle text-gray-700">
-                      {formatDateTime(item.occurredAt)}
+                      {formatDateTime(locale, item.occurredAt)}
                     </td>
                     <td className="px-6 py-3 align-middle">
                       <span className="inline-flex items-center rounded-full border border-gray-200 bg-gray-50 px-2 py-0.5 text-xs font-medium text-gray-700">
@@ -608,16 +661,13 @@ export default function AdminActivityPage() {
           </div>
           <div className="flex flex-col gap-3 border-t border-gray-100 bg-gray-50 px-6 py-3 text-xs text-gray-600 md:flex-row md:items-center md:justify-between">
             <span>
-              Showing <span className="font-semibold">{showingFrom}</span>-
-              <span className="font-semibold">{showingTo}</span> of{" "}
-              <span className="font-semibold">{totalCount}</span>
+              {t(lang, "common", "adminActivityFooterCountPrefix")} {" "}
+              <span className="font-semibold">{showingFrom}</span>-<span className="font-semibold">{showingTo}</span>{" "}
+              {t(lang, "common", "adminActivityFooterCountOf")} {" "}
+              <span className="font-semibold">{totalCount}</span>{" "}
+              {t(lang, "common", "adminActivityFooterCountSuffix")}
             </span>
             <div className="flex items-center gap-2">
-              <InfoTooltip
-                label="Activity pagination info"
-                title="Pagination"
-                description="Използвай стрелките и page size за да прегледаш повече активности. Настройването на page size ще рестартира към страница 1."
-              />
               <Pagination
                 currentPage={safeCurrentPage}
                 totalPages={totalPages}

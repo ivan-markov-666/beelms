@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { LanguageSwitcher } from "../language-switcher";
 import * as nextNavigation from "next/navigation";
+import { SUPPORTED_LANGS } from "../../../../i18n/config";
 
 jest.mock("next/navigation", () => ({
   usePathname: jest.fn(),
@@ -49,7 +50,7 @@ describe("LanguageSwitcher", () => {
     expect(listbox).toBeInTheDocument();
 
     const options = screen.getAllByRole("option").map((opt) => opt.textContent);
-    expect(options).toEqual(["BG", "EN", "DE"]);
+    expect(options).toEqual(SUPPORTED_LANGS.map((lang) => lang.toUpperCase()));
   });
 
   it("updates lang and removes page param when switching language on /wiki", () => {

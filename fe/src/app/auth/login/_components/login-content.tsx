@@ -2,7 +2,6 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import Image from "next/image";
 import { useCurrentLang } from "../../../../i18n/useCurrentLang";
 import { t } from "../../../../i18n/t";
 import {
@@ -22,6 +21,7 @@ import {
   type SocialProvider,
   type SocialOAuthAuthorizeErrorCode,
 } from "../../social-login";
+import { SocialIcon } from "../../_components/social-icon";
 
 const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
 
@@ -491,42 +491,9 @@ export function LoginContent() {
                     type="button"
                     onClick={() => handleSocialLogin("google")}
                     disabled={submitting || anySocialLoading}
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-70"
+                    className="be-social-button inline-flex w-full items-center justify-center gap-3 rounded-xl border px-4 py-3 text-sm font-semibold shadow-sm transition focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-1 focus:ring-offset-[color:var(--card)] disabled:cursor-not-allowed disabled:opacity-70"
                   >
-                    {socialIconUrls.google ? (
-                      <Image
-                        src={socialIconUrls.google}
-                        alt=""
-                        width={20}
-                        height={20}
-                        className="h-5 w-5 be-social-icon object-contain"
-                      />
-                    ) : (
-                      <svg
-                        className="h-5 w-5 be-social-icon"
-                        viewBox="0 0 24 24"
-                        aria-hidden="true"
-                        focusable="false"
-                      >
-                        <path
-                          fill="#EA4335"
-                          d="M12 5.09c1.26 0 2.39.43 3.29 1.28l2.45-2.45C16.25 2.36 14.31 1.64 12 1.64 7.9 1.64 4.34 4.06 2.68 7.64l2.85 2.21C6.37 7.41 8.98 5.09 12 5.09z"
-                        />
-                        <path
-                          fill="#FBBC05"
-                          d="M21.81 12.19c0-.74-.07-1.45-.19-2.14H12v4.05h5.54c-.24 1.3-.96 2.4-2.06 3.15l3.22 2.5c1.88-1.73 3.11-4.28 3.11-7.56z"
-                        />
-                        <path
-                          fill="#4285F4"
-                          d="M12 22.36c2.85 0 5.24-.94 6.99-2.61l-3.22-2.5c-.89.6-2.02.95-3.77.95-2.94 0-5.44-1.98-6.33-4.64l-2.9 2.24C4.4 20.17 7.92 22.36 12 22.36z"
-                        />
-                        <path
-                          fill="#34A853"
-                          d="M5.67 13.56c-.2-.6-.31-1.25-.31-1.92s.11-1.32.3-1.92L2.81 7.5C2.3 8.67 2 9.94 2 11.36s.3 2.69.81 3.86l2.86-1.66z"
-                        />
-                        <path fill="none" d="M2 2h20v20H2z" />
-                      </svg>
-                    )}
+                    <SocialIcon provider="google" iconUrl={socialIconUrls.google} />
                     {googleLoading
                       ? t(lang, "auth", "loginGoogleLoading")
                       : t(lang, "auth", "loginGoogleCta")}
@@ -537,29 +504,9 @@ export function LoginContent() {
                     type="button"
                     onClick={() => handleSocialLogin("facebook")}
                     disabled={submitting || anySocialLoading}
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-70"
+                    className="be-social-button inline-flex w-full items-center justify-center gap-3 rounded-xl border px-4 py-3 text-sm font-semibold shadow-sm transition focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-1 focus:ring-offset-[color:var(--card)] disabled:cursor-not-allowed disabled:opacity-70"
                   >
-                    {socialIconUrls.facebook ? (
-                      <Image
-                        src={socialIconUrls.facebook}
-                        alt=""
-                        width={20}
-                        height={20}
-                        className="h-5 w-5 be-social-icon object-contain"
-                      />
-                    ) : (
-                      <svg
-                        className="h-5 w-5 be-social-icon"
-                        viewBox="0 0 24 24"
-                        aria-hidden="true"
-                        focusable="false"
-                      >
-                        <path
-                          fill="#1877F2"
-                          d="M24 12.073C24 5.404 18.627 0 12 0S0 5.404 0 12.073c0 6.034 4.388 11.045 10.125 11.875V15.563H7.078v-3.49h3.047V9.356c0-3.007 1.792-4.668 4.533-4.668 1.313 0 2.686.235 2.686.235v2.953h-1.513c-1.491 0-1.953.93-1.953 1.887v2.259h3.328l-.532 3.49h-2.796v8.385C19.612 23.118 24 18.107 24 12.073z"
-                        />
-                      </svg>
-                    )}
+                    <SocialIcon provider="facebook" iconUrl={socialIconUrls.facebook} />
                     {facebookLoading
                       ? t(lang, "auth", "loginFacebookLoading")
                       : t(lang, "auth", "loginFacebookCta")}
@@ -570,29 +517,9 @@ export function LoginContent() {
                     type="button"
                     onClick={() => handleSocialLogin("github")}
                     disabled={submitting || anySocialLoading}
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-70"
+                    className="be-social-button inline-flex w-full items-center justify-center gap-3 rounded-xl border px-4 py-3 text-sm font-semibold shadow-sm transition focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-1 focus:ring-offset-[color:var(--card)] disabled:cursor-not-allowed disabled:opacity-70"
                   >
-                    {socialIconUrls.github ? (
-                      <Image
-                        src={socialIconUrls.github}
-                        alt=""
-                        width={20}
-                        height={20}
-                        className="h-5 w-5 be-social-icon object-contain"
-                      />
-                    ) : (
-                      <svg
-                        className="h-5 w-5 be-social-icon"
-                        viewBox="0 0 24 24"
-                        aria-hidden="true"
-                        focusable="false"
-                      >
-                        <path
-                          fill="#181717"
-                          d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.387.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.726-4.042-1.61-4.042-1.61-.546-1.387-1.333-1.757-1.333-1.757-1.089-.745.083-.73.083-.73 1.205.084 1.84 1.237 1.84 1.237 1.07 1.834 2.807 1.304 3.492.997.108-.775.418-1.305.762-1.605-2.665-.304-5.466-1.334-5.466-5.931 0-1.31.468-2.381 1.235-3.221-.124-.303-.535-1.523.117-3.176 0 0 1.008-.322 3.301 1.23a11.52 11.52 0 0 1 6.003 0c2.292-1.552 3.298-1.23 3.298-1.23.653 1.653.242 2.873.118 3.176.77.84 1.233 1.911 1.233 3.221 0 4.609-2.804 5.625-5.476 5.921.43.372.823 1.102.823 2.222 0 1.606-.015 2.898-.015 3.293 0 .321.218.694.825.576C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"
-                        />
-                      </svg>
-                    )}
+                    <SocialIcon provider="github" iconUrl={socialIconUrls.github} />
                     {githubLoading
                       ? t(lang, "auth", "loginGithubLoading")
                       : t(lang, "auth", "loginGithubCta")}
@@ -603,29 +530,9 @@ export function LoginContent() {
                     type="button"
                     onClick={() => handleSocialLogin("linkedin")}
                     disabled={submitting || anySocialLoading}
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-70"
+                    className="be-social-button inline-flex w-full items-center justify-center gap-3 rounded-xl border px-4 py-3 text-sm font-semibold shadow-sm transition focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-1 focus:ring-offset-[color:var(--card)] disabled:cursor-not-allowed disabled:opacity-70"
                   >
-                    {socialIconUrls.linkedin ? (
-                      <Image
-                        src={socialIconUrls.linkedin}
-                        alt=""
-                        width={20}
-                        height={20}
-                        className="h-5 w-5 be-social-icon object-contain"
-                      />
-                    ) : (
-                      <svg
-                        className="h-5 w-5 be-social-icon"
-                        viewBox="0 0 24 24"
-                        aria-hidden="true"
-                        focusable="false"
-                      >
-                        <path
-                          fill="#0A66C2"
-                          d="M20.447 20.452H17.21v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.086V9h3.104v1.561h.044c.433-.82 1.494-1.688 3.072-1.688 3.287 0 3.894 2.164 3.894 4.977v6.602zM5.337 7.433a1.8 1.8 0 1 1 0-3.6 1.8 1.8 0 0 1 0 3.6zM6.907 20.452H3.672V9h3.235v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729V22.27C0 23.226.792 24 1.771 24h20.451C23.2 24 24 23.226 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"
-                        />
-                      </svg>
-                    )}
+                    <SocialIcon provider="linkedin" iconUrl={socialIconUrls.linkedin} />
                     {linkedinLoading
                       ? t(lang, "auth", "loginLinkedinLoading")
                       : t(lang, "auth", "loginLinkedinCta")}
@@ -669,20 +576,36 @@ export function LoginContent() {
                 htmlFor="email"
                 className="block text-sm font-medium text-gray-800"
               >
-                {t(lang, "auth", "loginEmailLabel")}
+                {t(lang, "auth", "loginEmailLabel")} {" "}
+                <span className="text-red-500" aria-hidden="true">
+                  *
+                </span>
               </label>
               <input
                 id="email"
                 type="email"
                 autoComplete="email"
                 placeholder="your@email.com"
-                className="block w-full rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
+                className={`block w-full rounded-lg border px-4 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:outline-none focus:ring-1 ${
+                  fieldErrors.email
+                    ? "border-[color:var(--field-error-border)] bg-[color:var(--field-error-bg)] focus:border-[color:var(--error)] focus:ring-[color:var(--error)]"
+                    : "border-gray-300 bg-white focus:border-[color:var(--primary)] focus:ring-[color:var(--primary)]"
+                }`}
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setFieldErrors((prev) => ({ ...prev, email: undefined }));
+                }}
+                aria-invalid={Boolean(fieldErrors.email)}
+                aria-describedby={
+                  fieldErrors.email ? "login-email-error" : undefined
+                }
                 disabled={submitting}
               />
               {fieldErrors.email && (
-                <p className="text-xs text-red-600">{fieldErrors.email}</p>
+                <p id="login-email-error" className="text-xs text-red-600">
+                  {fieldErrors.email}
+                </p>
               )}
             </div>
 
@@ -700,9 +623,20 @@ export function LoginContent() {
                   type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
                   placeholder="********"
-                  className="block w-full rounded-lg border border-gray-300 px-4 py-2 pr-12 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
+                  className={`block w-full rounded-lg border px-4 py-2 pr-12 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:outline-none focus:ring-1 ${
+                    fieldErrors.password
+                      ? "border-[color:var(--field-error-border)] bg-[color:var(--field-error-bg)] focus:border-[color:var(--error)] focus:ring-[color:var(--error)]"
+                      : "border-gray-300 bg-white focus:border-[color:var(--primary)] focus:ring-[color:var(--primary)]"
+                  }`}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    setFieldErrors((prev) => ({ ...prev, password: undefined }));
+                  }}
+                  aria-invalid={Boolean(fieldErrors.password)}
+                  aria-describedby={
+                    fieldErrors.password ? "login-password-error" : undefined
+                  }
                   disabled={submitting}
                 />
                 <button
@@ -714,7 +648,9 @@ export function LoginContent() {
                 </button>
               </div>
               {fieldErrors.password && (
-                <p className="text-xs text-red-600">{fieldErrors.password}</p>
+                <p id="login-password-error" className="text-xs text-red-600">
+                  {fieldErrors.password}
+                </p>
               )}
             </div>
 

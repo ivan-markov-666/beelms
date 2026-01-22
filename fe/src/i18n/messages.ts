@@ -20,17 +20,7069 @@ export type Messages = {
   [L in SupportedLang]: DomainMessages;
 };
 
+const EN_MESSAGES: DomainMessages = {
+  nav: {
+    wiki: "Wiki",
+    courses: "Courses",
+    myCourses: "My Courses",
+    login: "Sign in",
+    register: "Register",
+    profile: "Profile",
+    logout: "Sign out",
+    admin: "Admin",
+  },
+  auth: {
+    loginTitle: "Sign in",
+    loginSubtitle: "Enter your login details.",
+    loginEmailLabel: "Email",
+    loginPasswordLabel: "Password",
+    loginSubmit: "Sign in",
+    loginSubmitLoading: "Signing in...",
+    loginForgotLink: "Forgot password?",
+    loginRegisterLink: "Don't have an account?",
+    loginRegisterLinkCta: "Create an account",
+    loginRememberMeLabel: "Remember me",
+    loginCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA (placeholder) – in the real system it appears only after several consecutive failed login attempts.",
+    loginCaptchaLabel: "CAPTCHA / reCAPTCHA",
+    loginCaptchaNotAvailable:
+      "CAPTCHA is required, but the integration is disabled or not configured. Please try again or contact an administrator.",
+    loginErrorEmailRequired: "Please enter your email.",
+    loginErrorEmailInvalid: "Please enter a valid email address.",
+    loginErrorPasswordRequired: "Please enter your password.",
+    socialResetPasswordHint:
+      "If social sign-in (Google/Facebook/GitHub/LinkedIn) is unavailable, you can use 'Forgot password' to set a password and then sign in with email + password.",
+    socialResetPasswordHintNoProviders:
+      "If social sign-in is unavailable, you can use 'Forgot password' to set a password and then sign in with email + password.",
+    loginErrorInvalidCredentials: "Invalid login details.",
+    loginErrorCaptchaRequired: "Please confirm that you are not a robot.",
+    loginErrorGeneric: "Sign in failed. Please try again later.",
+    loginErrorNetwork:
+      "A network error occurred while contacting the server.",
+    loginErrorDisabled: "Sign in is disabled for standard users.",
+    loginLoading: "Loading...",
+    registerTitle: "Create account",
+    registerSubtitle: "Create your free BeeLMS account to get started.",
+    registerEmailLabel: "Email",
+    registerEmailPlaceholder: "your@email.com",
+    registerPasswordLabel: "Password",
+    registerPasswordPlaceholder: "********",
+    registerPasswordHint:
+      "Minimum 8 characters: at least one uppercase letter, one lowercase letter, one digit, and one special character",
+    registerPasswordStrengthStrong: "Strong password",
+    registerPasswordStrengthMedium: "Medium password",
+    registerPasswordStrengthWeak: "Weak password",
+    registerConfirmPasswordLabel: "Confirm password",
+    registerTermsPrefix: "I agree to the ",
+    registerTermsAnd: " and the ",
+    registerTermsSuffix: ".",
+    registerTermsLabel: "I agree to the Terms of Use and the Privacy Policy.",
+    registerCaptchaLabel:
+      "I'm not a robot (placeholder for CAPTCHA integration).",
+    registerCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA (placeholder for bot protection during registration)",
+    registerSubmit: "Register",
+    registerSubmitLoading: "Submitting...",
+    registerHasAccount: "Already have an account?",
+    registerLoginLink: "Sign in",
+    registerErrorEmailRequired: "Please enter your email.",
+    registerErrorEmailInvalid: "Please enter a valid email address.",
+    registerErrorPasswordRequired: "Please enter a password.",
+    registerErrorPasswordTooShort:
+      "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one digit, and one special character.",
+    registerErrorPasswordMissingUppercase:
+      "Password must contain at least one uppercase letter.",
+    registerErrorPasswordMissingLowercase:
+      "Password must contain at least one lowercase letter.",
+    registerErrorPasswordMissingDigit:
+      "Password must contain at least one digit.",
+    registerErrorPasswordMissingSpecialChar:
+      "Password must contain at least one special character.",
+    registerErrorConfirmPasswordRequired: "Please confirm your password.",
+    registerErrorPasswordsMismatch: "Passwords do not match.",
+    registerErrorTermsRequired: "You must accept the terms.",
+    registerErrorCaptchaRequired: "Please confirm that you are not a robot.",
+    registerErrorDuplicateEmail: "This email is already registered.",
+    registerErrorInvalidData:
+      "The data is not valid. Please review the form and try again.",
+    registerErrorGeneric: "Registration failed. Please try again later.",
+    registerErrorNetwork:
+      "A network error occurred while contacting the server.",
+    registerSuccess:
+      "Registration was successful. Please check your email and confirm your address using the link we sent you. After that you can sign in from the login page.",
+    registerLoading: "Loading...",
+    registerDisabledTitle: "Registration is disabled",
+    registerDisabledMessage:
+      "The administrator has disabled registration and password reset.",
+    registerDisabledLoginCta: "Go to sign in",
+    forgotTitle: "Forgot password",
+    forgotSubtitle: "Enter your email address to request a password reset.",
+    forgotEmailLabel: "Email",
+    forgotCaptchaLabel:
+      "I'm not a robot (placeholder for CAPTCHA integration).",
+    forgotSubmit: "Send reset link",
+    forgotSubmitLoading: "Sending...",
+    forgotHasPassword: "Remembered your password?",
+    forgotLoginLink: "Back to sign in",
+    forgotErrorEmailRequired: "Please enter your email.",
+    forgotErrorEmailInvalid: "Please enter a valid email address.",
+    forgotErrorCaptchaRequired: "Please confirm that you are not a robot.",
+    forgotErrorInvalidData:
+      "The data is not valid. Please review the form and try again.",
+    forgotErrorGeneric:
+      "Password reset request failed. Please try again later.",
+    forgotErrorNetwork:
+      "A network error occurred while contacting the server.",
+    forgotSuccess:
+      "If there is an account with this email, we will send instructions to reset your password.",
+    forgotResetLinkInfo: "The password reset link is valid for 24 hours.",
+    forgotCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA (placeholder for bot protection when requesting a password reset)",
+    forgotDisabledTitle: "Password reset is disabled",
+    forgotDisabledMessage:
+      "The administrator has disabled registration and password reset.",
+    forgotDisabledLoginCta: "Go to sign in",
+    resetTitle: "Change password",
+    resetSubtitle: "Enter your new password.",
+    resetInfoMessage:
+      "This page is accessible via a secure link sent to your email address.",
+    resetNewPasswordLabel: "New password",
+    resetConfirmNewPasswordLabel: "Confirm new password",
+    resetSubmit: "Change password",
+    resetSubmitLoading: "Changing...",
+    resetHasPassword: "Already remember your password?",
+    resetBackToLogin: "Back to sign in",
+    resetSuccessLoginCta: "Go to login page",
+    resetErrorNewPasswordRequired: "Please enter a new password.",
+    resetErrorNewPasswordTooShort:
+      "Password must be at least 8 characters long.",
+    resetErrorConfirmPasswordRequired: "Please confirm your new password.",
+    resetErrorPasswordsMismatch: "Passwords do not match.",
+    resetErrorInvalidOrExpiredLink:
+      'The password reset link is invalid or has expired. Please request a new link from the "Forgot password" screen.',
+    resetErrorGeneric: "Password change failed. Please try again later.",
+    resetErrorNetwork:
+      "A network error occurred while contacting the server.",
+    resetSuccess:
+      "Your password has been changed successfully. We will redirect you to the login page...",
+    resetPasswordRequirementsTitle: "Password requirements:",
+    resetPasswordRequirementsItemMinLength: "Minimum 8 characters",
+    resetPasswordRequirementsItemRecommendation:
+      "We recommend using letters, numbers and symbols.",
+    resetGoToForgotCta: 'Go to the "Forgot password" screen',
+    resetDisabledTitle: "Password reset is disabled",
+    resetDisabledMessage:
+      "The administrator has disabled registration and password reset.",
+    resetDisabledLoginCta: "Go to sign in",
+    accountDeletedTitle: "Your account has been closed and deleted",
+    accountDeletedDescription:
+      "Your account has been closed and your personal data has been marked for deletion in accordance with our data protection rules and GDPR.",
+    accountDeletedHint:
+      "You will no longer have access to your profile. If you decide to use BeeLMS again in the future, you will need to create a new account.",
+    accountDeletedPrimaryCta: "Go to home page",
+    accountDeletedSecondaryCta: "Go to Wiki articles",
+    twoFactorTitle: "Two-factor authentication",
+    twoFactorSubtitle: "Enter the 6-digit code from your authenticator app.",
+    twoFactorCodeLabel: "Code",
+    twoFactorSubmit: "Verify",
+    twoFactorSubmitLoading: "Verifying...",
+    twoFactorBackToLogin: "Back to login",
+    twoFactorErrorMissingChallenge:
+      "Missing 2FA challenge. Please log in again.",
+    twoFactorErrorCodeRequired: "Please enter the 6-digit code.",
+    twoFactorErrorCodeInvalidFormat: "Invalid code format.",
+    twoFactorErrorInvalidCode: "Invalid code. Please try again.",
+    twoFactorErrorGeneric: "2FA verification failed. Please try again later.",
+  },
+  common: {
+    adminUsersTitle: "Admin Users",
+    adminUsersSubtitle: "List of users and account status (active/inactive).",
+    adminUsersSearchPlaceholder: "Search by email...",
+    adminUsersSearchButton: "Search",
+    adminUsersLoading: "Loading users...",
+    adminUsersError: "An error occurred while loading the users list.",
+    adminUsersNoData: "No users to display.",
+    adminUsersToggleError: "Failed to update user status. Please try again.",
+    adminUsersRoleUpdateError:
+      "Failed to update user role. Please try again.",
+    adminUsersNoToken:
+      "No access to the Admin API. Please sign in again as an administrator.",
+    adminUsersColEmail: "Email",
+    adminUsersColRole: "Role",
+    adminUsersColActive: "Active",
+    adminUsersColCreated: "Created",
+    adminUsersStatusActive: "Active",
+    adminUsersStatusInactive: "Inactive",
+    adminUsersStatusUpdating: "Updating...",
+    adminUsersStatsTotal: "Total users",
+    adminUsersStatsActive: "Active",
+    adminUsersStatsDeactivated: "Deleted / inactive",
+    adminUsersStatsAdmins: "Admins",
+    adminUsersStatsLoading: "Loading user statistics...",
+    adminUsersStatsError: "An error occurred while loading user statistics.",
+    adminWikiStatsTotal: "Total articles",
+    adminWikiStatsActive: "Active",
+    adminWikiStatsDraft: "Draft",
+    adminWikiStatsInactive: "Inactive",
+    adminWikiStatsActiveHelper:
+      "Only active articles are visible in the public Wiki.",
+    adminWikiStatsTotalHelper:
+      "All wiki articles (active, draft and inactive).",
+    adminWikiStatsDraftHelper:
+      "Drafts – visible only in Admin Wiki until they are published.",
+    adminWikiStatsInactiveHelper:
+      "Inactive – hidden from the public Wiki but can be reactivated.",
+    adminDashboardTitle: "Admin Dashboard",
+    adminDashboardSubtitle: "System overview and management tools",
+    adminDashboardMetricsTitle: "Total users",
+    adminDashboardMetricsLoading: "Loading metrics...",
+    adminDashboardMetricsError: "Failed to load metrics.",
+    adminDashboardLinksTitle: "Admin sections",
+    adminDashboardGoToWiki: "Go to Admin Wiki",
+    adminDashboardGoToUsers: "Go to Admin Users",
+    adminDashboardBreadcrumbHome: "Home",
+    adminDashboardTabDashboard: "Dashboard",
+    adminDashboardTabWiki: "Wiki",
+    adminDashboardTabCourses: "Courses",
+    adminDashboardTabUsers: "Users",
+    adminDashboardTabMetrics: "Metrics",
+    adminDashboardTabActivity: "Activity",
+    adminDashboardTabPayments: "Payments",
+    adminDashboardTabBackups: "Backups",
+    adminDashboardCardUsersTitle: "Registered Users",
+    adminDashboardCardUsersTrend: "+12% from last month",
+    adminDashboardCardUsersTrendSuffix: "from last month",
+    adminDashboardCardUsersTrendUnknown:
+      "No sufficient data to compare with last month",
+    adminDashboardCardUsersTrendHelp:
+      "Compared to the total number of users at the end of the previous calendar month.",
+    adminMetricsTitle: "Metrics Overview",
+    adminMetricsSubtitle:
+      "Basic system metrics for administrators (MVP scope)",
+    adminMetricsInfoTooltipLabel: "Info",
+    adminMetricsInfoTooltipTitle: "Metrics",
+    adminMetricsInfoTooltipDescription:
+      "Platform stats: users, wiki, activity summary, wiki attention, and advanced metrics export.",
+    adminMetricsWikiInsightsViewAria: "Wiki insights view",
+    adminMetricsPeriodAria: "Metrics period",
+    adminMetricsUsersCardHelper: "Example value for UI testing",
+    adminDashboardCardArticlesTitle: "Wiki Articles",
+    adminDashboardCardArticlesSubtitle:
+      "Overview of active and draft articles.",
+    adminDashboardQuickActionsTitle: "Quick Actions",
+    adminDashboardQuickActionsManageWiki: "Manage Wiki",
+    adminDashboardQuickActionsManageUsers: "Manage Users",
+    adminDashboardQuickActionsViewMetrics: "View Metrics",
+    adminDashboardRecentActivityTitle: "Recent Activity",
+    adminDashboardRecentItem1Prefix: "New article created:",
+    adminDashboardRecentItem1Detail: "Performance Testing with JMeter",
+    adminDashboardRecentItem1Time: "2 hours ago",
+    adminDashboardRecentItem2Prefix: "User registered:",
+    adminDashboardRecentItem2Detail: "user@example.com",
+    adminDashboardRecentItem2Time: "5 hours ago",
+    adminDashboardRecentItem3Prefix: "Article updated:",
+    adminDashboardRecentItem3Detail: "Selenium WebDriver Best Practices",
+    adminDashboardRecentItem3Time: "1 day ago",
+    adminDashboardRecentItem4Prefix: "User deactivated:",
+    adminDashboardRecentItem4Detail: "user2@example.com",
+    adminDashboardRecentItem4Time: "2 days ago",
+    adminDashboardRecentActivityViewAll: "View all",
+    adminActivityTitle: "Activity log",
+    adminActivitySubtitle:
+      "Recent changes in wiki articles and user accounts.",
+    adminActivitySearchPlaceholder: "Search by subject, actor or type...",
+    adminActivityFilterTypeLabel: "Type",
+    adminActivityFilterActionLabel: "Action",
+    adminActivityFilterTypeAll: "All types",
+    adminActivityFilterTypeWiki: "Wiki",
+    adminActivityFilterTypeUser: "Users",
+    adminActivityFilterActionAll: "All actions",
+    adminActivityFilterActionArticleCreated: "Article created",
+    adminActivityFilterActionArticleUpdated: "Article updated",
+    adminActivityFilterActionUserRegistered: "User registered",
+    adminActivityFilterActionUserDeactivated: "User deactivated",
+    adminActivityLoading: "Loading recent activity...",
+    adminActivityError: "Failed to load recent activity.",
+    adminActivityEmpty: "There is no activity to display.",
+    adminActivityColTime: "Time",
+    adminActivityColType: "Type",
+    adminActivityColAction: "Action",
+    adminActivityColSubject: "Subject",
+    adminActivityColActor: "Actor",
+    adminActivityTypeWiki: "Wiki",
+    adminActivityTypeUser: "User",
+    adminActivityActionArticleCreated: "Article created",
+    adminActivityActionArticleUpdated: "Article updated",
+    adminActivityActionUserRegistered: "User registered",
+    adminActivityActionUserDeactivated: "User deactivated",
+    adminActivityFilterRangeAll: "All time",
+    adminActivityFilterRangeLastDay: "Last day",
+    adminActivityFilterRangeLastWeek: "Last week",
+    adminActivityFilterRangeLastMonth: "Last month",
+    adminActivityFilterRangeLastYear: "Last year",
+    adminActivityFilterRangeCustom: "Custom period",
+    adminActivityFilterRangeFrom: "From date",
+    adminActivityFilterRangeTo: "To date",
+    adminActivityFooterCountPrefix: "Showing",
+    adminActivityFooterCountOf: "of",
+    adminActivityFooterCountSuffix:
+      "entries for selected period and filters",
+    adminActivityExportButton: "Export all (CSV)",
+    adminMetricsUsersTrendTitle: "New users per month (recent periods)",
+    adminMetricsUserActivityTitle: "Activity for selected period",
+    adminMetricsUserActivityRegisteredLink: "View users (Users)",
+    adminMetricsUserActivityDeactivatedLink: "View deactivated (Users)",
+    adminMetricsUserActivityArticleCreatedLink: "View new articles (Wiki)",
+    adminMetricsUserActivityArticleUpdatedLink:
+      "View updated articles (Wiki)",
+    adminWikiViewsTitle: "Wiki article views",
+    adminWikiViewsSubtitle:
+      "Daily aggregated views and unique visitors (salted IP hash) for the selected period.",
+    adminWikiViewsTotal: "Total views",
+    adminWikiViewsTotalUniqueVisitors: "Total unique visitors",
+    adminWikiViewsTopArticles: "Top articles",
+    adminWikiViewsTopArticlesUniqueVisitors: "Top articles (unique visitors)",
+    adminWikiViewsDaily: "Daily views",
+    adminWikiViewsDailyUniqueVisitors: "Daily unique visitors",
+    adminWikiFeedbackTitle: "Wiki feedback",
+    adminWikiFeedbackSubtitle:
+      "Helpful / not helpful votes for the selected period.",
+    adminWikiFeedbackTotal: "Total votes",
+    adminWikiFeedbackTotalYes: "Helpful (Yes)",
+    adminWikiFeedbackTotalNo: "Not helpful (No)",
+    adminWikiFeedbackHelpfulRate: "Helpful rate",
+    adminWikiFeedbackTopNotHelpful: "Top articles (not helpful)",
+    adminWikiFeedbackNotHelpful: "Not helpful",
+    adminWikiFeedbackNotHelpfulRate: "Not helpful rate",
+    adminWikiFeedbackDailyTotal: "Daily votes",
+    adminWikiFeedbackDailyNotHelpful: "Daily not helpful",
+    adminWikiInsightsViewAll: "Wiki: all",
+    adminWikiInsightsViewViews: "Wiki: views",
+    adminWikiInsightsViewFeedback: "Wiki: feedback",
+    adminWikiInsightsViewAttention: "Wiki: needs attention",
+    adminWikiAttentionTitle: "Wiki: needs attention",
+    adminWikiAttentionSubtitle:
+      "Articles with high views and high not helpful share (combined score).",
+    adminWikiAttentionArticle: "Article",
+    adminWikiAttentionScore: "Score",
+    adminWikiAttentionViews: "Views",
+    adminWikiAttentionNotHelpfulRate: "% not helpful",
+    adminWikiAttentionVotes: "Votes",
+    adminWikiAttentionHelpfulYes: "Helpful (Yes)",
+    adminWikiAttentionHelpfulNo: "Not helpful (No)",
+    adminWikiAttentionEdit: "Edit",
+    adminWikiAttentionExportCsv: "Export (CSV)",
+    adminWikiAttentionFilterSearch: "Search",
+    adminWikiAttentionFilterSearchPlaceholder: "slug...",
+    adminWikiAttentionFilterMinViews: "Min views",
+    adminWikiAttentionFilterMinVotes: "Min votes",
+    adminWikiAttentionFilterMinNotHelpfulRate: "Min % not helpful",
+    adminWikiAttentionFilterShowingPrefix: "Showing",
+    adminMetricsNetUsersChangeZero:
+      "No net change in users for the selected period.",
+    adminMetricsNetUsersChangePositiveSuffix:
+      "net new users for the selected period.",
+    adminMetricsNetUsersChangeNegativeSuffix:
+      "net lost users for the selected period.",
+    legalFooterDisclaimer:
+      "BeeLMS is a learning platform. See the Terms of Use and Privacy Policy pages for more details.",
+    legalFooterPrivacyLink: "Privacy Policy (GDPR)",
+    legalFooterTermsLink: "Terms of Use",
+    analyticsConsentTitle: "Analytics cookies (optional)",
+    analyticsConsentBody:
+      "With your consent we use privacy-friendly analytics (no personal data) to improve the platform.",
+    analyticsConsentPrivacyLink: "See the Privacy Policy",
+    analyticsConsentDecline: "Decline",
+    analyticsConsentAccept: "Accept",
+    showPassword: "Show password",
+    hidePassword: "Hide password",
+    adminAdvancedMetricsTitle: "Advanced metrics",
+    adminAdvancedMetricsSubtitle:
+      "Sessions and page views (no personal data) for the selected period.",
+    adminAdvancedMetricsError:
+      "Failed to load advanced metrics for the selected period.",
+    adminAdvancedMetricsExportCsv: "Export (CSV)",
+    adminAdvancedMetricsExportLoading: "Exporting...",
+    adminAdvancedMetricsExportError:
+      "Failed to export advanced metrics.",
+    adminAdvancedMetricsTotalSessions: "Total sessions",
+    adminAdvancedMetricsAvgDuration: "Avg session duration",
+    adminAdvancedMetricsTotalPageViews: "Total page views",
+    adminAdvancedMetricsSessionSources: "Sources (sessions)",
+    adminAdvancedMetricsPageViewSources: "Sources (page views)",
+    adminAdvancedMetricsTopPages: "Top pages",
+    adminAdvancedMetricsDailySessions: "Daily sessions",
+    adminAdvancedMetricsDailyPageViews: "Daily page views",
+    legalPrivacyTitle: "Privacy Policy and GDPR",
+    legalPrivacyIntro:
+      "This page summarizes what personal data BeeLMS processes and for what purposes, in line with GDPR.",
+    legalTermsTitle: "Terms of Use",
+    legalTermsIntro:
+      "This page outlines the key rules for fair and ethical use of BeeLMS as a learning platform.",
+    footerAboutLink: "About",
+    footerContactLink: "Contact",
+  },
+  wiki: {
+    articleShareButton: "Share",
+    articlePrintButton: "Print",
+    articleShareSuccess: "Shared successfully.",
+    articleShareClipboard: "Link copied to clipboard.",
+    articleShareError:
+      "We couldn't share the link. Please share it manually.",
+    articleHelpfulPrompt: "Was this article helpful?",
+    articleHelpfulYes: "Yes",
+    articleHelpfulNo: "No",
+    articleHelpfulThanks: "Thanks for your feedback!",
+    articleHelpfulError: "Failed to submit. Please try again.",
+    relatedArticlesTitle: "Related articles",
+  },
+};
+
+const ADMIN_WIKI_CREATE_FIELD_OVERRIDES: Partial<
+  Record<SupportedLang, Partial<DomainMessages["common"]>>
+> = {
+  bg: {
+    adminWikiCreateSlugLabel: "Slug",
+    adminWikiCreateTagsPlaceholder: "въведение, основи, настройка",
+  },
+  en: {
+    adminWikiCreateSlugLabel: "Slug",
+    adminWikiCreateTagsPlaceholder: "intro, basics, setup",
+  },
+  de: {
+    adminWikiCreateSlugLabel: "Slug",
+    adminWikiCreateTagsPlaceholder: "einleitung, grundlagen, einrichtung",
+  },
+  es: {
+    adminWikiCreateSlugLabel: "Slug",
+    adminWikiCreateTagsPlaceholder: "introducción, básicos, configuración",
+  },
+  pt: {
+    adminWikiCreateSlugLabel: "Slug",
+    adminWikiCreateTagsPlaceholder: "introdução, básicos, configuração",
+  },
+  pl: {
+    adminWikiCreateSlugLabel: "Slug",
+    adminWikiCreateTagsPlaceholder: "wprowadzenie, podstawy, konfiguracja",
+  },
+  ua: {
+    adminWikiCreateSlugLabel: "Slug",
+    adminWikiCreateTagsPlaceholder: "вступ, основи, налаштування",
+  },
+  ru: {
+    adminWikiCreateSlugLabel: "Slug",
+    adminWikiCreateTagsPlaceholder: "введение, основы, настройка",
+  },
+  fr: {
+    adminWikiCreateSlugLabel: "Slug",
+    adminWikiCreateTagsPlaceholder: "introduction, bases, configuration",
+  },
+  tr: {
+    adminWikiCreateSlugLabel: "Slug",
+    adminWikiCreateTagsPlaceholder: "giriş, temel bilgiler, kurulum",
+  },
+  ro: {
+    adminWikiCreateSlugLabel: "Slug",
+    adminWikiCreateTagsPlaceholder: "introducere, bazele, configurare",
+  },
+  hi: {
+    adminWikiCreateSlugLabel: "स्लग",
+    adminWikiCreateTagsPlaceholder: "परिचय, मूल बातें, सेटअप",
+  },
+  vi: {
+    adminWikiCreateSlugLabel: "Slug",
+    adminWikiCreateTagsPlaceholder: "giới thiệu, cơ bản, thiết lập",
+  },
+  id: {
+    adminWikiCreateSlugLabel: "Slug",
+    adminWikiCreateTagsPlaceholder: "pengantar, dasar, pengaturan",
+  },
+  it: {
+    adminWikiCreateSlugLabel: "Slug",
+    adminWikiCreateTagsPlaceholder: "introduzione, basi, configurazione",
+  },
+  ko: {
+    adminWikiCreateSlugLabel: "슬러그",
+    adminWikiCreateTagsPlaceholder: "소개, 기본, 설정",
+  },
+  ja: {
+    adminWikiCreateSlugLabel: "スラッグ",
+    adminWikiCreateTagsPlaceholder: "導入, 基本, セットアップ",
+  },
+  nl: {
+    adminWikiCreateSlugLabel: "Slug",
+    adminWikiCreateTagsPlaceholder: "introductie, basis, instelling",
+  },
+  cs: {
+    adminWikiCreateSlugLabel: "Slug",
+    adminWikiCreateTagsPlaceholder: "úvod, základy, nastavení",
+  },
+  ar: {
+    adminWikiCreateSlugLabel: "Slug",
+    adminWikiCreateTagsPlaceholder: "مقدمة، أساسيات، إعداد",
+  },
+};
+
+const ADMIN_METRICS_OVERRIDES: Partial<
+  Record<SupportedLang, Partial<DomainMessages["common"]>>
+> = {
+  bg: {
+    adminMetricsTitle: "Преглед на метриките",
+    adminMetricsSubtitle:
+      "Базови системни метрики за администратори (MVP обхват)",
+    adminMetricsInfoTooltipLabel: "Информация",
+    adminMetricsInfoTooltipTitle: "Метрики",
+    adminMetricsInfoTooltipDescription:
+      "Статистика за платформата: потребители, wiki, обобщена активност, wiki внимание и експорт на разширени метрики.",
+    adminMetricsWikiInsightsViewAria: "Изглед на Wiki метриките",
+    adminMetricsPeriodAria: "Период на метриките",
+
+    adminMetricsUsersTrendTitle:
+      "Нови потребители по месеци (последни периоди)",
+    adminMetricsUserActivityTitle: "Активност за избрания период",
+    adminMetricsUserActivityRegisteredLink: "Виж потребители (Users)",
+    adminMetricsUserActivityDeactivatedLink:
+      "Виж деактивирани (Users)",
+    adminMetricsUserActivityArticleCreatedLink: "Виж новите статии (Wiki)",
+    adminMetricsUserActivityArticleUpdatedLink:
+      "Виж обновените статии (Wiki)",
+
+    adminMetricsNetUsersChangeZero:
+      "Няма нетна промяна в броя потребители за избрания период.",
+    adminMetricsNetUsersChangePositiveSuffix:
+      "нетно нови потребители за избрания период.",
+    adminMetricsNetUsersChangeNegativeSuffix:
+      "нетно загубени потребители за избрания период.",
+
+    adminWikiViewsTitle: "Гледания на Wiki статии",
+    adminWikiViewsSubtitle:
+      "Агрегирани гледания и уникални посетители по ден (salted hash на IP) за избрания период.",
+    adminWikiViewsTotal: "Общо гледания",
+    adminWikiViewsTotalUniqueVisitors: "Общо уникални посетители",
+    adminWikiViewsTopArticles: "Топ статии",
+    adminWikiViewsTopArticlesUniqueVisitors:
+      "Топ статии (уникални посетители)",
+    adminWikiViewsDaily: "Дневни гледания",
+    adminWikiViewsDailyUniqueVisitors: "Дневни уникални посетители",
+
+    adminWikiFeedbackTitle: "Wiki обратна връзка",
+    adminWikiFeedbackSubtitle:
+      "Гласове полезно / неполезно за избрания период.",
+    adminWikiFeedbackTotal: "Общо гласове",
+    adminWikiFeedbackTotalYes: "Полезно (Да)",
+    adminWikiFeedbackTotalNo: "Неполезно (Не)",
+    adminWikiFeedbackHelpfulRate: "Дял полезно",
+    adminWikiFeedbackTopNotHelpful: "Топ статии (неполезно)",
+    adminWikiFeedbackNotHelpful: "Неполезно",
+    adminWikiFeedbackNotHelpfulRate: "Дял неполезно",
+    adminWikiFeedbackDailyTotal: "Дневни гласове",
+    adminWikiFeedbackDailyNotHelpful: "Дневни неполезно",
+
+    adminWikiInsightsViewAll: "Wiki: всички",
+    adminWikiInsightsViewViews: "Wiki: гледания",
+    adminWikiInsightsViewFeedback: "Wiki: обратна връзка",
+    adminWikiInsightsViewAttention: "Wiki: нуждае се от внимание",
+
+    adminWikiAttentionTitle: "Wiki: нуждае се от внимание",
+    adminWikiAttentionSubtitle:
+      "Статии с високи гледания и висок дял „неполезно“ (комбиниран score).",
+    adminWikiAttentionArticle: "Статия",
+    adminWikiAttentionScore: "Score",
+    adminWikiAttentionViews: "Гледания",
+    adminWikiAttentionNotHelpfulRate: "% неполезно",
+    adminWikiAttentionVotes: "Гласове",
+    adminWikiAttentionHelpfulYes: "Полезно (Да)",
+    adminWikiAttentionHelpfulNo: "Неполезно (Не)",
+    adminWikiAttentionEdit: "Редакция",
+    adminWikiAttentionExportCsv: "Експорт (CSV)",
+    adminWikiAttentionFilterSearch: "Търсене",
+    adminWikiAttentionFilterSearchPlaceholder: "slug...",
+    adminWikiAttentionFilterMinViews: "Мин. гледания",
+    adminWikiAttentionFilterMinVotes: "Мин. гласове",
+    adminWikiAttentionFilterMinNotHelpfulRate: "Мин. % неполезно",
+    adminWikiAttentionFilterShowingPrefix: "Показани",
+
+    adminAdvancedMetricsTitle: "Разширени метрики",
+    adminAdvancedMetricsSubtitle:
+      "Сесии и посещения (без лични данни) за избрания период.",
+    adminAdvancedMetricsError:
+      "Не успяхме да заредим разширените метрики за избрания период.",
+    adminAdvancedMetricsExportCsv: "Експорт (CSV)",
+    adminAdvancedMetricsExportLoading: "Експорт...",
+    adminAdvancedMetricsExportError:
+      "Не успяхме да експортираме разширените метрики.",
+    adminAdvancedMetricsTotalSessions: "Общо сесии",
+    adminAdvancedMetricsAvgDuration: "Средна продължителност",
+    adminAdvancedMetricsTotalPageViews: "Общо посещения",
+    adminAdvancedMetricsSessionSources: "Източници (сесии)",
+    adminAdvancedMetricsPageViewSources: "Източници (посещения)",
+    adminAdvancedMetricsTopPages: "Топ страници",
+    adminAdvancedMetricsDailySessions: "Дневни сесии",
+    adminAdvancedMetricsDailyPageViews: "Дневни посещения",
+  },
+  de: {
+    adminMetricsTitle: "Metriken-Übersicht",
+    adminMetricsSubtitle:
+      "Grundlegende Systemmetriken für Administratoren (MVP-Umfang)",
+    adminMetricsInfoTooltipLabel: "Info",
+    adminMetricsInfoTooltipTitle: "Metriken",
+    adminMetricsInfoTooltipDescription:
+      "Plattform-Statistiken: Benutzer, Wiki, Aktivitätsübersicht, Wiki-Aufmerksamkeit und Export erweiterter Metriken.",
+    adminMetricsWikiInsightsViewAria: "Wiki-Einblicke",
+    adminMetricsPeriodAria: "Metrik-Zeitraum",
+
+    adminMetricsUsersTrendTitle:
+      "Neue Benutzer pro Monat (letzte Zeiträume)",
+    adminMetricsUserActivityTitle: "Aktivität für den ausgewählten Zeitraum",
+    adminMetricsUserActivityRegisteredLink: "Benutzer anzeigen (Users)",
+    adminMetricsUserActivityDeactivatedLink:
+      "Deaktivierte anzeigen (Users)",
+    adminMetricsUserActivityArticleCreatedLink:
+      "Neue Artikel anzeigen (Wiki)",
+    adminMetricsUserActivityArticleUpdatedLink:
+      "Aktualisierte Artikel anzeigen (Wiki)",
+
+    adminMetricsNetUsersChangeZero:
+      "Keine Nettoveränderung bei Benutzern für den ausgewählten Zeitraum.",
+    adminMetricsNetUsersChangePositiveSuffix:
+      "Netto neue Benutzer für den ausgewählten Zeitraum.",
+    adminMetricsNetUsersChangeNegativeSuffix:
+      "Netto verlorene Benutzer für den ausgewählten Zeitraum.",
+
+    adminWikiViewsTitle: "Wiki-Artikelaufrufe",
+    adminWikiViewsSubtitle:
+      "Täglich aggregierte Aufrufe und eindeutige Besucher (salted IP hash) für den ausgewählten Zeitraum.",
+    adminWikiViewsTotal: "Aufrufe gesamt",
+    adminWikiViewsTotalUniqueVisitors: "Eindeutige Besucher gesamt",
+    adminWikiViewsTopArticles: "Top-Artikel",
+    adminWikiViewsTopArticlesUniqueVisitors:
+      "Top-Artikel (eindeutige Besucher)",
+    adminWikiViewsDaily: "Tägliche Aufrufe",
+    adminWikiViewsDailyUniqueVisitors: "Tägliche eindeutige Besucher",
+
+    adminWikiFeedbackTitle: "Wiki-Feedback",
+    adminWikiFeedbackSubtitle:
+      "Hilfreich / nicht hilfreich Stimmen für den ausgewählten Zeitraum.",
+    adminWikiFeedbackTotal: "Stimmen gesamt",
+    adminWikiFeedbackTotalYes: "Hilfreich (Ja)",
+    adminWikiFeedbackTotalNo: "Nicht hilfreich (Nein)",
+    adminWikiFeedbackHelpfulRate: "Hilfreich-Rate",
+    adminWikiFeedbackTopNotHelpful: "Top-Artikel (nicht hilfreich)",
+    adminWikiFeedbackNotHelpful: "Nicht hilfreich",
+    adminWikiFeedbackNotHelpfulRate: "Nicht-hilfreich-Rate",
+    adminWikiFeedbackDailyTotal: "Tägliche Stimmen",
+    adminWikiFeedbackDailyNotHelpful: "Täglich nicht hilfreich",
+
+    adminWikiInsightsViewAll: "Wiki: alle",
+    adminWikiInsightsViewViews: "Wiki: Aufrufe",
+    adminWikiInsightsViewFeedback: "Wiki: Feedback",
+    adminWikiInsightsViewAttention: "Wiki: braucht Aufmerksamkeit",
+
+    adminWikiAttentionTitle: "Wiki: braucht Aufmerksamkeit",
+    adminWikiAttentionSubtitle:
+      "Artikel mit vielen Aufrufen und hohem Anteil „nicht hilfreich“ (kombinierter Score).",
+    adminWikiAttentionArticle: "Artikel",
+    adminWikiAttentionScore: "Score",
+    adminWikiAttentionViews: "Aufrufe",
+    adminWikiAttentionNotHelpfulRate: "% nicht hilfreich",
+    adminWikiAttentionVotes: "Stimmen",
+    adminWikiAttentionHelpfulYes: "Hilfreich (Ja)",
+    adminWikiAttentionHelpfulNo: "Nicht hilfreich (Nein)",
+    adminWikiAttentionEdit: "Bearbeiten",
+    adminWikiAttentionExportCsv: "Export (CSV)",
+    adminWikiAttentionFilterSearch: "Suche",
+    adminWikiAttentionFilterSearchPlaceholder: "slug...",
+    adminWikiAttentionFilterMinViews: "Min. Aufrufe",
+    adminWikiAttentionFilterMinVotes: "Min. Stimmen",
+    adminWikiAttentionFilterMinNotHelpfulRate: "Min. % nicht hilfreich",
+    adminWikiAttentionFilterShowingPrefix: "Angezeigt",
+
+    adminAdvancedMetricsTitle: "Erweiterte Metriken",
+    adminAdvancedMetricsSubtitle:
+      "Sitzungen und Seitenaufrufe (keine personenbezogenen Daten) für den ausgewählten Zeitraum.",
+    adminAdvancedMetricsError:
+      "Erweiterte Metriken für den ausgewählten Zeitraum konnten nicht geladen werden.",
+    adminAdvancedMetricsExportCsv: "Export (CSV)",
+    adminAdvancedMetricsExportLoading: "Exportiere...",
+    adminAdvancedMetricsExportError:
+      "Erweiterte Metriken konnten nicht exportiert werden.",
+    adminAdvancedMetricsTotalSessions: "Sitzungen gesamt",
+    adminAdvancedMetricsAvgDuration: "Ø Sitzungsdauer",
+    adminAdvancedMetricsTotalPageViews: "Seitenaufrufe gesamt",
+    adminAdvancedMetricsSessionSources: "Quellen (Sitzungen)",
+    adminAdvancedMetricsPageViewSources: "Quellen (Seitenaufrufe)",
+    adminAdvancedMetricsTopPages: "Top-Seiten",
+    adminAdvancedMetricsDailySessions: "Tägliche Sitzungen",
+    adminAdvancedMetricsDailyPageViews: "Tägliche Seitenaufrufe",
+  },
+  es: {
+    adminMetricsTitle: "Resumen de métricas",
+    adminMetricsSubtitle:
+      "Métricas básicas del sistema para administradores (alcance MVP)",
+    adminMetricsInfoTooltipLabel: "Info",
+    adminMetricsInfoTooltipTitle: "Métricas",
+    adminMetricsInfoTooltipDescription:
+      "Estadísticas de la plataforma: usuarios, wiki, resumen de actividad, atención en wiki y exportación de métricas avanzadas.",
+    adminMetricsWikiInsightsViewAria: "Vista de métricas de Wiki",
+    adminMetricsPeriodAria: "Periodo de métricas",
+
+    adminMetricsUsersTrendTitle:
+      "Nuevos usuarios por mes (periodos recientes)",
+    adminMetricsUserActivityTitle: "Actividad del periodo seleccionado",
+    adminMetricsUserActivityRegisteredLink: "Ver usuarios (Users)",
+    adminMetricsUserActivityDeactivatedLink: "Ver desactivados (Users)",
+    adminMetricsUserActivityArticleCreatedLink: "Ver artículos nuevos (Wiki)",
+    adminMetricsUserActivityArticleUpdatedLink:
+      "Ver artículos actualizados (Wiki)",
+
+    adminMetricsNetUsersChangeZero:
+      "No hay cambio neto de usuarios en el periodo seleccionado.",
+    adminMetricsNetUsersChangePositiveSuffix:
+      "usuarios netos nuevos en el periodo seleccionado.",
+    adminMetricsNetUsersChangeNegativeSuffix:
+      "usuarios netos perdidos en el periodo seleccionado.",
+
+    adminWikiViewsTitle: "Vistas de artículos Wiki",
+    adminWikiViewsSubtitle:
+      "Vistas diarias agregadas y visitantes únicos (hash IP con sal) para el periodo seleccionado.",
+    adminWikiViewsTotal: "Vistas totales",
+    adminWikiViewsTotalUniqueVisitors: "Visitantes únicos totales",
+    adminWikiViewsTopArticles: "Artículos destacados",
+    adminWikiViewsTopArticlesUniqueVisitors:
+      "Artículos destacados (visitantes únicos)",
+    adminWikiViewsDaily: "Vistas diarias",
+    adminWikiViewsDailyUniqueVisitors: "Visitantes únicos diarios",
+
+    adminWikiFeedbackTitle: "Feedback de Wiki",
+    adminWikiFeedbackSubtitle:
+      "Votos útil / no útil para el periodo seleccionado.",
+    adminWikiFeedbackTotal: "Votos totales",
+    adminWikiFeedbackTotalYes: "Útil (Sí)",
+    adminWikiFeedbackTotalNo: "No útil (No)",
+    adminWikiFeedbackHelpfulRate: "Tasa de útil",
+    adminWikiFeedbackTopNotHelpful: "Artículos destacados (no útil)",
+    adminWikiFeedbackNotHelpful: "No útil",
+    adminWikiFeedbackNotHelpfulRate: "Tasa de no útil",
+    adminWikiFeedbackDailyTotal: "Votos diarios",
+    adminWikiFeedbackDailyNotHelpful: "No útil diario",
+
+    adminWikiInsightsViewAll: "Wiki: todo",
+    adminWikiInsightsViewViews: "Wiki: vistas",
+    adminWikiInsightsViewFeedback: "Wiki: feedback",
+    adminWikiInsightsViewAttention: "Wiki: requiere atención",
+
+    adminWikiAttentionTitle: "Wiki: requiere atención",
+    adminWikiAttentionSubtitle:
+      "Artículos con muchas vistas y alta proporción de no útil (score combinado).",
+    adminWikiAttentionArticle: "Artículo",
+    adminWikiAttentionScore: "Score",
+    adminWikiAttentionViews: "Vistas",
+    adminWikiAttentionNotHelpfulRate: "% no útil",
+    adminWikiAttentionVotes: "Votos",
+    adminWikiAttentionHelpfulYes: "Útil (Sí)",
+    adminWikiAttentionHelpfulNo: "No útil (No)",
+    adminWikiAttentionEdit: "Editar",
+    adminWikiAttentionExportCsv: "Exportar (CSV)",
+    adminWikiAttentionFilterSearch: "Buscar",
+    adminWikiAttentionFilterSearchPlaceholder: "slug...",
+    adminWikiAttentionFilterMinViews: "Vistas mín.",
+    adminWikiAttentionFilterMinVotes: "Votos mín.",
+    adminWikiAttentionFilterMinNotHelpfulRate: "% no útil mín.",
+    adminWikiAttentionFilterShowingPrefix: "Mostrando",
+
+    adminAdvancedMetricsTitle: "Métricas avanzadas",
+    adminAdvancedMetricsSubtitle:
+      "Sesiones y vistas de página (sin datos personales) para el periodo seleccionado.",
+    adminAdvancedMetricsError:
+      "No se pudieron cargar las métricas avanzadas para el periodo seleccionado.",
+    adminAdvancedMetricsExportCsv: "Exportar (CSV)",
+    adminAdvancedMetricsExportLoading: "Exportando...",
+    adminAdvancedMetricsExportError:
+      "No se pudieron exportar las métricas avanzadas.",
+    adminAdvancedMetricsTotalSessions: "Sesiones totales",
+    adminAdvancedMetricsAvgDuration: "Duración media",
+    adminAdvancedMetricsTotalPageViews: "Vistas de página totales",
+    adminAdvancedMetricsSessionSources: "Fuentes (sesiones)",
+    adminAdvancedMetricsPageViewSources: "Fuentes (vistas de página)",
+    adminAdvancedMetricsTopPages: "Páginas destacadas",
+    adminAdvancedMetricsDailySessions: "Sesiones diarias",
+    adminAdvancedMetricsDailyPageViews: "Vistas de página diarias",
+  },
+  pt: {
+    adminMetricsTitle: "Resumo de métricas",
+    adminMetricsSubtitle:
+      "Métricas básicas do sistema para administradores (escopo MVP)",
+    adminMetricsInfoTooltipLabel: "Info",
+    adminMetricsInfoTooltipTitle: "Métricas",
+    adminMetricsInfoTooltipDescription:
+      "Estatísticas da plataforma: utilizadores, wiki, resumo de atividade, atenção no wiki e exportação de métricas avançadas.",
+    adminMetricsWikiInsightsViewAria: "Vista de métricas do Wiki",
+    adminMetricsPeriodAria: "Período das métricas",
+
+    adminMetricsUsersTrendTitle:
+      "Novos utilizadores por mês (períodos recentes)",
+    adminMetricsUserActivityTitle: "Atividade do período selecionado",
+    adminMetricsUserActivityRegisteredLink: "Ver utilizadores (Users)",
+    adminMetricsUserActivityDeactivatedLink:
+      "Ver desativados (Users)",
+    adminMetricsUserActivityArticleCreatedLink: "Ver artigos novos (Wiki)",
+    adminMetricsUserActivityArticleUpdatedLink:
+      "Ver artigos atualizados (Wiki)",
+
+    adminMetricsNetUsersChangeZero:
+      "Sem alteração líquida de utilizadores no período selecionado.",
+    adminMetricsNetUsersChangePositiveSuffix:
+      "utilizadores líquidos novos no período selecionado.",
+    adminMetricsNetUsersChangeNegativeSuffix:
+      "utilizadores líquidos perdidos no período selecionado.",
+
+    adminWikiViewsTitle: "Visualizações de artigos Wiki",
+    adminWikiViewsSubtitle:
+      "Visualizações agregadas diárias e visitantes únicos (hash de IP com sal) para o período selecionado.",
+    adminWikiViewsTotal: "Total de visualizações",
+    adminWikiViewsTotalUniqueVisitors: "Total de visitantes únicos",
+    adminWikiViewsTopArticles: "Artigos em destaque",
+    adminWikiViewsTopArticlesUniqueVisitors:
+      "Artigos em destaque (visitantes únicos)",
+    adminWikiViewsDaily: "Visualizações diárias",
+    adminWikiViewsDailyUniqueVisitors: "Visitantes únicos diários",
+
+    adminWikiFeedbackTitle: "Feedback do Wiki",
+    adminWikiFeedbackSubtitle:
+      "Votos útil / não útil para o período selecionado.",
+    adminWikiFeedbackTotal: "Total de votos",
+    adminWikiFeedbackTotalYes: "Útil (Sim)",
+    adminWikiFeedbackTotalNo: "Não útil (Não)",
+    adminWikiFeedbackHelpfulRate: "Taxa de útil",
+    adminWikiFeedbackTopNotHelpful: "Artigos em destaque (não útil)",
+    adminWikiFeedbackNotHelpful: "Não útil",
+    adminWikiFeedbackNotHelpfulRate: "Taxa de não útil",
+    adminWikiFeedbackDailyTotal: "Votos diários",
+    adminWikiFeedbackDailyNotHelpful: "Não útil diário",
+
+    adminWikiInsightsViewAll: "Wiki: tudo",
+    adminWikiInsightsViewViews: "Wiki: visualizações",
+    adminWikiInsightsViewFeedback: "Wiki: feedback",
+    adminWikiInsightsViewAttention: "Wiki: precisa de atenção",
+
+    adminWikiAttentionTitle: "Wiki: precisa de atenção",
+    adminWikiAttentionSubtitle:
+      "Artigos com muitas visualizações e alta percentagem de “não útil” (score combinado).",
+    adminWikiAttentionArticle: "Artigo",
+    adminWikiAttentionScore: "Score",
+    adminWikiAttentionViews: "Visualizações",
+    adminWikiAttentionNotHelpfulRate: "% não útil",
+    adminWikiAttentionVotes: "Votos",
+    adminWikiAttentionHelpfulYes: "Útil (Sim)",
+    adminWikiAttentionHelpfulNo: "Não útil (Não)",
+    adminWikiAttentionEdit: "Editar",
+    adminWikiAttentionExportCsv: "Exportar (CSV)",
+    adminWikiAttentionFilterSearch: "Pesquisar",
+    adminWikiAttentionFilterSearchPlaceholder: "slug...",
+    adminWikiAttentionFilterMinViews: "Visualizações mín.",
+    adminWikiAttentionFilterMinVotes: "Votos mín.",
+    adminWikiAttentionFilterMinNotHelpfulRate: "% não útil mín.",
+    adminWikiAttentionFilterShowingPrefix: "A mostrar",
+
+    adminAdvancedMetricsTitle: "Métricas avançadas",
+    adminAdvancedMetricsSubtitle:
+      "Sessões e visitas de página (sem dados pessoais) para o período selecionado.",
+    adminAdvancedMetricsError:
+      "Não foi possível carregar as métricas avançadas para o período selecionado.",
+    adminAdvancedMetricsExportCsv: "Exportar (CSV)",
+    adminAdvancedMetricsExportLoading: "A exportar...",
+    adminAdvancedMetricsExportError:
+      "Não foi possível exportar as métricas avançadas.",
+    adminAdvancedMetricsTotalSessions: "Total de sessões",
+    adminAdvancedMetricsAvgDuration: "Duração média",
+    adminAdvancedMetricsTotalPageViews: "Total de visitas de página",
+    adminAdvancedMetricsSessionSources: "Fontes (sessões)",
+    adminAdvancedMetricsPageViewSources: "Fontes (visitas de página)",
+    adminAdvancedMetricsTopPages: "Páginas em destaque",
+    adminAdvancedMetricsDailySessions: "Sessões diárias",
+    adminAdvancedMetricsDailyPageViews: "Visitas de página diárias",
+  },
+  pl: {
+    adminMetricsTitle: "Przegląd metryk",
+    adminMetricsSubtitle:
+      "Podstawowe metryki systemu dla administratorów (zakres MVP)",
+    adminMetricsInfoTooltipLabel: "Info",
+    adminMetricsInfoTooltipTitle: "Metryki",
+    adminMetricsInfoTooltipDescription:
+      "Statystyki platformy: użytkownicy, wiki, podsumowanie aktywności, uwaga wiki i eksport metryk zaawansowanych.",
+    adminMetricsWikiInsightsViewAria: "Widok metryk Wiki",
+    adminMetricsPeriodAria: "Okres metryk",
+
+    adminMetricsUsersTrendTitle:
+      "Nowi użytkownicy na miesiąc (ostatnie okresy)",
+    adminMetricsUserActivityTitle: "Aktywność dla wybranego okresu",
+    adminMetricsUserActivityRegisteredLink: "Zobacz użytkowników (Users)",
+    adminMetricsUserActivityDeactivatedLink:
+      "Zobacz zdezaktywowanych (Users)",
+    adminMetricsUserActivityArticleCreatedLink:
+      "Zobacz nowe artykuły (Wiki)",
+    adminMetricsUserActivityArticleUpdatedLink:
+      "Zobacz zaktualizowane artykuły (Wiki)",
+
+    adminMetricsNetUsersChangeZero:
+      "Brak zmiany netto liczby użytkowników dla wybranego okresu.",
+    adminMetricsNetUsersChangePositiveSuffix:
+      "użytkowników netto przybyło w wybranym okresie.",
+    adminMetricsNetUsersChangeNegativeSuffix:
+      "użytkowników netto ubyło w wybranym okresie.",
+
+    adminWikiViewsTitle: "Wyświetlenia artykułów Wiki",
+    adminWikiViewsSubtitle:
+      "Dzienne zagregowane wyświetlenia i unikalni odwiedzający (hash IP z solą) dla wybranego okresu.",
+    adminWikiViewsTotal: "Łączne wyświetlenia",
+    adminWikiViewsTotalUniqueVisitors: "Łącznie unikalni odwiedzający",
+    adminWikiViewsTopArticles: "Najpopularniejsze artykuły",
+    adminWikiViewsTopArticlesUniqueVisitors:
+      "Najpopularniejsze artykuły (unikalni odwiedzający)",
+    adminWikiViewsDaily: "Dzienne wyświetlenia",
+    adminWikiViewsDailyUniqueVisitors: "Dzienni unikalni odwiedzający",
+
+    adminWikiFeedbackTitle: "Opinie Wiki",
+    adminWikiFeedbackSubtitle:
+      "Głosy pomocne / niepomocne dla wybranego okresu.",
+    adminWikiFeedbackTotal: "Łącznie głosów",
+    adminWikiFeedbackTotalYes: "Pomocne (Tak)",
+    adminWikiFeedbackTotalNo: "Niepomocne (Nie)",
+    adminWikiFeedbackHelpfulRate: "Wskaźnik pomocności",
+    adminWikiFeedbackTopNotHelpful: "Najgorsze artykuły (niepomocne)",
+    adminWikiFeedbackNotHelpful: "Niepomocne",
+    adminWikiFeedbackNotHelpfulRate: "Wskaźnik niepomocności",
+    adminWikiFeedbackDailyTotal: "Dzienne głosy",
+    adminWikiFeedbackDailyNotHelpful: "Dziennie niepomocne",
+
+    adminWikiInsightsViewAll: "Wiki: wszystko",
+    adminWikiInsightsViewViews: "Wiki: wyświetlenia",
+    adminWikiInsightsViewFeedback: "Wiki: opinie",
+    adminWikiInsightsViewAttention: "Wiki: wymaga uwagi",
+
+    adminWikiAttentionTitle: "Wiki: wymaga uwagi",
+    adminWikiAttentionSubtitle:
+      "Artykuły z dużą liczbą wyświetleń i wysokim udziałem „niepomocne” (łączny score).",
+    adminWikiAttentionArticle: "Artykuł",
+    adminWikiAttentionScore: "Score",
+    adminWikiAttentionViews: "Wyświetlenia",
+    adminWikiAttentionNotHelpfulRate: "% niepomocne",
+    adminWikiAttentionVotes: "Głosy",
+    adminWikiAttentionHelpfulYes: "Pomocne (Tak)",
+    adminWikiAttentionHelpfulNo: "Niepomocne (Nie)",
+    adminWikiAttentionEdit: "Edytuj",
+    adminWikiAttentionExportCsv: "Eksport (CSV)",
+    adminWikiAttentionFilterSearch: "Szukaj",
+    adminWikiAttentionFilterSearchPlaceholder: "slug...",
+    adminWikiAttentionFilterMinViews: "Min. wyświetleń",
+    adminWikiAttentionFilterMinVotes: "Min. głosów",
+    adminWikiAttentionFilterMinNotHelpfulRate: "Min. % niepomocne",
+    adminWikiAttentionFilterShowingPrefix: "Wyświetlanie",
+
+    adminAdvancedMetricsTitle: "Metryki zaawansowane",
+    adminAdvancedMetricsSubtitle:
+      "Sesje i odsłony stron (bez danych osobowych) dla wybranego okresu.",
+    adminAdvancedMetricsError:
+      "Nie udało się załadować metryk zaawansowanych dla wybranego okresu.",
+    adminAdvancedMetricsExportCsv: "Eksport (CSV)",
+    adminAdvancedMetricsExportLoading: "Eksportowanie...",
+    adminAdvancedMetricsExportError:
+      "Nie udało się wyeksportować metryk zaawansowanych.",
+    adminAdvancedMetricsTotalSessions: "Łącznie sesji",
+    adminAdvancedMetricsAvgDuration: "Śr. czas trwania",
+    adminAdvancedMetricsTotalPageViews: "Łącznie odsłon",
+    adminAdvancedMetricsSessionSources: "Źródła (sesje)",
+    adminAdvancedMetricsPageViewSources: "Źródła (odsłony)",
+    adminAdvancedMetricsTopPages: "Najpopularniejsze strony",
+    adminAdvancedMetricsDailySessions: "Dzienne sesje",
+    adminAdvancedMetricsDailyPageViews: "Dzienne odsłony",
+  },
+  ua: {
+    adminMetricsTitle: "Огляд метрик",
+    adminMetricsSubtitle:
+      "Базові системні метрики для адміністраторів (обсяг MVP)",
+    adminMetricsInfoTooltipLabel: "Інфо",
+    adminMetricsInfoTooltipTitle: "Метрики",
+    adminMetricsInfoTooltipDescription:
+      "Статистика платформи: користувачі, wiki, підсумок активності, увага wiki та експорт розширених метрик.",
+    adminMetricsWikiInsightsViewAria: "Вигляд метрик Wiki",
+    adminMetricsPeriodAria: "Період метрик",
+
+    adminMetricsUsersTrendTitle:
+      "Нові користувачі за місяцями (останні періоди)",
+    adminMetricsUserActivityTitle: "Активність за вибраний період",
+    adminMetricsUserActivityRegisteredLink:
+      "Переглянути користувачів (Users)",
+    adminMetricsUserActivityDeactivatedLink:
+      "Переглянути деактивованих (Users)",
+    adminMetricsUserActivityArticleCreatedLink:
+      "Переглянути нові статті (Wiki)",
+    adminMetricsUserActivityArticleUpdatedLink:
+      "Переглянути оновлені статті (Wiki)",
+
+    adminMetricsNetUsersChangeZero:
+      "Немає чистої зміни користувачів за вибраний період.",
+    adminMetricsNetUsersChangePositiveSuffix:
+      "чистих нових користувачів за вибраний період.",
+    adminMetricsNetUsersChangeNegativeSuffix:
+      "чисто втрачених користувачів за вибраний період.",
+
+    adminWikiViewsTitle: "Перегляди статей Wiki",
+    adminWikiViewsSubtitle:
+      "Щоденні агреговані перегляди та унікальні відвідувачі (salted hash IP) для вибраного періоду.",
+    adminWikiViewsTotal: "Загальні перегляди",
+    adminWikiViewsTotalUniqueVisitors: "Загалом унікальних відвідувачів",
+    adminWikiViewsTopArticles: "Топ статті",
+    adminWikiViewsTopArticlesUniqueVisitors:
+      "Топ статті (унікальні відвідувачі)",
+    adminWikiViewsDaily: "Щоденні перегляди",
+    adminWikiViewsDailyUniqueVisitors: "Щоденні унікальні відвідувачі",
+
+    adminWikiFeedbackTitle: "Відгуки Wiki",
+    adminWikiFeedbackSubtitle:
+      "Голоси корисно / некорисно за вибраний період.",
+    adminWikiFeedbackTotal: "Всього голосів",
+    adminWikiFeedbackTotalYes: "Корисно (Так)",
+    adminWikiFeedbackTotalNo: "Некорисно (Ні)",
+    adminWikiFeedbackHelpfulRate: "Рівень корисності",
+    adminWikiFeedbackTopNotHelpful: "Топ статті (некорисно)",
+    adminWikiFeedbackNotHelpful: "Некорисно",
+    adminWikiFeedbackNotHelpfulRate: "Рівень некорисно",
+    adminWikiFeedbackDailyTotal: "Щоденні голоси",
+    adminWikiFeedbackDailyNotHelpful: "Щодня некорисно",
+
+    adminWikiInsightsViewAll: "Wiki: усе",
+    adminWikiInsightsViewViews: "Wiki: перегляди",
+    adminWikiInsightsViewFeedback: "Wiki: відгуки",
+    adminWikiInsightsViewAttention: "Wiki: потребує уваги",
+
+    adminWikiAttentionTitle: "Wiki: потребує уваги",
+    adminWikiAttentionSubtitle:
+      "Статті з високими переглядами та високою часткою “некорисно” (комбінований score).",
+    adminWikiAttentionArticle: "Стаття",
+    adminWikiAttentionScore: "Score",
+    adminWikiAttentionViews: "Перегляди",
+    adminWikiAttentionNotHelpfulRate: "% некорисно",
+    adminWikiAttentionVotes: "Голоси",
+    adminWikiAttentionHelpfulYes: "Корисно (Так)",
+    adminWikiAttentionHelpfulNo: "Некорисно (Ні)",
+    adminWikiAttentionEdit: "Редагувати",
+    adminWikiAttentionExportCsv: "Експорт (CSV)",
+    adminWikiAttentionFilterSearch: "Пошук",
+    adminWikiAttentionFilterSearchPlaceholder: "slug...",
+    adminWikiAttentionFilterMinViews: "Мін. переглядів",
+    adminWikiAttentionFilterMinVotes: "Мін. голосів",
+    adminWikiAttentionFilterMinNotHelpfulRate: "Мін. % некорисно",
+    adminWikiAttentionFilterShowingPrefix: "Показано",
+
+    adminAdvancedMetricsTitle: "Розширені метрики",
+    adminAdvancedMetricsSubtitle:
+      "Сесії та перегляди сторінок (без персональних даних) за вибраний період.",
+    adminAdvancedMetricsError:
+      "Не вдалося завантажити розширені метрики для вибраного періоду.",
+    adminAdvancedMetricsExportCsv: "Експорт (CSV)",
+    adminAdvancedMetricsExportLoading: "Експорт...",
+    adminAdvancedMetricsExportError:
+      "Не вдалося експортувати розширені метрики.",
+    adminAdvancedMetricsTotalSessions: "Всього сесій",
+    adminAdvancedMetricsAvgDuration: "Сер. тривалість",
+    adminAdvancedMetricsTotalPageViews: "Всього переглядів сторінок",
+    adminAdvancedMetricsSessionSources: "Джерела (сесії)",
+    adminAdvancedMetricsPageViewSources:
+      "Джерела (перегляди сторінок)",
+    adminAdvancedMetricsTopPages: "Топ сторінки",
+    adminAdvancedMetricsDailySessions: "Щоденні сесії",
+    adminAdvancedMetricsDailyPageViews:
+      "Щоденні перегляди сторінок",
+  },
+  ru: {
+    adminMetricsTitle: "Обзор метрик",
+    adminMetricsSubtitle:
+      "Базовые системные метрики для администраторов (объем MVP)",
+    adminMetricsInfoTooltipLabel: "Инфо",
+    adminMetricsInfoTooltipTitle: "Метрики",
+    adminMetricsInfoTooltipDescription:
+      "Статистика платформы: пользователи, wiki, сводка активности, внимание wiki и экспорт расширенных метрик.",
+    adminMetricsWikiInsightsViewAria: "Вид метрик Wiki",
+    adminMetricsPeriodAria: "Период метрик",
+
+    adminMetricsUsersTrendTitle:
+      "Новые пользователи по месяцам (последние периоды)",
+    adminMetricsUserActivityTitle: "Активность за выбранный период",
+    adminMetricsUserActivityRegisteredLink:
+      "Смотреть пользователей (Users)",
+    adminMetricsUserActivityDeactivatedLink:
+      "Смотреть деактивированных (Users)",
+    adminMetricsUserActivityArticleCreatedLink:
+      "Смотреть новые статьи (Wiki)",
+    adminMetricsUserActivityArticleUpdatedLink:
+      "Смотреть обновленные статьи (Wiki)",
+
+    adminMetricsNetUsersChangeZero:
+      "Нет чистого изменения пользователей за выбранный период.",
+    adminMetricsNetUsersChangePositiveSuffix:
+      "чисто новых пользователей за выбранный период.",
+    adminMetricsNetUsersChangeNegativeSuffix:
+      "чисто потерянных пользователей за выбранный период.",
+
+    adminWikiViewsTitle: "Просмотры статей Wiki",
+    adminWikiViewsSubtitle:
+      "Ежедневные агрегированные просмотры и уникальные посетители (salted hash IP) за выбранный период.",
+    adminWikiViewsTotal: "Всего просмотров",
+    adminWikiViewsTotalUniqueVisitors: "Всего уникальных посетителей",
+    adminWikiViewsTopArticles: "Топ статьи",
+    adminWikiViewsTopArticlesUniqueVisitors:
+      "Топ статьи (уникальные посетители)",
+    adminWikiViewsDaily: "Ежедневные просмотры",
+    adminWikiViewsDailyUniqueVisitors:
+      "Ежедневные уникальные посетители",
+
+    adminWikiFeedbackTitle: "Обратная связь Wiki",
+    adminWikiFeedbackSubtitle:
+      "Голоса полезно / неполезно за выбранный период.",
+    adminWikiFeedbackTotal: "Всего голосов",
+    adminWikiFeedbackTotalYes: "Полезно (Да)",
+    adminWikiFeedbackTotalNo: "Неполезно (Нет)",
+    adminWikiFeedbackHelpfulRate: "Доля полезно",
+    adminWikiFeedbackTopNotHelpful: "Топ статьи (неполезно)",
+    adminWikiFeedbackNotHelpful: "Неполезно",
+    adminWikiFeedbackNotHelpfulRate: "Доля неполезно",
+    adminWikiFeedbackDailyTotal: "Ежедневные голоса",
+    adminWikiFeedbackDailyNotHelpful: "Ежедневно неполезно",
+
+    adminWikiInsightsViewAll: "Wiki: все",
+    adminWikiInsightsViewViews: "Wiki: просмотры",
+    adminWikiInsightsViewFeedback: "Wiki: обратная связь",
+    adminWikiInsightsViewAttention: "Wiki: требует внимания",
+
+    adminWikiAttentionTitle: "Wiki: требует внимания",
+    adminWikiAttentionSubtitle:
+      "Статьи с большим числом просмотров и высокой долей “неполезно” (комбинированный score).",
+    adminWikiAttentionArticle: "Статья",
+    adminWikiAttentionScore: "Score",
+    adminWikiAttentionViews: "Просмотры",
+    adminWikiAttentionNotHelpfulRate: "% неполезно",
+    adminWikiAttentionVotes: "Голоса",
+    adminWikiAttentionHelpfulYes: "Полезно (Да)",
+    adminWikiAttentionHelpfulNo: "Неполезно (Нет)",
+    adminWikiAttentionEdit: "Редактировать",
+    adminWikiAttentionExportCsv: "Экспорт (CSV)",
+    adminWikiAttentionFilterSearch: "Поиск",
+    adminWikiAttentionFilterSearchPlaceholder: "slug...",
+    adminWikiAttentionFilterMinViews: "Мин. просмотров",
+    adminWikiAttentionFilterMinVotes: "Мин. голосов",
+    adminWikiAttentionFilterMinNotHelpfulRate: "Мин. % неполезно",
+    adminWikiAttentionFilterShowingPrefix: "Показано",
+
+    adminAdvancedMetricsTitle: "Расширенные метрики",
+    adminAdvancedMetricsSubtitle:
+      "Сессии и просмотры страниц (без персональных данных) за выбранный период.",
+    adminAdvancedMetricsError:
+      "Не удалось загрузить расширенные метрики за выбранный период.",
+    adminAdvancedMetricsExportCsv: "Экспорт (CSV)",
+    adminAdvancedMetricsExportLoading: "Экспорт...",
+    adminAdvancedMetricsExportError:
+      "Не удалось экспортировать расширенные метрики.",
+    adminAdvancedMetricsTotalSessions: "Всего сессий",
+    adminAdvancedMetricsAvgDuration: "Средняя длительность",
+    adminAdvancedMetricsTotalPageViews: "Всего просмотров страниц",
+    adminAdvancedMetricsSessionSources: "Источники (сессии)",
+    adminAdvancedMetricsPageViewSources:
+      "Источники (просмотры страниц)",
+    adminAdvancedMetricsTopPages: "Топ страниц",
+    adminAdvancedMetricsDailySessions: "Ежедневные сессии",
+    adminAdvancedMetricsDailyPageViews:
+      "Ежедневные просмотры страниц",
+  },
+  fr: {
+    adminMetricsTitle: "Aperçu des métriques",
+    adminMetricsSubtitle:
+      "Métriques système de base pour les administrateurs (périmètre MVP)",
+    adminMetricsInfoTooltipLabel: "Info",
+    adminMetricsInfoTooltipTitle: "Métriques",
+    adminMetricsInfoTooltipDescription:
+      "Statistiques de la plateforme : utilisateurs, wiki, résumé d’activité, attention wiki et export des métriques avancées.",
+    adminMetricsWikiInsightsViewAria: "Vue des métriques Wiki",
+    adminMetricsPeriodAria: "Période des métriques",
+
+    adminMetricsUsersTrendTitle:
+      "Nouveaux utilisateurs par mois (périodes récentes)",
+    adminMetricsUserActivityTitle: "Activité pour la période sélectionnée",
+    adminMetricsUserActivityRegisteredLink: "Voir les utilisateurs (Users)",
+    adminMetricsUserActivityDeactivatedLink:
+      "Voir les désactivés (Users)",
+    adminMetricsUserActivityArticleCreatedLink:
+      "Voir les nouveaux articles (Wiki)",
+    adminMetricsUserActivityArticleUpdatedLink:
+      "Voir les articles mis à jour (Wiki)",
+
+    adminMetricsNetUsersChangeZero:
+      "Aucun changement net d’utilisateurs sur la période sélectionnée.",
+    adminMetricsNetUsersChangePositiveSuffix:
+      "nouveaux utilisateurs nets sur la période sélectionnée.",
+    adminMetricsNetUsersChangeNegativeSuffix:
+      "utilisateurs nets perdus sur la période sélectionnée.",
+
+    adminWikiViewsTitle: "Vues des articles Wiki",
+    adminWikiViewsSubtitle:
+      "Vues quotidiennes agrégées et visiteurs uniques (hash IP salé) pour la période sélectionnée.",
+    adminWikiViewsTotal: "Vues totales",
+    adminWikiViewsTotalUniqueVisitors: "Visiteurs uniques totaux",
+    adminWikiViewsTopArticles: "Top articles",
+    adminWikiViewsTopArticlesUniqueVisitors:
+      "Top articles (visiteurs uniques)",
+    adminWikiViewsDaily: "Vues quotidiennes",
+    adminWikiViewsDailyUniqueVisitors: "Visiteurs uniques quotidiens",
+
+    adminWikiFeedbackTitle: "Feedback Wiki",
+    adminWikiFeedbackSubtitle:
+      "Votes utile / non utile pour la période sélectionnée.",
+    adminWikiFeedbackTotal: "Votes totaux",
+    adminWikiFeedbackTotalYes: "Utile (Oui)",
+    adminWikiFeedbackTotalNo: "Non utile (Non)",
+    adminWikiFeedbackHelpfulRate: "Taux d’utilité",
+    adminWikiFeedbackTopNotHelpful: "Top articles (non utile)",
+    adminWikiFeedbackNotHelpful: "Non utile",
+    adminWikiFeedbackNotHelpfulRate: "Taux de non utilité",
+    adminWikiFeedbackDailyTotal: "Votes quotidiens",
+    adminWikiFeedbackDailyNotHelpful: "Non utile quotidien",
+
+    adminWikiInsightsViewAll: "Wiki : tout",
+    adminWikiInsightsViewViews: "Wiki : vues",
+    adminWikiInsightsViewFeedback: "Wiki : feedback",
+    adminWikiInsightsViewAttention: "Wiki : à surveiller",
+
+    adminWikiAttentionTitle: "Wiki : à surveiller",
+    adminWikiAttentionSubtitle:
+      "Articles avec beaucoup de vues et une forte part de “non utile” (score combiné).",
+    adminWikiAttentionArticle: "Article",
+    adminWikiAttentionScore: "Score",
+    adminWikiAttentionViews: "Vues",
+    adminWikiAttentionNotHelpfulRate: "% non utile",
+    adminWikiAttentionVotes: "Votes",
+    adminWikiAttentionHelpfulYes: "Utile (Oui)",
+    adminWikiAttentionHelpfulNo: "Non utile (Non)",
+    adminWikiAttentionEdit: "Modifier",
+    adminWikiAttentionExportCsv: "Exporter (CSV)",
+    adminWikiAttentionFilterSearch: "Rechercher",
+    adminWikiAttentionFilterSearchPlaceholder: "slug...",
+    adminWikiAttentionFilterMinViews: "Vues min.",
+    adminWikiAttentionFilterMinVotes: "Votes min.",
+    adminWikiAttentionFilterMinNotHelpfulRate: "% non utile min.",
+    adminWikiAttentionFilterShowingPrefix: "Affichage",
+
+    adminAdvancedMetricsTitle: "Métriques avancées",
+    adminAdvancedMetricsSubtitle:
+      "Sessions et vues de page (sans données personnelles) pour la période sélectionnée.",
+    adminAdvancedMetricsError:
+      "Impossible de charger les métriques avancées pour la période sélectionnée.",
+    adminAdvancedMetricsExportCsv: "Exporter (CSV)",
+    adminAdvancedMetricsExportLoading: "Exportation...",
+    adminAdvancedMetricsExportError:
+      "Impossible d’exporter les métriques avancées.",
+    adminAdvancedMetricsTotalSessions: "Sessions totales",
+    adminAdvancedMetricsAvgDuration: "Durée moyenne",
+    adminAdvancedMetricsTotalPageViews: "Vues de page totales",
+    adminAdvancedMetricsSessionSources: "Sources (sessions)",
+    adminAdvancedMetricsPageViewSources: "Sources (vues de page)",
+    adminAdvancedMetricsTopPages: "Top pages",
+    adminAdvancedMetricsDailySessions: "Sessions quotidiennes",
+    adminAdvancedMetricsDailyPageViews: "Vues de page quotidiennes",
+  },
+  tr: {
+    adminMetricsTitle: "Metrik özeti",
+    adminMetricsSubtitle:
+      "Yöneticiler için temel sistem metrikleri (MVP kapsamı)",
+    adminMetricsInfoTooltipLabel: "Bilgi",
+    adminMetricsInfoTooltipTitle: "Metrikler",
+    adminMetricsInfoTooltipDescription:
+      "Platform istatistikleri: kullanıcılar, wiki, etkinlik özeti, wiki dikkat ve gelişmiş metrik dışa aktarımı.",
+    adminMetricsWikiInsightsViewAria: "Wiki içgörü görünümü",
+    adminMetricsPeriodAria: "Metrik dönemi",
+
+    adminMetricsUsersTrendTitle:
+      "Aylık yeni kullanıcılar (son dönemler)",
+    adminMetricsUserActivityTitle: "Seçilen dönem için etkinlik",
+    adminMetricsUserActivityRegisteredLink: "Kullanıcıları gör (Users)",
+    adminMetricsUserActivityDeactivatedLink:
+      "Devre dışı olanları gör (Users)",
+    adminMetricsUserActivityArticleCreatedLink: "Yeni makaleleri gör (Wiki)",
+    adminMetricsUserActivityArticleUpdatedLink:
+      "Güncellenen makaleleri gör (Wiki)",
+
+    adminMetricsNetUsersChangeZero:
+      "Seçilen dönemde net kullanıcı değişimi yok.",
+    adminMetricsNetUsersChangePositiveSuffix:
+      "seçilen dönemde net yeni kullanıcı.",
+    adminMetricsNetUsersChangeNegativeSuffix:
+      "seçilen dönemde net kaybedilen kullanıcı.",
+
+    adminWikiViewsTitle: "Wiki makale görüntülenmeleri",
+    adminWikiViewsSubtitle:
+      "Seçilen dönem için günlük toplam görüntülenme ve benzersiz ziyaretçi (salted IP hash).",
+    adminWikiViewsTotal: "Toplam görüntülenme",
+    adminWikiViewsTotalUniqueVisitors: "Toplam benzersiz ziyaretçi",
+    adminWikiViewsTopArticles: "En iyi makaleler",
+    adminWikiViewsTopArticlesUniqueVisitors:
+      "En iyi makaleler (benzersiz ziyaretçi)",
+    adminWikiViewsDaily: "Günlük görüntülenme",
+    adminWikiViewsDailyUniqueVisitors: "Günlük benzersiz ziyaretçi",
+
+    adminWikiFeedbackTitle: "Wiki geri bildirim",
+    adminWikiFeedbackSubtitle:
+      "Seçilen dönem için faydalı / faydasız oylar.",
+    adminWikiFeedbackTotal: "Toplam oy",
+    adminWikiFeedbackTotalYes: "Faydalı (Evet)",
+    adminWikiFeedbackTotalNo: "Faydasız (Hayır)",
+    adminWikiFeedbackHelpfulRate: "Faydalı oranı",
+    adminWikiFeedbackTopNotHelpful: "En iyi makaleler (faydasız)",
+    adminWikiFeedbackNotHelpful: "Faydasız",
+    adminWikiFeedbackNotHelpfulRate: "Faydasız oranı",
+    adminWikiFeedbackDailyTotal: "Günlük oylar",
+    adminWikiFeedbackDailyNotHelpful: "Günlük faydasız",
+
+    adminWikiInsightsViewAll: "Wiki: tümü",
+    adminWikiInsightsViewViews: "Wiki: görüntülenmeler",
+    adminWikiInsightsViewFeedback: "Wiki: geri bildirim",
+    adminWikiInsightsViewAttention: "Wiki: dikkat gerekli",
+
+    adminWikiAttentionTitle: "Wiki: dikkat gerekli",
+    adminWikiAttentionSubtitle:
+      "Yüksek görüntülenme ve yüksek “faydasız” oranına sahip makaleler (birleşik score).",
+    adminWikiAttentionArticle: "Makale",
+    adminWikiAttentionScore: "Score",
+    adminWikiAttentionViews: "Görüntülenme",
+    adminWikiAttentionNotHelpfulRate: "% faydasız",
+    adminWikiAttentionVotes: "Oylar",
+    adminWikiAttentionHelpfulYes: "Faydalı (Evet)",
+    adminWikiAttentionHelpfulNo: "Faydasız (Hayır)",
+    adminWikiAttentionEdit: "Düzenle",
+    adminWikiAttentionExportCsv: "Dışa aktar (CSV)",
+    adminWikiAttentionFilterSearch: "Ara",
+    adminWikiAttentionFilterSearchPlaceholder: "slug...",
+    adminWikiAttentionFilterMinViews: "Min. görüntülenme",
+    adminWikiAttentionFilterMinVotes: "Min. oy",
+    adminWikiAttentionFilterMinNotHelpfulRate: "Min. % faydasız",
+    adminWikiAttentionFilterShowingPrefix: "Gösterilen",
+
+    adminAdvancedMetricsTitle: "Gelişmiş metrikler",
+    adminAdvancedMetricsSubtitle:
+      "Seçilen dönem için oturumlar ve sayfa görüntülemeleri (kişisel veri yok).",
+    adminAdvancedMetricsError:
+      "Seçilen dönem için gelişmiş metrikler yüklenemedi.",
+    adminAdvancedMetricsExportCsv: "Dışa aktar (CSV)",
+    adminAdvancedMetricsExportLoading: "Dışa aktarılıyor...",
+    adminAdvancedMetricsExportError:
+      "Gelişmiş metrikler dışa aktarılamadı.",
+    adminAdvancedMetricsTotalSessions: "Toplam oturum",
+    adminAdvancedMetricsAvgDuration: "Ort. oturum süresi",
+    adminAdvancedMetricsTotalPageViews: "Toplam sayfa görüntüleme",
+    adminAdvancedMetricsSessionSources: "Kaynaklar (oturum)",
+    adminAdvancedMetricsPageViewSources: "Kaynaklar (görüntüleme)",
+    adminAdvancedMetricsTopPages: "En iyi sayfalar",
+    adminAdvancedMetricsDailySessions: "Günlük oturum",
+    adminAdvancedMetricsDailyPageViews: "Günlük sayfa görüntüleme",
+  },
+  ro: {
+    adminMetricsTitle: "Prezentare metrici",
+    adminMetricsSubtitle:
+      "Metrici de bază ale sistemului pentru administratori (scop MVP)",
+    adminMetricsInfoTooltipLabel: "Info",
+    adminMetricsInfoTooltipTitle: "Metrici",
+    adminMetricsInfoTooltipDescription:
+      "Statistici platformă: utilizatori, wiki, rezumat activitate, atenție wiki și export metrici avansate.",
+    adminMetricsWikiInsightsViewAria: "Vizualizare metrici Wiki",
+    adminMetricsPeriodAria: "Perioada metricilor",
+
+    adminMetricsUsersTrendTitle:
+      "Utilizatori noi pe lună (perioade recente)",
+    adminMetricsUserActivityTitle: "Activitate pentru perioada selectată",
+    adminMetricsUserActivityRegisteredLink: "Vezi utilizatori (Users)",
+    adminMetricsUserActivityDeactivatedLink:
+      "Vezi dezactivați (Users)",
+    adminMetricsUserActivityArticleCreatedLink: "Vezi articole noi (Wiki)",
+    adminMetricsUserActivityArticleUpdatedLink:
+      "Vezi articole actualizate (Wiki)",
+
+    adminMetricsNetUsersChangeZero:
+      "Nu există schimbare netă de utilizatori pentru perioada selectată.",
+    adminMetricsNetUsersChangePositiveSuffix:
+      "utilizatori net noi pentru perioada selectată.",
+    adminMetricsNetUsersChangeNegativeSuffix:
+      "utilizatori net pierduți pentru perioada selectată.",
+
+    adminWikiViewsTitle: "Vizualizări articole Wiki",
+    adminWikiViewsSubtitle:
+      "Vizualizări zilnice agregate și vizitatori unici (hash IP cu salt) pentru perioada selectată.",
+    adminWikiViewsTotal: "Total vizualizări",
+    adminWikiViewsTotalUniqueVisitors: "Total vizitatori unici",
+    adminWikiViewsTopArticles: "Articole de top",
+    adminWikiViewsTopArticlesUniqueVisitors:
+      "Articole de top (vizitatori unici)",
+    adminWikiViewsDaily: "Vizualizări zilnice",
+    adminWikiViewsDailyUniqueVisitors: "Vizitatori unici zilnici",
+
+    adminWikiFeedbackTitle: "Feedback Wiki",
+    adminWikiFeedbackSubtitle:
+      "Voturi util / neutil pentru perioada selectată.",
+    adminWikiFeedbackTotal: "Total voturi",
+    adminWikiFeedbackTotalYes: "Util (Da)",
+    adminWikiFeedbackTotalNo: "Neutil (Nu)",
+    adminWikiFeedbackHelpfulRate: "Rată util",
+    adminWikiFeedbackTopNotHelpful: "Articole de top (neutil)",
+    adminWikiFeedbackNotHelpful: "Neutil",
+    adminWikiFeedbackNotHelpfulRate: "Rată neutil",
+    adminWikiFeedbackDailyTotal: "Voturi zilnice",
+    adminWikiFeedbackDailyNotHelpful: "Neutil zilnic",
+
+    adminWikiInsightsViewAll: "Wiki: toate",
+    adminWikiInsightsViewViews: "Wiki: vizualizări",
+    adminWikiInsightsViewFeedback: "Wiki: feedback",
+    adminWikiInsightsViewAttention: "Wiki: necesită atenție",
+
+    adminWikiAttentionTitle: "Wiki: necesită atenție",
+    adminWikiAttentionSubtitle:
+      "Articole cu multe vizualizări și pondere mare de “neutil” (score combinat).",
+    adminWikiAttentionArticle: "Articol",
+    adminWikiAttentionScore: "Score",
+    adminWikiAttentionViews: "Vizualizări",
+    adminWikiAttentionNotHelpfulRate: "% neutil",
+    adminWikiAttentionVotes: "Voturi",
+    adminWikiAttentionHelpfulYes: "Util (Da)",
+    adminWikiAttentionHelpfulNo: "Neutil (Nu)",
+    adminWikiAttentionEdit: "Editează",
+    adminWikiAttentionExportCsv: "Export (CSV)",
+    adminWikiAttentionFilterSearch: "Căutare",
+    adminWikiAttentionFilterSearchPlaceholder: "slug...",
+    adminWikiAttentionFilterMinViews: "Min. vizualizări",
+    adminWikiAttentionFilterMinVotes: "Min. voturi",
+    adminWikiAttentionFilterMinNotHelpfulRate: "Min. % neutil",
+    adminWikiAttentionFilterShowingPrefix: "Afișare",
+
+    adminAdvancedMetricsTitle: "Metrici avansate",
+    adminAdvancedMetricsSubtitle:
+      "Sesiuni și vizualizări de pagină (fără date personale) pentru perioada selectată.",
+    adminAdvancedMetricsError:
+      "Nu s-au putut încărca metricile avansate pentru perioada selectată.",
+    adminAdvancedMetricsExportCsv: "Export (CSV)",
+    adminAdvancedMetricsExportLoading: "Se exportă...",
+    adminAdvancedMetricsExportError:
+      "Nu s-au putut exporta metricile avansate.",
+    adminAdvancedMetricsTotalSessions: "Total sesiuni",
+    adminAdvancedMetricsAvgDuration: "Durată medie",
+    adminAdvancedMetricsTotalPageViews: "Total vizualizări pagină",
+    adminAdvancedMetricsSessionSources: "Surse (sesiuni)",
+    adminAdvancedMetricsPageViewSources: "Surse (vizualizări pagină)",
+    adminAdvancedMetricsTopPages: "Pagini de top",
+    adminAdvancedMetricsDailySessions: "Sesiuni zilnice",
+    adminAdvancedMetricsDailyPageViews: "Vizualizări pagină zilnice",
+  },
+  hi: {
+    adminMetricsTitle: "मेट्रिक्स ओवरव्यू",
+    adminMetricsSubtitle:
+      "प्रशासकों के लिए बुनियादी सिस्टम मेट्रिक्स (MVP स्कोप)",
+    adminMetricsInfoTooltipLabel: "जानकारी",
+    adminMetricsInfoTooltipTitle: "मेट्रिक्स",
+    adminMetricsInfoTooltipDescription:
+      "प्लेटफ़ॉर्म आँकड़े: उपयोगकर्ता, Wiki, गतिविधि सारांश, Wiki ध्यान और उन्नत मेट्रिक्स एक्सपोर्ट।",
+    adminMetricsWikiInsightsViewAria: "Wiki इनसाइट्स व्यू",
+    adminMetricsPeriodAria: "मेट्रिक्स अवधि",
+
+    adminMetricsUsersTrendTitle:
+      "प्रति माह नए उपयोगकर्ता (हालिया अवधि)",
+    adminMetricsUserActivityTitle: "चयनित अवधि की गतिविधि",
+    adminMetricsUserActivityRegisteredLink: "उपयोगकर्ता देखें (Users)",
+    adminMetricsUserActivityDeactivatedLink:
+      "निष्क्रिय देखें (Users)",
+    adminMetricsUserActivityArticleCreatedLink: "नई लेख देखें (Wiki)",
+    adminMetricsUserActivityArticleUpdatedLink:
+      "अपडेटेड लेख देखें (Wiki)",
+
+    adminMetricsNetUsersChangeZero:
+      "चयनित अवधि में उपयोगकर्ताओं में कोई नेट परिवर्तन नहीं।",
+    adminMetricsNetUsersChangePositiveSuffix:
+      "चयनित अवधि के लिए नेट नए उपयोगकर्ता।",
+    adminMetricsNetUsersChangeNegativeSuffix:
+      "चयनित अवधि के लिए नेट घटे उपयोगकर्ता।",
+
+    adminWikiViewsTitle: "Wiki लेख दृश्य",
+    adminWikiViewsSubtitle:
+      "चयनित अवधि के लिए दैनिक एग्रीगेटेड दृश्य और यूनिक विज़िटर (salted IP hash)।",
+    adminWikiViewsTotal: "कुल दृश्य",
+    adminWikiViewsTotalUniqueVisitors: "कुल यूनिक विज़िटर",
+    adminWikiViewsTopArticles: "शीर्ष लेख",
+    adminWikiViewsTopArticlesUniqueVisitors:
+      "शीर्ष लेख (यूनिक विज़िटर)",
+    adminWikiViewsDaily: "दैनिक दृश्य",
+    adminWikiViewsDailyUniqueVisitors: "दैनिक यूनिक विज़िटर",
+
+    adminWikiFeedbackTitle: "Wiki फीडबैक",
+    adminWikiFeedbackSubtitle:
+      "चयनित अवधि के लिए उपयोगी / अनुपयोगी वोट।",
+    adminWikiFeedbackTotal: "कुल वोट",
+    adminWikiFeedbackTotalYes: "उपयोगी (हाँ)",
+    adminWikiFeedbackTotalNo: "अनुपयोगी (नहीं)",
+    adminWikiFeedbackHelpfulRate: "उपयोगी दर",
+    adminWikiFeedbackTopNotHelpful: "शीर्ष लेख (अनुपयोगी)",
+    adminWikiFeedbackNotHelpful: "अनुपयोगी",
+    adminWikiFeedbackNotHelpfulRate: "अनुपयोगी दर",
+    adminWikiFeedbackDailyTotal: "दैनिक वोट",
+    adminWikiFeedbackDailyNotHelpful: "दैनिक अनुपयोगी",
+
+    adminWikiInsightsViewAll: "Wiki: सभी",
+    adminWikiInsightsViewViews: "Wiki: दृश्य",
+    adminWikiInsightsViewFeedback: "Wiki: फीडबैक",
+    adminWikiInsightsViewAttention: "Wiki: ध्यान चाहिए",
+
+    adminWikiAttentionTitle: "Wiki: ध्यान चाहिए",
+    adminWikiAttentionSubtitle:
+      "अधिक दृश्य और उच्च “अनुपयोगी” शेयर वाले लेख (कम्बाइंड score)।",
+    adminWikiAttentionArticle: "लेख",
+    adminWikiAttentionScore: "Score",
+    adminWikiAttentionViews: "दृश्य",
+    adminWikiAttentionNotHelpfulRate: "% अनुपयोगी",
+    adminWikiAttentionVotes: "वोट",
+    adminWikiAttentionHelpfulYes: "उपयोगी (हाँ)",
+    adminWikiAttentionHelpfulNo: "अनुपयोगी (नहीं)",
+    adminWikiAttentionEdit: "संपादित करें",
+    adminWikiAttentionExportCsv: "एक्सपोर्ट (CSV)",
+    adminWikiAttentionFilterSearch: "खोजें",
+    adminWikiAttentionFilterSearchPlaceholder: "slug...",
+    adminWikiAttentionFilterMinViews: "न्यूनतम दृश्य",
+    adminWikiAttentionFilterMinVotes: "न्यूनतम वोट",
+    adminWikiAttentionFilterMinNotHelpfulRate: "न्यूनतम % अनुपयोगी",
+    adminWikiAttentionFilterShowingPrefix: "दिखा रहे हैं",
+
+    adminAdvancedMetricsTitle: "उन्नत मेट्रिक्स",
+    adminAdvancedMetricsSubtitle:
+      "चयनित अवधि के लिए सेशन्स और पेज व्यू (कोई व्यक्तिगत डेटा नहीं)।",
+    adminAdvancedMetricsError:
+      "चयनित अवधि के लिए उन्नत मेट्रिक्स लोड नहीं हो पाए।",
+    adminAdvancedMetricsExportCsv: "एक्सपोर्ट (CSV)",
+    adminAdvancedMetricsExportLoading: "एक्सपोर्ट हो रहा है...",
+    adminAdvancedMetricsExportError:
+      "उन्नत मेट्रिक्स एक्सपोर्ट नहीं हो पाए।",
+    adminAdvancedMetricsTotalSessions: "कुल सेशन्स",
+    adminAdvancedMetricsAvgDuration: "औसत अवधि",
+    adminAdvancedMetricsTotalPageViews: "कुल पेज व्यू",
+    adminAdvancedMetricsSessionSources: "स्रोत (सेशन्स)",
+    adminAdvancedMetricsPageViewSources: "स्रोत (पेज व्यू)",
+    adminAdvancedMetricsTopPages: "शीर्ष पेज",
+    adminAdvancedMetricsDailySessions: "दैनिक सेशन्स",
+    adminAdvancedMetricsDailyPageViews: "दैनिक पेज व्यू",
+  },
+  vi: {
+    adminMetricsTitle: "Tổng quan chỉ số",
+    adminMetricsSubtitle:
+      "Chỉ số hệ thống cơ bản dành cho quản trị viên (phạm vi MVP)",
+    adminMetricsInfoTooltipLabel: "Thông tin",
+    adminMetricsInfoTooltipTitle: "Chỉ số",
+    adminMetricsInfoTooltipDescription:
+      "Thống kê nền tảng: người dùng, wiki, tổng hợp hoạt động, wiki cần chú ý và xuất chỉ số nâng cao.",
+    adminMetricsWikiInsightsViewAria: "Chế độ xem Wiki",
+    adminMetricsPeriodAria: "Khoảng thời gian",
+
+    adminMetricsUsersTrendTitle:
+      "Người dùng mới theo tháng (các giai đoạn gần đây)",
+    adminMetricsUserActivityTitle: "Hoạt động trong giai đoạn đã chọn",
+    adminMetricsUserActivityRegisteredLink: "Xem người dùng (Users)",
+    adminMetricsUserActivityDeactivatedLink:
+      "Xem người dùng đã vô hiệu (Users)",
+    adminMetricsUserActivityArticleCreatedLink: "Xem bài mới (Wiki)",
+    adminMetricsUserActivityArticleUpdatedLink:
+      "Xem bài đã cập nhật (Wiki)",
+
+    adminMetricsNetUsersChangeZero:
+      "Không có thay đổi ròng về người dùng trong giai đoạn đã chọn.",
+    adminMetricsNetUsersChangePositiveSuffix:
+      "người dùng mới ròng trong giai đoạn đã chọn.",
+    adminMetricsNetUsersChangeNegativeSuffix:
+      "người dùng giảm ròng trong giai đoạn đã chọn.",
+
+    adminWikiViewsTitle: "Lượt xem bài Wiki",
+    adminWikiViewsSubtitle:
+      "Lượt xem tổng hợp theo ngày và khách truy cập duy nhất (salted IP hash) trong giai đoạn đã chọn.",
+    adminWikiViewsTotal: "Tổng lượt xem",
+    adminWikiViewsTotalUniqueVisitors: "Tổng khách duy nhất",
+    adminWikiViewsTopArticles: "Bài nổi bật",
+    adminWikiViewsTopArticlesUniqueVisitors:
+      "Bài nổi bật (khách duy nhất)",
+    adminWikiViewsDaily: "Lượt xem theo ngày",
+    adminWikiViewsDailyUniqueVisitors: "Khách duy nhất theo ngày",
+
+    adminWikiFeedbackTitle: "Phản hồi Wiki",
+    adminWikiFeedbackSubtitle:
+      "Phiếu hữu ích / không hữu ích trong giai đoạn đã chọn.",
+    adminWikiFeedbackTotal: "Tổng phiếu",
+    adminWikiFeedbackTotalYes: "Hữu ích (Có)",
+    adminWikiFeedbackTotalNo: "Không hữu ích (Không)",
+    adminWikiFeedbackHelpfulRate: "Tỷ lệ hữu ích",
+    adminWikiFeedbackTopNotHelpful: "Bài nổi bật (không hữu ích)",
+    adminWikiFeedbackNotHelpful: "Không hữu ích",
+    adminWikiFeedbackNotHelpfulRate: "Tỷ lệ không hữu ích",
+    adminWikiFeedbackDailyTotal: "Phiếu theo ngày",
+    adminWikiFeedbackDailyNotHelpful: "Không hữu ích theo ngày",
+
+    adminWikiInsightsViewAll: "Wiki: tất cả",
+    adminWikiInsightsViewViews: "Wiki: lượt xem",
+    adminWikiInsightsViewFeedback: "Wiki: phản hồi",
+    adminWikiInsightsViewAttention: "Wiki: cần chú ý",
+
+    adminWikiAttentionTitle: "Wiki: cần chú ý",
+    adminWikiAttentionSubtitle:
+      "Bài có nhiều lượt xem và tỷ lệ “không hữu ích” cao (score kết hợp).",
+    adminWikiAttentionArticle: "Bài viết",
+    adminWikiAttentionScore: "Score",
+    adminWikiAttentionViews: "Lượt xem",
+    adminWikiAttentionNotHelpfulRate: "% không hữu ích",
+    adminWikiAttentionVotes: "Phiếu",
+    adminWikiAttentionHelpfulYes: "Hữu ích (Có)",
+    adminWikiAttentionHelpfulNo: "Không hữu ích (Không)",
+    adminWikiAttentionEdit: "Sửa",
+    adminWikiAttentionExportCsv: "Xuất (CSV)",
+    adminWikiAttentionFilterSearch: "Tìm kiếm",
+    adminWikiAttentionFilterSearchPlaceholder: "slug...",
+    adminWikiAttentionFilterMinViews: "Lượt xem tối thiểu",
+    adminWikiAttentionFilterMinVotes: "Phiếu tối thiểu",
+    adminWikiAttentionFilterMinNotHelpfulRate: "Tối thiểu % không hữu ích",
+    adminWikiAttentionFilterShowingPrefix: "Đang hiển thị",
+
+    adminAdvancedMetricsTitle: "Chỉ số nâng cao",
+    adminAdvancedMetricsSubtitle:
+      "Phiên và lượt xem trang (không có dữ liệu cá nhân) trong giai đoạn đã chọn.",
+    adminAdvancedMetricsError:
+      "Không thể tải chỉ số nâng cao trong giai đoạn đã chọn.",
+    adminAdvancedMetricsExportCsv: "Xuất (CSV)",
+    adminAdvancedMetricsExportLoading: "Đang xuất...",
+    adminAdvancedMetricsExportError:
+      "Không thể xuất chỉ số nâng cao.",
+    adminAdvancedMetricsTotalSessions: "Tổng phiên",
+    adminAdvancedMetricsAvgDuration: "Thời lượng trung bình",
+    adminAdvancedMetricsTotalPageViews: "Tổng lượt xem trang",
+    adminAdvancedMetricsSessionSources: "Nguồn (phiên)",
+    adminAdvancedMetricsPageViewSources: "Nguồn (lượt xem trang)",
+    adminAdvancedMetricsTopPages: "Trang hàng đầu",
+    adminAdvancedMetricsDailySessions: "Phiên theo ngày",
+    adminAdvancedMetricsDailyPageViews: "Lượt xem trang theo ngày",
+  },
+  ar: {
+    adminDashboardTitle: "لوحة تحكم الإدارة",
+    adminDashboardMetricsLoading: "جارٍ تحميل المقاييس...",
+    adminDashboardMetricsError: "تعذّر تحميل المقاييس.",
+    adminDashboardCardUsersTitle: "المستخدمون المسجّلون",
+    adminDashboardCardUsersTrendSuffix: "مقارنة بالشهر الماضي",
+    adminDashboardCardUsersTrendUnknown:
+      "لا توجد بيانات كافية للمقارنة مع الشهر الماضي",
+    adminDashboardCardUsersTrendHelp: "مقارنة مع الشهر السابق.",
+    adminDashboardCardArticlesTitle: "مقالات الويكي",
+
+    adminUsersStatsTotal: "الإجمالي",
+    adminUsersStatsActive: "نشط",
+    adminUsersStatsDeactivated: "مُعطّل",
+    adminUsersStatsAdmins: "المشرفون",
+
+    adminWikiStatsTotal: "إجمالي مقالات الويكي",
+    adminWikiStatsActive: "نشطة",
+    adminWikiStatsDraft: "مسودات",
+    adminWikiStatsInactive: "غير نشطة",
+    adminWikiStatsActiveHelper:
+      "المقالات النشطة فقط ظاهرة في الويكي العام.",
+    adminWikiStatsTotalHelper:
+      "جميع مقالات الويكي (نشطة، مسودات وغير نشطة).",
+    adminWikiStatsDraftHelper:
+      "المسودات – ظاهرة فقط في ويكي الإدارة حتى يتم نشرها.",
+    adminWikiStatsInactiveHelper:
+      "المقالات غير النشطة ليست ظاهرة في الويكي العام.",
+
+    adminActivityActionArticleCreated: "تم إنشاء مقال",
+    adminActivityActionArticleUpdated: "تم تحديث مقال",
+    adminActivityActionUserRegistered: "تم تسجيل مستخدم",
+    adminActivityActionUserDeactivated: "تم تعطيل مستخدم",
+    adminActivityFilterRangeAll: "كل الوقت",
+    adminActivityFilterRangeLastDay: "آخر يوم",
+    adminActivityFilterRangeLastWeek: "آخر أسبوع",
+    adminActivityFilterRangeLastMonth: "آخر شهر",
+    adminActivityFilterRangeLastYear: "آخر سنة",
+    adminActivityFilterRangeCustom: "مخصص",
+    adminActivityFilterRangeFrom: "من",
+    adminActivityFilterRangeTo: "إلى",
+
+    adminMetricsTitle: "نظرة عامة على المقاييس",
+    adminMetricsSubtitle:
+      "مقاييس نظام أساسية للمشرفين (نطاق MVP)",
+    adminMetricsInfoTooltipLabel: "معلومات",
+    adminMetricsInfoTooltipTitle: "المقاييس",
+    adminMetricsInfoTooltipDescription:
+      "إحصاءات المنصة: المستخدمون، الويكي، ملخص النشاط، الويكي التي تحتاج اهتمامًا وتصدير المقاييس المتقدمة.",
+    adminMetricsWikiInsightsViewAria: "عرض مؤشرات الويكي",
+    adminMetricsPeriodAria: "فترة المقاييس",
+
+    adminMetricsUsersTrendTitle:
+      "مستخدمون جدد حسب الشهر (آخر الفترات)",
+    adminMetricsUserActivityTitle: "النشاط للفترة المحددة",
+    adminMetricsUserActivityRegisteredLink: "عرض المستخدمين (Users)",
+    adminMetricsUserActivityDeactivatedLink:
+      "عرض المعطّلين (Users)",
+    adminMetricsUserActivityArticleCreatedLink:
+      "عرض المقالات الجديدة (Wiki)",
+    adminMetricsUserActivityArticleUpdatedLink:
+      "عرض المقالات المحدّثة (Wiki)",
+
+    adminMetricsNetUsersChangeZero:
+      "لا يوجد تغير صافي في عدد المستخدمين للفترة المحددة.",
+    adminMetricsNetUsersChangePositiveSuffix:
+      "مستخدمون جدد صافيًا للفترة المحددة.",
+    adminMetricsNetUsersChangeNegativeSuffix:
+      "مستخدمون مفقودون صافيًا للفترة المحددة.",
+
+    adminWikiViewsTitle: "مشاهدات مقالات الويكي",
+    adminWikiViewsSubtitle:
+      "مشاهدات مجمعة وزوار فريدون يوميًا (salted hash لـ IP) للفترة المحددة.",
+    adminWikiViewsTotal: "إجمالي المشاهدات",
+    adminWikiViewsTotalUniqueVisitors: "إجمالي الزوار الفريدين",
+    adminWikiViewsTopArticles: "أفضل المقالات",
+    adminWikiViewsTopArticlesUniqueVisitors:
+      "أفضل المقالات (زوار فريدون)",
+    adminWikiViewsDaily: "مشاهدات يومية",
+    adminWikiViewsDailyUniqueVisitors: "زوار فريدون يوميًا",
+
+    adminWikiFeedbackTitle: "ملاحظات الويكي",
+    adminWikiFeedbackSubtitle:
+      "تصويت مفيد / غير مفيد للفترة المحددة.",
+    adminWikiFeedbackTotal: "إجمالي الأصوات",
+    adminWikiFeedbackTotalYes: "مفيد (نعم)",
+    adminWikiFeedbackTotalNo: "غير مفيد (لا)",
+    adminWikiFeedbackHelpfulRate: "نسبة المفيد",
+    adminWikiFeedbackTopNotHelpful: "أفضل المقالات (غير مفيد)",
+    adminWikiFeedbackNotHelpful: "غير مفيد",
+    adminWikiFeedbackNotHelpfulRate: "نسبة غير المفيد",
+    adminWikiFeedbackDailyTotal: "أصوات يومية",
+    adminWikiFeedbackDailyNotHelpful: "غير مفيد يوميًا",
+
+    adminWikiInsightsViewAll: "الويكي: الكل",
+    adminWikiInsightsViewViews: "الويكي: المشاهدات",
+    adminWikiInsightsViewFeedback: "الويكي: الملاحظات",
+    adminWikiInsightsViewAttention: "الويكي: يحتاج اهتمامًا",
+
+    adminWikiAttentionTitle: "الويكي: يحتاج اهتمامًا",
+    adminWikiAttentionSubtitle:
+      "مقالات ذات مشاهدات عالية ونسبة “غير مفيد” مرتفعة (score مُركّب).",
+    adminWikiAttentionArticle: "مقال",
+    adminWikiAttentionScore: "Score",
+    adminWikiAttentionViews: "مشاهدات",
+    adminWikiAttentionNotHelpfulRate: "% غير مفيد",
+    adminWikiAttentionVotes: "أصوات",
+    adminWikiAttentionHelpfulYes: "مفيد (نعم)",
+    adminWikiAttentionHelpfulNo: "غير مفيد (لا)",
+    adminWikiAttentionEdit: "تحرير",
+    adminWikiAttentionExportCsv: "تصدير (CSV)",
+    adminWikiAttentionFilterSearch: "بحث",
+    adminWikiAttentionFilterSearchPlaceholder: "slug...",
+    adminWikiAttentionFilterMinViews: "الحد الأدنى للمشاهدات",
+    adminWikiAttentionFilterMinVotes: "الحد الأدنى للأصوات",
+    adminWikiAttentionFilterMinNotHelpfulRate: "الحد الأدنى % غير مفيد",
+    adminWikiAttentionFilterShowingPrefix: "المعروض",
+
+    adminAdvancedMetricsTitle: "مقاييس متقدمة",
+    adminAdvancedMetricsSubtitle:
+      "جلسات وزيارات (بدون بيانات شخصية) للفترة المحددة.",
+    adminAdvancedMetricsError:
+      "تعذّر تحميل المقاييس المتقدمة للفترة المحددة.",
+    adminAdvancedMetricsExportCsv: "تصدير (CSV)",
+    adminAdvancedMetricsExportLoading: "جارٍ التصدير...",
+    adminAdvancedMetricsExportError:
+      "تعذّر تصدير المقاييس المتقدمة.",
+    adminAdvancedMetricsTotalSessions: "إجمالي الجلسات",
+    adminAdvancedMetricsAvgDuration: "متوسط المدة",
+    adminAdvancedMetricsTotalPageViews: "إجمالي الزيارات",
+    adminAdvancedMetricsSessionSources: "المصادر (الجلسات)",
+    adminAdvancedMetricsPageViewSources: "المصادر (الزيارات)",
+    adminAdvancedMetricsTopPages: "أفضل الصفحات",
+    adminAdvancedMetricsDailySessions: "جلسات يومية",
+    adminAdvancedMetricsDailyPageViews: "زيارات يومية",
+  },
+  id: {
+    adminDashboardTitle: "Dasbor Admin",
+    adminDashboardMetricsLoading: "Memuat metrik...",
+    adminDashboardMetricsError: "Gagal memuat metrik.",
+    adminDashboardCardUsersTitle: "Pengguna terdaftar",
+    adminDashboardCardUsersTrendSuffix: "dibanding bulan lalu",
+    adminDashboardCardUsersTrendUnknown:
+      "Tidak ada data yang cukup untuk dibandingkan dengan bulan lalu",
+    adminDashboardCardUsersTrendHelp: "Dibandingkan dengan bulan sebelumnya.",
+    adminDashboardCardArticlesTitle: "Artikel Wiki",
+
+    adminUsersStatsTotal: "Total",
+    adminUsersStatsActive: "Aktif",
+    adminUsersStatsDeactivated: "Dinonaktifkan",
+    adminUsersStatsAdmins: "Admin",
+
+    adminWikiStatsTotal: "Total artikel Wiki",
+    adminWikiStatsActive: "Aktif",
+    adminWikiStatsDraft: "Draf",
+    adminWikiStatsInactive: "Tidak aktif",
+    adminWikiStatsActiveHelper:
+      "Hanya artikel aktif yang terlihat di Wiki publik.",
+    adminWikiStatsTotalHelper:
+      "Semua artikel wiki (aktif, draf, dan tidak aktif).",
+    adminWikiStatsDraftHelper:
+      "Draf – hanya terlihat di Admin Wiki sampai dipublikasikan.",
+    adminWikiStatsInactiveHelper:
+      "Artikel tidak aktif tidak terlihat di Wiki publik.",
+
+    adminActivityActionArticleCreated: "Artikel dibuat",
+    adminActivityActionArticleUpdated: "Artikel diperbarui",
+    adminActivityActionUserRegistered: "Pengguna terdaftar",
+    adminActivityActionUserDeactivated: "Pengguna dinonaktifkan",
+    adminActivityFilterRangeAll: "Sepanjang waktu",
+    adminActivityFilterRangeLastDay: "1 hari terakhir",
+    adminActivityFilterRangeLastWeek: "1 minggu terakhir",
+    adminActivityFilterRangeLastMonth: "1 bulan terakhir",
+    adminActivityFilterRangeLastYear: "1 tahun terakhir",
+    adminActivityFilterRangeCustom: "Kustom",
+    adminActivityFilterRangeFrom: "Dari",
+    adminActivityFilterRangeTo: "Sampai",
+
+    adminMetricsTitle: "Ringkasan metrik",
+    adminMetricsSubtitle:
+      "Metrik sistem dasar untuk admin (cakupan MVP)",
+    adminMetricsInfoTooltipLabel: "Info",
+    adminMetricsInfoTooltipTitle: "Metrik",
+    adminMetricsInfoTooltipDescription:
+      "Statistik platform: pengguna, wiki, ringkasan aktivitas, perhatian wiki, dan ekspor metrik lanjutan.",
+    adminMetricsWikiInsightsViewAria: "Tampilan metrik Wiki",
+    adminMetricsPeriodAria: "Periode metrik",
+
+    adminMetricsUsersTrendTitle:
+      "Pengguna baru per bulan (periode terakhir)",
+    adminMetricsUserActivityTitle: "Aktivitas untuk periode terpilih",
+    adminMetricsUserActivityRegisteredLink: "Lihat pengguna (Users)",
+    adminMetricsUserActivityDeactivatedLink:
+      "Lihat yang dinonaktifkan (Users)",
+    adminMetricsUserActivityArticleCreatedLink:
+      "Lihat artikel baru (Wiki)",
+    adminMetricsUserActivityArticleUpdatedLink:
+      "Lihat artikel diperbarui (Wiki)",
+
+    adminMetricsNetUsersChangeZero:
+      "Tidak ada perubahan bersih jumlah pengguna untuk periode terpilih.",
+    adminMetricsNetUsersChangePositiveSuffix:
+      "pengguna baru bersih untuk periode terpilih.",
+    adminMetricsNetUsersChangeNegativeSuffix:
+      "pengguna berkurang bersih untuk periode terpilih.",
+
+    adminWikiViewsTitle: "Tampilan artikel Wiki",
+    adminWikiViewsSubtitle:
+      "Tampilan agregat harian dan pengunjung unik (salted hash IP) untuk periode terpilih.",
+    adminWikiViewsTotal: "Total tampilan",
+    adminWikiViewsTotalUniqueVisitors: "Total pengunjung unik",
+    adminWikiViewsTopArticles: "Artikel teratas",
+    adminWikiViewsTopArticlesUniqueVisitors:
+      "Artikel teratas (pengunjung unik)",
+    adminWikiViewsDaily: "Tampilan harian",
+    adminWikiViewsDailyUniqueVisitors: "Pengunjung unik harian",
+
+    adminWikiFeedbackTitle: "Umpan balik Wiki",
+    adminWikiFeedbackSubtitle:
+      "Suara membantu / tidak membantu untuk periode terpilih.",
+    adminWikiFeedbackTotal: "Total suara",
+    adminWikiFeedbackTotalYes: "Membantu (Ya)",
+    adminWikiFeedbackTotalNo: "Tidak membantu (Tidak)",
+    adminWikiFeedbackHelpfulRate: "Rasio membantu",
+    adminWikiFeedbackTopNotHelpful: "Artikel teratas (tidak membantu)",
+    adminWikiFeedbackNotHelpful: "Tidak membantu",
+    adminWikiFeedbackNotHelpfulRate: "Rasio tidak membantu",
+    adminWikiFeedbackDailyTotal: "Suara harian",
+    adminWikiFeedbackDailyNotHelpful: "Tidak membantu harian",
+
+    adminWikiInsightsViewAll: "Wiki: semua",
+    adminWikiInsightsViewViews: "Wiki: tampilan",
+    adminWikiInsightsViewFeedback: "Wiki: umpan balik",
+    adminWikiInsightsViewAttention: "Wiki: perlu perhatian",
+
+    adminWikiAttentionTitle: "Wiki: perlu perhatian",
+    adminWikiAttentionSubtitle:
+      "Artikel dengan tampilan tinggi dan rasio “tidak membantu” tinggi (score gabungan).",
+    adminWikiAttentionArticle: "Artikel",
+    adminWikiAttentionScore: "Score",
+    adminWikiAttentionViews: "Tampilan",
+    adminWikiAttentionNotHelpfulRate: "% tidak membantu",
+    adminWikiAttentionVotes: "Suara",
+    adminWikiAttentionHelpfulYes: "Membantu (Ya)",
+    adminWikiAttentionHelpfulNo: "Tidak membantu (Tidak)",
+    adminWikiAttentionEdit: "Edit",
+    adminWikiAttentionExportCsv: "Ekspor (CSV)",
+    adminWikiAttentionFilterSearch: "Cari",
+    adminWikiAttentionFilterSearchPlaceholder: "slug...",
+    adminWikiAttentionFilterMinViews: "Min. tampilan",
+    adminWikiAttentionFilterMinVotes: "Min. suara",
+    adminWikiAttentionFilterMinNotHelpfulRate: "Min. % tidak membantu",
+    adminWikiAttentionFilterShowingPrefix: "Menampilkan",
+
+    adminAdvancedMetricsTitle: "Metrik lanjutan",
+    adminAdvancedMetricsSubtitle:
+      "Sesi dan kunjungan (tanpa data pribadi) untuk periode terpilih.",
+    adminAdvancedMetricsError:
+      "Tidak dapat memuat metrik lanjutan untuk periode terpilih.",
+    adminAdvancedMetricsExportCsv: "Ekspor (CSV)",
+    adminAdvancedMetricsExportLoading: "Mengekspor...",
+    adminAdvancedMetricsExportError:
+      "Tidak dapat mengekspor metrik lanjutan.",
+    adminAdvancedMetricsTotalSessions: "Total sesi",
+    adminAdvancedMetricsAvgDuration: "Durasi rata-rata",
+    adminAdvancedMetricsTotalPageViews: "Total kunjungan",
+    adminAdvancedMetricsSessionSources: "Sumber (sesi)",
+    adminAdvancedMetricsPageViewSources: "Sumber (kunjungan)",
+    adminAdvancedMetricsTopPages: "Halaman teratas",
+    adminAdvancedMetricsDailySessions: "Sesi harian",
+    adminAdvancedMetricsDailyPageViews: "Kunjungan harian",
+  },
+  it: {
+    adminDashboardTitle: "Dashboard amministratore",
+    adminDashboardMetricsLoading: "Caricamento metriche...",
+    adminDashboardMetricsError: "Impossibile caricare le metriche.",
+    adminDashboardCardUsersTitle: "Utenti registrati",
+    adminDashboardCardUsersTrendSuffix: "rispetto al mese scorso",
+    adminDashboardCardUsersTrendUnknown:
+      "Dati insufficienti per confrontare con il mese scorso",
+    adminDashboardCardUsersTrendHelp: "Confronto con il mese precedente.",
+    adminDashboardCardArticlesTitle: "Articoli Wiki",
+
+    adminUsersStatsTotal: "Totale",
+    adminUsersStatsActive: "Attivi",
+    adminUsersStatsDeactivated: "Disattivati",
+    adminUsersStatsAdmins: "Admin",
+
+    adminWikiStatsTotal: "Totale articoli Wiki",
+    adminWikiStatsActive: "Attivi",
+    adminWikiStatsDraft: "Bozze",
+    adminWikiStatsInactive: "Inattivi",
+    adminWikiStatsActiveHelper:
+      "Solo gli articoli attivi sono visibili nel Wiki pubblico.",
+    adminWikiStatsTotalHelper:
+      "Tutti gli articoli del Wiki (attivi, bozze e inattivi).",
+    adminWikiStatsDraftHelper:
+      "Bozze – visibili solo nel Wiki Admin finché non vengono pubblicate.",
+    adminWikiStatsInactiveHelper:
+      "Gli articoli inattivi non sono visibili nel Wiki pubblico.",
+
+    adminActivityActionArticleCreated: "Articolo creato",
+    adminActivityActionArticleUpdated: "Articolo aggiornato",
+    adminActivityActionUserRegistered: "Utente registrato",
+    adminActivityActionUserDeactivated: "Utente disattivato",
+    adminActivityFilterRangeAll: "Tutto il periodo",
+    adminActivityFilterRangeLastDay: "Ultimo giorno",
+    adminActivityFilterRangeLastWeek: "Ultima settimana",
+    adminActivityFilterRangeLastMonth: "Ultimo mese",
+    adminActivityFilterRangeLastYear: "Ultimo anno",
+    adminActivityFilterRangeCustom: "Personalizzato",
+    adminActivityFilterRangeFrom: "Da",
+    adminActivityFilterRangeTo: "A",
+
+    adminMetricsTitle: "Panoramica metriche",
+    adminMetricsSubtitle:
+      "Metriche di base del sistema per amministratori (ambito MVP)",
+    adminMetricsInfoTooltipLabel: "Info",
+    adminMetricsInfoTooltipTitle: "Metriche",
+    adminMetricsInfoTooltipDescription:
+      "Statistiche della piattaforma: utenti, wiki, riepilogo attività, wiki da attenzionare ed export delle metriche avanzate.",
+    adminMetricsWikiInsightsViewAria: "Vista metriche Wiki",
+    adminMetricsPeriodAria: "Periodo metriche",
+
+    adminMetricsUsersTrendTitle:
+      "Nuovi utenti per mese (ultimi periodi)",
+    adminMetricsUserActivityTitle: "Attività per il periodo selezionato",
+    adminMetricsUserActivityRegisteredLink: "Vedi utenti (Users)",
+    adminMetricsUserActivityDeactivatedLink:
+      "Vedi disattivati (Users)",
+    adminMetricsUserActivityArticleCreatedLink:
+      "Vedi nuovi articoli (Wiki)",
+    adminMetricsUserActivityArticleUpdatedLink:
+      "Vedi articoli aggiornati (Wiki)",
+
+    adminMetricsNetUsersChangeZero:
+      "Nessuna variazione netta nel numero di utenti per il periodo selezionato.",
+    adminMetricsNetUsersChangePositiveSuffix:
+      "nuovi utenti netti per il periodo selezionato.",
+    adminMetricsNetUsersChangeNegativeSuffix:
+      "utenti persi netti per il periodo selezionato.",
+
+    adminWikiViewsTitle: "Visualizzazioni articoli Wiki",
+    adminWikiViewsSubtitle:
+      "Visualizzazioni aggregate e visitatori unici per giorno (salted hash IP) per il periodo selezionato.",
+    adminWikiViewsTotal: "Visualizzazioni totali",
+    adminWikiViewsTotalUniqueVisitors: "Visitatori unici totali",
+    adminWikiViewsTopArticles: "Articoli principali",
+    adminWikiViewsTopArticlesUniqueVisitors:
+      "Articoli principali (visitatori unici)",
+    adminWikiViewsDaily: "Visualizzazioni giornaliere",
+    adminWikiViewsDailyUniqueVisitors: "Visitatori unici giornalieri",
+
+    adminWikiFeedbackTitle: "Feedback Wiki",
+    adminWikiFeedbackSubtitle:
+      "Voti utile / non utile per il periodo selezionato.",
+    adminWikiFeedbackTotal: "Voti totali",
+    adminWikiFeedbackTotalYes: "Utile (Sì)",
+    adminWikiFeedbackTotalNo: "Non utile (No)",
+    adminWikiFeedbackHelpfulRate: "Tasso di utilità",
+    adminWikiFeedbackTopNotHelpful: "Articoli principali (non utile)",
+    adminWikiFeedbackNotHelpful: "Non utile",
+    adminWikiFeedbackNotHelpfulRate: "Tasso non utile",
+    adminWikiFeedbackDailyTotal: "Voti giornalieri",
+    adminWikiFeedbackDailyNotHelpful: "Non utile giornaliero",
+
+    adminWikiInsightsViewAll: "Wiki: tutti",
+    adminWikiInsightsViewViews: "Wiki: visualizzazioni",
+    adminWikiInsightsViewFeedback: "Wiki: feedback",
+    adminWikiInsightsViewAttention: "Wiki: da attenzionare",
+
+    adminWikiAttentionTitle: "Wiki: da attenzionare",
+    adminWikiAttentionSubtitle:
+      "Articoli con molte visualizzazioni e alta percentuale di “non utile” (score combinato).",
+    adminWikiAttentionArticle: "Articolo",
+    adminWikiAttentionScore: "Score",
+    adminWikiAttentionViews: "Visualizzazioni",
+    adminWikiAttentionNotHelpfulRate: "% non utile",
+    adminWikiAttentionVotes: "Voti",
+    adminWikiAttentionHelpfulYes: "Utile (Sì)",
+    adminWikiAttentionHelpfulNo: "Non utile (No)",
+    adminWikiAttentionEdit: "Modifica",
+    adminWikiAttentionExportCsv: "Esporta (CSV)",
+    adminWikiAttentionFilterSearch: "Cerca",
+    adminWikiAttentionFilterSearchPlaceholder: "slug...",
+    adminWikiAttentionFilterMinViews: "Min. visualizzazioni",
+    adminWikiAttentionFilterMinVotes: "Min. voti",
+    adminWikiAttentionFilterMinNotHelpfulRate: "Min. % non utile",
+    adminWikiAttentionFilterShowingPrefix: "Mostrati",
+
+    adminAdvancedMetricsTitle: "Metriche avanzate",
+    adminAdvancedMetricsSubtitle:
+      "Sessioni e visite (senza dati personali) per il periodo selezionato.",
+    adminAdvancedMetricsError:
+      "Impossibile caricare le metriche avanzate per il periodo selezionato.",
+    adminAdvancedMetricsExportCsv: "Esporta (CSV)",
+    adminAdvancedMetricsExportLoading: "Esportazione...",
+    adminAdvancedMetricsExportError:
+      "Impossibile esportare le metriche avanzate.",
+    adminAdvancedMetricsTotalSessions: "Sessioni totali",
+    adminAdvancedMetricsAvgDuration: "Durata media",
+    adminAdvancedMetricsTotalPageViews: "Visite totali",
+    adminAdvancedMetricsSessionSources: "Sorgenti (sessioni)",
+    adminAdvancedMetricsPageViewSources: "Sorgenti (visite)",
+    adminAdvancedMetricsTopPages: "Pagine principali",
+    adminAdvancedMetricsDailySessions: "Sessioni giornaliere",
+    adminAdvancedMetricsDailyPageViews: "Visite giornaliere",
+  },
+  ko: {
+    adminDashboardTitle: "관리자 대시보드",
+    adminDashboardMetricsLoading: "지표를 불러오는 중...",
+    adminDashboardMetricsError: "지표를 불러오지 못했습니다.",
+    adminDashboardCardUsersTitle: "등록된 사용자",
+    adminDashboardCardUsersTrendSuffix: "지난달 대비",
+    adminDashboardCardUsersTrendUnknown:
+      "지난달과 비교할 데이터가 충분하지 않습니다",
+    adminDashboardCardUsersTrendHelp: "이전 달과 비교합니다.",
+    adminDashboardCardArticlesTitle: "위키 문서",
+
+    adminUsersStatsTotal: "전체",
+    adminUsersStatsActive: "활성",
+    adminUsersStatsDeactivated: "비활성화",
+    adminUsersStatsAdmins: "관리자",
+
+    adminWikiStatsTotal: "전체 위키 문서",
+    adminWikiStatsActive: "활성",
+    adminWikiStatsDraft: "초안",
+    adminWikiStatsInactive: "비활성",
+    adminWikiStatsActiveHelper:
+      "활성 문서만 공개 위키에 표시됩니다.",
+    adminWikiStatsTotalHelper:
+      "모든 위키 문서(활성, 초안, 비활성).",
+    adminWikiStatsDraftHelper:
+      "초안 – 게시될 때까지 관리자 위키에서만 보입니다.",
+    adminWikiStatsInactiveHelper:
+      "비활성 문서는 공개 위키에 표시되지 않습니다.",
+
+    adminActivityActionArticleCreated: "문서 생성",
+    adminActivityActionArticleUpdated: "문서 업데이트",
+    adminActivityActionUserRegistered: "사용자 등록",
+    adminActivityActionUserDeactivated: "사용자 비활성화",
+    adminActivityFilterRangeAll: "전체 기간",
+    adminActivityFilterRangeLastDay: "최근 1일",
+    adminActivityFilterRangeLastWeek: "최근 1주",
+    adminActivityFilterRangeLastMonth: "최근 1개월",
+    adminActivityFilterRangeLastYear: "최근 1년",
+    adminActivityFilterRangeCustom: "사용자 지정",
+    adminActivityFilterRangeFrom: "시작",
+    adminActivityFilterRangeTo: "끝",
+
+    adminMetricsTitle: "지표 개요",
+    adminMetricsSubtitle:
+      "관리자를 위한 기본 시스템 지표 (MVP 범위)",
+    adminMetricsInfoTooltipLabel: "정보",
+    adminMetricsInfoTooltipTitle: "지표",
+    adminMetricsInfoTooltipDescription:
+      "플랫폼 통계: 사용자, 위키, 활동 요약, 위키 주의 필요 항목, 고급 지표 내보내기.",
+    adminMetricsWikiInsightsViewAria: "위키 지표 보기",
+    adminMetricsPeriodAria: "지표 기간",
+
+    adminMetricsUsersTrendTitle: "월별 신규 사용자 (최근 기간)",
+    adminMetricsUserActivityTitle: "선택한 기간의 활동",
+    adminMetricsUserActivityRegisteredLink: "사용자 보기 (Users)",
+    adminMetricsUserActivityDeactivatedLink:
+      "비활성화 보기 (Users)",
+    adminMetricsUserActivityArticleCreatedLink:
+      "새 문서 보기 (Wiki)",
+    adminMetricsUserActivityArticleUpdatedLink:
+      "업데이트된 문서 보기 (Wiki)",
+
+    adminMetricsNetUsersChangeZero:
+      "선택한 기간 동안 사용자 수의 순변화가 없습니다.",
+    adminMetricsNetUsersChangePositiveSuffix:
+      "선택한 기간의 순증 사용자.",
+    adminMetricsNetUsersChangeNegativeSuffix:
+      "선택한 기간의 순감 사용자.",
+
+    adminWikiViewsTitle: "위키 문서 조회",
+    adminWikiViewsSubtitle:
+      "선택한 기간의 일별 집계 조회수 및 순방문자(salted IP hash).",
+    adminWikiViewsTotal: "총 조회수",
+    adminWikiViewsTotalUniqueVisitors: "총 순방문자",
+    adminWikiViewsTopArticles: "상위 문서",
+    adminWikiViewsTopArticlesUniqueVisitors:
+      "상위 문서 (순방문자)",
+    adminWikiViewsDaily: "일별 조회수",
+    adminWikiViewsDailyUniqueVisitors: "일별 순방문자",
+
+    adminWikiFeedbackTitle: "위키 피드백",
+    adminWikiFeedbackSubtitle:
+      "선택한 기간의 유용/비유용 투표.",
+    adminWikiFeedbackTotal: "총 투표",
+    adminWikiFeedbackTotalYes: "유용함 (예)",
+    adminWikiFeedbackTotalNo: "유용하지 않음 (아니오)",
+    adminWikiFeedbackHelpfulRate: "유용 비율",
+    adminWikiFeedbackTopNotHelpful: "상위 문서 (비유용)",
+    adminWikiFeedbackNotHelpful: "비유용",
+    adminWikiFeedbackNotHelpfulRate: "비유용 비율",
+    adminWikiFeedbackDailyTotal: "일별 투표",
+    adminWikiFeedbackDailyNotHelpful: "일별 비유용",
+
+    adminWikiInsightsViewAll: "위키: 전체",
+    adminWikiInsightsViewViews: "위키: 조회",
+    adminWikiInsightsViewFeedback: "위키: 피드백",
+    adminWikiInsightsViewAttention: "위키: 주의 필요",
+
+    adminWikiAttentionTitle: "위키: 주의 필요",
+    adminWikiAttentionSubtitle:
+      "조회수가 높고 “비유용” 비율이 높은 문서(결합 score).",
+    adminWikiAttentionArticle: "문서",
+    adminWikiAttentionScore: "Score",
+    adminWikiAttentionViews: "조회수",
+    adminWikiAttentionNotHelpfulRate: "% 비유용",
+    adminWikiAttentionVotes: "투표",
+    adminWikiAttentionHelpfulYes: "유용함 (예)",
+    adminWikiAttentionHelpfulNo: "유용하지 않음 (아니오)",
+    adminWikiAttentionEdit: "편집",
+    adminWikiAttentionExportCsv: "내보내기 (CSV)",
+    adminWikiAttentionFilterSearch: "검색",
+    adminWikiAttentionFilterSearchPlaceholder: "slug...",
+    adminWikiAttentionFilterMinViews: "최소 조회수",
+    adminWikiAttentionFilterMinVotes: "최소 투표",
+    adminWikiAttentionFilterMinNotHelpfulRate: "최소 % 비유용",
+    adminWikiAttentionFilterShowingPrefix: "표시 중",
+
+    adminAdvancedMetricsTitle: "고급 지표",
+    adminAdvancedMetricsSubtitle:
+      "선택한 기간의 세션 및 방문(개인 정보 없음).",
+    adminAdvancedMetricsError:
+      "선택한 기간의 고급 지표를 불러오지 못했습니다.",
+    adminAdvancedMetricsExportCsv: "내보내기 (CSV)",
+    adminAdvancedMetricsExportLoading: "내보내는 중...",
+    adminAdvancedMetricsExportError:
+      "고급 지표를 내보내지 못했습니다.",
+    adminAdvancedMetricsTotalSessions: "총 세션",
+    adminAdvancedMetricsAvgDuration: "평균 지속 시간",
+    adminAdvancedMetricsTotalPageViews: "총 방문",
+    adminAdvancedMetricsSessionSources: "유입 (세션)",
+    adminAdvancedMetricsPageViewSources: "유입 (방문)",
+    adminAdvancedMetricsTopPages: "상위 페이지",
+    adminAdvancedMetricsDailySessions: "일별 세션",
+    adminAdvancedMetricsDailyPageViews: "일별 방문",
+  },
+  ja: {
+    adminDashboardTitle: "管理ダッシュボード",
+    adminDashboardMetricsLoading: "メトリクスを読み込み中...",
+    adminDashboardMetricsError: "メトリクスの読み込みに失敗しました。",
+    adminDashboardCardUsersTitle: "登録ユーザー",
+    adminDashboardCardUsersTrendSuffix: "先月比",
+    adminDashboardCardUsersTrendUnknown:
+      "先月と比較するための十分なデータがありません",
+    adminDashboardCardUsersTrendHelp: "前月との比較です。",
+    adminDashboardCardArticlesTitle: "Wiki 記事",
+
+    adminUsersStatsTotal: "合計",
+    adminUsersStatsActive: "アクティブ",
+    adminUsersStatsDeactivated: "無効化",
+    adminUsersStatsAdmins: "管理者",
+
+    adminWikiStatsTotal: "Wiki 記事総数",
+    adminWikiStatsActive: "アクティブ",
+    adminWikiStatsDraft: "下書き",
+    adminWikiStatsInactive: "非アクティブ",
+    adminWikiStatsActiveHelper:
+      "アクティブな記事のみが公開 Wiki に表示されます。",
+    adminWikiStatsTotalHelper:
+      "すべての Wiki 記事（アクティブ、下書き、非アクティブ）。",
+    adminWikiStatsDraftHelper:
+      "下書き – 公開されるまで管理 Wiki にのみ表示されます。",
+    adminWikiStatsInactiveHelper:
+      "非アクティブな記事は公開 Wiki に表示されません。",
+
+    adminActivityActionArticleCreated: "記事が作成されました",
+    adminActivityActionArticleUpdated: "記事が更新されました",
+    adminActivityActionUserRegistered: "ユーザーが登録されました",
+    adminActivityActionUserDeactivated: "ユーザーが無効化されました",
+    adminActivityFilterRangeAll: "全期間",
+    adminActivityFilterRangeLastDay: "過去 1 日",
+    adminActivityFilterRangeLastWeek: "過去 1 週間",
+    adminActivityFilterRangeLastMonth: "過去 1 か月",
+    adminActivityFilterRangeLastYear: "過去 1 年",
+    adminActivityFilterRangeCustom: "カスタム",
+    adminActivityFilterRangeFrom: "開始",
+    adminActivityFilterRangeTo: "終了",
+
+    adminMetricsTitle: "メトリクス概要",
+    adminMetricsSubtitle:
+      "管理者向けの基本システムメトリクス（MVP 範囲）",
+    adminMetricsInfoTooltipLabel: "情報",
+    adminMetricsInfoTooltipTitle: "メトリクス",
+    adminMetricsInfoTooltipDescription:
+      "プラットフォーム統計：ユーザー、Wiki、アクティビティ概要、Wiki 注意対象、詳細メトリクスのエクスポート。",
+    adminMetricsWikiInsightsViewAria: "Wiki メトリクス表示",
+    adminMetricsPeriodAria: "メトリクス期間",
+
+    adminMetricsUsersTrendTitle:
+      "月別新規ユーザー（直近の期間）",
+    adminMetricsUserActivityTitle: "選択した期間のアクティビティ",
+    adminMetricsUserActivityRegisteredLink: "ユーザーを見る (Users)",
+    adminMetricsUserActivityDeactivatedLink:
+      "無効化を表示 (Users)",
+    adminMetricsUserActivityArticleCreatedLink:
+      "新規記事を見る (Wiki)",
+    adminMetricsUserActivityArticleUpdatedLink:
+      "更新済み記事を見る (Wiki)",
+
+    adminMetricsNetUsersChangeZero:
+      "選択した期間にユーザー数の純増減はありません。",
+    adminMetricsNetUsersChangePositiveSuffix:
+      "選択した期間の純増ユーザー。",
+    adminMetricsNetUsersChangeNegativeSuffix:
+      "選択した期間の純減ユーザー。",
+
+    adminWikiViewsTitle: "Wiki 記事の閲覧数",
+    adminWikiViewsSubtitle:
+      "選択した期間の日別集計閲覧数とユニーク訪問者（salted IP hash）。",
+    adminWikiViewsTotal: "総閲覧数",
+    adminWikiViewsTotalUniqueVisitors: "総ユニーク訪問者",
+    adminWikiViewsTopArticles: "トップ記事",
+    adminWikiViewsTopArticlesUniqueVisitors:
+      "トップ記事（ユニーク訪問者）",
+    adminWikiViewsDaily: "日別閲覧数",
+    adminWikiViewsDailyUniqueVisitors: "日別ユニーク訪問者",
+
+    adminWikiFeedbackTitle: "Wiki フィードバック",
+    adminWikiFeedbackSubtitle:
+      "選択した期間の「役に立つ / 役に立たない」投票。",
+    adminWikiFeedbackTotal: "総投票数",
+    adminWikiFeedbackTotalYes: "役に立つ（はい）",
+    adminWikiFeedbackTotalNo: "役に立たない（いいえ）",
+    adminWikiFeedbackHelpfulRate: "役に立つ割合",
+    adminWikiFeedbackTopNotHelpful:
+      "トップ記事（役に立たない）",
+    adminWikiFeedbackNotHelpful: "役に立たない",
+    adminWikiFeedbackNotHelpfulRate: "役に立たない割合",
+    adminWikiFeedbackDailyTotal: "日別投票数",
+    adminWikiFeedbackDailyNotHelpful: "日別 役に立たない",
+
+    adminWikiInsightsViewAll: "Wiki: すべて",
+    adminWikiInsightsViewViews: "Wiki: 閲覧数",
+    adminWikiInsightsViewFeedback: "Wiki: フィードバック",
+    adminWikiInsightsViewAttention: "Wiki: 要注意",
+
+    adminWikiAttentionTitle: "Wiki: 要注意",
+    adminWikiAttentionSubtitle:
+      "閲覧数が多く「役に立たない」割合が高い記事（複合 score）。",
+    adminWikiAttentionArticle: "記事",
+    adminWikiAttentionScore: "Score",
+    adminWikiAttentionViews: "閲覧数",
+    adminWikiAttentionNotHelpfulRate: "% 役に立たない",
+    adminWikiAttentionVotes: "投票数",
+    adminWikiAttentionHelpfulYes: "役に立つ（はい）",
+    adminWikiAttentionHelpfulNo: "役に立たない（いいえ）",
+    adminWikiAttentionEdit: "編集",
+    adminWikiAttentionExportCsv: "エクスポート (CSV)",
+    adminWikiAttentionFilterSearch: "検索",
+    adminWikiAttentionFilterSearchPlaceholder: "slug...",
+    adminWikiAttentionFilterMinViews: "最小閲覧数",
+    adminWikiAttentionFilterMinVotes: "最小投票数",
+    adminWikiAttentionFilterMinNotHelpfulRate:
+      "最小 % 役に立たない",
+    adminWikiAttentionFilterShowingPrefix: "表示中",
+
+    adminAdvancedMetricsTitle: "詳細メトリクス",
+    adminAdvancedMetricsSubtitle:
+      "選択した期間のセッションと訪問（個人情報なし）。",
+    adminAdvancedMetricsError:
+      "選択した期間の詳細メトリクスを読み込めませんでした。",
+    adminAdvancedMetricsExportCsv: "エクスポート (CSV)",
+    adminAdvancedMetricsExportLoading: "エクスポート中...",
+    adminAdvancedMetricsExportError:
+      "詳細メトリクスをエクスポートできませんでした。",
+    adminAdvancedMetricsTotalSessions: "総セッション数",
+    adminAdvancedMetricsAvgDuration: "平均時間",
+    adminAdvancedMetricsTotalPageViews: "総訪問数",
+    adminAdvancedMetricsSessionSources: "参照元（セッション）",
+    adminAdvancedMetricsPageViewSources: "参照元（訪問）",
+    adminAdvancedMetricsTopPages: "トップページ",
+    adminAdvancedMetricsDailySessions: "日別セッション数",
+    adminAdvancedMetricsDailyPageViews: "日別訪問数",
+  },
+  nl: {
+    adminDashboardTitle: "Beheerdersdashboard",
+    adminDashboardMetricsLoading: "Statistieken laden...",
+    adminDashboardMetricsError: "Kon statistieken niet laden.",
+    adminDashboardCardUsersTitle: "Geregistreerde gebruikers",
+    adminDashboardCardUsersTrendSuffix: "ten opzichte van vorige maand",
+    adminDashboardCardUsersTrendUnknown:
+      "Onvoldoende gegevens om te vergelijken met vorige maand",
+    adminDashboardCardUsersTrendHelp: "Vergelijking met de vorige maand.",
+    adminDashboardCardArticlesTitle: "Wiki-artikelen",
+
+    adminUsersStatsTotal: "Totaal",
+    adminUsersStatsActive: "Actief",
+    adminUsersStatsDeactivated: "Gedeactiveerd",
+    adminUsersStatsAdmins: "Beheerders",
+
+    adminWikiStatsTotal: "Totaal wiki-artikelen",
+    adminWikiStatsActive: "Actief",
+    adminWikiStatsDraft: "Concept",
+    adminWikiStatsInactive: "Inactief",
+    adminWikiStatsActiveHelper:
+      "Alleen actieve artikelen zijn zichtbaar in de publieke wiki.",
+    adminWikiStatsTotalHelper:
+      "Alle wiki-artikelen (actief, concept en inactief).",
+    adminWikiStatsDraftHelper:
+      "Concepten – alleen zichtbaar in de Admin Wiki totdat ze zijn gepubliceerd.",
+    adminWikiStatsInactiveHelper:
+      "Inactieve artikelen zijn niet zichtbaar in de publieke wiki.",
+
+    adminActivityActionArticleCreated: "Artikel aangemaakt",
+    adminActivityActionArticleUpdated: "Artikel bijgewerkt",
+    adminActivityActionUserRegistered: "Gebruiker geregistreerd",
+    adminActivityActionUserDeactivated: "Gebruiker gedeactiveerd",
+    adminActivityFilterRangeAll: "Alle tijd",
+    adminActivityFilterRangeLastDay: "Laatste dag",
+    adminActivityFilterRangeLastWeek: "Laatste week",
+    adminActivityFilterRangeLastMonth: "Laatste maand",
+    adminActivityFilterRangeLastYear: "Laatste jaar",
+    adminActivityFilterRangeCustom: "Aangepast",
+    adminActivityFilterRangeFrom: "Van",
+    adminActivityFilterRangeTo: "Tot",
+
+    adminMetricsTitle: "Overzicht statistieken",
+    adminMetricsSubtitle:
+      "Basis systeemstatistieken voor beheerders (MVP-scope)",
+    adminMetricsInfoTooltipLabel: "Info",
+    adminMetricsInfoTooltipTitle: "Statistieken",
+    adminMetricsInfoTooltipDescription:
+      "Platformstatistieken: gebruikers, wiki, activiteitenoverzicht, wiki-aandacht en export van geavanceerde statistieken.",
+    adminMetricsWikiInsightsViewAria: "Wiki-statistieken weergave",
+    adminMetricsPeriodAria: "Statistiekenperiode",
+
+    adminMetricsUsersTrendTitle:
+      "Nieuwe gebruikers per maand (recente perioden)",
+    adminMetricsUserActivityTitle: "Activiteit voor de geselecteerde periode",
+    adminMetricsUserActivityRegisteredLink: "Bekijk gebruikers (Users)",
+    adminMetricsUserActivityDeactivatedLink:
+      "Bekijk gedeactiveerden (Users)",
+    adminMetricsUserActivityArticleCreatedLink:
+      "Bekijk nieuwe artikelen (Wiki)",
+    adminMetricsUserActivityArticleUpdatedLink:
+      "Bekijk bijgewerkte artikelen (Wiki)",
+
+    adminMetricsNetUsersChangeZero:
+      "Geen netto verandering in het aantal gebruikers voor de geselecteerde periode.",
+    adminMetricsNetUsersChangePositiveSuffix:
+      "netto nieuwe gebruikers voor de geselecteerde periode.",
+    adminMetricsNetUsersChangeNegativeSuffix:
+      "netto verloren gebruikers voor de geselecteerde periode.",
+
+    adminWikiViewsTitle: "Weergaven van Wiki-artikelen",
+    adminWikiViewsSubtitle:
+      "Dagelijkse geaggregeerde weergaven en unieke bezoekers (salted IP hash) voor de geselecteerde periode.",
+    adminWikiViewsTotal: "Totaal weergaven",
+    adminWikiViewsTotalUniqueVisitors: "Totaal unieke bezoekers",
+    adminWikiViewsTopArticles: "Topartikelen",
+    adminWikiViewsTopArticlesUniqueVisitors:
+      "Topartikelen (unieke bezoekers)",
+    adminWikiViewsDaily: "Dagelijkse weergaven",
+    adminWikiViewsDailyUniqueVisitors: "Dagelijkse unieke bezoekers",
+
+    adminWikiFeedbackTitle: "Wiki-feedback",
+    adminWikiFeedbackSubtitle:
+      "Stemmen nuttig / niet nuttig voor de geselecteerde periode.",
+    adminWikiFeedbackTotal: "Totaal stemmen",
+    adminWikiFeedbackTotalYes: "Nuttig (Ja)",
+    adminWikiFeedbackTotalNo: "Niet nuttig (Nee)",
+    adminWikiFeedbackHelpfulRate: "Nuttigheidsratio",
+    adminWikiFeedbackTopNotHelpful:
+      "Topartikelen (niet nuttig)",
+    adminWikiFeedbackNotHelpful: "Niet nuttig",
+    adminWikiFeedbackNotHelpfulRate: "Niet-nuttigheidsratio",
+    adminWikiFeedbackDailyTotal: "Dagelijkse stemmen",
+    adminWikiFeedbackDailyNotHelpful: "Dagelijks niet nuttig",
+
+    adminWikiInsightsViewAll: "Wiki: alles",
+    adminWikiInsightsViewViews: "Wiki: weergaven",
+    adminWikiInsightsViewFeedback: "Wiki: feedback",
+    adminWikiInsightsViewAttention: "Wiki: aandacht nodig",
+
+    adminWikiAttentionTitle: "Wiki: aandacht nodig",
+    adminWikiAttentionSubtitle:
+      "Artikelen met veel weergaven en een hoge “niet nuttig”-ratio (gecombineerde score).",
+    adminWikiAttentionArticle: "Artikel",
+    adminWikiAttentionScore: "Score",
+    adminWikiAttentionViews: "Weergaven",
+    adminWikiAttentionNotHelpfulRate: "% niet nuttig",
+    adminWikiAttentionVotes: "Stemmen",
+    adminWikiAttentionHelpfulYes: "Nuttig (Ja)",
+    adminWikiAttentionHelpfulNo: "Niet nuttig (Nee)",
+    adminWikiAttentionEdit: "Bewerken",
+    adminWikiAttentionExportCsv: "Export (CSV)",
+    adminWikiAttentionFilterSearch: "Zoeken",
+    adminWikiAttentionFilterSearchPlaceholder: "slug...",
+    adminWikiAttentionFilterMinViews: "Min. weergaven",
+    adminWikiAttentionFilterMinVotes: "Min. stemmen",
+    adminWikiAttentionFilterMinNotHelpfulRate:
+      "Min. % niet nuttig",
+    adminWikiAttentionFilterShowingPrefix: "Getoond",
+
+    adminAdvancedMetricsTitle: "Geavanceerde statistieken",
+    adminAdvancedMetricsSubtitle:
+      "Sessies en bezoeken (zonder persoonsgegevens) voor de geselecteerde periode.",
+    adminAdvancedMetricsError:
+      "Kon geavanceerde statistieken niet laden voor de geselecteerde periode.",
+    adminAdvancedMetricsExportCsv: "Export (CSV)",
+    adminAdvancedMetricsExportLoading: "Exporteren...",
+    adminAdvancedMetricsExportError:
+      "Kon geavanceerde statistieken niet exporteren.",
+    adminAdvancedMetricsTotalSessions: "Totaal sessies",
+    adminAdvancedMetricsAvgDuration: "Gemiddelde duur",
+    adminAdvancedMetricsTotalPageViews: "Totaal bezoeken",
+    adminAdvancedMetricsSessionSources: "Bronnen (sessies)",
+    adminAdvancedMetricsPageViewSources: "Bronnen (bezoeken)",
+    adminAdvancedMetricsTopPages: "Toppagina's",
+    adminAdvancedMetricsDailySessions: "Dagelijkse sessies",
+    adminAdvancedMetricsDailyPageViews: "Dagelijkse bezoeken",
+  },
+  cs: {
+    adminDashboardTitle: "Administrátorský panel",
+    adminDashboardMetricsLoading: "Načítání metrik...",
+    adminDashboardMetricsError: "Nepodařilo se načíst metriky.",
+    adminDashboardCardUsersTitle: "Registrovaní uživatelé",
+    adminDashboardCardUsersTrendSuffix: "oproti minulému měsíci",
+    adminDashboardCardUsersTrendUnknown:
+      "Není dostatek dat pro porovnání s minulým měsícem",
+    adminDashboardCardUsersTrendHelp: "Porovnání s předchozím měsícem.",
+    adminDashboardCardArticlesTitle: "Wiki články",
+
+    adminUsersStatsTotal: "Celkem",
+    adminUsersStatsActive: "Aktivní",
+    adminUsersStatsDeactivated: "Deaktivovaní",
+    adminUsersStatsAdmins: "Administrátoři",
+
+    adminWikiStatsTotal: "Celkem wiki článků",
+    adminWikiStatsActive: "Aktivní",
+    adminWikiStatsDraft: "Koncepty",
+    adminWikiStatsInactive: "Neaktivní",
+    adminWikiStatsActiveHelper:
+      "Pouze aktivní články jsou viditelné ve veřejné wiki.",
+    adminWikiStatsTotalHelper:
+      "Všechny wiki články (aktivní, koncepty a neaktivní).",
+    adminWikiStatsDraftHelper:
+      "Koncepty – viditelné pouze v Admin Wiki, dokud nejsou publikovány.",
+    adminWikiStatsInactiveHelper:
+      "Neaktivní články nejsou viditelné ve veřejné wiki.",
+
+    adminActivityActionArticleCreated: "Článek vytvořen",
+    adminActivityActionArticleUpdated: "Článek aktualizován",
+    adminActivityActionUserRegistered: "Uživatel registrován",
+    adminActivityActionUserDeactivated: "Uživatel deaktivován",
+    adminActivityFilterRangeAll: "Celé období",
+    adminActivityFilterRangeLastDay: "Poslední den",
+    adminActivityFilterRangeLastWeek: "Poslední týden",
+    adminActivityFilterRangeLastMonth: "Poslední měsíc",
+    adminActivityFilterRangeLastYear: "Poslední rok",
+    adminActivityFilterRangeCustom: "Vlastní",
+    adminActivityFilterRangeFrom: "Od",
+    adminActivityFilterRangeTo: "Do",
+
+    adminMetricsTitle: "Přehled metrik",
+    adminMetricsSubtitle:
+      "Základní systémové metriky pro administrátory (rozsah MVP)",
+    adminMetricsInfoTooltipLabel: "Info",
+    adminMetricsInfoTooltipTitle: "Metriky",
+    adminMetricsInfoTooltipDescription:
+      "Statistiky platformy: uživatelé, wiki, souhrn aktivity, wiki vyžadující pozornost a export pokročilých metrik.",
+    adminMetricsWikiInsightsViewAria: "Zobrazení metrik Wiki",
+    adminMetricsPeriodAria: "Období metrik",
+
+    adminMetricsUsersTrendTitle:
+      "Noví uživatelé podle měsíců (poslední období)",
+    adminMetricsUserActivityTitle: "Aktivita pro vybrané období",
+    adminMetricsUserActivityRegisteredLink: "Zobrazit uživatele (Users)",
+    adminMetricsUserActivityDeactivatedLink:
+      "Zobrazit deaktivované (Users)",
+    adminMetricsUserActivityArticleCreatedLink:
+      "Zobrazit nové články (Wiki)",
+    adminMetricsUserActivityArticleUpdatedLink:
+      "Zobrazit aktualizované články (Wiki)",
+
+    adminMetricsNetUsersChangeZero:
+      "Pro vybrané období nedošlo k žádné čisté změně počtu uživatelů.",
+    adminMetricsNetUsersChangePositiveSuffix:
+      "čistě nových uživatelů pro vybrané období.",
+    adminMetricsNetUsersChangeNegativeSuffix:
+      "čistě ztracených uživatelů pro vybrané období.",
+
+    adminWikiViewsTitle: "Zobrazení wiki článků",
+    adminWikiViewsSubtitle:
+      "Agregovaná denní zobrazení a unikátní návštěvníci (salted hash IP) pro vybrané období.",
+    adminWikiViewsTotal: "Celkem zobrazení",
+    adminWikiViewsTotalUniqueVisitors: "Celkem unikátních návštěvníků",
+    adminWikiViewsTopArticles: "Top články",
+    adminWikiViewsTopArticlesUniqueVisitors:
+      "Top články (unikátní návštěvníci)",
+    adminWikiViewsDaily: "Denní zobrazení",
+    adminWikiViewsDailyUniqueVisitors: "Denní unikátní návštěvníci",
+
+    adminWikiFeedbackTitle: "Wiki zpětná vazba",
+    adminWikiFeedbackSubtitle:
+      "Hlasy užitečné / neužitečné pro vybrané období.",
+    adminWikiFeedbackTotal: "Celkem hlasů",
+    adminWikiFeedbackTotalYes: "Užitečné (Ano)",
+    adminWikiFeedbackTotalNo: "Neužitečné (Ne)",
+    adminWikiFeedbackHelpfulRate: "Podíl užitečných",
+    adminWikiFeedbackTopNotHelpful: "Top články (neužitečné)",
+    adminWikiFeedbackNotHelpful: "Neužitečné",
+    adminWikiFeedbackNotHelpfulRate: "Podíl neužitečných",
+    adminWikiFeedbackDailyTotal: "Denní hlasy",
+    adminWikiFeedbackDailyNotHelpful: "Denní neužitečné",
+
+    adminWikiInsightsViewAll: "Wiki: vše",
+    adminWikiInsightsViewViews: "Wiki: zobrazení",
+    adminWikiInsightsViewFeedback: "Wiki: zpětná vazba",
+    adminWikiInsightsViewAttention: "Wiki: vyžaduje pozornost",
+
+    adminWikiAttentionTitle: "Wiki: vyžaduje pozornost",
+    adminWikiAttentionSubtitle:
+      "Články s vysokým počtem zobrazení a vysokým podílem „neužitečné“ (kombinované score).",
+    adminWikiAttentionArticle: "Článek",
+    adminWikiAttentionScore: "Score",
+    adminWikiAttentionViews: "Zobrazení",
+    adminWikiAttentionNotHelpfulRate: "% neužitečné",
+    adminWikiAttentionVotes: "Hlasy",
+    adminWikiAttentionHelpfulYes: "Užitečné (Ano)",
+    adminWikiAttentionHelpfulNo: "Neužitečné (Ne)",
+    adminWikiAttentionEdit: "Upravit",
+    adminWikiAttentionExportCsv: "Export (CSV)",
+    adminWikiAttentionFilterSearch: "Hledat",
+    adminWikiAttentionFilterSearchPlaceholder: "slug...",
+    adminWikiAttentionFilterMinViews: "Min. zobrazení",
+    adminWikiAttentionFilterMinVotes: "Min. hlasů",
+    adminWikiAttentionFilterMinNotHelpfulRate: "Min. % neužitečné",
+    adminWikiAttentionFilterShowingPrefix: "Zobrazeno",
+
+    adminAdvancedMetricsTitle: "Pokročilé metriky",
+    adminAdvancedMetricsSubtitle:
+      "Relace a návštěvy (bez osobních údajů) pro vybrané období.",
+    adminAdvancedMetricsError:
+      "Nepodařilo se načíst pokročilé metriky pro vybrané období.",
+    adminAdvancedMetricsExportCsv: "Export (CSV)",
+    adminAdvancedMetricsExportLoading: "Exportuji...",
+    adminAdvancedMetricsExportError:
+      "Nepodařilo se exportovat pokročilé metriky.",
+    adminAdvancedMetricsTotalSessions: "Celkem relací",
+    adminAdvancedMetricsAvgDuration: "Průměrná doba",
+    adminAdvancedMetricsTotalPageViews: "Celkem návštěv",
+    adminAdvancedMetricsSessionSources: "Zdroje (relace)",
+    adminAdvancedMetricsPageViewSources: "Zdroje (návštěvy)",
+    adminAdvancedMetricsTopPages: "Top stránky",
+    adminAdvancedMetricsDailySessions: "Denní relace",
+    adminAdvancedMetricsDailyPageViews: "Denní návštěvy",
+  },
+};
+
+const ADMIN_COURSES_FALLBACK_COMMON: Partial<DomainMessages["common"]> = {
+  adminCoursesTitle: "Courses",
+  adminCoursesSubtitle: "Courses administration.",
+  adminCoursesInfoTooltipLabel: "Info",
+  adminCoursesInfoTooltipTitle: "Courses",
+  adminCoursesInfoTooltipDescription:
+    "Courses administration: create, filter, sort, pagination and export CSV.",
+  adminCoursesManageCourseCategoriesCta: "Manage course categories →",
+
+  adminCoursesCategoriesSlugHelpTitle: "Slug",
+  adminCoursesCategoriesSlugHelpDescription:
+    "Use lower-case letters, digits and dashes only (e.g. web-development).",
+  adminCoursesCategoriesTitleHelpTitle: "Title",
+  adminCoursesCategoriesTitleHelpDescription:
+    "User-facing category name (e.g. Web development).",
+  adminCoursesCategoriesOrderHelpTitle: "Order",
+  adminCoursesCategoriesOrderHelpDescription:
+    "Lower number means the category is shown earlier.",
+
+  adminCoursesCategoriesCardTitle: "Categories",
+  adminCoursesCategoriesInfoTooltipLabel: "Info",
+  adminCoursesCategoriesInfoTooltipTitle: "Course categories",
+  adminCoursesCategoriesInfoTooltipDescription:
+    "Categories are used to group courses. If you delete a category, courses assigned to it will NOT be deleted — they will remain uncategorized.",
+  adminCoursesCategoriesManageCta: "Manage categories →",
+  adminCoursesCategoriesSubtitle:
+    "Use categories to filter and organize the course catalog.",
+
+  adminCoursesCreateTitle: "Create course",
+  adminCoursesCreateCourseTitleLabel: "Title",
+  adminCoursesCreateCourseLanguageLabel: "Languages",
+  adminCoursesLanguagesAll: "All languages",
+  adminCoursesLanguagesSelect: "Select languages",
+  adminCoursesLanguagesCountSuffix: "languages",
+  adminCoursesCreateCourseStatusLabel: "Status",
+  adminCoursesCreateCourseStatusAria: "Course status",
+  adminCoursesStatusDraft: "Draft",
+  adminCoursesStatusActive: "Active",
+  adminCoursesStatusInactive: "Inactive",
+  adminCoursesCreateCourseCategoryLabel: "Category",
+  adminCoursesCreateCourseCategoryAria: "Course category",
+  adminCoursesCategorySearchPlaceholder: "Search category...",
+  adminCoursesCategoryNone: "(none)",
+  adminCoursesPaidCourseLabel: "Paid course",
+  adminCoursesPaidCourseToggleAria: "Toggle paid course",
+  adminCoursesPaidDisabledTooltipLabel: "Info",
+  adminCoursesPaidDisabledTooltipTitle: "Paid course",
+  adminCoursesPaidDisabledTooltipDescription:
+    "This option becomes available after enabling at least one payment method in Admin → Payments (and it is configured).",
+  adminCoursesCurrencyLabel: "Currency",
+  adminCoursesPriceLabel: "Price",
+  adminCoursesPricePlaceholder: "e.g. 9.99",
+  adminCoursesPriceHint: "Example: 9.99 (or 999 cents)",
+  adminCoursesDescriptionLabel: "Description",
+  adminCoursesCreating: "Creating...",
+  adminCoursesCreate: "Create",
+  adminCoursesCreateError: "Failed to create course.",
+  adminCoursesCreateSuccess: "Course created.",
+  adminCoursesOpenCourseCta: "Open course →",
+  adminCoursesExportCsvFilename: "courses.csv",
+
+  adminCoursesListTitle: "Courses list",
+  adminCoursesExportCsv: "Export CSV",
+  adminCoursesReload: "Reload",
+  adminCoursesSearchPlaceholder: "Search by title, ID, category...",
+  adminCoursesSearchButton: "Search",
+  adminCoursesStatusFilterAria: "Courses status",
+  adminCoursesFilterAllStatus: "All status",
+  adminCoursesPricingFilterAria: "Pricing",
+  adminCoursesPricingAll: "All pricing",
+  adminCoursesPricingFree: "Free",
+  adminCoursesPricingPaid: "Paid",
+  adminCoursesCategoryFilterAria: "Courses category",
+  adminCoursesFilterAllCategories: "All categories",
+  adminCoursesLoading: "Loading courses...",
+  adminCoursesLoadError: "An error occurred while loading courses.",
+  adminCoursesEmpty: "No courses found.",
+
+  adminCoursesSelectedCountLabel: "Selected count",
+  adminCoursesBulkDeleteSelected: "Delete selected",
+  adminCoursesBulkStatusAria: "Bulk status",
+  adminCoursesBulkStatusPlaceholder: "Bulk status...",
+  adminCoursesBulkStatusApply: "Apply",
+  adminCoursesBulkDeleteAllPrefix: "Delete all",
+  adminCoursesSelectAllVisible: "Select all visible",
+
+  adminCoursesColCreated: "Created",
+  adminCoursesColTitle: "Title",
+  adminCoursesColUpdated: "Updated",
+  adminCoursesColCategory: "Category",
+  adminCoursesColLanguage: "Language",
+  adminCoursesColStatus: "Status",
+  adminCoursesColPaid: "Paid",
+  adminCoursesColPrice: "Price",
+  adminCoursesColCreatedBy: "Created by",
+  adminCoursesColActions: "Actions",
+
+  adminCoursesSelectCoursePrefix: "Select",
+  adminCoursesIdPrefix: "ID",
+  adminCoursesPlaceholderDash: "-",
+  adminCoursesOpen: "Open",
+
+  adminCoursesPaginationShowingPrefix: "Showing",
+  adminCoursesPaginationOf: "of",
+  adminCoursesPaginationCoursesSuffix: "courses",
+
+  adminCoursesBulkDeleteDialogTitle: "Delete selected courses",
+  adminCoursesBulkDeleteDialogDescription:
+    "Selected courses will be permanently deleted. This action cannot be undone.",
+  adminCoursesDelete: "Delete",
+  adminCoursesCancel: "Cancel",
+  adminCoursesBulkDeleteError: "An error occurred while deleting selected courses.",
+
+  adminCoursesBulkStatusDialogTitle: "Change status",
+  adminCoursesBulkStatusDialogDescription:
+    "You are about to change the status of all selected courses.",
+  adminCoursesBulkStatusNewStatusLabel: "New status",
+  adminCoursesOk: "OK",
+  adminCoursesBulkStatusError:
+    "An error occurred while updating course status in bulk.",
+
+  adminCoursesPurgeAllDialogTitle: "Delete all courses",
+  adminCoursesPurgeAllDialogDescriptionPrefix:
+    "You are about to delete all courses",
+  adminCoursesPurgeAllDialogDescriptionSuffix:
+    "This action cannot be undone.",
+  adminCoursesDeleteAll: "Delete all",
+  adminCoursesPurgeAllError: "An error occurred while deleting all courses.",
+
+  adminCoursesCreateTitleRequired: "Title is required.",
+  adminCoursesCreateDescriptionRequired: "Description is required.",
+  adminCoursesCreateLanguagesRequired: "Please select a language.",
+  adminCoursesCreateRequiredFields: "Please fill the required fields.",
+  adminCoursesCurrencyInvalid: "Please enter a valid currency (e.g. EUR).",
+  adminCoursesPriceInvalid: "Please enter a valid price (e.g. 9.99 or 999).",
+
+  adminCoursesCategoriesRequiredFields: "Please fill the required fields.",
+  adminCoursesCategoriesSlugFormatInvalid:
+    "Slug must be lower-case with digits and dashes (e.g. web-development).",
+};
+
+const ADMIN_USERS_FALLBACK_COMMON: Partial<DomainMessages["common"]> = {
+  adminUsersBreadcrumbTitle: "Users",
+  adminUsersInfoTooltipLabel: "Info",
+  adminUsersInfoTooltipTitle: "Users Management",
+  adminUsersInfoTooltipDescription:
+    "Manage users: search, filters, role changes, activate/deactivate, and export results.",
+  adminUsersStatusFilterAria: "Users status",
+  adminUsersRoleFilterAria: "Users role",
+  adminUsersFilterAllStatus: "All status",
+  adminUsersFilterStatusActive: "Active",
+  adminUsersFilterStatusDeactivated: "Deactivated",
+  adminUsersFilterAllRoles: "All roles",
+  adminUsersRoleUser: "User",
+  adminUsersRoleAdmin: "Admin",
+  adminUsersRoleMonitoring: "Monitoring",
+  adminUsersRoleTeacher: "Teacher",
+  adminUsersRoleAuthor: "Author",
+  adminUsersExportCsv: "Export CSV",
+  adminUsersTableControlsTooltipLabel: "Info",
+  adminUsersTableControlsTooltipTitle: "Table controls",
+  adminUsersTableControlsTooltipDescription:
+    "Use Rows per page for 10/20/50/100. Export CSV generates a file for the current filters (server-side).",
+  adminUsersSelectedCountLabel: "Selected count",
+  adminUsersBulkDeleteSelected: "Delete selected",
+  adminUsersBulkDeleteAllPrefix: "Delete all",
+  adminUsersSelectAllVisible: "Select all visible",
+  adminUsersTableActions: "Actions",
+  adminUsersSelectUserPrefix: "Select",
+  adminUsersRoleForPrefix: "Role for",
+  adminUsersView: "View",
+  adminUsersBulkDeleteDialogTitle: "Delete selected users",
+  adminUsersBulkDeleteDialogDescription:
+    "Selected users will be permanently deleted. This action cannot be undone. Your account will not be deleted.",
+  adminUsersDelete: "Delete",
+  adminUsersCancel: "Cancel",
+  adminUsersBulkDeleteError: "An error occurred while deleting selected users.",
+  adminUsersPurgeAllDialogTitle: "Delete all users",
+  adminUsersPurgeAllDialogDescriptionPrefix:
+    "You are about to delete all users",
+  adminUsersPurgeAllDialogDescriptionSuffix:
+    "This action cannot be undone. Your account will not be deleted.",
+  adminUsersDeleteAll: "Delete all",
+  adminUsersPurgeAllError: "An error occurred while deleting all users.",
+  adminUsersViewDialogTitle: "User details",
+  adminUsersViewDialogSubtitle: "Details for the selected user.",
+  adminUsersClose: "Close",
+  adminUsersOk: "OK",
+  adminUsersEmailLabel: "Email",
+  adminUsersIdPrefix: "ID",
+  adminUsersRoleLabel: "Role",
+  adminUsersStatusLabel: "Status",
+  adminUsersUserIdLabel: "User ID",
+  adminUsersCreatedLabel: "Created",
+  adminUsersPaginationShowingPrefix: "Showing",
+  adminUsersPaginationOf: "of",
+  adminUsersPaginationUsersSuffix: "users",
+};
+
+const cloneEnglishMessages = (): DomainMessages =>
+  JSON.parse(JSON.stringify(EN_MESSAGES)) as DomainMessages;
+
+const ES_MESSAGES: DomainMessages = (() => {
+  const m = cloneEnglishMessages();
+  m.nav = {
+    wiki: "Wiki",
+    courses: "Cursos",
+    myCourses: "Mis cursos",
+    login: "Iniciar sesión",
+    register: "Registrarse",
+    profile: "Perfil",
+    logout: "Cerrar sesión",
+    admin: "Admin",
+  };
+  m.auth = {
+    loginTitle: "Iniciar sesión",
+    loginSubtitle: "Introduce tus datos de acceso.",
+    loginEmailLabel: "Correo electrónico",
+    loginPasswordLabel: "Contraseña",
+    loginSubmit: "Iniciar sesión",
+    loginSubmitLoading: "Iniciando sesión...",
+    loginGoogleCta: "Iniciar sesión con Google",
+    loginGoogleLoading: "Conectando...",
+    loginFacebookCta: "Iniciar sesión con Facebook",
+    loginFacebookLoading: "Conectando...",
+    loginGithubCta: "Iniciar sesión con GitHub",
+    loginGithubLoading: "Conectando...",
+    loginLinkedinCta: "Iniciar sesión con LinkedIn",
+    loginLinkedinLoading: "Conectando...",
+    loginSocialDivider: "o continuar con correo",
+    loginSocialUnavailable:
+      "El inicio de sesión social está deshabilitado por el administrador. Continúa con correo y contraseña.",
+    loginSocialResetHint:
+      "El inicio de sesión social está restringido. Si usaste Google/Facebook/GitHub/LinkedIn, restablece tu contraseña con '¿Olvidaste la contraseña?' y luego inicia sesión con correo + contraseña.",
+    loginGoogleDisabled:
+      "El inicio de sesión con Google está deshabilitado temporalmente por el administrador.",
+    loginGoogleUnavailable:
+      "El inicio de sesión con Google no está configurado. Usa correo y contraseña.",
+    loginFacebookDisabled:
+      "El inicio de sesión con Facebook está deshabilitado temporalmente por el administrador.",
+    loginFacebookUnavailable:
+      "El inicio de sesión con Facebook no está configurado. Usa correo y contraseña.",
+    loginGithubDisabled:
+      "El inicio de sesión con GitHub está deshabilitado temporalmente por el administrador.",
+    loginGithubUnavailable:
+      "El inicio de sesión con GitHub no está configurado. Usa correo y contraseña.",
+    loginLinkedinDisabled:
+      "El inicio de sesión con LinkedIn está deshabilitado temporalmente por el administrador.",
+    loginLinkedinUnavailable:
+      "El inicio de sesión con LinkedIn no está configurado. Usa correo y contraseña.",
+    loginGoogleError:
+      "El inicio de sesión con Google falló. Inténtalo de nuevo.",
+    loginFacebookError:
+      "El inicio de sesión con Facebook falló. Inténtalo de nuevo.",
+    loginGithubError:
+      "El inicio de sesión con GitHub falló. Inténtalo de nuevo.",
+    loginLinkedinError:
+      "El inicio de sesión con LinkedIn falló. Inténtalo de nuevo.",
+    loginForgotLink: "¿Olvidaste la contraseña?",
+    loginRegisterLink: "¿No tienes cuenta?",
+    loginRegisterLinkCta: "Crear una cuenta",
+    loginRememberMeLabel: "Recordarme",
+    loginCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA (marcador) – en el sistema real aparece solo tras varios intentos fallidos consecutivos.",
+    loginCaptchaLabel: "CAPTCHA / reCAPTCHA",
+    loginCaptchaNotAvailable:
+      "Se requiere CAPTCHA, pero la integración está deshabilitada o no está configurada. Inténtalo de nuevo o contacta con un administrador.",
+    loginErrorEmailRequired: "Introduce tu correo.",
+    loginErrorEmailInvalid: "Introduce un correo válido.",
+    loginErrorPasswordRequired: "Introduce tu contraseña.",
+    socialResetPasswordHint:
+      "Si el inicio de sesión social (Google/Facebook/GitHub/LinkedIn) no está disponible, puedes usar '¿Olvidaste la contraseña?' para establecer una contraseña y luego iniciar sesión con correo + contraseña.",
+    socialResetPasswordHintNoProviders:
+      "Si el inicio de sesión social no está disponible, puedes usar '¿Olvidaste la contraseña?' para establecer una contraseña y luego iniciar sesión con correo + contraseña.",
+    loginErrorInvalidCredentials: "Credenciales inválidas.",
+    loginErrorCaptchaRequired: "Confirma que no eres un robot.",
+    loginErrorGeneric:
+      "No se pudo iniciar sesión. Inténtalo más tarde.",
+    loginErrorNetwork:
+      "Ocurrió un error de red al contactar con el servidor.",
+    loginErrorDisabled:
+      "El inicio de sesión está deshabilitado para usuarios estándar.",
+    loginLoading: "Cargando...",
+    registerTitle: "Crear cuenta",
+    registerSubtitle: "Crea tu cuenta gratuita de BeeLMS para empezar.",
+    registerEmailLabel: "Correo electrónico",
+    registerPasswordLabel: "Contraseña",
+    registerPasswordHint:
+      "Mínimo 8 caracteres: al menos una mayúscula, una minúscula, un dígito y un carácter especial",
+    registerConfirmPasswordLabel: "Confirmar contraseña",
+    registerTermsPrefix: "Acepto los ",
+    registerTermsAnd: " y la ",
+    registerTermsSuffix: ".",
+    registerTermsLabel:
+      "Acepto los Términos de uso y la Política de privacidad.",
+    registerCaptchaLabel:
+      "No soy un robot (marcador para la integración de CAPTCHA).",
+    registerCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA (marcador para la protección anti-bots durante el registro)",
+    registerSubmit: "Registrarse",
+    registerSubmitLoading: "Enviando...",
+    registerGoogleCta: "Registrarse con Google",
+    registerGoogleLoading: "Conectando...",
+    registerFacebookCta: "Registrarse con Facebook",
+    registerFacebookLoading: "Conectando...",
+    registerGithubCta: "Registrarse con GitHub",
+    registerGithubLoading: "Conectando...",
+    registerLinkedinCta: "Registrarse con LinkedIn",
+    registerLinkedinLoading: "Conectando...",
+    registerSocialDivider: "o completa el formulario",
+    registerSocialUnavailable:
+      "El registro social está deshabilitado por el administrador. Continúa con el formulario abajo.",
+    registerGoogleDisabled:
+      "El registro con Google está deshabilitado temporalmente por el administrador.",
+    registerGoogleUnavailable:
+      "El registro con Google no está configurado. Usa el formulario abajo.",
+    registerFacebookDisabled:
+      "El registro con Facebook está deshabilitado temporalmente por el administrador.",
+    registerFacebookUnavailable:
+      "El registro con Facebook no está configurado. Usa el formulario abajo.",
+    registerGithubDisabled:
+      "El registro con GitHub está deshabilitado temporalmente por el administrador.",
+    registerGithubUnavailable:
+      "El registro con GitHub no está configurado. Usa el formulario abajo.",
+    registerLinkedinDisabled:
+      "El registro con LinkedIn está deshabilitado temporalmente por el administrador.",
+    registerLinkedinUnavailable:
+      "El registro con LinkedIn no está configurado. Usa el formulario abajo.",
+    registerGoogleError:
+      "El registro con Google falló. Inténtalo de nuevo.",
+    registerFacebookError:
+      "El registro con Facebook falló. Inténtalo de nuevo.",
+    registerGithubError:
+      "El registro con GitHub falló. Inténtalo de nuevo.",
+    registerLinkedinError:
+      "El registro con LinkedIn falló. Inténtalo de nuevo.",
+    registerHasAccount: "¿Ya tienes una cuenta?",
+    registerLoginLink: "Iniciar sesión",
+    registerErrorEmailRequired: "Introduce tu correo.",
+    registerErrorEmailInvalid: "Introduce un correo válido.",
+    registerErrorPasswordRequired: "Introduce una contraseña.",
+    registerErrorPasswordTooShort:
+      "La contraseña debe tener al menos 8 caracteres y contener una mayúscula, una minúscula, un dígito y un carácter especial.",
+    registerErrorPasswordMissingUppercase:
+      "La contraseña debe contener al menos una letra mayúscula.",
+    registerErrorPasswordMissingLowercase:
+      "La contraseña debe contener al menos una letra minúscula.",
+    registerErrorPasswordMissingDigit:
+      "La contraseña debe contener al menos un dígito.",
+    registerErrorPasswordMissingSpecialChar:
+      "La contraseña debe contener al menos un carácter especial.",
+    registerErrorConfirmPasswordRequired:
+      "Confirma tu contraseña.",
+    registerErrorPasswordsMismatch: "Las contraseñas no coinciden.",
+    registerErrorTermsRequired: "Debes aceptar los términos.",
+    registerErrorCaptchaRequired: "Confirma que no eres un robot.",
+    registerErrorDuplicateEmail: "Este correo ya está registrado.",
+    registerErrorInvalidData:
+      "Los datos no son válidos. Revisa el formulario e inténtalo de nuevo.",
+    registerErrorGeneric:
+      "El registro falló. Inténtalo más tarde.",
+    registerErrorNetwork:
+      "Ocurrió un error de red al contactar con el servidor.",
+    registerSuccess:
+      "El registro se realizó correctamente. Revisa tu correo y confirma tu dirección usando el enlace que te enviamos. Después podrás iniciar sesión desde la página de acceso.",
+    registerLoading: "Cargando...",
+    registerDisabledTitle: "El registro está deshabilitado",
+    registerDisabledMessage:
+      "El administrador ha deshabilitado el registro y el restablecimiento de contraseña.",
+    registerDisabledLoginCta: "Ir a iniciar sesión",
+    forgotTitle: "¿Olvidaste la contraseña?",
+    forgotSubtitle:
+      "Introduce tu correo para solicitar un restablecimiento de contraseña.",
+    forgotEmailLabel: "Correo electrónico",
+    forgotCaptchaLabel:
+      "No soy un robot (marcador para la integración de CAPTCHA).",
+    forgotSubmit: "Enviar enlace de restablecimiento",
+    forgotSubmitLoading: "Enviando...",
+    forgotHasPassword: "¿Recordaste tu contraseña?",
+    forgotLoginLink: "Volver a iniciar sesión",
+    forgotErrorEmailRequired: "Introduce tu correo.",
+    forgotErrorEmailInvalid: "Introduce un correo válido.",
+    forgotErrorCaptchaRequired: "Confirma que no eres un robot.",
+    forgotErrorInvalidData:
+      "Los datos no son válidos. Revisa el formulario e inténtalo de nuevo.",
+    forgotErrorGeneric:
+      "La solicitud de restablecimiento falló. Inténtalo más tarde.",
+    forgotErrorNetwork:
+      "Ocurrió un error de red al contactar con el servidor.",
+    forgotSuccess:
+      "Si existe una cuenta con este correo, enviaremos instrucciones para restablecer la contraseña.",
+    forgotResetLinkInfo:
+      "El enlace de restablecimiento es válido durante 24 horas.",
+    forgotCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA (marcador para proteger la solicitud de restablecimiento)",
+    forgotDisabledTitle: "El restablecimiento está deshabilitado",
+    forgotDisabledMessage:
+      "El administrador ha deshabilitado el registro y el restablecimiento de contraseña.",
+    forgotDisabledLoginCta: "Ir a iniciar sesión",
+    resetTitle: "Cambiar contraseña",
+    resetSubtitle: "Introduce tu nueva contraseña.",
+    resetInfoMessage:
+      "Esta página es accesible mediante un enlace seguro enviado a tu correo.",
+    resetNewPasswordLabel: "Nueva contraseña",
+    resetConfirmNewPasswordLabel: "Confirmar nueva contraseña",
+    resetSubmit: "Cambiar contraseña",
+    resetSubmitLoading: "Cambiando...",
+    resetHasPassword: "¿Ya recuerdas tu contraseña?",
+    resetBackToLogin: "Volver a iniciar sesión",
+    resetSuccessLoginCta: "Ir a la página de inicio de sesión",
+    resetErrorNewPasswordRequired: "Introduce una nueva contraseña.",
+    resetErrorNewPasswordTooShort:
+      "La contraseña debe tener al menos 8 caracteres.",
+    resetErrorConfirmPasswordRequired:
+      "Confirma tu nueva contraseña.",
+    resetErrorPasswordsMismatch: "Las contraseñas no coinciden.",
+    resetErrorInvalidOrExpiredLink:
+      'El enlace de restablecimiento es inválido o ha expirado. Solicita un nuevo enlace desde "¿Olvidaste la contraseña?".',
+    resetErrorGeneric:
+      "El cambio de contraseña falló. Inténtalo más tarde.",
+    resetErrorNetwork:
+      "Ocurrió un error de red al contactar con el servidor.",
+    resetSuccess:
+      "Tu contraseña se cambió correctamente. Te redirigiremos a la página de inicio de sesión...",
+    socialCallbackTitle: "Procesando inicio de sesión social",
+    socialCallbackProcessing:
+      "Por favor espera. Estamos completando tu inicio de sesión mediante el proveedor social.",
+    socialCallbackRedirectNotice:
+      "Serás redirigido automáticamente en unos segundos.",
+    socialCallbackErrorTitle: "Error en el inicio de sesión social",
+    socialCallbackError:
+      "No pudimos iniciar sesión con el proveedor social. Inténtalo de nuevo.",
+    socialCallbackErrorCta: "Volver a iniciar sesión",
+    resetPasswordRequirementsTitle: "Requisitos de contraseña:",
+    resetPasswordRequirementsItemMinLength: "Mínimo 8 caracteres",
+    resetPasswordRequirementsItemRecommendation:
+      "Recomendamos usar letras, números y símbolos.",
+    resetGoToForgotCta: 'Ir a "¿Olvidaste la contraseña?"',
+    resetDisabledTitle: "El restablecimiento está deshabilitado",
+    resetDisabledMessage:
+      "El administrador ha deshabilitado el registro y el restablecimiento de contraseña.",
+    resetDisabledLoginCta: "Ir a iniciar sesión",
+    accountDeletedTitle: "Tu cuenta ha sido cerrada y eliminada",
+    accountDeletedDescription:
+      "Tu cuenta ha sido cerrada y tus datos personales han sido marcados para su eliminación según nuestras políticas de protección de datos y el RGPD.",
+    accountDeletedHint:
+      "Ya no tendrás acceso a tu perfil. Si decides usar BeeLMS de nuevo, necesitarás crear una cuenta nueva.",
+    accountDeletedPrimaryCta: "Ir a la página principal",
+    accountDeletedSecondaryCta: "Ir a los artículos Wiki",
+    twoFactorTitle: "Autenticación de dos factores",
+    twoFactorSubtitle:
+      "Introduce el código de 6 dígitos de tu aplicación autenticadora.",
+    twoFactorCodeLabel: "Código",
+    twoFactorSubmit: "Verificar",
+    twoFactorSubmitLoading: "Verificando...",
+    twoFactorBackToLogin: "Volver a iniciar sesión",
+    twoFactorErrorMissingChallenge:
+      "Falta el desafío 2FA. Inicia sesión de nuevo.",
+    twoFactorErrorCodeRequired:
+      "Introduce el código de 6 dígitos.",
+    twoFactorErrorCodeInvalidFormat: "Formato de código inválido.",
+    twoFactorErrorInvalidCode: "Código inválido. Inténtalo de nuevo.",
+    twoFactorErrorGeneric:
+      "La verificación 2FA falló. Inténtalo más tarde.",
+  };
+  return m;
+})();
+
+const PL_MESSAGES: DomainMessages = (() => {
+  const m = cloneEnglishMessages();
+  m.nav = {
+    wiki: "Wiki",
+    courses: "Kursy",
+    myCourses: "Moje kursy",
+    login: "Zaloguj się",
+    register: "Zarejestruj się",
+    profile: "Profil",
+    logout: "Wyloguj się",
+    admin: "Admin",
+  };
+  m.auth = {
+    loginTitle: "Zaloguj się",
+    loginSubtitle: "Wpisz swoje dane logowania.",
+    loginEmailLabel: "E-mail",
+    loginPasswordLabel: "Hasło",
+    loginSubmit: "Zaloguj się",
+    loginSubmitLoading: "Logowanie...",
+    loginGoogleCta: "Zaloguj się przez Google",
+    loginGoogleLoading: "Łączenie...",
+    loginFacebookCta: "Zaloguj się przez Facebook",
+    loginFacebookLoading: "Łączenie...",
+    loginGithubCta: "Zaloguj się przez GitHub",
+    loginGithubLoading: "Łączenie...",
+    loginLinkedinCta: "Zaloguj się przez LinkedIn",
+    loginLinkedinLoading: "Łączenie...",
+    loginSocialDivider: "lub kontynuuj przez e-mail",
+    loginSocialUnavailable:
+      "Logowanie społecznościowe jest wyłączone przez administratora. Kontynuuj przez e-mail i hasło.",
+    loginSocialResetHint:
+      "Logowanie społecznościowe jest ograniczone. Jeśli używałeś Google/Facebook/GitHub/LinkedIn, ustaw hasło przez „Nie pamiętasz hasła?” i zaloguj się e-mailem i hasłem.",
+    loginGoogleDisabled:
+      "Logowanie przez Google jest tymczasowo wyłączone przez administratora.",
+    loginGoogleUnavailable:
+      "Logowanie przez Google nie jest skonfigurowane. Użyj e-maila i hasła.",
+    loginFacebookDisabled:
+      "Logowanie przez Facebook jest tymczasowo wyłączone przez administratora.",
+    loginFacebookUnavailable:
+      "Logowanie przez Facebook nie jest skonfigurowane. Użyj e-maila i hasła.",
+    loginGithubDisabled:
+      "Logowanie przez GitHub jest tymczasowo wyłączone przez administratora.",
+    loginGithubUnavailable:
+      "Logowanie przez GitHub nie jest skonfigurowane. Użyj e-maila i hasła.",
+    loginLinkedinDisabled:
+      "Logowanie przez LinkedIn jest tymczasowo wyłączone przez administratora.",
+    loginLinkedinUnavailable:
+      "Logowanie przez LinkedIn nie jest skonfigurowane. Użyj e-maila i hasła.",
+    loginGoogleError: "Logowanie przez Google nie powiodło się. Spróbuj ponownie.",
+    loginFacebookError:
+      "Logowanie przez Facebook nie powiodło się. Spróbuj ponownie.",
+    loginGithubError:
+      "Logowanie przez GitHub nie powiodło się. Spróbuj ponownie.",
+    loginLinkedinError:
+      "Logowanie przez LinkedIn nie powiodło się. Spróbuj ponownie.",
+    loginForgotLink: "Nie pamiętasz hasła?",
+    loginRegisterLink: "Nie masz konta?",
+    loginRegisterLinkCta: "Utwórz konto",
+    loginRememberMeLabel: "Zapamiętaj mnie",
+    loginCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA (placeholder) – w prawdziwym systemie pojawia się dopiero po kilku kolejnych nieudanych próbach logowania.",
+    loginCaptchaLabel: "CAPTCHA / reCAPTCHA",
+    loginCaptchaNotAvailable:
+      "CAPTCHA jest wymagana, ale integracja jest wyłączona lub nie skonfigurowana. Spróbuj ponownie lub skontaktuj się z administratorem.",
+    loginErrorEmailRequired: "Podaj adres e-mail.",
+    loginErrorEmailInvalid: "Podaj poprawny adres e-mail.",
+    loginErrorPasswordRequired: "Podaj hasło.",
+    socialResetPasswordHint:
+      "Jeśli logowanie społecznościowe (Google/Facebook/GitHub/LinkedIn) jest niedostępne, możesz użyć „Nie pamiętasz hasła?” aby ustawić hasło, a następnie zalogować się e-mailem i hasłem.",
+    socialResetPasswordHintNoProviders:
+      "Jeśli logowanie społecznościowe jest niedostępne, możesz użyć „Nie pamiętasz hasła?” aby ustawić hasło, a następnie zalogować się e-mailem i hasłem.",
+    loginErrorInvalidCredentials: "Nieprawidłowe dane logowania.",
+    loginErrorCaptchaRequired: "Potwierdź, że nie jesteś robotem.",
+    loginErrorGeneric:
+      "Logowanie nie powiodło się. Spróbuj ponownie później.",
+    loginErrorNetwork:
+      "Wystąpił błąd sieci podczas łączenia z serwerem.",
+    loginErrorDisabled:
+      "Logowanie jest wyłączone dla zwykłych użytkowników.",
+    loginLoading: "Ładowanie...",
+    registerTitle: "Utwórz konto",
+    registerSubtitle: "Załóż bezpłatne konto BeeLMS, aby rozpocząć.",
+    registerEmailLabel: "E-mail",
+    registerPasswordLabel: "Hasło",
+    registerPasswordHint:
+      "Minimum 8 znaków: co najmniej jedna wielka litera, jedna mała litera, jedna cyfra i jeden znak specjalny",
+    registerConfirmPasswordLabel: "Potwierdź hasło",
+    registerTermsPrefix: "Akceptuję ",
+    registerTermsAnd: " oraz ",
+    registerTermsSuffix: ".",
+    registerTermsLabel:
+      "Akceptuję Warunki korzystania oraz Politykę prywatności.",
+    registerCaptchaLabel:
+      "Nie jestem robotem (placeholder dla integracji CAPTCHA).",
+    registerCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA (placeholder dla ochrony przed botami podczas rejestracji)",
+    registerSubmit: "Zarejestruj się",
+    registerSubmitLoading: "Wysyłanie...",
+    registerGoogleCta: "Zarejestruj się przez Google",
+    registerGoogleLoading: "Łączenie...",
+    registerFacebookCta: "Zarejestruj się przez Facebook",
+    registerFacebookLoading: "Łączenie...",
+    registerGithubCta: "Zarejestruj się przez GitHub",
+    registerGithubLoading: "Łączenie...",
+    registerLinkedinCta: "Zarejestruj się przez LinkedIn",
+    registerLinkedinLoading: "Łączenie...",
+    registerSocialDivider: "lub wypełnij formularz",
+    registerSocialUnavailable:
+      "Rejestracja społecznościowa jest wyłączona przez administratora. Kontynuuj przez formularz poniżej.",
+    registerGoogleDisabled:
+      "Rejestracja przez Google jest tymczasowo wyłączona przez administratora.",
+    registerGoogleUnavailable:
+      "Rejestracja przez Google nie jest skonfigurowana. Użyj formularza poniżej.",
+    registerFacebookDisabled:
+      "Rejestracja przez Facebook jest tymczasowo wyłączona przez administratora.",
+    registerFacebookUnavailable:
+      "Rejestracja przez Facebook nie jest skonfigurowana. Użyj formularza poniżej.",
+    registerGithubDisabled:
+      "Rejestracja przez GitHub jest tymczasowo wyłączona przez administratora.",
+    registerGithubUnavailable:
+      "Rejestracja przez GitHub nie jest skonfigurowana. Użyj formularza poniżej.",
+    registerLinkedinDisabled:
+      "Rejestracja przez LinkedIn jest tymczasowo wyłączona przez administratora.",
+    registerLinkedinUnavailable:
+      "Rejestracja przez LinkedIn nie jest skonfigurowana. Użyj formularza poniżej.",
+    registerGoogleError:
+      "Rejestracja przez Google nie powiodła się. Spróbuj ponownie.",
+    registerFacebookError:
+      "Rejestracja przez Facebook nie powiodła się. Spróbuj ponownie.",
+    registerGithubError:
+      "Rejestracja przez GitHub nie powiodła się. Spróbuj ponownie.",
+    registerLinkedinError:
+      "Rejestracja przez LinkedIn nie powiodła się. Spróbuj ponownie.",
+    registerHasAccount: "Masz już konto?",
+    registerLoginLink: "Zaloguj się",
+    registerErrorEmailRequired: "Podaj adres e-mail.",
+    registerErrorEmailInvalid: "Podaj poprawny adres e-mail.",
+    registerErrorPasswordRequired: "Podaj hasło.",
+    registerErrorPasswordTooShort:
+      "Hasło musi mieć co najmniej 8 znaków i zawierać co najmniej jedną wielką literę, jedną małą literę, jedną cyfrę i jeden znak specjalny.",
+    registerErrorPasswordMissingUppercase:
+      "Hasło musi zawierać co najmniej jedną wielką literę.",
+    registerErrorPasswordMissingLowercase:
+      "Hasło musi zawierać co najmniej jedną małą literę.",
+    registerErrorPasswordMissingDigit:
+      "Hasło musi zawierać co najmniej jedną cyfrę.",
+    registerErrorPasswordMissingSpecialChar:
+      "Hasło musi zawierać co najmniej jeden znak specjalny.",
+    registerErrorConfirmPasswordRequired: "Potwierdź hasło.",
+    registerErrorPasswordsMismatch: "Hasła nie są takie same.",
+    registerErrorTermsRequired: "Musisz zaakceptować warunki.",
+    registerErrorCaptchaRequired: "Potwierdź, że nie jesteś robotem.",
+    registerErrorDuplicateEmail: "Ten adres e-mail jest już zarejestrowany.",
+    registerErrorInvalidData:
+      "Dane są nieprawidłowe. Sprawdź formularz i spróbuj ponownie.",
+    registerErrorGeneric:
+      "Rejestracja nie powiodła się. Spróbuj ponownie później.",
+    registerErrorNetwork:
+      "Wystąpił błąd sieci podczas łączenia z serwerem.",
+    registerSuccess:
+      "Rejestracja zakończyła się sukcesem. Sprawdź e-mail i potwierdź adres za pomocą linku, który wysłaliśmy. Następnie możesz się zalogować.",
+    registerLoading: "Ładowanie...",
+    registerDisabledTitle: "Rejestracja jest wyłączona",
+    registerDisabledMessage:
+      "Administrator wyłączył rejestrację i resetowanie hasła.",
+    registerDisabledLoginCta: "Przejdź do logowania",
+    forgotTitle: "Nie pamiętasz hasła",
+    forgotSubtitle:
+      "Podaj swój adres e-mail, aby poprosić o reset hasła.",
+    forgotEmailLabel: "E-mail",
+    forgotCaptchaLabel:
+      "Nie jestem robotem (placeholder dla integracji CAPTCHA).",
+    forgotSubmit: "Wyślij link resetujący",
+    forgotSubmitLoading: "Wysyłanie...",
+    forgotHasPassword: "Pamiętasz hasło?",
+    forgotLoginLink: "Wróć do logowania",
+    forgotErrorEmailRequired: "Podaj adres e-mail.",
+    forgotErrorEmailInvalid: "Podaj poprawny adres e-mail.",
+    forgotErrorCaptchaRequired: "Potwierdź, że nie jesteś robotem.",
+    forgotErrorInvalidData:
+      "Dane są nieprawidłowe. Sprawdź formularz i spróbuj ponownie.",
+    forgotErrorGeneric:
+      "Nie udało się wysłać prośby o reset hasła. Spróbuj później.",
+    forgotErrorNetwork:
+      "Wystąpił błąd sieci podczas łączenia z serwerem.",
+    forgotSuccess:
+      "Jeśli istnieje konto z tym adresem e-mail, wyślemy instrukcje resetowania hasła.",
+    forgotResetLinkInfo:
+      "Link do resetowania hasła jest ważny przez 24 godziny.",
+    forgotCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA (placeholder dla ochrony przed botami przy resecie hasła)",
+    forgotDisabledTitle: "Reset hasła jest wyłączony",
+    forgotDisabledMessage:
+      "Administrator wyłączył rejestrację i resetowanie hasła.",
+    forgotDisabledLoginCta: "Przejdź do logowania",
+    resetTitle: "Zmień hasło",
+    resetSubtitle: "Wpisz nowe hasło.",
+    resetInfoMessage:
+      "Ta strona jest dostępna przez bezpieczny link wysłany na Twój e-mail.",
+    resetNewPasswordLabel: "Nowe hasło",
+    resetConfirmNewPasswordLabel: "Potwierdź nowe hasło",
+    resetSubmit: "Zmień hasło",
+    resetSubmitLoading: "Zmiana...",
+    resetHasPassword: "Pamiętasz hasło?",
+    resetBackToLogin: "Wróć do logowania",
+    resetSuccessLoginCta: "Przejdź do strony logowania",
+    resetErrorNewPasswordRequired: "Podaj nowe hasło.",
+    resetErrorNewPasswordTooShort: "Hasło musi mieć co najmniej 8 znaków.",
+    resetErrorConfirmPasswordRequired: "Potwierdź nowe hasło.",
+    resetErrorPasswordsMismatch: "Hasła nie są takie same.",
+    resetErrorInvalidOrExpiredLink:
+      'Link do resetowania hasła jest nieprawidłowy lub wygasł. Poproś o nowy link na ekranie „Nie pamiętasz hasła?”.',
+    resetErrorGeneric:
+      "Zmiana hasła nie powiodła się. Spróbuj ponownie później.",
+    resetErrorNetwork:
+      "Wystąpił błąd sieci podczas łączenia z serwerem.",
+    resetSuccess:
+      "Hasło zostało zmienione. Za chwilę przekierujemy Cię do strony logowania...",
+    socialCallbackTitle: "Przetwarzanie logowania społecznościowego",
+    socialCallbackProcessing:
+      "Poczekaj. Kończymy logowanie przez dostawcę społecznościowego.",
+    socialCallbackRedirectNotice:
+      "Zostaniesz automatycznie przekierowany w ciągu kilku sekund.",
+    socialCallbackErrorTitle: "Logowanie społecznościowe nie powiodło się",
+    socialCallbackError:
+      "Nie udało się zalogować przez dostawcę społecznościowego. Spróbuj ponownie.",
+    socialCallbackErrorCta: "Wróć do logowania",
+    resetPasswordRequirementsTitle: "Wymagania hasła:",
+    resetPasswordRequirementsItemMinLength: "Minimum 8 znaków",
+    resetPasswordRequirementsItemRecommendation:
+      "Zalecamy użycie liter, cyfr i symboli.",
+    resetGoToForgotCta: "Przejdź do „Nie pamiętasz hasła?”",
+    resetDisabledTitle: "Reset hasła jest wyłączony",
+    resetDisabledMessage:
+      "Administrator wyłączył rejestrację i resetowanie hasła.",
+    resetDisabledLoginCta: "Przejdź do logowania",
+    accountDeletedTitle: "Twoje konto zostało zamknięte i usunięte",
+    accountDeletedDescription:
+      "Twoje konto zostało zamknięte, a Twoje dane osobowe zostały oznaczone do usunięcia zgodnie z naszymi zasadami ochrony danych i RODO.",
+    accountDeletedHint:
+      "Nie będziesz mieć dostępu do profilu. Jeśli zdecydujesz się ponownie korzystać z BeeLMS, musisz utworzyć nowe konto.",
+    accountDeletedPrimaryCta: "Przejdź do strony głównej",
+    accountDeletedSecondaryCta: "Przejdź do artykułów Wiki",
+    twoFactorTitle: "Uwierzytelnianie dwuskładnikowe",
+    twoFactorSubtitle:
+      "Wpisz 6-cyfrowy kod z aplikacji uwierzytelniającej.",
+    twoFactorCodeLabel: "Kod",
+    twoFactorSubmit: "Zweryfikuj",
+    twoFactorSubmitLoading: "Weryfikacja...",
+    twoFactorBackToLogin: "Wróć do logowania",
+    twoFactorErrorMissingChallenge:
+      "Brak wyzwania 2FA. Zaloguj się ponownie.",
+    twoFactorErrorCodeRequired: "Podaj 6-cyfrowy kod.",
+    twoFactorErrorCodeInvalidFormat: "Nieprawidłowy format kodu.",
+    twoFactorErrorInvalidCode: "Nieprawidłowy kod. Spróbuj ponownie.",
+    twoFactorErrorGeneric:
+      "Weryfikacja 2FA nie powiodła się. Spróbuj ponownie później.",
+  };
+  return m;
+})();
+
+const FR_MESSAGES: DomainMessages = (() => {
+  const m = cloneEnglishMessages();
+  m.nav = {
+    wiki: "Wiki",
+    courses: "Cours",
+    myCourses: "Mes cours",
+    login: "Se connecter",
+    register: "S'inscrire",
+    profile: "Profil",
+    logout: "Se déconnecter",
+    admin: "Admin",
+  };
+  m.auth = {
+    loginTitle: "Se connecter",
+    loginSubtitle: "Saisissez vos identifiants.",
+    loginEmailLabel: "E-mail",
+    loginPasswordLabel: "Mot de passe",
+    loginSubmit: "Se connecter",
+    loginSubmitLoading: "Connexion...",
+    loginGoogleCta: "Se connecter avec Google",
+    loginGoogleLoading: "Connexion...",
+    loginFacebookCta: "Se connecter avec Facebook",
+    loginFacebookLoading: "Connexion...",
+    loginGithubCta: "Se connecter avec GitHub",
+    loginGithubLoading: "Connexion...",
+    loginLinkedinCta: "Se connecter avec LinkedIn",
+    loginLinkedinLoading: "Connexion...",
+    loginSocialDivider: "ou continuer avec e-mail",
+    loginSocialUnavailable:
+      "La connexion via réseaux sociaux est désactivée par l'administrateur. Continuez avec e-mail et mot de passe.",
+    loginSocialResetHint:
+      "La connexion sociale est restreinte. Si vous utilisiez Google/Facebook/GitHub/LinkedIn, définissez un mot de passe via « Mot de passe oublié » puis connectez-vous avec e-mail + mot de passe.",
+    loginGoogleDisabled:
+      "La connexion avec Google est temporairement désactivée par l'administrateur.",
+    loginGoogleUnavailable:
+      "La connexion avec Google n'est pas configurée. Utilisez e-mail et mot de passe.",
+    loginFacebookDisabled:
+      "La connexion avec Facebook est temporairement désactivée par l'administrateur.",
+    loginFacebookUnavailable:
+      "La connexion avec Facebook n'est pas configurée. Utilisez e-mail et mot de passe.",
+    loginGithubDisabled:
+      "La connexion avec GitHub est temporairement désactivée par l'administrateur.",
+    loginGithubUnavailable:
+      "La connexion avec GitHub n'est pas configurée. Utilisez e-mail et mot de passe.",
+    loginLinkedinDisabled:
+      "La connexion avec LinkedIn est temporairement désactivée par l'administrateur.",
+    loginLinkedinUnavailable:
+      "La connexion avec LinkedIn n'est pas configurée. Utilisez e-mail et mot de passe.",
+    loginGoogleError: "La connexion avec Google a échoué. Réessayez.",
+    loginFacebookError:
+      "La connexion avec Facebook a échoué. Réessayez.",
+    loginGithubError: "La connexion avec GitHub a échoué. Réessayez.",
+    loginLinkedinError:
+      "La connexion avec LinkedIn a échoué. Réessayez.",
+    loginForgotLink: "Mot de passe oublié ?",
+    loginRegisterLink: "Pas de compte ?",
+    loginRegisterLinkCta: "Créer un compte",
+    loginRememberMeLabel: "Se souvenir de moi",
+    loginCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA (placeholder) – dans le système réel, il n'apparaît qu'après plusieurs tentatives de connexion échouées.",
+    loginCaptchaLabel: "CAPTCHA / reCAPTCHA",
+    loginCaptchaNotAvailable:
+      "Le CAPTCHA est requis, mais l'intégration est désactivée ou non configurée. Réessayez ou contactez un administrateur.",
+    loginErrorEmailRequired: "Veuillez saisir votre e-mail.",
+    loginErrorEmailInvalid: "Veuillez saisir une adresse e-mail valide.",
+    loginErrorPasswordRequired: "Veuillez saisir votre mot de passe.",
+    socialResetPasswordHint:
+      "Si la connexion sociale (Google/Facebook/GitHub/LinkedIn) n'est pas disponible, utilisez « Mot de passe oublié » pour définir un mot de passe puis connectez-vous avec e-mail + mot de passe.",
+    socialResetPasswordHintNoProviders:
+      "Si la connexion sociale n'est pas disponible, utilisez « Mot de passe oublié » pour définir un mot de passe puis connectez-vous avec e-mail + mot de passe.",
+    loginErrorInvalidCredentials: "Identifiants invalides.",
+    loginErrorCaptchaRequired:
+      "Veuillez confirmer que vous n'êtes pas un robot.",
+    loginErrorGeneric:
+      "La connexion a échoué. Veuillez réessayer plus tard.",
+    loginErrorNetwork:
+      "Une erreur réseau s'est produite lors du contact avec le serveur.",
+    loginErrorDisabled:
+      "La connexion est désactivée pour les utilisateurs standards.",
+    loginLoading: "Chargement...",
+    registerTitle: "Créer un compte",
+    registerSubtitle:
+      "Créez votre compte BeeLMS gratuit pour commencer.",
+    registerEmailLabel: "E-mail",
+    registerPasswordLabel: "Mot de passe",
+    registerPasswordHint:
+      "Minimum 8 caractères : au moins une majuscule, une minuscule, un chiffre et un caractère spécial",
+    registerConfirmPasswordLabel: "Confirmer le mot de passe",
+    registerTermsPrefix: "J'accepte les ",
+    registerTermsAnd: " et la ",
+    registerTermsSuffix: ".",
+    registerTermsLabel:
+      "J'accepte les Conditions d'utilisation et la Politique de confidentialité.",
+    registerCaptchaLabel:
+      "Je ne suis pas un robot (placeholder pour l'intégration CAPTCHA).",
+    registerCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA (placeholder pour la protection anti-bot lors de l'inscription)",
+    registerSubmit: "S'inscrire",
+    registerSubmitLoading: "Envoi...",
+    registerGoogleCta: "S'inscrire avec Google",
+    registerGoogleLoading: "Connexion...",
+    registerFacebookCta: "S'inscrire avec Facebook",
+    registerFacebookLoading: "Connexion...",
+    registerGithubCta: "S'inscrire avec GitHub",
+    registerGithubLoading: "Connexion...",
+    registerLinkedinCta: "S'inscrire avec LinkedIn",
+    registerLinkedinLoading: "Connexion...",
+    registerSocialDivider: "ou remplir le formulaire",
+    registerSocialUnavailable:
+      "L'inscription via réseaux sociaux est désactivée par l'administrateur. Continuez avec le formulaire ci-dessous.",
+    registerGoogleDisabled:
+      "L'inscription avec Google est temporairement désactivée par l'administrateur.",
+    registerGoogleUnavailable:
+      "L'inscription avec Google n'est pas configurée. Utilisez le formulaire ci-dessous.",
+    registerFacebookDisabled:
+      "L'inscription avec Facebook est temporairement désactivée par l'administrateur.",
+    registerFacebookUnavailable:
+      "L'inscription avec Facebook n'est pas configurée. Utilisez le formulaire ci-dessous.",
+    registerGithubDisabled:
+      "L'inscription avec GitHub est temporairement désactivée par l'administrateur.",
+    registerGithubUnavailable:
+      "L'inscription avec GitHub n'est pas configurée. Utilisez le formulaire ci-dessous.",
+    registerLinkedinDisabled:
+      "L'inscription avec LinkedIn est temporairement désactivée par l'administrateur.",
+    registerLinkedinUnavailable:
+      "L'inscription avec LinkedIn n'est pas configurée. Utilisez le formulaire ci-dessous.",
+    registerGoogleError: "L'inscription avec Google a échoué. Réessayez.",
+    registerFacebookError:
+      "L'inscription avec Facebook a échoué. Réessayez.",
+    registerGithubError: "L'inscription avec GitHub a échoué. Réessayez.",
+    registerLinkedinError:
+      "L'inscription avec LinkedIn a échoué. Réessayez.",
+    registerHasAccount: "Vous avez déjà un compte ?",
+    registerLoginLink: "Se connecter",
+    registerErrorEmailRequired: "Veuillez saisir votre e-mail.",
+    registerErrorEmailInvalid: "Veuillez saisir une adresse e-mail valide.",
+    registerErrorPasswordRequired: "Veuillez saisir un mot de passe.",
+    registerErrorPasswordTooShort:
+      "Le mot de passe doit comporter au moins 8 caractères et contenir au moins une majuscule, une minuscule, un chiffre et un caractère spécial.",
+    registerErrorPasswordMissingUppercase:
+      "Le mot de passe doit contenir au moins une lettre majuscule.",
+    registerErrorPasswordMissingLowercase:
+      "Le mot de passe doit contenir au moins une lettre minuscule.",
+    registerErrorPasswordMissingDigit:
+      "Le mot de passe doit contenir au moins un chiffre.",
+    registerErrorPasswordMissingSpecialChar:
+      "Le mot de passe doit contenir au moins un caractère spécial.",
+    registerErrorConfirmPasswordRequired:
+      "Veuillez confirmer votre mot de passe.",
+    registerErrorPasswordsMismatch: "Les mots de passe ne correspondent pas.",
+    registerErrorTermsRequired: "Vous devez accepter les conditions.",
+    registerErrorCaptchaRequired:
+      "Veuillez confirmer que vous n'êtes pas un robot.",
+    registerErrorDuplicateEmail: "Cet e-mail est déjà enregistré.",
+    registerErrorInvalidData:
+      "Les données ne sont pas valides. Vérifiez le formulaire et réessayez.",
+    registerErrorGeneric:
+      "L'inscription a échoué. Veuillez réessayer plus tard.",
+    registerErrorNetwork:
+      "Une erreur réseau s'est produite lors du contact avec le serveur.",
+    registerSuccess:
+      "L'inscription a réussi. Vérifiez votre e-mail et confirmez votre adresse avec le lien que nous avons envoyé. Ensuite, vous pourrez vous connecter depuis la page de connexion.",
+    registerLoading: "Chargement...",
+    registerDisabledTitle: "L'inscription est désactivée",
+    registerDisabledMessage:
+      "L'administrateur a désactivé l'inscription et la réinitialisation du mot de passe.",
+    registerDisabledLoginCta: "Aller à la connexion",
+    forgotTitle: "Mot de passe oublié",
+    forgotSubtitle:
+      "Saisissez votre e-mail pour demander une réinitialisation du mot de passe.",
+    forgotEmailLabel: "E-mail",
+    forgotCaptchaLabel:
+      "Je ne suis pas un robot (placeholder pour l'intégration CAPTCHA).",
+    forgotSubmit: "Envoyer le lien de réinitialisation",
+    forgotSubmitLoading: "Envoi...",
+    forgotHasPassword: "Vous vous souvenez de votre mot de passe ?",
+    forgotLoginLink: "Retour à la connexion",
+    forgotErrorEmailRequired: "Veuillez saisir votre e-mail.",
+    forgotErrorEmailInvalid: "Veuillez saisir une adresse e-mail valide.",
+    forgotErrorCaptchaRequired:
+      "Veuillez confirmer que vous n'êtes pas un robot.",
+    forgotErrorInvalidData:
+      "Les données ne sont pas valides. Vérifiez le formulaire et réessayez.",
+    forgotErrorGeneric:
+      "La demande de réinitialisation a échoué. Veuillez réessayer plus tard.",
+    forgotErrorNetwork:
+      "Une erreur réseau s'est produite lors du contact avec le serveur.",
+    forgotSuccess:
+      "S'il existe un compte avec cet e-mail, nous enverrons des instructions pour réinitialiser votre mot de passe.",
+    forgotResetLinkInfo:
+      "Le lien de réinitialisation est valable 24 heures.",
+    forgotCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA (placeholder pour protéger la demande de réinitialisation)",
+    forgotDisabledTitle: "La réinitialisation est désactivée",
+    forgotDisabledMessage:
+      "L'administrateur a désactivé l'inscription et la réinitialisation du mot de passe.",
+    forgotDisabledLoginCta: "Aller à la connexion",
+    resetTitle: "Changer le mot de passe",
+    resetSubtitle: "Saisissez votre nouveau mot de passe.",
+    resetInfoMessage:
+      "Cette page est accessible via un lien sécurisé envoyé à votre e-mail.",
+    resetNewPasswordLabel: "Nouveau mot de passe",
+    resetConfirmNewPasswordLabel: "Confirmer le nouveau mot de passe",
+    resetSubmit: "Changer le mot de passe",
+    resetSubmitLoading: "Modification...",
+    resetHasPassword: "Vous vous souvenez déjà de votre mot de passe ?",
+    resetBackToLogin: "Retour à la connexion",
+    resetSuccessLoginCta: "Aller à la page de connexion",
+    resetErrorNewPasswordRequired: "Veuillez saisir un nouveau mot de passe.",
+    resetErrorNewPasswordTooShort:
+      "Le mot de passe doit comporter au moins 8 caractères.",
+    resetErrorConfirmPasswordRequired:
+      "Veuillez confirmer votre nouveau mot de passe.",
+    resetErrorPasswordsMismatch: "Les mots de passe ne correspondent pas.",
+    resetErrorInvalidOrExpiredLink:
+      "Le lien de réinitialisation est invalide ou expiré. Demandez un nouveau lien depuis l'écran « Mot de passe oublié ».",
+    resetErrorGeneric:
+      "Le changement de mot de passe a échoué. Veuillez réessayer plus tard.",
+    resetErrorNetwork:
+      "Une erreur réseau s'est produite lors du contact avec le serveur.",
+    resetSuccess:
+      "Votre mot de passe a été modifié. Nous allons vous rediriger vers la page de connexion...",
+    socialCallbackTitle: "Traitement de la connexion sociale",
+    socialCallbackProcessing:
+      "Veuillez patienter. Nous terminons votre connexion via le fournisseur social.",
+    socialCallbackRedirectNotice:
+      "Vous serez redirigé automatiquement dans quelques secondes.",
+    socialCallbackErrorTitle: "Échec de la connexion sociale",
+    socialCallbackError:
+      "Impossible de vous connecter via le fournisseur social. Réessayez.",
+    socialCallbackErrorCta: "Retour à la connexion",
+    resetPasswordRequirementsTitle: "Exigences du mot de passe :",
+    resetPasswordRequirementsItemMinLength: "Minimum 8 caractères",
+    resetPasswordRequirementsItemRecommendation:
+      "Nous recommandons d'utiliser des lettres, des chiffres et des symboles.",
+    resetGoToForgotCta: "Aller à « Mot de passe oublié »",
+    resetDisabledTitle: "La réinitialisation est désactivée",
+    resetDisabledMessage:
+      "L'administrateur a désactivé l'inscription et la réinitialisation du mot de passe.",
+    resetDisabledLoginCta: "Aller à la connexion",
+    accountDeletedTitle: "Votre compte a été fermé et supprimé",
+    accountDeletedDescription:
+      "Votre compte a été fermé et vos données personnelles ont été marquées pour suppression conformément à nos règles de protection des données et au RGPD.",
+    accountDeletedHint:
+      "Vous n'aurez plus accès à votre profil. Si vous décidez d'utiliser BeeLMS à nouveau, vous devrez créer un nouveau compte.",
+    accountDeletedPrimaryCta: "Aller à la page d'accueil",
+    accountDeletedSecondaryCta: "Aller aux articles Wiki",
+    twoFactorTitle: "Authentification à deux facteurs",
+    twoFactorSubtitle:
+      "Saisissez le code à 6 chiffres de votre application d'authentification.",
+    twoFactorCodeLabel: "Code",
+    twoFactorSubmit: "Vérifier",
+    twoFactorSubmitLoading: "Vérification...",
+    twoFactorBackToLogin: "Retour à la connexion",
+    twoFactorErrorMissingChallenge:
+      "Défi 2FA manquant. Veuillez vous reconnecter.",
+    twoFactorErrorCodeRequired: "Veuillez saisir le code à 6 chiffres.",
+    twoFactorErrorCodeInvalidFormat: "Format de code invalide.",
+    twoFactorErrorInvalidCode: "Code invalide. Réessayez.",
+    twoFactorErrorGeneric:
+      "La vérification 2FA a échoué. Veuillez réessayer plus tard.",
+  };
+  return m;
+})();
+
+const IT_MESSAGES: DomainMessages = (() => {
+  const m = cloneEnglishMessages();
+  m.nav = {
+    wiki: "Wiki",
+    courses: "Corsi",
+    myCourses: "I miei corsi",
+    login: "Accedi",
+    register: "Registrati",
+    profile: "Profilo",
+    logout: "Esci",
+    admin: "Admin",
+  };
+  m.auth = {
+    loginTitle: "Accedi",
+    loginSubtitle: "Inserisci i tuoi dati di accesso.",
+    loginEmailLabel: "Email",
+    loginPasswordLabel: "Password",
+    loginSubmit: "Accedi",
+    loginSubmitLoading: "Accesso in corso...",
+    loginGoogleCta: "Accedi con Google",
+    loginGoogleLoading: "Connessione...",
+    loginFacebookCta: "Accedi con Facebook",
+    loginFacebookLoading: "Connessione...",
+    loginGithubCta: "Accedi con GitHub",
+    loginGithubLoading: "Connessione...",
+    loginLinkedinCta: "Accedi con LinkedIn",
+    loginLinkedinLoading: "Connessione...",
+    loginSocialDivider: "oppure continua con email",
+    loginSocialUnavailable:
+      "L'accesso social è disabilitato dall'amministratore. Continua con email e password.",
+    loginSocialResetHint:
+      "L'accesso social è limitato. Se hai usato Google/Facebook/GitHub/LinkedIn, reimposta la password con " +
+      "'Password dimenticata' e poi accedi con email + password.",
+    loginGoogleDisabled:
+      "L'accesso con Google è temporaneamente disabilitato dall'amministratore.",
+    loginGoogleUnavailable:
+      "L'accesso con Google non è configurato. Usa email e password.",
+    loginFacebookDisabled:
+      "L'accesso con Facebook è temporaneamente disabilitato dall'amministratore.",
+    loginFacebookUnavailable:
+      "L'accesso con Facebook non è configurato. Usa email e password.",
+    loginGithubDisabled:
+      "L'accesso con GitHub è temporaneamente disabilitato dall'amministratore.",
+    loginGithubUnavailable:
+      "L'accesso con GitHub non è configurato. Usa email e password.",
+    loginLinkedinDisabled:
+      "L'accesso con LinkedIn è temporaneamente disabilitato dall'amministratore.",
+    loginLinkedinUnavailable:
+      "L'accesso con LinkedIn non è configurato. Usa email e password.",
+    loginGoogleError: "Accesso con Google non riuscito. Riprova.",
+    loginFacebookError: "Accesso con Facebook non riuscito. Riprova.",
+    loginGithubError: "Accesso con GitHub non riuscito. Riprova.",
+    loginLinkedinError: "Accesso con LinkedIn non riuscito. Riprova.",
+    loginForgotLink: "Password dimenticata?",
+    loginRegisterLink: "Non hai un account?",
+    loginRegisterLinkCta: "Crea un account",
+    loginRememberMeLabel: "Ricordami",
+    loginCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA (placeholder) – nel sistema reale appare solo dopo diversi tentativi di accesso falliti consecutivi.",
+    loginCaptchaLabel: "CAPTCHA / reCAPTCHA",
+    loginCaptchaNotAvailable:
+      "Il CAPTCHA è richiesto, ma l'integrazione è disabilitata o non configurata. Riprova o contatta un amministratore.",
+    loginErrorEmailRequired: "Inserisci la tua email.",
+    loginErrorEmailInvalid: "Inserisci un indirizzo email valido.",
+    loginErrorPasswordRequired: "Inserisci la tua password.",
+    socialResetPasswordHint:
+      "Se l'accesso social (Google/Facebook/GitHub/LinkedIn) non è disponibile, puoi usare 'Password dimenticata' per impostare una password e poi accedere con email + password.",
+    socialResetPasswordHintNoProviders:
+      "Se l'accesso social non è disponibile, puoi usare 'Password dimenticata' per impostare una password e poi accedere con email + password.",
+    loginErrorInvalidCredentials: "Credenziali non valide.",
+    loginErrorCaptchaRequired: "Conferma di non essere un robot.",
+    loginErrorGeneric: "Accesso non riuscito. Riprova più tardi.",
+    loginErrorNetwork:
+      "Si è verificato un errore di rete durante il contatto con il server.",
+    loginErrorDisabled:
+      "L'accesso è disabilitato per gli utenti standard.",
+    loginLoading: "Caricamento...",
+    registerTitle: "Crea account",
+    registerSubtitle: "Crea il tuo account BeeLMS gratuito per iniziare.",
+    registerEmailLabel: "Email",
+    registerPasswordLabel: "Password",
+    registerPasswordHint:
+      "Minimo 8 caratteri: almeno una maiuscola, una minuscola, una cifra e un carattere speciale",
+    registerConfirmPasswordLabel: "Conferma password",
+    registerTermsPrefix: "Accetto i ",
+    registerTermsAnd: " e la ",
+    registerTermsSuffix: ".",
+    registerTermsLabel:
+      "Accetto i Termini di utilizzo e l'Informativa sulla privacy.",
+    registerCaptchaLabel:
+      "Non sono un robot (placeholder per l'integrazione CAPTCHA).",
+    registerCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA (placeholder per la protezione anti-bot durante la registrazione)",
+    registerSubmit: "Registrati",
+    registerSubmitLoading: "Invio...",
+    registerGoogleCta: "Registrati con Google",
+    registerGoogleLoading: "Connessione...",
+    registerFacebookCta: "Registrati con Facebook",
+    registerFacebookLoading: "Connessione...",
+    registerGithubCta: "Registrati con GitHub",
+    registerGithubLoading: "Connessione...",
+    registerLinkedinCta: "Registrati con LinkedIn",
+    registerLinkedinLoading: "Connessione...",
+    registerSocialDivider: "oppure compila il modulo",
+    registerSocialUnavailable:
+      "La registrazione social è disabilitata dall'amministratore. Continua con il modulo qui sotto.",
+    registerGoogleDisabled:
+      "La registrazione con Google è temporaneamente disabilitata dall'amministratore.",
+    registerGoogleUnavailable:
+      "La registrazione con Google non è configurata. Usa il modulo qui sotto.",
+    registerFacebookDisabled:
+      "La registrazione con Facebook è temporaneamente disabilitata dall'amministratore.",
+    registerFacebookUnavailable:
+      "La registrazione con Facebook non è configurata. Usa il modulo qui sotto.",
+    registerGithubDisabled:
+      "La registrazione con GitHub è temporaneamente disabilitata dall'amministratore.",
+    registerGithubUnavailable:
+      "La registrazione con GitHub non è configurata. Usa il modulo qui sotto.",
+    registerLinkedinDisabled:
+      "La registrazione con LinkedIn è temporaneamente disabilitata dall'amministratore.",
+    registerLinkedinUnavailable:
+      "La registrazione con LinkedIn non è configurata. Usa il modulo qui sotto.",
+    registerGoogleError: "Registrazione con Google non riuscita. Riprova.",
+    registerFacebookError:
+      "Registrazione con Facebook non riuscita. Riprova.",
+    registerGithubError: "Registrazione con GitHub non riuscita. Riprova.",
+    registerLinkedinError:
+      "Registrazione con LinkedIn non riuscita. Riprova.",
+    registerHasAccount: "Hai già un account?",
+    registerLoginLink: "Accedi",
+    registerErrorEmailRequired: "Inserisci la tua email.",
+    registerErrorEmailInvalid: "Inserisci un indirizzo email valido.",
+    registerErrorPasswordRequired: "Inserisci una password.",
+    registerErrorPasswordTooShort:
+      "La password deve avere almeno 8 caratteri e contenere almeno una maiuscola, una minuscola, una cifra e un carattere speciale.",
+    registerErrorPasswordMissingUppercase:
+      "La password deve contenere almeno una lettera maiuscola.",
+    registerErrorPasswordMissingLowercase:
+      "La password deve contenere almeno una lettera minuscola.",
+    registerErrorPasswordMissingDigit:
+      "La password deve contenere almeno una cifra.",
+    registerErrorPasswordMissingSpecialChar:
+      "La password deve contenere almeno un carattere speciale.",
+    registerErrorConfirmPasswordRequired: "Conferma la password.",
+    registerErrorPasswordsMismatch: "Le password non corrispondono.",
+    registerErrorTermsRequired: "Devi accettare i termini.",
+    registerErrorCaptchaRequired: "Conferma di non essere un robot.",
+    registerErrorDuplicateEmail: "Questa email è già registrata.",
+    registerErrorInvalidData:
+      "I dati non sono validi. Controlla il modulo e riprova.",
+    registerErrorGeneric: "Registrazione non riuscita. Riprova più tardi.",
+    registerErrorNetwork:
+      "Si è verificato un errore di rete durante il contatto con il server.",
+    registerSuccess:
+      "Registrazione completata. Controlla la tua email e conferma l'indirizzo tramite il link che abbiamo inviato. Dopo potrai accedere dalla pagina di login.",
+    registerLoading: "Caricamento...",
+    registerDisabledTitle: "La registrazione è disabilitata",
+    registerDisabledMessage:
+      "L'amministratore ha disabilitato la registrazione e il reset della password.",
+    registerDisabledLoginCta: "Vai al login",
+    forgotTitle: "Password dimenticata",
+    forgotSubtitle:
+      "Inserisci la tua email per richiedere il reset della password.",
+    forgotEmailLabel: "Email",
+    forgotCaptchaLabel:
+      "Non sono un robot (placeholder per l'integrazione CAPTCHA).",
+    forgotSubmit: "Invia link di reset",
+    forgotSubmitLoading: "Invio...",
+    forgotHasPassword: "Hai ricordato la password?",
+    forgotLoginLink: "Torna al login",
+    forgotErrorEmailRequired: "Inserisci la tua email.",
+    forgotErrorEmailInvalid: "Inserisci un indirizzo email valido.",
+    forgotErrorCaptchaRequired: "Conferma di non essere un robot.",
+    forgotErrorInvalidData:
+      "I dati non sono validi. Controlla il modulo e riprova.",
+    forgotErrorGeneric:
+      "Richiesta di reset non riuscita. Riprova più tardi.",
+    forgotErrorNetwork:
+      "Si è verificato un errore di rete durante il contatto con il server.",
+    forgotSuccess:
+      "Se esiste un account con questa email, invieremo le istruzioni per reimpostare la password.",
+    forgotResetLinkInfo:
+      "Il link di reset è valido per 24 ore.",
+    forgotCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA (placeholder per proteggere la richiesta di reset)",
+    forgotDisabledTitle: "Il reset è disabilitato",
+    forgotDisabledMessage:
+      "L'amministratore ha disabilitato la registrazione e il reset della password.",
+    forgotDisabledLoginCta: "Vai al login",
+    resetTitle: "Cambia password",
+    resetSubtitle: "Inserisci la tua nuova password.",
+    resetInfoMessage:
+      "Questa pagina è accessibile tramite un link sicuro inviato alla tua email.",
+    resetNewPasswordLabel: "Nuova password",
+    resetConfirmNewPasswordLabel: "Conferma nuova password",
+    resetSubmit: "Cambia password",
+    resetSubmitLoading: "Modifica...",
+    resetHasPassword: "Ricordi già la password?",
+    resetBackToLogin: "Torna al login",
+    resetSuccessLoginCta: "Vai alla pagina di login",
+    resetErrorNewPasswordRequired: "Inserisci una nuova password.",
+    resetErrorNewPasswordTooShort:
+      "La password deve avere almeno 8 caratteri.",
+    resetErrorConfirmPasswordRequired: "Conferma la nuova password.",
+    resetErrorPasswordsMismatch: "Le password non corrispondono.",
+    resetErrorInvalidOrExpiredLink:
+      'Il link di reset non è valido o è scaduto. Richiedi un nuovo link dalla schermata "Password dimenticata".',
+    resetErrorGeneric:
+      "Modifica della password non riuscita. Riprova più tardi.",
+    resetErrorNetwork:
+      "Si è verificato un errore di rete durante il contatto con il server.",
+    resetSuccess:
+      "Password modificata con successo. Ti reindirizzeremo alla pagina di login...",
+    socialCallbackTitle: "Elaborazione accesso social",
+    socialCallbackProcessing:
+      "Attendi. Stiamo completando l'accesso tramite il provider social.",
+    socialCallbackRedirectNotice:
+      "Verrai reindirizzato automaticamente entro pochi secondi.",
+    socialCallbackErrorTitle: "Accesso social non riuscito",
+    socialCallbackError:
+      "Non siamo riusciti ad accedere tramite il provider social. Riprova.",
+    socialCallbackErrorCta: "Torna al login",
+    resetPasswordRequirementsTitle: "Requisiti password:",
+    resetPasswordRequirementsItemMinLength: "Minimo 8 caratteri",
+    resetPasswordRequirementsItemRecommendation:
+      "Consigliamo di usare lettere, numeri e simboli.",
+    resetGoToForgotCta: "Vai a " + "\"Password dimenticata\"",
+    resetDisabledTitle: "Il reset è disabilitato",
+    resetDisabledMessage:
+      "L'amministratore ha disabilitato la registrazione e il reset della password.",
+    resetDisabledLoginCta: "Vai al login",
+    accountDeletedTitle: "Il tuo account è stato chiuso ed eliminato",
+    accountDeletedDescription:
+      "Il tuo account è stato chiuso e i tuoi dati personali sono stati contrassegnati per l'eliminazione in conformità alle nostre regole di protezione dei dati e al GDPR.",
+    accountDeletedHint:
+      "Non avrai più accesso al profilo. Se deciderai di usare BeeLMS di nuovo in futuro, dovrai creare un nuovo account.",
+    accountDeletedPrimaryCta: "Vai alla home",
+    accountDeletedSecondaryCta: "Vai agli articoli Wiki",
+    twoFactorTitle: "Autenticazione a due fattori",
+    twoFactorSubtitle:
+      "Inserisci il codice a 6 cifre dalla tua app di autenticazione.",
+    twoFactorCodeLabel: "Codice",
+    twoFactorSubmit: "Verifica",
+    twoFactorSubmitLoading: "Verifica in corso...",
+    twoFactorBackToLogin: "Torna al login",
+    twoFactorErrorMissingChallenge:
+      "Challenge 2FA mancante. Effettua nuovamente l'accesso.",
+    twoFactorErrorCodeRequired: "Inserisci il codice a 6 cifre.",
+    twoFactorErrorCodeInvalidFormat: "Formato del codice non valido.",
+    twoFactorErrorInvalidCode: "Codice non valido. Riprova.",
+    twoFactorErrorGeneric:
+      "Verifica 2FA non riuscita. Riprova più tardi.",
+  };
+  return m;
+})();
+
+const RU_MESSAGES: DomainMessages = (() => {
+  const m = cloneEnglishMessages();
+  m.nav = {
+    wiki: "Wiki",
+    courses: "Курсы",
+    myCourses: "Мои курсы",
+    login: "Войти",
+    register: "Регистрация",
+    profile: "Профиль",
+    logout: "Выйти",
+    admin: "Admin",
+  };
+  m.auth = {
+    loginTitle: "Войти",
+    loginSubtitle: "Введите данные для входа.",
+    loginEmailLabel: "Email",
+    loginPasswordLabel: "Пароль",
+    loginSubmit: "Войти",
+    loginSubmitLoading: "Вход...",
+    loginGoogleCta: "Войти через Google",
+    loginGoogleLoading: "Подключение...",
+    loginFacebookCta: "Войти через Facebook",
+    loginFacebookLoading: "Подключение...",
+    loginGithubCta: "Войти через GitHub",
+    loginGithubLoading: "Подключение...",
+    loginLinkedinCta: "Войти через LinkedIn",
+    loginLinkedinLoading: "Подключение...",
+    loginSocialDivider: "или продолжить по email",
+    loginSocialUnavailable:
+      "Социальный вход отключён администратором. Продолжите с email и паролем.",
+    loginSocialResetHint:
+      "Социальный вход ограничен. Если вы использовали Google/Facebook/GitHub/LinkedIn, установите пароль через «Забыли пароль» и затем войдите с email + паролем.",
+    loginGoogleDisabled:
+      "Вход через Google временно отключён администратором.",
+    loginGoogleUnavailable:
+      "Вход через Google не настроен. Используйте email и пароль.",
+    loginFacebookDisabled:
+      "Вход через Facebook временно отключён администратором.",
+    loginFacebookUnavailable:
+      "Вход через Facebook не настроен. Используйте email и пароль.",
+    loginGithubDisabled:
+      "Вход через GitHub временно отключён администратором.",
+    loginGithubUnavailable:
+      "Вход через GitHub не настроен. Используйте email и пароль.",
+    loginLinkedinDisabled:
+      "Вход через LinkedIn временно отключён администратором.",
+    loginLinkedinUnavailable:
+      "Вход через LinkedIn не настроен. Используйте email и пароль.",
+    loginGoogleError: "Не удалось войти через Google. Попробуйте ещё раз.",
+    loginFacebookError:
+      "Не удалось войти через Facebook. Попробуйте ещё раз.",
+    loginGithubError: "Не удалось войти через GitHub. Попробуйте ещё раз.",
+    loginLinkedinError:
+      "Не удалось войти через LinkedIn. Попробуйте ещё раз.",
+    loginForgotLink: "Забыли пароль?",
+    loginRegisterLink: "Нет аккаунта?",
+    loginRegisterLinkCta: "Создать аккаунт",
+    loginRememberMeLabel: "Запомнить меня",
+    loginCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA (заглушка) — в реальной системе появляется только после нескольких подряд неудачных попыток входа.",
+    loginCaptchaLabel: "CAPTCHA / reCAPTCHA",
+    loginCaptchaNotAvailable:
+      "Требуется CAPTCHA, но интеграция отключена или не настроена. Попробуйте ещё раз или обратитесь к администратору.",
+    loginErrorEmailRequired: "Введите email.",
+    loginErrorEmailInvalid: "Введите корректный email.",
+    loginErrorPasswordRequired: "Введите пароль.",
+    socialResetPasswordHint:
+      "Если социальный вход (Google/Facebook/GitHub/LinkedIn) недоступен, вы можете использовать «Забыли пароль», чтобы установить пароль, а затем войти по email и паролю.",
+    socialResetPasswordHintNoProviders:
+      "Если социальный вход недоступен, вы можете использовать «Забыли пароль», чтобы установить пароль, а затем войти по email и паролю.",
+    loginErrorInvalidCredentials: "Неверные данные для входа.",
+    loginErrorCaptchaRequired: "Подтвердите, что вы не робот.",
+    loginErrorGeneric: "Не удалось войти. Попробуйте позже.",
+    loginErrorNetwork:
+      "Произошла сетевая ошибка при обращении к серверу.",
+    loginErrorDisabled: "Вход отключён для обычных пользователей.",
+    loginLoading: "Загрузка...",
+    registerTitle: "Создать аккаунт",
+    registerSubtitle: "Создайте бесплатный аккаунт BeeLMS, чтобы начать.",
+    registerEmailLabel: "Email",
+    registerPasswordLabel: "Пароль",
+    registerPasswordHint:
+      "Минимум 8 символов: хотя бы одна заглавная буква, одна строчная, одна цифра и один спецсимвол",
+    registerConfirmPasswordLabel: "Подтвердите пароль",
+    registerTermsPrefix: "Я согласен(на) с ",
+    registerTermsAnd: " и ",
+    registerTermsSuffix: ".",
+    registerTermsLabel:
+      "Я согласен(на) с Условиями использования и Политикой конфиденциальности.",
+    registerCaptchaLabel:
+      "Я не робот (заглушка для CAPTCHA).",
+    registerCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA (заглушка для защиты от ботов при регистрации)",
+    registerSubmit: "Регистрация",
+    registerSubmitLoading: "Отправка...",
+    registerGoogleCta: "Регистрация через Google",
+    registerGoogleLoading: "Подключение...",
+    registerFacebookCta: "Регистрация через Facebook",
+    registerFacebookLoading: "Подключение...",
+    registerGithubCta: "Регистрация через GitHub",
+    registerGithubLoading: "Подключение...",
+    registerLinkedinCta: "Регистрация через LinkedIn",
+    registerLinkedinLoading: "Подключение...",
+    registerSocialDivider: "или заполните форму",
+    registerSocialUnavailable:
+      "Социальная регистрация отключена администратором. Продолжите с формой ниже.",
+    registerGoogleDisabled:
+      "Регистрация через Google временно отключена администратором.",
+    registerGoogleUnavailable:
+      "Регистрация через Google не настроена. Используйте форму ниже.",
+    registerFacebookDisabled:
+      "Регистрация через Facebook временно отключена администратором.",
+    registerFacebookUnavailable:
+      "Регистрация через Facebook не настроена. Используйте форму ниже.",
+    registerGithubDisabled:
+      "Регистрация через GitHub временно отключена администратором.",
+    registerGithubUnavailable:
+      "Регистрация через GitHub не настроена. Используйте форму ниже.",
+    registerLinkedinDisabled:
+      "Регистрация через LinkedIn временно отключена администратором.",
+    registerLinkedinUnavailable:
+      "Регистрация через LinkedIn не настроена. Используйте форму ниже.",
+    registerGoogleError:
+      "Регистрация через Google не удалась. Попробуйте ещё раз.",
+    registerFacebookError:
+      "Регистрация через Facebook не удалась. Попробуйте ещё раз.",
+    registerGithubError:
+      "Регистрация через GitHub не удалась. Попробуйте ещё раз.",
+    registerLinkedinError:
+      "Регистрация через LinkedIn не удалась. Попробуйте ещё раз.",
+    registerHasAccount: "Уже есть аккаунт?",
+    registerLoginLink: "Войти",
+    registerErrorEmailRequired: "Введите email.",
+    registerErrorEmailInvalid: "Введите корректный email.",
+    registerErrorPasswordRequired: "Введите пароль.",
+    registerErrorPasswordTooShort:
+      "Пароль должен быть не менее 8 символов и содержать хотя бы одну заглавную букву, одну строчную, одну цифру и один спецсимвол.",
+    registerErrorPasswordMissingUppercase:
+      "Пароль должен содержать хотя бы одну заглавную букву.",
+    registerErrorPasswordMissingLowercase:
+      "Пароль должен содержать хотя бы одну строчную букву.",
+    registerErrorPasswordMissingDigit:
+      "Пароль должен содержать хотя бы одну цифру.",
+    registerErrorPasswordMissingSpecialChar:
+      "Пароль должен содержать хотя бы один спецсимвол.",
+    registerErrorConfirmPasswordRequired: "Подтвердите пароль.",
+    registerErrorPasswordsMismatch: "Пароли не совпадают.",
+    registerErrorTermsRequired: "Необходимо принять условия.",
+    registerErrorCaptchaRequired: "Подтвердите, что вы не робот.",
+    registerErrorDuplicateEmail: "Этот email уже зарегистрирован.",
+    registerErrorInvalidData:
+      "Данные некорректны. Проверьте форму и попробуйте ещё раз.",
+    registerErrorGeneric:
+      "Регистрация не удалась. Попробуйте позже.",
+    registerErrorNetwork:
+      "Произошла сетевая ошибка при обращении к серверу.",
+    registerSuccess:
+      "Регистрация прошла успешно. Проверьте email и подтвердите адрес по ссылке, которую мы отправили. После этого вы сможете войти со страницы входа.",
+    registerLoading: "Загрузка...",
+    registerDisabledTitle: "Регистрация отключена",
+    registerDisabledMessage:
+      "Администратор отключил регистрацию и сброс пароля.",
+    registerDisabledLoginCta: "Перейти ко входу",
+    forgotTitle: "Забыли пароль",
+    forgotSubtitle: "Введите email, чтобы запросить сброс пароля.",
+    forgotEmailLabel: "Email",
+    forgotCaptchaLabel: "Я не робот (заглушка для CAPTCHA).",
+    forgotSubmit: "Отправить ссылку",
+    forgotSubmitLoading: "Отправка...",
+    forgotHasPassword: "Вспомнили пароль?",
+    forgotLoginLink: "Назад ко входу",
+    forgotErrorEmailRequired: "Введите email.",
+    forgotErrorEmailInvalid: "Введите корректный email.",
+    forgotErrorCaptchaRequired: "Подтвердите, что вы не робот.",
+    forgotErrorInvalidData:
+      "Данные некорректны. Проверьте форму и попробуйте ещё раз.",
+    forgotErrorGeneric:
+      "Не удалось отправить запрос на сброс пароля. Попробуйте позже.",
+    forgotErrorNetwork:
+      "Произошла сетевая ошибка при обращении к серверу.",
+    forgotSuccess:
+      "Если существует аккаунт с этим email, мы отправим инструкции для сброса пароля.",
+    forgotResetLinkInfo: "Ссылка действительна 24 часа.",
+    forgotCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA (заглушка для защиты при сбросе пароля)",
+    forgotDisabledTitle: "Сброс пароля отключён",
+    forgotDisabledMessage:
+      "Администратор отключил регистрацию и сброс пароля.",
+    forgotDisabledLoginCta: "Перейти ко входу",
+    resetTitle: "Смена пароля",
+    resetSubtitle: "Введите новый пароль.",
+    resetInfoMessage:
+      "Эта страница доступна по защищённой ссылке, отправленной на ваш email.",
+    resetNewPasswordLabel: "Новый пароль",
+    resetConfirmNewPasswordLabel: "Подтвердите новый пароль",
+    resetSubmit: "Сменить пароль",
+    resetSubmitLoading: "Смена...",
+    resetHasPassword: "Уже помните пароль?",
+    resetBackToLogin: "Назад ко входу",
+    resetSuccessLoginCta: "Перейти на страницу входа",
+    resetErrorNewPasswordRequired: "Введите новый пароль.",
+    resetErrorNewPasswordTooShort:
+      "Пароль должен быть не менее 8 символов.",
+    resetErrorConfirmPasswordRequired: "Подтвердите новый пароль.",
+    resetErrorPasswordsMismatch: "Пароли не совпадают.",
+    resetErrorInvalidOrExpiredLink:
+      "Ссылка для смены пароля недействительна или истекла. Запросите новую ссылку на экране «Забыли пароль».",
+    resetErrorGeneric: "Смена пароля не удалась. Попробуйте позже.",
+    resetErrorNetwork:
+      "Произошла сетевая ошибка при обращении к серверу.",
+    resetSuccess:
+      "Пароль успешно изменён. Мы перенаправим вас на страницу входа...",
+    socialCallbackTitle: "Обработка социального входа",
+    socialCallbackProcessing:
+      "Пожалуйста, подождите. Мы завершаем вход через социальную сеть.",
+    socialCallbackRedirectNotice:
+      "Вы будете перенаправлены автоматически через несколько секунд.",
+    socialCallbackErrorTitle: "Социальный вход не удался",
+    socialCallbackError:
+      "Не удалось войти через социальный профиль. Попробуйте ещё раз.",
+    socialCallbackErrorCta: "Назад ко входу",
+    resetPasswordRequirementsTitle: "Требования к паролю:",
+    resetPasswordRequirementsItemMinLength: "Минимум 8 символов",
+    resetPasswordRequirementsItemRecommendation:
+      "Рекомендуем использовать буквы, цифры и символы.",
+    resetGoToForgotCta: "Перейти к «Забыли пароль»",
+    resetDisabledTitle: "Сброс пароля отключён",
+    resetDisabledMessage:
+      "Администратор отключил регистрацию и сброс пароля.",
+    resetDisabledLoginCta: "Перейти ко входу",
+    accountDeletedTitle: "Ваш аккаунт был закрыт и удалён",
+    accountDeletedDescription:
+      "Ваш аккаунт был закрыт, а ваши персональные данные отмечены для удаления в соответствии с нашими правилами защиты данных и GDPR.",
+    accountDeletedHint:
+      "У вас больше не будет доступа к профилю. Если вы решите снова использовать BeeLMS, потребуется новая регистрация.",
+    accountDeletedPrimaryCta: "На главную",
+    accountDeletedSecondaryCta: "К статьям Wiki",
+    twoFactorTitle: "Двухфакторная аутентификация",
+    twoFactorSubtitle:
+      "Введите 6-значный код из приложения-аутентификатора.",
+    twoFactorCodeLabel: "Код",
+    twoFactorSubmit: "Подтвердить",
+    twoFactorSubmitLoading: "Проверка...",
+    twoFactorBackToLogin: "Назад ко входу",
+    twoFactorErrorMissingChallenge:
+      "Отсутствует 2FA challenge. Пожалуйста, войдите снова.",
+    twoFactorErrorCodeRequired: "Введите 6-значный код.",
+    twoFactorErrorCodeInvalidFormat: "Неверный формат кода.",
+    twoFactorErrorInvalidCode: "Неверный код. Попробуйте ещё раз.",
+    twoFactorErrorGeneric: "Проверка 2FA не удалась. Попробуйте позже.",
+  };
+  return m;
+})();
+
+const UK_MESSAGES: DomainMessages = (() => {
+  const m = cloneEnglishMessages();
+  m.nav = {
+    wiki: "Wiki",
+    courses: "Курси",
+    myCourses: "Мої курси",
+    login: "Увійти",
+    register: "Реєстрація",
+    profile: "Профіль",
+    logout: "Вийти",
+    admin: "Admin",
+  };
+  m.auth = {
+    loginTitle: "Увійти",
+    loginSubtitle: "Введіть ваші дані для входу.",
+    loginEmailLabel: "Email",
+    loginPasswordLabel: "Пароль",
+    loginSubmit: "Увійти",
+    loginSubmitLoading: "Вхід...",
+    loginGoogleCta: "Увійти з Google",
+    loginGoogleLoading: "Підключення...",
+    loginFacebookCta: "Увійти з Facebook",
+    loginFacebookLoading: "Підключення...",
+    loginGithubCta: "Увійти з GitHub",
+    loginGithubLoading: "Підключення...",
+    loginLinkedinCta: "Увійти з LinkedIn",
+    loginLinkedinLoading: "Підключення...",
+    loginSocialDivider: "або продовжити через email",
+    loginSocialUnavailable:
+      "Соціальний вхід вимкнено адміністратором. Продовжуйте з email і паролем.",
+    loginSocialResetHint:
+      "Соціальний вхід обмежено. Якщо ви використовували Google/Facebook/GitHub/LinkedIn, встановіть пароль через «Забули пароль» і потім увійдіть з email + паролем.",
+    loginGoogleDisabled:
+      "Вхід з Google тимчасово вимкнено адміністратором.",
+    loginGoogleUnavailable:
+      "Вхід з Google не налаштований. Використайте email і пароль.",
+    loginFacebookDisabled:
+      "Вхід з Facebook тимчасово вимкнено адміністратором.",
+    loginFacebookUnavailable:
+      "Вхід з Facebook не налаштований. Використайте email і пароль.",
+    loginGithubDisabled:
+      "Вхід з GitHub тимчасово вимкнено адміністратором.",
+    loginGithubUnavailable:
+      "Вхід з GitHub не налаштований. Використайте email і пароль.",
+    loginLinkedinDisabled:
+      "Вхід з LinkedIn тимчасово вимкнено адміністратором.",
+    loginLinkedinUnavailable:
+      "Вхід з LinkedIn не налаштований. Використайте email і пароль.",
+    loginGoogleError: "Не вдалося увійти через Google. Спробуйте ще раз.",
+    loginFacebookError:
+      "Не вдалося увійти через Facebook. Спробуйте ще раз.",
+    loginGithubError: "Не вдалося увійти через GitHub. Спробуйте ще раз.",
+    loginLinkedinError:
+      "Не вдалося увійти через LinkedIn. Спробуйте ще раз.",
+    loginForgotLink: "Забули пароль?",
+    loginRegisterLink: "Немає облікового запису?",
+    loginRegisterLinkCta: "Створити акаунт",
+    loginRememberMeLabel: "Запам'ятати мене",
+    loginCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA (заглушка) — у реальній системі з'являється лише після кількох невдалих спроб входу поспіль.",
+    loginCaptchaLabel: "CAPTCHA / reCAPTCHA",
+    loginCaptchaNotAvailable:
+      "Потрібна CAPTCHA, але інтеграцію вимкнено або не налаштовано. Спробуйте ще раз або зверніться до адміністратора.",
+    loginErrorEmailRequired: "Введіть email.",
+    loginErrorEmailInvalid: "Введіть коректний email.",
+    loginErrorPasswordRequired: "Введіть пароль.",
+    socialResetPasswordHint:
+      "Якщо соціальний вхід (Google/Facebook/GitHub/LinkedIn) недоступний, ви можете використати «Забули пароль», щоб встановити пароль, а потім увійти з email + паролем.",
+    socialResetPasswordHintNoProviders:
+      "Якщо соціальний вхід недоступний, ви можете використати «Забули пароль», щоб встановити пароль, а потім увійти з email + паролем.",
+    loginErrorInvalidCredentials: "Невірні дані для входу.",
+    loginErrorCaptchaRequired: "Підтвердьте, що ви не робот.",
+    loginErrorGeneric: "Не вдалося увійти. Спробуйте пізніше.",
+    loginErrorNetwork:
+      "Сталася мережева помилка під час звернення до сервера.",
+    loginErrorDisabled: "Вхід вимкнено для звичайних користувачів.",
+    loginLoading: "Завантаження...",
+    registerTitle: "Створити акаунт",
+    registerSubtitle: "Створіть безкоштовний акаунт BeeLMS, щоб почати.",
+    registerEmailLabel: "Email",
+    registerPasswordLabel: "Пароль",
+    registerPasswordHint:
+      "Мінімум 8 символів: хоча б одна велика літера, одна мала, одна цифра та один спеціальний символ",
+    registerConfirmPasswordLabel: "Підтвердьте пароль",
+    registerTermsPrefix: "Я погоджуюся з ",
+    registerTermsAnd: " та ",
+    registerTermsSuffix: ".",
+    registerTermsLabel:
+      "Я погоджуюся з Умовами використання та Політикою конфіденційності.",
+    registerCaptchaLabel: "Я не робот (заглушка для CAPTCHA).",
+    registerCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA (заглушка для захисту від ботів під час реєстрації)",
+    registerSubmit: "Реєстрація",
+    registerSubmitLoading: "Надсилання...",
+    registerGoogleCta: "Реєстрація з Google",
+    registerGoogleLoading: "Підключення...",
+    registerFacebookCta: "Реєстрація з Facebook",
+    registerFacebookLoading: "Підключення...",
+    registerGithubCta: "Реєстрація з GitHub",
+    registerGithubLoading: "Підключення...",
+    registerLinkedinCta: "Реєстрація з LinkedIn",
+    registerLinkedinLoading: "Підключення...",
+    registerSocialDivider: "або заповніть форму",
+    registerSocialUnavailable:
+      "Соціальну реєстрацію вимкнено адміністратором. Продовжуйте з формою нижче.",
+    registerGoogleDisabled:
+      "Реєстрацію з Google тимчасово вимкнено адміністратором.",
+    registerGoogleUnavailable:
+      "Реєстрацію з Google не налаштовано. Використайте форму нижче.",
+    registerFacebookDisabled:
+      "Реєстрацію з Facebook тимчасово вимкнено адміністратором.",
+    registerFacebookUnavailable:
+      "Реєстрацію з Facebook не налаштовано. Використайте форму нижче.",
+    registerGithubDisabled:
+      "Реєстрацію з GitHub тимчасово вимкнено адміністратором.",
+    registerGithubUnavailable:
+      "Реєстрацію з GitHub не налаштовано. Використайте форму нижче.",
+    registerLinkedinDisabled:
+      "Реєстрацію з LinkedIn тимчасово вимкнено адміністратором.",
+    registerLinkedinUnavailable:
+      "Реєстрацію з LinkedIn не налаштовано. Використайте форму нижче.",
+    registerGoogleError: "Не вдалося зареєструватися через Google. Спробуйте ще раз.",
+    registerFacebookError:
+      "Не вдалося зареєструватися через Facebook. Спробуйте ще раз.",
+    registerGithubError: "Не вдалося зареєструватися через GitHub. Спробуйте ще раз.",
+    registerLinkedinError:
+      "Не вдалося зареєструватися через LinkedIn. Спробуйте ще раз.",
+    registerHasAccount: "Вже маєте акаунт?",
+    registerLoginLink: "Увійти",
+    registerErrorEmailRequired: "Введіть email.",
+    registerErrorEmailInvalid: "Введіть коректний email.",
+    registerErrorPasswordRequired: "Введіть пароль.",
+    registerErrorPasswordTooShort:
+      "Пароль має бути не менше 8 символів і містити хоча б одну велику літеру, одну малу, одну цифру та один спеціальний символ.",
+    registerErrorPasswordMissingUppercase:
+      "Пароль має містити хоча б одну велику літеру.",
+    registerErrorPasswordMissingLowercase:
+      "Пароль має містити хоча б одну малу літеру.",
+    registerErrorPasswordMissingDigit:
+      "Пароль має містити хоча б одну цифру.",
+    registerErrorPasswordMissingSpecialChar:
+      "Пароль має містити хоча б один спеціальний символ.",
+    registerErrorConfirmPasswordRequired: "Підтвердьте пароль.",
+    registerErrorPasswordsMismatch: "Паролі не збігаються.",
+    registerErrorTermsRequired: "Потрібно прийняти умови.",
+    registerErrorCaptchaRequired: "Підтвердьте, що ви не робот.",
+    registerErrorDuplicateEmail: "Цей email уже зареєстровано.",
+    registerErrorInvalidData:
+      "Дані некоректні. Перевірте форму та спробуйте ще раз.",
+    registerErrorGeneric: "Реєстрація не вдалася. Спробуйте пізніше.",
+    registerErrorNetwork:
+      "Сталася мережева помилка під час звернення до сервера.",
+    registerSuccess:
+      "Реєстрація успішна. Перевірте email і підтвердьте адресу за посиланням, яке ми надіслали. Після цього ви зможете увійти зі сторінки входу.",
+    registerLoading: "Завантаження...",
+    registerDisabledTitle: "Реєстрацію вимкнено",
+    registerDisabledMessage:
+      "Адміністратор вимкнув реєстрацію та скидання пароля.",
+    registerDisabledLoginCta: "Перейти до входу",
+    forgotTitle: "Забули пароль",
+    forgotSubtitle: "Введіть email, щоб запросити скидання пароля.",
+    forgotEmailLabel: "Email",
+    forgotCaptchaLabel: "Я не робот (заглушка для CAPTCHA).",
+    forgotSubmit: "Надіслати посилання",
+    forgotSubmitLoading: "Надсилання...",
+    forgotHasPassword: "Згадали пароль?",
+    forgotLoginLink: "Назад до входу",
+    forgotErrorEmailRequired: "Введіть email.",
+    forgotErrorEmailInvalid: "Введіть коректний email.",
+    forgotErrorCaptchaRequired: "Підтвердьте, що ви не робот.",
+    forgotErrorInvalidData:
+      "Дані некоректні. Перевірте форму та спробуйте ще раз.",
+    forgotErrorGeneric: "Не вдалося надіслати запит. Спробуйте пізніше.",
+    forgotErrorNetwork:
+      "Сталася мережева помилка під час звернення до сервера.",
+    forgotSuccess:
+      "Якщо існує акаунт з цим email, ми надішлемо інструкції для скидання пароля.",
+    forgotResetLinkInfo: "Посилання дійсне 24 години.",
+    forgotCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA (заглушка для захисту під час скидання пароля)",
+    forgotDisabledTitle: "Скидання пароля вимкнено",
+    forgotDisabledMessage:
+      "Адміністратор вимкнув реєстрацію та скидання пароля.",
+    forgotDisabledLoginCta: "Перейти до входу",
+    resetTitle: "Зміна пароля",
+    resetSubtitle: "Введіть новий пароль.",
+    resetInfoMessage:
+      "Ця сторінка доступна за захищеним посиланням, надісланим на ваш email.",
+    resetNewPasswordLabel: "Новий пароль",
+    resetConfirmNewPasswordLabel: "Підтвердьте новий пароль",
+    resetSubmit: "Змінити пароль",
+    resetSubmitLoading: "Зміна...",
+    resetHasPassword: "Вже пам'ятаєте пароль?",
+    resetBackToLogin: "Назад до входу",
+    resetSuccessLoginCta: "Перейти на сторінку входу",
+    resetErrorNewPasswordRequired: "Введіть новий пароль.",
+    resetErrorNewPasswordTooShort: "Пароль має бути не менше 8 символів.",
+    resetErrorConfirmPasswordRequired: "Підтвердьте новий пароль.",
+    resetErrorPasswordsMismatch: "Паролі не збігаються.",
+    resetErrorInvalidOrExpiredLink:
+      "Посилання для скидання пароля недійсне або прострочене. Запросіть нове посилання на екрані «Забули пароль».",
+    resetErrorGeneric: "Не вдалося змінити пароль. Спробуйте пізніше.",
+    resetErrorNetwork:
+      "Сталася мережева помилка під час звернення до сервера.",
+    resetSuccess:
+      "Пароль успішно змінено. Ми перенаправимо вас на сторінку входу...",
+    socialCallbackTitle: "Обробка соціального входу",
+    socialCallbackProcessing:
+      "Зачекайте. Ми завершуємо вхід через соціального провайдера.",
+    socialCallbackRedirectNotice:
+      "Вас буде автоматично перенаправлено за кілька секунд.",
+    socialCallbackErrorTitle: "Соціальний вхід не вдався",
+    socialCallbackError:
+      "Не вдалося увійти через соціальний профіль. Спробуйте ще раз.",
+    socialCallbackErrorCta: "Назад до входу",
+    resetPasswordRequirementsTitle: "Вимоги до пароля:",
+    resetPasswordRequirementsItemMinLength: "Мінімум 8 символів",
+    resetPasswordRequirementsItemRecommendation:
+      "Рекомендуємо використовувати літери, цифри та символи.",
+    resetGoToForgotCta: "Перейти до «Забули пароль»",
+    resetDisabledTitle: "Скидання пароля вимкнено",
+    resetDisabledMessage:
+      "Адміністратор вимкнув реєстрацію та скидання пароля.",
+    resetDisabledLoginCta: "Перейти до входу",
+    accountDeletedTitle: "Ваш акаунт закрито та видалено",
+    accountDeletedDescription:
+      "Ваш акаунт закрито, а ваші персональні дані позначено для видалення відповідно до наших правил захисту даних та GDPR.",
+    accountDeletedHint:
+      "Ви більше не матимете доступу до профілю. Якщо ви вирішите знову користуватися BeeLMS у майбутньому, потрібно буде зареєструватися знову.",
+    accountDeletedPrimaryCta: "На головну",
+    accountDeletedSecondaryCta: "До статей Wiki",
+    twoFactorTitle: "Двофакторна автентифікація",
+    twoFactorSubtitle:
+      "Введіть 6-значний код з вашого додатка автентифікації.",
+    twoFactorCodeLabel: "Код",
+    twoFactorSubmit: "Підтвердити",
+    twoFactorSubmitLoading: "Перевірка...",
+    twoFactorBackToLogin: "Назад до входу",
+    twoFactorErrorMissingChallenge:
+      "Відсутній 2FA challenge. Будь ласка, увійдіть знову.",
+    twoFactorErrorCodeRequired: "Введіть 6-значний код.",
+    twoFactorErrorCodeInvalidFormat: "Невірний формат коду.",
+    twoFactorErrorInvalidCode: "Невірний код. Спробуйте ще раз.",
+    twoFactorErrorGeneric: "Перевірка 2FA не вдалася. Спробуйте пізніше.",
+  };
+  return m;
+})();
+
+const NL_MESSAGES: DomainMessages = (() => {
+  const m = cloneEnglishMessages();
+  m.nav = {
+    wiki: "Wiki",
+    courses: "Cursussen",
+    myCourses: "Mijn cursussen",
+    login: "Inloggen",
+    register: "Registreren",
+    profile: "Profiel",
+    logout: "Uitloggen",
+    admin: "Admin",
+  };
+  m.auth = {
+    loginTitle: "Inloggen",
+    loginSubtitle: "Vul je inloggegevens in.",
+    loginEmailLabel: "E-mail",
+    loginPasswordLabel: "Wachtwoord",
+    loginSubmit: "Inloggen",
+    loginSubmitLoading: "Bezig met inloggen...",
+    loginGoogleCta: "Inloggen met Google",
+    loginGoogleLoading: "Verbinden...",
+    loginFacebookCta: "Inloggen met Facebook",
+    loginFacebookLoading: "Verbinden...",
+    loginGithubCta: "Inloggen met GitHub",
+    loginGithubLoading: "Verbinden...",
+    loginLinkedinCta: "Inloggen met LinkedIn",
+    loginLinkedinLoading: "Verbinden...",
+    loginSocialDivider: "of ga verder met e-mail",
+    loginSocialUnavailable:
+      "Sociaal inloggen is uitgeschakeld door de beheerder. Ga verder met e-mail en wachtwoord.",
+    loginSocialResetHint:
+      "Sociaal inloggen is beperkt. Als je Google/Facebook/GitHub/LinkedIn gebruikte, stel dan een wachtwoord in via 'Wachtwoord vergeten' en log daarna in met e-mail + wachtwoord.",
+    loginGoogleDisabled:
+      "Inloggen met Google is tijdelijk uitgeschakeld door de beheerder.",
+    loginGoogleUnavailable:
+      "Inloggen met Google is niet geconfigureerd. Gebruik e-mail en wachtwoord.",
+    loginFacebookDisabled:
+      "Inloggen met Facebook is tijdelijk uitgeschakeld door de beheerder.",
+    loginFacebookUnavailable:
+      "Inloggen met Facebook is niet geconfigureerd. Gebruik e-mail en wachtwoord.",
+    loginGithubDisabled:
+      "Inloggen met GitHub is tijdelijk uitgeschakeld door de beheerder.",
+    loginGithubUnavailable:
+      "Inloggen met GitHub is niet geconfigureerd. Gebruik e-mail en wachtwoord.",
+    loginLinkedinDisabled:
+      "Inloggen met LinkedIn is tijdelijk uitgeschakeld door de beheerder.",
+    loginLinkedinUnavailable:
+      "Inloggen met LinkedIn is niet geconfigureerd. Gebruik e-mail en wachtwoord.",
+    loginGoogleError: "Inloggen met Google is mislukt. Probeer het opnieuw.",
+    loginFacebookError:
+      "Inloggen met Facebook is mislukt. Probeer het opnieuw.",
+    loginGithubError: "Inloggen met GitHub is mislukt. Probeer het opnieuw.",
+    loginLinkedinError:
+      "Inloggen met LinkedIn is mislukt. Probeer het opnieuw.",
+    loginForgotLink: "Wachtwoord vergeten?",
+    loginRegisterLink: "Nog geen account?",
+    loginRegisterLinkCta: "Account aanmaken",
+    loginRememberMeLabel: "Onthoud mij",
+    loginCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA (placeholder) – in het echte systeem verschijnt dit pas na meerdere opeenvolgende mislukte inlogpogingen.",
+    loginCaptchaLabel: "CAPTCHA / reCAPTCHA",
+    loginCaptchaNotAvailable:
+      "CAPTCHA is vereist, maar de integratie is uitgeschakeld of niet geconfigureerd. Probeer het opnieuw of neem contact op met een beheerder.",
+    loginErrorEmailRequired: "Vul je e-mailadres in.",
+    loginErrorEmailInvalid: "Vul een geldig e-mailadres in.",
+    loginErrorPasswordRequired: "Vul je wachtwoord in.",
+    socialResetPasswordHint:
+      "Als sociaal inloggen (Google/Facebook/GitHub/LinkedIn) niet beschikbaar is, kun je 'Wachtwoord vergeten' gebruiken om een wachtwoord in te stellen en daarna inloggen met e-mail + wachtwoord.",
+    socialResetPasswordHintNoProviders:
+      "Als sociaal inloggen niet beschikbaar is, kun je 'Wachtwoord vergeten' gebruiken om een wachtwoord in te stellen en daarna inloggen met e-mail + wachtwoord.",
+    loginErrorInvalidCredentials: "Ongeldige inloggegevens.",
+    loginErrorCaptchaRequired: "Bevestig dat je geen robot bent.",
+    loginErrorGeneric: "Inloggen mislukt. Probeer het later opnieuw.",
+    loginErrorNetwork:
+      "Er is een netwerkfout opgetreden bij het contacteren van de server.",
+    loginErrorDisabled: "Inloggen is uitgeschakeld voor standaardgebruikers.",
+    loginLoading: "Laden...",
+    registerTitle: "Account aanmaken",
+    registerSubtitle: "Maak je gratis BeeLMS-account aan om te starten.",
+    registerEmailLabel: "E-mail",
+    registerPasswordLabel: "Wachtwoord",
+    registerPasswordHint:
+      "Minimaal 8 tekens: ten minste één hoofdletter, één kleine letter, één cijfer en één speciaal teken",
+    registerConfirmPasswordLabel: "Bevestig wachtwoord",
+    registerTermsPrefix: "Ik ga akkoord met de ",
+    registerTermsAnd: " en het ",
+    registerTermsSuffix: ".",
+    registerTermsLabel:
+      "Ik ga akkoord met de Gebruiksvoorwaarden en het Privacybeleid.",
+    registerCaptchaLabel:
+      "Ik ben geen robot (placeholder voor CAPTCHA-integratie).",
+    registerCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA (placeholder voor botbescherming tijdens registratie)",
+    registerSubmit: "Registreren",
+    registerSubmitLoading: "Verzenden...",
+    registerGoogleCta: "Registreren met Google",
+    registerGoogleLoading: "Verbinden...",
+    registerFacebookCta: "Registreren met Facebook",
+    registerFacebookLoading: "Verbinden...",
+    registerGithubCta: "Registreren met GitHub",
+    registerGithubLoading: "Verbinden...",
+    registerLinkedinCta: "Registreren met LinkedIn",
+    registerLinkedinLoading: "Verbinden...",
+    registerSocialDivider: "of vul het formulier in",
+    registerSocialUnavailable:
+      "Sociale registratie is uitgeschakeld door de beheerder. Ga verder met het formulier hieronder.",
+    registerGoogleDisabled:
+      "Registreren met Google is tijdelijk uitgeschakeld door de beheerder.",
+    registerGoogleUnavailable:
+      "Registreren met Google is niet geconfigureerd. Gebruik het formulier hieronder.",
+    registerFacebookDisabled:
+      "Registreren met Facebook is tijdelijk uitgeschakeld door de beheerder.",
+    registerFacebookUnavailable:
+      "Registreren met Facebook is niet geconfigureerd. Gebruik het formulier hieronder.",
+    registerGithubDisabled:
+      "Registreren met GitHub is tijdelijk uitgeschakeld door de beheerder.",
+    registerGithubUnavailable:
+      "Registreren met GitHub is niet geconfigureerd. Gebruik het formulier hieronder.",
+    registerLinkedinDisabled:
+      "Registreren met LinkedIn is tijdelijk uitgeschakeld door de beheerder.",
+    registerLinkedinUnavailable:
+      "Registreren met LinkedIn is niet geconfigureerd. Gebruik het formulier hieronder.",
+    registerGoogleError: "Registratie met Google is mislukt. Probeer het opnieuw.",
+    registerFacebookError:
+      "Registratie met Facebook is mislukt. Probeer het opnieuw.",
+    registerGithubError: "Registratie met GitHub is mislukt. Probeer het opnieuw.",
+    registerLinkedinError:
+      "Registratie met LinkedIn is mislukt. Probeer het opnieuw.",
+    registerHasAccount: "Heb je al een account?",
+    registerLoginLink: "Inloggen",
+    registerErrorEmailRequired: "Vul je e-mailadres in.",
+    registerErrorEmailInvalid: "Vul een geldig e-mailadres in.",
+    registerErrorPasswordRequired: "Vul een wachtwoord in.",
+    registerErrorPasswordTooShort:
+      "Het wachtwoord moet minimaal 8 tekens lang zijn en minstens één hoofdletter, één kleine letter, één cijfer en één speciaal teken bevatten.",
+    registerErrorPasswordMissingUppercase:
+      "Het wachtwoord moet minstens één hoofdletter bevatten.",
+    registerErrorPasswordMissingLowercase:
+      "Het wachtwoord moet minstens één kleine letter bevatten.",
+    registerErrorPasswordMissingDigit:
+      "Het wachtwoord moet minstens één cijfer bevatten.",
+    registerErrorPasswordMissingSpecialChar:
+      "Het wachtwoord moet minstens één speciaal teken bevatten.",
+    registerErrorConfirmPasswordRequired: "Bevestig je wachtwoord.",
+    registerErrorPasswordsMismatch: "Wachtwoorden komen niet overeen.",
+    registerErrorTermsRequired: "Je moet de voorwaarden accepteren.",
+    registerErrorCaptchaRequired: "Bevestig dat je geen robot bent.",
+    registerErrorDuplicateEmail: "Dit e-mailadres is al geregistreerd.",
+    registerErrorInvalidData:
+      "De gegevens zijn niet geldig. Controleer het formulier en probeer het opnieuw.",
+    registerErrorGeneric: "Registratie mislukt. Probeer het later opnieuw.",
+    registerErrorNetwork:
+      "Er is een netwerkfout opgetreden bij het contacteren van de server.",
+    registerSuccess:
+      "Registratie is gelukt. Controleer je e-mail en bevestig je adres via de link die we hebben gestuurd. Daarna kun je inloggen vanaf de inlogpagina.",
+    registerLoading: "Laden...",
+    registerDisabledTitle: "Registratie is uitgeschakeld",
+    registerDisabledMessage:
+      "De beheerder heeft registratie en wachtwoord reset uitgeschakeld.",
+    registerDisabledLoginCta: "Ga naar inloggen",
+    forgotTitle: "Wachtwoord vergeten",
+    forgotSubtitle: "Vul je e-mailadres in om een wachtwoordreset aan te vragen.",
+    forgotEmailLabel: "E-mail",
+    forgotCaptchaLabel:
+      "Ik ben geen robot (placeholder voor CAPTCHA-integratie).",
+    forgotSubmit: "Resetlink versturen",
+    forgotSubmitLoading: "Versturen...",
+    forgotHasPassword: "Weet je je wachtwoord weer?",
+    forgotLoginLink: "Terug naar inloggen",
+    forgotErrorEmailRequired: "Vul je e-mailadres in.",
+    forgotErrorEmailInvalid: "Vul een geldig e-mailadres in.",
+    forgotErrorCaptchaRequired: "Bevestig dat je geen robot bent.",
+    forgotErrorInvalidData:
+      "De gegevens zijn niet geldig. Controleer het formulier en probeer het opnieuw.",
+    forgotErrorGeneric:
+      "Aanvraag voor wachtwoordreset mislukt. Probeer het later opnieuw.",
+    forgotErrorNetwork:
+      "Er is een netwerkfout opgetreden bij het contacteren van de server.",
+    forgotSuccess:
+      "Als er een account bestaat met dit e-mailadres, sturen we instructies om je wachtwoord te resetten.",
+    forgotResetLinkInfo: "De resetlink is 24 uur geldig.",
+    forgotCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA (placeholder voor bescherming bij wachtwoordreset)",
+    forgotDisabledTitle: "Wachtwoordreset is uitgeschakeld",
+    forgotDisabledMessage:
+      "De beheerder heeft registratie en wachtwoord reset uitgeschakeld.",
+    forgotDisabledLoginCta: "Ga naar inloggen",
+    resetTitle: "Wachtwoord wijzigen",
+    resetSubtitle: "Vul je nieuwe wachtwoord in.",
+    resetInfoMessage:
+      "Deze pagina is toegankelijk via een beveiligde link die naar je e-mailadres is gestuurd.",
+    resetNewPasswordLabel: "Nieuw wachtwoord",
+    resetConfirmNewPasswordLabel: "Bevestig nieuw wachtwoord",
+    resetSubmit: "Wachtwoord wijzigen",
+    resetSubmitLoading: "Wijzigen...",
+    resetHasPassword: "Weet je je wachtwoord al?",
+    resetBackToLogin: "Terug naar inloggen",
+    resetSuccessLoginCta: "Ga naar de inlogpagina",
+    resetErrorNewPasswordRequired: "Vul een nieuw wachtwoord in.",
+    resetErrorNewPasswordTooShort:
+      "Het wachtwoord moet minimaal 8 tekens lang zijn.",
+    resetErrorConfirmPasswordRequired: "Bevestig je nieuwe wachtwoord.",
+    resetErrorPasswordsMismatch: "Wachtwoorden komen niet overeen.",
+    resetErrorInvalidOrExpiredLink:
+      "De resetlink is ongeldig of verlopen. Vraag een nieuwe link aan via het scherm \"Wachtwoord vergeten\".",
+    resetErrorGeneric: "Wachtwoord wijzigen mislukt. Probeer het later opnieuw.",
+    resetErrorNetwork:
+      "Er is een netwerkfout opgetreden bij het contacteren van de server.",
+    resetSuccess:
+      "Je wachtwoord is succesvol gewijzigd. We sturen je door naar de inlogpagina...",
+    socialCallbackTitle: "Sociale login verwerken",
+    socialCallbackProcessing:
+      "Even geduld. We ronden je sociale login af.",
+    socialCallbackRedirectNotice:
+      "Je wordt automatisch doorgestuurd binnen enkele seconden.",
+    socialCallbackErrorTitle: "Sociale login mislukt",
+    socialCallbackError:
+      "We konden je niet aanmelden via de sociale provider. Probeer het opnieuw.",
+    socialCallbackErrorCta: "Terug naar inloggen",
+    resetPasswordRequirementsTitle: "Wachtwoordvereisten:",
+    resetPasswordRequirementsItemMinLength: "Minimaal 8 tekens",
+    resetPasswordRequirementsItemRecommendation:
+      "We raden aan letters, cijfers en symbolen te gebruiken.",
+    resetGoToForgotCta: "Ga naar \"Wachtwoord vergeten\"",
+    resetDisabledTitle: "Wachtwoordreset is uitgeschakeld",
+    resetDisabledMessage:
+      "De beheerder heeft registratie en wachtwoord reset uitgeschakeld.",
+    resetDisabledLoginCta: "Ga naar inloggen",
+    accountDeletedTitle: "Je account is gesloten en verwijderd",
+    accountDeletedDescription:
+      "Je account is gesloten en je persoonlijke gegevens zijn gemarkeerd voor verwijdering volgens onze gegevensbeschermingsregels en de AVG.",
+    accountDeletedHint:
+      "Je hebt geen toegang meer tot je profiel. Als je BeeLMS in de toekomst weer wilt gebruiken, moet je een nieuw account aanmaken.",
+    accountDeletedPrimaryCta: "Ga naar de startpagina",
+    accountDeletedSecondaryCta: "Ga naar Wiki-artikelen",
+    twoFactorTitle: "Twee-factor-authenticatie",
+    twoFactorSubtitle:
+      "Voer de 6-cijferige code uit je authenticator-app in.",
+    twoFactorCodeLabel: "Code",
+    twoFactorSubmit: "Verifiëren",
+    twoFactorSubmitLoading: "Bezig met verifiëren...",
+    twoFactorBackToLogin: "Terug naar inloggen",
+    twoFactorErrorMissingChallenge:
+      "2FA-challenge ontbreekt. Log opnieuw in.",
+    twoFactorErrorCodeRequired: "Voer de 6-cijferige code in.",
+    twoFactorErrorCodeInvalidFormat: "Ongeldig codeformaat.",
+    twoFactorErrorInvalidCode: "Ongeldige code. Probeer het opnieuw.",
+    twoFactorErrorGeneric: "2FA-verificatie mislukt. Probeer het later opnieuw.",
+  };
+  return m;
+})();
+
+const CS_MESSAGES: DomainMessages = (() => {
+  const m = cloneEnglishMessages();
+  m.nav = {
+    wiki: "Wiki",
+    courses: "Kurzy",
+    myCourses: "Moje kurzy",
+    login: "Přihlásit se",
+    register: "Registrovat",
+    profile: "Profil",
+    logout: "Odhlásit se",
+    admin: "Admin",
+  };
+  m.auth = {
+    loginTitle: "Přihlásit se",
+    loginSubtitle: "Zadejte své přihlašovací údaje.",
+    loginEmailLabel: "E-mail",
+    loginPasswordLabel: "Heslo",
+    loginSubmit: "Přihlásit se",
+    loginSubmitLoading: "Přihlašování...",
+    loginGoogleCta: "Přihlásit se přes Google",
+    loginGoogleLoading: "Připojování...",
+    loginFacebookCta: "Přihlásit se přes Facebook",
+    loginFacebookLoading: "Připojování...",
+    loginGithubCta: "Přihlásit se přes GitHub",
+    loginGithubLoading: "Připojování...",
+    loginLinkedinCta: "Přihlásit se přes LinkedIn",
+    loginLinkedinLoading: "Připojování...",
+    loginSocialDivider: "nebo pokračovat e-mailem",
+    loginSocialUnavailable:
+      "Sociální přihlášení je administrátorem vypnuto. Pokračujte e-mailem a heslem.",
+    loginSocialResetHint:
+      "Sociální přihlášení je omezené. Pokud jste používali Google/Facebook/GitHub/LinkedIn, nastavte heslo přes „Zapomenuté heslo“ a pak se přihlaste e-mailem a heslem.",
+    loginGoogleDisabled:
+      "Přihlášení přes Google je dočasně vypnuto administrátorem.",
+    loginGoogleUnavailable:
+      "Přihlášení přes Google není nastavené. Použijte e-mail a heslo.",
+    loginFacebookDisabled:
+      "Přihlášení přes Facebook je dočasně vypnuto administrátorem.",
+    loginFacebookUnavailable:
+      "Přihlášení přes Facebook není nastavené. Použijte e-mail a heslo.",
+    loginGithubDisabled:
+      "Přihlášení přes GitHub je dočasně vypnuto administrátorem.",
+    loginGithubUnavailable:
+      "Přihlášení přes GitHub není nastavené. Použijte e-mail a heslo.",
+    loginLinkedinDisabled:
+      "Přihlášení přes LinkedIn je dočasně vypnuto administrátorem.",
+    loginLinkedinUnavailable:
+      "Přihlášení přes LinkedIn není nastavené. Použijte e-mail a heslo.",
+    loginGoogleError: "Přihlášení přes Google se nezdařilo. Zkuste to znovu.",
+    loginFacebookError:
+      "Přihlášení přes Facebook se nezdařilo. Zkuste to znovu.",
+    loginGithubError: "Přihlášení přes GitHub se nezdařilo. Zkuste to znovu.",
+    loginLinkedinError:
+      "Přihlášení přes LinkedIn se nezdařilo. Zkuste to znovu.",
+    loginForgotLink: "Zapomenuté heslo?",
+    loginRegisterLink: "Nemáte účet?",
+    loginRegisterLinkCta: "Vytvořit účet",
+    loginRememberMeLabel: "Zapamatovat si mě",
+    loginCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA (placeholder) – v reálném systému se zobrazí až po několika po sobě jdoucích neúspěšných pokusech o přihlášení.",
+    loginCaptchaLabel: "CAPTCHA / reCAPTCHA",
+    loginCaptchaNotAvailable:
+      "CAPTCHA je vyžadována, ale integrace je vypnutá nebo není nastavená. Zkuste to znovu nebo kontaktujte administrátora.",
+    loginErrorEmailRequired: "Zadejte e-mail.",
+    loginErrorEmailInvalid: "Zadejte platný e-mail.",
+    loginErrorPasswordRequired: "Zadejte heslo.",
+    socialResetPasswordHint:
+      "Pokud sociální přihlášení (Google/Facebook/GitHub/LinkedIn) není dostupné, můžete použít „Zapomenuté heslo“ pro nastavení hesla a poté se přihlásit e-mailem a heslem.",
+    socialResetPasswordHintNoProviders:
+      "Pokud sociální přihlášení není dostupné, můžete použít „Zapomenuté heslo“ pro nastavení hesla a poté se přihlásit e-mailem a heslem.",
+    loginErrorInvalidCredentials: "Neplatné přihlašovací údaje.",
+    loginErrorCaptchaRequired: "Potvrďte, že nejste robot.",
+    loginErrorGeneric: "Přihlášení se nezdařilo. Zkuste to později.",
+    loginErrorNetwork:
+      "Při kontaktu se serverem došlo k chybě sítě.",
+    loginErrorDisabled: "Přihlášení je vypnuto pro standardní uživatele.",
+    loginLoading: "Načítání...",
+    registerTitle: "Vytvořit účet",
+    registerSubtitle: "Vytvořte si bezplatný účet BeeLMS a začněte.",
+    registerEmailLabel: "E-mail",
+    registerPasswordLabel: "Heslo",
+    registerPasswordHint:
+      "Minimálně 8 znaků: alespoň jedno velké písmeno, jedno malé písmeno, jedna číslice a jeden speciální znak",
+    registerConfirmPasswordLabel: "Potvrdit heslo",
+    registerTermsPrefix: "Souhlasím s ",
+    registerTermsAnd: " a ",
+    registerTermsSuffix: ".",
+    registerTermsLabel:
+      "Souhlasím s Podmínkami použití a Zásadami ochrany osobních údajů.",
+    registerCaptchaLabel:
+      "Nejsem robot (placeholder pro integraci CAPTCHA).",
+    registerCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA (placeholder pro ochranu proti botům při registraci)",
+    registerSubmit: "Registrovat",
+    registerSubmitLoading: "Odesílání...",
+    registerGoogleCta: "Registrovat přes Google",
+    registerGoogleLoading: "Připojování...",
+    registerFacebookCta: "Registrovat přes Facebook",
+    registerFacebookLoading: "Připojování...",
+    registerGithubCta: "Registrovat přes GitHub",
+    registerGithubLoading: "Připojování...",
+    registerLinkedinCta: "Registrovat přes LinkedIn",
+    registerLinkedinLoading: "Připojování...",
+    registerSocialDivider: "nebo vyplňte formulář",
+    registerSocialUnavailable:
+      "Sociální registrace je administrátorem vypnuta. Pokračujte formulářem níže.",
+    registerGoogleDisabled:
+      "Registrace přes Google je dočasně vypnuta administrátorem.",
+    registerGoogleUnavailable:
+      "Registrace přes Google není nastavená. Použijte formulář níže.",
+    registerFacebookDisabled:
+      "Registrace přes Facebook je dočasně vypnuta administrátorem.",
+    registerFacebookUnavailable:
+      "Registrace přes Facebook není nastavená. Použijte formulář níže.",
+    registerGithubDisabled:
+      "Registrace přes GitHub je dočasně vypnuta administrátorem.",
+    registerGithubUnavailable:
+      "Registrace přes GitHub není nastavená. Použijte formulář níže.",
+    registerLinkedinDisabled:
+      "Registrace přes LinkedIn je dočasně vypnuta administrátorem.",
+    registerLinkedinUnavailable:
+      "Registrace přes LinkedIn není nastavená. Použijte formulář níže.",
+    registerGoogleError: "Registrace přes Google se nezdařila. Zkuste to znovu.",
+    registerFacebookError:
+      "Registrace přes Facebook se nezdařila. Zkuste to znovu.",
+    registerGithubError: "Registrace přes GitHub se nezdařila. Zkuste to znovu.",
+    registerLinkedinError:
+      "Registrace přes LinkedIn se nezdařila. Zkuste to znovu.",
+    registerHasAccount: "Už máte účet?",
+    registerLoginLink: "Přihlásit se",
+    registerErrorEmailRequired: "Zadejte e-mail.",
+    registerErrorEmailInvalid: "Zadejte platný e-mail.",
+    registerErrorPasswordRequired: "Zadejte heslo.",
+    registerErrorPasswordTooShort:
+      "Heslo musí mít alespoň 8 znaků a obsahovat alespoň jedno velké písmeno, jedno malé písmeno, jednu číslici a jeden speciální znak.",
+    registerErrorPasswordMissingUppercase:
+      "Heslo musí obsahovat alespoň jedno velké písmeno.",
+    registerErrorPasswordMissingLowercase:
+      "Heslo musí obsahovat alespoň jedno malé písmeno.",
+    registerErrorPasswordMissingDigit:
+      "Heslo musí obsahovat alespoň jednu číslici.",
+    registerErrorPasswordMissingSpecialChar:
+      "Heslo musí obsahovat alespoň jeden speciální znak.",
+    registerErrorConfirmPasswordRequired: "Potvrďte heslo.",
+    registerErrorPasswordsMismatch: "Hesla se neshodují.",
+    registerErrorTermsRequired: "Musíte přijmout podmínky.",
+    registerErrorCaptchaRequired: "Potvrďte, že nejste robot.",
+    registerErrorDuplicateEmail: "Tento e-mail je již zaregistrován.",
+    registerErrorInvalidData:
+      "Data nejsou platná. Zkontrolujte formulář a zkuste to znovu.",
+    registerErrorGeneric: "Registrace se nezdařila. Zkuste to později.",
+    registerErrorNetwork:
+      "Při kontaktu se serverem došlo k chybě sítě.",
+    registerSuccess:
+      "Registrace byla úspěšná. Zkontrolujte e-mail a potvrďte adresu pomocí odkazu, který jsme vám poslali. Poté se můžete přihlásit ze stránky přihlášení.",
+    registerLoading: "Načítání...",
+    registerDisabledTitle: "Registrace je vypnutá",
+    registerDisabledMessage:
+      "Administrátor vypnul registraci a reset hesla.",
+    registerDisabledLoginCta: "Přejít na přihlášení",
+    forgotTitle: "Zapomenuté heslo",
+    forgotSubtitle: "Zadejte e-mail pro požadavek na reset hesla.",
+    forgotEmailLabel: "E-mail",
+    forgotCaptchaLabel:
+      "Nejsem robot (placeholder pro integraci CAPTCHA).",
+    forgotSubmit: "Odeslat odkaz",
+    forgotSubmitLoading: "Odesílání...",
+    forgotHasPassword: "Vzpomněli jste si na heslo?",
+    forgotLoginLink: "Zpět na přihlášení",
+    forgotErrorEmailRequired: "Zadejte e-mail.",
+    forgotErrorEmailInvalid: "Zadejte platný e-mail.",
+    forgotErrorCaptchaRequired: "Potvrďte, že nejste robot.",
+    forgotErrorInvalidData:
+      "Data nejsou platná. Zkontrolujte formulář a zkuste to znovu.",
+    forgotErrorGeneric:
+      "Požadavek na reset hesla se nezdařil. Zkuste to později.",
+    forgotErrorNetwork:
+      "Při kontaktu se serverem došlo k chybě sítě.",
+    forgotSuccess:
+      "Pokud existuje účet s tímto e-mailem, pošleme instrukce pro reset hesla.",
+    forgotResetLinkInfo: "Odkaz pro reset hesla je platný 24 hodin.",
+    forgotCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA (placeholder pro ochranu při resetu hesla)",
+    forgotDisabledTitle: "Reset hesla je vypnutý",
+    forgotDisabledMessage:
+      "Administrátor vypnul registraci a reset hesla.",
+    forgotDisabledLoginCta: "Přejít na přihlášení",
+    resetTitle: "Změna hesla",
+    resetSubtitle: "Zadejte nové heslo.",
+    resetInfoMessage:
+      "Tato stránka je dostupná přes zabezpečený odkaz zaslaný na váš e-mail.",
+    resetNewPasswordLabel: "Nové heslo",
+    resetConfirmNewPasswordLabel: "Potvrdit nové heslo",
+    resetSubmit: "Změnit heslo",
+    resetSubmitLoading: "Změna...",
+    resetHasPassword: "Už si pamatujete heslo?",
+    resetBackToLogin: "Zpět na přihlášení",
+    resetSuccessLoginCta: "Přejít na přihlašovací stránku",
+    resetErrorNewPasswordRequired: "Zadejte nové heslo.",
+    resetErrorNewPasswordTooShort:
+      "Heslo musí mít alespoň 8 znaků.",
+    resetErrorConfirmPasswordRequired: "Potvrďte nové heslo.",
+    resetErrorPasswordsMismatch: "Hesla se neshodují.",
+    resetErrorInvalidOrExpiredLink:
+      "Odkaz pro reset hesla je neplatný nebo vypršel. Vyžádejte si nový odkaz na obrazovce \"Zapomenuté heslo\".",
+    resetErrorGeneric: "Změna hesla se nezdařila. Zkuste to později.",
+    resetErrorNetwork:
+      "Při kontaktu se serverem došlo k chybě sítě.",
+    resetSuccess:
+      "Heslo bylo úspěšně změněno. Přesměrujeme vás na přihlašovací stránku...",
+    socialCallbackTitle: "Zpracování sociálního přihlášení",
+    socialCallbackProcessing:
+      "Prosím čekejte. Dokončujeme vaše přihlášení přes sociální síť.",
+    socialCallbackRedirectNotice:
+      "Budete automaticky přesměrováni během několika sekund.",
+    socialCallbackErrorTitle: "Sociální přihlášení se nezdařilo",
+    socialCallbackError:
+      "Nepodařilo se vás přihlásit přes sociální profil. Zkuste to znovu.",
+    socialCallbackErrorCta: "Zpět na přihlášení",
+    resetPasswordRequirementsTitle: "Požadavky na heslo:",
+    resetPasswordRequirementsItemMinLength: "Minimálně 8 znaků",
+    resetPasswordRequirementsItemRecommendation:
+      "Doporučujeme používat písmena, číslice a symboly.",
+    resetGoToForgotCta: "Přejít na \"Zapomenuté heslo\"",
+    resetDisabledTitle: "Reset hesla je vypnutý",
+    resetDisabledMessage:
+      "Administrátor vypnul registraci a reset hesla.",
+    resetDisabledLoginCta: "Přejít na přihlášení",
+    accountDeletedTitle: "Váš účet byl zrušen a smazán",
+    accountDeletedDescription:
+      "Váš účet byl zrušen a vaše osobní údaje byly označeny k odstranění v souladu s našimi pravidly ochrany dat a GDPR.",
+    accountDeletedHint:
+      "K profilu už nebudete mít přístup. Pokud se rozhodnete BeeLMS v budoucnu používat znovu, bude potřeba nová registrace.",
+    accountDeletedPrimaryCta: "Přejít na úvodní stránku",
+    accountDeletedSecondaryCta: "Přejít na Wiki články",
+    twoFactorTitle: "Dvoufaktorové ověření",
+    twoFactorSubtitle:
+      "Zadejte 6místný kód z autentizační aplikace.",
+    twoFactorCodeLabel: "Kód",
+    twoFactorSubmit: "Ověřit",
+    twoFactorSubmitLoading: "Ověřování...",
+    twoFactorBackToLogin: "Zpět na přihlášení",
+    twoFactorErrorMissingChallenge:
+      "Chybí 2FA challenge. Přihlaste se prosím znovu.",
+    twoFactorErrorCodeRequired: "Zadejte 6místný kód.",
+    twoFactorErrorCodeInvalidFormat: "Neplatný formát kódu.",
+    twoFactorErrorInvalidCode: "Neplatný kód. Zkuste to znovu.",
+    twoFactorErrorGeneric: "Ověření 2FA se nezdařilo. Zkuste to později.",
+  };
+  return m;
+})();
+
+const PT_MESSAGES: DomainMessages = (() => {
+  const m = cloneEnglishMessages();
+  m.nav = {
+    wiki: "Wiki",
+    courses: "Cursos",
+    myCourses: "Meus cursos",
+    login: "Entrar",
+    register: "Registar",
+    profile: "Perfil",
+    logout: "Sair",
+    admin: "Admin",
+  };
+  m.auth = {
+    loginTitle: "Entrar",
+    loginSubtitle: "Introduza os seus dados de acesso.",
+    loginEmailLabel: "Email",
+    loginPasswordLabel: "Palavra-passe",
+    loginSubmit: "Entrar",
+    loginSubmitLoading: "A entrar...",
+    loginGoogleCta: "Entrar com Google",
+    loginGoogleLoading: "A ligar...",
+    loginFacebookCta: "Entrar com Facebook",
+    loginFacebookLoading: "A ligar...",
+    loginGithubCta: "Entrar com GitHub",
+    loginGithubLoading: "A ligar...",
+    loginLinkedinCta: "Entrar com LinkedIn",
+    loginLinkedinLoading: "A ligar...",
+    loginSocialDivider: "ou continue com email",
+    loginSocialUnavailable:
+      "O login social está desativado pelo administrador. Continue com email e palavra-passe.",
+    loginSocialResetHint:
+      "O login social está restrito. Se usou Google/Facebook/GitHub/LinkedIn, redefina a palavra-passe em 'Esqueci-me da palavra-passe' e depois entre com email + palavra-passe.",
+    loginGoogleDisabled:
+      "O login com Google está temporariamente desativado pelo administrador.",
+    loginGoogleUnavailable:
+      "O login com Google não está configurado. Use email e palavra-passe.",
+    loginFacebookDisabled:
+      "O login com Facebook está temporariamente desativado pelo administrador.",
+    loginFacebookUnavailable:
+      "O login com Facebook não está configurado. Use email e palavra-passe.",
+    loginGithubDisabled:
+      "O login com GitHub está temporariamente desativado pelo administrador.",
+    loginGithubUnavailable:
+      "O login com GitHub não está configurado. Use email e palavra-passe.",
+    loginLinkedinDisabled:
+      "O login com LinkedIn está temporariamente desativado pelo administrador.",
+    loginLinkedinUnavailable:
+      "O login com LinkedIn não está configurado. Use email e palavra-passe.",
+    loginGoogleError: "Falha ao entrar com Google. Tente novamente.",
+    loginFacebookError:
+      "Falha ao entrar com Facebook. Tente novamente.",
+    loginGithubError: "Falha ao entrar com GitHub. Tente novamente.",
+    loginLinkedinError:
+      "Falha ao entrar com LinkedIn. Tente novamente.",
+    loginForgotLink: "Esqueci-me da palavra-passe",
+    loginRegisterLink: "Não tem conta?",
+    loginRegisterLinkCta: "Criar conta",
+    loginRememberMeLabel: "Manter sessão iniciada",
+    loginCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA (exemplo) – no sistema real aparece apenas após várias tentativas falhadas consecutivas.",
+    loginCaptchaLabel: "CAPTCHA / reCAPTCHA",
+    loginCaptchaNotAvailable:
+      "O CAPTCHA é obrigatório, mas a integração está desativada ou não configurada. Tente novamente ou contacte um administrador.",
+    loginErrorEmailRequired: "Introduza o seu email.",
+    loginErrorEmailInvalid: "Introduza um email válido.",
+    loginErrorPasswordRequired: "Introduza a sua palavra-passe.",
+    socialResetPasswordHint:
+      "Se o login social (Google/Facebook/GitHub/LinkedIn) não estiver disponível, pode usar 'Esqueci-me da palavra-passe' para definir uma palavra-passe e depois entrar com email + palavra-passe.",
+    socialResetPasswordHintNoProviders:
+      "Se o login social não estiver disponível, pode usar 'Esqueci-me da palavra-passe' para definir uma palavra-passe e depois entrar com email + palavra-passe.",
+    loginErrorInvalidCredentials: "Credenciais inválidas.",
+    loginErrorCaptchaRequired: "Confirme que não é um robô.",
+    loginErrorGeneric: "Falha ao entrar. Tente novamente mais tarde.",
+    loginErrorNetwork:
+      "Ocorreu um erro de rede ao contactar o servidor.",
+    loginErrorDisabled:
+      "O login está desativado para utilizadores padrão.",
+    loginLoading: "A carregar...",
+    registerTitle: "Criar conta",
+    registerSubtitle:
+      "Crie a sua conta gratuita BeeLMS para começar.",
+    registerEmailLabel: "Email",
+    registerPasswordLabel: "Palavra-passe",
+    registerPasswordHint:
+      "Mínimo 8 caracteres: pelo menos uma maiúscula, uma minúscula, um dígito e um caractere especial",
+    registerConfirmPasswordLabel: "Confirmar palavra-passe",
+    registerTermsPrefix: "Concordo com os ",
+    registerTermsAnd: " e com a ",
+    registerTermsSuffix: ".",
+    registerTermsLabel:
+      "Concordo com os Termos de Utilização e com a Política de Privacidade.",
+    registerCaptchaLabel:
+      "Não sou um robô (exemplo de integração CAPTCHA).",
+    registerCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA (exemplo para proteção anti-bot no registo)",
+    registerSubmit: "Registar",
+    registerSubmitLoading: "A enviar...",
+    registerGoogleCta: "Registar com Google",
+    registerGoogleLoading: "A ligar...",
+    registerFacebookCta: "Registar com Facebook",
+    registerFacebookLoading: "A ligar...",
+    registerGithubCta: "Registar com GitHub",
+    registerGithubLoading: "A ligar...",
+    registerLinkedinCta: "Registar com LinkedIn",
+    registerLinkedinLoading: "A ligar...",
+    registerSocialDivider: "ou preencha o formulário",
+    registerSocialUnavailable:
+      "O registo social está desativado pelo administrador. Continue com o formulário abaixo.",
+    registerGoogleDisabled:
+      "O registo com Google está temporariamente desativado pelo administrador.",
+    registerGoogleUnavailable:
+      "O registo com Google não está configurado. Use o formulário abaixo.",
+    registerFacebookDisabled:
+      "O registo com Facebook está temporariamente desativado pelo administrador.",
+    registerFacebookUnavailable:
+      "O registo com Facebook não está configurado. Use o formulário abaixo.",
+    registerGithubDisabled:
+      "O registo com GitHub está temporariamente desativado pelo administrador.",
+    registerGithubUnavailable:
+      "O registo com GitHub não está configurado. Use o formulário abaixo.",
+    registerLinkedinDisabled:
+      "O registo com LinkedIn está temporariamente desativado pelo administrador.",
+    registerLinkedinUnavailable:
+      "O registo com LinkedIn não está configurado. Use o formulário abaixo.",
+    registerGoogleError: "Falha no registo com Google. Tente novamente.",
+    registerFacebookError:
+      "Falha no registo com Facebook. Tente novamente.",
+    registerGithubError: "Falha no registo com GitHub. Tente novamente.",
+    registerLinkedinError:
+      "Falha no registo com LinkedIn. Tente novamente.",
+    registerHasAccount: "Já tem conta?",
+    registerLoginLink: "Entrar",
+    registerErrorEmailRequired: "Introduza o seu email.",
+    registerErrorEmailInvalid: "Introduza um email válido.",
+    registerErrorPasswordRequired: "Introduza uma palavra-passe.",
+    registerErrorPasswordTooShort:
+      "A palavra-passe deve ter pelo menos 8 caracteres e conter pelo menos uma maiúscula, uma minúscula, um dígito e um caractere especial.",
+    registerErrorPasswordMissingUppercase:
+      "A palavra-passe deve conter pelo menos uma letra maiúscula.",
+    registerErrorPasswordMissingLowercase:
+      "A palavra-passe deve conter pelo menos uma letra minúscula.",
+    registerErrorPasswordMissingDigit:
+      "A palavra-passe deve conter pelo menos um dígito.",
+    registerErrorPasswordMissingSpecialChar:
+      "A palavra-passe deve conter pelo menos um caractere especial.",
+    registerErrorConfirmPasswordRequired:
+      "Confirme a sua palavra-passe.",
+    registerErrorPasswordsMismatch: "As palavras-passe não coincidem.",
+    registerErrorTermsRequired: "Tem de aceitar os termos.",
+    registerErrorCaptchaRequired: "Confirme que não é um robô.",
+    registerErrorDuplicateEmail: "Este email já está registado.",
+    registerErrorInvalidData:
+      "Os dados não são válidos. Reveja o formulário e tente novamente.",
+    registerErrorGeneric: "Falha no registo. Tente novamente mais tarde.",
+    registerErrorNetwork:
+      "Ocorreu um erro de rede ao contactar o servidor.",
+    registerSuccess:
+      "O registo foi bem-sucedido. Verifique o seu email e confirme o endereço através do link que enviámos. Depois poderá entrar a partir da página de login.",
+    registerLoading: "A carregar...",
+    registerDisabledTitle: "O registo está desativado",
+    registerDisabledMessage:
+      "O administrador desativou o registo e a reposição de palavra-passe.",
+    registerDisabledLoginCta: "Ir para login",
+    forgotTitle: "Esqueci-me da palavra-passe",
+    forgotSubtitle:
+      "Introduza o seu email para pedir a reposição da palavra-passe.",
+    forgotEmailLabel: "Email",
+    forgotCaptchaLabel:
+      "Não sou um robô (exemplo de integração CAPTCHA).",
+    forgotSubmit: "Enviar link de reposição",
+    forgotSubmitLoading: "A enviar...",
+    forgotHasPassword: "Lembrou-se da sua palavra-passe?",
+    forgotLoginLink: "Voltar ao login",
+    forgotErrorEmailRequired: "Introduza o seu email.",
+    forgotErrorEmailInvalid: "Introduza um email válido.",
+    forgotErrorCaptchaRequired: "Confirme que não é um robô.",
+    forgotErrorInvalidData:
+      "Os dados não são válidos. Reveja o formulário e tente novamente.",
+    forgotErrorGeneric:
+      "Falha no pedido de reposição. Tente novamente mais tarde.",
+    forgotErrorNetwork:
+      "Ocorreu um erro de rede ao contactar o servidor.",
+    forgotSuccess:
+      "Se existir uma conta com este email, enviaremos instruções para repor a palavra-passe.",
+    forgotResetLinkInfo:
+      "O link de reposição é válido por 24 horas.",
+    forgotCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA (exemplo para proteger o pedido de reposição)",
+    forgotDisabledTitle: "A reposição está desativada",
+    forgotDisabledMessage:
+      "O administrador desativou o registo e a reposição de palavra-passe.",
+    forgotDisabledLoginCta: "Ir para login",
+    resetTitle: "Alterar palavra-passe",
+    resetSubtitle: "Introduza a sua nova palavra-passe.",
+    resetInfoMessage:
+      "Esta página está disponível através de um link seguro enviado para o seu email.",
+    resetNewPasswordLabel: "Nova palavra-passe",
+    resetConfirmNewPasswordLabel: "Confirmar nova palavra-passe",
+    resetSubmit: "Alterar palavra-passe",
+    resetSubmitLoading: "A alterar...",
+    resetHasPassword: "Já se lembra da palavra-passe?",
+    resetBackToLogin: "Voltar ao login",
+    resetSuccessLoginCta: "Ir para a página de login",
+    resetErrorNewPasswordRequired: "Introduza uma nova palavra-passe.",
+    resetErrorNewPasswordTooShort:
+      "A palavra-passe deve ter pelo menos 8 caracteres.",
+    resetErrorConfirmPasswordRequired:
+      "Confirme a sua nova palavra-passe.",
+    resetErrorPasswordsMismatch: "As palavras-passe não coincidem.",
+    resetErrorInvalidOrExpiredLink:
+      'O link de reposição é inválido ou expirou. Peça um novo link no ecrã "Esqueci-me da palavra-passe".',
+    resetErrorGeneric:
+      "Falha ao alterar a palavra-passe. Tente novamente mais tarde.",
+    resetErrorNetwork:
+      "Ocorreu um erro de rede ao contactar o servidor.",
+    resetSuccess:
+      "A sua palavra-passe foi alterada com sucesso. Vamos redirecioná-lo para a página de login...",
+    socialCallbackTitle: "A processar login social",
+    socialCallbackProcessing:
+      "Aguarde. Estamos a concluir o login através do fornecedor social.",
+    socialCallbackRedirectNotice:
+      "Será redirecionado automaticamente em alguns segundos.",
+    socialCallbackErrorTitle: "Falha no login social",
+    socialCallbackError:
+      "Não foi possível entrar com o fornecedor social. Tente novamente.",
+    socialCallbackErrorCta: "Voltar ao login",
+    resetPasswordRequirementsTitle: "Requisitos da palavra-passe:",
+    resetPasswordRequirementsItemMinLength: "Mínimo 8 caracteres",
+    resetPasswordRequirementsItemRecommendation:
+      "Recomendamos usar letras, números e símbolos.",
+    resetGoToForgotCta: 'Ir para "Esqueci-me da palavra-passe"',
+    resetDisabledTitle: "A reposição está desativada",
+    resetDisabledMessage:
+      "O administrador desativou o registo e a reposição de palavra-passe.",
+    resetDisabledLoginCta: "Ir para login",
+    accountDeletedTitle: "A sua conta foi encerrada e eliminada",
+    accountDeletedDescription:
+      "A sua conta foi encerrada e os seus dados pessoais foram marcados para eliminação de acordo com as nossas regras de proteção de dados e o RGPD.",
+    accountDeletedHint:
+      "Já não terá acesso ao seu perfil. Se decidir voltar a usar o BeeLMS no futuro, terá de criar uma nova conta.",
+    accountDeletedPrimaryCta: "Ir para a página inicial",
+    accountDeletedSecondaryCta: "Ir para artigos Wiki",
+    twoFactorTitle: "Autenticação de dois fatores",
+    twoFactorSubtitle:
+      "Introduza o código de 6 dígitos da sua app autenticadora.",
+    twoFactorCodeLabel: "Código",
+    twoFactorSubmit: "Verificar",
+    twoFactorSubmitLoading: "A verificar...",
+    twoFactorBackToLogin: "Voltar ao login",
+    twoFactorErrorMissingChallenge:
+      "Desafio 2FA em falta. Entre novamente.",
+    twoFactorErrorCodeRequired: "Introduza o código de 6 dígitos.",
+    twoFactorErrorCodeInvalidFormat: "Formato de código inválido.",
+    twoFactorErrorInvalidCode: "Código inválido. Tente novamente.",
+    twoFactorErrorGeneric:
+      "Falha na verificação 2FA. Tente novamente mais tarde.",
+  };
+  return m;
+})();
+
+const TR_MESSAGES: DomainMessages = (() => {
+  const m = cloneEnglishMessages();
+  m.nav = {
+    wiki: "Wiki",
+    courses: "Kurslar",
+    myCourses: "Kurslarım",
+    login: "Giriş yap",
+    register: "Kayıt ol",
+    profile: "Profil",
+    logout: "Çıkış yap",
+    admin: "Admin",
+  };
+  m.auth = {
+    loginTitle: "Giriş yap",
+    loginSubtitle: "Giriş bilgilerinizi girin.",
+    loginEmailLabel: "E-posta",
+    loginPasswordLabel: "Şifre",
+    loginSubmit: "Giriş yap",
+    loginSubmitLoading: "Giriş yapılıyor...",
+    loginGoogleCta: "Google ile giriş yap",
+    loginGoogleLoading: "Bağlanıyor...",
+    loginFacebookCta: "Facebook ile giriş yap",
+    loginFacebookLoading: "Bağlanıyor...",
+    loginGithubCta: "GitHub ile giriş yap",
+    loginGithubLoading: "Bağlanıyor...",
+    loginLinkedinCta: "LinkedIn ile giriş yap",
+    loginLinkedinLoading: "Bağlanıyor...",
+    loginSocialDivider: "veya e-posta ile devam edin",
+    loginSocialUnavailable:
+      "Sosyal giriş yönetici tarafından devre dışı bırakıldı. E-posta ve şifre ile devam edin.",
+    loginSocialResetHint:
+      "Sosyal giriş kısıtlı. Google/Facebook/GitHub/LinkedIn kullandıysanız, 'Şifremi unuttum' ile bir şifre belirleyin ve ardından e-posta + şifre ile giriş yapın.",
+    loginGoogleDisabled:
+      "Google ile giriş yönetici tarafından geçici olarak devre dışı bırakıldı.",
+    loginGoogleUnavailable:
+      "Google ile giriş yapılandırılmadı. E-posta ve şifre kullanın.",
+    loginFacebookDisabled:
+      "Facebook ile giriş yönetici tarafından geçici olarak devre dışı bırakıldı.",
+    loginFacebookUnavailable:
+      "Facebook ile giriş yapılandırılmadı. E-posta ve şifre kullanın.",
+    loginGithubDisabled:
+      "GitHub ile giriş yönetici tarafından geçici olarak devre dışı bırakıldı.",
+    loginGithubUnavailable:
+      "GitHub ile giriş yapılandırılmadı. E-posta ve şifre kullanın.",
+    loginLinkedinDisabled:
+      "LinkedIn ile giriş yönetici tarafından geçici olarak devre dışı bırakıldı.",
+    loginLinkedinUnavailable:
+      "LinkedIn ile giriş yapılandırılmadı. E-posta ve şifre kullanın.",
+    loginGoogleError: "Google ile giriş başarısız. Tekrar deneyin.",
+    loginFacebookError: "Facebook ile giriş başarısız. Tekrar deneyin.",
+    loginGithubError: "GitHub ile giriş başarısız. Tekrar deneyin.",
+    loginLinkedinError: "LinkedIn ile giriş başarısız. Tekrar deneyin.",
+    loginForgotLink: "Şifremi unuttum?",
+    loginRegisterLink: "Hesabınız yok mu?",
+    loginRegisterLinkCta: "Hesap oluştur",
+    loginRememberMeLabel: "Beni hatırla",
+    loginCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA (placeholder) – gerçek sistemde yalnızca art arda birkaç başarısız giriş denemesinden sonra görünür.",
+    loginCaptchaLabel: "CAPTCHA / reCAPTCHA",
+    loginCaptchaNotAvailable:
+      "CAPTCHA gerekli, ancak entegrasyon devre dışı veya yapılandırılmamış. Tekrar deneyin veya yöneticiyle iletişime geçin.",
+    loginErrorEmailRequired: "Lütfen e-posta adresinizi girin.",
+    loginErrorEmailInvalid: "Lütfen geçerli bir e-posta adresi girin.",
+    loginErrorPasswordRequired: "Lütfen şifrenizi girin.",
+    socialResetPasswordHint:
+      "Sosyal giriş (Google/Facebook/GitHub/LinkedIn) kullanılamıyorsa, 'Şifremi unuttum' ile şifre belirleyip e-posta + şifre ile giriş yapabilirsiniz.",
+    socialResetPasswordHintNoProviders:
+      "Sosyal giriş kullanılamıyorsa, 'Şifremi unuttum' ile şifre belirleyip e-posta + şifre ile giriş yapabilirsiniz.",
+    loginErrorInvalidCredentials: "Geçersiz giriş bilgileri.",
+    loginErrorCaptchaRequired: "Robot olmadığınızı doğrulayın.",
+    loginErrorGeneric: "Giriş başarısız. Lütfen daha sonra tekrar deneyin.",
+    loginErrorNetwork: "Sunucuya bağlanırken bir ağ hatası oluştu.",
+    loginErrorDisabled: "Standart kullanıcılar için giriş devre dışı.",
+    loginLoading: "Yükleniyor...",
+    registerTitle: "Hesap oluştur",
+    registerSubtitle: "Başlamak için ücretsiz BeeLMS hesabınızı oluşturun.",
+    registerEmailLabel: "E-posta",
+    registerPasswordLabel: "Şifre",
+    registerPasswordHint:
+      "En az 8 karakter: en az bir büyük harf, bir küçük harf, bir rakam ve bir özel karakter",
+    registerConfirmPasswordLabel: "Şifreyi doğrula",
+    registerTermsPrefix: "",
+    registerTermsAnd: "",
+    registerTermsSuffix: "",
+    registerTermsLabel:
+      "Kullanım Koşullarını ve Gizlilik Politikasını kabul ediyorum.",
+    registerCaptchaLabel:
+      "Robot değilim (CAPTCHA entegrasyonu için yer tutucu).",
+    registerCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA (kayıt sırasında bot koruması için yer tutucu)",
+    registerSubmit: "Kayıt ol",
+    registerSubmitLoading: "Gönderiliyor...",
+    registerGoogleCta: "Google ile kayıt ol",
+    registerGoogleLoading: "Bağlanıyor...",
+    registerFacebookCta: "Facebook ile kayıt ol",
+    registerFacebookLoading: "Bağlanıyor...",
+    registerGithubCta: "GitHub ile kayıt ol",
+    registerGithubLoading: "Bağlanıyor...",
+    registerLinkedinCta: "LinkedIn ile kayıt ol",
+    registerLinkedinLoading: "Bağlanıyor...",
+    registerSocialDivider: "veya formu doldurun",
+    registerSocialUnavailable:
+      "Sosyal kayıt yönetici tarafından devre dışı bırakıldı. Aşağıdaki form ile devam edin.",
+    registerGoogleDisabled:
+      "Google ile kayıt yönetici tarafından geçici olarak devre dışı bırakıldı.",
+    registerGoogleUnavailable:
+      "Google ile kayıt yapılandırılmadı. Aşağıdaki formu kullanın.",
+    registerFacebookDisabled:
+      "Facebook ile kayıt yönetici tarafından geçici olarak devre dışı bırakıldı.",
+    registerFacebookUnavailable:
+      "Facebook ile kayıt yapılandırılmadı. Aşağıdaki formu kullanın.",
+    registerGithubDisabled:
+      "GitHub ile kayıt yönetici tarafından geçici olarak devre dışı bırakıldı.",
+    registerGithubUnavailable:
+      "GitHub ile kayıt yapılandırılmadı. Aşağıdaki formu kullanın.",
+    registerLinkedinDisabled:
+      "LinkedIn ile kayıt yönetici tarafından geçici olarak devre dışı bırakıldı.",
+    registerLinkedinUnavailable:
+      "LinkedIn ile kayıt yapılandırılmadı. Aşağıdaki formu kullanın.",
+    registerGoogleError: "Google ile kayıt başarısız. Tekrar deneyin.",
+    registerFacebookError: "Facebook ile kayıt başarısız. Tekrar deneyin.",
+    registerGithubError: "GitHub ile kayıt başarısız. Tekrar deneyin.",
+    registerLinkedinError: "LinkedIn ile kayıt başarısız. Tekrar deneyin.",
+    registerHasAccount: "Zaten hesabınız var mı?",
+    registerLoginLink: "Giriş yap",
+    registerErrorEmailRequired: "Lütfen e-posta adresinizi girin.",
+    registerErrorEmailInvalid: "Lütfen geçerli bir e-posta adresi girin.",
+    registerErrorPasswordRequired: "Lütfen bir şifre girin.",
+    registerErrorPasswordTooShort:
+      "Şifre en az 8 karakter olmalı ve en az bir büyük harf, bir küçük harf, bir rakam ve bir özel karakter içermelidir.",
+    registerErrorPasswordMissingUppercase:
+      "Şifre en az bir büyük harf içermelidir.",
+    registerErrorPasswordMissingLowercase:
+      "Şifre en az bir küçük harf içermelidir.",
+    registerErrorPasswordMissingDigit: "Şifre en az bir rakam içermelidir.",
+    registerErrorPasswordMissingSpecialChar:
+      "Şifre en az bir özel karakter içermelidir.",
+    registerErrorConfirmPasswordRequired: "Lütfen şifreyi doğrulayın.",
+    registerErrorPasswordsMismatch: "Şifreler eşleşmiyor.",
+    registerErrorTermsRequired: "Koşulları kabul etmelisiniz.",
+    registerErrorCaptchaRequired: "Robot olmadığınızı doğrulayın.",
+    registerErrorDuplicateEmail: "Bu e-posta zaten kayıtlı.",
+    registerErrorInvalidData:
+      "Veriler geçerli değil. Formu kontrol edip tekrar deneyin.",
+    registerErrorGeneric: "Kayıt başarısız. Lütfen daha sonra tekrar deneyin.",
+    registerErrorNetwork: "Sunucuya bağlanırken bir ağ hatası oluştu.",
+    registerSuccess:
+      "Kayıt başarılı. Lütfen e-postanızı kontrol edin ve gönderdiğimiz bağlantı ile adresinizi doğrulayın. Sonrasında giriş yapabilirsiniz.",
+    registerLoading: "Yükleniyor...",
+    registerDisabledTitle: "Kayıt devre dışı",
+    registerDisabledMessage:
+      "Yönetici kayıt ve şifre sıfırlamayı devre dışı bıraktı.",
+    registerDisabledLoginCta: "Girişe git",
+    forgotTitle: "Şifremi unuttum",
+    forgotSubtitle: "Şifre sıfırlama için e-posta adresinizi girin.",
+    forgotEmailLabel: "E-posta",
+    forgotCaptchaLabel:
+      "Robot değilim (CAPTCHA entegrasyonu için yer tutucu).",
+    forgotSubmit: "Sıfırlama bağlantısı gönder",
+    forgotSubmitLoading: "Gönderiliyor...",
+    forgotHasPassword: "Şifrenizi hatırladınız mı?",
+    forgotLoginLink: "Girişe dön",
+    forgotErrorEmailRequired: "Lütfen e-posta adresinizi girin.",
+    forgotErrorEmailInvalid: "Lütfen geçerli bir e-posta adresi girin.",
+    forgotErrorCaptchaRequired: "Robot olmadığınızı doğrulayın.",
+    forgotErrorInvalidData:
+      "Veriler geçerli değil. Formu kontrol edip tekrar deneyin.",
+    forgotErrorGeneric:
+      "Şifre sıfırlama isteği başarısız. Lütfen daha sonra tekrar deneyin.",
+    forgotErrorNetwork: "Sunucuya bağlanırken bir ağ hatası oluştu.",
+    forgotSuccess:
+      "Bu e-posta ile bir hesap varsa, şifre sıfırlama talimatlarını göndereceğiz.",
+    forgotResetLinkInfo: "Sıfırlama bağlantısı 24 saat geçerlidir.",
+    forgotCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA (şifre sıfırlama sırasında bot koruması için yer tutucu)",
+    forgotDisabledTitle: "Şifre sıfırlama devre dışı",
+    forgotDisabledMessage:
+      "Yönetici kayıt ve şifre sıfırlamayı devre dışı bıraktı.",
+    forgotDisabledLoginCta: "Girişe git",
+    resetTitle: "Şifre değiştir",
+    resetSubtitle: "Yeni şifrenizi girin.",
+    resetInfoMessage:
+      "Bu sayfaya e-postanıza gönderilen güvenli bağlantı ile erişilir.",
+    resetNewPasswordLabel: "Yeni şifre",
+    resetConfirmNewPasswordLabel: "Yeni şifreyi doğrula",
+    resetSubmit: "Şifreyi değiştir",
+    resetSubmitLoading: "Değiştiriliyor...",
+    resetHasPassword: "Şifrenizi hatırlıyor musunuz?",
+    resetBackToLogin: "Girişe dön",
+    resetSuccessLoginCta: "Giriş sayfasına git",
+    resetErrorNewPasswordRequired: "Lütfen yeni bir şifre girin.",
+    resetErrorNewPasswordTooShort: "Şifre en az 8 karakter olmalıdır.",
+    resetErrorConfirmPasswordRequired: "Lütfen yeni şifreyi doğrulayın.",
+    resetErrorPasswordsMismatch: "Şifreler eşleşmiyor.",
+    resetErrorInvalidOrExpiredLink:
+      "Şifre sıfırlama bağlantısı geçersiz veya süresi dolmuş. 'Şifremi unuttum' ekranından yeni bağlantı isteyin.",
+    resetErrorGeneric:
+      "Şifre değişimi başarısız. Lütfen daha sonra tekrar deneyin.",
+    resetErrorNetwork: "Sunucuya bağlanırken bir ağ hatası oluştu.",
+    resetSuccess:
+      "Şifreniz başarıyla değiştirildi. Giriş sayfasına yönlendirileceksiniz...",
+    socialCallbackTitle: "Sosyal giriş işleniyor",
+    socialCallbackProcessing:
+      "Lütfen bekleyin. Sosyal ağ ile girişiniz tamamlanıyor.",
+    socialCallbackRedirectNotice:
+      "Birkaç saniye içinde otomatik olarak yönlendirileceksiniz.",
+    socialCallbackErrorTitle: "Sosyal giriş başarısız",
+    socialCallbackError:
+      "Sosyal sağlayıcı ile giriş yapılamadı. Lütfen tekrar deneyin.",
+    socialCallbackErrorCta: "Girişe dön",
+    resetPasswordRequirementsTitle: "Şifre gereksinimleri:",
+    resetPasswordRequirementsItemMinLength: "En az 8 karakter",
+    resetPasswordRequirementsItemRecommendation:
+      "Harf, rakam ve sembol kullanmanız önerilir.",
+    resetGoToForgotCta: "'Şifremi unuttum' ekranına git",
+    resetDisabledTitle: "Şifre sıfırlama devre dışı",
+    resetDisabledMessage:
+      "Yönetici kayıt ve şifre sıfırlamayı devre dışı bıraktı.",
+    resetDisabledLoginCta: "Girişe git",
+    accountDeletedTitle: "Hesabınız kapatıldı ve silindi",
+    accountDeletedDescription:
+      "Hesabınız kapatıldı ve kişisel verileriniz, veri koruma kurallarımız ve GDPR kapsamında silinmek üzere işaretlendi.",
+    accountDeletedHint:
+      "Artık profilinize erişemezsiniz. BeeLMS'yi gelecekte tekrar kullanmak isterseniz yeni bir kayıt gerekir.",
+    accountDeletedPrimaryCta: "Ana sayfaya git",
+    accountDeletedSecondaryCta: "Wiki makalelerine git",
+    twoFactorTitle: "İki faktörlü doğrulama",
+    twoFactorSubtitle:
+      "Kimlik doğrulama uygulamanızdaki 6 haneli kodu girin.",
+    twoFactorCodeLabel: "Kod",
+    twoFactorSubmit: "Doğrula",
+    twoFactorSubmitLoading: "Doğrulanıyor...",
+    twoFactorBackToLogin: "Girişe dön",
+    twoFactorErrorMissingChallenge:
+      "2FA doğrulaması eksik. Lütfen tekrar giriş yapın.",
+    twoFactorErrorCodeRequired: "Lütfen 6 haneli kodu girin.",
+    twoFactorErrorCodeInvalidFormat: "Kod formatı geçersiz.",
+    twoFactorErrorInvalidCode: "Kod geçersiz. Tekrar deneyin.",
+    twoFactorErrorGeneric:
+      "2FA doğrulaması başarısız. Lütfen daha sonra tekrar deneyin.",
+  };
+  return m;
+})();
+
+const RO_MESSAGES: DomainMessages = (() => {
+  const m = cloneEnglishMessages();
+  m.nav = {
+    wiki: "Wiki",
+    courses: "Cursuri",
+    myCourses: "Cursurile mele",
+    login: "Autentificare",
+    register: "Înregistrare",
+    profile: "Profil",
+    logout: "Deconectare",
+    admin: "Admin",
+  };
+  m.auth = {
+    loginTitle: "Autentificare",
+    loginSubtitle: "Introduceți datele de autentificare.",
+    loginEmailLabel: "Email",
+    loginPasswordLabel: "Parolă",
+    loginSubmit: "Autentificare",
+    loginSubmitLoading: "Se autentifică...",
+    loginGoogleCta: "Autentificare cu Google",
+    loginGoogleLoading: "Conectare...",
+    loginFacebookCta: "Autentificare cu Facebook",
+    loginFacebookLoading: "Conectare...",
+    loginGithubCta: "Autentificare cu GitHub",
+    loginGithubLoading: "Conectare...",
+    loginLinkedinCta: "Autentificare cu LinkedIn",
+    loginLinkedinLoading: "Conectare...",
+    loginSocialDivider: "sau continuați cu email",
+    loginSocialUnavailable:
+      "Autentificarea socială este dezactivată de administrator. Continuați cu email și parolă.",
+    loginSocialResetHint:
+      "Autentificarea socială este restricționată. Dacă ați folosit Google/Facebook/GitHub/LinkedIn, setați o parolă prin „Am uitat parola” și apoi autentificați-vă cu email + parolă.",
+    loginGoogleDisabled:
+      "Autentificarea cu Google este temporar dezactivată de administrator.",
+    loginGoogleUnavailable:
+      "Autentificarea cu Google nu este configurată. Folosiți email și parolă.",
+    loginFacebookDisabled:
+      "Autentificarea cu Facebook este temporar dezactivată de administrator.",
+    loginFacebookUnavailable:
+      "Autentificarea cu Facebook nu este configurată. Folosiți email și parolă.",
+    loginGithubDisabled:
+      "Autentificarea cu GitHub este temporar dezactivată de administrator.",
+    loginGithubUnavailable:
+      "Autentificarea cu GitHub nu este configurată. Folosiți email și parolă.",
+    loginLinkedinDisabled:
+      "Autentificarea cu LinkedIn este temporar dezactivată de administrator.",
+    loginLinkedinUnavailable:
+      "Autentificarea cu LinkedIn nu este configurată. Folosiți email și parolă.",
+    loginGoogleError: "Autentificarea cu Google a eșuat. Încercați din nou.",
+    loginFacebookError: "Autentificarea cu Facebook a eșuat. Încercați din nou.",
+    loginGithubError: "Autentificarea cu GitHub a eșuat. Încercați din nou.",
+    loginLinkedinError:
+      "Autentificarea cu LinkedIn a eșuat. Încercați din nou.",
+    loginForgotLink: "Ați uitat parola?",
+    loginRegisterLink: "Nu aveți cont?",
+    loginRegisterLinkCta: "Creați un cont",
+    loginRememberMeLabel: "Ține-mă minte",
+    loginCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA (placeholder) – în sistemul real apare doar după câteva încercări consecutive eșuate.",
+    loginCaptchaLabel: "CAPTCHA / reCAPTCHA",
+    loginCaptchaNotAvailable:
+      "CAPTCHA este necesar, dar integrarea este dezactivată sau neconfigurată. Încercați din nou sau contactați un administrator.",
+    loginErrorEmailRequired: "Introduceți email-ul.",
+    loginErrorEmailInvalid: "Introduceți un email valid.",
+    loginErrorPasswordRequired: "Introduceți parola.",
+    socialResetPasswordHint:
+      "Dacă autentificarea socială (Google/Facebook/GitHub/LinkedIn) nu este disponibilă, puteți folosi „Am uitat parola” pentru a seta o parolă și apoi să vă autentificați cu email + parolă.",
+    socialResetPasswordHintNoProviders:
+      "Dacă autentificarea socială nu este disponibilă, puteți folosi „Am uitat parola” pentru a seta o parolă și apoi să vă autentificați cu email + parolă.",
+    loginErrorInvalidCredentials: "Date de autentificare invalide.",
+    loginErrorCaptchaRequired: "Confirmați că nu sunteți robot.",
+    loginErrorGeneric: "Autentificarea a eșuat. Încercați mai târziu.",
+    loginErrorNetwork:
+      "A apărut o eroare de rețea la contactarea serverului.",
+    loginErrorDisabled:
+      "Autentificarea este dezactivată pentru utilizatorii standard.",
+    loginLoading: "Se încarcă...",
+    registerTitle: "Creați un cont",
+    registerSubtitle: "Creați contul gratuit BeeLMS pentru a începe.",
+    registerEmailLabel: "Email",
+    registerPasswordLabel: "Parolă",
+    registerPasswordHint:
+      "Minim 8 caractere: cel puțin o literă mare, o literă mică, o cifră și un caracter special",
+    registerConfirmPasswordLabel: "Confirmați parola",
+    registerTermsPrefix: "",
+    registerTermsAnd: "",
+    registerTermsSuffix: "",
+    registerTermsLabel:
+      "Sunt de acord cu Termenii de utilizare și Politica de confidențialitate.",
+    registerCaptchaLabel: "Nu sunt robot (placeholder pentru CAPTCHA).",
+    registerCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA (placeholder pentru protecția anti-bot la înregistrare)",
+    registerSubmit: "Înregistrare",
+    registerSubmitLoading: "Se trimite...",
+    registerGoogleCta: "Înregistrare cu Google",
+    registerGoogleLoading: "Conectare...",
+    registerFacebookCta: "Înregistrare cu Facebook",
+    registerFacebookLoading: "Conectare...",
+    registerGithubCta: "Înregistrare cu GitHub",
+    registerGithubLoading: "Conectare...",
+    registerLinkedinCta: "Înregistrare cu LinkedIn",
+    registerLinkedinLoading: "Conectare...",
+    registerSocialDivider: "sau completați formularul",
+    registerSocialUnavailable:
+      "Înregistrarea socială este dezactivată de administrator. Continuați cu formularul de mai jos.",
+    registerGoogleDisabled:
+      "Înregistrarea cu Google este temporar dezactivată de administrator.",
+    registerGoogleUnavailable:
+      "Înregistrarea cu Google nu este configurată. Folosiți formularul de mai jos.",
+    registerFacebookDisabled:
+      "Înregistrarea cu Facebook este temporar dezactivată de administrator.",
+    registerFacebookUnavailable:
+      "Înregistrarea cu Facebook nu este configurată. Folosiți formularul de mai jos.",
+    registerGithubDisabled:
+      "Înregistrarea cu GitHub este temporar dezactivată de administrator.",
+    registerGithubUnavailable:
+      "Înregistrarea cu GitHub nu este configurată. Folosiți formularul de mai jos.",
+    registerLinkedinDisabled:
+      "Înregistrarea cu LinkedIn este temporar dezactivată de administrator.",
+    registerLinkedinUnavailable:
+      "Înregistrarea cu LinkedIn nu este configurată. Folosiți formularul de mai jos.",
+    registerGoogleError: "Înregistrarea cu Google a eșuat. Încercați din nou.",
+    registerFacebookError: "Înregistrarea cu Facebook a eșuat. Încercați din nou.",
+    registerGithubError: "Înregistrarea cu GitHub a eșuat. Încercați din nou.",
+    registerLinkedinError:
+      "Înregistrarea cu LinkedIn a eșuat. Încercați din nou.",
+    registerHasAccount: "Aveți deja cont?",
+    registerLoginLink: "Autentificare",
+    registerErrorEmailRequired: "Introduceți email-ul.",
+    registerErrorEmailInvalid: "Introduceți un email valid.",
+    registerErrorPasswordRequired: "Introduceți o parolă.",
+    registerErrorPasswordTooShort:
+      "Parola trebuie să aibă cel puțin 8 caractere și să conțină cel puțin o literă mare, o literă mică, o cifră și un caracter special.",
+    registerErrorPasswordMissingUppercase:
+      "Parola trebuie să conțină cel puțin o literă mare.",
+    registerErrorPasswordMissingLowercase:
+      "Parola trebuie să conțină cel puțin o literă mică.",
+    registerErrorPasswordMissingDigit:
+      "Parola trebuie să conțină cel puțin o cifră.",
+    registerErrorPasswordMissingSpecialChar:
+      "Parola trebuie să conțină cel puțin un caracter special.",
+    registerErrorConfirmPasswordRequired: "Confirmați parola.",
+    registerErrorPasswordsMismatch: "Parolele nu se potrivesc.",
+    registerErrorTermsRequired: "Trebuie să acceptați termenii.",
+    registerErrorCaptchaRequired: "Confirmați că nu sunteți robot.",
+    registerErrorDuplicateEmail: "Acest email este deja înregistrat.",
+    registerErrorInvalidData:
+      "Datele nu sunt valide. Verificați formularul și încercați din nou.",
+    registerErrorGeneric: "Înregistrarea a eșuat. Încercați mai târziu.",
+    registerErrorNetwork:
+      "A apărut o eroare de rețea la contactarea serverului.",
+    registerSuccess:
+      "Înregistrarea a fost reușită. Verificați email-ul și confirmați adresa folosind linkul trimis. După aceea vă puteți autentifica.",
+    registerLoading: "Se încarcă...",
+    registerDisabledTitle: "Înregistrarea este dezactivată",
+    registerDisabledMessage:
+      "Administratorul a dezactivat înregistrarea și resetarea parolei.",
+    registerDisabledLoginCta: "Mergeți la autentificare",
+    forgotTitle: "Am uitat parola",
+    forgotSubtitle:
+      "Introduceți email-ul pentru a solicita resetarea parolei.",
+    forgotEmailLabel: "Email",
+    forgotCaptchaLabel: "Nu sunt robot (placeholder pentru CAPTCHA).",
+    forgotSubmit: "Trimite linkul de resetare",
+    forgotSubmitLoading: "Se trimite...",
+    forgotHasPassword: "V-ați amintit parola?",
+    forgotLoginLink: "Înapoi la autentificare",
+    forgotErrorEmailRequired: "Introduceți email-ul.",
+    forgotErrorEmailInvalid: "Introduceți un email valid.",
+    forgotErrorCaptchaRequired: "Confirmați că nu sunteți robot.",
+    forgotErrorInvalidData:
+      "Datele nu sunt valide. Verificați formularul și încercați din nou.",
+    forgotErrorGeneric:
+      "Solicitarea resetării parolei a eșuat. Încercați mai târziu.",
+    forgotErrorNetwork:
+      "A apărut o eroare de rețea la contactarea serverului.",
+    forgotSuccess:
+      "Dacă există un cont cu acest email, vom trimite instrucțiuni pentru resetarea parolei.",
+    forgotResetLinkInfo: "Linkul de resetare este valid 24 de ore.",
+    forgotCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA (placeholder pentru protecție la resetarea parolei)",
+    forgotDisabledTitle: "Resetarea parolei este dezactivată",
+    forgotDisabledMessage:
+      "Administratorul a dezactivat înregistrarea și resetarea parolei.",
+    forgotDisabledLoginCta: "Mergeți la autentificare",
+    resetTitle: "Schimbare parolă",
+    resetSubtitle: "Introduceți parola nouă.",
+    resetInfoMessage:
+      "Această pagină este accesibilă printr-un link securizat trimis pe email.",
+    resetNewPasswordLabel: "Parolă nouă",
+    resetConfirmNewPasswordLabel: "Confirmați parola nouă",
+    resetSubmit: "Schimbați parola",
+    resetSubmitLoading: "Se schimbă...",
+    resetHasPassword: "Vă amintiți parola?",
+    resetBackToLogin: "Înapoi la autentificare",
+    resetSuccessLoginCta: "Mergeți la pagina de autentificare",
+    resetErrorNewPasswordRequired: "Introduceți o parolă nouă.",
+    resetErrorNewPasswordTooShort: "Parola trebuie să aibă cel puțin 8 caractere.",
+    resetErrorConfirmPasswordRequired: "Confirmați parola nouă.",
+    resetErrorPasswordsMismatch: "Parolele nu se potrivesc.",
+    resetErrorInvalidOrExpiredLink:
+      "Linkul de resetare este invalid sau a expirat. Solicitați un link nou din ecranul „Am uitat parola”.",
+    resetErrorGeneric: "Schimbarea parolei a eșuat. Încercați mai târziu.",
+    resetErrorNetwork:
+      "A apărut o eroare de rețea la contactarea serverului.",
+    resetSuccess:
+      "Parola a fost schimbată cu succes. Vă vom redirecționa către pagina de autentificare...",
+    socialCallbackTitle: "Procesare autentificare socială",
+    socialCallbackProcessing:
+      "Vă rugăm așteptați. Finalizăm autentificarea socială.",
+    socialCallbackRedirectNotice:
+      "Veți fi redirecționat automat în câteva secunde.",
+    socialCallbackErrorTitle: "Autentificare socială eșuată",
+    socialCallbackError:
+      "Nu am reușit să vă autentificăm prin contul social. Încercați din nou.",
+    socialCallbackErrorCta: "Înapoi la autentificare",
+    resetPasswordRequirementsTitle: "Cerințe parolă:",
+    resetPasswordRequirementsItemMinLength: "Minim 8 caractere",
+    resetPasswordRequirementsItemRecommendation:
+      "Recomandăm utilizarea literelor, cifrelor și simbolurilor.",
+    resetGoToForgotCta: "Mergeți la „Am uitat parola”",
+    resetDisabledTitle: "Resetarea parolei este dezactivată",
+    resetDisabledMessage:
+      "Administratorul a dezactivat înregistrarea și resetarea parolei.",
+    resetDisabledLoginCta: "Mergeți la autentificare",
+    accountDeletedTitle: "Contul dvs. a fost închis și șters",
+    accountDeletedDescription:
+      "Contul dvs. a fost închis, iar datele personale au fost marcate pentru ștergere conform regulilor noastre de protecție a datelor și GDPR.",
+    accountDeletedHint:
+      "Nu veți mai avea acces la profil. Dacă decideți să folosiți BeeLMS din nou, va fi necesară o nouă înregistrare.",
+    accountDeletedPrimaryCta: "Mergeți la pagina principală",
+    accountDeletedSecondaryCta: "Mergeți la articolele Wiki",
+    twoFactorTitle: "Autentificare cu doi factori",
+    twoFactorSubtitle:
+      "Introduceți codul de 6 cifre din aplicația de autentificare.",
+    twoFactorCodeLabel: "Cod",
+    twoFactorSubmit: "Verifică",
+    twoFactorSubmitLoading: "Se verifică...",
+    twoFactorBackToLogin: "Înapoi la autentificare",
+    twoFactorErrorMissingChallenge:
+      "Lipsește challenge-ul 2FA. Vă rugăm autentificați-vă din nou.",
+    twoFactorErrorCodeRequired: "Introduceți codul de 6 cifre.",
+    twoFactorErrorCodeInvalidFormat: "Format de cod invalid.",
+    twoFactorErrorInvalidCode: "Cod invalid. Încercați din nou.",
+    twoFactorErrorGeneric:
+      "Verificarea 2FA a eșuat. Încercați mai târziu.",
+  };
+  return m;
+})();
+
+const HI_MESSAGES: DomainMessages = (() => {
+  const m = cloneEnglishMessages();
+  m.nav = {
+    wiki: "Wiki",
+    courses: "कोर्स",
+    myCourses: "मेरे कोर्स",
+    login: "साइन इन",
+    register: "रजिस्टर",
+    profile: "प्रोफ़ाइल",
+    logout: "साइन आउट",
+    admin: "Admin",
+  };
+  m.auth = {
+    loginTitle: "साइन इन",
+    loginSubtitle: "अपने लॉगिन विवरण दर्ज करें।",
+    loginEmailLabel: "ईमेल",
+    loginPasswordLabel: "पासवर्ड",
+    loginSubmit: "साइन इन",
+    loginSubmitLoading: "साइन इन हो रहा है...",
+    loginGoogleCta: "Google से साइन इन",
+    loginGoogleLoading: "कनेक्ट हो रहा है...",
+    loginFacebookCta: "Facebook से साइन इन",
+    loginFacebookLoading: "कनेक्ट हो रहा है...",
+    loginGithubCta: "GitHub से साइन इन",
+    loginGithubLoading: "कनेक्ट हो रहा है...",
+    loginLinkedinCta: "LinkedIn से साइन इन",
+    loginLinkedinLoading: "कनेक्ट हो रहा है...",
+    loginSocialDivider: "या ईमेल से जारी रखें",
+    loginSocialUnavailable:
+      "सोशल साइन इन एडमिन द्वारा अक्षम है। ईमेल और पासवर्ड से जारी रखें।",
+    loginSocialResetHint:
+      "सोशल साइन इन सीमित है। यदि आपने Google/Facebook/GitHub/LinkedIn उपयोग किया था, तो 'पासवर्ड भूल गए' से पासवर्ड सेट करें और फिर ईमेल + पासवर्ड से साइन इन करें।",
+    loginGoogleDisabled: "Google साइन इन अस्थायी रूप से एडमिन द्वारा अक्षम है।",
+    loginGoogleUnavailable:
+      "Google साइन इन कॉन्फ़िगर नहीं है। ईमेल और पासवर्ड का उपयोग करें।",
+    loginFacebookDisabled:
+      "Facebook साइन इन अस्थायी रूप से एडमिन द्वारा अक्षम है।",
+    loginFacebookUnavailable:
+      "Facebook साइन इन कॉन्फ़िगर नहीं है। ईमेल और पासवर्ड का उपयोग करें।",
+    loginGithubDisabled: "GitHub साइन इन अस्थायी रूप से एडमिन द्वारा अक्षम है।",
+    loginGithubUnavailable:
+      "GitHub साइन इन कॉन्फ़िगर नहीं है। ईमेल और पासवर्ड का उपयोग करें।",
+    loginLinkedinDisabled:
+      "LinkedIn साइन इन अस्थायी रूप से एडमिन द्वारा अक्षम है।",
+    loginLinkedinUnavailable:
+      "LinkedIn साइन इन कॉन्फ़िगर नहीं है। ईमेल और पासवर्ड का उपयोग करें।",
+    loginGoogleError: "Google से साइन इन विफल रहा। फिर से कोशिश करें।",
+    loginFacebookError: "Facebook से साइन इन विफल रहा। फिर से कोशिश करें।",
+    loginGithubError: "GitHub से साइन इन विफल रहा। फिर से कोशिश करें।",
+    loginLinkedinError: "LinkedIn से साइन इन विफल रहा। फिर से कोशिश करें।",
+    loginForgotLink: "पासवर्ड भूल गए?",
+    loginRegisterLink: "खाता नहीं है?",
+    loginRegisterLinkCta: "खाता बनाएं",
+    loginRememberMeLabel: "मुझे याद रखें",
+    loginCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA (placeholder) – असली सिस्टम में यह कई लगातार असफल लॉगिन प्रयासों के बाद ही दिखता है।",
+    loginCaptchaLabel: "CAPTCHA / reCAPTCHA",
+    loginCaptchaNotAvailable:
+      "CAPTCHA आवश्यक है, लेकिन इंटीग्रेशन अक्षम या कॉन्फ़िगर नहीं है। फिर से कोशिश करें या एडमिन से संपर्क करें।",
+    loginErrorEmailRequired: "कृपया अपना ईमेल दर्ज करें।",
+    loginErrorEmailInvalid: "कृपया मान्य ईमेल दर्ज करें।",
+    loginErrorPasswordRequired: "कृपया अपना पासवर्ड दर्ज करें।",
+    socialResetPasswordHint:
+      "यदि सोशल साइन इन (Google/Facebook/GitHub/LinkedIn) उपलब्ध नहीं है, तो 'पासवर्ड भूल गए' से पासवर्ड सेट करें और फिर ईमेल + पासवर्ड से साइन इन करें।",
+    socialResetPasswordHintNoProviders:
+      "यदि सोशल साइन इन उपलब्ध नहीं है, तो 'पासवर्ड भूल गए' से पासवर्ड सेट करें और फिर ईमेल + पासवर्ड से साइन इन करें।",
+    loginErrorInvalidCredentials: "अमान्य लॉगिन विवरण।",
+    loginErrorCaptchaRequired: "कृपया पुष्टि करें कि आप रोबोट नहीं हैं।",
+    loginErrorGeneric: "साइन इन विफल रहा। बाद में फिर से कोशिश करें।",
+    loginErrorNetwork: "सर्वर से संपर्क करते समय नेटवर्क त्रुटि हुई।",
+    loginErrorDisabled: "स्टैंडर्ड उपयोगकर्ताओं के लिए साइन इन अक्षम है।",
+    loginLoading: "लोड हो रहा है...",
+    registerTitle: "खाता बनाएं",
+    registerSubtitle: "शुरू करने के लिए अपना मुफ्त BeeLMS खाता बनाएं।",
+    registerEmailLabel: "ईमेल",
+    registerPasswordLabel: "पासवर्ड",
+    registerPasswordHint:
+      "कम से कम 8 अक्षर: कम से कम एक बड़ा अक्षर, एक छोटा अक्षर, एक अंक और एक विशेष वर्ण",
+    registerConfirmPasswordLabel: "पासवर्ड की पुष्टि करें",
+    registerTermsPrefix: "",
+    registerTermsAnd: "",
+    registerTermsSuffix: "",
+    registerTermsLabel:
+      "मैं उपयोग की शर्तों और गोपनीयता नीति से सहमत हूँ।",
+    registerCaptchaLabel: "मैं रोबोट नहीं हूँ (CAPTCHA placeholder).",
+    registerCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA (रजिस्ट्रेशन के दौरान बॉट सुरक्षा के लिए placeholder)",
+    registerSubmit: "रजिस्टर",
+    registerSubmitLoading: "भेजा जा रहा है...",
+    registerGoogleCta: "Google से रजिस्टर",
+    registerGoogleLoading: "कनेक्ट हो रहा है...",
+    registerFacebookCta: "Facebook से रजिस्टर",
+    registerFacebookLoading: "कनेक्ट हो रहा है...",
+    registerGithubCta: "GitHub से रजिस्टर",
+    registerGithubLoading: "कनेक्ट हो रहा है...",
+    registerLinkedinCta: "LinkedIn से रजिस्टर",
+    registerLinkedinLoading: "कनेक्ट हो रहा है...",
+    registerSocialDivider: "या फ़ॉर्म भरें",
+    registerSocialUnavailable:
+      "सोशल रजिस्ट्रेशन एडमिन द्वारा अक्षम है। नीचे दिए गए फ़ॉर्म से जारी रखें।",
+    registerGoogleDisabled:
+      "Google से रजिस्ट्रेशन अस्थायी रूप से एडमिन द्वारा अक्षम है।",
+    registerGoogleUnavailable:
+      "Google से रजिस्ट्रेशन कॉन्फ़िगर नहीं है। नीचे दिया गया फ़ॉर्म उपयोग करें।",
+    registerFacebookDisabled:
+      "Facebook से रजिस्ट्रेशन अस्थायी रूप से एडमिन द्वारा अक्षम है।",
+    registerFacebookUnavailable:
+      "Facebook से रजिस्ट्रेशन कॉन्फ़िगर नहीं है। नीचे दिया गया फ़ॉर्म उपयोग करें।",
+    registerGithubDisabled:
+      "GitHub से रजिस्ट्रेशन अस्थायी रूप से एडमिन द्वारा अक्षम है।",
+    registerGithubUnavailable:
+      "GitHub से रजिस्ट्रेशन कॉन्फ़िगर नहीं है। नीचे दिया गया फ़ॉर्म उपयोग करें।",
+    registerLinkedinDisabled:
+      "LinkedIn से रजिस्ट्रेशन अस्थायी रूप से एडमिन द्वारा अक्षम है।",
+    registerLinkedinUnavailable:
+      "LinkedIn से रजिस्ट्रेशन कॉन्फ़िगर नहीं है। नीचे दिया गया फ़ॉर्म उपयोग करें।",
+    registerGoogleError: "Google से रजिस्ट्रेशन विफल रहा। फिर से कोशिश करें।",
+    registerFacebookError: "Facebook से रजिस्ट्रेशन विफल रहा। फिर से कोशिश करें।",
+    registerGithubError: "GitHub से रजिस्ट्रेशन विफल रहा। फिर से कोशिश करें।",
+    registerLinkedinError: "LinkedIn से रजिस्ट्रेशन विफल रहा। फिर से कोशिश करें।",
+    registerHasAccount: "पहले से खाता है?",
+    registerLoginLink: "साइन इन",
+    registerErrorEmailRequired: "कृपया अपना ईमेल दर्ज करें।",
+    registerErrorEmailInvalid: "कृपया मान्य ईमेल दर्ज करें।",
+    registerErrorPasswordRequired: "कृपया पासवर्ड दर्ज करें।",
+    registerErrorPasswordTooShort:
+      "पासवर्ड कम से कम 8 अक्षरों का होना चाहिए और उसमें कम से कम एक बड़ा अक्षर, एक छोटा अक्षर, एक अंक और एक विशेष वर्ण होना चाहिए।",
+    registerErrorPasswordMissingUppercase:
+      "पासवर्ड में कम से कम एक बड़ा अक्षर होना चाहिए।",
+    registerErrorPasswordMissingLowercase:
+      "पासवर्ड में कम से कम एक छोटा अक्षर होना चाहिए।",
+    registerErrorPasswordMissingDigit: "पासवर्ड में कम से कम एक अंक होना चाहिए।",
+    registerErrorPasswordMissingSpecialChar:
+      "पासवर्ड में कम से कम एक विशेष वर्ण होना चाहिए।",
+    registerErrorConfirmPasswordRequired: "कृपया पासवर्ड की पुष्टि करें।",
+    registerErrorPasswordsMismatch: "पासवर्ड मेल नहीं खाते।",
+    registerErrorTermsRequired: "आपको शर्तें स्वीकार करनी होंगी।",
+    registerErrorCaptchaRequired: "कृपया पुष्टि करें कि आप रोबोट नहीं हैं।",
+    registerErrorDuplicateEmail: "यह ईमेल पहले से रजिस्टर्ड है।",
+    registerErrorInvalidData:
+      "डेटा मान्य नहीं है। कृपया फ़ॉर्म जांचें और फिर से कोशिश करें।",
+    registerErrorGeneric: "रजिस्ट्रेशन विफल रहा। बाद में फिर से कोशिश करें।",
+    registerErrorNetwork: "सर्वर से संपर्क करते समय नेटवर्क त्रुटि हुई।",
+    registerSuccess:
+      "रजिस्ट्रेशन सफल रहा। कृपया अपना ईमेल जांचें और भेजे गए लिंक से पता सत्यापित करें। इसके बाद आप साइन इन कर सकते हैं।",
+    registerLoading: "लोड हो रहा है...",
+    registerDisabledTitle: "रजिस्ट्रेशन अक्षम है",
+    registerDisabledMessage:
+      "एडमिन ने रजिस्ट्रेशन और पासवर्ड रीसेट अक्षम किया है।",
+    registerDisabledLoginCta: "साइन इन पर जाएं",
+    forgotTitle: "पासवर्ड भूल गए",
+    forgotSubtitle: "पासवर्ड रीसेट के लिए अपना ईमेल दर्ज करें।",
+    forgotEmailLabel: "ईमेल",
+    forgotCaptchaLabel: "मैं रोबोट नहीं हूँ (CAPTCHA placeholder).",
+    forgotSubmit: "रीसेट लिंक भेजें",
+    forgotSubmitLoading: "भेजा जा रहा है...",
+    forgotHasPassword: "पासवर्ड याद आ गया?",
+    forgotLoginLink: "साइन इन पर वापस",
+    forgotErrorEmailRequired: "कृपया अपना ईमेल दर्ज करें।",
+    forgotErrorEmailInvalid: "कृपया मान्य ईमेल दर्ज करें।",
+    forgotErrorCaptchaRequired: "कृपया पुष्टि करें कि आप रोबोट नहीं हैं।",
+    forgotErrorInvalidData:
+      "डेटा मान्य नहीं है। कृपया फ़ॉर्म जांचें और फिर से कोशिश करें।",
+    forgotErrorGeneric:
+      "पासवर्ड रीसेट अनुरोध विफल रहा। बाद में फिर से कोशिश करें।",
+    forgotErrorNetwork: "सर्वर से संपर्क करते समय नेटवर्क त्रुटि हुई।",
+    forgotSuccess:
+      "यदि इस ईमेल से कोई खाता है, तो हम पासवर्ड रीसेट निर्देश भेजेंगे।",
+    forgotResetLinkInfo: "रीसेट लिंक 24 घंटे के लिए मान्य है।",
+    forgotCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA (पासवर्ड रीसेट के दौरान बॉट सुरक्षा के लिए placeholder)",
+    forgotDisabledTitle: "पासवर्ड रीसेट अक्षम है",
+    forgotDisabledMessage:
+      "एडमिन ने रजिस्ट्रेशन और पासवर्ड रीसेट अक्षम किया है।",
+    forgotDisabledLoginCta: "साइन इन पर जाएं",
+    resetTitle: "पासवर्ड बदलें",
+    resetSubtitle: "अपना नया पासवर्ड दर्ज करें।",
+    resetInfoMessage:
+      "यह पेज आपके ईमेल पर भेजे गए सुरक्षित लिंक के जरिए उपलब्ध है।",
+    resetNewPasswordLabel: "नया पासवर्ड",
+    resetConfirmNewPasswordLabel: "नए पासवर्ड की पुष्टि",
+    resetSubmit: "पासवर्ड बदलें",
+    resetSubmitLoading: "बदल रहा है...",
+    resetHasPassword: "पासवर्ड याद है?",
+    resetBackToLogin: "साइन इन पर वापस",
+    resetSuccessLoginCta: "लॉगिन पेज पर जाएं",
+    resetErrorNewPasswordRequired: "कृपया नया पासवर्ड दर्ज करें।",
+    resetErrorNewPasswordTooShort: "पासवर्ड कम से कम 8 अक्षरों का होना चाहिए।",
+    resetErrorConfirmPasswordRequired: "कृपया नए पासवर्ड की पुष्टि करें।",
+    resetErrorPasswordsMismatch: "पासवर्ड मेल नहीं खाते।",
+    resetErrorInvalidOrExpiredLink:
+      "रीसेट लिंक अमान्य या समाप्त हो गया है। 'पासवर्ड भूल गए' स्क्रीन से नया लिंक मांगें।",
+    resetErrorGeneric: "पासवर्ड बदलना विफल रहा। बाद में फिर से कोशिश करें।",
+    resetErrorNetwork: "सर्वर से संपर्क करते समय नेटवर्क त्रुटि हुई।",
+    resetSuccess:
+      "पासवर्ड सफलतापूर्वक बदल दिया गया है। हम आपको लॉगिन पेज पर भेजेंगे...",
+    socialCallbackTitle: "सोशल साइन इन प्रोसेस हो रहा है",
+    socialCallbackProcessing:
+      "कृपया प्रतीक्षा करें। हम सोशल प्रोवाइडर के माध्यम से साइन इन पूरा कर रहे हैं।",
+    socialCallbackRedirectNotice:
+      "कुछ सेकंड में आपको अपने आप रीडायरेक्ट किया जाएगा।",
+    socialCallbackErrorTitle: "सोशल साइन इन विफल",
+    socialCallbackError:
+      "सोशल प्रोवाइडर से साइन इन नहीं हो सका। फिर से कोशिश करें।",
+    socialCallbackErrorCta: "साइन इन पर वापस",
+    resetPasswordRequirementsTitle: "पासवर्ड आवश्यकताएँ:",
+    resetPasswordRequirementsItemMinLength: "कम से कम 8 अक्षर",
+    resetPasswordRequirementsItemRecommendation:
+      "अक्षर, अंक और प्रतीक उपयोग करने की सलाह दी जाती है।",
+    resetGoToForgotCta: "'पासवर्ड भूल गए' पर जाएं",
+    resetDisabledTitle: "पासवर्ड रीसेट अक्षम है",
+    resetDisabledMessage:
+      "एडमिन ने रजिस्ट्रेशन और पासवर्ड रीसेट अक्षम किया है।",
+    resetDisabledLoginCta: "साइन इन पर जाएं",
+    accountDeletedTitle: "आपका खाता बंद और हटाया गया है",
+    accountDeletedDescription:
+      "आपका खाता बंद कर दिया गया है और आपकी व्यक्तिगत जानकारी को हमारी डेटा सुरक्षा नीतियों और GDPR के अनुसार हटाने के लिए चिन्हित किया गया है।",
+    accountDeletedHint:
+      "अब आपको अपने प्रोफ़ाइल तक पहुँच नहीं होगी। यदि आप भविष्य में BeeLMS फिर से उपयोग करना चाहते हैं, तो नया रजिस्ट्रेशन करना होगा।",
+    accountDeletedPrimaryCta: "होम पेज पर जाएं",
+    accountDeletedSecondaryCta: "Wiki लेखों पर जाएं",
+    twoFactorTitle: "दो-चरण प्रमाणीकरण",
+    twoFactorSubtitle:
+      "अपने ऑथेंटिकेटर ऐप से 6 अंकों का कोड दर्ज करें।",
+    twoFactorCodeLabel: "कोड",
+    twoFactorSubmit: "सत्यापित करें",
+    twoFactorSubmitLoading: "सत्यापन...",
+    twoFactorBackToLogin: "साइन इन पर वापस",
+    twoFactorErrorMissingChallenge:
+      "2FA चैलेंज गायब है। कृपया फिर से साइन इन करें।",
+    twoFactorErrorCodeRequired: "कृपया 6 अंकों का कोड दर्ज करें।",
+    twoFactorErrorCodeInvalidFormat: "कोड फॉर्मेट अमान्य है।",
+    twoFactorErrorInvalidCode: "कोड अमान्य है। फिर से कोशिश करें।",
+    twoFactorErrorGeneric:
+      "2FA सत्यापन विफल रहा। बाद में फिर से कोशिश करें।",
+  };
+  return m;
+})();
+
+const VI_MESSAGES: DomainMessages = (() => {
+  const m = cloneEnglishMessages();
+  m.nav = {
+    wiki: "Wiki",
+    courses: "Khóa học",
+    myCourses: "Khóa học của tôi",
+    login: "Đăng nhập",
+    register: "Đăng ký",
+    profile: "Hồ sơ",
+    logout: "Đăng xuất",
+    admin: "Admin",
+  };
+  m.auth = {
+    loginTitle: "Đăng nhập",
+    loginSubtitle: "Nhập thông tin đăng nhập của bạn.",
+    loginEmailLabel: "Email",
+    loginPasswordLabel: "Mật khẩu",
+    loginSubmit: "Đăng nhập",
+    loginSubmitLoading: "Đang đăng nhập...",
+    loginGoogleCta: "Đăng nhập với Google",
+    loginGoogleLoading: "Đang kết nối...",
+    loginFacebookCta: "Đăng nhập với Facebook",
+    loginFacebookLoading: "Đang kết nối...",
+    loginGithubCta: "Đăng nhập với GitHub",
+    loginGithubLoading: "Đang kết nối...",
+    loginLinkedinCta: "Đăng nhập với LinkedIn",
+    loginLinkedinLoading: "Đang kết nối...",
+    loginSocialDivider: "hoặc tiếp tục bằng email",
+    loginSocialUnavailable:
+      "Đăng nhập mạng xã hội đã bị quản trị viên tắt. Hãy tiếp tục bằng email và mật khẩu.",
+    loginSocialResetHint:
+      "Đăng nhập mạng xã hội bị hạn chế. Nếu bạn dùng Google/Facebook/GitHub/LinkedIn, hãy đặt mật khẩu qua 'Quên mật khẩu' rồi đăng nhập bằng email + mật khẩu.",
+    loginGoogleDisabled:
+      "Đăng nhập Google tạm thời bị quản trị viên tắt.",
+    loginGoogleUnavailable:
+      "Đăng nhập Google chưa được cấu hình. Hãy dùng email và mật khẩu.",
+    loginFacebookDisabled:
+      "Đăng nhập Facebook tạm thời bị quản trị viên tắt.",
+    loginFacebookUnavailable:
+      "Đăng nhập Facebook chưa được cấu hình. Hãy dùng email và mật khẩu.",
+    loginGithubDisabled:
+      "Đăng nhập GitHub tạm thời bị quản trị viên tắt.",
+    loginGithubUnavailable:
+      "Đăng nhập GitHub chưa được cấu hình. Hãy dùng email và mật khẩu.",
+    loginLinkedinDisabled:
+      "Đăng nhập LinkedIn tạm thời bị quản trị viên tắt.",
+    loginLinkedinUnavailable:
+      "Đăng nhập LinkedIn chưa được cấu hình. Hãy dùng email và mật khẩu.",
+    loginGoogleError: "Đăng nhập Google thất bại. Vui lòng thử lại.",
+    loginFacebookError: "Đăng nhập Facebook thất bại. Vui lòng thử lại.",
+    loginGithubError: "Đăng nhập GitHub thất bại. Vui lòng thử lại.",
+    loginLinkedinError:
+      "Đăng nhập LinkedIn thất bại. Vui lòng thử lại.",
+    loginForgotLink: "Quên mật khẩu?",
+    loginRegisterLink: "Chưa có tài khoản?",
+    loginRegisterLinkCta: "Tạo tài khoản",
+    loginRememberMeLabel: "Ghi nhớ tôi",
+    loginCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA (placeholder) – trong hệ thống thật chỉ xuất hiện sau nhiều lần đăng nhập thất bại liên tiếp.",
+    loginCaptchaLabel: "CAPTCHA / reCAPTCHA",
+    loginCaptchaNotAvailable:
+      "Yêu cầu CAPTCHA, nhưng tích hợp đang tắt hoặc chưa cấu hình. Vui lòng thử lại hoặc liên hệ quản trị viên.",
+    loginErrorEmailRequired: "Vui lòng nhập email.",
+    loginErrorEmailInvalid: "Vui lòng nhập email hợp lệ.",
+    loginErrorPasswordRequired: "Vui lòng nhập mật khẩu.",
+    socialResetPasswordHint:
+      "Nếu đăng nhập mạng xã hội (Google/Facebook/GitHub/LinkedIn) không khả dụng, bạn có thể dùng 'Quên mật khẩu' để đặt mật khẩu và đăng nhập bằng email + mật khẩu.",
+    socialResetPasswordHintNoProviders:
+      "Nếu đăng nhập mạng xã hội không khả dụng, bạn có thể dùng 'Quên mật khẩu' để đặt mật khẩu và đăng nhập bằng email + mật khẩu.",
+    loginErrorInvalidCredentials: "Thông tin đăng nhập không đúng.",
+    loginErrorCaptchaRequired: "Vui lòng xác nhận bạn không phải robot.",
+    loginErrorGeneric: "Đăng nhập thất bại. Vui lòng thử lại sau.",
+    loginErrorNetwork: "Có lỗi mạng khi kết nối tới máy chủ.",
+    loginErrorDisabled: "Đăng nhập đã bị tắt cho người dùng thường.",
+    loginLoading: "Đang tải...",
+    registerTitle: "Tạo tài khoản",
+    registerSubtitle: "Tạo tài khoản BeeLMS miễn phí để bắt đầu.",
+    registerEmailLabel: "Email",
+    registerPasswordLabel: "Mật khẩu",
+    registerPasswordHint:
+      "Tối thiểu 8 ký tự: ít nhất một chữ hoa, một chữ thường, một chữ số và một ký tự đặc biệt",
+    registerConfirmPasswordLabel: "Xác nhận mật khẩu",
+    registerTermsPrefix: "",
+    registerTermsAnd: "",
+    registerTermsSuffix: "",
+    registerTermsLabel:
+      "Tôi đồng ý với Điều khoản sử dụng và Chính sách quyền riêng tư.",
+    registerCaptchaLabel: "Tôi không phải robot (placeholder cho CAPTCHA).",
+    registerCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA (placeholder bảo vệ bot khi đăng ký)",
+    registerSubmit: "Đăng ký",
+    registerSubmitLoading: "Đang gửi...",
+    registerGoogleCta: "Đăng ký với Google",
+    registerGoogleLoading: "Đang kết nối...",
+    registerFacebookCta: "Đăng ký với Facebook",
+    registerFacebookLoading: "Đang kết nối...",
+    registerGithubCta: "Đăng ký với GitHub",
+    registerGithubLoading: "Đang kết nối...",
+    registerLinkedinCta: "Đăng ký với LinkedIn",
+    registerLinkedinLoading: "Đang kết nối...",
+    registerSocialDivider: "hoặc điền biểu mẫu",
+    registerSocialUnavailable:
+      "Đăng ký mạng xã hội đã bị quản trị viên tắt. Hãy tiếp tục bằng biểu mẫu bên dưới.",
+    registerGoogleDisabled:
+      "Đăng ký Google tạm thời bị quản trị viên tắt.",
+    registerGoogleUnavailable:
+      "Đăng ký Google chưa được cấu hình. Hãy dùng biểu mẫu bên dưới.",
+    registerFacebookDisabled:
+      "Đăng ký Facebook tạm thời bị quản trị viên tắt.",
+    registerFacebookUnavailable:
+      "Đăng ký Facebook chưa được cấu hình. Hãy dùng biểu mẫu bên dưới.",
+    registerGithubDisabled:
+      "Đăng ký GitHub tạm thời bị quản trị viên tắt.",
+    registerGithubUnavailable:
+      "Đăng ký GitHub chưa được cấu hình. Hãy dùng biểu mẫu bên dưới.",
+    registerLinkedinDisabled:
+      "Đăng ký LinkedIn tạm thời bị quản trị viên tắt.",
+    registerLinkedinUnavailable:
+      "Đăng ký LinkedIn chưa được cấu hình. Hãy dùng biểu mẫu bên dưới.",
+    registerGoogleError: "Đăng ký Google thất bại. Vui lòng thử lại.",
+    registerFacebookError: "Đăng ký Facebook thất bại. Vui lòng thử lại.",
+    registerGithubError: "Đăng ký GitHub thất bại. Vui lòng thử lại.",
+    registerLinkedinError: "Đăng ký LinkedIn thất bại. Vui lòng thử lại.",
+    registerHasAccount: "Bạn đã có tài khoản?",
+    registerLoginLink: "Đăng nhập",
+    registerErrorEmailRequired: "Vui lòng nhập email.",
+    registerErrorEmailInvalid: "Vui lòng nhập email hợp lệ.",
+    registerErrorPasswordRequired: "Vui lòng nhập mật khẩu.",
+    registerErrorPasswordTooShort:
+      "Mật khẩu phải có ít nhất 8 ký tự và chứa ít nhất một chữ hoa, một chữ thường, một chữ số và một ký tự đặc biệt.",
+    registerErrorPasswordMissingUppercase:
+      "Mật khẩu phải có ít nhất một chữ hoa.",
+    registerErrorPasswordMissingLowercase:
+      "Mật khẩu phải có ít nhất một chữ thường.",
+    registerErrorPasswordMissingDigit: "Mật khẩu phải có ít nhất một chữ số.",
+    registerErrorPasswordMissingSpecialChar:
+      "Mật khẩu phải có ít nhất một ký tự đặc biệt.",
+    registerErrorConfirmPasswordRequired: "Vui lòng xác nhận mật khẩu.",
+    registerErrorPasswordsMismatch: "Mật khẩu không khớp.",
+    registerErrorTermsRequired: "Bạn phải chấp nhận điều khoản.",
+    registerErrorCaptchaRequired: "Vui lòng xác nhận bạn không phải robot.",
+    registerErrorDuplicateEmail: "Email này đã được đăng ký.",
+    registerErrorInvalidData:
+      "Dữ liệu không hợp lệ. Vui lòng kiểm tra biểu mẫu và thử lại.",
+    registerErrorGeneric: "Đăng ký thất bại. Vui lòng thử lại sau.",
+    registerErrorNetwork: "Có lỗi mạng khi kết nối tới máy chủ.",
+    registerSuccess:
+      "Đăng ký thành công. Vui lòng kiểm tra email và xác nhận địa chỉ bằng liên kết chúng tôi gửi. Sau đó bạn có thể đăng nhập từ trang đăng nhập.",
+    registerLoading: "Đang tải...",
+    registerDisabledTitle: "Đăng ký đã bị tắt",
+    registerDisabledMessage:
+      "Quản trị viên đã tắt đăng ký và đặt lại mật khẩu.",
+    registerDisabledLoginCta: "Đi tới đăng nhập",
+    forgotTitle: "Quên mật khẩu",
+    forgotSubtitle: "Nhập email để yêu cầu đặt lại mật khẩu.",
+    forgotEmailLabel: "Email",
+    forgotCaptchaLabel: "Tôi không phải robot (placeholder cho CAPTCHA).",
+    forgotSubmit: "Gửi liên kết đặt lại",
+    forgotSubmitLoading: "Đang gửi...",
+    forgotHasPassword: "Nhớ mật khẩu rồi?",
+    forgotLoginLink: "Quay lại đăng nhập",
+    forgotErrorEmailRequired: "Vui lòng nhập email.",
+    forgotErrorEmailInvalid: "Vui lòng nhập email hợp lệ.",
+    forgotErrorCaptchaRequired: "Vui lòng xác nhận bạn không phải robot.",
+    forgotErrorInvalidData:
+      "Dữ liệu không hợp lệ. Vui lòng kiểm tra biểu mẫu và thử lại.",
+    forgotErrorGeneric:
+      "Yêu cầu đặt lại mật khẩu thất bại. Vui lòng thử lại sau.",
+    forgotErrorNetwork: "Có lỗi mạng khi kết nối tới máy chủ.",
+    forgotSuccess:
+      "Nếu có tài khoản với email này, chúng tôi sẽ gửi hướng dẫn đặt lại mật khẩu.",
+    forgotResetLinkInfo: "Liên kết đặt lại mật khẩu có hiệu lực trong 24 giờ.",
+    forgotCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA (placeholder bảo vệ khi đặt lại mật khẩu)",
+    forgotDisabledTitle: "Đặt lại mật khẩu đã bị tắt",
+    forgotDisabledMessage:
+      "Quản trị viên đã tắt đăng ký và đặt lại mật khẩu.",
+    forgotDisabledLoginCta: "Đi tới đăng nhập",
+    resetTitle: "Đổi mật khẩu",
+    resetSubtitle: "Nhập mật khẩu mới của bạn.",
+    resetInfoMessage:
+      "Trang này có thể truy cập qua liên kết bảo mật được gửi tới email của bạn.",
+    resetNewPasswordLabel: "Mật khẩu mới",
+    resetConfirmNewPasswordLabel: "Xác nhận mật khẩu mới",
+    resetSubmit: "Đổi mật khẩu",
+    resetSubmitLoading: "Đang đổi...",
+    resetHasPassword: "Đã nhớ mật khẩu?",
+    resetBackToLogin: "Quay lại đăng nhập",
+    resetSuccessLoginCta: "Đi tới trang đăng nhập",
+    resetErrorNewPasswordRequired: "Vui lòng nhập mật khẩu mới.",
+    resetErrorNewPasswordTooShort: "Mật khẩu phải có ít nhất 8 ký tự.",
+    resetErrorConfirmPasswordRequired: "Vui lòng xác nhận mật khẩu mới.",
+    resetErrorPasswordsMismatch: "Mật khẩu không khớp.",
+    resetErrorInvalidOrExpiredLink:
+      "Liên kết đặt lại mật khẩu không hợp lệ hoặc đã hết hạn. Vui lòng yêu cầu liên kết mới từ màn hình 'Quên mật khẩu'.",
+    resetErrorGeneric: "Đổi mật khẩu thất bại. Vui lòng thử lại sau.",
+    resetErrorNetwork: "Có lỗi mạng khi kết nối tới máy chủ.",
+    resetSuccess:
+      "Mật khẩu đã được đổi thành công. Chúng tôi sẽ chuyển bạn tới trang đăng nhập...",
+    socialCallbackTitle: "Đang xử lý đăng nhập mạng xã hội",
+    socialCallbackProcessing:
+      "Vui lòng chờ. Chúng tôi đang hoàn tất đăng nhập qua nhà cung cấp mạng xã hội.",
+    socialCallbackRedirectNotice:
+      "Bạn sẽ được chuyển hướng tự động trong vài giây.",
+    socialCallbackErrorTitle: "Đăng nhập mạng xã hội thất bại",
+    socialCallbackError:
+      "Không thể đăng nhập bằng tài khoản mạng xã hội. Vui lòng thử lại.",
+    socialCallbackErrorCta: "Quay lại đăng nhập",
+    resetPasswordRequirementsTitle: "Yêu cầu mật khẩu:",
+    resetPasswordRequirementsItemMinLength: "Tối thiểu 8 ký tự",
+    resetPasswordRequirementsItemRecommendation:
+      "Khuyến nghị dùng chữ cái, số và ký hiệu.",
+    resetGoToForgotCta: "Đi tới 'Quên mật khẩu'",
+    resetDisabledTitle: "Đặt lại mật khẩu đã bị tắt",
+    resetDisabledMessage:
+      "Quản trị viên đã tắt đăng ký và đặt lại mật khẩu.",
+    resetDisabledLoginCta: "Đi tới đăng nhập",
+    accountDeletedTitle: "Tài khoản của bạn đã bị đóng và xóa",
+    accountDeletedDescription:
+      "Tài khoản của bạn đã bị đóng và dữ liệu cá nhân đã được đánh dấu để xóa theo quy định bảo vệ dữ liệu và GDPR.",
+    accountDeletedHint:
+      "Bạn sẽ không còn truy cập được hồ sơ. Nếu muốn dùng BeeLMS lại trong tương lai, bạn cần tạo tài khoản mới.",
+    accountDeletedPrimaryCta: "Về trang chủ",
+    accountDeletedSecondaryCta: "Tới bài viết Wiki",
+    twoFactorTitle: "Xác thực hai yếu tố",
+    twoFactorSubtitle: "Nhập mã 6 chữ số từ ứng dụng xác thực của bạn.",
+    twoFactorCodeLabel: "Mã",
+    twoFactorSubmit: "Xác minh",
+    twoFactorSubmitLoading: "Đang xác minh...",
+    twoFactorBackToLogin: "Quay lại đăng nhập",
+    twoFactorErrorMissingChallenge:
+      "Thiếu 2FA challenge. Vui lòng đăng nhập lại.",
+    twoFactorErrorCodeRequired: "Vui lòng nhập mã 6 chữ số.",
+    twoFactorErrorCodeInvalidFormat: "Định dạng mã không hợp lệ.",
+    twoFactorErrorInvalidCode: "Mã không hợp lệ. Vui lòng thử lại.",
+    twoFactorErrorGeneric: "Xác minh 2FA thất bại. Vui lòng thử lại sau.",
+  };
+  return m;
+})();
+
+const ID_MESSAGES: DomainMessages = (() => {
+  const m = cloneEnglishMessages();
+  m.nav = {
+    wiki: "Wiki",
+    courses: "Kursus",
+    myCourses: "Kursus saya",
+    login: "Masuk",
+    register: "Daftar",
+    profile: "Profil",
+    logout: "Keluar",
+    admin: "Admin",
+  };
+  m.auth = {
+    loginTitle: "Masuk",
+    loginSubtitle: "Masukkan detail login Anda.",
+    loginEmailLabel: "Email",
+    loginPasswordLabel: "Kata sandi",
+    loginSubmit: "Masuk",
+    loginSubmitLoading: "Sedang masuk...",
+    loginGoogleCta: "Masuk dengan Google",
+    loginGoogleLoading: "Menghubungkan...",
+    loginFacebookCta: "Masuk dengan Facebook",
+    loginFacebookLoading: "Menghubungkan...",
+    loginGithubCta: "Masuk dengan GitHub",
+    loginGithubLoading: "Menghubungkan...",
+    loginLinkedinCta: "Masuk dengan LinkedIn",
+    loginLinkedinLoading: "Menghubungkan...",
+    loginSocialDivider: "atau lanjutkan dengan email",
+    loginSocialUnavailable:
+      "Login sosial dinonaktifkan oleh admin. Lanjutkan dengan email dan kata sandi.",
+    loginSocialResetHint:
+      "Login sosial dibatasi. Jika Anda menggunakan Google/Facebook/GitHub/LinkedIn, atur kata sandi melalui 'Lupa kata sandi' lalu masuk dengan email + kata sandi.",
+    loginGoogleDisabled:
+      "Login dengan Google sementara dinonaktifkan oleh admin.",
+    loginGoogleUnavailable:
+      "Login dengan Google belum dikonfigurasi. Gunakan email dan kata sandi.",
+    loginFacebookDisabled:
+      "Login dengan Facebook sementara dinonaktifkan oleh admin.",
+    loginFacebookUnavailable:
+      "Login dengan Facebook belum dikonfigurasi. Gunakan email dan kata sandi.",
+    loginGithubDisabled:
+      "Login dengan GitHub sementara dinonaktifkan oleh admin.",
+    loginGithubUnavailable:
+      "Login dengan GitHub belum dikonfigurasi. Gunakan email dan kata sandi.",
+    loginLinkedinDisabled:
+      "Login dengan LinkedIn sementara dinonaktifkan oleh admin.",
+    loginLinkedinUnavailable:
+      "Login dengan LinkedIn belum dikonfigurasi. Gunakan email dan kata sandi.",
+    loginGoogleError: "Login Google gagal. Coba lagi.",
+    loginFacebookError: "Login Facebook gagal. Coba lagi.",
+    loginGithubError: "Login GitHub gagal. Coba lagi.",
+    loginLinkedinError: "Login LinkedIn gagal. Coba lagi.",
+    loginForgotLink: "Lupa kata sandi?",
+    loginRegisterLink: "Belum punya akun?",
+    loginRegisterLinkCta: "Buat akun",
+    loginRememberMeLabel: "Ingat saya",
+    loginCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA (placeholder) – pada sistem nyata muncul hanya setelah beberapa percobaan login gagal berturut-turut.",
+    loginCaptchaLabel: "CAPTCHA / reCAPTCHA",
+    loginCaptchaNotAvailable:
+      "CAPTCHA diperlukan, tetapi integrasi dinonaktifkan atau belum dikonfigurasi. Coba lagi atau hubungi admin.",
+    loginErrorEmailRequired: "Masukkan email Anda.",
+    loginErrorEmailInvalid: "Masukkan email yang valid.",
+    loginErrorPasswordRequired: "Masukkan kata sandi Anda.",
+    socialResetPasswordHint:
+      "Jika login sosial (Google/Facebook/GitHub/LinkedIn) tidak tersedia, Anda dapat menggunakan 'Lupa kata sandi' untuk mengatur kata sandi lalu masuk dengan email + kata sandi.",
+    socialResetPasswordHintNoProviders:
+      "Jika login sosial tidak tersedia, Anda dapat menggunakan 'Lupa kata sandi' untuk mengatur kata sandi lalu masuk dengan email + kata sandi.",
+    loginErrorInvalidCredentials: "Detail login tidak valid.",
+    loginErrorCaptchaRequired: "Konfirmasi bahwa Anda bukan robot.",
+    loginErrorGeneric: "Login gagal. Coba lagi nanti.",
+    loginErrorNetwork: "Terjadi kesalahan jaringan saat menghubungi server.",
+    loginErrorDisabled: "Login dinonaktifkan untuk pengguna standar.",
+    loginLoading: "Memuat...",
+    registerTitle: "Buat akun",
+    registerSubtitle: "Buat akun BeeLMS gratis Anda untuk memulai.",
+    registerEmailLabel: "Email",
+    registerPasswordLabel: "Kata sandi",
+    registerPasswordHint:
+      "Minimal 8 karakter: setidaknya satu huruf besar, satu huruf kecil, satu angka, dan satu karakter spesial",
+    registerConfirmPasswordLabel: "Konfirmasi kata sandi",
+    registerTermsPrefix: "",
+    registerTermsAnd: "",
+    registerTermsSuffix: "",
+    registerTermsLabel:
+      "Saya setuju dengan Ketentuan Penggunaan dan Kebijakan Privasi.",
+    registerCaptchaLabel: "Saya bukan robot (placeholder CAPTCHA).",
+    registerCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA (placeholder perlindungan bot saat pendaftaran)",
+    registerSubmit: "Daftar",
+    registerSubmitLoading: "Mengirim...",
+    registerGoogleCta: "Daftar dengan Google",
+    registerGoogleLoading: "Menghubungkan...",
+    registerFacebookCta: "Daftar dengan Facebook",
+    registerFacebookLoading: "Menghubungkan...",
+    registerGithubCta: "Daftar dengan GitHub",
+    registerGithubLoading: "Menghubungkan...",
+    registerLinkedinCta: "Daftar dengan LinkedIn",
+    registerLinkedinLoading: "Menghubungkan...",
+    registerSocialDivider: "atau isi formulir",
+    registerSocialUnavailable:
+      "Pendaftaran sosial dinonaktifkan oleh admin. Lanjutkan dengan formulir di bawah.",
+    registerGoogleDisabled:
+      "Pendaftaran dengan Google sementara dinonaktifkan oleh admin.",
+    registerGoogleUnavailable:
+      "Pendaftaran dengan Google belum dikonfigurasi. Gunakan formulir di bawah.",
+    registerFacebookDisabled:
+      "Pendaftaran dengan Facebook sementara dinonaktifkan oleh admin.",
+    registerFacebookUnavailable:
+      "Pendaftaran dengan Facebook belum dikonfigurasi. Gunakan formulir di bawah.",
+    registerGithubDisabled:
+      "Pendaftaran dengan GitHub sementara dinonaktifkan oleh admin.",
+    registerGithubUnavailable:
+      "Pendaftaran dengan GitHub belum dikonfigurasi. Gunakan formulir di bawah.",
+    registerLinkedinDisabled:
+      "Pendaftaran dengan LinkedIn sementara dinonaktifkan oleh admin.",
+    registerLinkedinUnavailable:
+      "Pendaftaran dengan LinkedIn belum dikonfigurasi. Gunakan formulir di bawah.",
+    registerGoogleError: "Pendaftaran Google gagal. Coba lagi.",
+    registerFacebookError: "Pendaftaran Facebook gagal. Coba lagi.",
+    registerGithubError: "Pendaftaran GitHub gagal. Coba lagi.",
+    registerLinkedinError: "Pendaftaran LinkedIn gagal. Coba lagi.",
+    registerHasAccount: "Sudah punya akun?",
+    registerLoginLink: "Masuk",
+    registerErrorEmailRequired: "Masukkan email Anda.",
+    registerErrorEmailInvalid: "Masukkan email yang valid.",
+    registerErrorPasswordRequired: "Masukkan kata sandi.",
+    registerErrorPasswordTooShort:
+      "Kata sandi harus minimal 8 karakter dan berisi setidaknya satu huruf besar, satu huruf kecil, satu angka, dan satu karakter spesial.",
+    registerErrorPasswordMissingUppercase:
+      "Kata sandi harus berisi setidaknya satu huruf besar.",
+    registerErrorPasswordMissingLowercase:
+      "Kata sandi harus berisi setidaknya satu huruf kecil.",
+    registerErrorPasswordMissingDigit:
+      "Kata sandi harus berisi setidaknya satu angka.",
+    registerErrorPasswordMissingSpecialChar:
+      "Kata sandi harus berisi setidaknya satu karakter spesial.",
+    registerErrorConfirmPasswordRequired: "Konfirmasi kata sandi.",
+    registerErrorPasswordsMismatch: "Kata sandi tidak cocok.",
+    registerErrorTermsRequired: "Anda harus menyetujui ketentuan.",
+    registerErrorCaptchaRequired: "Konfirmasi bahwa Anda bukan robot.",
+    registerErrorDuplicateEmail: "Email ini sudah terdaftar.",
+    registerErrorInvalidData:
+      "Data tidak valid. Periksa formulir dan coba lagi.",
+    registerErrorGeneric: "Pendaftaran gagal. Coba lagi nanti.",
+    registerErrorNetwork: "Terjadi kesalahan jaringan saat menghubungi server.",
+    registerSuccess:
+      "Pendaftaran berhasil. Silakan periksa email Anda dan konfirmasi alamat melalui tautan yang kami kirim. Setelah itu Anda bisa masuk dari halaman login.",
+    registerLoading: "Memuat...",
+    registerDisabledTitle: "Pendaftaran dinonaktifkan",
+    registerDisabledMessage:
+      "Admin telah menonaktifkan pendaftaran dan reset kata sandi.",
+    registerDisabledLoginCta: "Pergi ke login",
+    forgotTitle: "Lupa kata sandi",
+    forgotSubtitle: "Masukkan email untuk meminta reset kata sandi.",
+    forgotEmailLabel: "Email",
+    forgotCaptchaLabel: "Saya bukan robot (placeholder CAPTCHA).",
+    forgotSubmit: "Kirim tautan reset",
+    forgotSubmitLoading: "Mengirim...",
+    forgotHasPassword: "Ingat kata sandi?",
+    forgotLoginLink: "Kembali ke login",
+    forgotErrorEmailRequired: "Masukkan email Anda.",
+    forgotErrorEmailInvalid: "Masukkan email yang valid.",
+    forgotErrorCaptchaRequired: "Konfirmasi bahwa Anda bukan robot.",
+    forgotErrorInvalidData:
+      "Data tidak valid. Periksa formulir dan coba lagi.",
+    forgotErrorGeneric: "Permintaan reset kata sandi gagal. Coba lagi nanti.",
+    forgotErrorNetwork: "Terjadi kesalahan jaringan saat menghubungi server.",
+    forgotSuccess:
+      "Jika ada akun dengan email ini, kami akan mengirim instruksi reset kata sandi.",
+    forgotResetLinkInfo: "Tautan reset berlaku selama 24 jam.",
+    forgotCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA (placeholder perlindungan saat reset kata sandi)",
+    forgotDisabledTitle: "Reset kata sandi dinonaktifkan",
+    forgotDisabledMessage:
+      "Admin telah menonaktifkan pendaftaran dan reset kata sandi.",
+    forgotDisabledLoginCta: "Pergi ke login",
+    resetTitle: "Ubah kata sandi",
+    resetSubtitle: "Masukkan kata sandi baru Anda.",
+    resetInfoMessage:
+      "Halaman ini dapat diakses melalui tautan aman yang dikirim ke email Anda.",
+    resetNewPasswordLabel: "Kata sandi baru",
+    resetConfirmNewPasswordLabel: "Konfirmasi kata sandi baru",
+    resetSubmit: "Ubah kata sandi",
+    resetSubmitLoading: "Mengubah...",
+    resetHasPassword: "Ingat kata sandi?",
+    resetBackToLogin: "Kembali ke login",
+    resetSuccessLoginCta: "Pergi ke halaman login",
+    resetErrorNewPasswordRequired: "Masukkan kata sandi baru.",
+    resetErrorNewPasswordTooShort: "Kata sandi harus minimal 8 karakter.",
+    resetErrorConfirmPasswordRequired: "Konfirmasi kata sandi baru.",
+    resetErrorPasswordsMismatch: "Kata sandi tidak cocok.",
+    resetErrorInvalidOrExpiredLink:
+      "Tautan reset tidak valid atau telah kedaluwarsa. Minta tautan baru dari layar 'Lupa kata sandi'.",
+    resetErrorGeneric: "Gagal mengubah kata sandi. Coba lagi nanti.",
+    resetErrorNetwork: "Terjadi kesalahan jaringan saat menghubungi server.",
+    resetSuccess:
+      "Kata sandi berhasil diubah. Anda akan diarahkan ke halaman login...",
+    socialCallbackTitle: "Memproses login sosial",
+    socialCallbackProcessing:
+      "Mohon tunggu. Kami sedang menyelesaikan login melalui penyedia sosial.",
+    socialCallbackRedirectNotice:
+      "Anda akan dialihkan secara otomatis dalam beberapa detik.",
+    socialCallbackErrorTitle: "Login sosial gagal",
+    socialCallbackError:
+      "Kami tidak dapat memasukkan Anda melalui penyedia sosial. Coba lagi.",
+    socialCallbackErrorCta: "Kembali ke login",
+    resetPasswordRequirementsTitle: "Persyaratan kata sandi:",
+    resetPasswordRequirementsItemMinLength: "Minimal 8 karakter",
+    resetPasswordRequirementsItemRecommendation:
+      "Disarankan menggunakan huruf, angka, dan simbol.",
+    resetGoToForgotCta: "Pergi ke 'Lupa kata sandi'",
+    resetDisabledTitle: "Reset kata sandi dinonaktifkan",
+    resetDisabledMessage:
+      "Admin telah menonaktifkan pendaftaran dan reset kata sandi.",
+    resetDisabledLoginCta: "Pergi ke login",
+    accountDeletedTitle: "Akun Anda telah ditutup dan dihapus",
+    accountDeletedDescription:
+      "Akun Anda telah ditutup dan data pribadi Anda telah ditandai untuk dihapus sesuai aturan perlindungan data dan GDPR.",
+    accountDeletedHint:
+      "Anda tidak lagi memiliki akses ke profil. Jika Anda ingin menggunakan BeeLMS lagi di masa depan, Anda harus mendaftar ulang.",
+    accountDeletedPrimaryCta: "Pergi ke beranda",
+    accountDeletedSecondaryCta: "Pergi ke artikel Wiki",
+    twoFactorTitle: "Autentikasi dua faktor",
+    twoFactorSubtitle:
+      "Masukkan kode 6 digit dari aplikasi autentikator Anda.",
+    twoFactorCodeLabel: "Kode",
+    twoFactorSubmit: "Verifikasi",
+    twoFactorSubmitLoading: "Memverifikasi...",
+    twoFactorBackToLogin: "Kembali ke login",
+    twoFactorErrorMissingChallenge:
+      "Tantangan 2FA hilang. Silakan login lagi.",
+    twoFactorErrorCodeRequired: "Masukkan kode 6 digit.",
+    twoFactorErrorCodeInvalidFormat: "Format kode tidak valid.",
+    twoFactorErrorInvalidCode: "Kode tidak valid. Coba lagi.",
+    twoFactorErrorGeneric: "Verifikasi 2FA gagal. Coba lagi nanti.",
+  };
+  return m;
+})();
+
+const KO_MESSAGES: DomainMessages = (() => {
+  const m = cloneEnglishMessages();
+  m.nav = {
+    wiki: "Wiki",
+    courses: "강좌",
+    myCourses: "내 강좌",
+    login: "로그인",
+    register: "회원가입",
+    profile: "프로필",
+    logout: "로그아웃",
+    admin: "관리자",
+  };
+  m.auth = {
+    loginTitle: "로그인",
+    loginSubtitle: "로그인 정보를 입력하세요.",
+    loginEmailLabel: "이메일",
+    loginPasswordLabel: "비밀번호",
+    loginSubmit: "로그인",
+    loginSubmitLoading: "로그인 중...",
+    loginGoogleCta: "Google로 로그인",
+    loginGoogleLoading: "연결 중...",
+    loginFacebookCta: "Facebook으로 로그인",
+    loginFacebookLoading: "연결 중...",
+    loginGithubCta: "GitHub로 로그인",
+    loginGithubLoading: "연결 중...",
+    loginLinkedinCta: "LinkedIn으로 로그인",
+    loginLinkedinLoading: "연결 중...",
+    loginSocialDivider: "또는 이메일로 계속",
+    loginSocialUnavailable:
+      "소셜 로그인이 관리자가 비활성화했습니다. 이메일과 비밀번호로 계속하세요.",
+    loginSocialResetHint:
+      "소셜 로그인이 제한됩니다. Google/Facebook/GitHub/LinkedIn을 사용했다면 '비밀번호를 잊으셨나요'에서 비밀번호를 설정한 후 이메일 + 비밀번호로 로그인하세요.",
+    loginGoogleDisabled:
+      "Google 로그인이 관리자에 의해 일시적으로 비활성화되었습니다.",
+    loginGoogleUnavailable:
+      "Google 로그인이 구성되지 않았습니다. 이메일과 비밀번호를 사용하세요.",
+    loginFacebookDisabled:
+      "Facebook 로그인이 관리자에 의해 일시적으로 비활성화되었습니다.",
+    loginFacebookUnavailable:
+      "Facebook 로그인이 구성되지 않았습니다. 이메일과 비밀번호를 사용하세요.",
+    loginGithubDisabled:
+      "GitHub 로그인이 관리자에 의해 일시적으로 비활성화되었습니다.",
+    loginGithubUnavailable:
+      "GitHub 로그인이 구성되지 않았습니다. 이메일과 비밀번호를 사용하세요.",
+    loginLinkedinDisabled:
+      "LinkedIn 로그인이 관리자에 의해 일시적으로 비활성화되었습니다.",
+    loginLinkedinUnavailable:
+      "LinkedIn 로그인이 구성되지 않았습니다. 이메일과 비밀번호를 사용하세요.",
+    loginGoogleError: "Google 로그인에 실패했습니다. 다시 시도하세요.",
+    loginFacebookError: "Facebook 로그인에 실패했습니다. 다시 시도하세요.",
+    loginGithubError: "GitHub 로그인에 실패했습니다. 다시 시도하세요.",
+    loginLinkedinError: "LinkedIn 로그인에 실패했습니다. 다시 시도하세요.",
+    loginForgotLink: "비밀번호를 잊으셨나요?",
+    loginRegisterLink: "계정이 없으신가요?",
+    loginRegisterLinkCta: "계정 만들기",
+    loginRememberMeLabel: "로그인 상태 유지",
+    loginCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA (placeholder) – 실제 시스템에서는 여러 번 연속 로그인 실패 후에만 표시됩니다.",
+    loginCaptchaLabel: "CAPTCHA / reCAPTCHA",
+    loginCaptchaNotAvailable:
+      "CAPTCHA가 필요하지만 통합이 비활성화되었거나 구성되지 않았습니다. 다시 시도하거나 관리자에게 문의하세요.",
+    loginErrorEmailRequired: "이메일을 입력하세요.",
+    loginErrorEmailInvalid: "유효한 이메일을 입력하세요.",
+    loginErrorPasswordRequired: "비밀번호를 입력하세요.",
+    socialResetPasswordHint:
+      "소셜 로그인(Google/Facebook/GitHub/LinkedIn)을 사용할 수 없으면 '비밀번호를 잊으셨나요'로 비밀번호를 설정한 뒤 이메일 + 비밀번호로 로그인할 수 있습니다.",
+    socialResetPasswordHintNoProviders:
+      "소셜 로그인을 사용할 수 없으면 '비밀번호를 잊으셨나요'로 비밀번호를 설정한 뒤 이메일 + 비밀번호로 로그인할 수 있습니다.",
+    loginErrorInvalidCredentials: "로그인 정보가 올바르지 않습니다.",
+    loginErrorCaptchaRequired: "로봇이 아님을 확인하세요.",
+    loginErrorGeneric: "로그인에 실패했습니다. 나중에 다시 시도하세요.",
+    loginErrorNetwork: "서버에 연결하는 동안 네트워크 오류가 발생했습니다.",
+    loginErrorDisabled: "일반 사용자 로그인이 비활성화되었습니다.",
+    loginLoading: "로딩 중...",
+    registerTitle: "계정 만들기",
+    registerSubtitle: "시작하려면 무료 BeeLMS 계정을 만드세요.",
+    registerEmailLabel: "이메일",
+    registerPasswordLabel: "비밀번호",
+    registerPasswordHint:
+      "최소 8자: 대문자 1개, 소문자 1개, 숫자 1개, 특수문자 1개 이상",
+    registerConfirmPasswordLabel: "비밀번호 확인",
+    registerTermsPrefix: "",
+    registerTermsAnd: "",
+    registerTermsSuffix: "",
+    registerTermsLabel: "이용약관 및 개인정보처리방침에 동의합니다.",
+    registerCaptchaLabel: "로봇이 아닙니다(CAPTCHA placeholder).",
+    registerCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA (회원가입 중 봇 방지 placeholder)",
+    registerSubmit: "회원가입",
+    registerSubmitLoading: "전송 중...",
+    registerGoogleCta: "Google로 가입",
+    registerGoogleLoading: "연결 중...",
+    registerFacebookCta: "Facebook으로 가입",
+    registerFacebookLoading: "연결 중...",
+    registerGithubCta: "GitHub로 가입",
+    registerGithubLoading: "연결 중...",
+    registerLinkedinCta: "LinkedIn으로 가입",
+    registerLinkedinLoading: "연결 중...",
+    registerSocialDivider: "또는 양식을 작성하세요",
+    registerSocialUnavailable:
+      "소셜 회원가입이 관리자가 비활성화했습니다. 아래 양식으로 진행하세요.",
+    registerGoogleDisabled:
+      "Google 회원가입이 관리자에 의해 일시적으로 비활성화되었습니다.",
+    registerGoogleUnavailable:
+      "Google 회원가입이 구성되지 않았습니다. 아래 양식을 사용하세요.",
+    registerFacebookDisabled:
+      "Facebook 회원가입이 관리자에 의해 일시적으로 비활성화되었습니다.",
+    registerFacebookUnavailable:
+      "Facebook 회원가입이 구성되지 않았습니다. 아래 양식을 사용하세요.",
+    registerGithubDisabled:
+      "GitHub 회원가입이 관리자에 의해 일시적으로 비활성화되었습니다.",
+    registerGithubUnavailable:
+      "GitHub 회원가입이 구성되지 않았습니다. 아래 양식을 사용하세요.",
+    registerLinkedinDisabled:
+      "LinkedIn 회원가입이 관리자에 의해 일시적으로 비활성화되었습니다.",
+    registerLinkedinUnavailable:
+      "LinkedIn 회원가입이 구성되지 않았습니다. 아래 양식을 사용하세요.",
+    registerGoogleError: "Google 회원가입에 실패했습니다. 다시 시도하세요.",
+    registerFacebookError: "Facebook 회원가입에 실패했습니다. 다시 시도하세요.",
+    registerGithubError: "GitHub 회원가입에 실패했습니다. 다시 시도하세요.",
+    registerLinkedinError: "LinkedIn 회원가입에 실패했습니다. 다시 시도하세요.",
+    registerHasAccount: "이미 계정이 있으신가요?",
+    registerLoginLink: "로그인",
+    registerErrorEmailRequired: "이메일을 입력하세요.",
+    registerErrorEmailInvalid: "유효한 이메일을 입력하세요.",
+    registerErrorPasswordRequired: "비밀번호를 입력하세요.",
+    registerErrorPasswordTooShort:
+      "비밀번호는 최소 8자이며 대문자, 소문자, 숫자, 특수문자를 포함해야 합니다.",
+    registerErrorPasswordMissingUppercase:
+      "비밀번호에 대문자를 최소 1개 포함해야 합니다.",
+    registerErrorPasswordMissingLowercase:
+      "비밀번호에 소문자를 최소 1개 포함해야 합니다.",
+    registerErrorPasswordMissingDigit:
+      "비밀번호에 숫자를 최소 1개 포함해야 합니다.",
+    registerErrorPasswordMissingSpecialChar:
+      "비밀번호에 특수문자를 최소 1개 포함해야 합니다.",
+    registerErrorConfirmPasswordRequired: "비밀번호 확인을 입력하세요.",
+    registerErrorPasswordsMismatch: "비밀번호가 일치하지 않습니다.",
+    registerErrorTermsRequired: "약관에 동의해야 합니다.",
+    registerErrorCaptchaRequired: "로봇이 아님을 확인하세요.",
+    registerErrorDuplicateEmail: "이미 등록된 이메일입니다.",
+    registerErrorInvalidData:
+      "데이터가 유효하지 않습니다. 양식을 확인하고 다시 시도하세요.",
+    registerErrorGeneric: "회원가입에 실패했습니다. 나중에 다시 시도하세요.",
+    registerErrorNetwork: "서버에 연결하는 동안 네트워크 오류가 발생했습니다.",
+    registerSuccess:
+      "회원가입이 완료되었습니다. 이메일을 확인하고 보내드린 링크로 주소를 확인하세요. 이후 로그인 페이지에서 로그인할 수 있습니다.",
+    registerLoading: "로딩 중...",
+    registerDisabledTitle: "회원가입이 비활성화되었습니다",
+    registerDisabledMessage:
+      "관리자가 회원가입 및 비밀번호 재설정을 비활성화했습니다.",
+    registerDisabledLoginCta: "로그인으로 이동",
+    forgotTitle: "비밀번호를 잊으셨나요",
+    forgotSubtitle: "비밀번호 재설정을 위해 이메일을 입력하세요.",
+    forgotEmailLabel: "이메일",
+    forgotCaptchaLabel: "로봇이 아닙니다(CAPTCHA placeholder).",
+    forgotSubmit: "재설정 링크 보내기",
+    forgotSubmitLoading: "전송 중...",
+    forgotHasPassword: "비밀번호가 기억나셨나요?",
+    forgotLoginLink: "로그인으로 돌아가기",
+    forgotErrorEmailRequired: "이메일을 입력하세요.",
+    forgotErrorEmailInvalid: "유효한 이메일을 입력하세요.",
+    forgotErrorCaptchaRequired: "로봇이 아님을 확인하세요.",
+    forgotErrorInvalidData:
+      "데이터가 유효하지 않습니다. 양식을 확인하고 다시 시도하세요.",
+    forgotErrorGeneric: "비밀번호 재설정 요청에 실패했습니다. 나중에 다시 시도하세요.",
+    forgotErrorNetwork: "서버에 연결하는 동안 네트워크 오류가 발생했습니다.",
+    forgotSuccess:
+      "해당 이메일로 계정이 존재한다면 비밀번호 재설정 안내를 보내드립니다.",
+    forgotResetLinkInfo: "재설정 링크는 24시간 동안 유효합니다.",
+    forgotCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA (비밀번호 재설정 중 보호를 위한 placeholder)",
+    forgotDisabledTitle: "비밀번호 재설정이 비활성화되었습니다",
+    forgotDisabledMessage:
+      "관리자가 회원가입 및 비밀번호 재설정을 비활성화했습니다.",
+    forgotDisabledLoginCta: "로그인으로 이동",
+    resetTitle: "비밀번호 변경",
+    resetSubtitle: "새 비밀번호를 입력하세요.",
+    resetInfoMessage:
+      "이 페이지는 이메일로 전송된 보안 링크를 통해 접근합니다.",
+    resetNewPasswordLabel: "새 비밀번호",
+    resetConfirmNewPasswordLabel: "새 비밀번호 확인",
+    resetSubmit: "비밀번호 변경",
+    resetSubmitLoading: "변경 중...",
+    resetHasPassword: "비밀번호가 기억나시나요?",
+    resetBackToLogin: "로그인으로 돌아가기",
+    resetSuccessLoginCta: "로그인 페이지로 이동",
+    resetErrorNewPasswordRequired: "새 비밀번호를 입력하세요.",
+    resetErrorNewPasswordTooShort: "비밀번호는 최소 8자여야 합니다.",
+    resetErrorConfirmPasswordRequired: "새 비밀번호 확인을 입력하세요.",
+    resetErrorPasswordsMismatch: "비밀번호가 일치하지 않습니다.",
+    resetErrorInvalidOrExpiredLink:
+      "비밀번호 재설정 링크가 유효하지 않거나 만료되었습니다. '비밀번호를 잊으셨나요'에서 새 링크를 요청하세요.",
+    resetErrorGeneric: "비밀번호 변경에 실패했습니다. 나중에 다시 시도하세요.",
+    resetErrorNetwork: "서버에 연결하는 동안 네트워크 오류가 발생했습니다.",
+    resetSuccess:
+      "비밀번호가 성공적으로 변경되었습니다. 로그인 페이지로 이동합니다...",
+    socialCallbackTitle: "소셜 로그인 처리 중",
+    socialCallbackProcessing:
+      "잠시만 기다려 주세요. 소셜 제공자를 통한 로그인을 완료하는 중입니다.",
+    socialCallbackRedirectNotice:
+      "몇 초 후 자동으로 이동됩니다.",
+    socialCallbackErrorTitle: "소셜 로그인 실패",
+    socialCallbackError:
+      "소셜 제공자를 통해 로그인할 수 없습니다. 다시 시도하세요.",
+    socialCallbackErrorCta: "로그인으로 돌아가기",
+    resetPasswordRequirementsTitle: "비밀번호 요구 사항:",
+    resetPasswordRequirementsItemMinLength: "최소 8자",
+    resetPasswordRequirementsItemRecommendation:
+      "문자, 숫자, 기호를 함께 사용하는 것을 권장합니다.",
+    resetGoToForgotCta: "'비밀번호를 잊으셨나요'로 이동",
+    resetDisabledTitle: "비밀번호 재설정이 비활성화되었습니다",
+    resetDisabledMessage:
+      "관리자가 회원가입 및 비밀번호 재설정을 비활성화했습니다.",
+    resetDisabledLoginCta: "로그인으로 이동",
+    accountDeletedTitle: "계정이 종료되고 삭제되었습니다",
+    accountDeletedDescription:
+      "계정이 종료되었으며 개인정보는 데이터 보호 규정 및 GDPR에 따라 삭제 대상으로 표시되었습니다.",
+    accountDeletedHint:
+      "더 이상 프로필에 접근할 수 없습니다. 나중에 BeeLMS를 다시 사용하려면 새로 가입해야 합니다.",
+    accountDeletedPrimaryCta: "홈으로 이동",
+    accountDeletedSecondaryCta: "위키 문서로 이동",
+    twoFactorTitle: "2단계 인증",
+    twoFactorSubtitle: "인증 앱의 6자리 코드를 입력하세요.",
+    twoFactorCodeLabel: "코드",
+    twoFactorSubmit: "확인",
+    twoFactorSubmitLoading: "확인 중...",
+    twoFactorBackToLogin: "로그인으로 돌아가기",
+    twoFactorErrorMissingChallenge:
+      "2FA 챌린지가 없습니다. 다시 로그인하세요.",
+    twoFactorErrorCodeRequired: "6자리 코드를 입력하세요.",
+    twoFactorErrorCodeInvalidFormat: "코드 형식이 올바르지 않습니다.",
+    twoFactorErrorInvalidCode: "코드가 올바르지 않습니다. 다시 시도하세요.",
+    twoFactorErrorGeneric: "2FA 확인에 실패했습니다. 나중에 다시 시도하세요.",
+  };
+  return m;
+})();
+
+const JA_MESSAGES: DomainMessages = (() => {
+  const m = cloneEnglishMessages();
+  m.nav = {
+    wiki: "Wiki",
+    courses: "コース",
+    myCourses: "マイコース",
+    login: "ログイン",
+    register: "登録",
+    profile: "プロフィール",
+    logout: "ログアウト",
+    admin: "管理",
+  };
+  m.auth = {
+    loginTitle: "ログイン",
+    loginSubtitle: "ログイン情報を入力してください。",
+    loginEmailLabel: "メール",
+    loginPasswordLabel: "パスワード",
+    loginSubmit: "ログイン",
+    loginSubmitLoading: "ログイン中...",
+    loginGoogleCta: "Googleでログイン",
+    loginGoogleLoading: "接続中...",
+    loginFacebookCta: "Facebookでログイン",
+    loginFacebookLoading: "接続中...",
+    loginGithubCta: "GitHubでログイン",
+    loginGithubLoading: "接続中...",
+    loginLinkedinCta: "LinkedInでログイン",
+    loginLinkedinLoading: "接続中...",
+    loginSocialDivider: "またはメールで続行",
+    loginSocialUnavailable:
+      "ソーシャルログインは管理者によって無効化されています。メールとパスワードで続行してください。",
+    loginSocialResetHint:
+      "ソーシャルログインが制限されています。Google/Facebook/GitHub/LinkedInを使用していた場合は、「パスワードをお忘れですか？」でパスワードを設定し、メール + パスワードでログインしてください。",
+    loginGoogleDisabled:
+      "Googleログインは管理者によって一時的に無効化されています。",
+    loginGoogleUnavailable:
+      "Googleログインが設定されていません。メールとパスワードを使用してください。",
+    loginFacebookDisabled:
+      "Facebookログインは管理者によって一時的に無効化されています。",
+    loginFacebookUnavailable:
+      "Facebookログインが設定されていません。メールとパスワードを使用してください。",
+    loginGithubDisabled:
+      "GitHubログインは管理者によって一時的に無効化されています。",
+    loginGithubUnavailable:
+      "GitHubログインが設定されていません。メールとパスワードを使用してください。",
+    loginLinkedinDisabled:
+      "LinkedInログインは管理者によって一時的に無効化されています。",
+    loginLinkedinUnavailable:
+      "LinkedInログインが設定されていません。メールとパスワードを使用してください。",
+    loginGoogleError: "Googleログインに失敗しました。もう一度お試しください。",
+    loginFacebookError:
+      "Facebookログインに失敗しました。もう一度お試しください。",
+    loginGithubError: "GitHubログインに失敗しました。もう一度お試しください。",
+    loginLinkedinError:
+      "LinkedInログインに失敗しました。もう一度お試しください。",
+    loginForgotLink: "パスワードをお忘れですか？",
+    loginRegisterLink: "アカウントをお持ちではありませんか？",
+    loginRegisterLinkCta: "アカウントを作成",
+    loginRememberMeLabel: "ログイン状態を保持",
+    loginCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA（プレースホルダー）– 実際のシステムでは、連続したログイン失敗後にのみ表示されます。",
+    loginCaptchaLabel: "CAPTCHA / reCAPTCHA",
+    loginCaptchaNotAvailable:
+      "CAPTCHAが必要ですが、統合が無効または未設定です。もう一度お試しいただくか、管理者に連絡してください。",
+    loginErrorEmailRequired: "メールアドレスを入力してください。",
+    loginErrorEmailInvalid: "有効なメールアドレスを入力してください。",
+    loginErrorPasswordRequired: "パスワードを入力してください。",
+    socialResetPasswordHint:
+      "ソーシャルログイン（Google/Facebook/GitHub/LinkedIn）が利用できない場合は、「パスワードをお忘れですか？」でパスワードを設定し、メール + パスワードでログインできます。",
+    socialResetPasswordHintNoProviders:
+      "ソーシャルログインが利用できない場合は、「パスワードをお忘れですか？」でパスワードを設定し、メール + パスワードでログインできます。",
+    loginErrorInvalidCredentials: "ログイン情報が正しくありません。",
+    loginErrorCaptchaRequired: "ロボットではないことを確認してください。",
+    loginErrorGeneric: "ログインに失敗しました。後でもう一度お試しください。",
+    loginErrorNetwork: "サーバーへの接続中にネットワークエラーが発生しました。",
+    loginErrorDisabled: "通常ユーザーのログインは無効です。",
+    loginLoading: "読み込み中...",
+    registerTitle: "アカウントを作成",
+    registerSubtitle: "無料のBeeLMSアカウントを作成して開始しましょう。",
+    registerEmailLabel: "メール",
+    registerPasswordLabel: "パスワード",
+    registerPasswordHint:
+      "8文字以上：大文字1つ、小文字1つ、数字1つ、記号1つ以上",
+    registerConfirmPasswordLabel: "パスワード（確認）",
+    registerTermsPrefix: "",
+    registerTermsAnd: "",
+    registerTermsSuffix: "",
+    registerTermsLabel: "利用規約とプライバシーポリシーに同意します。",
+    registerCaptchaLabel: "私はロボットではありません（CAPTCHAのプレースホルダー）。",
+    registerCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA（登録時のボット対策プレースホルダー）",
+    registerSubmit: "登録",
+    registerSubmitLoading: "送信中...",
+    registerGoogleCta: "Googleで登録",
+    registerGoogleLoading: "接続中...",
+    registerFacebookCta: "Facebookで登録",
+    registerFacebookLoading: "接続中...",
+    registerGithubCta: "GitHubで登録",
+    registerGithubLoading: "接続中...",
+    registerLinkedinCta: "LinkedInで登録",
+    registerLinkedinLoading: "接続中...",
+    registerSocialDivider: "またはフォームに入力",
+    registerSocialUnavailable:
+      "ソーシャル登録は管理者によって無効化されています。下のフォームで続行してください。",
+    registerGoogleDisabled:
+      "Google登録は管理者によって一時的に無効化されています。",
+    registerGoogleUnavailable:
+      "Google登録が設定されていません。下のフォームを使用してください。",
+    registerFacebookDisabled:
+      "Facebook登録は管理者によって一時的に無効化されています。",
+    registerFacebookUnavailable:
+      "Facebook登録が設定されていません。下のフォームを使用してください。",
+    registerGithubDisabled:
+      "GitHub登録は管理者によって一時的に無効化されています。",
+    registerGithubUnavailable:
+      "GitHub登録が設定されていません。下のフォームを使用してください。",
+    registerLinkedinDisabled:
+      "LinkedIn登録は管理者によって一時的に無効化されています。",
+    registerLinkedinUnavailable:
+      "LinkedIn登録が設定されていません。下のフォームを使用してください。",
+    registerGoogleError: "Google登録に失敗しました。もう一度お試しください。",
+    registerFacebookError:
+      "Facebook登録に失敗しました。もう一度お試しください。",
+    registerGithubError: "GitHub登録に失敗しました。もう一度お試しください。",
+    registerLinkedinError:
+      "LinkedIn登録に失敗しました。もう一度お試しください。",
+    registerHasAccount: "すでにアカウントをお持ちですか？",
+    registerLoginLink: "ログイン",
+    registerErrorEmailRequired: "メールアドレスを入力してください。",
+    registerErrorEmailInvalid: "有効なメールアドレスを入力してください。",
+    registerErrorPasswordRequired: "パスワードを入力してください。",
+    registerErrorPasswordTooShort:
+      "パスワードは8文字以上で、大文字・小文字・数字・記号を含める必要があります。",
+    registerErrorPasswordMissingUppercase:
+      "パスワードには大文字を1つ以上含めてください。",
+    registerErrorPasswordMissingLowercase:
+      "パスワードには小文字を1つ以上含めてください。",
+    registerErrorPasswordMissingDigit:
+      "パスワードには数字を1つ以上含めてください。",
+    registerErrorPasswordMissingSpecialChar:
+      "パスワードには記号を1つ以上含めてください。",
+    registerErrorConfirmPasswordRequired: "確認用パスワードを入力してください。",
+    registerErrorPasswordsMismatch: "パスワードが一致しません。",
+    registerErrorTermsRequired: "規約に同意する必要があります。",
+    registerErrorCaptchaRequired: "ロボットではないことを確認してください。",
+    registerErrorDuplicateEmail: "このメールはすでに登録されています。",
+    registerErrorInvalidData:
+      "入力内容が無効です。フォームを確認してもう一度お試しください。",
+    registerErrorGeneric: "登録に失敗しました。後でもう一度お試しください。",
+    registerErrorNetwork: "サーバーへの接続中にネットワークエラーが発生しました。",
+    registerSuccess:
+      "登録が完了しました。メールを確認し、送信したリンクでアドレスを確認してください。その後、ログインページからログインできます。",
+    registerLoading: "読み込み中...",
+    registerDisabledTitle: "登録が無効です",
+    registerDisabledMessage:
+      "管理者が登録とパスワードリセットを無効化しました。",
+    registerDisabledLoginCta: "ログインへ",
+    forgotTitle: "パスワードをお忘れですか",
+    forgotSubtitle: "パスワードリセットのためにメールを入力してください。",
+    forgotEmailLabel: "メール",
+    forgotCaptchaLabel: "私はロボットではありません（CAPTCHAのプレースホルダー）。",
+    forgotSubmit: "リセットリンクを送信",
+    forgotSubmitLoading: "送信中...",
+    forgotHasPassword: "パスワードを思い出しましたか？",
+    forgotLoginLink: "ログインに戻る",
+    forgotErrorEmailRequired: "メールアドレスを入力してください。",
+    forgotErrorEmailInvalid: "有効なメールアドレスを入力してください。",
+    forgotErrorCaptchaRequired: "ロボットではないことを確認してください。",
+    forgotErrorInvalidData:
+      "入力内容が無効です。フォームを確認してもう一度お試しください。",
+    forgotErrorGeneric:
+      "パスワードリセット要求に失敗しました。後でもう一度お試しください。",
+    forgotErrorNetwork: "サーバーへの接続中にネットワークエラーが発生しました。",
+    forgotSuccess:
+      "このメールのアカウントが存在する場合、パスワードリセット手順を送信します。",
+    forgotResetLinkInfo: "リセットリンクは24時間有効です。",
+    forgotCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA（パスワードリセット時の保護プレースホルダー）",
+    forgotDisabledTitle: "パスワードリセットが無効です",
+    forgotDisabledMessage:
+      "管理者が登録とパスワードリセットを無効化しました。",
+    forgotDisabledLoginCta: "ログインへ",
+    resetTitle: "パスワードを変更",
+    resetSubtitle: "新しいパスワードを入力してください。",
+    resetInfoMessage:
+      "このページはメールで送信された安全なリンクからアクセスできます。",
+    resetNewPasswordLabel: "新しいパスワード",
+    resetConfirmNewPasswordLabel: "新しいパスワード（確認）",
+    resetSubmit: "パスワードを変更",
+    resetSubmitLoading: "変更中...",
+    resetHasPassword: "パスワードを覚えていますか？",
+    resetBackToLogin: "ログインに戻る",
+    resetSuccessLoginCta: "ログインページへ",
+    resetErrorNewPasswordRequired: "新しいパスワードを入力してください。",
+    resetErrorNewPasswordTooShort: "パスワードは8文字以上である必要があります。",
+    resetErrorConfirmPasswordRequired: "新しいパスワード（確認）を入力してください。",
+    resetErrorPasswordsMismatch: "パスワードが一致しません。",
+    resetErrorInvalidOrExpiredLink:
+      "パスワードリセットリンクが無効または期限切れです。「パスワードをお忘れですか」から新しいリンクを要求してください。",
+    resetErrorGeneric:
+      "パスワードの変更に失敗しました。後でもう一度お試しください。",
+    resetErrorNetwork: "サーバーへの接続中にネットワークエラーが発生しました。",
+    resetSuccess:
+      "パスワードが正常に変更されました。ログインページへ移動します...",
+    socialCallbackTitle: "ソーシャルログインを処理中",
+    socialCallbackProcessing:
+      "お待ちください。ソーシャルプロバイダー経由のログインを完了しています。",
+    socialCallbackRedirectNotice: "数秒後に自動的にリダイレクトされます。",
+    socialCallbackErrorTitle: "ソーシャルログインに失敗しました",
+    socialCallbackError:
+      "ソーシャルプロバイダーでログインできませんでした。もう一度お試しください。",
+    socialCallbackErrorCta: "ログインに戻る",
+    resetPasswordRequirementsTitle: "パスワード要件：",
+    resetPasswordRequirementsItemMinLength: "8文字以上",
+    resetPasswordRequirementsItemRecommendation:
+      "文字・数字・記号の組み合わせを推奨します。",
+    resetGoToForgotCta: "「パスワードをお忘れですか」に移動",
+    resetDisabledTitle: "パスワードリセットが無効です",
+    resetDisabledMessage:
+      "管理者が登録とパスワードリセットを無効化しました。",
+    resetDisabledLoginCta: "ログインへ",
+    accountDeletedTitle: "アカウントは閉鎖され削除されました",
+    accountDeletedDescription:
+      "アカウントは閉鎖され、個人データはデータ保護規則およびGDPRに従って削除対象としてマークされました。",
+    accountDeletedHint:
+      "プロフィールにはアクセスできません。今後BeeLMSを再度利用する場合は、新規登録が必要です。",
+    accountDeletedPrimaryCta: "ホームへ",
+    accountDeletedSecondaryCta: "Wiki記事へ",
+    twoFactorTitle: "二要素認証",
+    twoFactorSubtitle: "認証アプリの6桁コードを入力してください。",
+    twoFactorCodeLabel: "コード",
+    twoFactorSubmit: "確認",
+    twoFactorSubmitLoading: "確認中...",
+    twoFactorBackToLogin: "ログインに戻る",
+    twoFactorErrorMissingChallenge:
+      "2FAチャレンジがありません。もう一度ログインしてください。",
+    twoFactorErrorCodeRequired: "6桁コードを入力してください。",
+    twoFactorErrorCodeInvalidFormat: "コード形式が無効です。",
+    twoFactorErrorInvalidCode: "コードが無効です。もう一度お試しください。",
+    twoFactorErrorGeneric:
+      "2FAの確認に失敗しました。後でもう一度お試しください。",
+  };
+  return m;
+})();
+
+const AR_MESSAGES: DomainMessages = (() => {
+  const m = cloneEnglishMessages();
+  m.nav = {
+    wiki: "ويكي",
+    courses: "الدورات",
+    myCourses: "دوراتي",
+    login: "تسجيل الدخول",
+    register: "إنشاء حساب",
+    profile: "الملف الشخصي",
+    logout: "تسجيل الخروج",
+    admin: "الإدارة",
+  };
+  m.auth = {
+    loginTitle: "تسجيل الدخول",
+    loginSubtitle: "أدخل بيانات تسجيل الدخول.",
+    loginEmailLabel: "البريد الإلكتروني",
+    loginPasswordLabel: "كلمة المرور",
+    loginSubmit: "تسجيل الدخول",
+    loginSubmitLoading: "جارٍ تسجيل الدخول...",
+    loginGoogleCta: "تسجيل الدخول باستخدام Google",
+    loginGoogleLoading: "جارٍ الاتصال...",
+    loginFacebookCta: "تسجيل الدخول باستخدام Facebook",
+    loginFacebookLoading: "جارٍ الاتصال...",
+    loginGithubCta: "تسجيل الدخول باستخدام GitHub",
+    loginGithubLoading: "جارٍ الاتصال...",
+    loginLinkedinCta: "تسجيل الدخول باستخدام LinkedIn",
+    loginLinkedinLoading: "جارٍ الاتصال...",
+    loginSocialDivider: "أو المتابعة بالبريد الإلكتروني",
+    loginSocialUnavailable:
+      "تم تعطيل تسجيل الدخول عبر الشبكات الاجتماعية بواسطة المسؤول. تابع بالبريد الإلكتروني وكلمة المرور.",
+    loginSocialResetHint:
+      "تسجيل الدخول الاجتماعي مقيّد. إذا كنت قد استخدمت Google/Facebook/GitHub/LinkedIn، قم بتعيين كلمة مرور عبر " +
+      "'نسيت كلمة المرور' ثم سجّل الدخول باستخدام البريد الإلكتروني + كلمة المرور.",
+    loginGoogleDisabled:
+      "تم تعطيل تسجيل الدخول عبر Google مؤقتًا بواسطة المسؤول.",
+    loginGoogleUnavailable:
+      "تسجيل الدخول عبر Google غير مُعدّ. استخدم البريد الإلكتروني وكلمة المرور.",
+    loginFacebookDisabled:
+      "تم تعطيل تسجيل الدخول عبر Facebook مؤقتًا بواسطة المسؤول.",
+    loginFacebookUnavailable:
+      "تسجيل الدخول عبر Facebook غير مُعدّ. استخدم البريد الإلكتروني وكلمة المرور.",
+    loginGithubDisabled:
+      "تم تعطيل تسجيل الدخول عبر GitHub مؤقتًا بواسطة المسؤول.",
+    loginGithubUnavailable:
+      "تسجيل الدخول عبر GitHub غير مُعدّ. استخدم البريد الإلكتروني وكلمة المرور.",
+    loginLinkedinDisabled:
+      "تم تعطيل تسجيل الدخول عبر LinkedIn مؤقتًا بواسطة المسؤول.",
+    loginLinkedinUnavailable:
+      "تسجيل الدخول عبر LinkedIn غير مُعدّ. استخدم البريد الإلكتروني وكلمة المرور.",
+    loginGoogleError: "فشل تسجيل الدخول عبر Google. حاول مرة أخرى.",
+    loginFacebookError: "فشل تسجيل الدخول عبر Facebook. حاول مرة أخرى.",
+    loginGithubError: "فشل تسجيل الدخول عبر GitHub. حاول مرة أخرى.",
+    loginLinkedinError: "فشل تسجيل الدخول عبر LinkedIn. حاول مرة أخرى.",
+    loginForgotLink: "نسيت كلمة المرور؟",
+    loginRegisterLink: "ليس لديك حساب؟",
+    loginRegisterLinkCta: "أنشئ حسابًا",
+    loginRememberMeLabel: "تذكرني",
+    loginCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA (عنصر نائب) – في النظام الحقيقي تظهر فقط بعد عدة محاولات فاشلة متتالية.",
+    loginCaptchaLabel: "CAPTCHA / reCAPTCHA",
+    loginCaptchaNotAvailable:
+      "CAPTCHA مطلوبة، لكن التكامل معطّل أو غير مُعدّ. حاول مرة أخرى أو تواصل مع المسؤول.",
+    loginErrorEmailRequired: "يرجى إدخال البريد الإلكتروني.",
+    loginErrorEmailInvalid: "يرجى إدخال بريد إلكتروني صالح.",
+    loginErrorPasswordRequired: "يرجى إدخال كلمة المرور.",
+    socialResetPasswordHint:
+      "إذا لم يكن تسجيل الدخول الاجتماعي (Google/Facebook/GitHub/LinkedIn) متاحًا، يمكنك استخدام 'نسيت كلمة المرور' لتعيين كلمة مرور ثم تسجيل الدخول بالبريد الإلكتروني + كلمة المرور.",
+    socialResetPasswordHintNoProviders:
+      "إذا لم يكن تسجيل الدخول الاجتماعي متاحًا، يمكنك استخدام 'نسيت كلمة المرور' لتعيين كلمة مرور ثم تسجيل الدخول بالبريد الإلكتروني + كلمة المرور.",
+    loginErrorInvalidCredentials: "بيانات تسجيل الدخول غير صحيحة.",
+    loginErrorCaptchaRequired: "يرجى تأكيد أنك لست روبوتًا.",
+    loginErrorGeneric: "فشل تسجيل الدخول. يرجى المحاولة لاحقًا.",
+    loginErrorNetwork: "حدث خطأ في الشبكة أثناء الاتصال بالخادم.",
+    loginErrorDisabled: "تم تعطيل تسجيل الدخول للمستخدمين العاديين.",
+    loginLoading: "جارٍ التحميل...",
+    registerTitle: "إنشاء حساب",
+    registerSubtitle: "أنشئ حساب BeeLMS مجانيًا للبدء.",
+    registerEmailLabel: "البريد الإلكتروني",
+    registerPasswordLabel: "كلمة المرور",
+    registerPasswordHint:
+      "8 أحرف على الأقل: حرف كبير واحد، حرف صغير واحد، رقم واحد، ورمز خاص واحد على الأقل",
+    registerConfirmPasswordLabel: "تأكيد كلمة المرور",
+    registerTermsPrefix: "",
+    registerTermsAnd: "",
+    registerTermsSuffix: "",
+    registerTermsLabel: "أوافق على شروط الاستخدام وسياسة الخصوصية.",
+    registerCaptchaLabel: "أنا لست روبوتًا (عنصر نائب لـ CAPTCHA).",
+    registerCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA (عنصر نائب للحماية من الروبوتات أثناء التسجيل)",
+    registerSubmit: "تسجيل",
+    registerSubmitLoading: "جارٍ الإرسال...",
+    registerGoogleCta: "التسجيل باستخدام Google",
+    registerGoogleLoading: "جارٍ الاتصال...",
+    registerFacebookCta: "التسجيل باستخدام Facebook",
+    registerFacebookLoading: "جارٍ الاتصال...",
+    registerGithubCta: "التسجيل باستخدام GitHub",
+    registerGithubLoading: "جارٍ الاتصال...",
+    registerLinkedinCta: "التسجيل باستخدام LinkedIn",
+    registerLinkedinLoading: "جارٍ الاتصال...",
+    registerSocialDivider: "أو املأ النموذج",
+    registerSocialUnavailable:
+      "تم تعطيل التسجيل عبر الشبكات الاجتماعية بواسطة المسؤول. تابع باستخدام النموذج أدناه.",
+    registerGoogleDisabled:
+      "تم تعطيل التسجيل عبر Google مؤقتًا بواسطة المسؤول.",
+    registerGoogleUnavailable:
+      "التسجيل عبر Google غير مُعدّ. استخدم النموذج أدناه.",
+    registerFacebookDisabled:
+      "تم تعطيل التسجيل عبر Facebook مؤقتًا بواسطة المسؤول.",
+    registerFacebookUnavailable:
+      "التسجيل عبر Facebook غير مُعدّ. استخدم النموذج أدناه.",
+    registerGithubDisabled:
+      "تم تعطيل التسجيل عبر GitHub مؤقتًا بواسطة المسؤول.",
+    registerGithubUnavailable:
+      "التسجيل عبر GitHub غير مُعدّ. استخدم النموذج أدناه.",
+    registerLinkedinDisabled:
+      "تم تعطيل التسجيل عبر LinkedIn مؤقتًا بواسطة المسؤول.",
+    registerLinkedinUnavailable:
+      "التسجيل عبر LinkedIn غير مُعدّ. استخدم النموذج أدناه.",
+    registerGoogleError: "فشل التسجيل عبر Google. حاول مرة أخرى.",
+    registerFacebookError: "فشل التسجيل عبر Facebook. حاول مرة أخرى.",
+    registerGithubError: "فشل التسجيل عبر GitHub. حاول مرة أخرى.",
+    registerLinkedinError: "فشل التسجيل عبر LinkedIn. حاول مرة أخرى.",
+    registerHasAccount: "لديك حساب بالفعل؟",
+    registerLoginLink: "تسجيل الدخول",
+    registerErrorEmailRequired: "يرجى إدخال البريد الإلكتروني.",
+    registerErrorEmailInvalid: "يرجى إدخال بريد إلكتروني صالح.",
+    registerErrorPasswordRequired: "يرجى إدخال كلمة المرور.",
+    registerErrorPasswordTooShort:
+      "يجب أن تكون كلمة المرور 8 أحرف على الأقل وتحتوي على حرف كبير وحرف صغير ورقم ورمز خاص.",
+    registerErrorPasswordMissingUppercase:
+      "يجب أن تحتوي كلمة المرور على حرف كبير واحد على الأقل.",
+    registerErrorPasswordMissingLowercase:
+      "يجب أن تحتوي كلمة المرور على حرف صغير واحد على الأقل.",
+    registerErrorPasswordMissingDigit: "يجب أن تحتوي كلمة المرور على رقم واحد على الأقل.",
+    registerErrorPasswordMissingSpecialChar:
+      "يجب أن تحتوي كلمة المرور على رمز خاص واحد على الأقل.",
+    registerErrorConfirmPasswordRequired: "يرجى تأكيد كلمة المرور.",
+    registerErrorPasswordsMismatch: "كلمتا المرور غير متطابقتين.",
+    registerErrorTermsRequired: "يجب الموافقة على الشروط.",
+    registerErrorCaptchaRequired: "يرجى تأكيد أنك لست روبوتًا.",
+    registerErrorDuplicateEmail: "هذا البريد الإلكتروني مسجل بالفعل.",
+    registerErrorInvalidData:
+      "البيانات غير صالحة. تحقق من النموذج وحاول مرة أخرى.",
+    registerErrorGeneric: "فشل التسجيل. يرجى المحاولة لاحقًا.",
+    registerErrorNetwork: "حدث خطأ في الشبكة أثناء الاتصال بالخادم.",
+    registerSuccess:
+      "تم التسجيل بنجاح. يرجى التحقق من بريدك الإلكتروني وتأكيد العنوان عبر الرابط المرسل. بعد ذلك يمكنك تسجيل الدخول.",
+    registerLoading: "جارٍ التحميل...",
+    registerDisabledTitle: "التسجيل معطّل",
+    registerDisabledMessage:
+      "قام المسؤول بتعطيل التسجيل وإعادة تعيين كلمة المرور.",
+    registerDisabledLoginCta: "اذهب إلى تسجيل الدخول",
+    forgotTitle: "نسيت كلمة المرور",
+    forgotSubtitle: "أدخل بريدك الإلكتروني لطلب إعادة تعيين كلمة المرور.",
+    forgotEmailLabel: "البريد الإلكتروني",
+    forgotCaptchaLabel: "أنا لست روبوتًا (عنصر نائب لـ CAPTCHA).",
+    forgotSubmit: "إرسال رابط إعادة التعيين",
+    forgotSubmitLoading: "جارٍ الإرسال...",
+    forgotHasPassword: "تذكرت كلمة المرور؟",
+    forgotLoginLink: "العودة إلى تسجيل الدخول",
+    forgotErrorEmailRequired: "يرجى إدخال البريد الإلكتروني.",
+    forgotErrorEmailInvalid: "يرجى إدخال بريد إلكتروني صالح.",
+    forgotErrorCaptchaRequired: "يرجى تأكيد أنك لست روبوتًا.",
+    forgotErrorInvalidData:
+      "البيانات غير صالحة. تحقق من النموذج وحاول مرة أخرى.",
+    forgotErrorGeneric:
+      "فشل طلب إعادة تعيين كلمة المرور. يرجى المحاولة لاحقًا.",
+    forgotErrorNetwork: "حدث خطأ في الشبكة أثناء الاتصال بالخادم.",
+    forgotSuccess:
+      "إذا كان هناك حساب بهذا البريد الإلكتروني، سنرسل تعليمات إعادة تعيين كلمة المرور.",
+    forgotResetLinkInfo: "رابط إعادة التعيين صالح لمدة 24 ساعة.",
+    forgotCaptchaPlaceholder:
+      "CAPTCHA / reCAPTCHA (عنصر نائب للحماية أثناء إعادة تعيين كلمة المرور)",
+    forgotDisabledTitle: "إعادة تعيين كلمة المرور معطّلة",
+    forgotDisabledMessage:
+      "قام المسؤول بتعطيل التسجيل وإعادة تعيين كلمة المرور.",
+    forgotDisabledLoginCta: "اذهب إلى تسجيل الدخول",
+    resetTitle: "تغيير كلمة المرور",
+    resetSubtitle: "أدخل كلمة المرور الجديدة.",
+    resetInfoMessage:
+      "يمكن الوصول إلى هذه الصفحة عبر رابط آمن تم إرساله إلى بريدك الإلكتروني.",
+    resetNewPasswordLabel: "كلمة مرور جديدة",
+    resetConfirmNewPasswordLabel: "تأكيد كلمة المرور الجديدة",
+    resetSubmit: "تغيير كلمة المرور",
+    resetSubmitLoading: "جارٍ التغيير...",
+    resetHasPassword: "تذكرت كلمة المرور؟",
+    resetBackToLogin: "العودة إلى تسجيل الدخول",
+    resetSuccessLoginCta: "اذهب إلى صفحة تسجيل الدخول",
+    resetErrorNewPasswordRequired: "يرجى إدخال كلمة مرور جديدة.",
+    resetErrorNewPasswordTooShort: "يجب أن تكون كلمة المرور 8 أحرف على الأقل.",
+    resetErrorConfirmPasswordRequired: "يرجى تأكيد كلمة المرور الجديدة.",
+    resetErrorPasswordsMismatch: "كلمتا المرور غير متطابقتين.",
+    resetErrorInvalidOrExpiredLink:
+      "رابط إعادة تعيين كلمة المرور غير صالح أو منتهي. اطلب رابطًا جديدًا من شاشة 'نسيت كلمة المرور'.",
+    resetErrorGeneric: "فشل تغيير كلمة المرور. يرجى المحاولة لاحقًا.",
+    resetErrorNetwork: "حدث خطأ في الشبكة أثناء الاتصال بالخادم.",
+    resetSuccess:
+      "تم تغيير كلمة المرور بنجاح. سيتم تحويلك إلى صفحة تسجيل الدخول...",
+    socialCallbackTitle: "جارٍ معالجة تسجيل الدخول الاجتماعي",
+    socialCallbackProcessing:
+      "يرجى الانتظار. نقوم بإكمال تسجيل الدخول عبر مزوّد اجتماعي.",
+    socialCallbackRedirectNotice:
+      "سيتم تحويلك تلقائيًا خلال بضع ثوانٍ.",
+    socialCallbackErrorTitle: "فشل تسجيل الدخول الاجتماعي",
+    socialCallbackError:
+      "لم نتمكن من تسجيل دخولك عبر المزوّد الاجتماعي. حاول مرة أخرى.",
+    socialCallbackErrorCta: "العودة إلى تسجيل الدخول",
+    resetPasswordRequirementsTitle: "متطلبات كلمة المرور:",
+    resetPasswordRequirementsItemMinLength: "8 أحرف على الأقل",
+    resetPasswordRequirementsItemRecommendation:
+      "نوصي باستخدام الحروف والأرقام والرموز.",
+    resetGoToForgotCta: "اذهب إلى 'نسيت كلمة المرور'",
+    resetDisabledTitle: "إعادة تعيين كلمة المرور معطّلة",
+    resetDisabledMessage:
+      "قام المسؤول بتعطيل التسجيل وإعادة تعيين كلمة المرور.",
+    resetDisabledLoginCta: "اذهب إلى تسجيل الدخول",
+    accountDeletedTitle: "تم إغلاق حسابك وحذفه",
+    accountDeletedDescription:
+      "تم إغلاق حسابك وتم وضع علامة على بياناتك الشخصية للحذف وفقًا لقواعد حماية البيانات وGDPR.",
+    accountDeletedHint:
+      "لن تتمكن من الوصول إلى ملفك الشخصي. إذا رغبت في استخدام BeeLMS مرة أخرى لاحقًا فستحتاج إلى تسجيل جديد.",
+    accountDeletedPrimaryCta: "اذهب إلى الصفحة الرئيسية",
+    accountDeletedSecondaryCta: "اذهب إلى مقالات الويكي",
+    twoFactorTitle: "المصادقة الثنائية",
+    twoFactorSubtitle: "أدخل الرمز المكون من 6 أرقام من تطبيق المصادقة.",
+    twoFactorCodeLabel: "الرمز",
+    twoFactorSubmit: "تحقق",
+    twoFactorSubmitLoading: "جارٍ التحقق...",
+    twoFactorBackToLogin: "العودة إلى تسجيل الدخول",
+    twoFactorErrorMissingChallenge:
+      "بيانات التحقق 2FA مفقودة. يرجى تسجيل الدخول مرة أخرى.",
+    twoFactorErrorCodeRequired: "يرجى إدخال الرمز المكون من 6 أرقام.",
+    twoFactorErrorCodeInvalidFormat: "تنسيق الرمز غير صالح.",
+    twoFactorErrorInvalidCode: "الرمز غير صحيح. حاول مرة أخرى.",
+    twoFactorErrorGeneric: "فشل التحقق 2FA. يرجى المحاولة لاحقًا.",
+  };
+  return m;
+})();
+
 export const messages: Messages = {
   bg: {
     nav: {
       wiki: "Wiki",
-      courses: "Courses",
-      myCourses: "My Courses",
+      courses: "Курсове",
+      myCourses: "Моите курсове",
       login: "Вход",
       register: "Регистрация",
       profile: "Профил",
       logout: "Изход",
-      admin: "Admin",
+      admin: "Админ",
     },
     auth: {
       loginTitle: "Вход",
@@ -78,6 +7130,7 @@ export const messages: Messages = {
       loginLinkedinError: "LinkedIn sign-in failed. Please try again.",
       loginForgotLink: "Забравена парола?",
       loginRegisterLink: "Нямате акаунт?",
+      loginRegisterLinkCta: "Регистрирай се",
       loginRememberMeLabel: "Remember me",
       loginCaptchaPlaceholder:
         "CAPTCHA / reCAPTCHA (placeholder) – в реалната система се показва само след няколко последователни неуспешни опита за вход.",
@@ -521,8 +7574,40 @@ export const messages: Messages = {
       loginPasswordLabel: "Password",
       loginSubmit: "Sign in",
       loginSubmitLoading: "Signing in...",
+      loginGoogleCta: "Sign in with Google",
+      loginGoogleLoading: "Connecting...",
+      loginFacebookCta: "Sign in with Facebook",
+      loginFacebookLoading: "Connecting...",
+      loginGithubCta: "Sign in with GitHub",
+      loginGithubLoading: "Connecting...",
+      loginLinkedinCta: "Sign in with LinkedIn",
+      loginLinkedinLoading: "Connecting...",
+      loginSocialDivider: "or continue with email",
+      loginSocialUnavailable:
+        "Social sign-in is disabled by the administrator. Continue with email and password.",
+      loginSocialResetHint:
+        "Social sign-in is restricted. If you used Google/Facebook/GitHub/LinkedIn, reset your password using 'Forgot password' and then sign in with email + password.",
+      loginGoogleDisabled: "Google sign-in is temporarily disabled by the administrator.",
+      loginGoogleUnavailable:
+        "Google sign-in is not configured. Please use email and password.",
+      loginFacebookDisabled:
+        "Facebook sign-in is temporarily disabled by the administrator.",
+      loginFacebookUnavailable:
+        "Facebook sign-in is not configured. Please use email and password.",
+      loginGithubDisabled: "GitHub sign-in is temporarily disabled by the administrator.",
+      loginGithubUnavailable:
+        "GitHub sign-in is not configured. Please use email and password.",
+      loginLinkedinDisabled:
+        "LinkedIn sign-in is temporarily disabled by the administrator.",
+      loginLinkedinUnavailable:
+        "LinkedIn sign-in is not configured. Please use email and password.",
+      loginGoogleError: "Google sign-in failed. Please try again.",
+      loginFacebookError: "Facebook sign-in failed. Please try again.",
+      loginGithubError: "GitHub sign-in failed. Please try again.",
+      loginLinkedinError: "LinkedIn sign-in failed. Please try again.",
       loginForgotLink: "Forgot password?",
       loginRegisterLink: "Don't have an account?",
+      loginRegisterLinkCta: "Create an account",
       loginRememberMeLabel: "Remember me",
       loginCaptchaPlaceholder:
         "CAPTCHA / reCAPTCHA (placeholder) – in the real system it appears only after several consecutive failed login attempts.",
@@ -560,6 +7645,37 @@ export const messages: Messages = {
         "CAPTCHA / reCAPTCHA (placeholder for bot protection during registration)",
       registerSubmit: "Register",
       registerSubmitLoading: "Submitting...",
+      registerGoogleCta: "Register with Google",
+      registerGoogleLoading: "Connecting...",
+      registerFacebookCta: "Register with Facebook",
+      registerFacebookLoading: "Connecting...",
+      registerGithubCta: "Register with GitHub",
+      registerGithubLoading: "Connecting...",
+      registerLinkedinCta: "Register with LinkedIn",
+      registerLinkedinLoading: "Connecting...",
+      registerSocialDivider: "or fill out the form",
+      registerSocialUnavailable:
+        "Social registration is disabled by the administrator. Continue with the form below.",
+      registerGoogleDisabled:
+        "Google registration is temporarily disabled by the administrator.",
+      registerGoogleUnavailable:
+        "Google registration is not configured. Please use the form below.",
+      registerFacebookDisabled:
+        "Facebook registration is temporarily disabled by the administrator.",
+      registerFacebookUnavailable:
+        "Facebook registration is not configured. Please use the form below.",
+      registerGithubDisabled:
+        "GitHub registration is temporarily disabled by the administrator.",
+      registerGithubUnavailable:
+        "GitHub registration is not configured. Please use the form below.",
+      registerLinkedinDisabled:
+        "LinkedIn registration is temporarily disabled by the administrator.",
+      registerLinkedinUnavailable:
+        "LinkedIn registration is not configured. Please use the form below.",
+      registerGoogleError: "Google registration failed. Please try again.",
+      registerFacebookError: "Facebook registration failed. Please try again.",
+      registerGithubError: "GitHub registration failed. Please try again.",
+      registerLinkedinError: "LinkedIn registration failed. Please try again.",
       registerHasAccount: "Already have an account?",
       registerLoginLink: "Sign in",
       registerErrorEmailRequired: "Please enter your email.",
@@ -642,6 +7758,15 @@ export const messages: Messages = {
         "A network error occurred while contacting the server.",
       resetSuccess:
         "Your password has been changed successfully. We will redirect you to the login page...",
+      socialCallbackTitle: "Processing social sign-in",
+      socialCallbackProcessing:
+        "Please wait. We're completing your sign-in via the social provider.",
+      socialCallbackRedirectNotice:
+        "You will be redirected automatically within a few seconds.",
+      socialCallbackErrorTitle: "Social sign-in failed",
+      socialCallbackError:
+        "We couldn't sign you in with the social provider. Please try again.",
+      socialCallbackErrorCta: "Back to sign in",
       resetPasswordRequirementsTitle: "Password requirements:",
       resetPasswordRequirementsItemMinLength: "Minimum 8 characters",
       resetPasswordRequirementsItemRecommendation:
@@ -924,8 +8049,44 @@ export const messages: Messages = {
       loginPasswordLabel: "Passwort",
       loginSubmit: "Anmelden",
       loginSubmitLoading: "Anmeldung läuft...",
+      loginGoogleCta: "Mit Google anmelden",
+      loginGoogleLoading: "Verbinden...",
+      loginFacebookCta: "Mit Facebook anmelden",
+      loginFacebookLoading: "Verbinden...",
+      loginGithubCta: "Mit GitHub anmelden",
+      loginGithubLoading: "Verbinden...",
+      loginLinkedinCta: "Mit LinkedIn anmelden",
+      loginLinkedinLoading: "Verbinden...",
+      loginSocialDivider: "oder mit E-Mail fortfahren",
+      loginSocialUnavailable:
+        "Social Sign-in wurde vom Administrator deaktiviert. Bitte nutze E-Mail und Passwort.",
+      loginSocialResetHint:
+        "Social Sign-in ist eingeschränkt. Wenn du Google/Facebook/GitHub/LinkedIn verwendet hast, setze dein Passwort über 'Passwort vergessen' zurück und melde dich dann mit E-Mail + Passwort an.",
+      loginGoogleDisabled:
+        "Google Sign-in ist vom Administrator vorübergehend deaktiviert.",
+      loginGoogleUnavailable:
+        "Google Sign-in ist nicht konfiguriert. Bitte nutze E-Mail und Passwort.",
+      loginFacebookDisabled:
+        "Facebook Sign-in ist vom Administrator vorübergehend deaktiviert.",
+      loginFacebookUnavailable:
+        "Facebook Sign-in ist nicht konfiguriert. Bitte nutze E-Mail und Passwort.",
+      loginGithubDisabled:
+        "GitHub Sign-in ist vom Administrator vorübergehend deaktiviert.",
+      loginGithubUnavailable:
+        "GitHub Sign-in ist nicht konfiguriert. Bitte nutze E-Mail und Passwort.",
+      loginLinkedinDisabled:
+        "LinkedIn Sign-in ist vom Administrator vorübergehend deaktiviert.",
+      loginLinkedinUnavailable:
+        "LinkedIn Sign-in ist nicht konfiguriert. Bitte nutze E-Mail und Passwort.",
+      loginGoogleError: "Google Sign-in ist fehlgeschlagen. Bitte versuche es erneut.",
+      loginFacebookError:
+        "Facebook Sign-in ist fehlgeschlagen. Bitte versuche es erneut.",
+      loginGithubError: "GitHub Sign-in ist fehlgeschlagen. Bitte versuche es erneut.",
+      loginLinkedinError:
+        "LinkedIn Sign-in ist fehlgeschlagen. Bitte versuche es erneut.",
       loginForgotLink: "Passwort vergessen?",
       loginRegisterLink: "Noch kein Konto?",
+      loginRegisterLinkCta: "Registrieren",
       loginRememberMeLabel: "Angemeldet bleiben",
       loginCaptchaPlaceholder:
         "CAPTCHA / reCAPTCHA (Platzhalter) – im echten System erscheint es nur nach mehreren fehlgeschlagenen Anmeldeversuchen.",
@@ -979,6 +8140,41 @@ export const messages: Messages = {
         "CAPTCHA / reCAPTCHA (Platzhalter zum Schutz vor Bots bei der Registrierung)",
       registerSubmit: "Registrieren",
       registerSubmitLoading: "Senden...",
+      registerGoogleCta: "Mit Google registrieren",
+      registerGoogleLoading: "Verbinden...",
+      registerFacebookCta: "Mit Facebook registrieren",
+      registerFacebookLoading: "Verbinden...",
+      registerGithubCta: "Mit GitHub registrieren",
+      registerGithubLoading: "Verbinden...",
+      registerLinkedinCta: "Mit LinkedIn registrieren",
+      registerLinkedinLoading: "Verbinden...",
+      registerSocialDivider: "oder Formular ausfüllen",
+      registerSocialUnavailable:
+        "Social Registrierung wurde vom Administrator deaktiviert. Bitte nutze das Formular unten.",
+      registerGoogleDisabled:
+        "Google Registrierung ist vom Administrator vorübergehend deaktiviert.",
+      registerGoogleUnavailable:
+        "Google Registrierung ist nicht konfiguriert. Bitte nutze das Formular unten.",
+      registerFacebookDisabled:
+        "Facebook Registrierung ist vom Administrator vorübergehend deaktiviert.",
+      registerFacebookUnavailable:
+        "Facebook Registrierung ist nicht konfiguriert. Bitte nutze das Formular unten.",
+      registerGithubDisabled:
+        "GitHub Registrierung ist vom Administrator vorübergehend deaktiviert.",
+      registerGithubUnavailable:
+        "GitHub Registrierung ist nicht konfiguriert. Bitte nutze das Formular unten.",
+      registerLinkedinDisabled:
+        "LinkedIn Registrierung ist vom Administrator vorübergehend deaktiviert.",
+      registerLinkedinUnavailable:
+        "LinkedIn Registrierung ist nicht konfiguriert. Bitte nutze das Formular unten.",
+      registerGoogleError:
+        "Google Registrierung ist fehlgeschlagen. Bitte versuche es erneut.",
+      registerFacebookError:
+        "Facebook Registrierung ist fehlgeschlagen. Bitte versuche es erneut.",
+      registerGithubError:
+        "GitHub Registrierung ist fehlgeschlagen. Bitte versuche es erneut.",
+      registerLinkedinError:
+        "LinkedIn Registrierung ist fehlgeschlagen. Bitte versuche es erneut.",
       registerHasAccount: "Du hast bereits ein Konto?",
       registerLoginLink: "Anmelden",
       registerErrorEmailRequired: "Bitte gib deine E-Mail-Adresse ein.",
@@ -1059,6 +8255,15 @@ export const messages: Messages = {
         "Beim Kontakt mit dem Server ist ein Netzwerkfehler aufgetreten.",
       resetSuccess:
         "Dein Passwort wurde erfolgreich geändert. Wir leiten dich gleich zur Login-Seite weiter...",
+      socialCallbackTitle: "Social Sign-in wird verarbeitet",
+      socialCallbackProcessing:
+        "Bitte warte. Wir schließen deine Anmeldung über den Social Provider ab.",
+      socialCallbackRedirectNotice:
+        "Du wirst automatisch in wenigen Sekunden weitergeleitet.",
+      socialCallbackErrorTitle: "Social Sign-in fehlgeschlagen",
+      socialCallbackError:
+        "Wir konnten dich nicht über den Social Provider anmelden. Bitte versuche es erneut.",
+      socialCallbackErrorCta: "Zurück zur Anmeldung",
       resetPasswordRequirementsTitle: "Passwortanforderungen:",
       resetPasswordRequirementsItemMinLength: "Mindestens 8 Zeichen",
       resetPasswordRequirementsItemRecommendation:
@@ -1307,4 +8512,10589 @@ export const messages: Messages = {
       relatedArticlesTitle: "Ähnliche Artikel",
     },
   },
+  es: ES_MESSAGES,
+  pt: PT_MESSAGES,
+  pl: PL_MESSAGES,
+  ua: UK_MESSAGES,
+  uk: UK_MESSAGES,
+  ru: RU_MESSAGES,
+  fr: FR_MESSAGES,
+  tr: TR_MESSAGES,
+  ro: RO_MESSAGES,
+  hi: HI_MESSAGES,
+  vi: VI_MESSAGES,
+  id: ID_MESSAGES,
+  it: IT_MESSAGES,
+  ko: KO_MESSAGES,
+  ja: JA_MESSAGES,
+  nl: NL_MESSAGES,
+  cs: CS_MESSAGES,
+  ar: AR_MESSAGES,
 };
+
+const HEADER_COMMON_OVERRIDES: Partial<
+  Record<SupportedLang, Partial<DomainMessages["common"]>>
+> = {
+  bg: {
+    legalFooterTermsLink: "Условия за ползване",
+    legalFooterPrivacyLink: "Политика за поверителност (GDPR)",
+    footerContactLink: "Контакт",
+    headerFaqLink: "ЧЗВ",
+    headerSupportLink: "Поддръжка",
+    headerCookiePolicyLink: "Политика за бисквитки",
+    headerImprintLink: "Импресум",
+    headerAccessibilityLink: "Достъпност",
+    headerThemeLabel: "Тема",
+    headerThemeOptionSystem: "Система",
+    headerThemeOptionLight: "Светла",
+    headerThemeOptionDark: "Тъмна",
+  },
+  en: {
+    headerFaqLink: "FAQ",
+    headerSupportLink: "Support",
+    headerCookiePolicyLink: "Cookie policy",
+    headerImprintLink: "Imprint",
+    headerAccessibilityLink: "Accessibility",
+    headerThemeLabel: "Theme",
+    headerThemeOptionSystem: "System",
+    headerThemeOptionLight: "Light",
+    headerThemeOptionDark: "Dark",
+  },
+  de: {
+    legalFooterTermsLink: "Nutzungsbedingungen",
+    legalFooterPrivacyLink: "Datenschutzerklärung (DSGVO)",
+    footerContactLink: "Kontakt",
+    headerFaqLink: "FAQ",
+    headerSupportLink: "Support",
+    headerCookiePolicyLink: "Cookie-Richtlinie",
+    headerImprintLink: "Impressum",
+    headerAccessibilityLink: "Barrierefreiheit",
+    headerThemeLabel: "Design",
+    headerThemeOptionSystem: "System",
+    headerThemeOptionLight: "Hell",
+    headerThemeOptionDark: "Dunkel",
+  },
+  es: {
+    legalFooterTermsLink: "Términos de uso",
+    legalFooterPrivacyLink: "Política de privacidad (RGPD)",
+    footerContactLink: "Contacto",
+    headerFaqLink: "Preguntas frecuentes",
+    headerSupportLink: "Soporte",
+    headerCookiePolicyLink: "Política de cookies",
+    headerImprintLink: "Aviso legal",
+    headerAccessibilityLink: "Accesibilidad",
+    headerThemeLabel: "Tema",
+    headerThemeOptionSystem: "Sistema",
+    headerThemeOptionLight: "Claro",
+    headerThemeOptionDark: "Oscuro",
+  },
+  pt: {
+    legalFooterTermsLink: "Termos de utilização",
+    legalFooterPrivacyLink: "Política de privacidade (RGPD)",
+    footerContactLink: "Contacto",
+    headerFaqLink: "Perguntas frequentes",
+    headerSupportLink: "Suporte",
+    headerCookiePolicyLink: "Política de cookies",
+    headerImprintLink: "Informações legais",
+    headerAccessibilityLink: "Acessibilidade",
+    headerThemeLabel: "Tema",
+    headerThemeOptionSystem: "Sistema",
+    headerThemeOptionLight: "Claro",
+    headerThemeOptionDark: "Escuro",
+  },
+  pl: {
+    legalFooterTermsLink: "Regulamin",
+    legalFooterPrivacyLink: "Polityka prywatności (RODO)",
+    footerContactLink: "Kontakt",
+    headerFaqLink: "FAQ",
+    headerSupportLink: "Wsparcie",
+    headerCookiePolicyLink: "Polityka plików cookie",
+    headerImprintLink: "Nota prawna",
+    headerAccessibilityLink: "Dostępność",
+    headerThemeLabel: "Motyw",
+    headerThemeOptionSystem: "System",
+    headerThemeOptionLight: "Jasny",
+    headerThemeOptionDark: "Ciemny",
+  },
+  ua: {
+    legalFooterTermsLink: "Умови використання",
+    legalFooterPrivacyLink: "Політика конфіденційності (GDPR)",
+    footerContactLink: "Контакт",
+    headerFaqLink: "Поширені питання",
+    headerSupportLink: "Підтримка",
+    headerCookiePolicyLink: "Політика cookie",
+    headerImprintLink: "Імпресум",
+    headerAccessibilityLink: "Доступність",
+    headerThemeLabel: "Тема",
+    headerThemeOptionSystem: "Система",
+    headerThemeOptionLight: "Світла",
+    headerThemeOptionDark: "Темна",
+  },
+  uk: {
+    legalFooterTermsLink: "Умови використання",
+    legalFooterPrivacyLink: "Політика конфіденційності (GDPR)",
+    footerContactLink: "Контакт",
+    headerFaqLink: "Поширені питання",
+    headerSupportLink: "Підтримка",
+    headerCookiePolicyLink: "Політика cookie",
+    headerImprintLink: "Імпресум",
+    headerAccessibilityLink: "Доступність",
+    headerThemeLabel: "Тема",
+    headerThemeOptionSystem: "Система",
+    headerThemeOptionLight: "Світла",
+    headerThemeOptionDark: "Темна",
+  },
+  ru: {
+    legalFooterTermsLink: "Условия использования",
+    legalFooterPrivacyLink: "Политика конфиденциальности (GDPR)",
+    footerContactLink: "Контакты",
+    headerFaqLink: "Частые вопросы",
+    headerSupportLink: "Поддержка",
+    headerCookiePolicyLink: "Политика файлов cookie",
+    headerImprintLink: "Импрессум",
+    headerAccessibilityLink: "Доступность",
+    headerThemeLabel: "Тема",
+    headerThemeOptionSystem: "Система",
+    headerThemeOptionLight: "Светлая",
+    headerThemeOptionDark: "Тёмная",
+  },
+  fr: {
+    legalFooterTermsLink: "Conditions d'utilisation",
+    legalFooterPrivacyLink: "Politique de confidentialité (RGPD)",
+    footerContactLink: "Contact",
+    headerFaqLink: "FAQ",
+    headerSupportLink: "Support",
+    headerCookiePolicyLink: "Politique de cookies",
+    headerImprintLink: "Mentions légales",
+    headerAccessibilityLink: "Accessibilité",
+    headerThemeLabel: "Thème",
+    headerThemeOptionSystem: "Système",
+    headerThemeOptionLight: "Clair",
+    headerThemeOptionDark: "Sombre",
+  },
+  tr: {
+    legalFooterTermsLink: "Kullanım koşulları",
+    legalFooterPrivacyLink: "Gizlilik politikası (GDPR)",
+    footerContactLink: "İletişim",
+    headerFaqLink: "SSS",
+    headerSupportLink: "Destek",
+    headerCookiePolicyLink: "Çerez politikası",
+    headerImprintLink: "Yasal bilgi",
+    headerAccessibilityLink: "Erişilebilirlik",
+    headerThemeLabel: "Tema",
+    headerThemeOptionSystem: "Sistem",
+    headerThemeOptionLight: "Açık",
+    headerThemeOptionDark: "Koyu",
+  },
+  ro: {
+    legalFooterTermsLink: "Termeni de utilizare",
+    legalFooterPrivacyLink: "Politica de confidențialitate (GDPR)",
+    footerContactLink: "Contact",
+    headerFaqLink: "Întrebări frecvente",
+    headerSupportLink: "Suport",
+    headerCookiePolicyLink: "Politica de cookie-uri",
+    headerImprintLink: "Mențiuni legale",
+    headerAccessibilityLink: "Accesibilitate",
+    headerThemeLabel: "Temă",
+    headerThemeOptionSystem: "Sistem",
+    headerThemeOptionLight: "Luminos",
+    headerThemeOptionDark: "Întunecat",
+  },
+  hi: {
+    legalFooterTermsLink: "उपयोग की शर्तें",
+    legalFooterPrivacyLink: "गोपनीयता नीति (GDPR)",
+    footerContactLink: "संपर्क",
+    headerFaqLink: "अक्सर पूछे जाने वाले प्रश्न",
+    headerSupportLink: "सहायता",
+    headerCookiePolicyLink: "कुकी नीति",
+    headerImprintLink: "कानूनी जानकारी",
+    headerAccessibilityLink: "सुगम्यता",
+    headerThemeLabel: "थीम",
+    headerThemeOptionSystem: "सिस्टम",
+    headerThemeOptionLight: "लाइट",
+    headerThemeOptionDark: "डार्क",
+  },
+  vi: {
+    legalFooterTermsLink: "Điều khoản sử dụng",
+    legalFooterPrivacyLink: "Chính sách quyền riêng tư (GDPR)",
+    footerContactLink: "Liên hệ",
+    headerFaqLink: "Câu hỏi thường gặp",
+    headerSupportLink: "Hỗ trợ",
+    headerCookiePolicyLink: "Chính sách cookie",
+    headerImprintLink: "Thông tin pháp lý",
+    headerAccessibilityLink: "Khả năng truy cập",
+    headerThemeLabel: "Giao diện",
+    headerThemeOptionSystem: "Hệ thống",
+    headerThemeOptionLight: "Sáng",
+    headerThemeOptionDark: "Tối",
+  },
+  id: {
+    legalFooterTermsLink: "Ketentuan penggunaan",
+    legalFooterPrivacyLink: "Kebijakan privasi (GDPR)",
+    footerContactLink: "Kontak",
+    headerFaqLink: "Tanya jawab",
+    headerSupportLink: "Dukungan",
+    headerCookiePolicyLink: "Kebijakan cookie",
+    headerImprintLink: "Informasi hukum",
+    headerAccessibilityLink: "Aksesibilitas",
+    headerThemeLabel: "Tema",
+    headerThemeOptionSystem: "Sistem",
+    headerThemeOptionLight: "Terang",
+    headerThemeOptionDark: "Gelap",
+  },
+  it: {
+    legalFooterTermsLink: "Termini di utilizzo",
+    legalFooterPrivacyLink: "Informativa sulla privacy (GDPR)",
+    footerContactLink: "Contatti",
+    headerFaqLink: "Domande frequenti",
+    headerSupportLink: "Supporto",
+    headerCookiePolicyLink: "Informativa sui cookie",
+    headerImprintLink: "Note legali",
+    headerAccessibilityLink: "Accessibilità",
+    headerThemeLabel: "Tema",
+    headerThemeOptionSystem: "Sistema",
+    headerThemeOptionLight: "Chiaro",
+    headerThemeOptionDark: "Scuro",
+  },
+  ko: {
+    legalFooterTermsLink: "이용 약관",
+    legalFooterPrivacyLink: "개인정보 처리방침 (GDPR)",
+    footerContactLink: "문의하기",
+    headerFaqLink: "자주 묻는 질문",
+    headerSupportLink: "지원",
+    headerCookiePolicyLink: "쿠키 정책",
+    headerImprintLink: "법적 고지",
+    headerAccessibilityLink: "접근성",
+    headerThemeLabel: "테마",
+    headerThemeOptionSystem: "시스템",
+    headerThemeOptionLight: "밝은",
+    headerThemeOptionDark: "어두운",
+  },
+  ja: {
+    legalFooterTermsLink: "利用規約",
+    legalFooterPrivacyLink: "プライバシーポリシー (GDPR)",
+    footerContactLink: "お問い合わせ",
+    headerFaqLink: "よくある質問",
+    headerSupportLink: "サポート",
+    headerCookiePolicyLink: "クッキーポリシー",
+    headerImprintLink: "特定商取引法表記",
+    headerAccessibilityLink: "アクセシビリティ",
+    headerThemeLabel: "テーマ",
+    headerThemeOptionSystem: "システム",
+    headerThemeOptionLight: "ライト",
+    headerThemeOptionDark: "ダーク",
+  },
+  nl: {
+    legalFooterTermsLink: "Gebruiksvoorwaarden",
+    legalFooterPrivacyLink: "Privacybeleid (AVG)",
+    footerContactLink: "Contact",
+    headerFaqLink: "FAQ",
+    headerSupportLink: "Support",
+    headerCookiePolicyLink: "Cookiebeleid",
+    headerImprintLink: "Colofon",
+    headerAccessibilityLink: "Toegankelijkheid",
+    headerThemeLabel: "Thema",
+    headerThemeOptionSystem: "Systeem",
+    headerThemeOptionLight: "Licht",
+    headerThemeOptionDark: "Donker",
+  },
+  cs: {
+    legalFooterTermsLink: "Podmínky použití",
+    legalFooterPrivacyLink: "Zásady ochrany osobních údajů (GDPR)",
+    footerContactLink: "Kontakt",
+    headerFaqLink: "Časté dotazy",
+    headerSupportLink: "Podpora",
+    headerCookiePolicyLink: "Zásady používání souborů cookie",
+    headerImprintLink: "Tiráž",
+    headerAccessibilityLink: "Přístupnost",
+    headerThemeLabel: "Motiv",
+    headerThemeOptionSystem: "Systém",
+    headerThemeOptionLight: "Světlý",
+    headerThemeOptionDark: "Tmavý",
+  },
+  ar: {
+    legalFooterTermsLink: "شروط الاستخدام",
+    legalFooterPrivacyLink: "سياسة الخصوصية (GDPR)",
+    footerContactLink: "اتصل بنا",
+    headerFaqLink: "الأسئلة الشائعة",
+    headerSupportLink: "الدعم",
+    headerCookiePolicyLink: "سياسة ملفات تعريف الارتباط",
+    headerImprintLink: "بيان الناشر",
+    headerAccessibilityLink: "سهولة الوصول",
+    headerThemeLabel: "السمة",
+    headerThemeOptionSystem: "النظام",
+    headerThemeOptionLight: "فاتح",
+    headerThemeOptionDark: "داكن",
+  },
+};
+
+for (const [lang, overrides] of Object.entries(HEADER_COMMON_OVERRIDES)) {
+  if (!overrides) continue;
+  const target = (messages as Record<string, DomainMessages>)[lang]?.common;
+  if (target) {
+    Object.assign(target, overrides);
+  }
+}
+
+const ADMIN_COMMON_OVERRIDES: Partial<
+  Record<SupportedLang, Partial<DomainMessages["common"]>>
+> = {
+  bg: {
+    adminDashboardTitle: "Админ табло",
+    adminDashboardSubtitle: "Системен преглед и инструменти за управление",
+    adminDashboardBreadcrumbHome: "Начало",
+    adminDashboardTabDashboard: "Табло",
+    adminDashboardTabWiki: "Wiki",
+    adminDashboardTabCourses: "Курсове",
+    adminDashboardTabUsers: "Потребители",
+    adminDashboardTabMetrics: "Метрики",
+    adminDashboardTabActivity: "Активност",
+    adminDashboardTabPayments: "Плащания",
+    adminDashboardTabBackups: "Архиви",
+    adminDashboardTabPages: "Страници",
+    adminDashboardTabNavigation: "Навигация",
+    adminDashboardTabSettings: "Настройки",
+    adminAreaLoading: "Зареждане на Admin зоната...",
+    adminAreaForbiddenTitle: "Нямате достъп до Admin зоната",
+    adminAreaForbiddenBody: "Този раздел е достъпен само за администратори.",
+    adminDashboardInfoTitle: "Админ табло",
+    adminDashboardInfoDescription:
+      "Начално табло за администратори: бърз преглед на основни метрики и последни активности.",
+    adminDashboardMetricsLoading: "Зареждане на метриките...",
+    adminDashboardMetricsError: "Не успяхме да заредим метриките.",
+    adminDashboardCardUsersTitle: "Регистрирани потребители",
+    adminDashboardCardUsersTrendSuffix: "спрямо миналия месец",
+    adminDashboardCardUsersTrendUnknown:
+      "Няма достатъчно данни за сравнение с миналия месец",
+    adminDashboardCardUsersTrendHelp:
+      "Сравнение спрямо общия брой потребители в края на предишния календарен месец.",
+    adminDashboardCardArticlesTitle: "Wiki статии",
+    adminDashboardCardArticlesSubtitle:
+      "Преглед на активни и чернови статии.",
+    adminDashboardQuickActionsTitle: "Бързи действия",
+    adminDashboardQuickActionsManageWiki: "Управление на Wiki",
+    adminDashboardQuickActionsManageUsers: "Управление на потребители",
+    adminDashboardQuickActionsViewMetrics: "Виж метрики",
+    adminDashboardRecentActivityTitle: "Последна активност",
+    adminDashboardRecentActivityViewAll: "Виж всички",
+    adminDashboardRecentActivityLoading: "Зареждане на последните събития...",
+    adminDashboardRecentActivityEmpty: "Няма записана активност за показване.",
+    adminDashboardRecentItem1Prefix: "Създадена нова статия:",
+    adminDashboardRecentItem2Prefix: "Регистриран потребител:",
+    adminDashboardRecentItem3Prefix: "Обновена статия:",
+    adminDashboardRecentItem4Prefix: "Деактивиран потребител:",
+    adminActivityInfoTooltipLabel: "Инфо за активността",
+    adminActivityInfoTooltipTitle: "Активност",
+    adminActivityInfoTooltipDescription:
+      "Прегледай последните wiki и user действия. Използвай филтрите и диапазоните по-долу, за да стесниш резултатите.",
+    adminActivityFiltersTitle: "Филтри и диапазон",
+    adminActivityFiltersTooltipLabel: "Инфо за филтрите",
+    adminActivityFiltersTooltipTitle: "Филтри",
+    adminActivityFiltersTooltipDescription:
+      'Комбинирай търсене, тип, действие и времеви диапазон. "Custom" ти позволява да избереш From/To дати.',
+    adminActivityRangeAria: "Диапазон на активността",
+    adminActivityTypeAria: "Тип активност",
+    adminActivityActionAria: "Действие на активност",
+    adminActivityExportTooltipLabel: "Инфо за експорта",
+    adminActivityExportTooltipTitle: "Export CSV",
+    adminActivityExportTooltipDescription:
+      "Експортът генерира CSV на базата на текущите филтри и видимия времеви диапазон.",
+  },
+  en: {
+    adminDashboardTitle: "Admin Dashboard",
+    adminDashboardSubtitle: "System overview and management tools",
+    adminDashboardBreadcrumbHome: "Home",
+    adminDashboardTabDashboard: "Dashboard",
+    adminDashboardTabWiki: "Wiki",
+    adminDashboardTabCourses: "Courses",
+    adminDashboardTabUsers: "Users",
+    adminDashboardTabMetrics: "Metrics",
+    adminDashboardTabActivity: "Activity",
+    adminDashboardTabPayments: "Payments",
+    adminDashboardTabBackups: "Backups",
+    adminDashboardTabPages: "Pages",
+    adminDashboardTabNavigation: "Navigation",
+    adminDashboardTabSettings: "Settings",
+    adminAreaLoading: "Loading Admin area...",
+    adminAreaForbiddenTitle: "You do not have access to the Admin area",
+    adminAreaForbiddenBody: "This section is available to administrators only.",
+    adminDashboardInfoTitle: "Admin dashboard",
+    adminDashboardInfoDescription:
+      "Admin home dashboard: a quick overview of key metrics and recent activity.",
+    adminDashboardMetricsLoading: "Loading metrics...",
+    adminDashboardMetricsError: "Failed to load metrics.",
+    adminDashboardCardUsersTitle: "Registered Users",
+    adminDashboardCardUsersTrendSuffix: "from last month",
+    adminDashboardCardUsersTrendUnknown:
+      "No sufficient data to compare with last month",
+    adminDashboardCardUsersTrendHelp:
+      "Compared to the total number of users at the end of the previous calendar month.",
+    adminDashboardCardArticlesTitle: "Wiki Articles",
+    adminDashboardCardArticlesSubtitle:
+      "Overview of active and draft articles.",
+    adminDashboardQuickActionsTitle: "Quick Actions",
+    adminDashboardQuickActionsManageWiki: "Manage Wiki",
+    adminDashboardQuickActionsManageUsers: "Manage Users",
+    adminDashboardQuickActionsViewMetrics: "View Metrics",
+    adminDashboardRecentActivityTitle: "Recent Activity",
+    adminDashboardRecentActivityViewAll: "View all",
+    adminDashboardRecentActivityLoading: "Loading recent events...",
+    adminDashboardRecentActivityEmpty: "There is no activity to display.",
+    adminDashboardRecentItem1Prefix: "New article created:",
+    adminDashboardRecentItem2Prefix: "User registered:",
+    adminDashboardRecentItem3Prefix: "Article updated:",
+    adminDashboardRecentItem4Prefix: "User deactivated:",
+    adminActivityInfoTooltipLabel: "Activity overview info",
+    adminActivityInfoTooltipTitle: "Activity",
+    adminActivityInfoTooltipDescription:
+      "Review recent wiki and user actions. Use the filters and ranges below to narrow results.",
+    adminActivityFiltersTitle: "Filters and range",
+    adminActivityFiltersTooltipLabel: "Activity filters info",
+    adminActivityFiltersTooltipTitle: "Filters",
+    adminActivityFiltersTooltipDescription:
+      'Combine search, type, action and time range. "Custom" lets you choose From/To dates.',
+    adminActivityRangeAria: "Activity range",
+    adminActivityTypeAria: "Activity type",
+    adminActivityActionAria: "Activity action",
+    adminActivityExportTooltipLabel: "Activity export info",
+    adminActivityExportTooltipTitle: "Export CSV",
+    adminActivityExportTooltipDescription:
+      "Export generates a CSV based on the current filters and the visible time range.",
+  },
+  de: {
+    adminDashboardTitle: "Admin-Dashboard",
+    adminDashboardSubtitle: "Systemübersicht und Administrationswerkzeuge",
+    adminDashboardBreadcrumbHome: "Startseite",
+    adminDashboardTabDashboard: "Dashboard",
+    adminDashboardTabWiki: "Wiki",
+    adminDashboardTabCourses: "Kurse",
+    adminDashboardTabUsers: "Benutzer",
+    adminDashboardTabMetrics: "Metriken",
+    adminDashboardTabActivity: "Aktivitäten",
+    adminDashboardTabPayments: "Zahlungen",
+    adminDashboardTabBackups: "Sicherungen",
+    adminDashboardTabPages: "Seiten",
+    adminDashboardTabNavigation: "Navigation",
+    adminDashboardTabSettings: "Einstellungen",
+    adminAreaLoading: "Admin-Bereich wird geladen...",
+    adminAreaForbiddenTitle: "Du hast keinen Zugriff auf den Admin-Bereich",
+    adminAreaForbiddenBody: "Dieser Bereich ist nur für Administratoren verfügbar.",
+    adminDashboardInfoTitle: "Admin-Dashboard",
+    adminDashboardInfoDescription:
+      "Startseite für Admins: schneller Überblick über wichtige Metriken und letzte Aktivitäten.",
+    adminDashboardMetricsLoading: "Lade Metriken...",
+    adminDashboardMetricsError: "Metriken konnten nicht geladen werden.",
+    adminDashboardCardUsersTitle: "Registrierte Benutzer",
+    adminDashboardCardUsersTrendSuffix: "im Vergleich zum Vormonat",
+    adminDashboardCardUsersTrendUnknown:
+      "Keine ausreichenden Daten zum Vergleich mit dem Vormonat",
+    adminDashboardCardUsersTrendHelp:
+      "Verglichen mit der Gesamtzahl der Benutzer am Ende des vorherigen Kalendermonats.",
+    adminDashboardCardArticlesTitle: "Wiki-Artikel",
+    adminDashboardCardArticlesSubtitle:
+      "Übersicht über aktive und Entwurfsartikel.",
+    adminDashboardQuickActionsTitle: "Schnellaktionen",
+    adminDashboardQuickActionsManageWiki: "Wiki verwalten",
+    adminDashboardQuickActionsManageUsers: "Benutzer verwalten",
+    adminDashboardQuickActionsViewMetrics: "Metriken anzeigen",
+    adminDashboardRecentActivityTitle: "Letzte Aktivitäten",
+    adminDashboardRecentActivityViewAll: "Alle anzeigen",
+    adminDashboardRecentActivityLoading: "Letzte Ereignisse werden geladen...",
+    adminDashboardRecentActivityEmpty: "Keine Aktivitäten zum Anzeigen.",
+    adminDashboardRecentItem1Prefix: "Neuer Artikel erstellt:",
+    adminDashboardRecentItem2Prefix: "Benutzer registriert:",
+    adminDashboardRecentItem3Prefix: "Artikel aktualisiert:",
+    adminDashboardRecentItem4Prefix: "Benutzer deaktiviert:",
+    adminActivityInfoTooltipLabel: "Info zur Aktivität",
+    adminActivityInfoTooltipTitle: "Aktivität",
+    adminActivityInfoTooltipDescription:
+      "Sieh dir die neuesten Wiki- und Benutzeraktionen an. Verwende die Filter und Zeiträume unten, um die Ergebnisse einzugrenzen.",
+    adminActivityFiltersTitle: "Filter und Zeitraum",
+    adminActivityFiltersTooltipLabel: "Info zu Filtern",
+    adminActivityFiltersTooltipTitle: "Filter",
+    adminActivityFiltersTooltipDescription:
+      'Kombiniere Suche, Typ, Aktion und Zeitraum. "Benutzerdefiniert" ermöglicht die Auswahl von Von/Bis-Daten.',
+    adminActivityRangeAria: "Aktivitätszeitraum",
+    adminActivityTypeAria: "Aktivitätstyp",
+    adminActivityActionAria: "Aktivitätshandlung",
+    adminActivityExportTooltipLabel: "Info zum Export",
+    adminActivityExportTooltipTitle: "CSV exportieren",
+    adminActivityExportTooltipDescription:
+      "Der Export erzeugt eine CSV basierend auf den aktuellen Filtern und dem sichtbaren Zeitraum.",
+  },
+  es: {
+    adminDashboardTitle: "Panel de administración",
+    adminDashboardSubtitle: "Resumen del sistema y herramientas de gestión",
+    adminDashboardBreadcrumbHome: "Inicio",
+    adminDashboardTabDashboard: "Panel",
+    adminDashboardTabWiki: "Wiki",
+    adminDashboardTabCourses: "Cursos",
+    adminDashboardTabUsers: "Usuarios",
+    adminDashboardTabMetrics: "Métricas",
+    adminDashboardTabActivity: "Actividad",
+    adminDashboardTabPayments: "Pagos",
+    adminDashboardTabBackups: "Copias de seguridad",
+    adminDashboardTabPages: "Páginas",
+    adminDashboardTabNavigation: "Navegación",
+    adminDashboardTabSettings: "Ajustes",
+    adminAreaLoading: "Cargando el área de administración...",
+    adminAreaForbiddenTitle: "No tienes acceso al área de administración",
+    adminAreaForbiddenBody: "Esta sección está disponible solo para administradores.",
+    adminDashboardInfoTitle: "Panel de administración",
+    adminDashboardInfoDescription:
+      "Panel de inicio para administradores: vista rápida de métricas clave y actividad reciente.",
+    adminDashboardMetricsLoading: "Cargando métricas...",
+    adminDashboardMetricsError: "No se pudieron cargar las métricas.",
+    adminDashboardCardUsersTitle: "Usuarios registrados",
+    adminDashboardCardUsersTrendSuffix: "respecto al mes pasado",
+    adminDashboardCardUsersTrendUnknown:
+      "No hay datos suficientes para comparar con el mes pasado",
+    adminDashboardCardUsersTrendHelp:
+      "Comparado con el total de usuarios al final del mes calendario anterior.",
+    adminDashboardCardArticlesTitle: "Artículos Wiki",
+    adminDashboardCardArticlesSubtitle:
+      "Resumen de artículos activos y borradores.",
+    adminDashboardQuickActionsTitle: "Acciones rápidas",
+    adminDashboardQuickActionsManageWiki: "Gestionar Wiki",
+    adminDashboardQuickActionsManageUsers: "Gestionar usuarios",
+    adminDashboardQuickActionsViewMetrics: "Ver métricas",
+    adminDashboardRecentActivityTitle: "Actividad reciente",
+    adminDashboardRecentActivityViewAll: "Ver todo",
+    adminDashboardRecentActivityLoading: "Cargando eventos recientes...",
+    adminDashboardRecentActivityEmpty: "No hay actividad para mostrar.",
+    adminDashboardRecentItem1Prefix: "Nuevo artículo creado:",
+    adminDashboardRecentItem2Prefix: "Usuario registrado:",
+    adminDashboardRecentItem3Prefix: "Artículo actualizado:",
+    adminDashboardRecentItem4Prefix: "Usuario desactivado:",
+    adminActivityInfoTooltipLabel: "Info de actividad",
+    adminActivityInfoTooltipTitle: "Actividad",
+    adminActivityInfoTooltipDescription:
+      "Revisa las acciones recientes de wiki y usuarios. Usa los filtros y rangos para acotar los resultados.",
+    adminActivityFiltersTitle: "Filtros y rango",
+    adminActivityFiltersTooltipLabel: "Info de filtros",
+    adminActivityFiltersTooltipTitle: "Filtros",
+    adminActivityFiltersTooltipDescription:
+      'Combina búsqueda, tipo, acción y rango de tiempo. "Personalizado" te permite elegir fechas Desde/Hasta.',
+    adminActivityRangeAria: "Rango de actividad",
+    adminActivityTypeAria: "Tipo de actividad",
+    adminActivityActionAria: "Acción de actividad",
+    adminActivityExportTooltipLabel: "Info de exportación",
+    adminActivityExportTooltipTitle: "Exportar CSV",
+    adminActivityExportTooltipDescription:
+      "La exportación genera un CSV según los filtros actuales y el rango de tiempo visible.",
+  },
+  pt: {
+    adminDashboardTitle: "Painel de administração",
+    adminDashboardSubtitle: "Visão geral do sistema e ferramentas de gestão",
+    adminDashboardBreadcrumbHome: "Início",
+    adminDashboardTabDashboard: "Painel",
+    adminDashboardTabWiki: "Wiki",
+    adminDashboardTabCourses: "Cursos",
+    adminDashboardTabUsers: "Utilizadores",
+    adminDashboardTabMetrics: "Métricas",
+    adminDashboardTabActivity: "Atividade",
+    adminDashboardTabPayments: "Pagamentos",
+    adminDashboardTabBackups: "Backups",
+    adminDashboardTabPages: "Páginas",
+    adminDashboardTabNavigation: "Navegação",
+    adminDashboardTabSettings: "Configurações",
+    adminAreaLoading: "A carregar a área de administração...",
+    adminAreaForbiddenTitle: "Não tens acesso à área de administração",
+    adminAreaForbiddenBody: "Esta secção está disponível apenas para administradores.",
+    adminDashboardInfoTitle: "Painel de administração",
+    adminDashboardInfoDescription:
+      "Página inicial para administradores: visão rápida de métricas principais e atividade recente.",
+    adminDashboardMetricsLoading: "A carregar métricas...",
+    adminDashboardMetricsError: "Não foi possível carregar as métricas.",
+    adminDashboardCardUsersTitle: "Utilizadores registados",
+    adminDashboardCardUsersTrendSuffix: "em relação ao mês passado",
+    adminDashboardCardUsersTrendUnknown:
+      "Sem dados suficientes para comparar com o mês passado",
+    adminDashboardCardUsersTrendHelp:
+      "Comparado com o total de utilizadores no fim do mês anterior.",
+    adminDashboardCardArticlesTitle: "Artigos Wiki",
+    adminDashboardCardArticlesSubtitle:
+      "Visão geral de artigos ativos e rascunhos.",
+    adminDashboardQuickActionsTitle: "Ações rápidas",
+    adminDashboardQuickActionsManageWiki: "Gerir Wiki",
+    adminDashboardQuickActionsManageUsers: "Gerir utilizadores",
+    adminDashboardQuickActionsViewMetrics: "Ver métricas",
+    adminDashboardRecentActivityTitle: "Atividade recente",
+    adminDashboardRecentActivityViewAll: "Ver tudo",
+    adminDashboardRecentActivityLoading: "A carregar eventos recentes...",
+    adminDashboardRecentActivityEmpty: "Não há atividade para mostrar.",
+    adminDashboardRecentItem1Prefix: "Novo artigo criado:",
+    adminDashboardRecentItem2Prefix: "Utilizador registado:",
+    adminDashboardRecentItem3Prefix: "Artigo atualizado:",
+    adminDashboardRecentItem4Prefix: "Utilizador desativado:",
+    adminActivityInfoTooltipLabel: "Info da atividade",
+    adminActivityInfoTooltipTitle: "Atividade",
+    adminActivityInfoTooltipDescription:
+      "Veja as ações recentes de wiki e utilizadores. Use os filtros e intervalos abaixo para restringir os resultados.",
+    adminActivityFiltersTitle: "Filtros e período",
+    adminActivityFiltersTooltipLabel: "Info dos filtros",
+    adminActivityFiltersTooltipTitle: "Filtros",
+    adminActivityFiltersTooltipDescription:
+      'Combine pesquisa, tipo, ação e período. "Personalizado" permite escolher datas De/Até.',
+    adminActivityRangeAria: "Período da atividade",
+    adminActivityTypeAria: "Tipo de atividade",
+    adminActivityActionAria: "Ação de atividade",
+    adminActivityExportTooltipLabel: "Info de exportação",
+    adminActivityExportTooltipTitle: "Exportar CSV",
+    adminActivityExportTooltipDescription:
+      "A exportação gera um CSV com base nos filtros atuais e no período visível.",
+  },
+  pl: {
+    adminDashboardTitle: "Panel administracyjny",
+    adminDashboardSubtitle: "Przegląd systemu i narzędzia zarządzania",
+    adminDashboardBreadcrumbHome: "Start",
+    adminDashboardTabDashboard: "Panel",
+    adminDashboardTabWiki: "Wiki",
+    adminDashboardTabCourses: "Kursy",
+    adminDashboardTabUsers: "Użytkownicy",
+    adminDashboardTabMetrics: "Metryki",
+    adminDashboardTabActivity: "Aktywność",
+    adminDashboardTabPayments: "Płatności",
+    adminDashboardTabBackups: "Kopie zapasowe",
+    adminDashboardTabPages: "Strony",
+    adminDashboardTabNavigation: "Nawigacja",
+    adminDashboardTabSettings: "Ustawienia",
+    adminAreaLoading: "Ładowanie panelu administracyjnego...",
+    adminAreaForbiddenTitle: "Brak dostępu do panelu administracyjnego",
+    adminAreaForbiddenBody: "Ta sekcja jest dostępna tylko dla administratorów.",
+    adminDashboardInfoTitle: "Panel administracyjny",
+    adminDashboardInfoDescription:
+      "Panel startowy administratora: szybki podgląd kluczowych metryk i ostatniej aktywności.",
+    adminDashboardMetricsLoading: "Ładowanie metryk...",
+    adminDashboardMetricsError: "Nie udało się załadować metryk.",
+    adminDashboardCardUsersTitle: "Zarejestrowani użytkownicy",
+    adminDashboardCardUsersTrendSuffix:
+      "w porównaniu do poprzedniego miesiąca",
+    adminDashboardCardUsersTrendUnknown:
+      "Brak wystarczających danych do porównania z poprzednim miesiącem",
+    adminDashboardCardUsersTrendHelp:
+      "Porównanie do łącznej liczby użytkowników na koniec poprzedniego miesiąca.",
+    adminDashboardCardArticlesTitle: "Artykuły Wiki",
+    adminDashboardCardArticlesSubtitle:
+      "Przegląd artykułów aktywnych i szkiców.",
+    adminDashboardQuickActionsTitle: "Szybkie akcje",
+    adminDashboardQuickActionsManageWiki: "Zarządzaj Wiki",
+    adminDashboardQuickActionsManageUsers: "Zarządzaj użytkownikami",
+    adminDashboardQuickActionsViewMetrics: "Zobacz metryki",
+    adminDashboardRecentActivityTitle: "Ostatnia aktywność",
+    adminDashboardRecentActivityViewAll: "Zobacz wszystkie",
+    adminDashboardRecentActivityLoading: "Ładowanie ostatnich zdarzeń...",
+    adminDashboardRecentActivityEmpty: "Brak aktywności do wyświetlenia.",
+    adminDashboardRecentItem1Prefix: "Utworzono nowy artykuł:",
+    adminDashboardRecentItem2Prefix: "Zarejestrowano użytkownika:",
+    adminDashboardRecentItem3Prefix: "Zaktualizowano artykuł:",
+    adminDashboardRecentItem4Prefix: "Dezaktywowano użytkownika:",
+    adminActivityInfoTooltipLabel: "Informacje o aktywności",
+    adminActivityInfoTooltipTitle: "Aktywność",
+    adminActivityInfoTooltipDescription:
+      "Przeglądaj ostatnie działania w wiki i na kontach użytkowników. Użyj filtrów i zakresów poniżej, aby zawęzić wyniki.",
+    adminActivityFiltersTitle: "Filtry i zakres",
+    adminActivityFiltersTooltipLabel: "Informacje o filtrach",
+    adminActivityFiltersTooltipTitle: "Filtry",
+    adminActivityFiltersTooltipDescription:
+      'Połącz wyszukiwanie, typ, akcję i zakres czasu. "Niestandardowy" pozwala wybrać daty Od/Do.',
+    adminActivityRangeAria: "Zakres aktywności",
+    adminActivityTypeAria: "Typ aktywności",
+    adminActivityActionAria: "Akcja aktywności",
+    adminActivityExportTooltipLabel: "Informacje o eksporcie",
+    adminActivityExportTooltipTitle: "Eksport CSV",
+    adminActivityExportTooltipDescription:
+      "Eksport generuje CSV na podstawie bieżących filtrów i widocznego zakresu czasu.",
+  },
+  ua: {
+    adminDashboardTitle: "Панель адміністратора",
+    adminDashboardSubtitle: "Огляд системи та інструменти керування",
+    adminDashboardBreadcrumbHome: "Головна",
+    adminDashboardTabDashboard: "Табло",
+    adminDashboardTabWiki: "Wiki",
+    adminDashboardTabCourses: "Курси",
+    adminDashboardTabUsers: "Користувачі",
+    adminDashboardTabMetrics: "Метрики",
+    adminDashboardTabActivity: "Активність",
+    adminDashboardTabPayments: "Платежі",
+    adminDashboardTabBackups: "Резервні копії",
+    adminDashboardTabPages: "Сторінки",
+    adminDashboardTabNavigation: "Навігація",
+    adminDashboardTabSettings: "Налаштування",
+    adminAreaLoading: "Завантаження Admin зони...",
+    adminAreaForbiddenTitle: "У вас немає доступу до Admin зони",
+    adminAreaForbiddenBody: "Цей розділ доступний лише адміністраторам.",
+    adminDashboardInfoTitle: "Адмін панель",
+    adminDashboardInfoDescription:
+      "Головна сторінка адміністратора: швидкий огляд ключових метрик та останньої активності.",
+    adminDashboardMetricsLoading: "Завантаження метрик...",
+    adminDashboardMetricsError: "Не вдалося завантажити метрики.",
+    adminDashboardCardUsersTitle: "Зареєстровані користувачі",
+    adminDashboardCardUsersTrendSuffix: "порівняно з минулим місяцем",
+    adminDashboardCardUsersTrendUnknown:
+      "Недостатньо даних для порівняння з минулим місяцем",
+    adminDashboardCardUsersTrendHelp:
+      "Порівняно з загальною кількістю користувачів на кінець попереднього місяця.",
+    adminDashboardCardArticlesTitle: "Wiki статті",
+    adminDashboardCardArticlesSubtitle:
+      "Огляд активних статей та чернеток.",
+    adminDashboardQuickActionsTitle: "Швидкі дії",
+    adminDashboardQuickActionsManageWiki: "Керувати Wiki",
+    adminDashboardQuickActionsManageUsers: "Керувати користувачами",
+    adminDashboardQuickActionsViewMetrics: "Переглянути метрики",
+    adminDashboardRecentActivityTitle: "Остання активність",
+    adminDashboardRecentActivityViewAll: "Переглянути всі",
+    adminDashboardRecentActivityLoading: "Завантаження останніх подій...",
+    adminDashboardRecentActivityEmpty: "Немає активності для відображення.",
+    adminDashboardRecentItem1Prefix: "Створено нову статтю:",
+    adminDashboardRecentItem2Prefix: "Зареєстровано користувача:",
+    adminDashboardRecentItem3Prefix: "Оновлено статтю:",
+    adminDashboardRecentItem4Prefix: "Деактивовано користувача:",
+    adminActivityInfoTooltipLabel: "Інфо про активність",
+    adminActivityInfoTooltipTitle: "Активність",
+    adminActivityInfoTooltipDescription:
+      "Перегляньте останні дії у wiki та користувачів. Використовуйте фільтри та періоди нижче, щоб звузити результати.",
+    adminActivityFiltersTitle: "Фільтри та період",
+    adminActivityFiltersTooltipLabel: "Інфо про фільтри",
+    adminActivityFiltersTooltipTitle: "Фільтри",
+    adminActivityFiltersTooltipDescription:
+      'Поєднуйте пошук, тип, дію та часовий період. "Власний" дозволяє вибрати дати Від/До.',
+    adminActivityRangeAria: "Період активності",
+    adminActivityTypeAria: "Тип активності",
+    adminActivityActionAria: "Дія активності",
+    adminActivityExportTooltipLabel: "Інфо про експорт",
+    adminActivityExportTooltipTitle: "Експорт CSV",
+    adminActivityExportTooltipDescription:
+      "Експорт формує CSV на основі поточних фільтрів та видимого періоду.",
+  },
+  uk: {
+    adminDashboardTitle: "Панель адміністратора",
+    adminDashboardSubtitle: "Огляд системи та інструменти керування",
+    adminDashboardBreadcrumbHome: "Головна",
+    adminDashboardTabDashboard: "Табло",
+    adminDashboardTabWiki: "Wiki",
+    adminDashboardTabCourses: "Курси",
+    adminDashboardTabUsers: "Користувачі",
+    adminDashboardTabMetrics: "Метрики",
+    adminDashboardTabActivity: "Активність",
+    adminDashboardTabPayments: "Платежі",
+    adminDashboardTabBackups: "Резервні копії",
+    adminDashboardTabPages: "Сторінки",
+    adminDashboardTabNavigation: "Навігація",
+    adminDashboardTabSettings: "Налаштування",
+    adminAreaLoading: "Завантаження Admin зони...",
+    adminAreaForbiddenTitle: "У вас немає доступу до Admin зони",
+    adminAreaForbiddenBody: "Цей розділ доступний лише адміністраторам.",
+    adminDashboardInfoTitle: "Адмін панель",
+    adminDashboardInfoDescription:
+      "Головна сторінка адміністратора: швидкий огляд ключових метрик та останньої активності.",
+    adminDashboardMetricsLoading: "Завантаження метрик...",
+    adminDashboardMetricsError: "Не вдалося завантажити метрики.",
+    adminDashboardCardUsersTitle: "Зареєстровані користувачі",
+    adminDashboardCardUsersTrendSuffix: "порівняно з минулим місяцем",
+    adminDashboardCardUsersTrendUnknown:
+      "Недостатньо даних для порівняння з минулим місяцем",
+    adminDashboardCardUsersTrendHelp:
+      "Порівняно з загальною кількістю користувачів на кінець попереднього місяця.",
+    adminDashboardCardArticlesTitle: "Wiki статті",
+    adminDashboardCardArticlesSubtitle:
+      "Огляд активних статей та чернеток.",
+    adminDashboardQuickActionsTitle: "Швидкі дії",
+    adminDashboardQuickActionsManageWiki: "Керувати Wiki",
+    adminDashboardQuickActionsManageUsers: "Керувати користувачами",
+    adminDashboardQuickActionsViewMetrics: "Переглянути метрики",
+    adminDashboardRecentActivityTitle: "Остання активність",
+    adminDashboardRecentActivityViewAll: "Переглянути всі",
+    adminDashboardRecentActivityLoading: "Завантаження останніх подій...",
+    adminDashboardRecentActivityEmpty: "Немає активності для відображення.",
+    adminDashboardRecentItem1Prefix: "Створено нову статтю:",
+    adminDashboardRecentItem2Prefix: "Зареєстровано користувача:",
+    adminDashboardRecentItem3Prefix: "Оновлено статтю:",
+    adminDashboardRecentItem4Prefix: "Деактивовано користувача:",
+    adminActivityInfoTooltipLabel: "Інфо про активність",
+    adminActivityInfoTooltipTitle: "Активність",
+    adminActivityInfoTooltipDescription:
+      "Перегляньте останні дії у wiki та користувачів. Використовуйте фільтри та періоди нижче, щоб звузити результати.",
+    adminActivityFiltersTitle: "Фільтри та період",
+    adminActivityFiltersTooltipLabel: "Інфо про фільтри",
+    adminActivityFiltersTooltipTitle: "Фільтри",
+    adminActivityFiltersTooltipDescription:
+      'Поєднуйте пошук, тип, дію та часовий період. "Власний" дозволяє вибрати дати Від/До.',
+    adminActivityRangeAria: "Період активності",
+    adminActivityTypeAria: "Тип активності",
+    adminActivityActionAria: "Дія активності",
+    adminActivityExportTooltipLabel: "Інфо про експорт",
+    adminActivityExportTooltipTitle: "Експорт CSV",
+    adminActivityExportTooltipDescription:
+      "Експорт формує CSV на основі поточних фільтрів та видимого періоду.",
+  },
+  ru: {
+    adminDashboardTitle: "Админ-панель",
+    adminDashboardSubtitle: "Обзор системы и инструменты управления",
+    adminDashboardBreadcrumbHome: "Главная",
+    adminDashboardTabDashboard: "Панель",
+    adminDashboardTabWiki: "Wiki",
+    adminDashboardTabCourses: "Курсы",
+    adminDashboardTabUsers: "Пользователи",
+    adminDashboardTabMetrics: "Метрики",
+    adminDashboardTabActivity: "Активность",
+    adminDashboardTabPayments: "Платежи",
+    adminDashboardTabBackups: "Резервные копии",
+    adminDashboardTabPages: "Страницы",
+    adminDashboardTabNavigation: "Навигация",
+    adminDashboardTabSettings: "Настройки",
+    adminAreaLoading: "Загрузка админ-зоны...",
+    adminAreaForbiddenTitle: "У вас нет доступа к админ-зоне",
+    adminAreaForbiddenBody: "Этот раздел доступен только администраторам.",
+    adminDashboardInfoTitle: "Админ-панель",
+    adminDashboardInfoDescription:
+      "Главная страница администратора: быстрый обзор ключевых метрик и недавней активности.",
+    adminDashboardMetricsLoading: "Загрузка метрик...",
+    adminDashboardMetricsError: "Не удалось загрузить метрики.",
+    adminDashboardCardUsersTitle: "Зарегистрированные пользователи",
+    adminDashboardCardUsersTrendSuffix: "по сравнению с прошлым месяцем",
+    adminDashboardCardUsersTrendUnknown:
+      "Недостаточно данных для сравнения с прошлым месяцем",
+    adminDashboardCardUsersTrendHelp:
+      "Сравнение с общим числом пользователей на конец предыдущего месяца.",
+    adminDashboardCardArticlesTitle: "Wiki статьи",
+    adminDashboardCardArticlesSubtitle:
+      "Обзор активных статей и черновиков.",
+    adminDashboardQuickActionsTitle: "Быстрые действия",
+    adminDashboardQuickActionsManageWiki: "Управление Wiki",
+    adminDashboardQuickActionsManageUsers: "Управление пользователями",
+    adminDashboardQuickActionsViewMetrics: "Посмотреть метрики",
+    adminDashboardRecentActivityTitle: "Последняя активность",
+    adminDashboardRecentActivityViewAll: "Смотреть все",
+    adminDashboardRecentActivityLoading: "Загрузка последних событий...",
+    adminDashboardRecentActivityEmpty: "Нет активности для отображения.",
+    adminDashboardRecentItem1Prefix: "Создана новая статья:",
+    adminDashboardRecentItem2Prefix: "Пользователь зарегистрирован:",
+    adminDashboardRecentItem3Prefix: "Статья обновлена:",
+    adminDashboardRecentItem4Prefix: "Пользователь деактивирован:",
+    adminActivityInfoTooltipLabel: "Инфо об активности",
+    adminActivityInfoTooltipTitle: "Активность",
+    adminActivityInfoTooltipDescription:
+      "Просмотрите последние действия в wiki и учетных записях пользователей. Используйте фильтры и диапазоны ниже, чтобы сузить результаты.",
+    adminActivityFiltersTitle: "Фильтры и диапазон",
+    adminActivityFiltersTooltipLabel: "Инфо о фильтрах",
+    adminActivityFiltersTooltipTitle: "Фильтры",
+    adminActivityFiltersTooltipDescription:
+      'Комбинируйте поиск, тип, действие и период. "Пользовательский" позволяет выбрать даты От/До.',
+    adminActivityRangeAria: "Диапазон активности",
+    adminActivityTypeAria: "Тип активности",
+    adminActivityActionAria: "Действие активности",
+    adminActivityExportTooltipLabel: "Инфо об экспорте",
+    adminActivityExportTooltipTitle: "Экспорт CSV",
+    adminActivityExportTooltipDescription:
+      "Экспорт формирует CSV на основе текущих фильтров и видимого периода.",
+  },
+  fr: {
+    adminDashboardTitle: "Tableau de bord admin",
+    adminDashboardSubtitle: "Aperçu du système et outils de gestion",
+    adminDashboardBreadcrumbHome: "Accueil",
+    adminDashboardTabDashboard: "Tableau",
+    adminDashboardTabWiki: "Wiki",
+    adminDashboardTabCourses: "Cours",
+    adminDashboardTabUsers: "Utilisateurs",
+    adminDashboardTabMetrics: "Métriques",
+    adminDashboardTabActivity: "Activité",
+    adminDashboardTabPayments: "Paiements",
+    adminDashboardTabBackups: "Sauvegardes",
+    adminDashboardTabPages: "Pages",
+    adminDashboardTabNavigation: "Navigation",
+    adminDashboardTabSettings: "Paramètres",
+    adminAreaLoading: "Chargement de la zone Admin...",
+    adminAreaForbiddenTitle: "Vous n'avez pas accès à la zone Admin",
+    adminAreaForbiddenBody:
+      "Cette section est accessible uniquement aux administrateurs.",
+    adminDashboardInfoTitle: "Tableau de bord admin",
+    adminDashboardInfoDescription:
+      "Tableau de bord pour administrateurs : aperçu rapide des métriques clés et de l’activité récente.",
+    adminDashboardMetricsLoading: "Chargement des métriques...",
+    adminDashboardMetricsError: "Impossible de charger les métriques.",
+    adminDashboardCardUsersTitle: "Utilisateurs inscrits",
+    adminDashboardCardUsersTrendSuffix: "par rapport au mois dernier",
+    adminDashboardCardUsersTrendUnknown:
+      "Pas assez de données pour comparer avec le mois dernier",
+    adminDashboardCardUsersTrendHelp:
+      "Comparé au nombre total d’utilisateurs à la fin du mois précédent.",
+    adminDashboardCardArticlesTitle: "Articles Wiki",
+    adminDashboardCardArticlesSubtitle:
+      "Aperçu des articles actifs et des brouillons.",
+    adminDashboardQuickActionsTitle: "Actions rapides",
+    adminDashboardQuickActionsManageWiki: "Gérer le Wiki",
+    adminDashboardQuickActionsManageUsers: "Gérer les utilisateurs",
+    adminDashboardQuickActionsViewMetrics: "Voir les métriques",
+    adminDashboardRecentActivityTitle: "Activité récente",
+    adminDashboardRecentActivityViewAll: "Voir tout",
+    adminDashboardRecentActivityLoading: "Chargement des événements récents...",
+    adminDashboardRecentActivityEmpty: "Aucune activité à afficher.",
+    adminDashboardRecentItem1Prefix: "Nouvel article créé :",
+    adminDashboardRecentItem2Prefix: "Utilisateur inscrit :",
+    adminDashboardRecentItem3Prefix: "Article mis à jour :",
+    adminDashboardRecentItem4Prefix: "Utilisateur désactivé :",
+    adminActivityInfoTooltipLabel: "Infos sur l’activité",
+    adminActivityInfoTooltipTitle: "Activité",
+    adminActivityInfoTooltipDescription:
+      "Consultez les actions récentes sur le wiki et les utilisateurs. Utilisez les filtres et périodes ci-dessous pour affiner les résultats.",
+    adminActivityFiltersTitle: "Filtres et période",
+    adminActivityFiltersTooltipLabel: "Infos sur les filtres",
+    adminActivityFiltersTooltipTitle: "Filtres",
+    adminActivityFiltersTooltipDescription:
+      'Combinez recherche, type, action et période. "Personnalisé" vous permet de choisir des dates De/À.',
+    adminActivityRangeAria: "Période d’activité",
+    adminActivityTypeAria: "Type d’activité",
+    adminActivityActionAria: "Action d’activité",
+    adminActivityExportTooltipLabel: "Infos d’export",
+    adminActivityExportTooltipTitle: "Exporter CSV",
+    adminActivityExportTooltipDescription:
+      "L’export génère un CSV selon les filtres actuels et la période visible.",
+  },
+  tr: {
+    adminDashboardTitle: "Yönetim paneli",
+    adminDashboardSubtitle: "Sistem özeti ve yönetim araçları",
+    adminDashboardBreadcrumbHome: "Ana sayfa",
+    adminDashboardTabDashboard: "Panel",
+    adminDashboardTabWiki: "Wiki",
+    adminDashboardTabCourses: "Kurslar",
+    adminDashboardTabUsers: "Kullanıcılar",
+    adminDashboardTabMetrics: "Metrikler",
+    adminDashboardTabActivity: "Etkinlik",
+    adminDashboardTabPayments: "Ödemeler",
+    adminDashboardTabBackups: "Yedekler",
+    adminDashboardTabPages: "Sayfalar",
+    adminDashboardTabNavigation: "Navigasyon",
+    adminDashboardTabSettings: "Ayarlar",
+    adminAreaLoading: "Admin alanı yükleniyor...",
+    adminAreaForbiddenTitle: "Admin alanına erişiminiz yok",
+    adminAreaForbiddenBody: "Bu bölüm yalnızca yöneticilere açıktır.",
+    adminDashboardInfoTitle: "Yönetim paneli",
+    adminDashboardInfoDescription:
+      "Yöneticiler için başlangıç paneli: temel metrikler ve son etkinlikler için hızlı genel bakış.",
+    adminDashboardMetricsLoading: "Metrikler yükleniyor...",
+    adminDashboardMetricsError: "Metrikler yüklenemedi.",
+    adminDashboardCardUsersTitle: "Kayıtlı kullanıcılar",
+    adminDashboardCardUsersTrendSuffix: "geçen aya göre",
+    adminDashboardCardUsersTrendUnknown:
+      "Geçen ayla karşılaştırmak için yeterli veri yok",
+    adminDashboardCardUsersTrendHelp:
+      "Önceki ayın sonundaki toplam kullanıcı sayısıyla karşılaştırılır.",
+    adminDashboardCardArticlesTitle: "Wiki makaleleri",
+    adminDashboardCardArticlesSubtitle:
+      "Aktif ve taslak makalelere genel bakış.",
+    adminDashboardQuickActionsTitle: "Hızlı işlemler",
+    adminDashboardQuickActionsManageWiki: "Wiki'yi yönet",
+    adminDashboardQuickActionsManageUsers: "Kullanıcıları yönet",
+    adminDashboardQuickActionsViewMetrics: "Metrikleri görüntüle",
+    adminDashboardRecentActivityTitle: "Son etkinlik",
+    adminDashboardRecentActivityViewAll: "Tümünü gör",
+    adminDashboardRecentActivityLoading: "Son olaylar yükleniyor...",
+    adminDashboardRecentActivityEmpty: "Gösterilecek etkinlik yok.",
+    adminDashboardRecentItem1Prefix: "Yeni makale oluşturuldu:",
+    adminDashboardRecentItem2Prefix: "Kullanıcı kaydoldu:",
+    adminDashboardRecentItem3Prefix: "Makale güncellendi:",
+    adminDashboardRecentItem4Prefix: "Kullanıcı devre dışı bırakıldı:",
+    adminActivityInfoTooltipLabel: "Etkinlik bilgisi",
+    adminActivityInfoTooltipTitle: "Etkinlik",
+    adminActivityInfoTooltipDescription:
+      "Son wiki ve kullanıcı işlemlerini inceleyin. Sonuçları daraltmak için aşağıdaki filtreleri ve aralıkları kullanın.",
+    adminActivityFiltersTitle: "Filtreler ve aralık",
+    adminActivityFiltersTooltipLabel: "Filtre bilgisi",
+    adminActivityFiltersTooltipTitle: "Filtreler",
+    adminActivityFiltersTooltipDescription:
+      'Arama, tür, işlem ve zaman aralığını birleştirin. "Özel" seçeneği Başlangıç/Bitiş tarihlerini seçmenizi sağlar.',
+    adminActivityRangeAria: "Etkinlik aralığı",
+    adminActivityTypeAria: "Etkinlik türü",
+    adminActivityActionAria: "Etkinlik işlemi",
+    adminActivityExportTooltipLabel: "Dışa aktarma bilgisi",
+    adminActivityExportTooltipTitle: "CSV dışa aktar",
+    adminActivityExportTooltipDescription:
+      "Dışa aktarma, mevcut filtrelere ve görünür zaman aralığına göre bir CSV üretir.",
+  },
+  ro: {
+    adminDashboardTitle: "Panou de administrare",
+    adminDashboardSubtitle: "Prezentare generală a sistemului și instrumente de management",
+    adminDashboardBreadcrumbHome: "Acasă",
+    adminDashboardTabDashboard: "Tablou",
+    adminDashboardTabWiki: "Wiki",
+    adminDashboardTabCourses: "Cursuri",
+    adminDashboardTabUsers: "Utilizatori",
+    adminDashboardTabMetrics: "Metrici",
+    adminDashboardTabActivity: "Activitate",
+    adminDashboardTabPayments: "Plăți",
+    adminDashboardTabBackups: "Copii de rezervă",
+    adminDashboardTabPages: "Pagini",
+    adminDashboardTabNavigation: "Navigație",
+    adminDashboardTabSettings: "Setări",
+    adminAreaLoading: "Se încarcă zona de administrare...",
+    adminAreaForbiddenTitle: "Nu ai acces la zona de administrare",
+    adminAreaForbiddenBody: "Această secțiune este disponibilă doar pentru administratori.",
+    adminDashboardInfoTitle: "Tablou de bord admin",
+    adminDashboardInfoDescription:
+      "Pagina principală pentru administratori: prezentare rapidă a metricilor cheie și a activității recente.",
+    adminDashboardMetricsLoading: "Se încarcă metricile...",
+    adminDashboardMetricsError: "Nu s-au putut încărca metricile.",
+    adminDashboardCardUsersTitle: "Utilizatori înregistrați",
+    adminDashboardCardUsersTrendSuffix: "față de luna trecută",
+    adminDashboardCardUsersTrendUnknown:
+      "Nu există suficiente date pentru comparație cu luna trecută",
+    adminDashboardCardUsersTrendHelp:
+      "Comparat cu numărul total de utilizatori la sfârșitul lunii anterioare.",
+    adminDashboardCardArticlesTitle: "Articole Wiki",
+    adminDashboardCardArticlesSubtitle:
+      "Prezentare a articolelor active și a ciornelor.",
+    adminDashboardQuickActionsTitle: "Acțiuni rapide",
+    adminDashboardQuickActionsManageWiki: "Gestionează Wiki",
+    adminDashboardQuickActionsManageUsers: "Gestionează utilizatorii",
+    adminDashboardQuickActionsViewMetrics: "Vezi metricile",
+    adminDashboardRecentActivityTitle: "Activitate recentă",
+    adminDashboardRecentActivityViewAll: "Vezi toate",
+    adminDashboardRecentActivityLoading: "Se încarcă evenimentele recente...",
+    adminDashboardRecentActivityEmpty: "Nu există activitate de afișat.",
+    adminDashboardRecentItem1Prefix: "Articol nou creat:",
+    adminDashboardRecentItem2Prefix: "Utilizator înregistrat:",
+    adminDashboardRecentItem3Prefix: "Articol actualizat:",
+    adminDashboardRecentItem4Prefix: "Utilizator dezactivat:",
+    adminActivityInfoTooltipLabel: "Info activitate",
+    adminActivityInfoTooltipTitle: "Activitate",
+    adminActivityInfoTooltipDescription:
+      "Revizuiește acțiunile recente din wiki și utilizatori. Folosește filtrele și intervalele de mai jos pentru a restrânge rezultatele.",
+    adminActivityFiltersTitle: "Filtre și interval",
+    adminActivityFiltersTooltipLabel: "Info filtre",
+    adminActivityFiltersTooltipTitle: "Filtre",
+    adminActivityFiltersTooltipDescription:
+      'Combină căutarea, tipul, acțiunea și intervalul de timp. "Personalizat" îți permite să alegi datele De/La.',
+    adminActivityRangeAria: "Interval activitate",
+    adminActivityTypeAria: "Tip activitate",
+    adminActivityActionAria: "Acțiune activitate",
+    adminActivityExportTooltipLabel: "Info export",
+    adminActivityExportTooltipTitle: "Export CSV",
+    adminActivityExportTooltipDescription:
+      "Exportul generează un CSV pe baza filtrelor curente și a intervalului de timp vizibil.",
+  },
+  hi: {
+    adminDashboardTitle: "एडमिन डैशबोर्ड",
+    adminDashboardSubtitle: "सिस्टम अवलोकन और प्रबंधन टूल",
+    adminDashboardBreadcrumbHome: "होम",
+    adminDashboardTabDashboard: "डैशबोर्ड",
+    adminDashboardTabWiki: "Wiki",
+    adminDashboardTabCourses: "कोर्स",
+    adminDashboardTabUsers: "यूज़र्स",
+    adminDashboardTabMetrics: "मेट्रिक्स",
+    adminDashboardTabActivity: "एक्टिविटी",
+    adminDashboardTabPayments: "भुगतान",
+    adminDashboardTabBackups: "बैकअप",
+    adminDashboardTabPages: "पृष्ठ",
+    adminDashboardTabNavigation: "नेविगेशन",
+    adminDashboardTabSettings: "सेटिंग्स",
+    adminAreaLoading: "एडमिन क्षेत्र लोड हो रहा है...",
+    adminAreaForbiddenTitle: "आपके पास एडमिन क्षेत्र की पहुँच नहीं है",
+    adminAreaForbiddenBody: "यह अनुभाग केवल एडमिनिस्ट्रेटरों के लिए उपलब्ध है।",
+    adminDashboardInfoTitle: "एडमिन डैशबोर्ड",
+    adminDashboardInfoDescription:
+      "एडमिन के लिए होम डैशबोर्ड: मुख्य मेट्रिक्स और हाल की गतिविधि का त्वरित अवलोकन।",
+    adminDashboardMetricsLoading: "मेट्रिक्स लोड हो रहे हैं...",
+    adminDashboardMetricsError: "मेट्रिक्स लोड नहीं हो पाए।",
+    adminDashboardCardUsersTitle: "पंजीकृत उपयोगकर्ता",
+    adminDashboardCardUsersTrendSuffix: "पिछले महीने की तुलना में",
+    adminDashboardCardUsersTrendUnknown:
+      "पिछले महीने से तुलना के लिए पर्याप्त डेटा नहीं है",
+    adminDashboardCardUsersTrendHelp:
+      "पिछले कैलेंडर महीने के अंत में कुल उपयोगकर्ताओं से तुलना।",
+    adminDashboardCardArticlesTitle: "Wiki लेख",
+    adminDashboardCardArticlesSubtitle:
+      "सक्रिय और ड्राफ्ट लेखों का अवलोकन।",
+    adminDashboardQuickActionsTitle: "त्वरित कार्रवाइयाँ",
+    adminDashboardQuickActionsManageWiki: "Wiki प्रबंधित करें",
+    adminDashboardQuickActionsManageUsers: "उपयोगकर्ता प्रबंधित करें",
+    adminDashboardQuickActionsViewMetrics: "मेट्रिक्स देखें",
+    adminDashboardRecentActivityTitle: "हाल की गतिविधि",
+    adminDashboardRecentActivityViewAll: "सब देखें",
+    adminDashboardRecentActivityLoading: "हाल की घटनाएँ लोड हो रही हैं...",
+    adminDashboardRecentActivityEmpty: "दिखाने के लिए कोई गतिविधि नहीं है।",
+    adminDashboardRecentItem1Prefix: "नया लेख बनाया गया:",
+    adminDashboardRecentItem2Prefix: "उपयोगकर्ता पंजीकृत:",
+    adminDashboardRecentItem3Prefix: "लेख अपडेट किया गया:",
+    adminDashboardRecentItem4Prefix: "उपयोगकर्ता निष्क्रिय किया गया:",
+    adminActivityInfoTooltipLabel: "गतिविधि जानकारी",
+    adminActivityInfoTooltipTitle: "गतिविधि",
+    adminActivityInfoTooltipDescription:
+      "हाल की wiki और user कार्रवाइयों की समीक्षा करें। परिणामों को सीमित करने के लिए नीचे दिए गए फ़िल्टर और रेंज का उपयोग करें।",
+    adminActivityFiltersTitle: "फ़िल्टर और रेंज",
+    adminActivityFiltersTooltipLabel: "फ़िल्टर जानकारी",
+    adminActivityFiltersTooltipTitle: "फ़िल्टर",
+    adminActivityFiltersTooltipDescription:
+      'खोज, प्रकार, कार्रवाई और समय-सीमा को मिलाएँ। "कस्टम" आपको From/To तारीखें चुनने देता है।',
+    adminActivityRangeAria: "गतिविधि रेंज",
+    adminActivityTypeAria: "गतिविधि प्रकार",
+    adminActivityActionAria: "गतिविधि कार्रवाई",
+    adminActivityExportTooltipLabel: "एक्सपोर्ट जानकारी",
+    adminActivityExportTooltipTitle: "CSV एक्सपोर्ट",
+    adminActivityExportTooltipDescription:
+      "एक्सपोर्ट वर्तमान फ़िल्टर और दिखाई देने वाली समय-सीमा के आधार पर CSV बनाता है।",
+  },
+  vi: {
+    adminDashboardTitle: "Bảng điều khiển quản trị",
+    adminDashboardSubtitle: "Tổng quan hệ thống và công cụ quản lý",
+    adminDashboardBreadcrumbHome: "Trang chủ",
+    adminDashboardTabDashboard: "Bảng điều khiển",
+    adminDashboardTabWiki: "Wiki",
+    adminDashboardTabCourses: "Khóa học",
+    adminDashboardTabUsers: "Người dùng",
+    adminDashboardTabMetrics: "Chỉ số",
+    adminDashboardTabActivity: "Hoạt động",
+    adminDashboardTabPayments: "Thanh toán",
+    adminDashboardTabBackups: "Sao lưu",
+    adminDashboardTabPages: "Trang",
+    adminDashboardTabNavigation: "Điều hướng",
+    adminDashboardTabSettings: "Cài đặt",
+    adminAreaLoading: "Đang tải khu vực quản trị...",
+    adminAreaForbiddenTitle: "Bạn không có quyền truy cập khu vực quản trị",
+    adminAreaForbiddenBody: "Mục này chỉ dành cho quản trị viên.",
+    adminDashboardInfoTitle: "Bảng điều khiển quản trị",
+    adminDashboardInfoDescription:
+      "Trang tổng quan cho quản trị viên: xem nhanh các chỉ số chính và hoạt động gần đây.",
+    adminDashboardMetricsLoading: "Đang tải chỉ số...",
+    adminDashboardMetricsError: "Không thể tải chỉ số.",
+    adminDashboardCardUsersTitle: "Người dùng đã đăng ký",
+    adminDashboardCardUsersTrendSuffix: "so với tháng trước",
+    adminDashboardCardUsersTrendUnknown:
+      "Không đủ dữ liệu để so sánh với tháng trước",
+    adminDashboardCardUsersTrendHelp:
+      "So sánh với tổng số người dùng vào cuối tháng trước.",
+    adminDashboardCardArticlesTitle: "Bài viết Wiki",
+    adminDashboardCardArticlesSubtitle:
+      "Tổng quan về bài viết đang hoạt động và bản nháp.",
+    adminDashboardQuickActionsTitle: "Thao tác nhanh",
+    adminDashboardQuickActionsManageWiki: "Quản lý Wiki",
+    adminDashboardQuickActionsManageUsers: "Quản lý người dùng",
+    adminDashboardQuickActionsViewMetrics: "Xem chỉ số",
+    adminDashboardRecentActivityTitle: "Hoạt động gần đây",
+    adminDashboardRecentActivityViewAll: "Xem tất cả",
+    adminDashboardRecentActivityLoading: "Đang tải các sự kiện gần đây...",
+    adminDashboardRecentActivityEmpty: "Không có hoạt động để hiển thị.",
+    adminDashboardRecentItem1Prefix: "Bài viết mới được tạo:",
+    adminDashboardRecentItem2Prefix: "Người dùng đã đăng ký:",
+    adminDashboardRecentItem3Prefix: "Bài viết đã cập nhật:",
+    adminDashboardRecentItem4Prefix: "Người dùng bị vô hiệu hóa:",
+    adminActivityInfoTooltipLabel: "Thông tin hoạt động",
+    adminActivityInfoTooltipTitle: "Hoạt động",
+    adminActivityInfoTooltipDescription:
+      "Xem lại các hành động gần đây của wiki và người dùng. Sử dụng bộ lọc và khoảng thời gian bên dưới để thu hẹp kết quả.",
+    adminActivityFiltersTitle: "Bộ lọc và khoảng thời gian",
+    adminActivityFiltersTooltipLabel: "Thông tin bộ lọc",
+    adminActivityFiltersTooltipTitle: "Bộ lọc",
+    adminActivityFiltersTooltipDescription:
+      'Kết hợp tìm kiếm, loại, hành động và khoảng thời gian. "Tùy chỉnh" cho phép bạn chọn ngày Từ/Đến.',
+    adminActivityRangeAria: "Khoảng thời gian hoạt động",
+    adminActivityTypeAria: "Loại hoạt động",
+    adminActivityActionAria: "Hành động hoạt động",
+    adminActivityExportTooltipLabel: "Thông tin xuất",
+    adminActivityExportTooltipTitle: "Xuất CSV",
+    adminActivityExportTooltipDescription:
+      "Xuất tạo một CSV dựa trên bộ lọc hiện tại và khoảng thời gian đang hiển thị.",
+  },
+  id: {
+    adminDashboardTitle: "Dasbor admin",
+    adminDashboardSubtitle: "Ringkasan sistem dan alat pengelolaan",
+    adminDashboardBreadcrumbHome: "Beranda",
+    adminDashboardTabDashboard: "Dasbor",
+    adminDashboardTabWiki: "Wiki",
+    adminDashboardTabCourses: "Kursus",
+    adminDashboardTabUsers: "Pengguna",
+    adminDashboardTabMetrics: "Metrik",
+    adminDashboardTabActivity: "Aktivitas",
+    adminDashboardTabPayments: "Pembayaran",
+    adminDashboardTabBackups: "Cadangan",
+    adminDashboardTabPages: "Halaman",
+    adminDashboardTabNavigation: "Navigasi",
+    adminDashboardTabSettings: "Pengaturan",
+    adminAreaLoading: "Memuat area Admin...",
+    adminAreaForbiddenTitle: "Anda tidak memiliki akses ke area Admin",
+    adminAreaForbiddenBody: "Bagian ini hanya tersedia untuk administrator.",
+    adminDashboardInfoTitle: "Dasbor admin",
+    adminDashboardInfoDescription:
+      "Dasbor utama admin: ringkasan cepat metrik utama dan aktivitas terbaru.",
+    adminDashboardMetricsLoading: "Memuat metrik...",
+    adminDashboardMetricsError: "Gagal memuat metrik.",
+    adminDashboardCardUsersTitle: "Pengguna terdaftar",
+    adminDashboardCardUsersTrendSuffix: "dibandingkan bulan lalu",
+    adminDashboardCardUsersTrendUnknown:
+      "Tidak cukup data untuk dibandingkan dengan bulan lalu",
+    adminDashboardCardUsersTrendHelp:
+      "Dibandingkan dengan total pengguna pada akhir bulan sebelumnya.",
+    adminDashboardCardArticlesTitle: "Artikel Wiki",
+    adminDashboardCardArticlesSubtitle:
+      "Ringkasan artikel aktif dan draf.",
+    adminDashboardQuickActionsTitle: "Aksi cepat",
+    adminDashboardQuickActionsManageWiki: "Kelola Wiki",
+    adminDashboardQuickActionsManageUsers: "Kelola pengguna",
+    adminDashboardQuickActionsViewMetrics: "Lihat metrik",
+    adminDashboardRecentActivityTitle: "Aktivitas terbaru",
+    adminDashboardRecentActivityViewAll: "Lihat semua",
+    adminDashboardRecentActivityLoading: "Memuat peristiwa terbaru...",
+    adminDashboardRecentActivityEmpty: "Tidak ada aktivitas untuk ditampilkan.",
+    adminDashboardRecentItem1Prefix: "Artikel baru dibuat:",
+    adminDashboardRecentItem2Prefix: "Pengguna terdaftar:",
+    adminDashboardRecentItem3Prefix: "Artikel diperbarui:",
+    adminDashboardRecentItem4Prefix: "Pengguna dinonaktifkan:",
+    adminActivityInfoTooltipLabel: "Info aktivitas",
+    adminActivityInfoTooltipTitle: "Aktivitas",
+    adminActivityInfoTooltipDescription:
+      "Tinjau tindakan wiki dan pengguna terbaru. Gunakan filter dan rentang waktu di bawah untuk mempersempit hasil.",
+    adminActivityFiltersTitle: "Filter dan rentang",
+    adminActivityFiltersTooltipLabel: "Info filter",
+    adminActivityFiltersTooltipTitle: "Filter",
+    adminActivityFiltersTooltipDescription:
+      'Gabungkan pencarian, tipe, tindakan, dan rentang waktu. "Kustom" memungkinkan Anda memilih tanggal Dari/Sampai.',
+    adminActivityRangeAria: "Rentang aktivitas",
+    adminActivityTypeAria: "Tipe aktivitas",
+    adminActivityActionAria: "Tindakan aktivitas",
+    adminActivityExportTooltipLabel: "Info ekspor",
+    adminActivityExportTooltipTitle: "Ekspor CSV",
+    adminActivityExportTooltipDescription:
+      "Ekspor menghasilkan CSV berdasarkan filter saat ini dan rentang waktu yang terlihat.",
+  },
+  it: {
+    adminDashboardTitle: "Dashboard admin",
+    adminDashboardSubtitle: "Panoramica del sistema e strumenti di gestione",
+    adminDashboardBreadcrumbHome: "Home",
+    adminDashboardTabDashboard: "Dashboard",
+    adminDashboardTabWiki: "Wiki",
+    adminDashboardTabCourses: "Corsi",
+    adminDashboardTabUsers: "Utenti",
+    adminDashboardTabMetrics: "Metriche",
+    adminDashboardTabActivity: "Attività",
+    adminDashboardTabPayments: "Pagamenti",
+    adminDashboardTabBackups: "Backup",
+    adminDashboardTabPages: "Pagine",
+    adminDashboardTabNavigation: "Navigazione",
+    adminDashboardTabSettings: "Impostazioni",
+    adminAreaLoading: "Caricamento area Admin...",
+    adminAreaForbiddenTitle: "Non hai accesso all'area Admin",
+    adminAreaForbiddenBody: "Questa sezione è disponibile solo per gli amministratori.",
+    adminDashboardInfoTitle: "Dashboard admin",
+    adminDashboardInfoDescription:
+      "Dashboard per amministratori: panoramica rapida delle metriche principali e dell'attività recente.",
+    adminDashboardMetricsLoading: "Caricamento metriche...",
+    adminDashboardMetricsError: "Impossibile caricare le metriche.",
+    adminDashboardCardUsersTitle: "Utenti registrati",
+    adminDashboardCardUsersTrendSuffix: "rispetto al mese scorso",
+    adminDashboardCardUsersTrendUnknown:
+      "Dati insufficienti per confrontare con il mese scorso",
+    adminDashboardCardUsersTrendHelp:
+      "Confrontato con il numero totale di utenti alla fine del mese precedente.",
+    adminDashboardCardArticlesTitle: "Articoli Wiki",
+    adminDashboardCardArticlesSubtitle:
+      "Panoramica di articoli attivi e bozze.",
+    adminDashboardQuickActionsTitle: "Azioni rapide",
+    adminDashboardQuickActionsManageWiki: "Gestisci Wiki",
+    adminDashboardQuickActionsManageUsers: "Gestisci utenti",
+    adminDashboardQuickActionsViewMetrics: "Vedi metriche",
+    adminDashboardRecentActivityTitle: "Attività recente",
+    adminDashboardRecentActivityViewAll: "Vedi tutto",
+    adminDashboardRecentActivityLoading: "Caricamento degli eventi recenti...",
+    adminDashboardRecentActivityEmpty: "Nessuna attività da visualizzare.",
+    adminDashboardRecentItem1Prefix: "Nuovo articolo creato:",
+    adminDashboardRecentItem2Prefix: "Utente registrato:",
+    adminDashboardRecentItem3Prefix: "Articolo aggiornato:",
+    adminDashboardRecentItem4Prefix: "Utente disattivato:",
+    adminActivityInfoTooltipLabel: "Info attività",
+    adminActivityInfoTooltipTitle: "Attività",
+    adminActivityInfoTooltipDescription:
+      "Rivedi le azioni recenti su wiki e utenti. Usa i filtri e gli intervalli qui sotto per restringere i risultati.",
+    adminActivityFiltersTitle: "Filtri e intervallo",
+    adminActivityFiltersTooltipLabel: "Info filtri",
+    adminActivityFiltersTooltipTitle: "Filtri",
+    adminActivityFiltersTooltipDescription:
+      'Combina ricerca, tipo, azione e intervallo di tempo. "Personalizzato" ti permette di scegliere le date Da/A.',
+    adminActivityRangeAria: "Intervallo attività",
+    adminActivityTypeAria: "Tipo di attività",
+    adminActivityActionAria: "Azione attività",
+    adminActivityExportTooltipLabel: "Info esportazione",
+    adminActivityExportTooltipTitle: "Esporta CSV",
+    adminActivityExportTooltipDescription:
+      "L'esportazione genera un CSV in base ai filtri correnti e all'intervallo di tempo visibile.",
+  },
+  ko: {
+    adminDashboardTitle: "관리자 대시보드",
+    adminDashboardSubtitle: "시스템 개요 및 관리 도구",
+    adminDashboardBreadcrumbHome: "홈",
+    adminDashboardTabDashboard: "대시보드",
+    adminDashboardTabWiki: "Wiki",
+    adminDashboardTabCourses: "코스",
+    adminDashboardTabUsers: "사용자",
+    adminDashboardTabMetrics: "메트릭",
+    adminDashboardTabActivity: "활동",
+    adminDashboardTabPayments: "결제",
+    adminDashboardTabBackups: "백업",
+    adminDashboardTabPages: "페이지",
+    adminDashboardTabNavigation: "내비게이션",
+    adminDashboardTabSettings: "설정",
+    adminAreaLoading: "관리자 영역을 불러오는 중...",
+    adminAreaForbiddenTitle: "관리자 영역에 접근할 수 없습니다",
+    adminAreaForbiddenBody: "이 섹션은 관리자만 사용할 수 있습니다.",
+    adminDashboardInfoTitle: "관리자 대시보드",
+    adminDashboardInfoDescription:
+      "관리자 홈 대시보드: 주요 지표와 최근 활동을 빠르게 확인합니다.",
+    adminDashboardMetricsLoading: "메트릭을 불러오는 중...",
+    adminDashboardMetricsError: "메트릭을 불러오지 못했습니다.",
+    adminDashboardCardUsersTitle: "등록된 사용자",
+    adminDashboardCardUsersTrendSuffix: "지난달 대비",
+    adminDashboardCardUsersTrendUnknown:
+      "지난달과 비교할 데이터가 충분하지 않습니다",
+    adminDashboardCardUsersTrendHelp:
+      "이전 달 말의 총 사용자 수와 비교합니다.",
+    adminDashboardCardArticlesTitle: "Wiki 문서",
+    adminDashboardCardArticlesSubtitle:
+      "활성 및 초안 문서 개요.",
+    adminDashboardQuickActionsTitle: "빠른 작업",
+    adminDashboardQuickActionsManageWiki: "Wiki 관리",
+    adminDashboardQuickActionsManageUsers: "사용자 관리",
+    adminDashboardQuickActionsViewMetrics: "메트릭 보기",
+    adminDashboardRecentActivityTitle: "최근 활동",
+    adminDashboardRecentActivityViewAll: "모두 보기",
+    adminDashboardRecentActivityLoading: "최근 이벤트를 불러오는 중...",
+    adminDashboardRecentActivityEmpty: "표시할 활동이 없습니다.",
+    adminDashboardRecentItem1Prefix: "새 문서 생성:",
+    adminDashboardRecentItem2Prefix: "사용자 등록:",
+    adminDashboardRecentItem3Prefix: "문서 업데이트:",
+    adminDashboardRecentItem4Prefix: "사용자 비활성화:",
+    adminActivityInfoTooltipLabel: "활동 정보",
+    adminActivityInfoTooltipTitle: "활동",
+    adminActivityInfoTooltipDescription:
+      "최근 위키 및 사용자 작업을 확인하세요. 아래 필터와 기간을 사용해 결과를 좁힐 수 있습니다.",
+    adminActivityFiltersTitle: "필터 및 기간",
+    adminActivityFiltersTooltipLabel: "필터 정보",
+    adminActivityFiltersTooltipTitle: "필터",
+    adminActivityFiltersTooltipDescription:
+      '검색, 유형, 작업 및 기간을 결합하세요. "사용자 지정"을 사용하면 시작/종료 날짜를 선택할 수 있습니다.',
+    adminActivityRangeAria: "활동 기간",
+    adminActivityTypeAria: "활동 유형",
+    adminActivityActionAria: "활동 작업",
+    adminActivityExportTooltipLabel: "내보내기 정보",
+    adminActivityExportTooltipTitle: "CSV 내보내기",
+    adminActivityExportTooltipDescription:
+      "내보내기는 현재 필터와 보이는 기간을 기준으로 CSV를 생성합니다.",
+  },
+  ja: {
+    adminDashboardTitle: "管理ダッシュボード",
+    adminDashboardSubtitle: "システム概要と管理ツール",
+    adminDashboardBreadcrumbHome: "ホーム",
+    adminDashboardTabDashboard: "ダッシュボード",
+    adminDashboardTabWiki: "Wiki",
+    adminDashboardTabCourses: "コース",
+    adminDashboardTabUsers: "ユーザー",
+    adminDashboardTabMetrics: "メトリクス",
+    adminDashboardTabActivity: "アクティビティ",
+    adminDashboardTabPayments: "支払い",
+    adminDashboardTabBackups: "バックアップ",
+    adminDashboardTabPages: "ページ",
+    adminDashboardTabNavigation: "ナビゲーション",
+    adminDashboardTabSettings: "設定",
+    adminAreaLoading: "管理者エリアを読み込み中...",
+    adminAreaForbiddenTitle: "管理者エリアにアクセスできません",
+    adminAreaForbiddenBody: "このセクションは管理者のみ利用できます。",
+    adminDashboardInfoTitle: "管理ダッシュボード",
+    adminDashboardInfoDescription:
+      "管理者用ホームダッシュボード：主要メトリクスと最近のアクティビティを素早く確認できます。",
+    adminDashboardMetricsLoading: "メトリクスを読み込み中...",
+    adminDashboardMetricsError: "メトリクスの読み込みに失敗しました。",
+    adminDashboardCardUsersTitle: "登録ユーザー",
+    adminDashboardCardUsersTrendSuffix: "先月比",
+    adminDashboardCardUsersTrendUnknown:
+      "先月と比較するための十分なデータがありません",
+    adminDashboardCardUsersTrendHelp:
+      "前月末時点の総ユーザー数と比較します。",
+    adminDashboardCardArticlesTitle: "Wiki 記事",
+    adminDashboardCardArticlesSubtitle:
+      "公開中の記事と下書きの概要。",
+    adminDashboardQuickActionsTitle: "クイックアクション",
+    adminDashboardQuickActionsManageWiki: "Wiki を管理",
+    adminDashboardQuickActionsManageUsers: "ユーザーを管理",
+    adminDashboardQuickActionsViewMetrics: "メトリクスを見る",
+    adminDashboardRecentActivityTitle: "最近のアクティビティ",
+    adminDashboardRecentActivityViewAll: "すべて表示",
+    adminDashboardRecentActivityLoading: "最近のイベントを読み込み中...",
+    adminDashboardRecentActivityEmpty: "表示するアクティビティがありません。",
+    adminDashboardRecentItem1Prefix: "新しい記事が作成されました:",
+    adminDashboardRecentItem2Prefix: "ユーザー登録:",
+    adminDashboardRecentItem3Prefix: "記事が更新されました:",
+    adminDashboardRecentItem4Prefix: "ユーザーが無効化されました:",
+    adminActivityInfoTooltipLabel: "アクティビティ情報",
+    adminActivityInfoTooltipTitle: "アクティビティ",
+    adminActivityInfoTooltipDescription:
+      "最近のWikiおよびユーザーの操作を確認できます。下のフィルターと期間で結果を絞り込めます。",
+    adminActivityFiltersTitle: "フィルターと期間",
+    adminActivityFiltersTooltipLabel: "フィルター情報",
+    adminActivityFiltersTooltipTitle: "フィルター",
+    adminActivityFiltersTooltipDescription:
+      '検索、種類、操作、期間を組み合わせます。"カスタム" では開始/終了日を選択できます。',
+    adminActivityRangeAria: "アクティビティ期間",
+    adminActivityTypeAria: "アクティビティ種別",
+    adminActivityActionAria: "アクティビティ操作",
+    adminActivityExportTooltipLabel: "エクスポート情報",
+    adminActivityExportTooltipTitle: "CSVエクスポート",
+    adminActivityExportTooltipDescription:
+      "エクスポートは現在のフィルターと表示中の期間に基づいてCSVを生成します。",
+  },
+  nl: {
+    adminDashboardRecentActivityTitle: "Recente activiteit",
+    adminDashboardRecentActivityViewAll: "Alles bekijken",
+    adminDashboardRecentActivityLoading: "Recente gebeurtenissen worden geladen...",
+    adminDashboardRecentActivityEmpty: "Er is geen activiteit om te tonen.",
+    adminDashboardRecentItem1Prefix: "Nieuw artikel aangemaakt:",
+    adminDashboardRecentItem2Prefix: "Gebruiker geregistreerd:",
+    adminDashboardRecentItem3Prefix: "Artikel bijgewerkt:",
+    adminDashboardRecentItem4Prefix: "Gebruiker gedeactiveerd:",
+    adminActivityInfoTooltipLabel: "Activiteit info",
+    adminActivityInfoTooltipTitle: "Activiteit",
+    adminActivityInfoTooltipDescription:
+      "Bekijk recente wiki- en gebruikersacties. Gebruik de filters en perioden hieronder om resultaten te verfijnen.",
+    adminActivityFiltersTitle: "Filters en periode",
+    adminActivityFiltersTooltipLabel: "Filterinfo",
+    adminActivityFiltersTooltipTitle: "Filters",
+    adminActivityFiltersTooltipDescription:
+      'Combineer zoeken, type, actie en tijdsperiode. "Aangepast" laat je Van/Tot-datums kiezen.',
+    adminActivityRangeAria: "Activiteitsperiode",
+    adminActivityTypeAria: "Activiteitstype",
+    adminActivityActionAria: "Activiteitsactie",
+    adminActivityExportTooltipLabel: "Exportinfo",
+    adminActivityExportTooltipTitle: "CSV exporteren",
+    adminActivityExportTooltipDescription:
+      "Export genereert een CSV op basis van de huidige filters en de zichtbare periode.",
+  },
+  cs: {
+    adminDashboardRecentActivityTitle: "Poslední aktivita",
+    adminDashboardRecentActivityViewAll: "Zobrazit vše",
+    adminDashboardRecentActivityLoading: "Načítání posledních událostí...",
+    adminDashboardRecentActivityEmpty: "Žádná aktivita k zobrazení.",
+    adminDashboardRecentItem1Prefix: "Nový článek vytvořen:",
+    adminDashboardRecentItem2Prefix: "Uživatel zaregistrován:",
+    adminDashboardRecentItem3Prefix: "Článek aktualizován:",
+    adminDashboardRecentItem4Prefix: "Uživatel deaktivován:",
+    adminActivityInfoTooltipLabel: "Info o aktivitě",
+    adminActivityInfoTooltipTitle: "Aktivita",
+    adminActivityInfoTooltipDescription:
+      "Zobrazte si nedávné akce ve wiki a u uživatelů. Pomocí filtrů a období níže můžete zúžit výsledky.",
+    adminActivityFiltersTitle: "Filtry a období",
+    adminActivityFiltersTooltipLabel: "Info o filtrech",
+    adminActivityFiltersTooltipTitle: "Filtry",
+    adminActivityFiltersTooltipDescription:
+      'Kombinujte hledání, typ, akci a časové období. "Vlastní" vám umožní zvolit data Od/Do.',
+    adminActivityRangeAria: "Období aktivity",
+    adminActivityTypeAria: "Typ aktivity",
+    adminActivityActionAria: "Akce aktivity",
+    adminActivityExportTooltipLabel: "Info o exportu",
+    adminActivityExportTooltipTitle: "Export CSV",
+    adminActivityExportTooltipDescription:
+      "Export vytvoří CSV podle aktuálních filtrů a viditelného období.",
+  },
+  ar: {
+    adminDashboardRecentActivityTitle: "النشاط الأخير",
+    adminDashboardRecentActivityViewAll: "عرض الكل",
+    adminDashboardRecentActivityLoading: "جارٍ تحميل الأحداث الأخيرة...",
+    adminDashboardRecentActivityEmpty: "لا توجد نشاطات لعرضها.",
+    adminDashboardRecentItem1Prefix: "تم إنشاء مقال جديد:",
+    adminDashboardRecentItem2Prefix: "تم تسجيل المستخدم:",
+    adminDashboardRecentItem3Prefix: "تم تحديث المقال:",
+    adminDashboardRecentItem4Prefix: "تم تعطيل المستخدم:",
+    adminActivityInfoTooltipLabel: "معلومات النشاط",
+    adminActivityInfoTooltipTitle: "النشاط",
+    adminActivityInfoTooltipDescription:
+      "استعرض أحدث إجراءات الويكي والمستخدمين. استخدم عوامل التصفية والفترات أدناه لتضييق النتائج.",
+    adminActivityFiltersTitle: "عوامل التصفية والفترة",
+    adminActivityFiltersTooltipLabel: "معلومات عوامل التصفية",
+    adminActivityFiltersTooltipTitle: "عوامل التصفية",
+    adminActivityFiltersTooltipDescription:
+      'ادمج البحث والنوع والإجراء والفترة الزمنية. خيار "مخصص" يتيح لك اختيار تاريخ من/إلى.',
+    adminActivityRangeAria: "فترة النشاط",
+    adminActivityTypeAria: "نوع النشاط",
+    adminActivityActionAria: "إجراء النشاط",
+    adminActivityExportTooltipLabel: "معلومات التصدير",
+    adminActivityExportTooltipTitle: "تصدير CSV",
+    adminActivityExportTooltipDescription:
+      "ينشئ التصدير ملف CSV بناءً على عوامل التصفية الحالية والفترة الزمنية الظاهرة.",
+  },
+};
+
+const ADMIN_WIKI_OVERRIDES: Partial<
+  Record<SupportedLang, Partial<DomainMessages["common"]>>
+> = {
+  bg: {
+    adminErrorMissingApiAccess:
+      "Липсва достъп до Admin API. Моля, влезте отново като администратор.",
+    adminWikiCancel: "Отказ",
+    adminWikiOk: "OK",
+    adminWikiClose: "Затвори",
+    adminWikiManagementTitle: "Управление на Wiki",
+    adminWikiManagementInfoLabel: "Информация",
+    adminWikiManagementInfoDescription:
+      "Управление на Wiki статии: създаване, търсене, филтриране, промяна на статус, експорт и версии.",
+    adminWikiManagementSubtitle: "Списък и управление на Wiki статии.",
+    adminWikiCreateNewArticle: "Създай нова статия",
+    adminWikiSearchPlaceholder: "Търси по заглавие или slug...",
+    adminWikiFilterLanguage: "Филтър по език",
+    adminWikiAllLanguages: "Всички езици",
+    adminWikiFilterStatus: "Филтър по статус",
+    adminWikiAllStatus: "Всички статуси",
+    adminWikiExportCsv: "Експорт CSV",
+    adminWikiLoadingList: "Зареждане на списъка...",
+    adminWikiEmptyList: "Няма Wiki статии за показване.",
+    adminWikiLoadError: "Възникна грешка при зареждане на Admin Wiki списъка.",
+    adminWikiStatusUpdateError:
+      "Възникна грешка при промяна на статуса на статията.",
+    adminWikiSelectedPrefix: "Избрани",
+    adminWikiSelectAllVisible: "Избери всички видими",
+    adminWikiSelectArticle: "Избери статия",
+    adminWikiIdPrefix: "ID",
+    adminWikiDeleteSelected: "Изтрий избраните",
+    adminWikiBulkStatus: "Bulk статус...",
+    adminWikiBulkStatusPlaceholder: "Bulk статус...",
+    adminWikiDeleteAll: "Изтрий всички",
+    adminWikiSelectedCountLabel: "Брой избрани",
+    adminWikiColTitle: "Заглавие",
+    adminWikiColSlug: "Slug",
+    adminWikiColLanguages: "Езици",
+    adminWikiColStatus: "Статус",
+    adminWikiColLastUpdated: "Последна промяна",
+    adminWikiColActions: "Действия",
+    adminWikiBulkDeleteTitle: "Изтриване на избраните статии",
+    adminWikiBulkDeleteDescription:
+      "Избраните статии ще бъдат физически изтрити (включително всички версии). Това действие е необратимо.",
+    adminWikiDeleteConfirm: "Изтрий",
+    adminWikiBulkDeleteError: "Възникна грешка при bulk изтриването.",
+    adminWikiBulkStatusTitle: "Промяна на статуса",
+    adminWikiBulkStatusDescription:
+      "Ще промените статуса на всички избрани статии.",
+    adminWikiBulkStatusNewStatusLabel: "Нов статус",
+    adminWikiBulkStatusError:
+      "Възникна грешка при bulk промяна на статуса.",
+    adminWikiApply: "Приложи",
+    adminWikiFooterShowingPrefix: "Показани",
+    adminWikiFooterOf: "от общо",
+    adminWikiFooterArticlesSuffix: "статии",
+    adminWikiPurgeAllTitle: "Изтриване на всички статии",
+    adminWikiPurgeAllDescriptionPrefix: "Ще изтриете абсолютно всички wiki статии",
+    adminWikiPurgeAllDescriptionSuffix: "Това действие е необратимо.",
+    adminWikiPurgeAllConfirm: "Изтрий всички",
+    adminWikiPurgeAllError: "Възникна грешка при изтриване на всички статии.",
+    adminWikiActionEdit: "Редакция",
+    adminWikiActionVersions: "Версии",
+    adminWikiStatusUpdating: "Обновяване...",
+    adminWikiActionActivate: "Активирай",
+    adminWikiActionDeactivate: "Деактивирай",
+    adminWikiCreateSlugRequired: "Моля, въведете slug за статията.",
+    adminWikiCreateInvalidOrExists: "Невалидни данни или slug вече съществува.",
+    adminWikiCreateError: "Възникна грешка при създаване на статията.",
+    adminWikiCreateSuccess: "Статията беше създадена успешно.",
+    adminWikiCreateIntro:
+      "Въведете само slug за нова Wiki статия. Език, статус и съдържание се настройват по-късно в страницата за редакция.",
+    adminWikiBackToList: "Обратно към списъка",
+    adminWikiCreateBasicInformation: "Основна информация",
+    adminWikiCreateSlugLabel: "Slug",
+    adminWikiCreateSlugPlaceholder: "manual-testing-intro",
+    adminWikiCreateTagsLabel: "Тагове (разделени със запетая)",
+    adminWikiCreateTagsPlaceholder: "intro, basics, setup",
+    adminWikiCreateArticleIdLabel: "Article ID (само за четене)",
+    adminWikiCreateArticleIdPlaceholder: "Автоматично се генерира при запис",
+    adminWikiCreateFooterNote:
+      "Статиите, създадени тук, се записват в BeeLMS базата (development среда).",
+    adminWikiCreateSaving: "Запазване...",
+    adminWikiCreateArticleSaved: "Статията е запазена",
+    adminWikiCreateSaveArticle: "Запази статията",
+    adminWikiCreateAlreadyCreatedNote:
+      "Статията вече е създадена. За промени използвайте страницата за редакция (Edit).",
+    adminWikiEditRichEditorLoading: "Зареждане на rich editor...",
+    adminWikiEditTitle: "Редакция на Wiki статия",
+    adminWikiEditSubtitle:
+      "Преглед и редакция на съдържанието на избрана Wiki статия.",
+    adminWikiEditBreadcrumbFallback: "Редакция",
+    adminWikiEditOpenPublicPage: "Отвори публичната страница",
+    adminWikiEditPublicVisibleHintPrefix: "Статията трябва да е със статус",
+    adminWikiEditPublicVisibleHintSuffix: ", за да е видима публично.",
+    adminWikiEditLoading: "Зареждане на статията за редакция...",
+    adminWikiEditLanguageLabel: "Език",
+    adminWikiEditLanguageAria: "Език на Wiki статията",
+    adminWikiEditLanguageHelp:
+      "Смяната на езика зарежда или създава отделна версия на съдържанието за избрания език.",
+    adminWikiEditStatusLabel: "Статус",
+    adminWikiEditStatusAria: "Статус на Wiki статията",
+    adminWikiEditTitleLabel: "Заглавие",
+    adminWikiEditSubtitleLabel: "Подзаглавие (по избор)",
+    adminWikiEditTagsLabel: "Тагове (разделени със запетая)",
+    adminWikiEditTagsExamplePrefix: "Пример",
+    adminWikiEditContentLabel: "Съдържание",
+    adminWikiEditEditorModeLabel: "Режим на редакция:",
+    adminWikiEditEditorModeMarkdown: "Markdown",
+    adminWikiEditEditorModeRichText: "Rich text",
+    adminWikiEditRequiredFieldSrOnly: "(задължително поле)",
+    adminWikiEditTitleRequiredError:
+      "Заглавието е задължително. Моля, въведете текст.",
+    adminWikiEditContentRequiredError:
+      "Съдържанието е задължително. Добавете текст преди да запазите.",
+    adminWikiEditRequiredFieldTitle: "Заглавие",
+    adminWikiEditRequiredFieldContent: "Съдържание",
+    adminWikiEditSaveDisabledNoChanges:
+      "Бутонът „Запази“ се активира, когато направите промяна по някое поле.",
+    adminWikiEditSaveDisabledMissingFields:
+      "Попълнете задължителните полета, за да запазите.",
+    adminWikiEditSave: "Запази",
+    adminWikiEditSaving: "Запазване...",
+    adminWikiEditInvalidData:
+      "Невалидни данни за статията. Моля, проверете полетата.",
+    adminWikiEditSaveError: "Възникна грешка при запис на промените.",
+    adminWikiEditSaveSuccess: "Промените са запазени успешно.",
+    adminWikiEditMissingArticleId:
+      "Липсва Article ID. Моля, заредете отново страницата.",
+    adminWikiEditMediaLoadError: "Възникна грешка при зареждане на изображенията.",
+    adminWikiEditVersionsLoadError: "Възникна грешка при зареждане на версиите.",
+    adminWikiEditUploadImage: "Качи изображение",
+    adminWikiEditUploading: "Качване...",
+    adminWikiEditUploadImageError: "Възникна грешка при качване на изображението.",
+    adminWikiEditDeleteMediaConfirm:
+      "Сигурни ли сте, че искате да изтриете това изображение?",
+    adminWikiEditDeleteMediaError: "Възникна грешка при изтриване на изображението.",
+    adminWikiEditClipboardUnavailable:
+      "Clipboard API не е наличен в този браузър.",
+    adminWikiEditMarkdownCopied: "Markdown snippet е копиран в клипборда.",
+    adminWikiEditMarkdownCopyFailed: "Неуспешно копиране на markdown snippet.",
+    adminWikiEditRollbackConfirm:
+      "Сигурни ли сте, че искате да върнете статията към тази версия?",
+    adminWikiEditRollbackNotFound: "Избраната версия или статия не беше намерена.",
+    adminWikiEditRollbackInvalidRequest:
+      "Невалидна заявка за връщане към версия. Моля, опитайте отново.",
+    adminWikiEditRollbackError: "Възникна грешка при връщане към избраната версия.",
+    adminWikiEditRollbackSuccess: "Статията беше върната към избраната версия.",
+    adminWikiEditCompareSameLangError:
+      "Може да сравнявате само версии на един и същи език.",
+    adminWikiEditMermaidHelp:
+      "За диаграми използвайте fenced code block с език mermaid (напр. ```mermaid ... ```). Диаграмите ще се виждат в прегледа и в публичната Wiki.",
+    adminWikiEditCaptionHelp:
+      "За caption под изображение: поставете изображението, а на следващия ред напишете текста (по желание в italic), напр.: ![Alt](url) *Caption*.",
+    adminWikiEditPreviewAria: "Преглед на съдържанието",
+    adminWikiEditPreviewTitle: "Преглед (както в публичната Wiki)",
+    adminWikiEditPreviewShow: "Покажи прегледа",
+    adminWikiEditPreviewHide: "Скрий прегледа",
+    adminWikiEditPreviewUntitled: "(Без заглавие)",
+    adminWikiEditMissingFieldsPrefix: "Липсват задължителни полета:",
+    adminWikiEditMissingFieldsSuffix:
+      "Попълнете ги, за да активирате бутона \"Запази\".",
+    adminWikiEditUnsavedChangesWarning: "Има незапазени промени.",
+    adminWikiEditUnsavedChangesConfirm:
+      "Имате незапазени промени. Сигурни ли сте, че искате да напуснете страницата?",
+    adminWikiEditMediaSectionAria: "Изображения към статията",
+    adminWikiEditMediaSectionTitle: "Изображения към статията",
+    adminWikiEditMediaSectionDescription:
+      "Качете изображения, които искате да реферирате от markdown съдържанието по-горе. След качване ще видите готов URL, който може да поставите директно в текста.",
+    adminWikiEditNeedArticleIdHint:
+      "Първо се уверете, че статията е запазена и има Article ID.",
+    adminWikiEditImportMarkdownAria: "Импорт на преводи от Markdown файлове",
+    adminWikiEditImportMarkdownTitle: "Импорт на преводи (.md)",
+    adminWikiEditImportMarkdownDescription:
+      "Качете няколко .md файла наведнъж (напр. white-box-testing-bg.md, white-box-testing-en.md). Системата ще създаде нова версия за всеки език.",
+    adminWikiEditImportMarkdownSupportedLangSuffixes:
+      "Поддържани suffix кодове:",
+    adminWikiEditImportMarkdownFilenameSuffixHint:
+      "Име на файл:",
+    adminWikiEditImportMarkdownButton: "Качи .md файлове",
+    adminWikiEditImportMarkdownUploading: "Импорт...",
+    adminWikiEditImportMarkdownError:
+      "Възникна грешка при импорт на markdown файловете.",
+    adminWikiEditImportMarkdownResultsTitle: "Резултати от импорта",
+    adminWikiEditMediaLoading: "Зареждане на изображения...",
+    adminWikiEditUploadedImagesTitle: "Качени изображения",
+    adminWikiEditUploadedImagesNoArticleId:
+      "Все още няма Article ID. Заредете статията отново или изчакайте да се зареди напълно.",
+    adminWikiEditUploadedImagesEmpty:
+      "Все още няма качени изображения за тази статия.",
+    adminWikiEditMediaInsert: "Вмъкни",
+    adminWikiEditMediaCopyMarkdown: "Копирай markdown",
+    adminWikiEditMediaDelete: "Изтрий",
+    adminWikiEditVersionsAria: "Версии на статията",
+    adminWikiEditVersionsTitle: "Версии на статията",
+    adminWikiEditVersionsHighlight: "Погледнете тук",
+    adminWikiEditVersionsLoading: "Зареждане на версиите...",
+    adminWikiEditVersionsEmpty: "Няма налични версии за този език.",
+    adminWikiEditVersionsCompareHeader: "Сравни",
+    adminWikiEditVersionsSelectLabel: "избери",
+    adminWikiEditVersionsColVersion: "Версия",
+    adminWikiEditVersionsColLanguage: "Език",
+    adminWikiEditVersionsColTitle: "Заглавие",
+    adminWikiEditVersionsColSubtitle: "Подзаглавие",
+    adminWikiEditVersionsColCreatedAt: "Създадена на",
+    adminWikiEditVersionsColCreatedBy: "Създадена от",
+    adminWikiEditVersionsColActions: "Действия",
+    adminWikiEditVersionsActionPreview: "Преглед",
+    adminWikiEditVersionsCurrent: "Текуща версия",
+    adminWikiEditVersionsRollback: "Върни",
+    adminWikiEditVersionsRollbacking: "Връщане...",
+    adminWikiEditVersionsDelete: "Изтрий",
+    adminWikiEditVersionsCompareHelp:
+      "Изберете две версии (един и същи език), за да ги сравните.",
+    adminWikiEditPageLabel: "Страница",
+    adminWikiEditOfLabel: "от",
+    adminWikiEditVersionsCountLabel: "версии",
+    adminWikiEditVersionsCompareSelected: "Сравни избраните версии",
+    adminWikiEditVersionsDeleteSelected: "Изтрий избраните",
+    adminWikiEditCompareAria: "Сравнение на версии",
+    adminWikiEditCompareTitle: "Сравнение на версии",
+    adminWikiEditCompareSubtitle:
+      "Ляво: по-стара версия. Дясно: по-нова версия.",
+    adminWikiEditCompareClear: "Изчисти сравнението",
+    adminWikiEditCompareOlder: "По-стара",
+    adminWikiEditCompareNewer: "По-нова",
+    adminWikiEditCompareVersionLabel: "Версия",
+    adminWikiEditCompareFieldTitle: "Заглавие:",
+    adminWikiEditCompareFieldSubtitle: "Подзаглавие:",
+    adminWikiEditCompareLegendToken: "текст",
+    adminWikiEditCompareLegendRemoved: "= премахнат текст,",
+    adminWikiEditCompareLegendAdded: "= добавен текст.",
+    adminWikiEditViewVersionTitlePrefix: "Преглед на версия",
+    adminWikiEditViewVersionCreatedAt: "Създадена на",
+    adminWikiEditViewVersionBy: "от",
+    adminWikiEditDeleteVersionTitle: "Изтриване на версия",
+    adminWikiEditDeleteVersionDescription:
+      "Тази версия ще бъде завинаги премахната от историята на статията. Това действие е необратимо и може да повлияе на проследимостта на промените.",
+    adminWikiEditDeleteVersionConfirmTitle: "Потвърдете изтриването на версията",
+    adminWikiEditDeleteVersionConfirmDescription:
+      "Наистина ли искате да изтриете тази версия? Това действие е окончателно и не може да бъде отменено.",
+    adminWikiEditDeleteVersionConfirmMetaPrefix: "Версия",
+    adminWikiEditDeleteVersionConfirmMetaCreatedAt: "създадена на",
+    adminWikiEditDeleteVersionCurrentActiveError:
+      "Текущата активна версия не може да бъде изтрита.",
+    adminWikiEditDeleteVersionLastVersionError:
+      "Тази версия не може да бъде изтрита, защото е последната версия на статията.",
+    adminWikiEditDeleteVersionNotFound: "Версията или статията не бяха намерени.",
+    adminWikiEditDeleteVersionError: "Възникна грешка при изтриване на версията.",
+    adminWikiEditDeleteVersionConfirmButton: "Да, изтрий версията",
+    adminWikiEditBulkDeleteTitle: "Изтриване на избрани версии",
+    adminWikiEditBulkDeleteDescriptionPrefix: "Ще бъдат завинаги премахнати",
+    adminWikiEditBulkDeleteDescriptionSuffix:
+      "версии от историята на статията. Това действие е необратимо и може да повлияе на проследимостта на промените.",
+    adminWikiEditBulkDeleteConfirmTitle:
+      "Потвърдете изтриването на избраните версии",
+    adminWikiEditBulkDeleteConfirmDescription:
+      "Наистина ли искате да изтриете избраните версии? Това действие е окончателно и не може да бъде отменено.",
+    adminWikiEditBulkDeletePartialError:
+      "Някои версии не можаха да бъдат изтрити. Списъкът с версии ще бъде обновен.",
+    adminWikiEditBulkDeleteError:
+      "Възникна грешка при изтриване на избраните версии.",
+    adminWikiEditBulkDeleteConfirmButton: "Да, изтрий избраните версии",
+  },
+  en: {
+    adminErrorMissingApiAccess:
+      "Missing Admin API access. Please sign in again as an administrator.",
+    adminWikiCancel: "Cancel",
+    adminWikiOk: "OK",
+    adminWikiClose: "Close",
+    adminWikiManagementTitle: "Wiki Management",
+    adminWikiManagementInfoLabel: "Info",
+    adminWikiManagementInfoDescription:
+      "Manage Wiki articles: create, search, filter, change status, export and versioning.",
+    adminWikiManagementSubtitle: "List and manage Wiki articles.",
+    adminWikiCreateNewArticle: "Create New Article",
+    adminWikiSearchPlaceholder: "Search by title or slug...",
+    adminWikiFilterLanguage: "Filter by language",
+    adminWikiAllLanguages: "All Languages",
+    adminWikiFilterStatus: "Filter by status",
+    adminWikiAllStatus: "All Status",
+    adminWikiExportCsv: "Export CSV",
+    adminWikiLoadingList: "Loading list...",
+    adminWikiEmptyList: "No Wiki articles to display.",
+    adminWikiLoadError: "An error occurred while loading the Admin Wiki list.",
+    adminWikiStatusUpdateError:
+      "An error occurred while updating the article status.",
+    adminWikiSelectedPrefix: "Selected",
+    adminWikiSelectAllVisible: "Select all visible",
+    adminWikiSelectArticle: "Select article",
+    adminWikiIdPrefix: "ID",
+    adminWikiDeleteSelected: "Delete selected",
+    adminWikiBulkStatus: "Bulk status...",
+    adminWikiBulkStatusPlaceholder: "Bulk status...",
+    adminWikiDeleteAll: "Delete all",
+    adminWikiSelectedCountLabel: "Selected count",
+    adminWikiColTitle: "Title",
+    adminWikiColSlug: "Slug",
+    adminWikiColLanguages: "Languages",
+    adminWikiColStatus: "Status",
+    adminWikiColLastUpdated: "Last updated",
+    adminWikiColActions: "Actions",
+    adminWikiBulkDeleteTitle: "Delete selected articles",
+    adminWikiBulkDeleteDescription:
+      "Selected articles will be permanently deleted (including all versions). This action cannot be undone.",
+    adminWikiDeleteConfirm: "Delete",
+    adminWikiBulkDeleteError: "An error occurred during bulk delete.",
+    adminWikiBulkStatusTitle: "Change status",
+    adminWikiBulkStatusDescription:
+      "This will change the status of all selected articles.",
+    adminWikiBulkStatusNewStatusLabel: "New status",
+    adminWikiBulkStatusError:
+      "An error occurred during bulk status update.",
+    adminWikiApply: "Apply",
+    adminWikiFooterShowingPrefix: "Showing",
+    adminWikiFooterOf: "of",
+    adminWikiFooterArticlesSuffix: "articles",
+    adminWikiPurgeAllTitle: "Delete all articles",
+    adminWikiPurgeAllDescriptionPrefix: "You are about to delete ALL wiki articles",
+    adminWikiPurgeAllDescriptionSuffix: "This action cannot be undone.",
+    adminWikiPurgeAllConfirm: "Delete all",
+    adminWikiPurgeAllError: "An error occurred while deleting all articles.",
+    adminWikiActionEdit: "Edit",
+    adminWikiActionVersions: "Versions",
+    adminWikiStatusUpdating: "Updating...",
+    adminWikiActionActivate: "Activate",
+    adminWikiActionDeactivate: "Deactivate",
+    adminWikiCreateSlugRequired: "Please enter a slug for the article.",
+    adminWikiCreateInvalidOrExists:
+      "Invalid data or the slug already exists.",
+    adminWikiCreateError: "An error occurred while creating the article.",
+    adminWikiCreateSuccess: "The article was created successfully.",
+    adminWikiCreateIntro:
+      "Enter only the slug for a new Wiki article. Language, status and content are set later on the edit page.",
+    adminWikiBackToList: "Back to list",
+    adminWikiCreateBasicInformation: "Basic Information",
+    adminWikiCreateSlugLabel: "Slug",
+    adminWikiCreateSlugPlaceholder: "manual-testing-intro",
+    adminWikiCreateTagsLabel: "Tags (comma-separated)",
+    adminWikiCreateTagsPlaceholder: "intro, basics, setup",
+    adminWikiCreateArticleIdLabel: "Article ID (read-only)",
+    adminWikiCreateArticleIdPlaceholder: "Auto-generated on save",
+    adminWikiCreateFooterNote:
+      "Articles created here are stored in the BeeLMS database (development environment).",
+    adminWikiCreateSaving: "Saving...",
+    adminWikiCreateArticleSaved: "Article saved",
+    adminWikiCreateSaveArticle: "Save Article",
+    adminWikiCreateAlreadyCreatedNote:
+      "This article is already created. Use the edit page to make changes.",
+    adminWikiEditRichEditorLoading: "Loading rich editor...",
+    adminWikiEditTitle: "Edit Wiki Article",
+    adminWikiEditSubtitle: "Review and edit the content of a selected Wiki article.",
+    adminWikiEditBreadcrumbFallback: "Edit Article",
+    adminWikiEditOpenPublicPage: "Open public page",
+    adminWikiEditPublicVisibleHintPrefix: "The article must have status",
+    adminWikiEditPublicVisibleHintSuffix: "to be publicly visible.",
+    adminWikiEditLoading: "Loading article for editing...",
+    adminWikiEditLanguageLabel: "Language",
+    adminWikiEditLanguageAria: "Wiki article language",
+    adminWikiEditLanguageHelp:
+      "Changing the language loads or creates a separate content version for the selected language.",
+    adminWikiEditStatusLabel: "Status",
+    adminWikiEditStatusAria: "Wiki article status",
+    adminWikiEditTitleLabel: "Title",
+    adminWikiEditSubtitleLabel: "Subtitle (optional)",
+    adminWikiEditTagsLabel: "Tags (comma-separated)",
+    adminWikiEditTagsExamplePrefix: "Example",
+    adminWikiEditContentLabel: "Content",
+    adminWikiEditEditorModeLabel: "Editor mode:",
+    adminWikiEditEditorModeMarkdown: "Markdown",
+    adminWikiEditEditorModeRichText: "Rich text",
+    adminWikiEditRequiredFieldSrOnly: "(required field)",
+    adminWikiEditTitleRequiredError: "Title is required. Please enter text.",
+    adminWikiEditContentRequiredError:
+      "Content is required. Add text before saving.",
+    adminWikiEditRequiredFieldTitle: "Title",
+    adminWikiEditRequiredFieldContent: "Content",
+    adminWikiEditSaveDisabledNoChanges:
+      "The Save button becomes active after you change a field.",
+    adminWikiEditSaveDisabledMissingFields:
+      "Fill in the required fields to save.",
+    adminWikiEditSave: "Save",
+    adminWikiEditSaving: "Saving...",
+    adminWikiEditInvalidData:
+      "Invalid article data. Please review the fields.",
+    adminWikiEditSaveError: "An error occurred while saving changes.",
+    adminWikiEditSaveSuccess: "Changes saved successfully.",
+    adminWikiEditMissingArticleId:
+      "Missing Article ID. Please reload the page.",
+    adminWikiEditMediaLoadError: "An error occurred while loading images.",
+    adminWikiEditVersionsLoadError: "An error occurred while loading versions.",
+    adminWikiEditUploadImage: "Upload image",
+    adminWikiEditUploading: "Uploading...",
+    adminWikiEditUploadImageError: "An error occurred while uploading the image.",
+    adminWikiEditDeleteMediaConfirm:
+      "Are you sure you want to delete this image?",
+    adminWikiEditDeleteMediaError: "An error occurred while deleting the image.",
+    adminWikiEditClipboardUnavailable:
+      "Clipboard API is not available in this browser.",
+    adminWikiEditMarkdownCopied: "Markdown snippet copied to clipboard.",
+    adminWikiEditMarkdownCopyFailed: "Failed to copy markdown snippet.",
+    adminWikiEditRollbackConfirm:
+      "Are you sure you want to restore the article to this version?",
+    adminWikiEditRollbackNotFound: "The selected version or article was not found.",
+    adminWikiEditRollbackInvalidRequest:
+      "Invalid restore request. Please try again.",
+    adminWikiEditRollbackError: "An error occurred while restoring the version.",
+    adminWikiEditRollbackSuccess: "The article was restored to the selected version.",
+    adminWikiEditCompareSameLangError:
+      "You can only compare versions of the same language.",
+    adminWikiEditMermaidHelp:
+      "For diagrams, use a fenced code block with language mermaid (e.g. ```mermaid ... ```). Diagrams will appear in the preview and the public Wiki.",
+    adminWikiEditCaptionHelp:
+      "For an image caption: insert the image, then on the next line add the text (optionally italic), e.g.: ![Alt](url) *Caption*.",
+    adminWikiEditPreviewAria: "Content preview",
+    adminWikiEditPreviewTitle: "Preview (as in public Wiki)",
+    adminWikiEditPreviewShow: "Show preview",
+    adminWikiEditPreviewHide: "Hide preview",
+    adminWikiEditPreviewUntitled: "(Untitled)",
+    adminWikiEditMissingFieldsPrefix: "Missing required fields:",
+    adminWikiEditMissingFieldsSuffix:
+      "Fill them in to enable the \"Save\" button.",
+    adminWikiEditUnsavedChangesWarning: "There are unsaved changes.",
+    adminWikiEditUnsavedChangesConfirm:
+      "You have unsaved changes. Are you sure you want to leave the page?",
+    adminWikiEditMediaSectionAria: "Article images",
+    adminWikiEditMediaSectionTitle: "Article images",
+    adminWikiEditMediaSectionDescription:
+      "Upload images you want to reference from the markdown content above. After upload you'll see a URL you can paste into the text.",
+    adminWikiEditNeedArticleIdHint:
+      "First make sure the article is saved and has an Article ID.",
+    adminWikiEditImportMarkdownAria: "Import translations from Markdown files",
+    adminWikiEditImportMarkdownTitle: "Import translations (.md)",
+    adminWikiEditImportMarkdownDescription:
+      "Upload multiple .md files at once (e.g. white-box-testing-bg.md, white-box-testing-en.md). The system will create a new version for each language.",
+    adminWikiEditImportMarkdownSupportedLangSuffixes:
+      "Supported suffix codes:",
+    adminWikiEditImportMarkdownFilenameSuffixHint:
+      "Filename:",
+    adminWikiEditImportMarkdownButton: "Upload .md files",
+    adminWikiEditImportMarkdownUploading: "Importing...",
+    adminWikiEditImportMarkdownError:
+      "An error occurred while importing the markdown files.",
+    adminWikiEditImportMarkdownResultsTitle: "Import results",
+    adminWikiEditMediaLoading: "Loading images...",
+    adminWikiEditUploadedImagesTitle: "Uploaded images",
+    adminWikiEditUploadedImagesNoArticleId:
+      "There is no Article ID yet. Reload the article or wait for it to load completely.",
+    adminWikiEditUploadedImagesEmpty:
+      "No images uploaded for this article yet.",
+    adminWikiEditMediaInsert: "Insert",
+    adminWikiEditMediaCopyMarkdown: "Copy markdown",
+    adminWikiEditMediaDelete: "Delete",
+    adminWikiEditVersionsAria: "Article versions",
+    adminWikiEditVersionsTitle: "Article versions",
+    adminWikiEditVersionsHighlight: "Look here",
+    adminWikiEditVersionsLoading: "Loading versions...",
+    adminWikiEditVersionsEmpty: "No versions available for this language.",
+    adminWikiEditVersionsCompareHeader: "Compare",
+    adminWikiEditVersionsSelectLabel: "select",
+    adminWikiEditVersionsColVersion: "Version",
+    adminWikiEditVersionsColLanguage: "Language",
+    adminWikiEditVersionsColTitle: "Title",
+    adminWikiEditVersionsColSubtitle: "Subtitle",
+    adminWikiEditVersionsColCreatedAt: "Created at",
+    adminWikiEditVersionsColCreatedBy: "Created by",
+    adminWikiEditVersionsColActions: "Actions",
+    adminWikiEditVersionsActionPreview: "Preview",
+    adminWikiEditVersionsCurrent: "Current",
+    adminWikiEditVersionsRollback: "Restore",
+    adminWikiEditVersionsRollbacking: "Restoring...",
+    adminWikiEditVersionsDelete: "Delete",
+    adminWikiEditVersionsCompareHelp:
+      "Select two versions (same language) to compare them.",
+    adminWikiEditPageLabel: "Page",
+    adminWikiEditOfLabel: "of",
+    adminWikiEditVersionsCountLabel: "versions",
+    adminWikiEditVersionsCompareSelected: "Compare selected",
+    adminWikiEditVersionsDeleteSelected: "Delete selected",
+    adminWikiEditCompareAria: "Version comparison",
+    adminWikiEditCompareTitle: "Version comparison",
+    adminWikiEditCompareSubtitle:
+      "Left: older version. Right: newer version.",
+    adminWikiEditCompareClear: "Clear comparison",
+    adminWikiEditCompareOlder: "Older",
+    adminWikiEditCompareNewer: "Newer",
+    adminWikiEditCompareVersionLabel: "Version",
+    adminWikiEditCompareFieldTitle: "Title:",
+    adminWikiEditCompareFieldSubtitle: "Subtitle:",
+    adminWikiEditCompareLegendToken: "text",
+    adminWikiEditCompareLegendRemoved: "= removed text,",
+    adminWikiEditCompareLegendAdded: "= added text.",
+    adminWikiEditViewVersionTitlePrefix: "Preview version",
+    adminWikiEditViewVersionCreatedAt: "Created at",
+    adminWikiEditViewVersionBy: "by",
+    adminWikiEditDeleteVersionTitle: "Delete version",
+    adminWikiEditDeleteVersionDescription:
+      "This version will be permanently removed from the article history. This action cannot be undone and may affect traceability.",
+    adminWikiEditDeleteVersionConfirmTitle: "Confirm deleting the version",
+    adminWikiEditDeleteVersionConfirmDescription:
+      "Are you sure you want to delete this version? This action is permanent and cannot be undone.",
+    adminWikiEditDeleteVersionConfirmMetaPrefix: "Version",
+    adminWikiEditDeleteVersionConfirmMetaCreatedAt: "created at",
+    adminWikiEditDeleteVersionCurrentActiveError:
+      "The current active version cannot be deleted.",
+    adminWikiEditDeleteVersionLastVersionError:
+      "This version cannot be deleted because it is the last remaining version.",
+    adminWikiEditDeleteVersionNotFound: "The version or article was not found.",
+    adminWikiEditDeleteVersionError:
+      "An error occurred while deleting the version.",
+    adminWikiEditDeleteVersionConfirmButton: "Yes, delete version",
+    adminWikiEditBulkDeleteTitle: "Delete selected versions",
+    adminWikiEditBulkDeleteDescriptionPrefix: "You are about to permanently delete",
+    adminWikiEditBulkDeleteDescriptionSuffix:
+      "versions from the article history. This action cannot be undone and may affect traceability.",
+    adminWikiEditBulkDeleteConfirmTitle: "Confirm deleting selected versions",
+    adminWikiEditBulkDeleteConfirmDescription:
+      "Are you sure you want to delete the selected versions? This action is permanent and cannot be undone.",
+    adminWikiEditBulkDeletePartialError:
+      "Some versions could not be deleted. The version list will be refreshed.",
+    adminWikiEditBulkDeleteError:
+      "An error occurred while deleting the selected versions.",
+    adminWikiEditBulkDeleteConfirmButton: "Yes, delete selected versions",
+  },
+  de: {
+    adminErrorMissingApiAccess:
+      "Fehlender Zugriff auf die Admin-API. Bitte melde dich erneut als Administrator an.",
+    adminWikiCancel: "Abbrechen",
+    adminWikiOk: "OK",
+    adminWikiClose: "Schließen",
+    adminWikiManagementTitle: "Wiki-Verwaltung",
+    adminWikiManagementInfoLabel: "Info",
+    adminWikiManagementInfoDescription:
+      "Wiki-Artikel verwalten: erstellen, suchen, filtern, Status ändern, exportieren und Versionen.",
+    adminWikiManagementSubtitle: "Liste und Verwaltung von Wiki-Artikeln.",
+    adminWikiCreateNewArticle: "Neuen Artikel erstellen",
+    adminWikiSearchPlaceholder: "Nach Titel oder Slug suchen...",
+    adminWikiFilterLanguage: "Nach Sprache filtern",
+    adminWikiAllLanguages: "Alle Sprachen",
+    adminWikiFilterStatus: "Nach Status filtern",
+    adminWikiAllStatus: "Alle Status",
+    adminWikiExportCsv: "CSV exportieren",
+    adminWikiLoadingList: "Liste wird geladen...",
+    adminWikiEmptyList: "Keine Wiki-Artikel zum Anzeigen.",
+    adminWikiLoadError:
+      "Beim Laden der Admin-Wiki-Liste ist ein Fehler aufgetreten.",
+    adminWikiStatusUpdateError:
+      "Beim Aktualisieren des Artikelstatus ist ein Fehler aufgetreten.",
+    adminWikiSelectedPrefix: "Ausgewählt",
+    adminWikiSelectAllVisible: "Alle sichtbaren auswählen",
+    adminWikiSelectArticle: "Artikel auswählen",
+    adminWikiIdPrefix: "ID",
+    adminWikiDeleteSelected: "Ausgewählte löschen",
+    adminWikiBulkStatus: "Massenstatus...",
+    adminWikiBulkStatusPlaceholder: "Massenstatus...",
+    adminWikiDeleteAll: "Alle löschen",
+    adminWikiSelectedCountLabel: "Anzahl ausgewählt",
+    adminWikiBulkDeleteTitle: "Ausgewählte Artikel löschen",
+    adminWikiBulkDeleteDescription:
+      "Ausgewählte Artikel werden dauerhaft gelöscht (einschließlich aller Versionen). Diese Aktion kann nicht rückgängig gemacht werden.",
+    adminWikiDeleteConfirm: "Löschen",
+    adminWikiBulkDeleteError:
+      "Beim Massenlöschen ist ein Fehler aufgetreten.",
+    adminWikiBulkStatusTitle: "Status ändern",
+    adminWikiBulkStatusDescription:
+      "Dadurch wird der Status aller ausgewählten Artikel geändert.",
+    adminWikiBulkStatusNewStatusLabel: "Neuer Status",
+    adminWikiBulkStatusError:
+      "Beim Massen-Statuswechsel ist ein Fehler aufgetreten.",
+    adminWikiPurgeAllTitle: "Alle Artikel löschen",
+    adminWikiPurgeAllDescriptionPrefix:
+      "Du bist dabei, ALLE Wiki-Artikel zu löschen",
+    adminWikiPurgeAllDescriptionSuffix:
+      "Diese Aktion kann nicht rückgängig gemacht werden.",
+    adminWikiPurgeAllConfirm: "Alle löschen",
+    adminWikiPurgeAllError:
+      "Beim Löschen aller Artikel ist ein Fehler aufgetreten.",
+    adminWikiActionEdit: "Bearbeiten",
+    adminWikiActionVersions: "Versionen",
+    adminWikiStatusUpdating: "Aktualisieren...",
+    adminWikiActionActivate: "Aktivieren",
+    adminWikiActionDeactivate: "Deaktivieren",
+    adminWikiCreateSlugRequired:
+      "Bitte gib einen Slug für den Artikel ein.",
+    adminWikiCreateInvalidOrExists:
+      "Ungültige Daten oder der Slug existiert bereits.",
+    adminWikiCreateError:
+      "Beim Erstellen des Artikels ist ein Fehler aufgetreten.",
+    adminWikiCreateSuccess: "Der Artikel wurde erfolgreich erstellt.",
+    adminWikiCreateIntro:
+      "Gib nur den Slug für einen neuen Wiki-Artikel ein. Sprache, Status und Inhalt werden später auf der Bearbeitungsseite festgelegt.",
+    adminWikiBackToList: "Zurück zur Liste",
+    adminWikiCreateBasicInformation: "Grundinformationen",
+    adminWikiCreateSlugLabel: "Slug",
+    adminWikiCreateSlugPlaceholder: "manual-testing-intro",
+    adminWikiCreateTagsLabel: "Tags (durch Kommas getrennt)",
+    adminWikiCreateTagsPlaceholder: "intro, basics, setup",
+    adminWikiCreateArticleIdLabel: "Artikel-ID (nur lesen)",
+    adminWikiCreateArticleIdPlaceholder:
+      "Wird beim Speichern automatisch erstellt",
+    adminWikiCreateFooterNote:
+      "Hier erstellte Artikel werden in der BeeLMS-Datenbank (Entwicklungsumgebung) gespeichert.",
+    adminWikiCreateSaving: "Speichern...",
+    adminWikiCreateArticleSaved: "Artikel gespeichert",
+    adminWikiCreateSaveArticle: "Artikel speichern",
+    adminWikiCreateAlreadyCreatedNote:
+      "Dieser Artikel wurde bereits erstellt. Verwende die Bearbeitungsseite, um Änderungen vorzunehmen.",
+    adminWikiEditRichEditorLoading: "Rich-Editor wird geladen...",
+    adminWikiEditTitle: "Wiki-Artikel bearbeiten",
+    adminWikiEditSubtitle:
+      "Inhalt eines ausgewählten Wiki-Artikels ansehen und bearbeiten.",
+    adminWikiEditBreadcrumbFallback: "Artikel bearbeiten",
+    adminWikiEditOpenPublicPage: "Öffentliche Seite öffnen",
+    adminWikiEditPublicVisibleHintPrefix: "Der Artikel muss den Status",
+    adminWikiEditPublicVisibleHintSuffix:
+      "haben, um öffentlich sichtbar zu sein.",
+    adminWikiEditLoading: "Artikel wird zum Bearbeiten geladen...",
+    adminWikiEditLanguageLabel: "Sprache",
+    adminWikiEditLanguageAria: "Sprache des Wiki-Artikels",
+    adminWikiEditLanguageHelp:
+      "Beim Wechsel der Sprache wird eine separate Inhaltsversion für die gewählte Sprache geladen oder erstellt.",
+    adminWikiEditStatusLabel: "Status",
+    adminWikiEditStatusAria: "Status des Wiki-Artikels",
+    adminWikiEditTitleLabel: "Titel",
+    adminWikiEditSubtitleLabel: "Untertitel (optional)",
+    adminWikiEditTagsLabel: "Tags (durch Kommas getrennt)",
+    adminWikiEditTagsExamplePrefix: "Beispiel",
+    adminWikiEditContentLabel: "Inhalt",
+    adminWikiEditEditorModeLabel: "Editor-Modus:",
+    adminWikiEditEditorModeMarkdown: "Markdown",
+    adminWikiEditEditorModeRichText: "Rich Text",
+    adminWikiEditRequiredFieldSrOnly: "(Pflichtfeld)",
+    adminWikiEditTitleRequiredError:
+      "Titel ist erforderlich. Bitte gib Text ein.",
+    adminWikiEditContentRequiredError:
+      "Inhalt ist erforderlich. Füge Text hinzu, bevor du speicherst.",
+    adminWikiEditRequiredFieldTitle: "Titel",
+    adminWikiEditRequiredFieldContent: "Inhalt",
+    adminWikiEditSaveDisabledNoChanges:
+      "Die Schaltfläche „Speichern“ wird aktiv, sobald du ein Feld änderst.",
+    adminWikiEditSaveDisabledMissingFields:
+      "Fülle die Pflichtfelder aus, um zu speichern.",
+    adminWikiEditSave: "Speichern",
+    adminWikiEditSaving: "Wird gespeichert...",
+    adminWikiEditInvalidData:
+      "Ungültige Artikeldaten. Bitte überprüfe die Felder.",
+    adminWikiEditSaveError:
+      "Beim Speichern der Änderungen ist ein Fehler aufgetreten.",
+    adminWikiEditSaveSuccess: "Änderungen erfolgreich gespeichert.",
+    adminWikiEditMissingArticleId:
+      "Fehlende Artikel-ID. Bitte lade die Seite neu.",
+    adminWikiEditMediaLoadError:
+      "Beim Laden der Bilder ist ein Fehler aufgetreten.",
+    adminWikiEditVersionsLoadError:
+      "Beim Laden der Versionen ist ein Fehler aufgetreten.",
+    adminWikiEditUploadImage: "Bild hochladen",
+    adminWikiEditUploading: "Wird hochgeladen...",
+    adminWikiEditUploadImageError:
+      "Beim Hochladen des Bildes ist ein Fehler aufgetreten.",
+    adminWikiEditDeleteMediaConfirm:
+      "Möchtest du dieses Bild wirklich löschen?",
+    adminWikiEditDeleteMediaError:
+      "Beim Löschen des Bildes ist ein Fehler aufgetreten.",
+    adminWikiEditClipboardUnavailable:
+      "Die Clipboard-API ist in diesem Browser nicht verfügbar.",
+    adminWikiEditMarkdownCopied: "Markdown-Snippet wurde kopiert.",
+    adminWikiEditMarkdownCopyFailed:
+      "Markdown-Snippet konnte nicht kopiert werden.",
+    adminWikiEditRollbackConfirm:
+      "Möchtest du den Artikel wirklich auf diese Version zurücksetzen?",
+    adminWikiEditRollbackNotFound:
+      "Die ausgewählte Version oder der Artikel wurde nicht gefunden.",
+    adminWikiEditRollbackInvalidRequest:
+      "Ungültige Wiederherstellungsanfrage. Bitte versuche es erneut.",
+    adminWikiEditRollbackError:
+      "Beim Wiederherstellen der Version ist ein Fehler aufgetreten.",
+    adminWikiEditRollbackSuccess:
+      "Der Artikel wurde auf die ausgewählte Version zurückgesetzt.",
+    adminWikiEditCompareSameLangError:
+      "Du kannst nur Versionen derselben Sprache vergleichen.",
+    adminWikiEditMermaidHelp:
+      "Für Diagramme verwende einen fenced code block mit Sprache mermaid (z. B. ```mermaid ... ```). Diagramme erscheinen in der Vorschau und im öffentlichen Wiki.",
+    adminWikiEditCaptionHelp:
+      "Für eine Bildunterschrift: Bild einfügen und in der nächsten Zeile den Text hinzufügen (optional kursiv), z. B.: ![Alt](url) *Caption*.",
+    adminWikiEditPreviewAria: "Inhaltsvorschau",
+    adminWikiEditPreviewTitle: "Vorschau (wie im öffentlichen Wiki)",
+    adminWikiEditPreviewShow: "Vorschau anzeigen",
+    adminWikiEditPreviewHide: "Vorschau ausblenden",
+    adminWikiEditPreviewUntitled: "(Ohne Titel)",
+    adminWikiEditMissingFieldsPrefix: "Fehlende Pflichtfelder:",
+    adminWikiEditMissingFieldsSuffix:
+      "Fülle sie aus, um die Schaltfläche \"Speichern\" zu aktivieren.",
+    adminWikiEditUnsavedChangesWarning: "Es gibt ungespeicherte Änderungen.",
+    adminWikiEditUnsavedChangesConfirm:
+      "Du hast ungespeicherte Änderungen. Möchtest du die Seite wirklich verlassen?",
+    adminWikiEditMediaSectionAria: "Artikelbilder",
+    adminWikiEditMediaSectionTitle: "Artikelbilder",
+    adminWikiEditMediaSectionDescription:
+      "Lade Bilder hoch, die du im Markdown-Inhalt oben referenzieren möchtest. Nach dem Upload siehst du eine URL, die du in den Text einfügen kannst.",
+    adminWikiEditNeedArticleIdHint:
+      "Stelle zuerst sicher, dass der Artikel gespeichert ist und eine Artikel-ID hat.",
+    adminWikiEditMediaLoading: "Bilder werden geladen...",
+    adminWikiEditUploadedImagesTitle: "Hochgeladene Bilder",
+    adminWikiEditUploadedImagesNoArticleId:
+      "Es gibt noch keine Artikel-ID. Lade den Artikel neu oder warte, bis er vollständig geladen ist.",
+    adminWikiEditUploadedImagesEmpty:
+      "Noch keine Bilder für diesen Artikel hochgeladen.",
+    adminWikiEditMediaInsert: "Einfügen",
+    adminWikiEditMediaCopyMarkdown: "Markdown kopieren",
+    adminWikiEditMediaDelete: "Löschen",
+    adminWikiEditVersionsAria: "Artikelversionen",
+    adminWikiEditVersionsTitle: "Artikelversionen",
+    adminWikiEditVersionsHighlight: "Hier ansehen",
+    adminWikiEditVersionsLoading: "Versionen werden geladen...",
+    adminWikiEditVersionsEmpty:
+      "Keine Versionen für diese Sprache verfügbar.",
+    adminWikiEditVersionsCompareHeader: "Vergleichen",
+    adminWikiEditVersionsSelectLabel: "auswählen",
+    adminWikiEditVersionsColVersion: "Version",
+    adminWikiEditVersionsColLanguage: "Sprache",
+    adminWikiEditVersionsColTitle: "Titel",
+    adminWikiEditVersionsColSubtitle: "Untertitel",
+    adminWikiEditVersionsColCreatedAt: "Erstellt am",
+    adminWikiEditVersionsColCreatedBy: "Erstellt von",
+    adminWikiEditVersionsColActions: "Aktionen",
+    adminWikiEditVersionsActionPreview: "Vorschau",
+    adminWikiEditVersionsCurrent: "Aktuell",
+    adminWikiEditVersionsRollback: "Wiederherstellen",
+    adminWikiEditVersionsRollbacking: "Wird wiederhergestellt...",
+    adminWikiEditVersionsDelete: "Löschen",
+    adminWikiEditVersionsCompareHelp:
+      "Wähle zwei Versionen (gleiche Sprache), um sie zu vergleichen.",
+    adminWikiEditPageLabel: "Seite",
+    adminWikiEditOfLabel: "von",
+    adminWikiEditVersionsCountLabel: "Versionen",
+    adminWikiEditVersionsCompareSelected: "Ausgewählte vergleichen",
+    adminWikiEditVersionsDeleteSelected: "Ausgewählte löschen",
+    adminWikiEditCompareAria: "Versionsvergleich",
+    adminWikiEditCompareTitle: "Versionsvergleich",
+    adminWikiEditCompareSubtitle:
+      "Links: ältere Version. Rechts: neuere Version.",
+    adminWikiEditCompareClear: "Vergleich löschen",
+    adminWikiEditCompareOlder: "Älter",
+    adminWikiEditCompareNewer: "Neuer",
+    adminWikiEditCompareVersionLabel: "Version",
+    adminWikiEditCompareFieldTitle: "Titel:",
+    adminWikiEditCompareFieldSubtitle: "Untertitel:",
+    adminWikiEditCompareLegendToken: "Text",
+    adminWikiEditCompareLegendRemoved: "= entfernte Text,",
+    adminWikiEditCompareLegendAdded: "= hinzugefügter Text.",
+    adminWikiEditViewVersionTitlePrefix: "Version anzeigen",
+    adminWikiEditViewVersionCreatedAt: "Erstellt am",
+    adminWikiEditViewVersionBy: "von",
+    adminWikiEditDeleteVersionTitle: "Version löschen",
+    adminWikiEditDeleteVersionDescription:
+      "Diese Version wird dauerhaft aus dem Verlauf entfernt. Diese Aktion kann nicht rückgängig gemacht werden und kann die Nachvollziehbarkeit beeinträchtigen.",
+    adminWikiEditDeleteVersionConfirmTitle:
+      "Löschen der Version bestätigen",
+    adminWikiEditDeleteVersionConfirmDescription:
+      "Möchtest du diese Version wirklich löschen? Diese Aktion ist endgültig und kann nicht rückgängig gemacht werden.",
+    adminWikiEditDeleteVersionConfirmMetaPrefix: "Version",
+    adminWikiEditDeleteVersionConfirmMetaCreatedAt: "erstellt am",
+    adminWikiEditDeleteVersionCurrentActiveError:
+      "Die aktuelle aktive Version kann nicht gelöscht werden.",
+    adminWikiEditDeleteVersionLastVersionError:
+      "Diese Version kann nicht gelöscht werden, da sie die letzte verbleibende Version ist.",
+    adminWikiEditDeleteVersionNotFound:
+      "Die Version oder der Artikel wurde nicht gefunden.",
+    adminWikiEditDeleteVersionError:
+      "Beim Löschen der Version ist ein Fehler aufgetreten.",
+    adminWikiEditDeleteVersionConfirmButton: "Ja, Version löschen",
+    adminWikiEditBulkDeleteTitle: "Ausgewählte Versionen löschen",
+    adminWikiEditBulkDeleteDescriptionPrefix:
+      "Du bist dabei, dauerhaft zu löschen",
+    adminWikiEditBulkDeleteDescriptionSuffix:
+      "Versionen aus dem Artikelverlauf. Diese Aktion kann nicht rückgängig gemacht werden und kann die Nachvollziehbarkeit beeinträchtigen.",
+    adminWikiEditBulkDeleteConfirmTitle:
+      "Löschen der ausgewählten Versionen bestätigen",
+    adminWikiEditBulkDeleteConfirmDescription:
+      "Möchtest du die ausgewählten Versionen wirklich löschen? Diese Aktion ist endgültig und kann nicht rückgängig gemacht werden.",
+    adminWikiEditBulkDeletePartialError:
+      "Einige Versionen konnten nicht gelöscht werden. Die Versionsliste wird aktualisiert.",
+    adminWikiEditBulkDeleteError:
+      "Beim Löschen der ausgewählten Versionen ist ein Fehler aufgetreten.",
+    adminWikiEditBulkDeleteConfirmButton: "Ja, ausgewählte Versionen löschen",
+  },
+  es: {
+    adminErrorMissingApiAccess:
+      "Falta acceso a la API de administración. Inicia sesión de nuevo como administrador.",
+    adminWikiCancel: "Cancelar",
+    adminWikiOk: "OK",
+    adminWikiClose: "Cerrar",
+    adminWikiManagementTitle: "Gestión de Wiki",
+    adminWikiManagementInfoLabel: "Info",
+    adminWikiManagementInfoDescription:
+      "Gestiona artículos Wiki: crear, buscar, filtrar, cambiar estado, exportar y versionar.",
+    adminWikiManagementSubtitle: "Lista y gestión de artículos Wiki.",
+    adminWikiCreateNewArticle: "Crear nuevo artículo",
+    adminWikiSearchPlaceholder: "Buscar por título o slug...",
+    adminWikiFilterLanguage: "Filtrar por idioma",
+    adminWikiAllLanguages: "Todos los idiomas",
+    adminWikiFilterStatus: "Filtrar por estado",
+    adminWikiAllStatus: "Todos los estados",
+    adminWikiExportCsv: "Exportar CSV",
+    adminWikiLoadingList: "Cargando lista...",
+    adminWikiEmptyList: "No hay artículos Wiki para mostrar.",
+    adminWikiLoadError:
+      "Ocurrió un error al cargar la lista de Admin Wiki.",
+    adminWikiStatusUpdateError:
+      "Ocurrió un error al cambiar el estado del artículo.",
+    adminWikiSelectedPrefix: "Seleccionados",
+    adminWikiSelectAllVisible: "Seleccionar todos los visibles",
+    adminWikiSelectArticle: "Seleccionar artículo",
+    adminWikiIdPrefix: "ID",
+    adminWikiDeleteSelected: "Eliminar seleccionados",
+    adminWikiBulkStatus: "Estado masivo...",
+    adminWikiBulkStatusPlaceholder: "Estado masivo...",
+    adminWikiDeleteAll: "Eliminar todo",
+    adminWikiSelectedCountLabel: "Cantidad seleccionada",
+    adminWikiBulkDeleteTitle: "Eliminar artículos seleccionados",
+    adminWikiBulkDeleteDescription:
+      "Los artículos seleccionados se eliminarán permanentemente (incluidas todas las versiones). Esta acción no se puede deshacer.",
+    adminWikiDeleteConfirm: "Eliminar",
+    adminWikiBulkDeleteError:
+      "Ocurrió un error durante la eliminación masiva.",
+    adminWikiBulkStatusTitle: "Cambiar estado",
+    adminWikiBulkStatusDescription:
+      "Esto cambiará el estado de todos los artículos seleccionados.",
+    adminWikiBulkStatusNewStatusLabel: "Nuevo estado",
+    adminWikiBulkStatusError:
+      "Ocurrió un error durante el cambio masivo de estado.",
+    adminWikiPurgeAllTitle: "Eliminar todos los artículos",
+    adminWikiPurgeAllDescriptionPrefix:
+      "Vas a eliminar TODOS los artículos wiki",
+    adminWikiPurgeAllDescriptionSuffix:
+      "Esta acción no se puede deshacer.",
+    adminWikiPurgeAllConfirm: "Eliminar todo",
+    adminWikiPurgeAllError:
+      "Ocurrió un error al eliminar todos los artículos.",
+    adminWikiActionEdit: "Editar",
+    adminWikiActionVersions: "Versiones",
+    adminWikiStatusUpdating: "Actualizando...",
+    adminWikiActionActivate: "Activar",
+    adminWikiActionDeactivate: "Desactivar",
+    adminWikiCreateSlugRequired:
+      "Introduce un slug para el artículo.",
+    adminWikiCreateInvalidOrExists:
+      "Datos inválidos o el slug ya existe.",
+    adminWikiCreateError: "Ocurrió un error al crear el artículo.",
+    adminWikiCreateSuccess: "El artículo se creó correctamente.",
+    adminWikiCreateIntro:
+      "Introduce solo el slug de un nuevo artículo Wiki. El idioma, el estado y el contenido se configuran más tarde en la página de edición.",
+    adminWikiBackToList: "Volver a la lista",
+    adminWikiCreateBasicInformation: "Información básica",
+    adminWikiCreateSlugLabel: "Slug",
+    adminWikiCreateSlugPlaceholder: "manual-testing-intro",
+    adminWikiCreateTagsLabel: "Etiquetas (separadas por comas)",
+    adminWikiCreateTagsPlaceholder: "intro, basics, setup",
+    adminWikiCreateArticleIdLabel: "ID del artículo (solo lectura)",
+    adminWikiCreateArticleIdPlaceholder: "Se genera automáticamente al guardar",
+    adminWikiCreateFooterNote:
+      "Los artículos creados aquí se almacenan en la base de datos de BeeLMS (entorno de desarrollo).",
+    adminWikiCreateSaving: "Guardando...",
+    adminWikiCreateArticleSaved: "Artículo guardado",
+    adminWikiCreateSaveArticle: "Guardar artículo",
+    adminWikiCreateAlreadyCreatedNote:
+      "Este artículo ya existe. Usa la página de edición para hacer cambios.",
+    adminWikiEditRichEditorLoading: "Cargando editor enriquecido...",
+    adminWikiEditTitle: "Editar artículo Wiki",
+    adminWikiEditSubtitle:
+      "Revisar y editar el contenido de un artículo Wiki seleccionado.",
+    adminWikiEditBreadcrumbFallback: "Editar",
+    adminWikiEditOpenPublicPage: "Abrir página pública",
+    adminWikiEditPublicVisibleHintPrefix: "El artículo debe tener el estado",
+    adminWikiEditPublicVisibleHintSuffix:
+      "para ser visible públicamente.",
+    adminWikiEditLoading: "Cargando artículo para editar...",
+    adminWikiEditLanguageLabel: "Idioma",
+    adminWikiEditLanguageAria: "Idioma del artículo Wiki",
+    adminWikiEditLanguageHelp:
+      "Cambiar el idioma carga o crea una versión de contenido separada para el idioma seleccionado.",
+    adminWikiEditStatusLabel: "Estado",
+    adminWikiEditStatusAria: "Estado del artículo Wiki",
+    adminWikiEditTitleLabel: "Título",
+    adminWikiEditSubtitleLabel: "Subtítulo (opcional)",
+    adminWikiEditTagsLabel: "Etiquetas (separadas por comas)",
+    adminWikiEditTagsExamplePrefix: "Ejemplo",
+    adminWikiEditContentLabel: "Contenido",
+    adminWikiEditEditorModeLabel: "Modo de edición:",
+    adminWikiEditEditorModeMarkdown: "Markdown",
+    adminWikiEditEditorModeRichText: "Texto enriquecido",
+    adminWikiEditRequiredFieldSrOnly: "(campo obligatorio)",
+    adminWikiEditTitleRequiredError:
+      "El título es obligatorio. Introduce texto.",
+    adminWikiEditContentRequiredError:
+      "El contenido es obligatorio. Añade texto antes de guardar.",
+    adminWikiEditRequiredFieldTitle: "Título",
+    adminWikiEditRequiredFieldContent: "Contenido",
+    adminWikiEditSaveDisabledNoChanges:
+      "El botón Guardar se activa cuando cambias algún campo.",
+    adminWikiEditSaveDisabledMissingFields:
+      "Completa los campos obligatorios para guardar.",
+    adminWikiEditSave: "Guardar",
+    adminWikiEditSaving: "Guardando...",
+    adminWikiEditInvalidData:
+      "Datos del artículo inválidos. Revisa los campos.",
+    adminWikiEditSaveError: "Ocurrió un error al guardar los cambios.",
+    adminWikiEditSaveSuccess: "Cambios guardados correctamente.",
+    adminWikiEditMissingArticleId:
+      "Falta el ID del artículo. Recarga la página.",
+    adminWikiEditMediaLoadError:
+      "Ocurrió un error al cargar las imágenes.",
+    adminWikiEditVersionsLoadError:
+      "Ocurrió un error al cargar las versiones.",
+    adminWikiEditUploadImage: "Subir imagen",
+    adminWikiEditUploading: "Subiendo...",
+    adminWikiEditUploadImageError:
+      "Ocurrió un error al subir la imagen.",
+    adminWikiEditDeleteMediaConfirm:
+      "¿Seguro que quieres eliminar esta imagen?",
+    adminWikiEditDeleteMediaError:
+      "Ocurrió un error al eliminar la imagen.",
+    adminWikiEditClipboardUnavailable:
+      "La API del portapapeles no está disponible en este navegador.",
+    adminWikiEditMarkdownCopied:
+      "El fragmento Markdown se copió al portapapeles.",
+    adminWikiEditMarkdownCopyFailed:
+      "No se pudo copiar el fragmento Markdown.",
+    adminWikiEditRollbackConfirm:
+      "¿Seguro que quieres restaurar el artículo a esta versión?",
+    adminWikiEditRollbackNotFound:
+      "No se encontró la versión o el artículo seleccionado.",
+    adminWikiEditRollbackInvalidRequest:
+      "Solicitud de restauración inválida. Inténtalo de nuevo.",
+    adminWikiEditRollbackError:
+      "Ocurrió un error al restaurar la versión.",
+    adminWikiEditRollbackSuccess:
+      "El artículo se restauró a la versión seleccionada.",
+    adminWikiEditCompareSameLangError:
+      "Solo puedes comparar versiones del mismo idioma.",
+    adminWikiEditMermaidHelp:
+      "Para diagramas, usa un bloque de código con lenguaje mermaid (por ejemplo, ```mermaid ... ```). Los diagramas aparecerán en la vista previa y en la Wiki pública.",
+    adminWikiEditCaptionHelp:
+      "Para un pie de imagen: inserta la imagen y en la siguiente línea añade el texto (opcionalmente en cursiva), por ejemplo: ![Alt](url) *Caption*.",
+    adminWikiEditPreviewAria: "Vista previa del contenido",
+    adminWikiEditPreviewTitle: "Vista previa (como en la Wiki pública)",
+    adminWikiEditPreviewShow: "Mostrar vista previa",
+    adminWikiEditPreviewHide: "Ocultar vista previa",
+    adminWikiEditPreviewUntitled: "(Sin título)",
+    adminWikiEditMissingFieldsPrefix: "Faltan campos obligatorios:",
+    adminWikiEditMissingFieldsSuffix:
+      "Complétalos para habilitar el botón \"Guardar\".",
+    adminWikiEditUnsavedChangesWarning: "Hay cambios sin guardar.",
+    adminWikiEditUnsavedChangesConfirm:
+      "Tienes cambios sin guardar. ¿Seguro que quieres salir de la página?",
+    adminWikiEditMediaSectionAria: "Imágenes del artículo",
+    adminWikiEditMediaSectionTitle: "Imágenes del artículo",
+    adminWikiEditMediaSectionDescription:
+      "Sube imágenes que quieras referenciar desde el contenido Markdown de arriba. Tras subirlas verás una URL que puedes pegar en el texto.",
+    adminWikiEditNeedArticleIdHint:
+      "Primero asegúrate de que el artículo está guardado y tiene un ID.",
+    adminWikiEditMediaLoading: "Cargando imágenes...",
+    adminWikiEditUploadedImagesTitle: "Imágenes subidas",
+    adminWikiEditUploadedImagesNoArticleId:
+      "Todavía no hay ID de artículo. Recarga el artículo o espera a que cargue completamente.",
+    adminWikiEditUploadedImagesEmpty:
+      "Aún no hay imágenes subidas para este artículo.",
+    adminWikiEditMediaInsert: "Insertar",
+    adminWikiEditMediaCopyMarkdown: "Copiar Markdown",
+    adminWikiEditMediaDelete: "Eliminar",
+    adminWikiEditVersionsAria: "Versiones del artículo",
+    adminWikiEditVersionsTitle: "Versiones del artículo",
+    adminWikiEditVersionsHighlight: "Mira aquí",
+    adminWikiEditVersionsLoading: "Cargando versiones...",
+    adminWikiEditVersionsEmpty:
+      "No hay versiones disponibles para este idioma.",
+    adminWikiEditVersionsCompareHeader: "Comparar",
+    adminWikiEditVersionsSelectLabel: "seleccionar",
+    adminWikiEditVersionsColVersion: "Versión",
+    adminWikiEditVersionsColLanguage: "Idioma",
+    adminWikiEditVersionsColTitle: "Título",
+    adminWikiEditVersionsColSubtitle: "Subtítulo",
+    adminWikiEditVersionsColCreatedAt: "Creada el",
+    adminWikiEditVersionsColCreatedBy: "Creada por",
+    adminWikiEditVersionsColActions: "Acciones",
+    adminWikiEditVersionsActionPreview: "Vista previa",
+    adminWikiEditVersionsCurrent: "Actual",
+    adminWikiEditVersionsRollback: "Restaurar",
+    adminWikiEditVersionsRollbacking: "Restaurando...",
+    adminWikiEditVersionsDelete: "Eliminar",
+    adminWikiEditVersionsCompareHelp:
+      "Selecciona dos versiones (mismo idioma) para compararlas.",
+    adminWikiEditPageLabel: "Página",
+    adminWikiEditOfLabel: "de",
+    adminWikiEditVersionsCountLabel: "versiones",
+    adminWikiEditVersionsCompareSelected: "Comparar seleccionadas",
+    adminWikiEditVersionsDeleteSelected: "Eliminar seleccionadas",
+    adminWikiEditCompareAria: "Comparación de versiones",
+    adminWikiEditCompareTitle: "Comparación de versiones",
+    adminWikiEditCompareSubtitle:
+      "Izquierda: versión más antigua. Derecha: versión más reciente.",
+    adminWikiEditCompareClear: "Borrar comparación",
+    adminWikiEditCompareOlder: "Más antigua",
+    adminWikiEditCompareNewer: "Más reciente",
+    adminWikiEditCompareVersionLabel: "Versión",
+    adminWikiEditCompareFieldTitle: "Título:",
+    adminWikiEditCompareFieldSubtitle: "Subtítulo:",
+    adminWikiEditCompareLegendToken: "texto",
+    adminWikiEditCompareLegendRemoved: "= texto eliminado,",
+    adminWikiEditCompareLegendAdded: "= texto añadido.",
+    adminWikiEditViewVersionTitlePrefix: "Vista previa de la versión",
+    adminWikiEditViewVersionCreatedAt: "Creada el",
+    adminWikiEditViewVersionBy: "por",
+    adminWikiEditDeleteVersionTitle: "Eliminar versión",
+    adminWikiEditDeleteVersionDescription:
+      "Esta versión se eliminará permanentemente del historial. Esta acción no se puede deshacer y puede afectar la trazabilidad.",
+    adminWikiEditDeleteVersionConfirmTitle:
+      "Confirmar eliminación de la versión",
+    adminWikiEditDeleteVersionConfirmDescription:
+      "¿Seguro que quieres eliminar esta versión? Esta acción es permanente y no se puede deshacer.",
+    adminWikiEditDeleteVersionConfirmMetaPrefix: "Versión",
+    adminWikiEditDeleteVersionConfirmMetaCreatedAt: "creada el",
+    adminWikiEditDeleteVersionCurrentActiveError:
+      "La versión activa actual no se puede eliminar.",
+    adminWikiEditDeleteVersionLastVersionError:
+      "Esta versión no se puede eliminar porque es la última versión restante.",
+    adminWikiEditDeleteVersionNotFound:
+      "No se encontró la versión o el artículo.",
+    adminWikiEditDeleteVersionError:
+      "Ocurrió un error al eliminar la versión.",
+    adminWikiEditDeleteVersionConfirmButton: "Sí, eliminar versión",
+    adminWikiEditBulkDeleteTitle: "Eliminar versiones seleccionadas",
+    adminWikiEditBulkDeleteDescriptionPrefix:
+      "Vas a eliminar permanentemente",
+    adminWikiEditBulkDeleteDescriptionSuffix:
+      "versiones del historial. Esta acción no se puede deshacer y puede afectar la trazabilidad.",
+    adminWikiEditBulkDeleteConfirmTitle:
+      "Confirmar eliminación de versiones seleccionadas",
+    adminWikiEditBulkDeleteConfirmDescription:
+      "¿Seguro que quieres eliminar las versiones seleccionadas? Esta acción es permanente y no se puede deshacer.",
+    adminWikiEditBulkDeletePartialError:
+      "Algunas versiones no se pudieron eliminar. La lista de versiones se actualizará.",
+    adminWikiEditBulkDeleteError:
+      "Ocurrió un error al eliminar las versiones seleccionadas.",
+    adminWikiEditBulkDeleteConfirmButton:
+      "Sí, eliminar versiones seleccionadas",
+  },
+  pt: {
+    adminErrorMissingApiAccess:
+      "Falta acesso à Admin API. Inicie sessão novamente como administrador.",
+    adminWikiCancel: "Cancelar",
+    adminWikiOk: "OK",
+    adminWikiClose: "Fechar",
+    adminWikiManagementTitle: "Gestão da Wiki",
+    adminWikiManagementInfoLabel: "Info",
+    adminWikiManagementInfoDescription:
+      "Gerir artigos da Wiki: criar, pesquisar, filtrar, alterar estado, exportar e versões.",
+    adminWikiManagementSubtitle: "Lista e gestão de artigos da Wiki.",
+    adminWikiCreateNewArticle: "Criar novo artigo",
+    adminWikiSearchPlaceholder: "Pesquisar por título ou slug...",
+    adminWikiFilterLanguage: "Filtrar por idioma",
+    adminWikiAllLanguages: "Todos os idiomas",
+    adminWikiFilterStatus: "Filtrar por estado",
+    adminWikiAllStatus: "Todos os estados",
+    adminWikiExportCsv: "Exportar CSV",
+    adminWikiLoadingList: "A carregar lista...",
+    adminWikiEmptyList: "Não há artigos da Wiki para mostrar.",
+    adminWikiLoadError: "Ocorreu um erro ao carregar a lista da Admin Wiki.",
+    adminWikiStatusUpdateError:
+      "Ocorreu um erro ao atualizar o estado do artigo.",
+    adminWikiSelectedPrefix: "Selecionados",
+    adminWikiSelectAllVisible: "Selecionar todos os visíveis",
+    adminWikiSelectArticle: "Selecionar artigo",
+    adminWikiIdPrefix: "ID",
+    adminWikiDeleteSelected: "Eliminar selecionados",
+    adminWikiBulkStatus: "Estado em massa...",
+    adminWikiBulkStatusPlaceholder: "Estado em massa...",
+    adminWikiDeleteAll: "Eliminar tudo",
+    adminWikiSelectedCountLabel: "Selecionados",
+    adminWikiBulkDeleteTitle: "Eliminar artigos selecionados",
+    adminWikiBulkDeleteDescription:
+      "Os artigos selecionados serão eliminados permanentemente (incluindo todas as versões). Esta ação não pode ser anulada.",
+    adminWikiDeleteConfirm: "Eliminar",
+    adminWikiBulkDeleteError: "Ocorreu um erro na eliminação em massa.",
+    adminWikiBulkStatusTitle: "Alterar estado",
+    adminWikiBulkStatusDescription:
+      "Isto irá alterar o estado de todos os artigos selecionados.",
+    adminWikiBulkStatusNewStatusLabel: "Novo estado",
+    adminWikiBulkStatusError:
+      "Ocorreu um erro ao atualizar o estado em massa.",
+    adminWikiPurgeAllTitle: "Eliminar todos os artigos",
+    adminWikiPurgeAllDescriptionPrefix:
+      "Está prestes a eliminar TODOS os artigos wiki",
+    adminWikiPurgeAllDescriptionSuffix: "Esta ação não pode ser anulada.",
+    adminWikiPurgeAllConfirm: "Eliminar tudo",
+    adminWikiPurgeAllError: "Ocorreu um erro ao eliminar todos os artigos.",
+    adminWikiActionEdit: "Editar",
+    adminWikiActionVersions: "Versões",
+    adminWikiStatusUpdating: "A atualizar...",
+    adminWikiActionActivate: "Ativar",
+    adminWikiActionDeactivate: "Desativar",
+    adminWikiCreateSlugRequired: "Introduza um slug para o artigo.",
+    adminWikiCreateInvalidOrExists: "Dados inválidos ou o slug já existe.",
+    adminWikiCreateError: "Ocorreu um erro ao criar o artigo.",
+    adminWikiCreateSuccess: "O artigo foi criado com sucesso.",
+    adminWikiCreateIntro:
+      "Introduza apenas o slug para um novo artigo da Wiki. Idioma, estado e conteúdo são definidos mais tarde na página de edição.",
+    adminWikiBackToList: "Voltar à lista",
+    adminWikiCreateBasicInformation: "Informações básicas",
+    adminWikiCreateSlugLabel: "Slug",
+    adminWikiCreateSlugPlaceholder: "manual-testing-intro",
+    adminWikiCreateTagsLabel: "Tags (separadas por vírgulas)",
+    adminWikiCreateTagsPlaceholder: "intro, basics, setup",
+    adminWikiCreateArticleIdLabel: "ID do artigo (apenas leitura)",
+    adminWikiCreateArticleIdPlaceholder: "Gerado automaticamente ao guardar",
+    adminWikiCreateFooterNote:
+      "Os artigos criados aqui são armazenados na base de dados BeeLMS (ambiente de desenvolvimento).",
+    adminWikiCreateSaving: "A guardar...",
+    adminWikiCreateArticleSaved: "Artigo guardado",
+    adminWikiCreateSaveArticle: "Guardar artigo",
+    adminWikiCreateAlreadyCreatedNote:
+      "Este artigo já foi criado. Use a página de edição para fazer alterações.",
+    adminWikiEditRichEditorLoading: "A carregar editor rich...",
+    adminWikiEditTitle: "Editar artigo da Wiki",
+    adminWikiEditSubtitle:
+      "Rever e editar o conteúdo de um artigo da Wiki selecionado.",
+    adminWikiEditBreadcrumbFallback: "Editar",
+    adminWikiEditOpenPublicPage: "Abrir página pública",
+    adminWikiEditPublicVisibleHintPrefix: "O artigo deve ter o estado",
+    adminWikiEditPublicVisibleHintSuffix: "para estar visível publicamente.",
+    adminWikiEditLoading: "A carregar artigo para edição...",
+    adminWikiEditLanguageLabel: "Idioma",
+    adminWikiEditLanguageAria: "Idioma do artigo da Wiki",
+    adminWikiEditLanguageHelp:
+      "Alterar o idioma carrega ou cria uma versão de conteúdo separada para o idioma selecionado.",
+    adminWikiEditStatusLabel: "Estado",
+    adminWikiEditStatusAria: "Estado do artigo da Wiki",
+    adminWikiEditTitleLabel: "Título",
+    adminWikiEditSubtitleLabel: "Subtítulo (opcional)",
+    adminWikiEditTagsLabel: "Tags (separadas por vírgulas)",
+    adminWikiEditTagsExamplePrefix: "Exemplo",
+    adminWikiEditContentLabel: "Conteúdo",
+    adminWikiEditEditorModeLabel: "Modo de edição:",
+    adminWikiEditEditorModeMarkdown: "Markdown",
+    adminWikiEditEditorModeRichText: "Rich text",
+    adminWikiEditRequiredFieldSrOnly: "(campo obrigatório)",
+    adminWikiEditTitleRequiredError:
+      "O título é obrigatório. Introduza texto.",
+    adminWikiEditContentRequiredError:
+      "O conteúdo é obrigatório. Adicione texto antes de guardar.",
+    adminWikiEditRequiredFieldTitle: "Título",
+    adminWikiEditRequiredFieldContent: "Conteúdo",
+    adminWikiEditSaveDisabledNoChanges:
+      "O botão Guardar fica ativo após alterar um campo.",
+    adminWikiEditSaveDisabledMissingFields:
+      "Preencha os campos obrigatórios para guardar.",
+    adminWikiEditSave: "Guardar",
+    adminWikiEditSaving: "A guardar...",
+    adminWikiEditInvalidData:
+      "Dados do artigo inválidos. Verifique os campos.",
+    adminWikiEditSaveError: "Ocorreu um erro ao guardar as alterações.",
+    adminWikiEditSaveSuccess: "Alterações guardadas com sucesso.",
+    adminWikiEditMissingArticleId: "Falta o ID do artigo. Recarregue a página.",
+    adminWikiEditMediaLoadError: "Ocorreu um erro ao carregar as imagens.",
+    adminWikiEditVersionsLoadError: "Ocorreu um erro ao carregar as versões.",
+    adminWikiEditUploadImage: "Carregar imagem",
+    adminWikiEditUploading: "A carregar...",
+    adminWikiEditUploadImageError: "Ocorreu um erro ao carregar a imagem.",
+    adminWikiEditDeleteMediaConfirm:
+      "Tem a certeza de que pretende eliminar esta imagem?",
+    adminWikiEditDeleteMediaError: "Ocorreu um erro ao eliminar a imagem.",
+    adminWikiEditClipboardUnavailable:
+      "A API da área de transferência não está disponível neste navegador.",
+    adminWikiEditMarkdownCopied:
+      "Snippet Markdown copiado para a área de transferência.",
+    adminWikiEditMarkdownCopyFailed:
+      "Falha ao copiar o snippet Markdown.",
+    adminWikiEditRollbackConfirm:
+      "Tem a certeza de que pretende restaurar o artigo para esta versão?",
+    adminWikiEditRollbackNotFound: "A versão selecionada ou o artigo não foi encontrado.",
+    adminWikiEditRollbackInvalidRequest:
+      "Pedido de restauro inválido. Tente novamente.",
+    adminWikiEditRollbackError: "Ocorreu um erro ao restaurar a versão.",
+    adminWikiEditRollbackSuccess: "O artigo foi restaurado para a versão selecionada.",
+    adminWikiEditCompareSameLangError:
+      "Só pode comparar versões do mesmo idioma.",
+    adminWikiEditMermaidHelp:
+      "Para diagramas, use um bloco de código com linguagem mermaid (ex.: ```mermaid ... ```). Os diagramas aparecerão na pré-visualização e na Wiki pública.",
+    adminWikiEditCaptionHelp:
+      "Para legenda de imagem: insira a imagem e na linha seguinte adicione o texto (opcionalmente em itálico), ex.: ![Alt](url) *Caption*.",
+    adminWikiEditPreviewAria: "Pré-visualização do conteúdo",
+    adminWikiEditPreviewTitle: "Pré-visualização (como na Wiki pública)",
+    adminWikiEditPreviewShow: "Mostrar pré-visualização",
+    adminWikiEditPreviewHide: "Ocultar pré-visualização",
+    adminWikiEditPreviewUntitled: "(Sem título)",
+    adminWikiEditMissingFieldsPrefix: "Faltam campos obrigatórios:",
+    adminWikiEditMissingFieldsSuffix:
+      "Preencha-os para ativar o botão \"Guardar\".",
+    adminWikiEditUnsavedChangesWarning: "Existem alterações não guardadas.",
+    adminWikiEditUnsavedChangesConfirm:
+      "Tem alterações não guardadas. Tem a certeza de que pretende sair da página?",
+    adminWikiEditMediaSectionAria: "Imagens do artigo",
+    adminWikiEditMediaSectionTitle: "Imagens do artigo",
+    adminWikiEditMediaSectionDescription:
+      "Carregue imagens que pretende referenciar no conteúdo Markdown acima. Após o carregamento verá um URL que pode colar no texto.",
+    adminWikiEditNeedArticleIdHint:
+      "Certifique-se primeiro de que o artigo está guardado e tem um ID.",
+    adminWikiEditMediaLoading: "A carregar imagens...",
+    adminWikiEditUploadedImagesTitle: "Imagens carregadas",
+    adminWikiEditUploadedImagesNoArticleId:
+      "Ainda não existe um ID do artigo. Recarregue o artigo ou aguarde até carregar completamente.",
+    adminWikiEditUploadedImagesEmpty:
+      "Ainda não há imagens carregadas para este artigo.",
+    adminWikiEditMediaInsert: "Inserir",
+    adminWikiEditMediaCopyMarkdown: "Copiar markdown",
+    adminWikiEditMediaDelete: "Eliminar",
+    adminWikiEditVersionsAria: "Versões do artigo",
+    adminWikiEditVersionsTitle: "Versões do artigo",
+    adminWikiEditVersionsHighlight: "Ver aqui",
+    adminWikiEditVersionsLoading: "A carregar versões...",
+    adminWikiEditVersionsEmpty: "Não existem versões disponíveis para este idioma.",
+    adminWikiEditVersionsCompareHeader: "Comparar",
+    adminWikiEditVersionsSelectLabel: "selecionar",
+    adminWikiEditVersionsColVersion: "Versão",
+    adminWikiEditVersionsColLanguage: "Idioma",
+    adminWikiEditVersionsColTitle: "Título",
+    adminWikiEditVersionsColSubtitle: "Subtítulo",
+    adminWikiEditVersionsColCreatedAt: "Criada em",
+    adminWikiEditVersionsColCreatedBy: "Criada por",
+    adminWikiEditVersionsColActions: "Ações",
+    adminWikiEditVersionsActionPreview: "Pré-visualização",
+    adminWikiEditVersionsCurrent: "Atual",
+    adminWikiEditVersionsRollback: "Restaurar",
+    adminWikiEditVersionsRollbacking: "A restaurar...",
+    adminWikiEditVersionsDelete: "Eliminar",
+    adminWikiEditVersionsCompareHelp:
+      "Selecione duas versões (mesmo idioma) para as comparar.",
+    adminWikiEditPageLabel: "Página",
+    adminWikiEditOfLabel: "de",
+    adminWikiEditVersionsCountLabel: "versões",
+    adminWikiEditVersionsCompareSelected: "Comparar selecionadas",
+    adminWikiEditVersionsDeleteSelected: "Eliminar selecionadas",
+    adminWikiEditCompareAria: "Comparação de versões",
+    adminWikiEditCompareTitle: "Comparação de versões",
+    adminWikiEditCompareSubtitle:
+      "Esquerda: versão mais antiga. Direita: versão mais recente.",
+    adminWikiEditCompareClear: "Limpar comparação",
+    adminWikiEditCompareOlder: "Mais antiga",
+    adminWikiEditCompareNewer: "Mais recente",
+    adminWikiEditCompareVersionLabel: "Versão",
+    adminWikiEditCompareFieldTitle: "Título:",
+    adminWikiEditCompareFieldSubtitle: "Subtítulo:",
+    adminWikiEditCompareLegendToken: "texto",
+    adminWikiEditCompareLegendRemoved: "= texto removido,",
+    adminWikiEditCompareLegendAdded: "= texto adicionado.",
+    adminWikiEditViewVersionTitlePrefix: "Pré-visualizar versão",
+    adminWikiEditViewVersionCreatedAt: "Criada em",
+    adminWikiEditViewVersionBy: "por",
+    adminWikiEditDeleteVersionTitle: "Eliminar versão",
+    adminWikiEditDeleteVersionDescription:
+      "Esta versão será removida permanentemente do histórico do artigo. Esta ação não pode ser anulada e pode afetar a rastreabilidade.",
+    adminWikiEditDeleteVersionConfirmTitle:
+      "Confirmar eliminação da versão",
+    adminWikiEditDeleteVersionConfirmDescription:
+      "Tem a certeza de que pretende eliminar esta versão? Esta ação é permanente e não pode ser anulada.",
+    adminWikiEditDeleteVersionConfirmMetaPrefix: "Versão",
+    adminWikiEditDeleteVersionConfirmMetaCreatedAt: "criada em",
+    adminWikiEditDeleteVersionCurrentActiveError:
+      "A versão ativa atual não pode ser eliminada.",
+    adminWikiEditDeleteVersionLastVersionError:
+      "Esta versão não pode ser eliminada porque é a última versão restante.",
+    adminWikiEditDeleteVersionNotFound: "A versão ou o artigo não foi encontrado.",
+    adminWikiEditDeleteVersionError: "Ocorreu um erro ao eliminar a versão.",
+    adminWikiEditDeleteVersionConfirmButton: "Sim, eliminar versão",
+    adminWikiEditBulkDeleteTitle: "Eliminar versões selecionadas",
+    adminWikiEditBulkDeleteDescriptionPrefix:
+      "Está prestes a eliminar permanentemente",
+    adminWikiEditBulkDeleteDescriptionSuffix:
+      "versões do histórico do artigo. Esta ação não pode ser anulada e pode afetar a rastreabilidade.",
+    adminWikiEditBulkDeleteConfirmTitle:
+      "Confirmar eliminação das versões selecionadas",
+    adminWikiEditBulkDeleteConfirmDescription:
+      "Tem a certeza de que pretende eliminar as versões selecionadas? Esta ação é permanente e não pode ser anulada.",
+    adminWikiEditBulkDeletePartialError:
+      "Algumas versões não puderam ser eliminadas. A lista de versões será atualizada.",
+    adminWikiEditBulkDeleteError:
+      "Ocorreu um erro ao eliminar as versões selecionadas.",
+    adminWikiEditBulkDeleteConfirmButton: "Sim, eliminar versões selecionadas",
+  },
+  pl: {
+    adminErrorMissingApiAccess:
+      "Brak dostępu do Admin API. Zaloguj się ponownie jako administrator.",
+    adminWikiCancel: "Anuluj",
+    adminWikiOk: "OK",
+    adminWikiClose: "Zamknij",
+    adminWikiManagementTitle: "Zarządzanie Wiki",
+    adminWikiManagementInfoLabel: "Informacje",
+    adminWikiManagementInfoDescription:
+      "Zarządzaj artykułami Wiki: twórz, wyszukuj, filtruj, zmieniaj status, eksportuj i obsługuj wersje.",
+    adminWikiManagementSubtitle: "Lista i zarządzanie artykułami Wiki.",
+    adminWikiCreateNewArticle: "Utwórz nowy artykuł",
+    adminWikiSearchPlaceholder: "Szukaj po tytule lub slug...",
+    adminWikiFilterLanguage: "Filtruj wg języka",
+    adminWikiAllLanguages: "Wszystkie języki",
+    adminWikiFilterStatus: "Filtruj wg statusu",
+    adminWikiAllStatus: "Wszystkie statusy",
+    adminWikiExportCsv: "Eksportuj CSV",
+    adminWikiLoadingList: "Ładowanie listy...",
+    adminWikiEmptyList: "Brak artykułów Wiki do wyświetlenia.",
+    adminWikiLoadError:
+      "Wystąpił błąd podczas ładowania listy Admin Wiki.",
+    adminWikiStatusUpdateError:
+      "Wystąpił błąd podczas zmiany statusu artykułu.",
+    adminWikiSelectedPrefix: "Wybrane",
+    adminWikiSelectAllVisible: "Zaznacz wszystkie widoczne",
+    adminWikiSelectArticle: "Zaznacz artykuł",
+    adminWikiIdPrefix: "ID",
+    adminWikiDeleteSelected: "Usuń wybrane",
+    adminWikiBulkStatus: "Status zbiorczy...",
+    adminWikiBulkStatusPlaceholder: "Status zbiorczy...",
+    adminWikiDeleteAll: "Usuń wszystko",
+    adminWikiSelectedCountLabel: "Liczba wybranych",
+    adminWikiBulkDeleteTitle: "Usuń wybrane artykuły",
+    adminWikiBulkDeleteDescription:
+      "Wybrane artykuły zostaną trwale usunięte (wraz ze wszystkimi wersjami). Tej operacji nie można cofnąć.",
+    adminWikiDeleteConfirm: "Usuń",
+    adminWikiBulkDeleteError:
+      "Wystąpił błąd podczas zbiorczego usuwania.",
+    adminWikiBulkStatusTitle: "Zmień status",
+    adminWikiBulkStatusDescription:
+      "To zmieni status wszystkich wybranych artykułów.",
+    adminWikiBulkStatusNewStatusLabel: "Nowy status",
+    adminWikiBulkStatusError:
+      "Wystąpił błąd podczas zbiorczej zmiany statusu.",
+    adminWikiPurgeAllTitle: "Usuń wszystkie artykuły",
+    adminWikiPurgeAllDescriptionPrefix:
+      "Zamierzasz usunąć WSZYSTKIE artykuły wiki",
+    adminWikiPurgeAllDescriptionSuffix: "Tej operacji nie można cofnąć.",
+    adminWikiPurgeAllConfirm: "Usuń wszystko",
+    adminWikiPurgeAllError:
+      "Wystąpił błąd podczas usuwania wszystkich artykułów.",
+    adminWikiActionEdit: "Edytuj",
+    adminWikiActionVersions: "Wersje",
+    adminWikiStatusUpdating: "Aktualizowanie...",
+    adminWikiActionActivate: "Aktywuj",
+    adminWikiActionDeactivate: "Dezaktywuj",
+    adminWikiCreateSlugRequired: "Podaj slug artykułu.",
+    adminWikiCreateInvalidOrExists:
+      "Nieprawidłowe dane lub slug już istnieje.",
+    adminWikiCreateError: "Wystąpił błąd podczas tworzenia artykułu.",
+    adminWikiCreateSuccess: "Artykuł został utworzony pomyślnie.",
+    adminWikiCreateIntro:
+      "Podaj tylko slug nowego artykułu Wiki. Język, status i treść ustawisz później na stronie edycji.",
+    adminWikiBackToList: "Wróć do listy",
+    adminWikiCreateBasicInformation: "Podstawowe informacje",
+    adminWikiCreateSlugLabel: "Slug",
+    adminWikiCreateSlugPlaceholder: "manual-testing-intro",
+    adminWikiCreateTagsLabel: "Tagi (oddzielone przecinkami)",
+    adminWikiCreateTagsPlaceholder: "intro, basics, setup",
+    adminWikiCreateArticleIdLabel: "ID artykułu (tylko do odczytu)",
+    adminWikiCreateArticleIdPlaceholder: "Generowane automatycznie przy zapisie",
+    adminWikiCreateFooterNote:
+      "Artykuły utworzone tutaj są zapisywane w bazie BeeLMS (środowisko deweloperskie).",
+    adminWikiCreateSaving: "Zapisywanie...",
+    adminWikiCreateArticleSaved: "Artykuł zapisany",
+    adminWikiCreateSaveArticle: "Zapisz artykuł",
+    adminWikiCreateAlreadyCreatedNote:
+      "Ten artykuł już istnieje. Użyj strony edycji, aby wprowadzić zmiany.",
+    adminWikiEditRichEditorLoading: "Ładowanie edytora rich...",
+    adminWikiEditTitle: "Edycja artykułu Wiki",
+    adminWikiEditSubtitle:
+      "Przegląd i edycja treści wybranego artykułu Wiki.",
+    adminWikiEditBreadcrumbFallback: "Edycja",
+    adminWikiEditOpenPublicPage: "Otwórz stronę publiczną",
+    adminWikiEditPublicVisibleHintPrefix: "Artykuł musi mieć status",
+    adminWikiEditPublicVisibleHintSuffix: "aby był widoczny publicznie.",
+    adminWikiEditLoading: "Ładowanie artykułu do edycji...",
+    adminWikiEditLanguageLabel: "Język",
+    adminWikiEditLanguageAria: "Język artykułu Wiki",
+    adminWikiEditLanguageHelp:
+      "Zmiana języka wczytuje lub tworzy osobną wersję treści dla wybranego języka.",
+    adminWikiEditStatusLabel: "Status",
+    adminWikiEditStatusAria: "Status artykułu Wiki",
+    adminWikiEditTitleLabel: "Tytuł",
+    adminWikiEditSubtitleLabel: "Podtytuł (opcjonalnie)",
+    adminWikiEditTagsLabel: "Tagi (oddzielone przecinkami)",
+    adminWikiEditTagsExamplePrefix: "Przykład",
+    adminWikiEditContentLabel: "Treść",
+    adminWikiEditEditorModeLabel: "Tryb edycji:",
+    adminWikiEditEditorModeMarkdown: "Markdown",
+    adminWikiEditEditorModeRichText: "Rich text",
+    adminWikiEditRequiredFieldSrOnly: "(pole wymagane)",
+    adminWikiEditTitleRequiredError:
+      "Tytuł jest wymagany. Wprowadź tekst.",
+    adminWikiEditContentRequiredError:
+      "Treść jest wymagana. Dodaj tekst przed zapisaniem.",
+    adminWikiEditRequiredFieldTitle: "Tytuł",
+    adminWikiEditRequiredFieldContent: "Treść",
+    adminWikiEditSaveDisabledNoChanges:
+      "Przycisk Zapisz stanie się aktywny po wprowadzeniu zmian.",
+    adminWikiEditSaveDisabledMissingFields:
+      "Uzupełnij wymagane pola, aby zapisać.",
+    adminWikiEditSave: "Zapisz",
+    adminWikiEditSaving: "Zapisywanie...",
+    adminWikiEditInvalidData:
+      "Nieprawidłowe dane artykułu. Sprawdź pola.",
+    adminWikiEditSaveError: "Wystąpił błąd podczas zapisywania zmian.",
+    adminWikiEditSaveSuccess: "Zmiany zapisano pomyślnie.",
+    adminWikiEditMissingArticleId:
+      "Brak ID artykułu. Odśwież stronę.",
+    adminWikiEditMediaLoadError:
+      "Wystąpił błąd podczas ładowania obrazów.",
+    adminWikiEditVersionsLoadError:
+      "Wystąpił błąd podczas ładowania wersji.",
+    adminWikiEditUploadImage: "Prześlij obraz",
+    adminWikiEditUploading: "Przesyłanie...",
+    adminWikiEditUploadImageError:
+      "Wystąpił błąd podczas przesyłania obrazu.",
+    adminWikiEditDeleteMediaConfirm:
+      "Czy na pewno chcesz usunąć ten obraz?",
+    adminWikiEditDeleteMediaError:
+      "Wystąpił błąd podczas usuwania obrazu.",
+    adminWikiEditClipboardUnavailable:
+      "API schowka nie jest dostępne w tej przeglądarce.",
+    adminWikiEditMarkdownCopied: "Skopiowano fragment Markdown do schowka.",
+    adminWikiEditMarkdownCopyFailed:
+      "Nie udało się skopiować fragmentu Markdown.",
+    adminWikiEditRollbackConfirm:
+      "Czy na pewno chcesz przywrócić artykuł do tej wersji?",
+    adminWikiEditRollbackNotFound:
+      "Nie znaleziono wybranej wersji lub artykułu.",
+    adminWikiEditRollbackInvalidRequest:
+      "Nieprawidłowe żądanie przywrócenia. Spróbuj ponownie.",
+    adminWikiEditRollbackError:
+      "Wystąpił błąd podczas przywracania wersji.",
+    adminWikiEditRollbackSuccess:
+      "Artykuł został przywrócony do wybranej wersji.",
+    adminWikiEditCompareSameLangError:
+      "Możesz porównywać tylko wersje tego samego języka.",
+    adminWikiEditMermaidHelp:
+      "Dla diagramów użyj bloku kodu z językiem mermaid (np. ```mermaid ... ```). Diagramy pojawią się w podglądzie i publicznej Wiki.",
+    adminWikiEditCaptionHelp:
+      "Dla podpisu pod obrazem: wstaw obraz, a w następnej linii dodaj tekst (opcjonalnie kursywą), np.: ![Alt](url) *Caption*.",
+    adminWikiEditPreviewAria: "Podgląd treści",
+    adminWikiEditPreviewTitle: "Podgląd (jak w publicznej Wiki)",
+    adminWikiEditPreviewShow: "Pokaż podgląd",
+    adminWikiEditPreviewHide: "Ukryj podgląd",
+    adminWikiEditPreviewUntitled: "(Bez tytułu)",
+    adminWikiEditMissingFieldsPrefix: "Brak wymaganych pól:",
+    adminWikiEditMissingFieldsSuffix:
+      "Uzupełnij je, aby włączyć przycisk \"Zapisz\".",
+    adminWikiEditUnsavedChangesWarning: "Są niezapisane zmiany.",
+    adminWikiEditUnsavedChangesConfirm:
+      "Masz niezapisane zmiany. Czy na pewno chcesz opuścić stronę?",
+    adminWikiEditMediaSectionAria: "Obrazy artykułu",
+    adminWikiEditMediaSectionTitle: "Obrazy artykułu",
+    adminWikiEditMediaSectionDescription:
+      "Prześlij obrazy, do których chcesz odwoływać się w treści Markdown powyżej. Po przesłaniu zobaczysz URL, który możesz wkleić do tekstu.",
+    adminWikiEditNeedArticleIdHint:
+      "Najpierw upewnij się, że artykuł jest zapisany i ma ID.",
+    adminWikiEditMediaLoading: "Ładowanie obrazów...",
+    adminWikiEditUploadedImagesTitle: "Przesłane obrazy",
+    adminWikiEditUploadedImagesNoArticleId:
+      "Nie ma jeszcze ID artykułu. Odśwież artykuł lub poczekaj, aż w pełni się załaduje.",
+    adminWikiEditUploadedImagesEmpty:
+      "Brak przesłanych obrazów dla tego artykułu.",
+    adminWikiEditMediaInsert: "Wstaw",
+    adminWikiEditMediaCopyMarkdown: "Kopiuj Markdown",
+    adminWikiEditMediaDelete: "Usuń",
+    adminWikiEditVersionsAria: "Wersje artykułu",
+    adminWikiEditVersionsTitle: "Wersje artykułu",
+    adminWikiEditVersionsHighlight: "Spójrz tutaj",
+    adminWikiEditVersionsLoading: "Ładowanie wersji...",
+    adminWikiEditVersionsEmpty: "Brak wersji dla tego języka.",
+    adminWikiEditVersionsCompareHeader: "Porównaj",
+    adminWikiEditVersionsSelectLabel: "wybierz",
+    adminWikiEditVersionsColVersion: "Wersja",
+    adminWikiEditVersionsColLanguage: "Język",
+    adminWikiEditVersionsColTitle: "Tytuł",
+    adminWikiEditVersionsColSubtitle: "Podtytuł",
+    adminWikiEditVersionsColCreatedAt: "Utworzono",
+    adminWikiEditVersionsColCreatedBy: "Utworzył",
+    adminWikiEditVersionsColActions: "Akcje",
+    adminWikiEditVersionsActionPreview: "Podgląd",
+    adminWikiEditVersionsCurrent: "Aktualna",
+    adminWikiEditVersionsRollback: "Przywróć",
+    adminWikiEditVersionsRollbacking: "Przywracanie...",
+    adminWikiEditVersionsDelete: "Usuń",
+    adminWikiEditVersionsCompareHelp:
+      "Wybierz dwie wersje (ten sam język), aby je porównać.",
+    adminWikiEditPageLabel: "Strona",
+    adminWikiEditOfLabel: "z",
+    adminWikiEditVersionsCountLabel: "wersji",
+    adminWikiEditVersionsCompareSelected: "Porównaj wybrane",
+    adminWikiEditVersionsDeleteSelected: "Usuń wybrane",
+    adminWikiEditCompareAria: "Porównanie wersji",
+    adminWikiEditCompareTitle: "Porównanie wersji",
+    adminWikiEditCompareSubtitle:
+      "Lewo: starsza wersja. Prawo: nowsza wersja.",
+    adminWikiEditCompareClear: "Wyczyść porównanie",
+    adminWikiEditCompareOlder: "Starsza",
+    adminWikiEditCompareNewer: "Nowsza",
+    adminWikiEditCompareVersionLabel: "Wersja",
+    adminWikiEditCompareFieldTitle: "Tytuł:",
+    adminWikiEditCompareFieldSubtitle: "Podtytuł:",
+    adminWikiEditCompareLegendToken: "tekst",
+    adminWikiEditCompareLegendRemoved: "= usunięty tekst,",
+    adminWikiEditCompareLegendAdded: "= dodany tekst.",
+    adminWikiEditViewVersionTitlePrefix: "Podgląd wersji",
+    adminWikiEditViewVersionCreatedAt: "Utworzono",
+    adminWikiEditViewVersionBy: "przez",
+    adminWikiEditDeleteVersionTitle: "Usuń wersję",
+    adminWikiEditDeleteVersionDescription:
+      "Ta wersja zostanie trwale usunięta z historii artykułu. Tej operacji nie można cofnąć i może to wpłynąć na możliwość śledzenia zmian.",
+    adminWikiEditDeleteVersionConfirmTitle: "Potwierdź usunięcie wersji",
+    adminWikiEditDeleteVersionConfirmDescription:
+      "Czy na pewno chcesz usunąć tę wersję? Ta operacja jest nieodwracalna.",
+    adminWikiEditDeleteVersionConfirmMetaPrefix: "Wersja",
+    adminWikiEditDeleteVersionConfirmMetaCreatedAt: "utworzona",
+    adminWikiEditDeleteVersionCurrentActiveError:
+      "Nie można usunąć aktualnej aktywnej wersji.",
+    adminWikiEditDeleteVersionLastVersionError:
+      "Nie można usunąć tej wersji, ponieważ jest to ostatnia pozostała wersja.",
+    adminWikiEditDeleteVersionNotFound:
+      "Nie znaleziono wersji lub artykułu.",
+    adminWikiEditDeleteVersionError:
+      "Wystąpił błąd podczas usuwania wersji.",
+    adminWikiEditDeleteVersionConfirmButton: "Tak, usuń wersję",
+    adminWikiEditBulkDeleteTitle: "Usuń wybrane wersje",
+    adminWikiEditBulkDeleteDescriptionPrefix:
+      "Zamierzasz trwale usunąć",
+    adminWikiEditBulkDeleteDescriptionSuffix:
+      "wersje z historii artykułu. Tej operacji nie można cofnąć i może to wpłynąć na śledzenie zmian.",
+    adminWikiEditBulkDeleteConfirmTitle:
+      "Potwierdź usunięcie wybranych wersji",
+    adminWikiEditBulkDeleteConfirmDescription:
+      "Czy na pewno chcesz usunąć wybrane wersje? Ta operacja jest nieodwracalna.",
+    adminWikiEditBulkDeletePartialError:
+      "Niektórych wersji nie udało się usunąć. Lista wersji zostanie odświeżona.",
+    adminWikiEditBulkDeleteError:
+      "Wystąpił błąd podczas usuwania wybranych wersji.",
+    adminWikiEditBulkDeleteConfirmButton: "Tak, usuń wybrane wersje",
+  },
+  fr: {
+    adminErrorMissingApiAccess:
+      "Accès à l’API Admin manquant. Veuillez vous reconnecter en tant qu’administrateur.",
+    adminWikiCancel: "Annuler",
+    adminWikiOk: "OK",
+    adminWikiClose: "Fermer",
+    adminWikiManagementTitle: "Gestion du Wiki",
+    adminWikiManagementInfoLabel: "Info",
+    adminWikiManagementInfoDescription:
+      "Gérez les articles du Wiki : créer, rechercher, filtrer, changer le statut, exporter et gérer les versions.",
+    adminWikiManagementSubtitle: "Liste et gestion des articles du Wiki.",
+    adminWikiCreateNewArticle: "Créer un nouvel article",
+    adminWikiSearchPlaceholder: "Rechercher par titre ou slug...",
+    adminWikiFilterLanguage: "Filtrer par langue",
+    adminWikiAllLanguages: "Toutes les langues",
+    adminWikiFilterStatus: "Filtrer par statut",
+    adminWikiAllStatus: "Tous les statuts",
+    adminWikiExportCsv: "Exporter CSV",
+    adminWikiLoadingList: "Chargement de la liste...",
+    adminWikiEmptyList: "Aucun article Wiki à afficher.",
+    adminWikiLoadError:
+      "Une erreur est survenue lors du chargement de la liste Admin Wiki.",
+    adminWikiStatusUpdateError:
+      "Une erreur est survenue lors de la mise à jour du statut de l’article.",
+    adminWikiSelectedPrefix: "Sélectionnés",
+    adminWikiSelectAllVisible: "Tout sélectionner (visible)",
+    adminWikiSelectArticle: "Sélectionner l’article",
+    adminWikiIdPrefix: "ID",
+    adminWikiDeleteSelected: "Supprimer la sélection",
+    adminWikiBulkStatus: "Statut en masse...",
+    adminWikiBulkStatusPlaceholder: "Statut en masse...",
+    adminWikiDeleteAll: "Tout supprimer",
+    adminWikiSelectedCountLabel: "Nombre sélectionné",
+    adminWikiBulkDeleteTitle: "Supprimer les articles sélectionnés",
+    adminWikiBulkDeleteDescription:
+      "Les articles sélectionnés seront supprimés définitivement (y compris toutes les versions). Cette action est irréversible.",
+    adminWikiDeleteConfirm: "Supprimer",
+    adminWikiBulkDeleteError:
+      "Une erreur est survenue lors de la suppression en masse.",
+    adminWikiBulkStatusTitle: "Changer le statut",
+    adminWikiBulkStatusDescription:
+      "Cela changera le statut de tous les articles sélectionnés.",
+    adminWikiBulkStatusNewStatusLabel: "Nouveau statut",
+    adminWikiBulkStatusError:
+      "Une erreur est survenue lors de la mise à jour en masse du statut.",
+    adminWikiPurgeAllTitle: "Supprimer tous les articles",
+    adminWikiPurgeAllDescriptionPrefix:
+      "Vous êtes sur le point de supprimer TOUS les articles wiki",
+    adminWikiPurgeAllDescriptionSuffix: "Cette action est irréversible.",
+    adminWikiPurgeAllConfirm: "Tout supprimer",
+    adminWikiPurgeAllError:
+      "Une erreur est survenue lors de la suppression de tous les articles.",
+    adminWikiActionEdit: "Modifier",
+    adminWikiActionVersions: "Versions",
+    adminWikiStatusUpdating: "Mise à jour...",
+    adminWikiActionActivate: "Activer",
+    adminWikiActionDeactivate: "Désactiver",
+    adminWikiCreateSlugRequired: "Veuillez saisir un slug pour l’article.",
+    adminWikiCreateInvalidOrExists:
+      "Données invalides ou le slug existe déjà.",
+    adminWikiCreateError: "Une erreur est survenue lors de la création de l’article.",
+    adminWikiCreateSuccess: "L’article a été créé avec succès.",
+    adminWikiCreateIntro:
+      "Saisissez uniquement le slug d’un nouvel article Wiki. La langue, le statut et le contenu se définissent ensuite sur la page d’édition.",
+    adminWikiBackToList: "Retour à la liste",
+    adminWikiCreateBasicInformation: "Informations de base",
+    adminWikiCreateSlugLabel: "Slug",
+    adminWikiCreateSlugPlaceholder: "manual-testing-intro",
+    adminWikiCreateTagsLabel: "Tags (séparés par des virgules)",
+    adminWikiCreateTagsPlaceholder: "intro, basics, setup",
+    adminWikiCreateArticleIdLabel: "ID de l’article (lecture seule)",
+    adminWikiCreateArticleIdPlaceholder: "Généré automatiquement lors de l’enregistrement",
+    adminWikiCreateFooterNote:
+      "Les articles créés ici sont stockés dans la base de données BeeLMS (environnement de développement).",
+    adminWikiCreateSaving: "Enregistrement...",
+    adminWikiCreateArticleSaved: "Article enregistré",
+    adminWikiCreateSaveArticle: "Enregistrer l’article",
+    adminWikiCreateAlreadyCreatedNote:
+      "Cet article existe déjà. Utilisez la page d’édition pour effectuer des modifications.",
+    adminWikiEditRichEditorLoading: "Chargement de l’éditeur rich...",
+    adminWikiEditTitle: "Modifier l’article Wiki",
+    adminWikiEditSubtitle:
+      "Consultez et modifiez le contenu d’un article Wiki sélectionné.",
+    adminWikiEditBreadcrumbFallback: "Modifier",
+    adminWikiEditOpenPublicPage: "Ouvrir la page publique",
+    adminWikiEditPublicVisibleHintPrefix: "L’article doit avoir le statut",
+    adminWikiEditPublicVisibleHintSuffix: "pour être visible publiquement.",
+    adminWikiEditLoading: "Chargement de l’article pour modification...",
+    adminWikiEditLanguageLabel: "Langue",
+    adminWikiEditLanguageAria: "Langue de l’article Wiki",
+    adminWikiEditLanguageHelp:
+      "Changer la langue charge ou crée une version de contenu distincte pour la langue sélectionnée.",
+    adminWikiEditStatusLabel: "Statut",
+    adminWikiEditStatusAria: "Statut de l’article Wiki",
+    adminWikiEditTitleLabel: "Titre",
+    adminWikiEditSubtitleLabel: "Sous-titre (optionnel)",
+    adminWikiEditTagsLabel: "Tags (séparés par des virgules)",
+    adminWikiEditTagsExamplePrefix: "Exemple",
+    adminWikiEditContentLabel: "Contenu",
+    adminWikiEditEditorModeLabel: "Mode d’édition :",
+    adminWikiEditEditorModeMarkdown: "Markdown",
+    adminWikiEditEditorModeRichText: "Texte riche",
+    adminWikiEditRequiredFieldSrOnly: "(champ requis)",
+    adminWikiEditTitleRequiredError:
+      "Le titre est requis. Veuillez saisir du texte.",
+    adminWikiEditContentRequiredError:
+      "Le contenu est requis. Ajoutez du texte avant d’enregistrer.",
+    adminWikiEditRequiredFieldTitle: "Titre",
+    adminWikiEditRequiredFieldContent: "Contenu",
+    adminWikiEditSaveDisabledNoChanges:
+      "Le bouton Enregistrer s’active après une modification.",
+    adminWikiEditSaveDisabledMissingFields:
+      "Renseignez les champs requis pour enregistrer.",
+    adminWikiEditSave: "Enregistrer",
+    adminWikiEditSaving: "Enregistrement...",
+    adminWikiEditInvalidData:
+      "Données de l’article invalides. Vérifiez les champs.",
+    adminWikiEditSaveError:
+      "Une erreur est survenue lors de l’enregistrement.",
+    adminWikiEditSaveSuccess: "Modifications enregistrées.",
+    adminWikiEditMissingArticleId:
+      "ID de l’article manquant. Veuillez recharger la page.",
+    adminWikiEditMediaLoadError:
+      "Une erreur est survenue lors du chargement des images.",
+    adminWikiEditVersionsLoadError:
+      "Une erreur est survenue lors du chargement des versions.",
+    adminWikiEditUploadImage: "Téléverser une image",
+    adminWikiEditUploading: "Téléversement...",
+    adminWikiEditUploadImageError:
+      "Une erreur est survenue lors du téléversement de l’image.",
+    adminWikiEditDeleteMediaConfirm:
+      "Voulez-vous vraiment supprimer cette image ?",
+    adminWikiEditDeleteMediaError:
+      "Une erreur est survenue lors de la suppression de l’image.",
+    adminWikiEditClipboardUnavailable:
+      "L’API du presse-papiers n’est pas disponible dans ce navigateur.",
+    adminWikiEditMarkdownCopied: "Extrait Markdown copié dans le presse-papiers.",
+    adminWikiEditMarkdownCopyFailed: "Échec de la copie de l’extrait Markdown.",
+    adminWikiEditRollbackConfirm:
+      "Voulez-vous restaurer l’article à cette version ?",
+    adminWikiEditRollbackNotFound: "La version ou l’article est introuvable.",
+    adminWikiEditRollbackInvalidRequest:
+      "Demande de restauration invalide. Veuillez réessayer.",
+    adminWikiEditRollbackError:
+      "Une erreur est survenue lors de la restauration.",
+    adminWikiEditRollbackSuccess:
+      "L’article a été restauré à la version sélectionnée.",
+    adminWikiEditCompareSameLangError:
+      "Vous ne pouvez comparer que des versions de la même langue.",
+    adminWikiEditMermaidHelp:
+      "Pour les diagrammes, utilisez un bloc de code avec le langage mermaid (ex. ```mermaid ... ```). Les diagrammes apparaîtront dans l’aperçu et dans le Wiki public.",
+    adminWikiEditCaptionHelp:
+      "Pour une légende d’image : insérez l’image puis, à la ligne suivante, ajoutez le texte (italique optionnel), ex. : ![Alt](url) *Caption*.",
+    adminWikiEditPreviewAria: "Aperçu du contenu",
+    adminWikiEditPreviewTitle: "Aperçu (comme dans le Wiki public)",
+    adminWikiEditPreviewShow: "Afficher l’aperçu",
+    adminWikiEditPreviewHide: "Masquer l’aperçu",
+    adminWikiEditPreviewUntitled: "(Sans titre)",
+    adminWikiEditMissingFieldsPrefix: "Champs requis manquants :",
+    adminWikiEditMissingFieldsSuffix:
+      "Complétez-les pour activer le bouton \"Enregistrer\".",
+    adminWikiEditUnsavedChangesWarning: "Des modifications ne sont pas enregistrées.",
+    adminWikiEditUnsavedChangesConfirm:
+      "Vous avez des modifications non enregistrées. Voulez-vous quitter la page ?",
+    adminWikiEditMediaSectionAria: "Images de l’article",
+    adminWikiEditMediaSectionTitle: "Images de l’article",
+    adminWikiEditMediaSectionDescription:
+      "Téléversez des images que vous souhaitez référencer dans le contenu Markdown ci-dessus. Après téléversement, vous verrez une URL à coller dans le texte.",
+    adminWikiEditNeedArticleIdHint:
+      "Assurez-vous d’abord que l’article est enregistré et possède un ID.",
+    adminWikiEditMediaLoading: "Chargement des images...",
+    adminWikiEditUploadedImagesTitle: "Images téléversées",
+    adminWikiEditUploadedImagesNoArticleId:
+      "Aucun ID d’article pour le moment. Rechargez l’article ou attendez qu’il se charge complètement.",
+    adminWikiEditUploadedImagesEmpty:
+      "Aucune image téléversée pour cet article.",
+    adminWikiEditMediaInsert: "Insérer",
+    adminWikiEditMediaCopyMarkdown: "Copier Markdown",
+    adminWikiEditMediaDelete: "Supprimer",
+    adminWikiEditVersionsAria: "Versions de l’article",
+    adminWikiEditVersionsTitle: "Versions de l’article",
+    adminWikiEditVersionsHighlight: "Regarder ici",
+    adminWikiEditVersionsLoading: "Chargement des versions...",
+    adminWikiEditVersionsEmpty: "Aucune version pour cette langue.",
+    adminWikiEditVersionsCompareHeader: "Comparer",
+    adminWikiEditVersionsSelectLabel: "sélectionner",
+    adminWikiEditVersionsColVersion: "Version",
+    adminWikiEditVersionsColLanguage: "Langue",
+    adminWikiEditVersionsColTitle: "Titre",
+    adminWikiEditVersionsColSubtitle: "Sous-titre",
+    adminWikiEditVersionsColCreatedAt: "Créée le",
+    adminWikiEditVersionsColCreatedBy: "Créée par",
+    adminWikiEditVersionsColActions: "Actions",
+    adminWikiEditVersionsActionPreview: "Aperçu",
+    adminWikiEditVersionsCurrent: "Actuelle",
+    adminWikiEditVersionsRollback: "Restaurer",
+    adminWikiEditVersionsRollbacking: "Restauration...",
+    adminWikiEditVersionsDelete: "Supprimer",
+    adminWikiEditVersionsCompareHelp:
+      "Sélectionnez deux versions (même langue) pour les comparer.",
+    adminWikiEditPageLabel: "Page",
+    adminWikiEditOfLabel: "sur",
+    adminWikiEditVersionsCountLabel: "versions",
+    adminWikiEditVersionsCompareSelected: "Comparer la sélection",
+    adminWikiEditVersionsDeleteSelected: "Supprimer la sélection",
+    adminWikiEditCompareAria: "Comparaison des versions",
+    adminWikiEditCompareTitle: "Comparaison des versions",
+    adminWikiEditCompareSubtitle:
+      "Gauche : version plus ancienne. Droite : version plus récente.",
+    adminWikiEditCompareClear: "Effacer la comparaison",
+    adminWikiEditCompareOlder: "Plus ancienne",
+    adminWikiEditCompareNewer: "Plus récente",
+    adminWikiEditCompareVersionLabel: "Version",
+    adminWikiEditCompareFieldTitle: "Titre :",
+    adminWikiEditCompareFieldSubtitle: "Sous-titre :",
+    adminWikiEditCompareLegendToken: "texte",
+    adminWikiEditCompareLegendRemoved: "= texte supprimé,",
+    adminWikiEditCompareLegendAdded: "= texte ajouté.",
+    adminWikiEditViewVersionTitlePrefix: "Aperçu de la version",
+    adminWikiEditViewVersionCreatedAt: "Créée le",
+    adminWikiEditViewVersionBy: "par",
+    adminWikiEditDeleteVersionTitle: "Supprimer la version",
+    adminWikiEditDeleteVersionDescription:
+      "Cette version sera supprimée définitivement de l’historique de l’article. Cette action est irréversible et peut affecter la traçabilité.",
+    adminWikiEditDeleteVersionConfirmTitle: "Confirmer la suppression de la version",
+    adminWikiEditDeleteVersionConfirmDescription:
+      "Voulez-vous vraiment supprimer cette version ? Cette action est définitive et irréversible.",
+    adminWikiEditDeleteVersionConfirmMetaPrefix: "Version",
+    adminWikiEditDeleteVersionConfirmMetaCreatedAt: "créée le",
+    adminWikiEditDeleteVersionCurrentActiveError:
+      "La version active actuelle ne peut pas être supprimée.",
+    adminWikiEditDeleteVersionLastVersionError:
+      "Cette version ne peut pas être supprimée car c’est la dernière version restante.",
+    adminWikiEditDeleteVersionNotFound:
+      "La version ou l’article est introuvable.",
+    adminWikiEditDeleteVersionError:
+      "Une erreur est survenue lors de la suppression de la version.",
+    adminWikiEditDeleteVersionConfirmButton: "Oui, supprimer la version",
+    adminWikiEditBulkDeleteTitle: "Supprimer les versions sélectionnées",
+    adminWikiEditBulkDeleteDescriptionPrefix:
+      "Vous êtes sur le point de supprimer définitivement",
+    adminWikiEditBulkDeleteDescriptionSuffix:
+      "versions de l’historique de l’article. Cette action est irréversible et peut affecter la traçabilité.",
+    adminWikiEditBulkDeleteConfirmTitle:
+      "Confirmer la suppression des versions sélectionnées",
+    adminWikiEditBulkDeleteConfirmDescription:
+      "Voulez-vous vraiment supprimer les versions sélectionnées ? Cette action est définitive et irréversible.",
+    adminWikiEditBulkDeletePartialError:
+      "Certaines versions n’ont pas pu être supprimées. La liste des versions sera rafraîchie.",
+    adminWikiEditBulkDeleteError:
+      "Une erreur est survenue lors de la suppression des versions sélectionnées.",
+    adminWikiEditBulkDeleteConfirmButton: "Oui, supprimer les versions sélectionnées",
+  },
+  ru: {
+    adminErrorMissingApiAccess:
+      "Нет доступа к Admin API. Пожалуйста, войдите снова как администратор.",
+    adminWikiCancel: "Отмена",
+    adminWikiOk: "OK",
+    adminWikiClose: "Закрыть",
+    adminWikiManagementTitle: "Управление Wiki",
+    adminWikiManagementInfoLabel: "Инфо",
+    adminWikiManagementInfoDescription:
+      "Управляйте статьями Wiki: создавать, искать, фильтровать, менять статус, экспортировать и работать с версиями.",
+    adminWikiManagementSubtitle: "Список и управление статьями Wiki.",
+    adminWikiCreateNewArticle: "Создать новую статью",
+    adminWikiSearchPlaceholder: "Поиск по заголовку или slug...",
+    adminWikiFilterLanguage: "Фильтр по языку",
+    adminWikiAllLanguages: "Все языки",
+    adminWikiFilterStatus: "Фильтр по статусу",
+    adminWikiAllStatus: "Все статусы",
+    adminWikiExportCsv: "Экспорт CSV",
+    adminWikiLoadingList: "Загрузка списка...",
+    adminWikiEmptyList: "Нет статей Wiki для отображения.",
+    adminWikiLoadError:
+      "Произошла ошибка при загрузке списка Admin Wiki.",
+    adminWikiStatusUpdateError:
+      "Произошла ошибка при обновлении статуса статьи.",
+    adminWikiSelectedPrefix: "Выбрано",
+    adminWikiSelectAllVisible: "Выбрать все видимые",
+    adminWikiSelectArticle: "Выбрать статью",
+    adminWikiIdPrefix: "ID",
+    adminWikiDeleteSelected: "Удалить выбранные",
+    adminWikiBulkStatus: "Массовый статус...",
+    adminWikiBulkStatusPlaceholder: "Массовый статус...",
+    adminWikiDeleteAll: "Удалить все",
+    adminWikiSelectedCountLabel: "Количество выбранных",
+    adminWikiBulkDeleteTitle: "Удаление выбранных статей",
+    adminWikiBulkDeleteDescription:
+      "Выбранные статьи будут удалены навсегда (включая все версии). Это действие нельзя отменить.",
+    adminWikiDeleteConfirm: "Удалить",
+    adminWikiBulkDeleteError:
+      "Произошла ошибка при массовом удалении.",
+    adminWikiBulkStatusTitle: "Изменение статуса",
+    adminWikiBulkStatusDescription:
+      "Это изменит статус всех выбранных статей.",
+    adminWikiBulkStatusNewStatusLabel: "Новый статус",
+    adminWikiBulkStatusError:
+      "Произошла ошибка при массовом обновлении статуса.",
+    adminWikiPurgeAllTitle: "Удалить все статьи",
+    adminWikiPurgeAllDescriptionPrefix:
+      "Вы собираетесь удалить ВСЕ статьи wiki",
+    adminWikiPurgeAllDescriptionSuffix: "Это действие нельзя отменить.",
+    adminWikiPurgeAllConfirm: "Удалить все",
+    adminWikiPurgeAllError:
+      "Произошла ошибка при удалении всех статей.",
+    adminWikiActionEdit: "Редактировать",
+    adminWikiActionVersions: "Версии",
+    adminWikiStatusUpdating: "Обновление...",
+    adminWikiActionActivate: "Активировать",
+    adminWikiActionDeactivate: "Деактивировать",
+    adminWikiCreateSlugRequired: "Введите slug статьи.",
+    adminWikiCreateInvalidOrExists:
+      "Неверные данные или slug уже существует.",
+    adminWikiCreateError: "Произошла ошибка при создании статьи.",
+    adminWikiCreateSuccess: "Статья успешно создана.",
+    adminWikiCreateIntro:
+      "Введите только slug для новой статьи Wiki. Язык, статус и контент настраиваются позже на странице редактирования.",
+    adminWikiBackToList: "Назад к списку",
+    adminWikiCreateBasicInformation: "Основная информация",
+    adminWikiCreateSlugLabel: "Slug",
+    adminWikiCreateSlugPlaceholder: "manual-testing-intro",
+    adminWikiCreateTagsLabel: "Теги (через запятую)",
+    adminWikiCreateTagsPlaceholder: "intro, basics, setup",
+    adminWikiCreateArticleIdLabel: "ID статьи (только чтение)",
+    adminWikiCreateArticleIdPlaceholder: "Генерируется автоматически при сохранении",
+    adminWikiCreateFooterNote:
+      "Статьи, созданные здесь, сохраняются в базе BeeLMS (среда разработки).",
+    adminWikiCreateSaving: "Сохранение...",
+    adminWikiCreateArticleSaved: "Статья сохранена",
+    adminWikiCreateSaveArticle: "Сохранить статью",
+    adminWikiCreateAlreadyCreatedNote:
+      "Эта статья уже создана. Используйте страницу редактирования для изменений.",
+    adminWikiEditRichEditorLoading: "Загрузка rich editor...",
+    adminWikiEditTitle: "Редактирование статьи Wiki",
+    adminWikiEditSubtitle:
+      "Просмотр и редактирование содержимого выбранной статьи Wiki.",
+    adminWikiEditBreadcrumbFallback: "Редактирование",
+    adminWikiEditOpenPublicPage: "Открыть публичную страницу",
+    adminWikiEditPublicVisibleHintPrefix: "Статья должна иметь статус",
+    adminWikiEditPublicVisibleHintSuffix: "чтобы быть видимой публично.",
+    adminWikiEditLoading: "Загрузка статьи для редактирования...",
+    adminWikiEditLanguageLabel: "Язык",
+    adminWikiEditLanguageAria: "Язык статьи Wiki",
+    adminWikiEditLanguageHelp:
+      "Смена языка загружает или создаёт отдельную версию контента для выбранного языка.",
+    adminWikiEditStatusLabel: "Статус",
+    adminWikiEditStatusAria: "Статус статьи Wiki",
+    adminWikiEditTitleLabel: "Заголовок",
+    adminWikiEditSubtitleLabel: "Подзаголовок (необязательно)",
+    adminWikiEditTagsLabel: "Теги (через запятую)",
+    adminWikiEditTagsExamplePrefix: "Пример",
+    adminWikiEditContentLabel: "Контент",
+    adminWikiEditEditorModeLabel: "Режим редактирования:",
+    adminWikiEditEditorModeMarkdown: "Markdown",
+    adminWikiEditEditorModeRichText: "Rich text",
+    adminWikiEditRequiredFieldSrOnly: "(обязательное поле)",
+    adminWikiEditTitleRequiredError:
+      "Заголовок обязателен. Введите текст.",
+    adminWikiEditContentRequiredError:
+      "Контент обязателен. Добавьте текст перед сохранением.",
+    adminWikiEditRequiredFieldTitle: "Заголовок",
+    adminWikiEditRequiredFieldContent: "Контент",
+    adminWikiEditSaveDisabledNoChanges:
+      "Кнопка «Сохранить» станет активной после изменения поля.",
+    adminWikiEditSaveDisabledMissingFields:
+      "Заполните обязательные поля, чтобы сохранить.",
+    adminWikiEditSave: "Сохранить",
+    adminWikiEditSaving: "Сохранение...",
+    adminWikiEditInvalidData:
+      "Неверные данные статьи. Проверьте поля.",
+    adminWikiEditSaveError:
+      "Произошла ошибка при сохранении изменений.",
+    adminWikiEditSaveSuccess: "Изменения сохранены.",
+    adminWikiEditMissingArticleId:
+      "Отсутствует ID статьи. Перезагрузите страницу.",
+    adminWikiEditMediaLoadError:
+      "Произошла ошибка при загрузке изображений.",
+    adminWikiEditVersionsLoadError:
+      "Произошла ошибка при загрузке версий.",
+    adminWikiEditUploadImage: "Загрузить изображение",
+    adminWikiEditUploading: "Загрузка...",
+    adminWikiEditUploadImageError:
+      "Произошла ошибка при загрузке изображения.",
+    adminWikiEditDeleteMediaConfirm:
+      "Вы уверены, что хотите удалить это изображение?",
+    adminWikiEditDeleteMediaError:
+      "Произошла ошибка при удалении изображения.",
+    adminWikiEditClipboardUnavailable:
+      "Clipboard API недоступен в этом браузере.",
+    adminWikiEditMarkdownCopied: "Markdown-фрагмент скопирован в буфер обмена.",
+    adminWikiEditMarkdownCopyFailed:
+      "Не удалось скопировать Markdown-фрагмент.",
+    adminWikiEditRollbackConfirm:
+      "Вы уверены, что хотите восстановить статью к этой версии?",
+    adminWikiEditRollbackNotFound:
+      "Выбранная версия или статья не найдена.",
+    adminWikiEditRollbackInvalidRequest:
+      "Неверный запрос на восстановление. Попробуйте снова.",
+    adminWikiEditRollbackError:
+      "Произошла ошибка при восстановлении версии.",
+    adminWikiEditRollbackSuccess:
+      "Статья восстановлена к выбранной версии.",
+    adminWikiEditCompareSameLangError:
+      "Сравнивать можно только версии одного и того же языка.",
+    adminWikiEditMermaidHelp:
+      "Для диаграмм используйте fenced code block с языком mermaid (например, ```mermaid ... ```). Диаграммы будут отображаться в предпросмотре и публичной Wiki.",
+    adminWikiEditCaptionHelp:
+      "Для подписи к изображению: вставьте изображение, а затем в следующей строке добавьте текст (опционально курсивом), например: ![Alt](url) *Caption*.",
+    adminWikiEditPreviewAria: "Предпросмотр контента",
+    adminWikiEditPreviewTitle: "Предпросмотр (как в публичной Wiki)",
+    adminWikiEditPreviewShow: "Показать предпросмотр",
+    adminWikiEditPreviewHide: "Скрыть предпросмотр",
+    adminWikiEditPreviewUntitled: "(Без заголовка)",
+    adminWikiEditMissingFieldsPrefix: "Отсутствуют обязательные поля:",
+    adminWikiEditMissingFieldsSuffix:
+      "Заполните их, чтобы активировать кнопку \"Сохранить\".",
+    adminWikiEditUnsavedChangesWarning: "Есть несохранённые изменения.",
+    adminWikiEditUnsavedChangesConfirm:
+      "У вас есть несохранённые изменения. Вы уверены, что хотите покинуть страницу?",
+    adminWikiEditMediaSectionAria: "Изображения статьи",
+    adminWikiEditMediaSectionTitle: "Изображения статьи",
+    adminWikiEditMediaSectionDescription:
+      "Загрузите изображения, на которые хотите ссылаться из Markdown-контента выше. После загрузки вы увидите URL, который можно вставить в текст.",
+    adminWikiEditNeedArticleIdHint:
+      "Сначала убедитесь, что статья сохранена и имеет ID.",
+    adminWikiEditMediaLoading: "Загрузка изображений...",
+    adminWikiEditUploadedImagesTitle: "Загруженные изображения",
+    adminWikiEditUploadedImagesNoArticleId:
+      "Пока нет ID статьи. Перезагрузите статью или дождитесь полной загрузки.",
+    adminWikiEditUploadedImagesEmpty:
+      "Для этой статьи ещё нет загруженных изображений.",
+    adminWikiEditMediaInsert: "Вставить",
+    adminWikiEditMediaCopyMarkdown: "Скопировать Markdown",
+    adminWikiEditMediaDelete: "Удалить",
+    adminWikiEditVersionsAria: "Версии статьи",
+    adminWikiEditVersionsTitle: "Версии статьи",
+    adminWikiEditVersionsHighlight: "Смотрите здесь",
+    adminWikiEditVersionsLoading: "Загрузка версий...",
+    adminWikiEditVersionsEmpty: "Нет версий для этого языка.",
+    adminWikiEditVersionsCompareHeader: "Сравнить",
+    adminWikiEditVersionsSelectLabel: "выбрать",
+    adminWikiEditVersionsColVersion: "Версия",
+    adminWikiEditVersionsColLanguage: "Язык",
+    adminWikiEditVersionsColTitle: "Заголовок",
+    adminWikiEditVersionsColSubtitle: "Подзаголовок",
+    adminWikiEditVersionsColCreatedAt: "Создано",
+    adminWikiEditVersionsColCreatedBy: "Создал",
+    adminWikiEditVersionsColActions: "Действия",
+    adminWikiEditVersionsActionPreview: "Предпросмотр",
+    adminWikiEditVersionsCurrent: "Текущая",
+    adminWikiEditVersionsRollback: "Восстановить",
+    adminWikiEditVersionsRollbacking: "Восстановление...",
+    adminWikiEditVersionsDelete: "Удалить",
+    adminWikiEditVersionsCompareHelp:
+      "Выберите две версии (один язык), чтобы сравнить.",
+    adminWikiEditPageLabel: "Страница",
+    adminWikiEditOfLabel: "из",
+    adminWikiEditVersionsCountLabel: "версий",
+    adminWikiEditVersionsCompareSelected: "Сравнить выбранные",
+    adminWikiEditVersionsDeleteSelected: "Удалить выбранные",
+    adminWikiEditCompareAria: "Сравнение версий",
+    adminWikiEditCompareTitle: "Сравнение версий",
+    adminWikiEditCompareSubtitle:
+      "Слева: более старая версия. Справа: более новая версия.",
+    adminWikiEditCompareClear: "Очистить сравнение",
+    adminWikiEditCompareOlder: "Старая",
+    adminWikiEditCompareNewer: "Новая",
+    adminWikiEditCompareVersionLabel: "Версия",
+    adminWikiEditCompareFieldTitle: "Заголовок:",
+    adminWikiEditCompareFieldSubtitle: "Подзаголовок:",
+    adminWikiEditCompareLegendToken: "текст",
+    adminWikiEditCompareLegendRemoved: "= удалённый текст,",
+    adminWikiEditCompareLegendAdded: "= добавленный текст.",
+    adminWikiEditViewVersionTitlePrefix: "Предпросмотр версии",
+    adminWikiEditViewVersionCreatedAt: "Создано",
+    adminWikiEditViewVersionBy: "кем",
+    adminWikiEditDeleteVersionTitle: "Удалить версию",
+    adminWikiEditDeleteVersionDescription:
+      "Эта версия будет навсегда удалена из истории статьи. Это действие нельзя отменить и оно может повлиять на отслеживаемость.",
+    adminWikiEditDeleteVersionConfirmTitle: "Подтвердите удаление версии",
+    adminWikiEditDeleteVersionConfirmDescription:
+      "Вы уверены, что хотите удалить эту версию? Это действие необратимо.",
+    adminWikiEditDeleteVersionConfirmMetaPrefix: "Версия",
+    adminWikiEditDeleteVersionConfirmMetaCreatedAt: "создана",
+    adminWikiEditDeleteVersionCurrentActiveError:
+      "Текущая активная версия не может быть удалена.",
+    adminWikiEditDeleteVersionLastVersionError:
+      "Эта версия не может быть удалена, потому что это последняя оставшаяся версия.",
+    adminWikiEditDeleteVersionNotFound:
+      "Версия или статья не найдены.",
+    adminWikiEditDeleteVersionError:
+      "Произошла ошибка при удалении версии.",
+    adminWikiEditDeleteVersionConfirmButton: "Да, удалить версию",
+    adminWikiEditBulkDeleteTitle: "Удалить выбранные версии",
+    adminWikiEditBulkDeleteDescriptionPrefix:
+      "Вы собираетесь навсегда удалить",
+    adminWikiEditBulkDeleteDescriptionSuffix:
+      "версии из истории статьи. Это действие нельзя отменить и оно может повлиять на отслеживаемость.",
+    adminWikiEditBulkDeleteConfirmTitle:
+      "Подтвердите удаление выбранных версий",
+    adminWikiEditBulkDeleteConfirmDescription:
+      "Вы уверены, что хотите удалить выбранные версии? Это действие необратимо.",
+    adminWikiEditBulkDeletePartialError:
+      "Некоторые версии не удалось удалить. Список версий будет обновлён.",
+    adminWikiEditBulkDeleteError:
+      "Произошла ошибка при удалении выбранных версий.",
+    adminWikiEditBulkDeleteConfirmButton:
+      "Да, удалить выбранные версии",
+  },
+  ua: {
+    adminErrorMissingApiAccess:
+      "Немає доступу до Admin API. Будь ласка, увійдіть знову як адміністратор.",
+    adminWikiCancel: "Скасувати",
+    adminWikiOk: "OK",
+    adminWikiClose: "Закрити",
+    adminWikiManagementTitle: "Керування Wiki",
+    adminWikiManagementInfoLabel: "Інфо",
+    adminWikiManagementInfoDescription:
+      "Керування статтями Wiki: створення, пошук, фільтри, зміна статусу, експорт та версії.",
+    adminWikiManagementSubtitle: "Список і керування статтями Wiki.",
+    adminWikiCreateNewArticle: "Створити нову статтю",
+    adminWikiSearchPlaceholder: "Пошук за назвою або slug...",
+    adminWikiFilterLanguage: "Фільтр за мовою",
+    adminWikiAllLanguages: "Усі мови",
+    adminWikiFilterStatus: "Фільтр за статусом",
+    adminWikiAllStatus: "Усі статуси",
+    adminWikiExportCsv: "Експорт CSV",
+    adminWikiLoadingList: "Завантаження списку...",
+    adminWikiEmptyList: "Немає статей Wiki для відображення.",
+    adminWikiLoadError:
+      "Сталася помилка під час завантаження списку Admin Wiki.",
+    adminWikiStatusUpdateError:
+      "Сталася помилка під час оновлення статусу статті.",
+    adminWikiSelectedPrefix: "Вибрано",
+    adminWikiSelectAllVisible: "Вибрати всі видимі",
+    adminWikiSelectArticle: "Вибрати статтю",
+    adminWikiIdPrefix: "ID",
+    adminWikiDeleteSelected: "Видалити вибрані",
+    adminWikiBulkStatus: "Масовий статус...",
+    adminWikiBulkStatusPlaceholder: "Масовий статус...",
+    adminWikiDeleteAll: "Видалити всі",
+    adminWikiSelectedCountLabel: "Кількість вибраних",
+    adminWikiBulkDeleteTitle: "Видалення вибраних статей",
+    adminWikiBulkDeleteDescription:
+      "Вибрані статті буде остаточно видалено (включно з усіма версіями). Цю дію не можна скасувати.",
+    adminWikiDeleteConfirm: "Видалити",
+    adminWikiBulkDeleteError:
+      "Сталася помилка під час масового видалення.",
+    adminWikiBulkStatusTitle: "Зміна статусу",
+    adminWikiBulkStatusDescription:
+      "Це змінить статус усіх вибраних статей.",
+    adminWikiBulkStatusNewStatusLabel: "Новий статус",
+    adminWikiBulkStatusError:
+      "Сталася помилка під час масового оновлення статусу.",
+    adminWikiPurgeAllTitle: "Видалити всі статті",
+    adminWikiPurgeAllDescriptionPrefix:
+      "Ви збираєтесь видалити УСІ wiki-статті",
+    adminWikiPurgeAllDescriptionSuffix: "Цю дію не можна скасувати.",
+    adminWikiPurgeAllConfirm: "Видалити всі",
+    adminWikiPurgeAllError:
+      "Сталася помилка під час видалення всіх статей.",
+    adminWikiActionEdit: "Редагувати",
+    adminWikiActionVersions: "Версії",
+    adminWikiStatusUpdating: "Оновлення...",
+    adminWikiActionActivate: "Активувати",
+    adminWikiActionDeactivate: "Деактивувати",
+    adminWikiCreateSlugRequired: "Введіть slug статті.",
+    adminWikiCreateInvalidOrExists:
+      "Некоректні дані або slug уже існує.",
+    adminWikiCreateError: "Сталася помилка під час створення статті.",
+    adminWikiCreateSuccess: "Статтю успішно створено.",
+    adminWikiCreateIntro:
+      "Введіть лише slug для нової Wiki-статті. Мову, статус і контент налаштовують пізніше на сторінці редагування.",
+    adminWikiBackToList: "Назад до списку",
+    adminWikiCreateBasicInformation: "Основна інформація",
+    adminWikiCreateSlugLabel: "Slug",
+    adminWikiCreateSlugPlaceholder: "manual-testing-intro",
+    adminWikiCreateTagsLabel: "Теги (через кому)",
+    adminWikiCreateTagsPlaceholder: "intro, basics, setup",
+    adminWikiCreateArticleIdLabel: "ID статті (лише читання)",
+    adminWikiCreateArticleIdPlaceholder: "Автоматично генерується під час збереження",
+    adminWikiCreateFooterNote:
+      "Статті, створені тут, зберігаються у базі BeeLMS (середовище розробки).",
+    adminWikiCreateSaving: "Збереження...",
+    adminWikiCreateArticleSaved: "Статтю збережено",
+    adminWikiCreateSaveArticle: "Зберегти статтю",
+    adminWikiCreateAlreadyCreatedNote:
+      "Ця стаття вже створена. Використайте сторінку редагування для змін.",
+    adminWikiEditRichEditorLoading: "Завантаження rich editor...",
+    adminWikiEditTitle: "Редагування Wiki-статті",
+    adminWikiEditSubtitle:
+      "Перегляд і редагування вмісту вибраної Wiki-статті.",
+    adminWikiEditBreadcrumbFallback: "Редагування",
+    adminWikiEditOpenPublicPage: "Відкрити публічну сторінку",
+    adminWikiEditPublicVisibleHintPrefix: "Стаття має мати статус",
+    adminWikiEditPublicVisibleHintSuffix: "щоб бути видимою публічно.",
+    adminWikiEditLoading: "Завантаження статті для редагування...",
+    adminWikiEditLanguageLabel: "Мова",
+    adminWikiEditLanguageAria: "Мова Wiki-статті",
+    adminWikiEditLanguageHelp:
+      "Зміна мови завантажує або створює окрему версію контенту для вибраної мови.",
+    adminWikiEditStatusLabel: "Статус",
+    adminWikiEditStatusAria: "Статус Wiki-статті",
+    adminWikiEditTitleLabel: "Заголовок",
+    adminWikiEditSubtitleLabel: "Підзаголовок (необов’язково)",
+    adminWikiEditTagsLabel: "Теги (через кому)",
+    adminWikiEditTagsExamplePrefix: "Приклад",
+    adminWikiEditContentLabel: "Контент",
+    adminWikiEditEditorModeLabel: "Режим редагування:",
+    adminWikiEditEditorModeMarkdown: "Markdown",
+    adminWikiEditEditorModeRichText: "Rich text",
+    adminWikiEditRequiredFieldSrOnly: "(обов’язкове поле)",
+    adminWikiEditTitleRequiredError:
+      "Заголовок обов’язковий. Введіть текст.",
+    adminWikiEditContentRequiredError:
+      "Контент обов’язковий. Додайте текст перед збереженням.",
+    adminWikiEditRequiredFieldTitle: "Заголовок",
+    adminWikiEditRequiredFieldContent: "Контент",
+    adminWikiEditSaveDisabledNoChanges:
+      "Кнопка «Зберегти» стане активною після змін.",
+    adminWikiEditSaveDisabledMissingFields:
+      "Заповніть обов’язкові поля, щоб зберегти.",
+    adminWikiEditSave: "Зберегти",
+    adminWikiEditSaving: "Збереження...",
+    adminWikiEditInvalidData:
+      "Некоректні дані статті. Перевірте поля.",
+    adminWikiEditSaveError:
+      "Сталася помилка під час збереження змін.",
+    adminWikiEditSaveSuccess: "Зміни збережено.",
+    adminWikiEditMissingArticleId:
+      "Відсутній ID статті. Перезавантажте сторінку.",
+    adminWikiEditMediaLoadError:
+      "Сталася помилка під час завантаження зображень.",
+    adminWikiEditVersionsLoadError:
+      "Сталася помилка під час завантаження версій.",
+    adminWikiEditUploadImage: "Завантажити зображення",
+    adminWikiEditUploading: "Завантаження...",
+    adminWikiEditUploadImageError:
+      "Сталася помилка під час завантаження зображення.",
+    adminWikiEditDeleteMediaConfirm:
+      "Ви впевнені, що хочете видалити це зображення?",
+    adminWikiEditDeleteMediaError:
+      "Сталася помилка під час видалення зображення.",
+    adminWikiEditClipboardUnavailable:
+      "Clipboard API недоступний у цьому браузері.",
+    adminWikiEditMarkdownCopied: "Фрагмент Markdown скопійовано в буфер обміну.",
+    adminWikiEditMarkdownCopyFailed:
+      "Не вдалося скопіювати фрагмент Markdown.",
+    adminWikiEditRollbackConfirm:
+      "Ви впевнені, що хочете відновити статтю до цієї версії?",
+    adminWikiEditRollbackNotFound:
+      "Вибрану версію або статтю не знайдено.",
+    adminWikiEditRollbackInvalidRequest:
+      "Некоректний запит на відновлення. Спробуйте ще раз.",
+    adminWikiEditRollbackError:
+      "Сталася помилка під час відновлення версії.",
+    adminWikiEditRollbackSuccess: "Статтю відновлено до вибраної версії.",
+    adminWikiEditCompareSameLangError:
+      "Порівнювати можна лише версії однієї мови.",
+    adminWikiEditMermaidHelp:
+      "Для діаграм використовуйте fenced code block з мовою mermaid (наприклад, ```mermaid ... ```). Діаграми будуть в попередньому перегляді та публічній Wiki.",
+    adminWikiEditCaptionHelp:
+      "Для підпису під зображенням: вставте зображення, а на наступному рядку додайте текст (за бажанням курсивом), напр.: ![Alt](url) *Caption*.",
+    adminWikiEditPreviewAria: "Попередній перегляд контенту",
+    adminWikiEditPreviewTitle: "Попередній перегляд (як у публічній Wiki)",
+    adminWikiEditPreviewShow: "Показати перегляд",
+    adminWikiEditPreviewHide: "Сховати перегляд",
+    adminWikiEditPreviewUntitled: "(Без заголовка)",
+    adminWikiEditMissingFieldsPrefix: "Відсутні обов’язкові поля:",
+    adminWikiEditMissingFieldsSuffix:
+      "Заповніть їх, щоб активувати кнопку \"Зберегти\".",
+    adminWikiEditUnsavedChangesWarning: "Є незбережені зміни.",
+    adminWikiEditUnsavedChangesConfirm:
+      "У вас є незбережені зміни. Ви впевнені, що хочете покинути сторінку?",
+    adminWikiEditMediaSectionAria: "Зображення статті",
+    adminWikiEditMediaSectionTitle: "Зображення статті",
+    adminWikiEditMediaSectionDescription:
+      "Завантажте зображення, на які хочете посилатися з Markdown-контенту вище. Після завантаження ви побачите URL, який можна вставити в текст.",
+    adminWikiEditNeedArticleIdHint:
+      "Спочатку переконайтеся, що стаття збережена та має ID.",
+    adminWikiEditMediaLoading: "Завантаження зображень...",
+    adminWikiEditUploadedImagesTitle: "Завантажені зображення",
+    adminWikiEditUploadedImagesNoArticleId:
+      "Поки немає ID статті. Перезавантажте статтю або дочекайтеся повного завантаження.",
+    adminWikiEditUploadedImagesEmpty:
+      "Для цієї статті ще немає завантажених зображень.",
+    adminWikiEditMediaInsert: "Вставити",
+    adminWikiEditMediaCopyMarkdown: "Скопіювати Markdown",
+    adminWikiEditMediaDelete: "Видалити",
+    adminWikiEditVersionsAria: "Версії статті",
+    adminWikiEditVersionsTitle: "Версії статті",
+    adminWikiEditVersionsHighlight: "Дивіться тут",
+    adminWikiEditVersionsLoading: "Завантаження версій...",
+    adminWikiEditVersionsEmpty: "Немає версій для цієї мови.",
+    adminWikiEditVersionsCompareHeader: "Порівняти",
+    adminWikiEditVersionsSelectLabel: "вибрати",
+    adminWikiEditVersionsColVersion: "Версія",
+    adminWikiEditVersionsColLanguage: "Мова",
+    adminWikiEditVersionsColTitle: "Заголовок",
+    adminWikiEditVersionsColSubtitle: "Підзаголовок",
+    adminWikiEditVersionsColCreatedAt: "Створено",
+    adminWikiEditVersionsColCreatedBy: "Створив",
+    adminWikiEditVersionsColActions: "Дії",
+    adminWikiEditVersionsActionPreview: "Перегляд",
+    adminWikiEditVersionsCurrent: "Поточна",
+    adminWikiEditVersionsRollback: "Відновити",
+    adminWikiEditVersionsRollbacking: "Відновлення...",
+    adminWikiEditVersionsDelete: "Видалити",
+    adminWikiEditVersionsCompareHelp:
+      "Виберіть дві версії (одна мова), щоб порівняти.",
+    adminWikiEditPageLabel: "Сторінка",
+    adminWikiEditOfLabel: "з",
+    adminWikiEditVersionsCountLabel: "версій",
+    adminWikiEditVersionsCompareSelected: "Порівняти вибрані",
+    adminWikiEditVersionsDeleteSelected: "Видалити вибрані",
+    adminWikiEditCompareAria: "Порівняння версій",
+    adminWikiEditCompareTitle: "Порівняння версій",
+    adminWikiEditCompareSubtitle:
+      "Ліворуч: старіша версія. Праворуч: новіша версія.",
+    adminWikiEditCompareClear: "Очистити порівняння",
+    adminWikiEditCompareOlder: "Старіша",
+    adminWikiEditCompareNewer: "Новіша",
+    adminWikiEditCompareVersionLabel: "Версія",
+    adminWikiEditCompareFieldTitle: "Заголовок:",
+    adminWikiEditCompareFieldSubtitle: "Підзаголовок:",
+    adminWikiEditCompareLegendToken: "текст",
+    adminWikiEditCompareLegendRemoved: "= видалений текст,",
+    adminWikiEditCompareLegendAdded: "= доданий текст.",
+    adminWikiEditViewVersionTitlePrefix: "Перегляд версії",
+    adminWikiEditViewVersionCreatedAt: "Створено",
+    adminWikiEditViewVersionBy: "ким",
+    adminWikiEditDeleteVersionTitle: "Видалити версію",
+    adminWikiEditDeleteVersionDescription:
+      "Цю версію буде остаточно видалено з історії статті. Цю дію не можна скасувати і вона може вплинути на відстежуваність.",
+    adminWikiEditDeleteVersionConfirmTitle: "Підтвердіть видалення версії",
+    adminWikiEditDeleteVersionConfirmDescription:
+      "Ви впевнені, що хочете видалити цю версію? Цю дію не можна скасувати.",
+    adminWikiEditDeleteVersionConfirmMetaPrefix: "Версія",
+    adminWikiEditDeleteVersionConfirmMetaCreatedAt: "створено",
+    adminWikiEditDeleteVersionCurrentActiveError:
+      "Поточну активну версію не можна видалити.",
+    adminWikiEditDeleteVersionLastVersionError:
+      "Цю версію не можна видалити, оскільки це остання версія.",
+    adminWikiEditDeleteVersionNotFound: "Версію або статтю не знайдено.",
+    adminWikiEditDeleteVersionError:
+      "Сталася помилка під час видалення версії.",
+    adminWikiEditDeleteVersionConfirmButton: "Так, видалити версію",
+    adminWikiEditBulkDeleteTitle: "Видалити вибрані версії",
+    adminWikiEditBulkDeleteDescriptionPrefix:
+      "Ви збираєтесь остаточно видалити",
+    adminWikiEditBulkDeleteDescriptionSuffix:
+      "версії з історії статті. Цю дію не можна скасувати і вона може вплинути на відстежуваність.",
+    adminWikiEditBulkDeleteConfirmTitle:
+      "Підтвердіть видалення вибраних версій",
+    adminWikiEditBulkDeleteConfirmDescription:
+      "Ви впевнені, що хочете видалити вибрані версії? Цю дію не можна скасувати.",
+    adminWikiEditBulkDeletePartialError:
+      "Деякі версії не вдалося видалити. Список версій буде оновлено.",
+    adminWikiEditBulkDeleteError:
+      "Сталася помилка під час видалення вибраних версій.",
+    adminWikiEditBulkDeleteConfirmButton:
+      "Так, видалити вибрані версії",
+  },
+  tr: {
+    adminErrorMissingApiAccess:
+      "Admin API erişimi yok. Lütfen yönetici olarak tekrar giriş yapın.",
+    adminWikiCancel: "İptal",
+    adminWikiOk: "Tamam",
+    adminWikiClose: "Kapat",
+    adminWikiManagementTitle: "Wiki Yönetimi",
+    adminWikiManagementInfoLabel: "Bilgi",
+    adminWikiManagementInfoDescription:
+      "Wiki makalelerini yönetin: oluşturma, arama, filtreleme, durum değiştirme, dışa aktarma ve sürümler.",
+    adminWikiManagementSubtitle: "Wiki makalelerini listeleyin ve yönetin.",
+    adminWikiCreateNewArticle: "Yeni makale oluştur",
+    adminWikiSearchPlaceholder: "Başlık veya slug ile ara...",
+    adminWikiFilterLanguage: "Dile göre filtrele",
+    adminWikiAllLanguages: "Tüm diller",
+    adminWikiFilterStatus: "Duruma göre filtrele",
+    adminWikiAllStatus: "Tüm durumlar",
+    adminWikiExportCsv: "CSV dışa aktar",
+    adminWikiLoadingList: "Liste yükleniyor...",
+    adminWikiEmptyList: "Gösterilecek Wiki makalesi yok.",
+    adminWikiLoadError: "Admin Wiki listesi yüklenirken bir hata oluştu.",
+    adminWikiStatusUpdateError:
+      "Makale durumu güncellenirken bir hata oluştu.",
+    adminWikiSelectedPrefix: "Seçili",
+    adminWikiSelectAllVisible: "Görünenlerin tümünü seç",
+    adminWikiSelectArticle: "Makaleyi seç",
+    adminWikiIdPrefix: "ID",
+    adminWikiDeleteSelected: "Seçilileri sil",
+    adminWikiBulkStatus: "Toplu durum...",
+    adminWikiBulkStatusPlaceholder: "Toplu durum...",
+    adminWikiDeleteAll: "Tümünü sil",
+    adminWikiSelectedCountLabel: "Seçili sayısı",
+    adminWikiBulkDeleteTitle: "Seçili makaleleri sil",
+    adminWikiBulkDeleteDescription:
+      "Seçili makaleler kalıcı olarak silinecek (tüm sürümler dahil). Bu işlem geri alınamaz.",
+    adminWikiDeleteConfirm: "Sil",
+    adminWikiBulkDeleteError: "Toplu silme sırasında bir hata oluştu.",
+    adminWikiBulkStatusTitle: "Durumu değiştir",
+    adminWikiBulkStatusDescription:
+      "Bu işlem, seçili tüm makalelerin durumunu değiştirecek.",
+    adminWikiBulkStatusNewStatusLabel: "Yeni durum",
+    adminWikiBulkStatusError:
+      "Toplu durum güncellemesi sırasında bir hata oluştu.",
+    adminWikiPurgeAllTitle: "Tüm makaleleri sil",
+    adminWikiPurgeAllDescriptionPrefix:
+      "TÜM wiki makalelerini silmek üzeresiniz",
+    adminWikiPurgeAllDescriptionSuffix: "Bu işlem geri alınamaz.",
+    adminWikiPurgeAllConfirm: "Tümünü sil",
+    adminWikiPurgeAllError: "Tüm makaleler silinirken bir hata oluştu.",
+    adminWikiActionEdit: "Düzenle",
+    adminWikiActionVersions: "Sürümler",
+    adminWikiStatusUpdating: "Güncelleniyor...",
+    adminWikiActionActivate: "Etkinleştir",
+    adminWikiActionDeactivate: "Devre dışı bırak",
+    adminWikiCreateSlugRequired: "Lütfen makale için bir slug girin.",
+    adminWikiCreateInvalidOrExists:
+      "Geçersiz veri veya slug zaten mevcut.",
+    adminWikiCreateError: "Makale oluşturulurken bir hata oluştu.",
+    adminWikiCreateSuccess: "Makale başarıyla oluşturuldu.",
+    adminWikiCreateIntro:
+      "Yeni bir Wiki makalesi için sadece slug girin. Dil, durum ve içerik daha sonra düzenleme sayfasında ayarlanır.",
+    adminWikiBackToList: "Listeye dön",
+    adminWikiCreateBasicInformation: "Temel bilgiler",
+    adminWikiCreateSlugLabel: "Slug",
+    adminWikiCreateSlugPlaceholder: "manual-testing-intro",
+    adminWikiCreateTagsLabel: "Etiketler (virgülle ayrılmış)",
+    adminWikiCreateTagsPlaceholder: "intro, basics, setup",
+    adminWikiCreateArticleIdLabel: "Makale ID (salt okunur)",
+    adminWikiCreateArticleIdPlaceholder: "Kaydetmede otomatik oluşturulur",
+    adminWikiCreateFooterNote:
+      "Burada oluşturulan makaleler BeeLMS veritabanında saklanır (geliştirme ortamı).",
+    adminWikiCreateSaving: "Kaydediliyor...",
+    adminWikiCreateArticleSaved: "Makale kaydedildi",
+    adminWikiCreateSaveArticle: "Makaleyi kaydet",
+    adminWikiCreateAlreadyCreatedNote:
+      "Bu makale zaten mevcut. Değişiklikler için düzenleme sayfasını kullanın.",
+    adminWikiEditRichEditorLoading: "Zengin düzenleyici yükleniyor...",
+    adminWikiEditTitle: "Wiki makalesini düzenle",
+    adminWikiEditSubtitle:
+      "Seçili bir Wiki makalesinin içeriğini inceleyin ve düzenleyin.",
+    adminWikiEditBreadcrumbFallback: "Düzenle",
+    adminWikiEditOpenPublicPage: "Herkese açık sayfayı aç",
+    adminWikiEditPublicVisibleHintPrefix: "Makalenin durumu",
+    adminWikiEditPublicVisibleHintSuffix:
+      "olmalıdır ki herkese açık görünsün.",
+    adminWikiEditLoading: "Makale düzenlemek için yükleniyor...",
+    adminWikiEditLanguageLabel: "Dil",
+    adminWikiEditLanguageAria: "Wiki makalesi dili",
+    adminWikiEditLanguageHelp:
+      "Dil değiştirmek, seçilen dil için ayrı bir içerik sürümü yükler veya oluşturur.",
+    adminWikiEditStatusLabel: "Durum",
+    adminWikiEditStatusAria: "Wiki makalesi durumu",
+    adminWikiEditTitleLabel: "Başlık",
+    adminWikiEditSubtitleLabel: "Alt başlık (isteğe bağlı)",
+    adminWikiEditTagsLabel: "Etiketler (virgülle ayrılmış)",
+    adminWikiEditTagsExamplePrefix: "Örnek",
+    adminWikiEditContentLabel: "İçerik",
+    adminWikiEditEditorModeLabel: "Düzenleme modu:",
+    adminWikiEditEditorModeMarkdown: "Markdown",
+    adminWikiEditEditorModeRichText: "Zengin metin",
+    adminWikiEditRequiredFieldSrOnly: "(zorunlu alan)",
+    adminWikiEditTitleRequiredError: "Başlık zorunludur. Metin girin.",
+    adminWikiEditContentRequiredError:
+      "İçerik zorunludur. Kaydetmeden önce metin ekleyin.",
+    adminWikiEditRequiredFieldTitle: "Başlık",
+    adminWikiEditRequiredFieldContent: "İçerik",
+    adminWikiEditSaveDisabledNoChanges:
+      "Kaydet düğmesi, bir alanı değiştirdikten sonra etkinleşir.",
+    adminWikiEditSaveDisabledMissingFields:
+      "Kaydetmek için zorunlu alanları doldurun.",
+    adminWikiEditSave: "Kaydet",
+    adminWikiEditSaving: "Kaydediliyor...",
+    adminWikiEditInvalidData:
+      "Geçersiz makale verisi. Alanları kontrol edin.",
+    adminWikiEditSaveError: "Değişiklikler kaydedilirken bir hata oluştu.",
+    adminWikiEditSaveSuccess: "Değişiklikler başarıyla kaydedildi.",
+    adminWikiEditMissingArticleId: "Makale ID eksik. Sayfayı yenileyin.",
+    adminWikiEditMediaLoadError: "Görseller yüklenirken bir hata oluştu.",
+    adminWikiEditVersionsLoadError: "Sürümler yüklenirken bir hata oluştu.",
+    adminWikiEditUploadImage: "Görsel yükle",
+    adminWikiEditUploading: "Yükleniyor...",
+    adminWikiEditUploadImageError: "Görsel yüklenirken bir hata oluştu.",
+    adminWikiEditDeleteMediaConfirm:
+      "Bu görseli silmek istediğinizden emin misiniz?",
+    adminWikiEditDeleteMediaError: "Görsel silinirken bir hata oluştu.",
+    adminWikiEditClipboardUnavailable:
+      "Clipboard API bu tarayıcıda kullanılamıyor.",
+    adminWikiEditMarkdownCopied: "Markdown parçası panoya kopyalandı.",
+    adminWikiEditMarkdownCopyFailed: "Markdown parçası kopyalanamadı.",
+    adminWikiEditRollbackConfirm:
+      "Makaleyi bu sürüme geri almak istediğinizden emin misiniz?",
+    adminWikiEditRollbackNotFound: "Seçili sürüm veya makale bulunamadı.",
+    adminWikiEditRollbackInvalidRequest:
+      "Geçersiz geri yükleme isteği. Tekrar deneyin.",
+    adminWikiEditRollbackError: "Sürüm geri yüklenirken bir hata oluştu.",
+    adminWikiEditRollbackSuccess: "Makale seçili sürüme geri yüklendi.",
+    adminWikiEditCompareSameLangError:
+      "Yalnızca aynı dildeki sürümleri karşılaştırabilirsiniz.",
+    adminWikiEditMermaidHelp:
+      "Diyagramlar için mermaid dilinde kod bloğu kullanın (örn. ```mermaid ... ```). Diyagramlar önizlemede ve herkese açık Wiki’de görünür.",
+    adminWikiEditCaptionHelp:
+      "Görsel altyazısı için: görseli ekleyin, sonra bir sonraki satıra metni yazın (isteğe bağlı italik), örn.: ![Alt](url) *Caption*.",
+    adminWikiEditPreviewAria: "İçerik önizlemesi",
+    adminWikiEditPreviewTitle: "Önizleme (herkese açık Wiki gibi)",
+    adminWikiEditPreviewShow: "Önizlemeyi göster",
+    adminWikiEditPreviewHide: "Önizlemeyi gizle",
+    adminWikiEditPreviewUntitled: "(Başlıksız)",
+    adminWikiEditMissingFieldsPrefix: "Zorunlu alanlar eksik:",
+    adminWikiEditMissingFieldsSuffix:
+      "\"Kaydet\" düğmesini etkinleştirmek için doldurun.",
+    adminWikiEditUnsavedChangesWarning: "Kaydedilmemiş değişiklikler var.",
+    adminWikiEditUnsavedChangesConfirm:
+      "Kaydedilmemiş değişiklikleriniz var. Sayfadan ayrılmak istediğinizden emin misiniz?",
+    adminWikiEditMediaSectionAria: "Makale görselleri",
+    adminWikiEditMediaSectionTitle: "Makale görselleri",
+    adminWikiEditMediaSectionDescription:
+      "Yukarıdaki Markdown içeriğinde kullanmak istediğiniz görselleri yükleyin. Yükleme sonrası metne yapıştırabileceğiniz bir URL görürsünüz.",
+    adminWikiEditNeedArticleIdHint:
+      "Önce makalenin kaydedildiğinden ve bir ID’si olduğundan emin olun.",
+    adminWikiEditMediaLoading: "Görseller yükleniyor...",
+    adminWikiEditUploadedImagesTitle: "Yüklenen görseller",
+    adminWikiEditUploadedImagesNoArticleId:
+      "Henüz makale ID yok. Makaleyi yenileyin veya tamamen yüklenmesini bekleyin.",
+    adminWikiEditUploadedImagesEmpty: "Bu makale için henüz görsel yok.",
+    adminWikiEditMediaInsert: "Ekle",
+    adminWikiEditMediaCopyMarkdown: "Markdown kopyala",
+    adminWikiEditMediaDelete: "Sil",
+    adminWikiEditVersionsAria: "Makale sürümleri",
+    adminWikiEditVersionsTitle: "Makale sürümleri",
+    adminWikiEditVersionsHighlight: "Buraya bakın",
+    adminWikiEditVersionsLoading: "Sürümler yükleniyor...",
+    adminWikiEditVersionsEmpty: "Bu dil için sürüm yok.",
+    adminWikiEditVersionsCompareHeader: "Karşılaştır",
+    adminWikiEditVersionsSelectLabel: "seç",
+    adminWikiEditVersionsColVersion: "Sürüm",
+    adminWikiEditVersionsColLanguage: "Dil",
+    adminWikiEditVersionsColTitle: "Başlık",
+    adminWikiEditVersionsColSubtitle: "Alt başlık",
+    adminWikiEditVersionsColCreatedAt: "Oluşturulma",
+    adminWikiEditVersionsColCreatedBy: "Oluşturan",
+    adminWikiEditVersionsColActions: "İşlemler",
+    adminWikiEditVersionsActionPreview: "Önizle",
+    adminWikiEditVersionsCurrent: "Mevcut",
+    adminWikiEditVersionsRollback: "Geri al",
+    adminWikiEditVersionsRollbacking: "Geri alınıyor...",
+    adminWikiEditVersionsDelete: "Sil",
+    adminWikiEditVersionsCompareHelp:
+      "Karşılaştırmak için iki sürüm seçin (aynı dil).",
+    adminWikiEditPageLabel: "Sayfa",
+    adminWikiEditOfLabel: " / ",
+    adminWikiEditVersionsCountLabel: "sürüm",
+    adminWikiEditVersionsCompareSelected: "Seçilileri karşılaştır",
+    adminWikiEditVersionsDeleteSelected: "Seçilileri sil",
+    adminWikiEditCompareAria: "Sürüm karşılaştırma",
+    adminWikiEditCompareTitle: "Sürüm karşılaştırma",
+    adminWikiEditCompareSubtitle:
+      "Sol: daha eski sürüm. Sağ: daha yeni sürüm.",
+    adminWikiEditCompareClear: "Karşılaştırmayı temizle",
+    adminWikiEditCompareOlder: "Daha eski",
+    adminWikiEditCompareNewer: "Daha yeni",
+    adminWikiEditCompareVersionLabel: "Sürüm",
+    adminWikiEditCompareFieldTitle: "Başlık:",
+    adminWikiEditCompareFieldSubtitle: "Alt başlık:",
+    adminWikiEditCompareLegendToken: "metin",
+    adminWikiEditCompareLegendRemoved: "= kaldırılan metin,",
+    adminWikiEditCompareLegendAdded: "= eklenen metin.",
+    adminWikiEditViewVersionTitlePrefix: "Sürüm önizleme",
+    adminWikiEditViewVersionCreatedAt: "Oluşturulma",
+    adminWikiEditViewVersionBy: "tarafından",
+    adminWikiEditDeleteVersionTitle: "Sürümü sil",
+    adminWikiEditDeleteVersionDescription:
+      "Bu sürüm, makale geçmişinden kalıcı olarak kaldırılacak. Bu işlem geri alınamaz ve izlenebilirliği etkileyebilir.",
+    adminWikiEditDeleteVersionConfirmTitle: "Sürüm silmeyi onaylayın",
+    adminWikiEditDeleteVersionConfirmDescription:
+      "Bu sürümü silmek istediğinizden emin misiniz? Bu işlem kalıcıdır ve geri alınamaz.",
+    adminWikiEditDeleteVersionConfirmMetaPrefix: "Sürüm",
+    adminWikiEditDeleteVersionConfirmMetaCreatedAt: "oluşturulma",
+    adminWikiEditDeleteVersionCurrentActiveError:
+      "Mevcut etkin sürüm silinemez.",
+    adminWikiEditDeleteVersionLastVersionError:
+      "Bu sürüm silinemez çünkü kalan son sürüm.",
+    adminWikiEditDeleteVersionNotFound: "Sürüm veya makale bulunamadı.",
+    adminWikiEditDeleteVersionError: "Sürüm silinirken bir hata oluştu.",
+    adminWikiEditDeleteVersionConfirmButton: "Evet, sürümü sil",
+    adminWikiEditBulkDeleteTitle: "Seçili sürümleri sil",
+    adminWikiEditBulkDeleteDescriptionPrefix: "Kalıcı olarak silmek üzeresiniz",
+    adminWikiEditBulkDeleteDescriptionSuffix:
+      "sürümü makale geçmişinden. Bu işlem geri alınamaz ve izlenebilirliği etkileyebilir.",
+    adminWikiEditBulkDeleteConfirmTitle: "Seçili sürümleri silmeyi onaylayın",
+    adminWikiEditBulkDeleteConfirmDescription:
+      "Seçili sürümleri silmek istediğinizden emin misiniz? Bu işlem kalıcıdır ve geri alınamaz.",
+    adminWikiEditBulkDeletePartialError:
+      "Bazı sürümler silinemedi. Sürüm listesi yenilenecek.",
+    adminWikiEditBulkDeleteError: "Seçili sürümler silinirken bir hata oluştu.",
+    adminWikiEditBulkDeleteConfirmButton: "Evet, seçili sürümleri sil",
+  },
+  ro: {
+    adminErrorMissingApiAccess:
+      "Lipsește accesul la Admin API. Te rugăm să te autentifici din nou ca administrator.",
+    adminWikiCancel: "Anulează",
+    adminWikiOk: "OK",
+    adminWikiClose: "Închide",
+    adminWikiManagementTitle: "Administrare Wiki",
+    adminWikiManagementInfoLabel: "Info",
+    adminWikiManagementInfoDescription:
+      "Gestionează articolele Wiki: creează, caută, filtrează, schimbă statusul, exportă și gestionează versiuni.",
+    adminWikiManagementSubtitle: "Listă și administrare articole Wiki.",
+    adminWikiCreateNewArticle: "Creează articol nou",
+    adminWikiSearchPlaceholder: "Caută după titlu sau slug...",
+    adminWikiFilterLanguage: "Filtrează după limbă",
+    adminWikiAllLanguages: "Toate limbile",
+    adminWikiFilterStatus: "Filtrează după status",
+    adminWikiAllStatus: "Toate statusurile",
+    adminWikiExportCsv: "Exportă CSV",
+    adminWikiLoadingList: "Se încarcă lista...",
+    adminWikiEmptyList: "Nu există articole Wiki de afișat.",
+    adminWikiLoadError:
+      "A apărut o eroare la încărcarea listei Admin Wiki.",
+    adminWikiStatusUpdateError:
+      "A apărut o eroare la actualizarea statusului articolului.",
+    adminWikiSelectedPrefix: "Selectate",
+    adminWikiSelectAllVisible: "Selectează toate cele vizibile",
+    adminWikiSelectArticle: "Selectează articol",
+    adminWikiIdPrefix: "ID",
+    adminWikiDeleteSelected: "Șterge selectatele",
+    adminWikiBulkStatus: "Status în masă...",
+    adminWikiBulkStatusPlaceholder: "Status în masă...",
+    adminWikiDeleteAll: "Șterge tot",
+    adminWikiSelectedCountLabel: "Număr selectate",
+    adminWikiBulkDeleteTitle: "Șterge articolele selectate",
+    adminWikiBulkDeleteDescription:
+      "Articolele selectate vor fi șterse definitiv (inclusiv toate versiunile). Această acțiune nu poate fi anulată.",
+    adminWikiDeleteConfirm: "Șterge",
+    adminWikiBulkDeleteError:
+      "A apărut o eroare la ștergerea în masă.",
+    adminWikiBulkStatusTitle: "Schimbă statusul",
+    adminWikiBulkStatusDescription:
+      "Aceasta va schimba statusul tuturor articolelor selectate.",
+    adminWikiBulkStatusNewStatusLabel: "Status nou",
+    adminWikiBulkStatusError:
+      "A apărut o eroare la actualizarea statusului în masă.",
+    adminWikiPurgeAllTitle: "Șterge toate articolele",
+    adminWikiPurgeAllDescriptionPrefix:
+      "Ești pe cale să ștergi TOATE articolele wiki",
+    adminWikiPurgeAllDescriptionSuffix: "Această acțiune nu poate fi anulată.",
+    adminWikiPurgeAllConfirm: "Șterge tot",
+    adminWikiPurgeAllError:
+      "A apărut o eroare la ștergerea tuturor articolelor.",
+    adminWikiActionEdit: "Editează",
+    adminWikiActionVersions: "Versiuni",
+    adminWikiStatusUpdating: "Se actualizează...",
+    adminWikiActionActivate: "Activează",
+    adminWikiActionDeactivate: "Dezactivează",
+    adminWikiCreateSlugRequired: "Te rugăm să introduci un slug pentru articol.",
+    adminWikiCreateInvalidOrExists:
+      "Date invalide sau slug-ul există deja.",
+    adminWikiCreateError: "A apărut o eroare la crearea articolului.",
+    adminWikiCreateSuccess: "Articolul a fost creat cu succes.",
+    adminWikiCreateIntro:
+      "Introdu doar slug-ul unui articol Wiki nou. Limba, statusul și conținutul se setează ulterior în pagina de editare.",
+    adminWikiBackToList: "Înapoi la listă",
+    adminWikiCreateBasicInformation: "Informații de bază",
+    adminWikiCreateSlugLabel: "Slug",
+    adminWikiCreateSlugPlaceholder: "manual-testing-intro",
+    adminWikiCreateTagsLabel: "Etichete (separate prin virgulă)",
+    adminWikiCreateTagsPlaceholder: "intro, basics, setup",
+    adminWikiCreateArticleIdLabel: "ID articol (doar citire)",
+    adminWikiCreateArticleIdPlaceholder: "Generat automat la salvare",
+    adminWikiCreateFooterNote:
+      "Articolele create aici sunt stocate în baza de date BeeLMS (mediu de dezvoltare).",
+    adminWikiCreateSaving: "Se salvează...",
+    adminWikiCreateArticleSaved: "Articol salvat",
+    adminWikiCreateSaveArticle: "Salvează articolul",
+    adminWikiCreateAlreadyCreatedNote:
+      "Acest articol există deja. Folosește pagina de editare pentru modificări.",
+    adminWikiEditRichEditorLoading: "Se încarcă editorul rich...",
+    adminWikiEditTitle: "Editează articolul Wiki",
+    adminWikiEditSubtitle:
+      "Revizuiește și editează conținutul unui articol Wiki selectat.",
+    adminWikiEditBreadcrumbFallback: "Editare",
+    adminWikiEditOpenPublicPage: "Deschide pagina publică",
+    adminWikiEditPublicVisibleHintPrefix: "Articolul trebuie să aibă statusul",
+    adminWikiEditPublicVisibleHintSuffix: "pentru a fi vizibil public.",
+    adminWikiEditLoading: "Se încarcă articolul pentru editare...",
+    adminWikiEditLanguageLabel: "Limbă",
+    adminWikiEditLanguageAria: "Limba articolului Wiki",
+    adminWikiEditLanguageHelp:
+      "Schimbarea limbii încarcă sau creează o versiune separată a conținutului pentru limba selectată.",
+    adminWikiEditStatusLabel: "Status",
+    adminWikiEditStatusAria: "Statusul articolului Wiki",
+    adminWikiEditTitleLabel: "Titlu",
+    adminWikiEditSubtitleLabel: "Subtitlu (opțional)",
+    adminWikiEditTagsLabel: "Etichete (separate prin virgulă)",
+    adminWikiEditTagsExamplePrefix: "Exemplu",
+    adminWikiEditContentLabel: "Conținut",
+    adminWikiEditEditorModeLabel: "Mod editare:",
+    adminWikiEditEditorModeMarkdown: "Markdown",
+    adminWikiEditEditorModeRichText: "Text îmbogățit",
+    adminWikiEditRequiredFieldSrOnly: "(câmp obligatoriu)",
+    adminWikiEditTitleRequiredError: "Titlul este obligatoriu. Introdu text.",
+    adminWikiEditContentRequiredError:
+      "Conținutul este obligatoriu. Adaugă text înainte de salvare.",
+    adminWikiEditRequiredFieldTitle: "Titlu",
+    adminWikiEditRequiredFieldContent: "Conținut",
+    adminWikiEditSaveDisabledNoChanges:
+      "Butonul Salvare se va activa după ce faci modificări.",
+    adminWikiEditSaveDisabledMissingFields:
+      "Completează câmpurile obligatorii pentru a salva.",
+    adminWikiEditSave: "Salvează",
+    adminWikiEditSaving: "Se salvează...",
+    adminWikiEditInvalidData:
+      "Date articol invalide. Verifică câmpurile.",
+    adminWikiEditSaveError: "A apărut o eroare la salvarea modificărilor.",
+    adminWikiEditSaveSuccess: "Modificările au fost salvate.",
+    adminWikiEditMissingArticleId:
+      "Lipsește ID-ul articolului. Reîncarcă pagina.",
+    adminWikiEditMediaLoadError: "A apărut o eroare la încărcarea imaginilor.",
+    adminWikiEditVersionsLoadError: "A apărut o eroare la încărcarea versiunilor.",
+    adminWikiEditUploadImage: "Încarcă imagine",
+    adminWikiEditUploading: "Se încarcă...",
+    adminWikiEditUploadImageError: "A apărut o eroare la încărcarea imaginii.",
+    adminWikiEditDeleteMediaConfirm:
+      "Ești sigur că vrei să ștergi această imagine?",
+    adminWikiEditDeleteMediaError: "A apărut o eroare la ștergerea imaginii.",
+    adminWikiEditClipboardUnavailable:
+      "Clipboard API nu este disponibil în acest browser.",
+    adminWikiEditMarkdownCopied:
+      "Fragmentul Markdown a fost copiat în clipboard.",
+    adminWikiEditMarkdownCopyFailed:
+      "Nu s-a putut copia fragmentul Markdown.",
+    adminWikiEditRollbackConfirm:
+      "Ești sigur că vrei să revii la această versiune?",
+    adminWikiEditRollbackNotFound:
+      "Versiunea selectată sau articolul nu a fost găsit.",
+    adminWikiEditRollbackInvalidRequest:
+      "Cerere de revenire invalidă. Încearcă din nou.",
+    adminWikiEditRollbackError:
+      "A apărut o eroare la revenirea la versiune.",
+    adminWikiEditRollbackSuccess:
+      "Articolul a fost readus la versiunea selectată.",
+    adminWikiEditCompareSameLangError:
+      "Poți compara doar versiuni din aceeași limbă.",
+    adminWikiEditMermaidHelp:
+      "Pentru diagrame folosește un bloc de cod cu limbajul mermaid (ex. ```mermaid ... ```). Diagramele vor apărea în previzualizare și în Wiki public.",
+    adminWikiEditCaptionHelp:
+      "Pentru legendă imagine: inserează imaginea, apoi pe linia următoare adaugă textul (opțional italic), ex.: ![Alt](url) *Caption*.",
+    adminWikiEditPreviewAria: "Previzualizare conținut",
+    adminWikiEditPreviewTitle: "Previzualizare (ca în Wiki public)",
+    adminWikiEditPreviewShow: "Arată previzualizarea",
+    adminWikiEditPreviewHide: "Ascunde previzualizarea",
+    adminWikiEditPreviewUntitled: "(Fără titlu)",
+    adminWikiEditMissingFieldsPrefix: "Lipsesc câmpuri obligatorii:",
+    adminWikiEditMissingFieldsSuffix:
+      "Completează-le pentru a activa butonul \"Salvează\".",
+    adminWikiEditUnsavedChangesWarning: "Există modificări nesalvate.",
+    adminWikiEditUnsavedChangesConfirm:
+      "Ai modificări nesalvate. Ești sigur că vrei să părăsești pagina?",
+    adminWikiEditMediaSectionAria: "Imagini articol",
+    adminWikiEditMediaSectionTitle: "Imagini articol",
+    adminWikiEditMediaSectionDescription:
+      "Încarcă imagini pe care vrei să le folosești în conținutul Markdown de mai sus. După încărcare vei vedea un URL pe care îl poți lipi în text.",
+    adminWikiEditNeedArticleIdHint:
+      "Asigură-te mai întâi că articolul este salvat și are un ID.",
+    adminWikiEditMediaLoading: "Se încarcă imaginile...",
+    adminWikiEditUploadedImagesTitle: "Imagini încărcate",
+    adminWikiEditUploadedImagesNoArticleId:
+      "Nu există încă un ID de articol. Reîncarcă articolul sau așteaptă să se încarce complet.",
+    adminWikiEditUploadedImagesEmpty:
+      "Nu există imagini încărcate pentru acest articol.",
+    adminWikiEditMediaInsert: "Inserează",
+    adminWikiEditMediaCopyMarkdown: "Copiază Markdown",
+    adminWikiEditMediaDelete: "Șterge",
+    adminWikiEditVersionsAria: "Versiuni articol",
+    adminWikiEditVersionsTitle: "Versiuni articol",
+    adminWikiEditVersionsHighlight: "Uită-te aici",
+    adminWikiEditVersionsLoading: "Se încarcă versiunile...",
+    adminWikiEditVersionsEmpty: "Nu există versiuni pentru această limbă.",
+    adminWikiEditVersionsCompareHeader: "Compară",
+    adminWikiEditVersionsSelectLabel: "selectează",
+    adminWikiEditVersionsColVersion: "Versiune",
+    adminWikiEditVersionsColLanguage: "Limbă",
+    adminWikiEditVersionsColTitle: "Titlu",
+    adminWikiEditVersionsColSubtitle: "Subtitlu",
+    adminWikiEditVersionsColCreatedAt: "Creat la",
+    adminWikiEditVersionsColCreatedBy: "Creat de",
+    adminWikiEditVersionsColActions: "Acțiuni",
+    adminWikiEditVersionsActionPreview: "Previzualizează",
+    adminWikiEditVersionsCurrent: "Curentă",
+    adminWikiEditVersionsRollback: "Revino",
+    adminWikiEditVersionsRollbacking: "Se revine...",
+    adminWikiEditVersionsDelete: "Șterge",
+    adminWikiEditVersionsCompareHelp:
+      "Selectează două versiuni (aceeași limbă) pentru a le compara.",
+    adminWikiEditPageLabel: "Pagina",
+    adminWikiEditOfLabel: "din",
+    adminWikiEditVersionsCountLabel: "versiuni",
+    adminWikiEditVersionsCompareSelected: "Compară selectatele",
+    adminWikiEditVersionsDeleteSelected: "Șterge selectatele",
+    adminWikiEditCompareAria: "Comparare versiuni",
+    adminWikiEditCompareTitle: "Comparare versiuni",
+    adminWikiEditCompareSubtitle:
+      "Stânga: versiune mai veche. Dreapta: versiune mai nouă.",
+    adminWikiEditCompareClear: "Șterge compararea",
+    adminWikiEditCompareOlder: "Mai veche",
+    adminWikiEditCompareNewer: "Mai nouă",
+    adminWikiEditCompareVersionLabel: "Versiune",
+    adminWikiEditCompareFieldTitle: "Titlu:",
+    adminWikiEditCompareFieldSubtitle: "Subtitlu:",
+    adminWikiEditCompareLegendToken: "text",
+    adminWikiEditCompareLegendRemoved: "= text eliminat,",
+    adminWikiEditCompareLegendAdded: "= text adăugat.",
+    adminWikiEditViewVersionTitlePrefix: "Previzualizare versiune",
+    adminWikiEditViewVersionCreatedAt: "Creat la",
+    adminWikiEditViewVersionBy: "de",
+    adminWikiEditDeleteVersionTitle: "Șterge versiunea",
+    adminWikiEditDeleteVersionDescription:
+      "Această versiune va fi eliminată definitiv din istoricul articolului. Acțiunea este ireversibilă și poate afecta trasabilitatea.",
+    adminWikiEditDeleteVersionConfirmTitle: "Confirmă ștergerea versiunii",
+    adminWikiEditDeleteVersionConfirmDescription:
+      "Ești sigur că vrei să ștergi această versiune? Acțiunea este permanentă și ireversibilă.",
+    adminWikiEditDeleteVersionConfirmMetaPrefix: "Versiune",
+    adminWikiEditDeleteVersionConfirmMetaCreatedAt: "creată la",
+    adminWikiEditDeleteVersionCurrentActiveError:
+      "Versiunea activă curentă nu poate fi ștearsă.",
+    adminWikiEditDeleteVersionLastVersionError:
+      "Această versiune nu poate fi ștearsă deoarece este ultima versiune rămasă.",
+    adminWikiEditDeleteVersionNotFound:
+      "Versiunea sau articolul nu a fost găsit.",
+    adminWikiEditDeleteVersionError:
+      "A apărut o eroare la ștergerea versiunii.",
+    adminWikiEditDeleteVersionConfirmButton: "Da, șterge versiunea",
+    adminWikiEditBulkDeleteTitle: "Șterge versiunile selectate",
+    adminWikiEditBulkDeleteDescriptionPrefix:
+      "Ești pe cale să ștergi definitiv",
+    adminWikiEditBulkDeleteDescriptionSuffix:
+      "versiuni din istoricul articolului. Acțiunea este ireversibilă și poate afecta trasabilitatea.",
+    adminWikiEditBulkDeleteConfirmTitle:
+      "Confirmă ștergerea versiunilor selectate",
+    adminWikiEditBulkDeleteConfirmDescription:
+      "Ești sigur că vrei să ștergi versiunile selectate? Acțiunea este permanentă și ireversibilă.",
+    adminWikiEditBulkDeletePartialError:
+      "Unele versiuni nu au putut fi șterse. Lista versiunilor va fi reîmprospătată.",
+    adminWikiEditBulkDeleteError:
+      "A apărut o eroare la ștergerea versiunilor selectate.",
+    adminWikiEditBulkDeleteConfirmButton:
+      "Da, șterge versiunile selectate",
+  },
+  hi: {
+    adminErrorMissingApiAccess:
+      "Admin API तक पहुँच उपलब्ध नहीं है। कृपया एडमिन के रूप में फिर से साइन इन करें।",
+    adminWikiCancel: "रद्द करें",
+    adminWikiOk: "ठीक है",
+    adminWikiClose: "बंद करें",
+    adminWikiManagementTitle: "Wiki प्रबंधन",
+    adminWikiManagementInfoLabel: "जानकारी",
+    adminWikiManagementInfoDescription:
+      "Wiki लेख प्रबंधित करें: बनाएं, खोजें, फ़िल्टर करें, स्थिति बदलें, CSV निर्यात करें और संस्करण प्रबंधित करें।",
+    adminWikiManagementSubtitle: "Wiki लेखों की सूची और प्रबंधन।",
+    adminWikiCreateNewArticle: "नया लेख बनाएं",
+    adminWikiSearchPlaceholder: "शीर्षक या स्लग से खोजें...",
+    adminWikiFilterLanguage: "भाषा के अनुसार फ़िल्टर करें",
+    adminWikiAllLanguages: "सभी भाषाएँ",
+    adminWikiFilterStatus: "स्थिति के अनुसार फ़िल्टर करें",
+    adminWikiAllStatus: "सभी स्थितियाँ",
+    adminWikiExportCsv: "CSV निर्यात करें",
+    adminWikiLoadingList: "सूची लोड हो रही है...",
+    adminWikiEmptyList: "दिखाने के लिए कोई Wiki लेख नहीं है।",
+    adminWikiLoadError:
+      "Admin Wiki सूची लोड करते समय त्रुटि हुई।",
+    adminWikiStatusUpdateError:
+      "लेख की स्थिति अपडेट करते समय त्रुटि हुई।",
+    adminWikiSelectedPrefix: "चयनित",
+    adminWikiSelectAllVisible: "सभी दृश्यमान चुनें",
+    adminWikiSelectArticle: "लेख चुनें",
+    adminWikiIdPrefix: "ID",
+    adminWikiDeleteSelected: "चयनित हटाएँ",
+    adminWikiBulkStatus: "बल्क स्थिति...",
+    adminWikiBulkStatusPlaceholder: "बल्क स्थिति...",
+    adminWikiDeleteAll: "सभी हटाएँ",
+    adminWikiSelectedCountLabel: "चयनित संख्या",
+    adminWikiBulkDeleteTitle: "चयनित लेख हटाएँ",
+    adminWikiBulkDeleteDescription:
+      "चयनित लेख स्थायी रूप से हटाए जाएंगे (सभी संस्करणों सहित)। इस कार्रवाई को वापस नहीं लिया जा सकता।",
+    adminWikiDeleteConfirm: "हटाएँ",
+    adminWikiBulkDeleteError:
+      "बल्क हटाने के दौरान त्रुटि हुई।",
+    adminWikiBulkStatusTitle: "स्थिति बदलें",
+    adminWikiBulkStatusDescription:
+      "यह सभी चयनित लेखों की स्थिति बदल देगा।",
+    adminWikiBulkStatusNewStatusLabel: "नई स्थिति",
+    adminWikiBulkStatusError:
+      "बल्क स्थिति अपडेट के दौरान त्रुटि हुई।",
+    adminWikiPurgeAllTitle: "सभी लेख हटाएँ",
+    adminWikiPurgeAllDescriptionPrefix:
+      "आप सभी Wiki लेख हटाने वाले हैं",
+    adminWikiPurgeAllDescriptionSuffix: "इस कार्रवाई को वापस नहीं लिया जा सकता।",
+    adminWikiPurgeAllConfirm: "सभी हटाएँ",
+    adminWikiPurgeAllError:
+      "सभी लेख हटाते समय त्रुटि हुई।",
+    adminWikiActionEdit: "संपादित करें",
+    adminWikiActionVersions: "संस्करण",
+    adminWikiStatusUpdating: "अपडेट हो रहा है...",
+    adminWikiActionActivate: "सक्रिय करें",
+    adminWikiActionDeactivate: "निष्क्रिय करें",
+    adminWikiCreateSlugRequired: "कृपया लेख के लिए स्लग दर्ज करें।",
+    adminWikiCreateInvalidOrExists:
+      "अमान्य डेटा या स्लग पहले से मौजूद है।",
+    adminWikiCreateError: "लेख बनाते समय त्रुटि हुई।",
+    adminWikiCreateSuccess: "लेख सफलतापूर्वक बनाया गया।",
+    adminWikiCreateIntro:
+      "नए Wiki लेख के लिए केवल स्लग दर्ज करें। भाषा, स्थिति और सामग्री बाद में संपादन पेज पर सेट की जाएगी।",
+    adminWikiBackToList: "सूची पर वापस जाएँ",
+    adminWikiCreateBasicInformation: "मूल जानकारी",
+    adminWikiCreateSlugLabel: "स्लग",
+    adminWikiCreateSlugPlaceholder: "manual-testing-intro",
+    adminWikiCreateTagsLabel: "टैग (कॉमा से अलग)",
+    adminWikiCreateTagsPlaceholder: "intro, basics, setup",
+    adminWikiCreateArticleIdLabel: "लेख ID (केवल पढ़ने योग्य)",
+    adminWikiCreateArticleIdPlaceholder: "सेव करने पर स्वतः जनरेट होगा",
+    adminWikiCreateFooterNote:
+      "यहाँ बनाए गए लेख BeeLMS डेटाबेस में संग्रहीत होते हैं (डेव वातावरण)।",
+    adminWikiCreateSaving: "सेव हो रहा है...",
+    adminWikiCreateArticleSaved: "लेख सेव हुआ",
+    adminWikiCreateSaveArticle: "लेख सेव करें",
+    adminWikiCreateAlreadyCreatedNote:
+      "यह लेख पहले से मौजूद है। बदलाव के लिए संपादन पेज का उपयोग करें।",
+    adminWikiEditRichEditorLoading: "रिच एडिटर लोड हो रहा है...",
+    adminWikiEditTitle: "Wiki लेख संपादित करें",
+    adminWikiEditSubtitle:
+      "चयनित Wiki लेख की सामग्री देखें और संपादित करें।",
+    adminWikiEditBreadcrumbFallback: "संपादित करें",
+    adminWikiEditOpenPublicPage: "सार्वजनिक पेज खोलें",
+    adminWikiEditPublicVisibleHintPrefix: "लेख की स्थिति",
+    adminWikiEditPublicVisibleHintSuffix:
+      "होनी चाहिए ताकि वह सार्वजनिक रूप से दिखे।",
+    adminWikiEditLoading: "संपादन के लिए लेख लोड हो रहा है...",
+    adminWikiEditLanguageLabel: "भाषा",
+    adminWikiEditLanguageAria: "Wiki लेख की भाषा",
+    adminWikiEditLanguageHelp:
+      "भाषा बदलने पर चयनित भाषा के लिए अलग सामग्री संस्करण लोड या बनाया जाता है।",
+    adminWikiEditStatusLabel: "स्थिति",
+    adminWikiEditStatusAria: "Wiki लेख की स्थिति",
+    adminWikiEditTitleLabel: "शीर्षक",
+    adminWikiEditSubtitleLabel: "उपशीर्षक (वैकल्पिक)",
+    adminWikiEditTagsLabel: "टैग (कॉमा से अलग)",
+    adminWikiEditTagsExamplePrefix: "उदाहरण",
+    adminWikiEditContentLabel: "सामग्री",
+    adminWikiEditEditorModeLabel: "संपादन मोड:",
+    adminWikiEditEditorModeMarkdown: "Markdown",
+    adminWikiEditEditorModeRichText: "Rich text",
+    adminWikiEditRequiredFieldSrOnly: "(अनिवार्य फ़ील्ड)",
+    adminWikiEditTitleRequiredError:
+      "शीर्षक आवश्यक है। कृपया टेक्स्ट दर्ज करें।",
+    adminWikiEditContentRequiredError:
+      "सामग्री आवश्यक है। सेव करने से पहले टेक्स्ट जोड़ें।",
+    adminWikiEditRequiredFieldTitle: "शीर्षक",
+    adminWikiEditRequiredFieldContent: "सामग्री",
+    adminWikiEditSaveDisabledNoChanges:
+      "किसी फ़ील्ड में बदलाव करने के बाद सेव बटन सक्रिय होगा।",
+    adminWikiEditSaveDisabledMissingFields:
+      "सेव करने के लिए अनिवार्य फ़ील्ड भरें।",
+    adminWikiEditSave: "सेव करें",
+    adminWikiEditSaving: "सेव हो रहा है...",
+    adminWikiEditInvalidData:
+      "अमान्य लेख डेटा। कृपया फ़ील्ड जाँचें।",
+    adminWikiEditSaveError:
+      "बदलाव सेव करते समय त्रुटि हुई।",
+    adminWikiEditSaveSuccess: "बदलाव सफलतापूर्वक सेव हुए।",
+    adminWikiEditMissingArticleId:
+      "लेख ID गायब है। कृपया पेज रीलोड करें।",
+    adminWikiEditMediaLoadError:
+      "छवियाँ लोड करते समय त्रुटि हुई।",
+    adminWikiEditVersionsLoadError:
+      "संस्करण लोड करते समय त्रुटि हुई।",
+    adminWikiEditUploadImage: "छवि अपलोड करें",
+    adminWikiEditUploading: "अपलोड हो रहा है...",
+    adminWikiEditUploadImageError:
+      "छवि अपलोड करते समय त्रुटि हुई।",
+    adminWikiEditDeleteMediaConfirm:
+      "क्या आप वाकई इस छवि को हटाना चाहते हैं?",
+    adminWikiEditDeleteMediaError:
+      "छवि हटाते समय त्रुटि हुई।",
+    adminWikiEditClipboardUnavailable:
+      "इस ब्राउज़र में Clipboard API उपलब्ध नहीं है।",
+    adminWikiEditMarkdownCopied:
+      "Markdown स्निपेट क्लिपबोर्ड में कॉपी हो गया।",
+    adminWikiEditMarkdownCopyFailed:
+      "Markdown स्निपेट कॉपी नहीं हो सका।",
+    adminWikiEditRollbackConfirm:
+      "क्या आप वाकई इस संस्करण पर वापस जाना चाहते हैं?",
+    adminWikiEditRollbackNotFound:
+      "चयनित संस्करण या लेख नहीं मिला।",
+    adminWikiEditRollbackInvalidRequest:
+      "अमान्य रोलबैक अनुरोध। कृपया फिर से प्रयास करें।",
+    adminWikiEditRollbackError:
+      "संस्करण रोलबैक करते समय त्रुटि हुई।",
+    adminWikiEditRollbackSuccess:
+      "लेख को चयनित संस्करण पर वापस कर दिया गया।",
+    adminWikiEditCompareSameLangError:
+      "आप केवल एक ही भाषा के संस्करणों की तुलना कर सकते हैं।",
+    adminWikiEditMermaidHelp:
+      "डायग्राम के लिए mermaid भाषा के साथ कोड ब्लॉक उपयोग करें (उदा. ```mermaid ... ```). डायग्राम प्रीव्यू और सार्वजनिक Wiki में दिखेंगे।",
+    adminWikiEditCaptionHelp:
+      "कैप्शन के लिए: छवि जोड़ें, फिर अगली पंक्ति में टेक्स्ट लिखें (वैकल्पिक italic), उदा.: ![Alt](url) *Caption*.",
+    adminWikiEditPreviewAria: "सामग्री प्रीव्यू",
+    adminWikiEditPreviewTitle: "प्रीव्यू (सार्वजनिक Wiki जैसा)",
+    adminWikiEditPreviewShow: "प्रीव्यू दिखाएँ",
+    adminWikiEditPreviewHide: "प्रीव्यू छिपाएँ",
+    adminWikiEditPreviewUntitled: "(शीर्षक नहीं)",
+    adminWikiEditMissingFieldsPrefix: "अनिवार्य फ़ील्ड गायब हैं:",
+    adminWikiEditMissingFieldsSuffix:
+      "\"सेव\" बटन सक्रिय करने के लिए इन्हें भरें।",
+    adminWikiEditUnsavedChangesWarning: "कुछ बदलाव सेव नहीं हुए हैं।",
+    adminWikiEditUnsavedChangesConfirm:
+      "आपके पास सेव न किए गए बदलाव हैं। क्या आप वाकई पेज छोड़ना चाहते हैं?",
+    adminWikiEditMediaSectionAria: "लेख की छवियाँ",
+    adminWikiEditMediaSectionTitle: "लेख की छवियाँ",
+    adminWikiEditMediaSectionDescription:
+      "ऊपर दिए Markdown कंटेंट में उपयोग करने के लिए छवियाँ अपलोड करें। अपलोड के बाद आपको एक URL मिलेगा जिसे आप टेक्स्ट में पेस्ट कर सकते हैं।",
+    adminWikiEditNeedArticleIdHint:
+      "पहले सुनिश्चित करें कि लेख सेव है और उसका ID है।",
+    adminWikiEditMediaLoading: "छवियाँ लोड हो रही हैं...",
+    adminWikiEditUploadedImagesTitle: "अपलोड की गई छवियाँ",
+    adminWikiEditUploadedImagesNoArticleId:
+      "अभी लेख ID नहीं है। लेख रीलोड करें या पूरी तरह लोड होने का इंतज़ार करें।",
+    adminWikiEditUploadedImagesEmpty:
+      "इस लेख के लिए कोई छवि अपलोड नहीं हुई है।",
+    adminWikiEditMediaInsert: "डालें",
+    adminWikiEditMediaCopyMarkdown: "Markdown कॉपी करें",
+    adminWikiEditMediaDelete: "हटाएँ",
+    adminWikiEditVersionsAria: "लेख के संस्करण",
+    adminWikiEditVersionsTitle: "लेख के संस्करण",
+    adminWikiEditVersionsHighlight: "यहाँ देखें",
+    adminWikiEditVersionsLoading: "संस्करण लोड हो रहे हैं...",
+    adminWikiEditVersionsEmpty: "इस भाषा के लिए कोई संस्करण नहीं है।",
+    adminWikiEditVersionsCompareHeader: "तुलना करें",
+    adminWikiEditVersionsSelectLabel: "चुनें",
+    adminWikiEditVersionsColVersion: "संस्करण",
+    adminWikiEditVersionsColLanguage: "भाषा",
+    adminWikiEditVersionsColTitle: "शीर्षक",
+    adminWikiEditVersionsColSubtitle: "उपशीर्षक",
+    adminWikiEditVersionsColCreatedAt: "बनाया गया",
+    adminWikiEditVersionsColCreatedBy: "बनाने वाला",
+    adminWikiEditVersionsColActions: "कार्रवाइयाँ",
+    adminWikiEditVersionsActionPreview: "प्रीव्यू",
+    adminWikiEditVersionsCurrent: "वर्तमान",
+    adminWikiEditVersionsRollback: "वापस करें",
+    adminWikiEditVersionsRollbacking: "वापस किया जा रहा है...",
+    adminWikiEditVersionsDelete: "हटाएँ",
+    adminWikiEditVersionsCompareHelp:
+      "तुलना के लिए दो संस्करण चुनें (एक ही भाषा)।",
+    adminWikiEditPageLabel: "पेज",
+    adminWikiEditOfLabel: "में से",
+    adminWikiEditVersionsCountLabel: "संस्करण",
+    adminWikiEditVersionsCompareSelected: "चयनित तुलना करें",
+    adminWikiEditVersionsDeleteSelected: "चयनित हटाएँ",
+    adminWikiEditCompareAria: "संस्करण तुलना",
+    adminWikiEditCompareTitle: "संस्करण तुलना",
+    adminWikiEditCompareSubtitle:
+      "बाएँ: पुराना संस्करण। दाएँ: नया संस्करण।",
+    adminWikiEditCompareClear: "तुलना साफ़ करें",
+    adminWikiEditCompareOlder: "पुराना",
+    adminWikiEditCompareNewer: "नया",
+    adminWikiEditCompareVersionLabel: "संस्करण",
+    adminWikiEditCompareFieldTitle: "शीर्षक:",
+    adminWikiEditCompareFieldSubtitle: "उपशीर्षक:",
+    adminWikiEditCompareLegendToken: "टेक्स्ट",
+    adminWikiEditCompareLegendRemoved: "= हटाया गया टेक्स्ट,",
+    adminWikiEditCompareLegendAdded: "= जोड़ा गया टेक्स्ट।",
+    adminWikiEditViewVersionTitlePrefix: "संस्करण प्रीव्यू",
+    adminWikiEditViewVersionCreatedAt: "बनाया गया",
+    adminWikiEditViewVersionBy: "द्वारा",
+    adminWikiEditDeleteVersionTitle: "संस्करण हटाएँ",
+    adminWikiEditDeleteVersionDescription:
+      "यह संस्करण लेख के इतिहास से स्थायी रूप से हट जाएगा। यह कार्रवाई अपरिवर्तनीय है और ट्रेसबिलिटी को प्रभावित कर सकती है।",
+    adminWikiEditDeleteVersionConfirmTitle: "संस्करण हटाने की पुष्टि करें",
+    adminWikiEditDeleteVersionConfirmDescription:
+      "क्या आप वाकई इस संस्करण को हटाना चाहते हैं? यह कार्रवाई स्थायी और अपरिवर्तनीय है।",
+    adminWikiEditDeleteVersionConfirmMetaPrefix: "संस्करण",
+    adminWikiEditDeleteVersionConfirmMetaCreatedAt: "बनाया गया",
+    adminWikiEditDeleteVersionCurrentActiveError:
+      "वर्तमान सक्रिय संस्करण हटाया नहीं जा सकता।",
+    adminWikiEditDeleteVersionLastVersionError:
+      "यह संस्करण हटाया नहीं जा सकता क्योंकि यह आख़िरी बचा संस्करण है।",
+    adminWikiEditDeleteVersionNotFound: "संस्करण या लेख नहीं मिला।",
+    adminWikiEditDeleteVersionError:
+      "संस्करण हटाते समय त्रुटि हुई।",
+    adminWikiEditDeleteVersionConfirmButton: "हाँ, संस्करण हटाएँ",
+    adminWikiEditBulkDeleteTitle: "चयनित संस्करण हटाएँ",
+    adminWikiEditBulkDeleteDescriptionPrefix:
+      "आप स्थायी रूप से हटाने वाले हैं",
+    adminWikiEditBulkDeleteDescriptionSuffix:
+      "संस्करण लेख के इतिहास से। यह कार्रवाई अपरिवर्तनीय है और ट्रेसबिलिटी को प्रभावित कर सकती है।",
+    adminWikiEditBulkDeleteConfirmTitle:
+      "चयनित संस्करण हटाने की पुष्टि करें",
+    adminWikiEditBulkDeleteConfirmDescription:
+      "क्या आप वाकई चयनित संस्करण हटाना चाहते हैं? यह कार्रवाई स्थायी और अपरिवर्तनीय है।",
+    adminWikiEditBulkDeletePartialError:
+      "कुछ संस्करण हटाए नहीं जा सके। संस्करण सूची रिफ्रेश होगी।",
+    adminWikiEditBulkDeleteError:
+      "चयनित संस्करण हटाते समय त्रुटि हुई।",
+    adminWikiEditBulkDeleteConfirmButton:
+      "हाँ, चयनित संस्करण हटाएँ",
+  },
+  vi: {
+    adminErrorMissingApiAccess:
+      "Thiếu quyền truy cập Admin API. Vui lòng đăng nhập lại với tư cách quản trị viên.",
+    adminWikiCancel: "Hủy",
+    adminWikiOk: "OK",
+    adminWikiClose: "Đóng",
+    adminWikiManagementTitle: "Quản lý Wiki",
+    adminWikiManagementInfoLabel: "Thông tin",
+    adminWikiManagementInfoDescription:
+      "Quản lý bài viết Wiki: tạo, tìm kiếm, lọc, đổi trạng thái, xuất và quản lý phiên bản.",
+    adminWikiManagementSubtitle: "Danh sách và quản lý bài viết Wiki.",
+    adminWikiCreateNewArticle: "Tạo bài viết mới",
+    adminWikiSearchPlaceholder: "Tìm theo tiêu đề hoặc slug...",
+    adminWikiFilterLanguage: "Lọc theo ngôn ngữ",
+    adminWikiAllLanguages: "Tất cả ngôn ngữ",
+    adminWikiFilterStatus: "Lọc theo trạng thái",
+    adminWikiAllStatus: "Tất cả trạng thái",
+    adminWikiExportCsv: "Xuất CSV",
+    adminWikiLoadingList: "Đang tải danh sách...",
+    adminWikiEmptyList: "Không có bài viết Wiki để hiển thị.",
+    adminWikiLoadError:
+      "Đã xảy ra lỗi khi tải danh sách Admin Wiki.",
+    adminWikiStatusUpdateError:
+      "Đã xảy ra lỗi khi cập nhật trạng thái bài viết.",
+    adminWikiSelectedPrefix: "Đã chọn",
+    adminWikiSelectAllVisible: "Chọn tất cả (đang hiển thị)",
+    adminWikiSelectArticle: "Chọn bài viết",
+    adminWikiIdPrefix: "ID",
+    adminWikiDeleteSelected: "Xóa mục đã chọn",
+    adminWikiBulkStatus: "Trạng thái hàng loạt...",
+    adminWikiBulkStatusPlaceholder: "Trạng thái hàng loạt...",
+    adminWikiDeleteAll: "Xóa tất cả",
+    adminWikiSelectedCountLabel: "Số lượng đã chọn",
+    adminWikiBulkDeleteTitle: "Xóa bài viết đã chọn",
+    adminWikiBulkDeleteDescription:
+      "Các bài viết đã chọn sẽ bị xóa vĩnh viễn (bao gồm tất cả phiên bản). Hành động này không thể hoàn tác.",
+    adminWikiDeleteConfirm: "Xóa",
+    adminWikiBulkDeleteError:
+      "Đã xảy ra lỗi khi xóa hàng loạt.",
+    adminWikiBulkStatusTitle: "Đổi trạng thái",
+    adminWikiBulkStatusDescription:
+      "Điều này sẽ thay đổi trạng thái của tất cả bài viết đã chọn.",
+    adminWikiBulkStatusNewStatusLabel: "Trạng thái mới",
+    adminWikiBulkStatusError:
+      "Đã xảy ra lỗi khi cập nhật trạng thái hàng loạt.",
+    adminWikiPurgeAllTitle: "Xóa tất cả bài viết",
+    adminWikiPurgeAllDescriptionPrefix:
+      "Bạn sắp xóa TẤT CẢ bài viết wiki",
+    adminWikiPurgeAllDescriptionSuffix: "Hành động này không thể hoàn tác.",
+    adminWikiPurgeAllConfirm: "Xóa tất cả",
+    adminWikiPurgeAllError:
+      "Đã xảy ra lỗi khi xóa tất cả bài viết.",
+    adminWikiActionEdit: "Chỉnh sửa",
+    adminWikiActionVersions: "Phiên bản",
+    adminWikiStatusUpdating: "Đang cập nhật...",
+    adminWikiActionActivate: "Kích hoạt",
+    adminWikiActionDeactivate: "Vô hiệu hóa",
+    adminWikiCreateSlugRequired: "Vui lòng nhập slug cho bài viết.",
+    adminWikiCreateInvalidOrExists:
+      "Dữ liệu không hợp lệ hoặc slug đã tồn tại.",
+    adminWikiCreateError: "Đã xảy ra lỗi khi tạo bài viết.",
+    adminWikiCreateSuccess: "Đã tạo bài viết thành công.",
+    adminWikiCreateIntro:
+      "Chỉ nhập slug cho bài viết Wiki mới. Ngôn ngữ, trạng thái và nội dung sẽ được thiết lập sau ở trang chỉnh sửa.",
+    adminWikiBackToList: "Quay lại danh sách",
+    adminWikiCreateBasicInformation: "Thông tin cơ bản",
+    adminWikiCreateSlugLabel: "Slug",
+    adminWikiCreateSlugPlaceholder: "manual-testing-intro",
+    adminWikiCreateTagsLabel: "Thẻ (phân tách bằng dấu phẩy)",
+    adminWikiCreateTagsPlaceholder: "intro, basics, setup",
+    adminWikiCreateArticleIdLabel: "ID bài viết (chỉ đọc)",
+    adminWikiCreateArticleIdPlaceholder: "Tự động tạo khi lưu",
+    adminWikiCreateFooterNote:
+      "Các bài viết tạo tại đây được lưu trong cơ sở dữ liệu BeeLMS (môi trường dev).",
+    adminWikiCreateSaving: "Đang lưu...",
+    adminWikiCreateArticleSaved: "Đã lưu bài viết",
+    adminWikiCreateSaveArticle: "Lưu bài viết",
+    adminWikiCreateAlreadyCreatedNote:
+      "Bài viết này đã tồn tại. Hãy dùng trang chỉnh sửa để thay đổi.",
+    adminWikiEditRichEditorLoading: "Đang tải trình soạn thảo rich...",
+    adminWikiEditTitle: "Chỉnh sửa bài viết Wiki",
+    adminWikiEditSubtitle:
+      "Xem và chỉnh sửa nội dung của bài viết Wiki đã chọn.",
+    adminWikiEditBreadcrumbFallback: "Chỉnh sửa",
+    adminWikiEditOpenPublicPage: "Mở trang công khai",
+    adminWikiEditPublicVisibleHintPrefix: "Bài viết phải có trạng thái",
+    adminWikiEditPublicVisibleHintSuffix: "để hiển thị công khai.",
+    adminWikiEditLoading: "Đang tải bài viết để chỉnh sửa...",
+    adminWikiEditLanguageLabel: "Ngôn ngữ",
+    adminWikiEditLanguageAria: "Ngôn ngữ bài viết Wiki",
+    adminWikiEditLanguageHelp:
+      "Đổi ngôn ngữ sẽ tải hoặc tạo một phiên bản nội dung riêng cho ngôn ngữ đã chọn.",
+    adminWikiEditStatusLabel: "Trạng thái",
+    adminWikiEditStatusAria: "Trạng thái bài viết Wiki",
+    adminWikiEditTitleLabel: "Tiêu đề",
+    adminWikiEditSubtitleLabel: "Phụ đề (tùy chọn)",
+    adminWikiEditTagsLabel: "Thẻ (phân tách bằng dấu phẩy)",
+    adminWikiEditTagsExamplePrefix: "Ví dụ",
+    adminWikiEditContentLabel: "Nội dung",
+    adminWikiEditEditorModeLabel: "Chế độ soạn:",
+    adminWikiEditEditorModeMarkdown: "Markdown",
+    adminWikiEditEditorModeRichText: "Rich text",
+    adminWikiEditRequiredFieldSrOnly: "(bắt buộc)",
+    adminWikiEditTitleRequiredError:
+      "Tiêu đề là bắt buộc. Vui lòng nhập văn bản.",
+    adminWikiEditContentRequiredError:
+      "Nội dung là bắt buộc. Hãy thêm văn bản trước khi lưu.",
+    adminWikiEditRequiredFieldTitle: "Tiêu đề",
+    adminWikiEditRequiredFieldContent: "Nội dung",
+    adminWikiEditSaveDisabledNoChanges:
+      "Nút Lưu sẽ được bật sau khi bạn thay đổi một trường.",
+    adminWikiEditSaveDisabledMissingFields:
+      "Hãy điền các trường bắt buộc để lưu.",
+    adminWikiEditSave: "Lưu",
+    adminWikiEditSaving: "Đang lưu...",
+    adminWikiEditInvalidData:
+      "Dữ liệu bài viết không hợp lệ. Hãy kiểm tra các trường.",
+    adminWikiEditSaveError: "Đã xảy ra lỗi khi lưu thay đổi.",
+    adminWikiEditSaveSuccess: "Đã lưu thay đổi thành công.",
+    adminWikiEditMissingArticleId:
+      "Thiếu ID bài viết. Vui lòng tải lại trang.",
+    adminWikiEditMediaLoadError: "Đã xảy ra lỗi khi tải hình ảnh.",
+    adminWikiEditVersionsLoadError: "Đã xảy ra lỗi khi tải các phiên bản.",
+    adminWikiEditUploadImage: "Tải ảnh lên",
+    adminWikiEditUploading: "Đang tải lên...",
+    adminWikiEditUploadImageError: "Đã xảy ra lỗi khi tải ảnh lên.",
+    adminWikiEditDeleteMediaConfirm:
+      "Bạn có chắc muốn xóa hình ảnh này không?",
+    adminWikiEditDeleteMediaError: "Đã xảy ra lỗi khi xóa hình ảnh.",
+    adminWikiEditClipboardUnavailable:
+      "Clipboard API không khả dụng trên trình duyệt này.",
+    adminWikiEditMarkdownCopied: "Đã sao chép đoạn Markdown vào clipboard.",
+    adminWikiEditMarkdownCopyFailed:
+      "Không thể sao chép đoạn Markdown.",
+    adminWikiEditRollbackConfirm:
+      "Bạn có chắc muốn khôi phục bài viết về phiên bản này không?",
+    adminWikiEditRollbackNotFound:
+      "Không tìm thấy phiên bản hoặc bài viết đã chọn.",
+    adminWikiEditRollbackInvalidRequest:
+      "Yêu cầu khôi phục không hợp lệ. Vui lòng thử lại.",
+    adminWikiEditRollbackError:
+      "Đã xảy ra lỗi khi khôi phục phiên bản.",
+    adminWikiEditRollbackSuccess:
+      "Bài viết đã được khôi phục về phiên bản đã chọn.",
+    adminWikiEditCompareSameLangError:
+      "Bạn chỉ có thể so sánh các phiên bản cùng ngôn ngữ.",
+    adminWikiEditMermaidHelp:
+      "Đối với sơ đồ, hãy dùng khối code với ngôn ngữ mermaid (ví dụ: ```mermaid ... ```). Sơ đồ sẽ xuất hiện trong phần xem trước và Wiki công khai.",
+    adminWikiEditCaptionHelp:
+      "Để thêm chú thích ảnh: chèn ảnh, sau đó ở dòng tiếp theo thêm văn bản (tùy chọn in nghiêng), ví dụ: ![Alt](url) *Caption*.",
+    adminWikiEditPreviewAria: "Xem trước nội dung",
+    adminWikiEditPreviewTitle: "Xem trước (như Wiki công khai)",
+    adminWikiEditPreviewShow: "Hiện xem trước",
+    adminWikiEditPreviewHide: "Ẩn xem trước",
+    adminWikiEditPreviewUntitled: "(Không tiêu đề)",
+    adminWikiEditMissingFieldsPrefix: "Thiếu trường bắt buộc:",
+    adminWikiEditMissingFieldsSuffix:
+      "Hãy điền để bật nút \"Lưu\".",
+    adminWikiEditUnsavedChangesWarning: "Có thay đổi chưa được lưu.",
+    adminWikiEditUnsavedChangesConfirm:
+      "Bạn có thay đổi chưa lưu. Bạn có chắc muốn rời trang không?",
+    adminWikiEditMediaSectionAria: "Hình ảnh bài viết",
+    adminWikiEditMediaSectionTitle: "Hình ảnh bài viết",
+    adminWikiEditMediaSectionDescription:
+      "Tải lên hình ảnh bạn muốn tham chiếu trong nội dung Markdown ở trên. Sau khi tải lên, bạn sẽ thấy URL để dán vào văn bản.",
+    adminWikiEditNeedArticleIdHint:
+      "Trước tiên hãy đảm bảo bài viết đã được lưu và có ID.",
+    adminWikiEditMediaLoading: "Đang tải hình ảnh...",
+    adminWikiEditUploadedImagesTitle: "Hình ảnh đã tải lên",
+    adminWikiEditUploadedImagesNoArticleId:
+      "Chưa có ID bài viết. Hãy tải lại bài viết hoặc chờ tải xong.",
+    adminWikiEditUploadedImagesEmpty:
+      "Chưa có hình ảnh nào được tải lên cho bài viết này.",
+    adminWikiEditMediaInsert: "Chèn",
+    adminWikiEditMediaCopyMarkdown: "Sao chép Markdown",
+    adminWikiEditMediaDelete: "Xóa",
+    adminWikiEditVersionsAria: "Phiên bản bài viết",
+    adminWikiEditVersionsTitle: "Phiên bản bài viết",
+    adminWikiEditVersionsHighlight: "Xem ở đây",
+    adminWikiEditVersionsLoading: "Đang tải phiên bản...",
+    adminWikiEditVersionsEmpty: "Không có phiên bản cho ngôn ngữ này.",
+    adminWikiEditVersionsCompareHeader: "So sánh",
+    adminWikiEditVersionsSelectLabel: "chọn",
+    adminWikiEditVersionsColVersion: "Phiên bản",
+    adminWikiEditVersionsColLanguage: "Ngôn ngữ",
+    adminWikiEditVersionsColTitle: "Tiêu đề",
+    adminWikiEditVersionsColSubtitle: "Phụ đề",
+    adminWikiEditVersionsColCreatedAt: "Tạo lúc",
+    adminWikiEditVersionsColCreatedBy: "Tạo bởi",
+    adminWikiEditVersionsColActions: "Hành động",
+    adminWikiEditVersionsActionPreview: "Xem trước",
+    adminWikiEditVersionsCurrent: "Hiện tại",
+    adminWikiEditVersionsRollback: "Khôi phục",
+    adminWikiEditVersionsRollbacking: "Đang khôi phục...",
+    adminWikiEditVersionsDelete: "Xóa",
+    adminWikiEditVersionsCompareHelp:
+      "Chọn hai phiên bản (cùng ngôn ngữ) để so sánh.",
+    adminWikiEditPageLabel: "Trang",
+    adminWikiEditOfLabel: "trên",
+    adminWikiEditVersionsCountLabel: "phiên bản",
+    adminWikiEditVersionsCompareSelected: "So sánh đã chọn",
+    adminWikiEditVersionsDeleteSelected: "Xóa đã chọn",
+    adminWikiEditCompareAria: "So sánh phiên bản",
+    adminWikiEditCompareTitle: "So sánh phiên bản",
+    adminWikiEditCompareSubtitle:
+      "Trái: phiên bản cũ hơn. Phải: phiên bản mới hơn.",
+    adminWikiEditCompareClear: "Xóa so sánh",
+    adminWikiEditCompareOlder: "Cũ hơn",
+    adminWikiEditCompareNewer: "Mới hơn",
+    adminWikiEditCompareVersionLabel: "Phiên bản",
+    adminWikiEditCompareFieldTitle: "Tiêu đề:",
+    adminWikiEditCompareFieldSubtitle: "Phụ đề:",
+    adminWikiEditCompareLegendToken: "văn bản",
+    adminWikiEditCompareLegendRemoved: "= văn bản đã xóa,",
+    adminWikiEditCompareLegendAdded: "= văn bản đã thêm.",
+    adminWikiEditViewVersionTitlePrefix: "Xem trước phiên bản",
+    adminWikiEditViewVersionCreatedAt: "Tạo lúc",
+    adminWikiEditViewVersionBy: "bởi",
+    adminWikiEditDeleteVersionTitle: "Xóa phiên bản",
+    adminWikiEditDeleteVersionDescription:
+      "Phiên bản này sẽ bị xóa vĩnh viễn khỏi lịch sử bài viết. Hành động này không thể hoàn tác và có thể ảnh hưởng đến việc theo dõi thay đổi.",
+    adminWikiEditDeleteVersionConfirmTitle: "Xác nhận xóa phiên bản",
+    adminWikiEditDeleteVersionConfirmDescription:
+      "Bạn có chắc muốn xóa phiên bản này không? Hành động này là vĩnh viễn và không thể hoàn tác.",
+    adminWikiEditDeleteVersionConfirmMetaPrefix: "Phiên bản",
+    adminWikiEditDeleteVersionConfirmMetaCreatedAt: "tạo lúc",
+    adminWikiEditDeleteVersionCurrentActiveError:
+      "Không thể xóa phiên bản đang hoạt động hiện tại.",
+    adminWikiEditDeleteVersionLastVersionError:
+      "Không thể xóa phiên bản này vì đây là phiên bản cuối cùng còn lại.",
+    adminWikiEditDeleteVersionNotFound:
+      "Không tìm thấy phiên bản hoặc bài viết.",
+    adminWikiEditDeleteVersionError: "Đã xảy ra lỗi khi xóa phiên bản.",
+    adminWikiEditDeleteVersionConfirmButton: "Có, xóa phiên bản",
+    adminWikiEditBulkDeleteTitle: "Xóa các phiên bản đã chọn",
+    adminWikiEditBulkDeleteDescriptionPrefix:
+      "Bạn sắp xóa vĩnh viễn",
+    adminWikiEditBulkDeleteDescriptionSuffix:
+      "phiên bản khỏi lịch sử bài viết. Hành động này không thể hoàn tác và có thể ảnh hưởng đến việc theo dõi thay đổi.",
+    adminWikiEditBulkDeleteConfirmTitle:
+      "Xác nhận xóa các phiên bản đã chọn",
+    adminWikiEditBulkDeleteConfirmDescription:
+      "Bạn có chắc muốn xóa các phiên bản đã chọn không? Hành động này là vĩnh viễn và không thể hoàn tác.",
+    adminWikiEditBulkDeletePartialError:
+      "Một số phiên bản không thể xóa. Danh sách phiên bản sẽ được làm mới.",
+    adminWikiEditBulkDeleteError:
+      "Đã xảy ra lỗi khi xóa các phiên bản đã chọn.",
+    adminWikiEditBulkDeleteConfirmButton:
+      "Có, xóa các phiên bản đã chọn",
+  },
+  id: {
+    adminErrorMissingApiAccess:
+      "Akses Admin API tidak tersedia. Silakan masuk lagi sebagai administrator.",
+    adminWikiCancel: "Batal",
+    adminWikiOk: "OK",
+    adminWikiClose: "Tutup",
+    adminWikiManagementTitle: "Manajemen Wiki",
+    adminWikiManagementInfoLabel: "Info",
+    adminWikiManagementInfoDescription:
+      "Kelola artikel Wiki: buat, cari, filter, ubah status, ekspor dan kelola versi.",
+    adminWikiManagementSubtitle: "Daftar dan pengelolaan artikel Wiki.",
+    adminWikiCreateNewArticle: "Buat artikel baru",
+    adminWikiSearchPlaceholder: "Cari berdasarkan judul atau slug...",
+    adminWikiFilterLanguage: "Filter berdasarkan bahasa",
+    adminWikiAllLanguages: "Semua bahasa",
+    adminWikiFilterStatus: "Filter berdasarkan status",
+    adminWikiAllStatus: "Semua status",
+    adminWikiExportCsv: "Ekspor CSV",
+    adminWikiLoadingList: "Memuat daftar...",
+    adminWikiEmptyList: "Tidak ada artikel Wiki untuk ditampilkan.",
+    adminWikiLoadError:
+      "Terjadi kesalahan saat memuat daftar Admin Wiki.",
+    adminWikiStatusUpdateError:
+      "Terjadi kesalahan saat memperbarui status artikel.",
+    adminWikiSelectedPrefix: "Dipilih",
+    adminWikiSelectAllVisible: "Pilih semua yang terlihat",
+    adminWikiSelectArticle: "Pilih artikel",
+    adminWikiIdPrefix: "ID",
+    adminWikiDeleteSelected: "Hapus yang dipilih",
+    adminWikiBulkStatus: "Status massal...",
+    adminWikiBulkStatusPlaceholder: "Status massal...",
+    adminWikiDeleteAll: "Hapus semua",
+    adminWikiSelectedCountLabel: "Jumlah dipilih",
+    adminWikiBulkDeleteTitle: "Hapus artikel yang dipilih",
+    adminWikiBulkDeleteDescription:
+      "Artikel yang dipilih akan dihapus permanen (termasuk semua versinya). Tindakan ini tidak dapat dibatalkan.",
+    adminWikiDeleteConfirm: "Hapus",
+    adminWikiBulkDeleteError:
+      "Terjadi kesalahan saat menghapus secara massal.",
+    adminWikiBulkStatusTitle: "Ubah status",
+    adminWikiBulkStatusDescription:
+      "Ini akan mengubah status semua artikel yang dipilih.",
+    adminWikiBulkStatusNewStatusLabel: "Status baru",
+    adminWikiBulkStatusError:
+      "Terjadi kesalahan saat memperbarui status secara massal.",
+    adminWikiPurgeAllTitle: "Hapus semua artikel",
+    adminWikiPurgeAllDescriptionPrefix:
+      "Anda akan menghapus SEMUA artikel wiki",
+    adminWikiPurgeAllDescriptionSuffix: "Tindakan ini tidak dapat dibatalkan.",
+    adminWikiPurgeAllConfirm: "Hapus semua",
+    adminWikiPurgeAllError:
+      "Terjadi kesalahan saat menghapus semua artikel.",
+    adminWikiActionEdit: "Edit",
+    adminWikiActionVersions: "Versi",
+    adminWikiStatusUpdating: "Memperbarui...",
+    adminWikiActionActivate: "Aktifkan",
+    adminWikiActionDeactivate: "Nonaktifkan",
+    adminWikiCreateSlugRequired: "Silakan masukkan slug artikel.",
+    adminWikiCreateInvalidOrExists:
+      "Data tidak valid atau slug sudah ada.",
+    adminWikiCreateError: "Terjadi kesalahan saat membuat artikel.",
+    adminWikiCreateSuccess: "Artikel berhasil dibuat.",
+    adminWikiCreateIntro:
+      "Masukkan hanya slug untuk artikel Wiki baru. Bahasa, status, dan konten diatur kemudian di halaman edit.",
+    adminWikiBackToList: "Kembali ke daftar",
+    adminWikiCreateBasicInformation: "Informasi dasar",
+    adminWikiCreateSlugLabel: "Slug",
+    adminWikiCreateSlugPlaceholder: "manual-testing-intro",
+    adminWikiCreateTagsLabel: "Tag (dipisahkan koma)",
+    adminWikiCreateTagsPlaceholder: "intro, basics, setup",
+    adminWikiCreateArticleIdLabel: "ID artikel (hanya baca)",
+    adminWikiCreateArticleIdPlaceholder: "Dibuat otomatis saat disimpan",
+    adminWikiCreateFooterNote:
+      "Artikel yang dibuat di sini disimpan di database BeeLMS (lingkungan dev).",
+    adminWikiCreateSaving: "Menyimpan...",
+    adminWikiCreateArticleSaved: "Artikel tersimpan",
+    adminWikiCreateSaveArticle: "Simpan artikel",
+    adminWikiCreateAlreadyCreatedNote:
+      "Artikel ini sudah ada. Gunakan halaman edit untuk melakukan perubahan.",
+    adminWikiEditRichEditorLoading: "Memuat rich editor...",
+    adminWikiEditTitle: "Edit artikel Wiki",
+    adminWikiEditSubtitle:
+      "Tinjau dan edit konten artikel Wiki yang dipilih.",
+    adminWikiEditBreadcrumbFallback: "Edit",
+    adminWikiEditOpenPublicPage: "Buka halaman publik",
+    adminWikiEditPublicVisibleHintPrefix: "Artikel harus berstatus",
+    adminWikiEditPublicVisibleHintSuffix: "agar terlihat publik.",
+    adminWikiEditLoading: "Memuat artikel untuk diedit...",
+    adminWikiEditLanguageLabel: "Bahasa",
+    adminWikiEditLanguageAria: "Bahasa artikel Wiki",
+    adminWikiEditLanguageHelp:
+      "Mengubah bahasa akan memuat atau membuat versi konten terpisah untuk bahasa yang dipilih.",
+    adminWikiEditStatusLabel: "Status",
+    adminWikiEditStatusAria: "Status artikel Wiki",
+    adminWikiEditTitleLabel: "Judul",
+    adminWikiEditSubtitleLabel: "Subjudul (opsional)",
+    adminWikiEditTagsLabel: "Tag (dipisahkan koma)",
+    adminWikiEditTagsExamplePrefix: "Contoh",
+    adminWikiEditContentLabel: "Konten",
+    adminWikiEditEditorModeLabel: "Mode edit:",
+    adminWikiEditEditorModeMarkdown: "Markdown",
+    adminWikiEditEditorModeRichText: "Rich text",
+    adminWikiEditRequiredFieldSrOnly: "(wajib)",
+    adminWikiEditTitleRequiredError: "Judul wajib diisi. Masukkan teks.",
+    adminWikiEditContentRequiredError:
+      "Konten wajib diisi. Tambahkan teks sebelum menyimpan.",
+    adminWikiEditRequiredFieldTitle: "Judul",
+    adminWikiEditRequiredFieldContent: "Konten",
+    adminWikiEditSaveDisabledNoChanges:
+      "Tombol Simpan akan aktif setelah Anda melakukan perubahan.",
+    adminWikiEditSaveDisabledMissingFields:
+      "Lengkapi field wajib untuk menyimpan.",
+    adminWikiEditSave: "Simpan",
+    adminWikiEditSaving: "Menyimpan...",
+    adminWikiEditInvalidData:
+      "Data artikel tidak valid. Periksa field.",
+    adminWikiEditSaveError: "Terjadi kesalahan saat menyimpan perubahan.",
+    adminWikiEditSaveSuccess: "Perubahan berhasil disimpan.",
+    adminWikiEditMissingArticleId:
+      "ID artikel tidak ada. Muat ulang halaman.",
+    adminWikiEditMediaLoadError: "Terjadi kesalahan saat memuat gambar.",
+    adminWikiEditVersionsLoadError: "Terjadi kesalahan saat memuat versi.",
+    adminWikiEditUploadImage: "Unggah gambar",
+    adminWikiEditUploading: "Mengunggah...",
+    adminWikiEditUploadImageError: "Terjadi kesalahan saat mengunggah gambar.",
+    adminWikiEditDeleteMediaConfirm:
+      "Yakin ingin menghapus gambar ini?",
+    adminWikiEditDeleteMediaError: "Terjadi kesalahan saat menghapus gambar.",
+    adminWikiEditClipboardUnavailable:
+      "Clipboard API tidak tersedia di browser ini.",
+    adminWikiEditMarkdownCopied: "Cuplikan Markdown disalin ke clipboard.",
+    adminWikiEditMarkdownCopyFailed:
+      "Gagal menyalin cuplikan Markdown.",
+    adminWikiEditRollbackConfirm:
+      "Yakin ingin mengembalikan artikel ke versi ini?",
+    adminWikiEditRollbackNotFound:
+      "Versi atau artikel yang dipilih tidak ditemukan.",
+    adminWikiEditRollbackInvalidRequest:
+      "Permintaan rollback tidak valid. Coba lagi.",
+    adminWikiEditRollbackError: "Terjadi kesalahan saat rollback versi.",
+    adminWikiEditRollbackSuccess:
+      "Artikel berhasil dikembalikan ke versi yang dipilih.",
+    adminWikiEditCompareSameLangError:
+      "Anda hanya dapat membandingkan versi dengan bahasa yang sama.",
+    adminWikiEditMermaidHelp:
+      "Untuk diagram, gunakan blok kode dengan bahasa mermaid (mis. ```mermaid ... ```). Diagram akan muncul di pratinjau dan Wiki publik.",
+    adminWikiEditCaptionHelp:
+      "Untuk caption gambar: sisipkan gambar, lalu pada baris berikutnya tambahkan teks (italic opsional), mis.: ![Alt](url) *Caption*.",
+    adminWikiEditPreviewAria: "Pratinjau konten",
+    adminWikiEditPreviewTitle: "Pratinjau (seperti di Wiki publik)",
+    adminWikiEditPreviewShow: "Tampilkan pratinjau",
+    adminWikiEditPreviewHide: "Sembunyikan pratinjau",
+    adminWikiEditPreviewUntitled: "(Tanpa judul)",
+    adminWikiEditMissingFieldsPrefix: "Field wajib belum diisi:",
+    adminWikiEditMissingFieldsSuffix:
+      "Lengkapi untuk mengaktifkan tombol \"Simpan\".",
+    adminWikiEditUnsavedChangesWarning: "Ada perubahan yang belum disimpan.",
+    adminWikiEditUnsavedChangesConfirm:
+      "Anda memiliki perubahan yang belum disimpan. Yakin ingin meninggalkan halaman?",
+    adminWikiEditMediaSectionAria: "Gambar artikel",
+    adminWikiEditMediaSectionTitle: "Gambar artikel",
+    adminWikiEditMediaSectionDescription:
+      "Unggah gambar yang ingin Anda referensikan di konten Markdown di atas. Setelah diunggah, Anda akan melihat URL yang bisa ditempel ke teks.",
+    adminWikiEditNeedArticleIdHint:
+      "Pastikan artikel sudah disimpan dan memiliki ID.",
+    adminWikiEditMediaLoading: "Memuat gambar...",
+    adminWikiEditUploadedImagesTitle: "Gambar yang diunggah",
+    adminWikiEditUploadedImagesNoArticleId:
+      "Belum ada ID artikel. Muat ulang artikel atau tunggu hingga selesai dimuat.",
+    adminWikiEditUploadedImagesEmpty:
+      "Belum ada gambar yang diunggah untuk artikel ini.",
+    adminWikiEditMediaInsert: "Sisipkan",
+    adminWikiEditMediaCopyMarkdown: "Salin Markdown",
+    adminWikiEditMediaDelete: "Hapus",
+    adminWikiEditVersionsAria: "Versi artikel",
+    adminWikiEditVersionsTitle: "Versi artikel",
+    adminWikiEditVersionsHighlight: "Lihat di sini",
+    adminWikiEditVersionsLoading: "Memuat versi...",
+    adminWikiEditVersionsEmpty: "Tidak ada versi untuk bahasa ini.",
+    adminWikiEditVersionsCompareHeader: "Bandingkan",
+    adminWikiEditVersionsSelectLabel: "pilih",
+    adminWikiEditVersionsColVersion: "Versi",
+    adminWikiEditVersionsColLanguage: "Bahasa",
+    adminWikiEditVersionsColTitle: "Judul",
+    adminWikiEditVersionsColSubtitle: "Subjudul",
+    adminWikiEditVersionsColCreatedAt: "Dibuat",
+    adminWikiEditVersionsColCreatedBy: "Dibuat oleh",
+    adminWikiEditVersionsColActions: "Aksi",
+    adminWikiEditVersionsActionPreview: "Pratinjau",
+    adminWikiEditVersionsCurrent: "Saat ini",
+    adminWikiEditVersionsRollback: "Rollback",
+    adminWikiEditVersionsRollbacking: "Melakukan rollback...",
+    adminWikiEditVersionsDelete: "Hapus",
+    adminWikiEditVersionsCompareHelp:
+      "Pilih dua versi (bahasa yang sama) untuk dibandingkan.",
+    adminWikiEditPageLabel: "Halaman",
+    adminWikiEditOfLabel: "dari",
+    adminWikiEditVersionsCountLabel: "versi",
+    adminWikiEditVersionsCompareSelected: "Bandingkan yang dipilih",
+    adminWikiEditVersionsDeleteSelected: "Hapus yang dipilih",
+    adminWikiEditCompareAria: "Perbandingan versi",
+    adminWikiEditCompareTitle: "Perbandingan versi",
+    adminWikiEditCompareSubtitle:
+      "Kiri: versi lebih lama. Kanan: versi lebih baru.",
+    adminWikiEditCompareClear: "Hapus perbandingan",
+    adminWikiEditCompareOlder: "Lebih lama",
+    adminWikiEditCompareNewer: "Lebih baru",
+    adminWikiEditCompareVersionLabel: "Versi",
+    adminWikiEditCompareFieldTitle: "Judul:",
+    adminWikiEditCompareFieldSubtitle: "Subjudul:",
+    adminWikiEditCompareLegendToken: "teks",
+    adminWikiEditCompareLegendRemoved: "= teks dihapus,",
+    adminWikiEditCompareLegendAdded: "= teks ditambahkan.",
+    adminWikiEditViewVersionTitlePrefix: "Pratinjau versi",
+    adminWikiEditViewVersionCreatedAt: "Dibuat",
+    adminWikiEditViewVersionBy: "oleh",
+    adminWikiEditDeleteVersionTitle: "Hapus versi",
+    adminWikiEditDeleteVersionDescription:
+      "Versi ini akan dihapus permanen dari riwayat artikel. Tindakan ini tidak dapat dibatalkan dan dapat memengaruhi pelacakan perubahan.",
+    adminWikiEditDeleteVersionConfirmTitle: "Konfirmasi hapus versi",
+    adminWikiEditDeleteVersionConfirmDescription:
+      "Yakin ingin menghapus versi ini? Tindakan ini permanen dan tidak dapat dibatalkan.",
+    adminWikiEditDeleteVersionConfirmMetaPrefix: "Versi",
+    adminWikiEditDeleteVersionConfirmMetaCreatedAt: "dibuat",
+    adminWikiEditDeleteVersionCurrentActiveError:
+      "Versi aktif saat ini tidak dapat dihapus.",
+    adminWikiEditDeleteVersionLastVersionError:
+      "Versi ini tidak dapat dihapus karena ini adalah versi terakhir yang tersisa.",
+    adminWikiEditDeleteVersionNotFound:
+      "Versi atau artikel tidak ditemukan.",
+    adminWikiEditDeleteVersionError: "Terjadi kesalahan saat menghapus versi.",
+    adminWikiEditDeleteVersionConfirmButton: "Ya, hapus versi",
+    adminWikiEditBulkDeleteTitle: "Hapus versi yang dipilih",
+    adminWikiEditBulkDeleteDescriptionPrefix:
+      "Anda akan menghapus permanen",
+    adminWikiEditBulkDeleteDescriptionSuffix:
+      "versi dari riwayat artikel. Tindakan ini tidak dapat dibatalkan dan dapat memengaruhi pelacakan perubahan.",
+    adminWikiEditBulkDeleteConfirmTitle:
+      "Konfirmasi hapus versi yang dipilih",
+    adminWikiEditBulkDeleteConfirmDescription:
+      "Yakin ingin menghapus versi yang dipilih? Tindakan ini permanen dan tidak dapat dibatalkan.",
+    adminWikiEditBulkDeletePartialError:
+      "Beberapa versi tidak dapat dihapus. Daftar versi akan disegarkan.",
+    adminWikiEditBulkDeleteError:
+      "Terjadi kesalahan saat menghapus versi yang dipilih.",
+    adminWikiEditBulkDeleteConfirmButton:
+      "Ya, hapus versi yang dipilih",
+  },
+  it: {
+    adminErrorMissingApiAccess:
+      "Accesso mancante all'Admin API. Effettua nuovamente l'accesso come amministratore.",
+    adminWikiCancel: "Annulla",
+    adminWikiOk: "OK",
+    adminWikiClose: "Chiudi",
+    adminWikiManagementTitle: "Gestione Wiki",
+    adminWikiManagementInfoLabel: "Info",
+    adminWikiManagementInfoDescription:
+      "Gestisci gli articoli Wiki: crea, cerca, filtra, cambia stato, esporta e gestisci le versioni.",
+    adminWikiManagementSubtitle: "Elenco e gestione degli articoli Wiki.",
+    adminWikiCreateNewArticle: "Crea nuovo articolo",
+    adminWikiSearchPlaceholder: "Cerca per titolo o slug...",
+    adminWikiFilterLanguage: "Filtra per lingua",
+    adminWikiAllLanguages: "Tutte le lingue",
+    adminWikiFilterStatus: "Filtra per stato",
+    adminWikiAllStatus: "Tutti gli stati",
+    adminWikiExportCsv: "Esporta CSV",
+    adminWikiLoadingList: "Caricamento elenco...",
+    adminWikiEmptyList: "Nessun articolo Wiki da mostrare.",
+    adminWikiLoadError:
+      "Si è verificato un errore durante il caricamento dell'elenco Admin Wiki.",
+    adminWikiStatusUpdateError:
+      "Si è verificato un errore durante l'aggiornamento dello stato dell'articolo.",
+    adminWikiSelectedPrefix: "Selezionati",
+    adminWikiSelectAllVisible: "Seleziona tutti (visibili)",
+    adminWikiSelectArticle: "Seleziona articolo",
+    adminWikiIdPrefix: "ID",
+    adminWikiDeleteSelected: "Elimina selezionati",
+    adminWikiBulkStatus: "Stato in blocco...",
+    adminWikiBulkStatusPlaceholder: "Stato in blocco...",
+    adminWikiDeleteAll: "Elimina tutto",
+    adminWikiSelectedCountLabel: "Numero selezionati",
+    adminWikiBulkDeleteTitle: "Elimina articoli selezionati",
+    adminWikiBulkDeleteDescription:
+      "Gli articoli selezionati verranno eliminati definitivamente (incluse tutte le versioni). Questa azione non può essere annullata.",
+    adminWikiDeleteConfirm: "Elimina",
+    adminWikiBulkDeleteError:
+      "Si è verificato un errore durante l'eliminazione in blocco.",
+    adminWikiBulkStatusTitle: "Cambia stato",
+    adminWikiBulkStatusDescription:
+      "Questo cambierà lo stato di tutti gli articoli selezionati.",
+    adminWikiBulkStatusNewStatusLabel: "Nuovo stato",
+    adminWikiBulkStatusError:
+      "Si è verificato un errore durante l'aggiornamento dello stato in blocco.",
+    adminWikiPurgeAllTitle: "Elimina tutti gli articoli",
+    adminWikiPurgeAllDescriptionPrefix:
+      "Stai per eliminare TUTTI gli articoli wiki",
+    adminWikiPurgeAllDescriptionSuffix:
+      "Questa azione non può essere annullata.",
+    adminWikiPurgeAllConfirm: "Elimina tutto",
+    adminWikiPurgeAllError:
+      "Si è verificato un errore durante l'eliminazione di tutti gli articoli.",
+    adminWikiActionEdit: "Modifica",
+    adminWikiActionVersions: "Versioni",
+    adminWikiStatusUpdating: "Aggiornamento...",
+    adminWikiActionActivate: "Attiva",
+    adminWikiActionDeactivate: "Disattiva",
+    adminWikiCreateSlugRequired: "Inserisci lo slug dell'articolo.",
+    adminWikiCreateInvalidOrExists:
+      "Dati non validi o lo slug esiste già.",
+    adminWikiCreateError:
+      "Si è verificato un errore durante la creazione dell'articolo.",
+    adminWikiCreateSuccess: "Articolo creato con successo.",
+    adminWikiCreateIntro:
+      "Inserisci solo lo slug per un nuovo articolo Wiki. Lingua, stato e contenuto verranno impostati successivamente nella pagina di modifica.",
+    adminWikiBackToList: "Torna all'elenco",
+    adminWikiCreateBasicInformation: "Informazioni di base",
+    adminWikiCreateSlugLabel: "Slug",
+    adminWikiCreateSlugPlaceholder: "manual-testing-intro",
+    adminWikiCreateTagsLabel: "Tag (separati da virgola)",
+    adminWikiCreateTagsPlaceholder: "intro, basics, setup",
+    adminWikiCreateArticleIdLabel: "ID articolo (sola lettura)",
+    adminWikiCreateArticleIdPlaceholder: "Generato automaticamente al salvataggio",
+    adminWikiCreateFooterNote:
+      "Gli articoli creati qui vengono salvati nel database BeeLMS (ambiente di sviluppo).",
+    adminWikiCreateSaving: "Salvataggio...",
+    adminWikiCreateArticleSaved: "Articolo salvato",
+    adminWikiCreateSaveArticle: "Salva articolo",
+    adminWikiCreateAlreadyCreatedNote:
+      "Questo articolo esiste già. Usa la pagina di modifica per apportare cambiamenti.",
+    adminWikiEditRichEditorLoading: "Caricamento editor rich...",
+    adminWikiEditTitle: "Modifica articolo Wiki",
+    adminWikiEditSubtitle:
+      "Rivedi e modifica il contenuto dell'articolo Wiki selezionato.",
+    adminWikiEditBreadcrumbFallback: "Modifica",
+    adminWikiEditOpenPublicPage: "Apri pagina pubblica",
+    adminWikiEditPublicVisibleHintPrefix: "L'articolo deve avere lo stato",
+    adminWikiEditPublicVisibleHintSuffix: "per essere visibile pubblicamente.",
+    adminWikiEditLoading: "Caricamento articolo per la modifica...",
+    adminWikiEditLanguageLabel: "Lingua",
+    adminWikiEditLanguageAria: "Lingua dell'articolo Wiki",
+    adminWikiEditLanguageHelp:
+      "Cambiare lingua carica o crea una versione di contenuto separata per la lingua selezionata.",
+    adminWikiEditStatusLabel: "Stato",
+    adminWikiEditStatusAria: "Stato dell'articolo Wiki",
+    adminWikiEditTitleLabel: "Titolo",
+    adminWikiEditSubtitleLabel: "Sottotitolo (opzionale)",
+    adminWikiEditTagsLabel: "Tag (separati da virgola)",
+    adminWikiEditTagsExamplePrefix: "Esempio",
+    adminWikiEditContentLabel: "Contenuto",
+    adminWikiEditEditorModeLabel: "Modalità di modifica:",
+    adminWikiEditEditorModeMarkdown: "Markdown",
+    adminWikiEditEditorModeRichText: "Rich text",
+    adminWikiEditRequiredFieldSrOnly: "(campo obbligatorio)",
+    adminWikiEditTitleRequiredError:
+      "Il titolo è obbligatorio. Inserisci del testo.",
+    adminWikiEditContentRequiredError:
+      "Il contenuto è obbligatorio. Aggiungi del testo prima di salvare.",
+    adminWikiEditRequiredFieldTitle: "Titolo",
+    adminWikiEditRequiredFieldContent: "Contenuto",
+    adminWikiEditSaveDisabledNoChanges:
+      "Il pulsante Salva si attiverà dopo una modifica.",
+    adminWikiEditSaveDisabledMissingFields:
+      "Compila i campi obbligatori per salvare.",
+    adminWikiEditSave: "Salva",
+    adminWikiEditSaving: "Salvataggio...",
+    adminWikiEditInvalidData:
+      "Dati articolo non validi. Controlla i campi.",
+    adminWikiEditSaveError:
+      "Si è verificato un errore durante il salvataggio delle modifiche.",
+    adminWikiEditSaveSuccess: "Modifiche salvate correttamente.",
+    adminWikiEditMissingArticleId:
+      "ID articolo mancante. Ricarica la pagina.",
+    adminWikiEditMediaLoadError:
+      "Si è verificato un errore durante il caricamento delle immagini.",
+    adminWikiEditVersionsLoadError:
+      "Si è verificato un errore durante il caricamento delle versioni.",
+    adminWikiEditUploadImage: "Carica immagine",
+    adminWikiEditUploading: "Caricamento...",
+    adminWikiEditUploadImageError:
+      "Si è verificato un errore durante il caricamento dell'immagine.",
+    adminWikiEditDeleteMediaConfirm:
+      "Sei sicuro di voler eliminare questa immagine?",
+    adminWikiEditDeleteMediaError:
+      "Si è verificato un errore durante l'eliminazione dell'immagine.",
+    adminWikiEditClipboardUnavailable:
+      "Clipboard API non è disponibile in questo browser.",
+    adminWikiEditMarkdownCopied:
+      "Snippet Markdown copiato negli appunti.",
+    adminWikiEditMarkdownCopyFailed:
+      "Impossibile copiare lo snippet Markdown.",
+    adminWikiEditRollbackConfirm:
+      "Sei sicuro di voler ripristinare l'articolo a questa versione?",
+    adminWikiEditRollbackNotFound:
+      "Versione selezionata o articolo non trovato.",
+    adminWikiEditRollbackInvalidRequest:
+      "Richiesta di ripristino non valida. Riprova.",
+    adminWikiEditRollbackError:
+      "Si è verificato un errore durante il ripristino della versione.",
+    adminWikiEditRollbackSuccess:
+      "L'articolo è stato ripristinato alla versione selezionata.",
+    adminWikiEditCompareSameLangError:
+      "Puoi confrontare solo versioni della stessa lingua.",
+    adminWikiEditMermaidHelp:
+      "Per i diagrammi usa un blocco di codice con linguaggio mermaid (es. ```mermaid ... ```). I diagrammi appariranno nell'anteprima e nella Wiki pubblica.",
+    adminWikiEditCaptionHelp:
+      "Per una didascalia immagine: inserisci l'immagine e nella riga successiva aggiungi testo (corsivo opzionale), es.: ![Alt](url) *Caption*.",
+    adminWikiEditPreviewAria: "Anteprima contenuto",
+    adminWikiEditPreviewTitle: "Anteprima (come nella Wiki pubblica)",
+    adminWikiEditPreviewShow: "Mostra anteprima",
+    adminWikiEditPreviewHide: "Nascondi anteprima",
+    adminWikiEditPreviewUntitled: "(Senza titolo)",
+    adminWikiEditMissingFieldsPrefix: "Campi obbligatori mancanti:",
+    adminWikiEditMissingFieldsSuffix:
+      "Compilali per abilitare il pulsante \"Salva\".",
+    adminWikiEditUnsavedChangesWarning: "Ci sono modifiche non salvate.",
+    adminWikiEditUnsavedChangesConfirm:
+      "Hai modifiche non salvate. Sei sicuro di voler lasciare la pagina?",
+    adminWikiEditMediaSectionAria: "Immagini articolo",
+    adminWikiEditMediaSectionTitle: "Immagini articolo",
+    adminWikiEditMediaSectionDescription:
+      "Carica immagini che vuoi referenziare nel contenuto Markdown sopra. Dopo il caricamento vedrai un URL da incollare nel testo.",
+    adminWikiEditNeedArticleIdHint:
+      "Assicurati prima che l'articolo sia salvato e abbia un ID.",
+    adminWikiEditMediaLoading: "Caricamento immagini...",
+    adminWikiEditUploadedImagesTitle: "Immagini caricate",
+    adminWikiEditUploadedImagesNoArticleId:
+      "Nessun ID articolo al momento. Ricarica l'articolo o attendi il caricamento completo.",
+    adminWikiEditUploadedImagesEmpty:
+      "Nessuna immagine caricata per questo articolo.",
+    adminWikiEditMediaInsert: "Inserisci",
+    adminWikiEditMediaCopyMarkdown: "Copia Markdown",
+    adminWikiEditMediaDelete: "Elimina",
+    adminWikiEditVersionsAria: "Versioni articolo",
+    adminWikiEditVersionsTitle: "Versioni articolo",
+    adminWikiEditVersionsHighlight: "Guarda qui",
+    adminWikiEditVersionsLoading: "Caricamento versioni...",
+    adminWikiEditVersionsEmpty: "Nessuna versione per questa lingua.",
+    adminWikiEditVersionsCompareHeader: "Confronta",
+    adminWikiEditVersionsSelectLabel: "seleziona",
+    adminWikiEditVersionsColVersion: "Versione",
+    adminWikiEditVersionsColLanguage: "Lingua",
+    adminWikiEditVersionsColTitle: "Titolo",
+    adminWikiEditVersionsColSubtitle: "Sottotitolo",
+    adminWikiEditVersionsColCreatedAt: "Creato il",
+    adminWikiEditVersionsColCreatedBy: "Creato da",
+    adminWikiEditVersionsColActions: "Azioni",
+    adminWikiEditVersionsActionPreview: "Anteprima",
+    adminWikiEditVersionsCurrent: "Corrente",
+    adminWikiEditVersionsRollback: "Ripristina",
+    adminWikiEditVersionsRollbacking: "Ripristino...",
+    adminWikiEditVersionsDelete: "Elimina",
+    adminWikiEditVersionsCompareHelp:
+      "Seleziona due versioni (stessa lingua) per confrontarle.",
+    adminWikiEditPageLabel: "Pagina",
+    adminWikiEditOfLabel: "di",
+    adminWikiEditVersionsCountLabel: "versioni",
+    adminWikiEditVersionsCompareSelected: "Confronta selezionate",
+    adminWikiEditVersionsDeleteSelected: "Elimina selezionate",
+    adminWikiEditCompareAria: "Confronto versioni",
+    adminWikiEditCompareTitle: "Confronto versioni",
+    adminWikiEditCompareSubtitle:
+      "Sinistra: versione più vecchia. Destra: versione più recente.",
+    adminWikiEditCompareClear: "Pulisci confronto",
+    adminWikiEditCompareOlder: "Più vecchia",
+    adminWikiEditCompareNewer: "Più recente",
+    adminWikiEditCompareVersionLabel: "Versione",
+    adminWikiEditCompareFieldTitle: "Titolo:",
+    adminWikiEditCompareFieldSubtitle: "Sottotitolo:",
+    adminWikiEditCompareLegendToken: "testo",
+    adminWikiEditCompareLegendRemoved: "= testo rimosso,",
+    adminWikiEditCompareLegendAdded: "= testo aggiunto.",
+    adminWikiEditViewVersionTitlePrefix: "Anteprima versione",
+    adminWikiEditViewVersionCreatedAt: "Creato il",
+    adminWikiEditViewVersionBy: "da",
+    adminWikiEditDeleteVersionTitle: "Elimina versione",
+    adminWikiEditDeleteVersionDescription:
+      "Questa versione verrà rimossa definitivamente dalla cronologia dell'articolo. Questa azione è irreversibile e può influire sulla tracciabilità.",
+    adminWikiEditDeleteVersionConfirmTitle: "Conferma eliminazione versione",
+    adminWikiEditDeleteVersionConfirmDescription:
+      "Sei sicuro di voler eliminare questa versione? Questa azione è permanente e irreversibile.",
+    adminWikiEditDeleteVersionConfirmMetaPrefix: "Versione",
+    adminWikiEditDeleteVersionConfirmMetaCreatedAt: "creata il",
+    adminWikiEditDeleteVersionCurrentActiveError:
+      "La versione attiva corrente non può essere eliminata.",
+    adminWikiEditDeleteVersionLastVersionError:
+      "Questa versione non può essere eliminata perché è l'ultima versione rimasta.",
+    adminWikiEditDeleteVersionNotFound:
+      "Versione o articolo non trovato.",
+    adminWikiEditDeleteVersionError:
+      "Si è verificato un errore durante l'eliminazione della versione.",
+    adminWikiEditDeleteVersionConfirmButton: "Sì, elimina la versione",
+    adminWikiEditBulkDeleteTitle: "Elimina versioni selezionate",
+    adminWikiEditBulkDeleteDescriptionPrefix:
+      "Stai per eliminare definitivamente",
+    adminWikiEditBulkDeleteDescriptionSuffix:
+      "versioni dalla cronologia dell'articolo. Questa azione è irreversibile e può influire sulla tracciabilità.",
+    adminWikiEditBulkDeleteConfirmTitle:
+      "Conferma eliminazione delle versioni selezionate",
+    adminWikiEditBulkDeleteConfirmDescription:
+      "Sei sicuro di voler eliminare le versioni selezionate? Questa azione è permanente e irreversibile.",
+    adminWikiEditBulkDeletePartialError:
+      "Alcune versioni non possono essere eliminate. L'elenco versioni verrà aggiornato.",
+    adminWikiEditBulkDeleteError:
+      "Si è verificato un errore durante l'eliminazione delle versioni selezionate.",
+    adminWikiEditBulkDeleteConfirmButton: "Sì, elimina le versioni selezionate",
+  },
+  ko: {
+    adminErrorMissingApiAccess:
+      "Admin API 접근 권한이 없습니다. 관리자 계정으로 다시 로그인해 주세요.",
+    adminWikiCancel: "취소",
+    adminWikiOk: "확인",
+    adminWikiClose: "닫기",
+    adminWikiManagementTitle: "위키 관리",
+    adminWikiManagementInfoLabel: "정보",
+    adminWikiManagementInfoDescription:
+      "위키 문서를 관리합니다: 생성, 검색, 필터, 상태 변경, CSV 내보내기 및 버전 관리.",
+    adminWikiManagementSubtitle: "위키 문서 목록 및 관리.",
+    adminWikiCreateNewArticle: "새 문서 만들기",
+    adminWikiSearchPlaceholder: "제목 또는 슬러그로 검색...",
+    adminWikiFilterLanguage: "언어로 필터",
+    adminWikiAllLanguages: "모든 언어",
+    adminWikiFilterStatus: "상태로 필터",
+    adminWikiAllStatus: "모든 상태",
+    adminWikiExportCsv: "CSV 내보내기",
+    adminWikiLoadingList: "목록 불러오는 중...",
+    adminWikiEmptyList: "표시할 위키 문서가 없습니다.",
+    adminWikiLoadError:
+      "Admin Wiki 목록을 불러오는 중 오류가 발생했습니다.",
+    adminWikiStatusUpdateError:
+      "문서 상태를 업데이트하는 중 오류가 발생했습니다.",
+    adminWikiSelectedPrefix: "선택됨",
+    adminWikiSelectAllVisible: "보이는 항목 모두 선택",
+    adminWikiSelectArticle: "문서 선택",
+    adminWikiIdPrefix: "ID",
+    adminWikiDeleteSelected: "선택 항목 삭제",
+    adminWikiBulkStatus: "일괄 상태...",
+    adminWikiBulkStatusPlaceholder: "일괄 상태...",
+    adminWikiDeleteAll: "모두 삭제",
+    adminWikiSelectedCountLabel: "선택 개수",
+    adminWikiBulkDeleteTitle: "선택한 문서 삭제",
+    adminWikiBulkDeleteDescription:
+      "선택한 문서는 모든 버전과 함께 영구 삭제됩니다. 이 작업은 되돌릴 수 없습니다.",
+    adminWikiDeleteConfirm: "삭제",
+    adminWikiBulkDeleteError:
+      "일괄 삭제 중 오류가 발생했습니다.",
+    adminWikiBulkStatusTitle: "상태 변경",
+    adminWikiBulkStatusDescription:
+      "선택한 모든 문서의 상태가 변경됩니다.",
+    adminWikiBulkStatusNewStatusLabel: "새 상태",
+    adminWikiBulkStatusError:
+      "일괄 상태 업데이트 중 오류가 발생했습니다.",
+    adminWikiPurgeAllTitle: "모든 문서 삭제",
+    adminWikiPurgeAllDescriptionPrefix:
+      "모든 위키 문서를 삭제하려고 합니다",
+    adminWikiPurgeAllDescriptionSuffix: "이 작업은 되돌릴 수 없습니다.",
+    adminWikiPurgeAllConfirm: "모두 삭제",
+    adminWikiPurgeAllError:
+      "모든 문서를 삭제하는 중 오류가 발생했습니다.",
+    adminWikiActionEdit: "편집",
+    adminWikiActionVersions: "버전",
+    adminWikiStatusUpdating: "업데이트 중...",
+    adminWikiActionActivate: "활성화",
+    adminWikiActionDeactivate: "비활성화",
+    adminWikiCreateSlugRequired: "문서 슬러그를 입력해 주세요.",
+    adminWikiCreateInvalidOrExists:
+      "데이터가 올바르지 않거나 슬러그가 이미 존재합니다.",
+    adminWikiCreateError: "문서를 생성하는 중 오류가 발생했습니다.",
+    adminWikiCreateSuccess: "문서가 성공적으로 생성되었습니다.",
+    adminWikiCreateIntro:
+      "새 위키 문서의 슬러그만 입력하세요. 언어, 상태 및 내용은 이후 편집 페이지에서 설정합니다.",
+    adminWikiBackToList: "목록으로 돌아가기",
+    adminWikiCreateBasicInformation: "기본 정보",
+    adminWikiCreateSlugLabel: "슬러그",
+    adminWikiCreateSlugPlaceholder: "manual-testing-intro",
+    adminWikiCreateTagsLabel: "태그 (쉼표로 구분)",
+    adminWikiCreateTagsPlaceholder: "intro, basics, setup",
+    adminWikiCreateArticleIdLabel: "문서 ID (읽기 전용)",
+    adminWikiCreateArticleIdPlaceholder: "저장 시 자동 생성",
+    adminWikiCreateFooterNote:
+      "여기서 생성한 문서는 BeeLMS 데이터베이스(개발 환경)에 저장됩니다.",
+    adminWikiCreateSaving: "저장 중...",
+    adminWikiCreateArticleSaved: "문서가 저장됨",
+    adminWikiCreateSaveArticle: "문서 저장",
+    adminWikiCreateAlreadyCreatedNote:
+      "이 문서는 이미 존재합니다. 변경하려면 편집 페이지를 사용하세요.",
+    adminWikiEditRichEditorLoading: "리치 에디터 로딩 중...",
+    adminWikiEditTitle: "위키 문서 편집",
+    adminWikiEditSubtitle:
+      "선택한 위키 문서의 내용을 검토하고 편집합니다.",
+    adminWikiEditBreadcrumbFallback: "편집",
+    adminWikiEditOpenPublicPage: "공개 페이지 열기",
+    adminWikiEditPublicVisibleHintPrefix: "문서는 상태가",
+    adminWikiEditPublicVisibleHintSuffix: "여야 공개적으로 표시됩니다.",
+    adminWikiEditLoading: "편집할 문서 로딩 중...",
+    adminWikiEditLanguageLabel: "언어",
+    adminWikiEditLanguageAria: "위키 문서 언어",
+    adminWikiEditLanguageHelp:
+      "언어를 변경하면 선택한 언어에 대한 별도의 콘텐츠 버전을 불러오거나 생성합니다.",
+    adminWikiEditStatusLabel: "상태",
+    adminWikiEditStatusAria: "위키 문서 상태",
+    adminWikiEditTitleLabel: "제목",
+    adminWikiEditSubtitleLabel: "부제목(선택)",
+    adminWikiEditTagsLabel: "태그 (쉼표로 구분)",
+    adminWikiEditTagsExamplePrefix: "예시",
+    adminWikiEditContentLabel: "내용",
+    adminWikiEditEditorModeLabel: "편집 모드:",
+    adminWikiEditEditorModeMarkdown: "Markdown",
+    adminWikiEditEditorModeRichText: "Rich text",
+    adminWikiEditRequiredFieldSrOnly: "(필수 항목)",
+    adminWikiEditTitleRequiredError: "제목은 필수입니다. 텍스트를 입력하세요.",
+    adminWikiEditContentRequiredError:
+      "내용은 필수입니다. 저장하기 전에 텍스트를 추가하세요.",
+    adminWikiEditRequiredFieldTitle: "제목",
+    adminWikiEditRequiredFieldContent: "내용",
+    adminWikiEditSaveDisabledNoChanges:
+      "필드를 변경하면 저장 버튼이 활성화됩니다.",
+    adminWikiEditSaveDisabledMissingFields:
+      "저장하려면 필수 항목을 입력하세요.",
+    adminWikiEditSave: "저장",
+    adminWikiEditSaving: "저장 중...",
+    adminWikiEditInvalidData:
+      "문서 데이터가 올바르지 않습니다. 필드를 확인하세요.",
+    adminWikiEditSaveError: "변경 사항을 저장하는 중 오류가 발생했습니다.",
+    adminWikiEditSaveSuccess: "변경 사항이 저장되었습니다.",
+    adminWikiEditMissingArticleId: "문서 ID가 없습니다. 페이지를 새로고침하세요.",
+    adminWikiEditMediaLoadError: "이미지를 불러오는 중 오류가 발생했습니다.",
+    adminWikiEditVersionsLoadError: "버전을 불러오는 중 오류가 발생했습니다.",
+    adminWikiEditUploadImage: "이미지 업로드",
+    adminWikiEditUploading: "업로드 중...",
+    adminWikiEditUploadImageError: "이미지 업로드 중 오류가 발생했습니다.",
+    adminWikiEditDeleteMediaConfirm: "이 이미지를 삭제하시겠습니까?",
+    adminWikiEditDeleteMediaError: "이미지 삭제 중 오류가 발생했습니다.",
+    adminWikiEditClipboardUnavailable:
+      "이 브라우저에서는 Clipboard API를 사용할 수 없습니다.",
+    adminWikiEditMarkdownCopied: "Markdown 조각이 클립보드에 복사되었습니다.",
+    adminWikiEditMarkdownCopyFailed: "Markdown 조각을 복사하지 못했습니다.",
+    adminWikiEditRollbackConfirm: "이 버전으로 되돌리시겠습니까?",
+    adminWikiEditRollbackNotFound: "선택한 버전 또는 문서를 찾을 수 없습니다.",
+    adminWikiEditRollbackInvalidRequest: "잘못된 롤백 요청입니다. 다시 시도하세요.",
+    adminWikiEditRollbackError: "버전 롤백 중 오류가 발생했습니다.",
+    adminWikiEditRollbackSuccess: "문서가 선택한 버전으로 복원되었습니다.",
+    adminWikiEditCompareSameLangError:
+      "같은 언어의 버전만 비교할 수 있습니다.",
+    adminWikiEditMermaidHelp:
+      "다이어그램을 위해 mermaid 언어 코드 블록(예: ```mermaid ... ```)을 사용하세요. 다이어그램은 미리보기와 공개 위키에 표시됩니다.",
+    adminWikiEditCaptionHelp:
+      "이미지 캡션: 이미지를 삽입한 뒤 다음 줄에 텍스트(선택적으로 기울임꼴)를 추가하세요. 예: ![Alt](url) *Caption*.",
+    adminWikiEditPreviewAria: "내용 미리보기",
+    adminWikiEditPreviewTitle: "미리보기(공개 위키와 동일)",
+    adminWikiEditPreviewShow: "미리보기 표시",
+    adminWikiEditPreviewHide: "미리보기 숨기기",
+    adminWikiEditPreviewUntitled: "(제목 없음)",
+    adminWikiEditMissingFieldsPrefix: "필수 항목 누락:",
+    adminWikiEditMissingFieldsSuffix:
+      "\"저장\" 버튼을 활성화하려면 입력하세요.",
+    adminWikiEditUnsavedChangesWarning: "저장되지 않은 변경 사항이 있습니다.",
+    adminWikiEditUnsavedChangesConfirm:
+      "저장되지 않은 변경 사항이 있습니다. 페이지를 떠나시겠습니까?",
+    adminWikiEditMediaSectionAria: "문서 이미지",
+    adminWikiEditMediaSectionTitle: "문서 이미지",
+    adminWikiEditMediaSectionDescription:
+      "위 Markdown 내용에서 참조할 이미지를 업로드하세요. 업로드 후 텍스트에 붙여넣을 URL이 표시됩니다.",
+    adminWikiEditNeedArticleIdHint:
+      "먼저 문서가 저장되어 ID가 있는지 확인하세요.",
+    adminWikiEditMediaLoading: "이미지 로딩 중...",
+    adminWikiEditUploadedImagesTitle: "업로드된 이미지",
+    adminWikiEditUploadedImagesNoArticleId:
+      "아직 문서 ID가 없습니다. 문서를 새로고침하거나 완전히 로드될 때까지 기다리세요.",
+    adminWikiEditUploadedImagesEmpty:
+      "이 문서에는 업로드된 이미지가 없습니다.",
+    adminWikiEditMediaInsert: "삽입",
+    adminWikiEditMediaCopyMarkdown: "Markdown 복사",
+    adminWikiEditMediaDelete: "삭제",
+    adminWikiEditVersionsAria: "문서 버전",
+    adminWikiEditVersionsTitle: "문서 버전",
+    adminWikiEditVersionsHighlight: "여기를 확인",
+    adminWikiEditVersionsLoading: "버전 로딩 중...",
+    adminWikiEditVersionsEmpty: "이 언어에 대한 버전이 없습니다.",
+    adminWikiEditVersionsCompareHeader: "비교",
+    adminWikiEditVersionsSelectLabel: "선택",
+    adminWikiEditVersionsColVersion: "버전",
+    adminWikiEditVersionsColLanguage: "언어",
+    adminWikiEditVersionsColTitle: "제목",
+    adminWikiEditVersionsColSubtitle: "부제목",
+    adminWikiEditVersionsColCreatedAt: "생성일",
+    adminWikiEditVersionsColCreatedBy: "생성자",
+    adminWikiEditVersionsColActions: "작업",
+    adminWikiEditVersionsActionPreview: "미리보기",
+    adminWikiEditVersionsCurrent: "현재",
+    adminWikiEditVersionsRollback: "복원",
+    adminWikiEditVersionsRollbacking: "복원 중...",
+    adminWikiEditVersionsDelete: "삭제",
+    adminWikiEditVersionsCompareHelp:
+      "두 버전(같은 언어)을 선택하여 비교하세요.",
+    adminWikiEditPageLabel: "페이지",
+    adminWikiEditOfLabel: "/",
+    adminWikiEditVersionsCountLabel: "버전",
+    adminWikiEditVersionsCompareSelected: "선택 항목 비교",
+    adminWikiEditVersionsDeleteSelected: "선택 항목 삭제",
+    adminWikiEditCompareAria: "버전 비교",
+    adminWikiEditCompareTitle: "버전 비교",
+    adminWikiEditCompareSubtitle:
+      "왼쪽: 이전 버전. 오른쪽: 최신 버전.",
+    adminWikiEditCompareClear: "비교 초기화",
+    adminWikiEditCompareOlder: "이전",
+    adminWikiEditCompareNewer: "최신",
+    adminWikiEditCompareVersionLabel: "버전",
+    adminWikiEditCompareFieldTitle: "제목:",
+    adminWikiEditCompareFieldSubtitle: "부제목:",
+    adminWikiEditCompareLegendToken: "텍스트",
+    adminWikiEditCompareLegendRemoved: "= 삭제된 텍스트,",
+    adminWikiEditCompareLegendAdded: "= 추가된 텍스트.",
+    adminWikiEditViewVersionTitlePrefix: "버전 미리보기",
+    adminWikiEditViewVersionCreatedAt: "생성일",
+    adminWikiEditViewVersionBy: "작성자",
+    adminWikiEditDeleteVersionTitle: "버전 삭제",
+    adminWikiEditDeleteVersionDescription:
+      "이 버전은 문서 히스토리에서 영구적으로 제거됩니다. 이 작업은 되돌릴 수 없으며 변경 추적에 영향을 줄 수 있습니다.",
+    adminWikiEditDeleteVersionConfirmTitle: "버전 삭제 확인",
+    adminWikiEditDeleteVersionConfirmDescription:
+      "이 버전을 삭제하시겠습니까? 이 작업은 영구적이며 되돌릴 수 없습니다.",
+    adminWikiEditDeleteVersionConfirmMetaPrefix: "버전",
+    adminWikiEditDeleteVersionConfirmMetaCreatedAt: "생성일",
+    adminWikiEditDeleteVersionCurrentActiveError:
+      "현재 활성 버전은 삭제할 수 없습니다.",
+    adminWikiEditDeleteVersionLastVersionError:
+      "이 버전은 마지막 남은 버전이므로 삭제할 수 없습니다.",
+    adminWikiEditDeleteVersionNotFound: "버전 또는 문서를 찾을 수 없습니다.",
+    adminWikiEditDeleteVersionError: "버전 삭제 중 오류가 발생했습니다.",
+    adminWikiEditDeleteVersionConfirmButton: "예, 버전 삭제",
+    adminWikiEditBulkDeleteTitle: "선택한 버전 삭제",
+    adminWikiEditBulkDeleteDescriptionPrefix: "영구적으로 삭제하려고 합니다",
+    adminWikiEditBulkDeleteDescriptionSuffix:
+      "개의 버전을 문서 히스토리에서. 이 작업은 되돌릴 수 없으며 변경 추적에 영향을 줄 수 있습니다.",
+    adminWikiEditBulkDeleteConfirmTitle: "선택한 버전 삭제 확인",
+    adminWikiEditBulkDeleteConfirmDescription:
+      "선택한 버전을 삭제하시겠습니까? 이 작업은 영구적이며 되돌릴 수 없습니다.",
+    adminWikiEditBulkDeletePartialError:
+      "일부 버전을 삭제하지 못했습니다. 버전 목록이 새로고침됩니다.",
+    adminWikiEditBulkDeleteError: "선택한 버전 삭제 중 오류가 발생했습니다.",
+    adminWikiEditBulkDeleteConfirmButton: "예, 선택한 버전 삭제",
+  },
+  ja: {
+    adminErrorMissingApiAccess:
+      "Admin API へのアクセスがありません。管理者として再度サインインしてください。",
+    adminWikiCancel: "キャンセル",
+    adminWikiOk: "OK",
+    adminWikiClose: "閉じる",
+    adminWikiManagementTitle: "Wiki 管理",
+    adminWikiManagementInfoLabel: "情報",
+    adminWikiManagementInfoDescription:
+      "Wiki 記事を管理します: 作成、検索、フィルター、ステータス変更、CSV エクスポート、バージョン管理。",
+    adminWikiManagementSubtitle: "Wiki 記事の一覧と管理。",
+    adminWikiCreateNewArticle: "新規記事を作成",
+    adminWikiSearchPlaceholder: "タイトルまたはスラッグで検索...",
+    adminWikiFilterLanguage: "言語でフィルター",
+    adminWikiAllLanguages: "すべての言語",
+    adminWikiFilterStatus: "ステータスでフィルター",
+    adminWikiAllStatus: "すべてのステータス",
+    adminWikiExportCsv: "CSV をエクスポート",
+    adminWikiLoadingList: "一覧を読み込み中...",
+    adminWikiEmptyList: "表示する Wiki 記事がありません。",
+    adminWikiLoadError:
+      "Admin Wiki 一覧の読み込み中にエラーが発生しました。",
+    adminWikiStatusUpdateError:
+      "記事のステータス更新中にエラーが発生しました。",
+    adminWikiSelectedPrefix: "選択済み",
+    adminWikiSelectAllVisible: "表示中をすべて選択",
+    adminWikiSelectArticle: "記事を選択",
+    adminWikiIdPrefix: "ID",
+    adminWikiDeleteSelected: "選択を削除",
+    adminWikiBulkStatus: "一括ステータス...",
+    adminWikiBulkStatusPlaceholder: "一括ステータス...",
+    adminWikiDeleteAll: "すべて削除",
+    adminWikiSelectedCountLabel: "選択数",
+    adminWikiBulkDeleteTitle: "選択した記事を削除",
+    adminWikiBulkDeleteDescription:
+      "選択した記事はすべてのバージョンを含めて完全に削除されます。この操作は元に戻せません。",
+    adminWikiDeleteConfirm: "削除",
+    adminWikiBulkDeleteError: "一括削除中にエラーが発生しました。",
+    adminWikiBulkStatusTitle: "ステータスを変更",
+    adminWikiBulkStatusDescription:
+      "選択したすべての記事のステータスを変更します。",
+    adminWikiBulkStatusNewStatusLabel: "新しいステータス",
+    adminWikiBulkStatusError:
+      "一括ステータス更新中にエラーが発生しました。",
+    adminWikiPurgeAllTitle: "すべての記事を削除",
+    adminWikiPurgeAllDescriptionPrefix:
+      "すべての Wiki 記事を削除しようとしています",
+    adminWikiPurgeAllDescriptionSuffix: "この操作は元に戻せません。",
+    adminWikiPurgeAllConfirm: "すべて削除",
+    adminWikiPurgeAllError:
+      "すべての記事の削除中にエラーが発生しました。",
+    adminWikiActionEdit: "編集",
+    adminWikiActionVersions: "バージョン",
+    adminWikiStatusUpdating: "更新中...",
+    adminWikiActionActivate: "有効化",
+    adminWikiActionDeactivate: "無効化",
+    adminWikiCreateSlugRequired: "記事のスラッグを入力してください。",
+    adminWikiCreateInvalidOrExists:
+      "無効なデータ、またはスラッグが既に存在します。",
+    adminWikiCreateError: "記事の作成中にエラーが発生しました。",
+    adminWikiCreateSuccess: "記事が正常に作成されました。",
+    adminWikiCreateIntro:
+      "新しい Wiki 記事のスラッグのみを入力してください。言語、ステータス、内容は後で編集ページで設定します。",
+    adminWikiBackToList: "一覧に戻る",
+    adminWikiCreateBasicInformation: "基本情報",
+    adminWikiCreateSlugLabel: "スラッグ",
+    adminWikiCreateSlugPlaceholder: "manual-testing-intro",
+    adminWikiCreateTagsLabel: "タグ（カンマ区切り）",
+    adminWikiCreateTagsPlaceholder: "intro, basics, setup",
+    adminWikiCreateArticleIdLabel: "記事 ID（読み取り専用）",
+    adminWikiCreateArticleIdPlaceholder: "保存時に自動生成されます",
+    adminWikiCreateFooterNote:
+      "ここで作成した記事は BeeLMS のデータベース（開発環境）に保存されます。",
+    adminWikiCreateSaving: "保存中...",
+    adminWikiCreateArticleSaved: "記事を保存しました",
+    adminWikiCreateSaveArticle: "記事を保存",
+    adminWikiCreateAlreadyCreatedNote:
+      "この記事は既に存在します。変更するには編集ページを使用してください。",
+    adminWikiEditRichEditorLoading: "リッチエディタを読み込み中...",
+    adminWikiEditTitle: "Wiki 記事を編集",
+    adminWikiEditSubtitle:
+      "選択した Wiki 記事の内容を確認・編集します。",
+    adminWikiEditBreadcrumbFallback: "編集",
+    adminWikiEditOpenPublicPage: "公開ページを開く",
+    adminWikiEditPublicVisibleHintPrefix: "記事はステータスが",
+    adminWikiEditPublicVisibleHintSuffix: "である必要があります（公開表示）。",
+    adminWikiEditLoading: "編集用に記事を読み込み中...",
+    adminWikiEditLanguageLabel: "言語",
+    adminWikiEditLanguageAria: "Wiki 記事の言語",
+    adminWikiEditLanguageHelp:
+      "言語を変更すると、選択した言語の別コンテンツバージョンを読み込むか作成します。",
+    adminWikiEditStatusLabel: "ステータス",
+    adminWikiEditStatusAria: "Wiki 記事のステータス",
+    adminWikiEditTitleLabel: "タイトル",
+    adminWikiEditSubtitleLabel: "サブタイトル（任意）",
+    adminWikiEditTagsLabel: "タグ（カンマ区切り）",
+    adminWikiEditTagsExamplePrefix: "例",
+    adminWikiEditContentLabel: "内容",
+    adminWikiEditEditorModeLabel: "編集モード:",
+    adminWikiEditEditorModeMarkdown: "Markdown",
+    adminWikiEditEditorModeRichText: "Rich text",
+    adminWikiEditRequiredFieldSrOnly: "（必須）",
+    adminWikiEditTitleRequiredError:
+      "タイトルは必須です。テキストを入力してください。",
+    adminWikiEditContentRequiredError:
+      "内容は必須です。保存する前にテキストを追加してください。",
+    adminWikiEditRequiredFieldTitle: "タイトル",
+    adminWikiEditRequiredFieldContent: "内容",
+    adminWikiEditSaveDisabledNoChanges:
+      "フィールドを変更すると保存ボタンが有効になります。",
+    adminWikiEditSaveDisabledMissingFields:
+      "保存するには必須項目を入力してください。",
+    adminWikiEditSave: "保存",
+    adminWikiEditSaving: "保存中...",
+    adminWikiEditInvalidData:
+      "記事データが無効です。フィールドを確認してください。",
+    adminWikiEditSaveError:
+      "変更の保存中にエラーが発生しました。",
+    adminWikiEditSaveSuccess: "変更を保存しました。",
+    adminWikiEditMissingArticleId:
+      "記事 ID がありません。ページを再読み込みしてください。",
+    adminWikiEditMediaLoadError:
+      "画像の読み込み中にエラーが発生しました。",
+    adminWikiEditVersionsLoadError:
+      "バージョンの読み込み中にエラーが発生しました。",
+    adminWikiEditUploadImage: "画像をアップロード",
+    adminWikiEditUploading: "アップロード中...",
+    adminWikiEditUploadImageError:
+      "画像のアップロード中にエラーが発生しました。",
+    adminWikiEditDeleteMediaConfirm: "この画像を削除してもよろしいですか？",
+    adminWikiEditDeleteMediaError: "画像の削除中にエラーが発生しました。",
+    adminWikiEditClipboardUnavailable:
+      "このブラウザでは Clipboard API を利用できません。",
+    adminWikiEditMarkdownCopied:
+      "Markdown スニペットをクリップボードにコピーしました。",
+    adminWikiEditMarkdownCopyFailed:
+      "Markdown スニペットをコピーできませんでした。",
+    adminWikiEditRollbackConfirm:
+      "この記事をこのバージョンに戻しますか？",
+    adminWikiEditRollbackNotFound:
+      "選択したバージョンまたは記事が見つかりません。",
+    adminWikiEditRollbackInvalidRequest:
+      "無効なロールバック要求です。もう一度お試しください。",
+    adminWikiEditRollbackError:
+      "バージョンのロールバック中にエラーが発生しました。",
+    adminWikiEditRollbackSuccess:
+      "記事を選択したバージョンに戻しました。",
+    adminWikiEditCompareSameLangError:
+      "同じ言語のバージョンのみ比較できます。",
+    adminWikiEditMermaidHelp:
+      "図には mermaid 言語のコードブロック（例: ```mermaid ... ```）を使用してください。図はプレビューと公開 Wiki に表示されます。",
+    adminWikiEditCaptionHelp:
+      "画像キャプション: 画像を挿入し、次の行にテキスト（任意で斜体）を追加します。例: ![Alt](url) *Caption*.",
+    adminWikiEditPreviewAria: "内容プレビュー",
+    adminWikiEditPreviewTitle: "プレビュー（公開 Wiki と同じ）",
+    adminWikiEditPreviewShow: "プレビューを表示",
+    adminWikiEditPreviewHide: "プレビューを非表示",
+    adminWikiEditPreviewUntitled: "（タイトルなし）",
+    adminWikiEditMissingFieldsPrefix: "必須項目が不足しています:",
+    adminWikiEditMissingFieldsSuffix:
+      "\"保存\" ボタンを有効にするには入力してください。",
+    adminWikiEditUnsavedChangesWarning: "未保存の変更があります。",
+    adminWikiEditUnsavedChangesConfirm:
+      "未保存の変更があります。ページを離れてもよろしいですか？",
+    adminWikiEditMediaSectionAria: "記事の画像",
+    adminWikiEditMediaSectionTitle: "記事の画像",
+    adminWikiEditMediaSectionDescription:
+      "上の Markdown 内容で参照したい画像をアップロードしてください。アップロード後、テキストに貼り付ける URL が表示されます。",
+    adminWikiEditNeedArticleIdHint:
+      "まず記事が保存されて ID があることを確認してください。",
+    adminWikiEditMediaLoading: "画像を読み込み中...",
+    adminWikiEditUploadedImagesTitle: "アップロード済み画像",
+    adminWikiEditUploadedImagesNoArticleId:
+      "まだ記事 ID がありません。記事を再読み込みするか、完全に読み込まれるまでお待ちください。",
+    adminWikiEditUploadedImagesEmpty: "この記事には画像がありません。",
+    adminWikiEditMediaInsert: "挿入",
+    adminWikiEditMediaCopyMarkdown: "Markdown をコピー",
+    adminWikiEditMediaDelete: "削除",
+    adminWikiEditVersionsAria: "記事のバージョン",
+    adminWikiEditVersionsTitle: "記事のバージョン",
+    adminWikiEditVersionsHighlight: "こちらを確認",
+    adminWikiEditVersionsLoading: "バージョンを読み込み中...",
+    adminWikiEditVersionsEmpty: "この言語のバージョンはありません。",
+    adminWikiEditVersionsCompareHeader: "比較",
+    adminWikiEditVersionsSelectLabel: "選択",
+    adminWikiEditVersionsColVersion: "バージョン",
+    adminWikiEditVersionsColLanguage: "言語",
+    adminWikiEditVersionsColTitle: "タイトル",
+    adminWikiEditVersionsColSubtitle: "サブタイトル",
+    adminWikiEditVersionsColCreatedAt: "作成日時",
+    adminWikiEditVersionsColCreatedBy: "作成者",
+    adminWikiEditVersionsColActions: "操作",
+    adminWikiEditVersionsActionPreview: "プレビュー",
+    adminWikiEditVersionsCurrent: "現在",
+    adminWikiEditVersionsRollback: "戻す",
+    adminWikiEditVersionsRollbacking: "戻しています...",
+    adminWikiEditVersionsDelete: "削除",
+    adminWikiEditVersionsCompareHelp:
+      "比較するには 2 つのバージョン（同じ言語）を選択してください。",
+    adminWikiEditPageLabel: "ページ",
+    adminWikiEditOfLabel: "/",
+    adminWikiEditVersionsCountLabel: "バージョン",
+    adminWikiEditVersionsCompareSelected: "選択を比較",
+    adminWikiEditVersionsDeleteSelected: "選択を削除",
+    adminWikiEditCompareAria: "バージョン比較",
+    adminWikiEditCompareTitle: "バージョン比較",
+    adminWikiEditCompareSubtitle:
+      "左: 古いバージョン。右: 新しいバージョン。",
+    adminWikiEditCompareClear: "比較をクリア",
+    adminWikiEditCompareOlder: "古い",
+    adminWikiEditCompareNewer: "新しい",
+    adminWikiEditCompareVersionLabel: "バージョン",
+    adminWikiEditCompareFieldTitle: "タイトル:",
+    adminWikiEditCompareFieldSubtitle: "サブタイトル:",
+    adminWikiEditCompareLegendToken: "テキスト",
+    adminWikiEditCompareLegendRemoved: "= 削除されたテキスト,",
+    adminWikiEditCompareLegendAdded: "= 追加されたテキスト.",
+    adminWikiEditViewVersionTitlePrefix: "バージョンプレビュー",
+    adminWikiEditViewVersionCreatedAt: "作成日時",
+    adminWikiEditViewVersionBy: "作成者",
+    adminWikiEditDeleteVersionTitle: "バージョンを削除",
+    adminWikiEditDeleteVersionDescription:
+      "このバージョンは記事履歴から完全に削除されます。この操作は元に戻せず、変更の追跡に影響する可能性があります。",
+    adminWikiEditDeleteVersionConfirmTitle: "バージョン削除の確認",
+    adminWikiEditDeleteVersionConfirmDescription:
+      "このバージョンを削除してもよろしいですか？この操作は恒久的で元に戻せません。",
+    adminWikiEditDeleteVersionConfirmMetaPrefix: "バージョン",
+    adminWikiEditDeleteVersionConfirmMetaCreatedAt: "作成日時",
+    adminWikiEditDeleteVersionCurrentActiveError:
+      "現在のアクティブなバージョンは削除できません。",
+    adminWikiEditDeleteVersionLastVersionError:
+      "最後のバージョンのため削除できません。",
+    adminWikiEditDeleteVersionNotFound:
+      "バージョンまたは記事が見つかりません。",
+    adminWikiEditDeleteVersionError:
+      "バージョン削除中にエラーが発生しました。",
+    adminWikiEditDeleteVersionConfirmButton: "はい、バージョンを削除",
+    adminWikiEditBulkDeleteTitle: "選択したバージョンを削除",
+    adminWikiEditBulkDeleteDescriptionPrefix: "完全に削除しようとしています:",
+    adminWikiEditBulkDeleteDescriptionSuffix:
+      "件のバージョン（記事履歴から）。この操作は元に戻せず、変更追跡に影響する可能性があります。",
+    adminWikiEditBulkDeleteConfirmTitle: "選択したバージョン削除の確認",
+    adminWikiEditBulkDeleteConfirmDescription:
+      "選択したバージョンを削除してもよろしいですか？この操作は恒久的で元に戻せません。",
+    adminWikiEditBulkDeletePartialError:
+      "一部のバージョンを削除できませんでした。バージョン一覧を更新します。",
+    adminWikiEditBulkDeleteError:
+      "選択したバージョンの削除中にエラーが発生しました。",
+    adminWikiEditBulkDeleteConfirmButton: "はい、選択したバージョンを削除",
+  },
+  nl: {
+    adminErrorMissingApiAccess:
+      "Geen toegang tot de Admin API. Meld je opnieuw aan als beheerder.",
+    adminWikiCancel: "Annuleren",
+    adminWikiOk: "OK",
+    adminWikiClose: "Sluiten",
+    adminWikiManagementTitle: "Wiki-beheer",
+    adminWikiManagementInfoLabel: "Info",
+    adminWikiManagementInfoDescription:
+      "Beheer Wiki-artikelen: aanmaken, zoeken, filteren, status wijzigen, exporteren en versies beheren.",
+    adminWikiManagementSubtitle: "Overzicht en beheer van Wiki-artikelen.",
+    adminWikiCreateNewArticle: "Nieuw artikel aanmaken",
+    adminWikiSearchPlaceholder: "Zoek op titel of slug...",
+    adminWikiFilterLanguage: "Filter op taal",
+    adminWikiAllLanguages: "Alle talen",
+    adminWikiFilterStatus: "Filter op status",
+    adminWikiAllStatus: "Alle statussen",
+    adminWikiExportCsv: "CSV exporteren",
+    adminWikiLoadingList: "Lijst laden...",
+    adminWikiEmptyList: "Geen Wiki-artikelen om te tonen.",
+    adminWikiLoadError:
+      "Er is een fout opgetreden bij het laden van de Admin Wiki-lijst.",
+    adminWikiStatusUpdateError:
+      "Er is een fout opgetreden bij het bijwerken van de artikelstatus.",
+    adminWikiSelectedPrefix: "Geselecteerd",
+    adminWikiSelectAllVisible: "Selecteer alle zichtbare",
+    adminWikiSelectArticle: "Selecteer artikel",
+    adminWikiIdPrefix: "ID",
+    adminWikiDeleteSelected: "Selectie verwijderen",
+    adminWikiBulkStatus: "Bulkstatus...",
+    adminWikiBulkStatusPlaceholder: "Bulkstatus...",
+    adminWikiDeleteAll: "Alles verwijderen",
+    adminWikiSelectedCountLabel: "Aantal geselecteerd",
+    adminWikiBulkDeleteTitle: "Geselecteerde artikelen verwijderen",
+    adminWikiBulkDeleteDescription:
+      "De geselecteerde artikelen worden permanent verwijderd (inclusief alle versies). Deze actie kan niet ongedaan worden gemaakt.",
+    adminWikiDeleteConfirm: "Verwijderen",
+    adminWikiBulkDeleteError:
+      "Er is een fout opgetreden tijdens bulkverwijderen.",
+    adminWikiBulkStatusTitle: "Status wijzigen",
+    adminWikiBulkStatusDescription:
+      "Dit wijzigt de status van alle geselecteerde artikelen.",
+    adminWikiBulkStatusNewStatusLabel: "Nieuwe status",
+    adminWikiBulkStatusError:
+      "Er is een fout opgetreden tijdens het bulk bijwerken van de status.",
+    adminWikiPurgeAllTitle: "Alle artikelen verwijderen",
+    adminWikiPurgeAllDescriptionPrefix:
+      "Je staat op het punt ALLE wiki-artikelen te verwijderen",
+    adminWikiPurgeAllDescriptionSuffix: "Deze actie kan niet ongedaan worden gemaakt.",
+    adminWikiPurgeAllConfirm: "Alles verwijderen",
+    adminWikiPurgeAllError:
+      "Er is een fout opgetreden bij het verwijderen van alle artikelen.",
+    adminWikiActionEdit: "Bewerken",
+    adminWikiActionVersions: "Versies",
+    adminWikiStatusUpdating: "Bijwerken...",
+    adminWikiActionActivate: "Activeren",
+    adminWikiActionDeactivate: "Deactiveren",
+    adminWikiCreateSlugRequired: "Voer een slug in voor het artikel.",
+    adminWikiCreateInvalidOrExists:
+      "Ongeldige gegevens of de slug bestaat al.",
+    adminWikiCreateError:
+      "Er is een fout opgetreden bij het aanmaken van het artikel.",
+    adminWikiCreateSuccess: "Artikel succesvol aangemaakt.",
+    adminWikiCreateIntro:
+      "Voer alleen de slug in voor een nieuw Wiki-artikel. Taal, status en inhoud stel je later in op de bewerkpagina.",
+    adminWikiBackToList: "Terug naar lijst",
+    adminWikiCreateBasicInformation: "Basisinformatie",
+    adminWikiCreateSlugLabel: "Slug",
+    adminWikiCreateSlugPlaceholder: "manual-testing-intro",
+    adminWikiCreateTagsLabel: "Tags (komma-gescheiden)",
+    adminWikiCreateTagsPlaceholder: "intro, basics, setup",
+    adminWikiCreateArticleIdLabel: "Artikel-ID (alleen-lezen)",
+    adminWikiCreateArticleIdPlaceholder: "Automatisch gegenereerd bij opslaan",
+    adminWikiCreateFooterNote:
+      "Artikelen die je hier aanmaakt worden opgeslagen in de BeeLMS-database (dev-omgeving).",
+    adminWikiCreateSaving: "Opslaan...",
+    adminWikiCreateArticleSaved: "Artikel opgeslagen",
+    adminWikiCreateSaveArticle: "Artikel opslaan",
+    adminWikiCreateAlreadyCreatedNote:
+      "Dit artikel bestaat al. Gebruik de bewerkpagina om wijzigingen aan te brengen.",
+    adminWikiEditRichEditorLoading: "Rich editor laden...",
+    adminWikiEditTitle: "Wiki-artikel bewerken",
+    adminWikiEditSubtitle:
+      "Bekijk en bewerk de inhoud van een geselecteerd Wiki-artikel.",
+    adminWikiEditBreadcrumbFallback: "Bewerken",
+    adminWikiEditOpenPublicPage: "Open openbare pagina",
+    adminWikiEditPublicVisibleHintPrefix: "Het artikel moet de status",
+    adminWikiEditPublicVisibleHintSuffix: "hebben om openbaar zichtbaar te zijn.",
+    adminWikiEditLoading: "Artikel laden om te bewerken...",
+    adminWikiEditLanguageLabel: "Taal",
+    adminWikiEditLanguageAria: "Taal van het Wiki-artikel",
+    adminWikiEditLanguageHelp:
+      "Het wijzigen van de taal laadt of maakt een aparte inhoudsversie voor de geselecteerde taal.",
+    adminWikiEditStatusLabel: "Status",
+    adminWikiEditStatusAria: "Status van het Wiki-artikel",
+    adminWikiEditTitleLabel: "Titel",
+    adminWikiEditSubtitleLabel: "Subtitel (optioneel)",
+    adminWikiEditTagsLabel: "Tags (komma-gescheiden)",
+    adminWikiEditTagsExamplePrefix: "Voorbeeld",
+    adminWikiEditContentLabel: "Inhoud",
+    adminWikiEditEditorModeLabel: "Bewerkmodus:",
+    adminWikiEditEditorModeMarkdown: "Markdown",
+    adminWikiEditEditorModeRichText: "Rich text",
+    adminWikiEditRequiredFieldSrOnly: "(verplicht veld)",
+    adminWikiEditTitleRequiredError:
+      "Titel is verplicht. Voer tekst in.",
+    adminWikiEditContentRequiredError:
+      "Inhoud is verplicht. Voeg tekst toe voordat je opslaat.",
+    adminWikiEditRequiredFieldTitle: "Titel",
+    adminWikiEditRequiredFieldContent: "Inhoud",
+    adminWikiEditSaveDisabledNoChanges:
+      "De knop Opslaan wordt actief nadat je een veld hebt gewijzigd.",
+    adminWikiEditSaveDisabledMissingFields:
+      "Vul de verplichte velden in om op te slaan.",
+    adminWikiEditSave: "Opslaan",
+    adminWikiEditSaving: "Opslaan...",
+    adminWikiEditInvalidData:
+      "Ongeldige artikelgegevens. Controleer de velden.",
+    adminWikiEditSaveError:
+      "Er is een fout opgetreden bij het opslaan van de wijzigingen.",
+    adminWikiEditSaveSuccess: "Wijzigingen succesvol opgeslagen.",
+    adminWikiEditMissingArticleId:
+      "Artikel-ID ontbreekt. Ververs de pagina.",
+    adminWikiEditMediaLoadError:
+      "Er is een fout opgetreden bij het laden van afbeeldingen.",
+    adminWikiEditVersionsLoadError:
+      "Er is een fout opgetreden bij het laden van versies.",
+    adminWikiEditUploadImage: "Afbeelding uploaden",
+    adminWikiEditUploading: "Uploaden...",
+    adminWikiEditUploadImageError:
+      "Er is een fout opgetreden bij het uploaden van de afbeelding.",
+    adminWikiEditDeleteMediaConfirm:
+      "Weet je zeker dat je deze afbeelding wilt verwijderen?",
+    adminWikiEditDeleteMediaError:
+      "Er is een fout opgetreden bij het verwijderen van de afbeelding.",
+    adminWikiEditClipboardUnavailable:
+      "Clipboard API is niet beschikbaar in deze browser.",
+    adminWikiEditMarkdownCopied:
+      "Markdown-fragment gekopieerd naar klembord.",
+    adminWikiEditMarkdownCopyFailed:
+      "Kon het Markdown-fragment niet kopiëren.",
+    adminWikiEditRollbackConfirm:
+      "Weet je zeker dat je het artikel naar deze versie wilt terugzetten?",
+    adminWikiEditRollbackNotFound:
+      "De geselecteerde versie of het artikel is niet gevonden.",
+    adminWikiEditRollbackInvalidRequest:
+      "Ongeldig rollback-verzoek. Probeer het opnieuw.",
+    adminWikiEditRollbackError:
+      "Er is een fout opgetreden bij het terugzetten van de versie.",
+    adminWikiEditRollbackSuccess:
+      "Het artikel is teruggezet naar de geselecteerde versie.",
+    adminWikiEditCompareSameLangError:
+      "Je kunt alleen versies van dezelfde taal vergelijken.",
+    adminWikiEditMermaidHelp:
+      "Voor diagrammen gebruik je een codeblok met taal mermaid (bijv. ```mermaid ... ```). Diagrammen verschijnen in de preview en in de openbare Wiki.",
+    adminWikiEditCaptionHelp:
+      "Voor een afbeeldingstitel: voeg de afbeelding in en voeg op de volgende regel tekst toe (optioneel cursief), bijv.: ![Alt](url) *Caption*.",
+    adminWikiEditPreviewAria: "Inhoudsvoorbeeld",
+    adminWikiEditPreviewTitle: "Preview (zoals in de openbare Wiki)",
+    adminWikiEditPreviewShow: "Preview tonen",
+    adminWikiEditPreviewHide: "Preview verbergen",
+    adminWikiEditPreviewUntitled: "(Zonder titel)",
+    adminWikiEditMissingFieldsPrefix: "Verplichte velden ontbreken:",
+    adminWikiEditMissingFieldsSuffix:
+      "Vul ze in om de knop \"Opslaan\" te activeren.",
+    adminWikiEditUnsavedChangesWarning: "Er zijn niet-opgeslagen wijzigingen.",
+    adminWikiEditUnsavedChangesConfirm:
+      "Je hebt niet-opgeslagen wijzigingen. Weet je zeker dat je de pagina wilt verlaten?",
+    adminWikiEditMediaSectionAria: "Artikelafbeeldingen",
+    adminWikiEditMediaSectionTitle: "Artikelafbeeldingen",
+    adminWikiEditMediaSectionDescription:
+      "Upload afbeeldingen waarnaar je wilt verwijzen in de Markdown-inhoud hierboven. Na uploaden zie je een URL die je in de tekst kunt plakken.",
+    adminWikiEditNeedArticleIdHint:
+      "Zorg er eerst voor dat het artikel is opgeslagen en een ID heeft.",
+    adminWikiEditMediaLoading: "Afbeeldingen laden...",
+    adminWikiEditUploadedImagesTitle: "Geüploade afbeeldingen",
+    adminWikiEditUploadedImagesNoArticleId:
+      "Nog geen artikel-ID. Ververs het artikel of wacht tot alles volledig is geladen.",
+    adminWikiEditUploadedImagesEmpty:
+      "Er zijn nog geen afbeeldingen geüpload voor dit artikel.",
+    adminWikiEditMediaInsert: "Invoegen",
+    adminWikiEditMediaCopyMarkdown: "Markdown kopiëren",
+    adminWikiEditMediaDelete: "Verwijderen",
+    adminWikiEditVersionsAria: "Artikelversies",
+    adminWikiEditVersionsTitle: "Artikelversies",
+    adminWikiEditVersionsHighlight: "Kijk hier",
+    adminWikiEditVersionsLoading: "Versies laden...",
+    adminWikiEditVersionsEmpty: "Geen versies voor deze taal.",
+    adminWikiEditVersionsCompareHeader: "Vergelijken",
+    adminWikiEditVersionsSelectLabel: "selecteer",
+    adminWikiEditVersionsColVersion: "Versie",
+    adminWikiEditVersionsColLanguage: "Taal",
+    adminWikiEditVersionsColTitle: "Titel",
+    adminWikiEditVersionsColSubtitle: "Subtitel",
+    adminWikiEditVersionsColCreatedAt: "Aangemaakt op",
+    adminWikiEditVersionsColCreatedBy: "Aangemaakt door",
+    adminWikiEditVersionsColActions: "Acties",
+    adminWikiEditVersionsActionPreview: "Preview",
+    adminWikiEditVersionsCurrent: "Huidig",
+    adminWikiEditVersionsRollback: "Terugzetten",
+    adminWikiEditVersionsRollbacking: "Terugzetten...",
+    adminWikiEditVersionsDelete: "Verwijderen",
+    adminWikiEditVersionsCompareHelp:
+      "Selecteer twee versies (dezelfde taal) om ze te vergelijken.",
+    adminWikiEditPageLabel: "Pagina",
+    adminWikiEditOfLabel: "van",
+    adminWikiEditVersionsCountLabel: "versies",
+    adminWikiEditVersionsCompareSelected: "Geselecteerde vergelijken",
+    adminWikiEditVersionsDeleteSelected: "Geselecteerde verwijderen",
+    adminWikiEditCompareAria: "Versievergelijking",
+    adminWikiEditCompareTitle: "Versievergelijking",
+    adminWikiEditCompareSubtitle:
+      "Links: oudere versie. Rechts: nieuwere versie.",
+    adminWikiEditCompareClear: "Vergelijking wissen",
+    adminWikiEditCompareOlder: "Ouder",
+    adminWikiEditCompareNewer: "Nieuwer",
+    adminWikiEditCompareVersionLabel: "Versie",
+    adminWikiEditCompareFieldTitle: "Titel:",
+    adminWikiEditCompareFieldSubtitle: "Subtitel:",
+    adminWikiEditCompareLegendToken: "tekst",
+    adminWikiEditCompareLegendRemoved: "= verwijderde tekst,",
+    adminWikiEditCompareLegendAdded: "= toegevoegde tekst.",
+    adminWikiEditViewVersionTitlePrefix: "Versie-preview",
+    adminWikiEditViewVersionCreatedAt: "Aangemaakt op",
+    adminWikiEditViewVersionBy: "door",
+    adminWikiEditDeleteVersionTitle: "Versie verwijderen",
+    adminWikiEditDeleteVersionDescription:
+      "Deze versie wordt permanent verwijderd uit de artikelgeschiedenis. Deze actie kan niet ongedaan worden gemaakt en kan de traceerbaarheid beïnvloeden.",
+    adminWikiEditDeleteVersionConfirmTitle: "Bevestig verwijderen van versie",
+    adminWikiEditDeleteVersionConfirmDescription:
+      "Weet je zeker dat je deze versie wilt verwijderen? Deze actie is permanent en onomkeerbaar.",
+    adminWikiEditDeleteVersionConfirmMetaPrefix: "Versie",
+    adminWikiEditDeleteVersionConfirmMetaCreatedAt: "aangemaakt op",
+    adminWikiEditDeleteVersionCurrentActiveError:
+      "De huidige actieve versie kan niet worden verwijderd.",
+    adminWikiEditDeleteVersionLastVersionError:
+      "Deze versie kan niet worden verwijderd omdat het de laatst overgebleven versie is.",
+    adminWikiEditDeleteVersionNotFound:
+      "Versie of artikel niet gevonden.",
+    adminWikiEditDeleteVersionError:
+      "Er is een fout opgetreden bij het verwijderen van de versie.",
+    adminWikiEditDeleteVersionConfirmButton: "Ja, versie verwijderen",
+    adminWikiEditBulkDeleteTitle: "Geselecteerde versies verwijderen",
+    adminWikiEditBulkDeleteDescriptionPrefix:
+      "Je staat op het punt permanent te verwijderen",
+    adminWikiEditBulkDeleteDescriptionSuffix:
+      "versies uit de artikelgeschiedenis. Deze actie kan niet ongedaan worden gemaakt en kan de traceerbaarheid beïnvloeden.",
+    adminWikiEditBulkDeleteConfirmTitle:
+      "Bevestig verwijderen van geselecteerde versies",
+    adminWikiEditBulkDeleteConfirmDescription:
+      "Weet je zeker dat je de geselecteerde versies wilt verwijderen? Deze actie is permanent en onomkeerbaar.",
+    adminWikiEditBulkDeletePartialError:
+      "Sommige versies konden niet worden verwijderd. De versielijst wordt vernieuwd.",
+    adminWikiEditBulkDeleteError:
+      "Er is een fout opgetreden bij het verwijderen van geselecteerde versies.",
+    adminWikiEditBulkDeleteConfirmButton:
+      "Ja, geselecteerde versies verwijderen",
+  },
+  cs: {
+    adminErrorMissingApiAccess:
+      "Chybí přístup k Admin API. Přihlaste se prosím znovu jako administrátor.",
+    adminWikiCancel: "Zrušit",
+    adminWikiOk: "OK",
+    adminWikiClose: "Zavřít",
+    adminWikiManagementTitle: "Správa Wiki",
+    adminWikiManagementInfoLabel: "Info",
+    adminWikiManagementInfoDescription:
+      "Spravujte články Wiki: vytváření, vyhledávání, filtrování, změna stavu, export a správa verzí.",
+    adminWikiManagementSubtitle: "Seznam a správa článků Wiki.",
+    adminWikiCreateNewArticle: "Vytvořit nový článek",
+    adminWikiSearchPlaceholder: "Hledat podle názvu nebo slugu...",
+    adminWikiFilterLanguage: "Filtrovat podle jazyka",
+    adminWikiAllLanguages: "Všechny jazyky",
+    adminWikiFilterStatus: "Filtrovat podle stavu",
+    adminWikiAllStatus: "Všechny stavy",
+    adminWikiExportCsv: "Exportovat CSV",
+    adminWikiLoadingList: "Načítání seznamu...",
+    adminWikiEmptyList: "Žádné články Wiki k zobrazení.",
+    adminWikiLoadError:
+      "Při načítání seznamu Admin Wiki došlo k chybě.",
+    adminWikiStatusUpdateError:
+      "Při aktualizaci stavu článku došlo k chybě.",
+    adminWikiSelectedPrefix: "Vybráno",
+    adminWikiSelectAllVisible: "Vybrat vše viditelné",
+    adminWikiSelectArticle: "Vybrat článek",
+    adminWikiIdPrefix: "ID",
+    adminWikiDeleteSelected: "Smazat vybrané",
+    adminWikiBulkStatus: "Hromadný stav...",
+    adminWikiBulkStatusPlaceholder: "Hromadný stav...",
+    adminWikiDeleteAll: "Smazat vše",
+    adminWikiSelectedCountLabel: "Počet vybraných",
+    adminWikiBulkDeleteTitle: "Smazat vybrané články",
+    adminWikiBulkDeleteDescription:
+      "Vybrané články budou trvale smazány (včetně všech verzí). Tuto akci nelze vrátit zpět.",
+    adminWikiDeleteConfirm: "Smazat",
+    adminWikiBulkDeleteError:
+      "Při hromadném mazání došlo k chybě.",
+    adminWikiBulkStatusTitle: "Změnit stav",
+    adminWikiBulkStatusDescription:
+      "Tímto se změní stav všech vybraných článků.",
+    adminWikiBulkStatusNewStatusLabel: "Nový stav",
+    adminWikiBulkStatusError:
+      "Při hromadné aktualizaci stavu došlo k chybě.",
+    adminWikiPurgeAllTitle: "Smazat všechny články",
+    adminWikiPurgeAllDescriptionPrefix:
+      "Chystáte se smazat VŠECHNY wiki články",
+    adminWikiPurgeAllDescriptionSuffix: "Tuto akci nelze vrátit zpět.",
+    adminWikiPurgeAllConfirm: "Smazat vše",
+    adminWikiPurgeAllError:
+      "Při mazání všech článků došlo k chybě.",
+    adminWikiActionEdit: "Upravit",
+    adminWikiActionVersions: "Verze",
+    adminWikiStatusUpdating: "Aktualizace...",
+    adminWikiActionActivate: "Aktivovat",
+    adminWikiActionDeactivate: "Deaktivovat",
+    adminWikiCreateSlugRequired: "Zadejte prosím slug článku.",
+    adminWikiCreateInvalidOrExists:
+      "Neplatná data nebo slug již existuje.",
+    adminWikiCreateError:
+      "Při vytváření článku došlo k chybě.",
+    adminWikiCreateSuccess: "Článek byl úspěšně vytvořen.",
+    adminWikiCreateIntro:
+      "Zadejte pouze slug nového článku Wiki. Jazyk, stav a obsah nastavíte později na stránce úprav.",
+    adminWikiBackToList: "Zpět na seznam",
+    adminWikiCreateBasicInformation: "Základní informace",
+    adminWikiCreateSlugLabel: "Slug",
+    adminWikiCreateSlugPlaceholder: "manual-testing-intro",
+    adminWikiCreateTagsLabel: "Tagy (oddělené čárkou)",
+    adminWikiCreateTagsPlaceholder: "intro, basics, setup",
+    adminWikiCreateArticleIdLabel: "ID článku (jen pro čtení)",
+    adminWikiCreateArticleIdPlaceholder: "Vygeneruje se automaticky při uložení",
+    adminWikiCreateFooterNote:
+      "Články vytvořené zde se ukládají do databáze BeeLMS (vývojové prostředí).",
+    adminWikiCreateSaving: "Ukládání...",
+    adminWikiCreateArticleSaved: "Článek uložen",
+    adminWikiCreateSaveArticle: "Uložit článek",
+    adminWikiCreateAlreadyCreatedNote:
+      "Tento článek již existuje. Pro změny použijte stránku úprav.",
+    adminWikiEditRichEditorLoading: "Načítání rich editoru...",
+    adminWikiEditTitle: "Upravit Wiki článek",
+    adminWikiEditSubtitle:
+      "Zkontrolujte a upravte obsah vybraného Wiki článku.",
+    adminWikiEditBreadcrumbFallback: "Upravit",
+    adminWikiEditOpenPublicPage: "Otevřít veřejnou stránku",
+    adminWikiEditPublicVisibleHintPrefix: "Článek musí mít stav",
+    adminWikiEditPublicVisibleHintSuffix: "aby byl veřejně viditelný.",
+    adminWikiEditLoading: "Načítání článku k úpravám...",
+    adminWikiEditLanguageLabel: "Jazyk",
+    adminWikiEditLanguageAria: "Jazyk Wiki článku",
+    adminWikiEditLanguageHelp:
+      "Změna jazyka načte nebo vytvoří samostatnou verzi obsahu pro zvolený jazyk.",
+    adminWikiEditStatusLabel: "Stav",
+    adminWikiEditStatusAria: "Stav Wiki článku",
+    adminWikiEditTitleLabel: "Název",
+    adminWikiEditSubtitleLabel: "Podnázev (volitelné)",
+    adminWikiEditTagsLabel: "Tagy (oddělené čárkou)",
+    adminWikiEditTagsExamplePrefix: "Příklad",
+    adminWikiEditContentLabel: "Obsah",
+    adminWikiEditEditorModeLabel: "Režim úprav:",
+    adminWikiEditEditorModeMarkdown: "Markdown",
+    adminWikiEditEditorModeRichText: "Rich text",
+    adminWikiEditRequiredFieldSrOnly: "(povinné pole)",
+    adminWikiEditTitleRequiredError:
+      "Název je povinný. Zadejte prosím text.",
+    adminWikiEditContentRequiredError:
+      "Obsah je povinný. Před uložením přidejte text.",
+    adminWikiEditRequiredFieldTitle: "Název",
+    adminWikiEditRequiredFieldContent: "Obsah",
+    adminWikiEditSaveDisabledNoChanges:
+      "Tlačítko Uložit se aktivuje po změně některého pole.",
+    adminWikiEditSaveDisabledMissingFields:
+      "Vyplňte povinná pole pro uložení.",
+    adminWikiEditSave: "Uložit",
+    adminWikiEditSaving: "Ukládání...",
+    adminWikiEditInvalidData:
+      "Neplatná data článku. Zkontrolujte pole.",
+    adminWikiEditSaveError:
+      "Při ukládání změn došlo k chybě.",
+    adminWikiEditSaveSuccess: "Změny byly úspěšně uloženy.",
+    adminWikiEditMissingArticleId:
+      "Chybí ID článku. Obnovte stránku.",
+    adminWikiEditMediaLoadError:
+      "Při načítání obrázků došlo k chybě.",
+    adminWikiEditVersionsLoadError:
+      "Při načítání verzí došlo k chybě.",
+    adminWikiEditUploadImage: "Nahrát obrázek",
+    adminWikiEditUploading: "Nahrávání...",
+    adminWikiEditUploadImageError:
+      "Při nahrávání obrázku došlo k chybě.",
+    adminWikiEditDeleteMediaConfirm:
+      "Opravdu chcete tento obrázek smazat?",
+    adminWikiEditDeleteMediaError:
+      "Při mazání obrázku došlo k chybě.",
+    adminWikiEditClipboardUnavailable:
+      "Clipboard API není v tomto prohlížeči k dispozici.",
+    adminWikiEditMarkdownCopied: "Markdown úryvek byl zkopírován do schránky.",
+    adminWikiEditMarkdownCopyFailed:
+      "Markdown úryvek se nepodařilo zkopírovat.",
+    adminWikiEditRollbackConfirm:
+      "Opravdu chcete vrátit článek na tuto verzi?",
+    adminWikiEditRollbackNotFound:
+      "Vybraná verze nebo článek nebyly nalezeny.",
+    adminWikiEditRollbackInvalidRequest:
+      "Neplatný požadavek na vrácení. Zkuste to znovu.",
+    adminWikiEditRollbackError:
+      "Při vracení verze došlo k chybě.",
+    adminWikiEditRollbackSuccess:
+      "Článek byl vrácen na vybranou verzi.",
+    adminWikiEditCompareSameLangError:
+      "Porovnávat lze pouze verze stejného jazyka.",
+    adminWikiEditMermaidHelp:
+      "Pro diagramy použijte blok kódu s jazykem mermaid (např. ```mermaid ... ```). Diagramy se zobrazí v náhledu i ve veřejné Wiki.",
+    adminWikiEditCaptionHelp:
+      "Pro popisek obrázku: vložte obrázek a na další řádek přidejte text (volitelně kurzívou), např.: ![Alt](url) *Caption*.",
+    adminWikiEditPreviewAria: "Náhled obsahu",
+    adminWikiEditPreviewTitle: "Náhled (jako ve veřejné Wiki)",
+    adminWikiEditPreviewShow: "Zobrazit náhled",
+    adminWikiEditPreviewHide: "Skrýt náhled",
+    adminWikiEditPreviewUntitled: "(Bez názvu)",
+    adminWikiEditMissingFieldsPrefix: "Chybí povinná pole:",
+    adminWikiEditMissingFieldsSuffix:
+      "Vyplňte je pro aktivaci tlačítka \"Uložit\".",
+    adminWikiEditUnsavedChangesWarning: "Máte neuložené změny.",
+    adminWikiEditUnsavedChangesConfirm:
+      "Máte neuložené změny. Opravdu chcete stránku opustit?",
+    adminWikiEditMediaSectionAria: "Obrázky článku",
+    adminWikiEditMediaSectionTitle: "Obrázky článku",
+    adminWikiEditMediaSectionDescription:
+      "Nahrajte obrázky, na které chcete odkazovat v Markdown obsahu výše. Po nahrání uvidíte URL, které můžete vložit do textu.",
+    adminWikiEditNeedArticleIdHint:
+      "Nejprve se ujistěte, že je článek uložen a má ID.",
+    adminWikiEditMediaLoading: "Načítání obrázků...",
+    adminWikiEditUploadedImagesTitle: "Nahrané obrázky",
+    adminWikiEditUploadedImagesNoArticleId:
+      "Zatím není k dispozici ID článku. Obnovte článek nebo počkejte na úplné načtení.",
+    adminWikiEditUploadedImagesEmpty:
+      "Pro tento článek zatím nejsou nahrané žádné obrázky.",
+    adminWikiEditMediaInsert: "Vložit",
+    adminWikiEditMediaCopyMarkdown: "Kopírovat Markdown",
+    adminWikiEditMediaDelete: "Smazat",
+    adminWikiEditVersionsAria: "Verze článku",
+    adminWikiEditVersionsTitle: "Verze článku",
+    adminWikiEditVersionsHighlight: "Podívejte se sem",
+    adminWikiEditVersionsLoading: "Načítání verzí...",
+    adminWikiEditVersionsEmpty: "Pro tento jazyk nejsou žádné verze.",
+    adminWikiEditVersionsCompareHeader: "Porovnat",
+    adminWikiEditVersionsSelectLabel: "vybrat",
+    adminWikiEditVersionsColVersion: "Verze",
+    adminWikiEditVersionsColLanguage: "Jazyk",
+    adminWikiEditVersionsColTitle: "Název",
+    adminWikiEditVersionsColSubtitle: "Podnázev",
+    adminWikiEditVersionsColCreatedAt: "Vytvořeno",
+    adminWikiEditVersionsColCreatedBy: "Vytvořil",
+    adminWikiEditVersionsColActions: "Akce",
+    adminWikiEditVersionsActionPreview: "Náhled",
+    adminWikiEditVersionsCurrent: "Aktuální",
+    adminWikiEditVersionsRollback: "Vrátit",
+    adminWikiEditVersionsRollbacking: "Vracení...",
+    adminWikiEditVersionsDelete: "Smazat",
+    adminWikiEditVersionsCompareHelp:
+      "Vyberte dvě verze (stejný jazyk) pro porovnání.",
+    adminWikiEditPageLabel: "Stránka",
+    adminWikiEditOfLabel: "z",
+    adminWikiEditVersionsCountLabel: "verzí",
+    adminWikiEditVersionsCompareSelected: "Porovnat vybrané",
+    adminWikiEditVersionsDeleteSelected: "Smazat vybrané",
+    adminWikiEditCompareAria: "Porovnání verzí",
+    adminWikiEditCompareTitle: "Porovnání verzí",
+    adminWikiEditCompareSubtitle:
+      "Vlevo: starší verze. Vpravo: novější verze.",
+    adminWikiEditCompareClear: "Vymazat porovnání",
+    adminWikiEditCompareOlder: "Starší",
+    adminWikiEditCompareNewer: "Novější",
+    adminWikiEditCompareVersionLabel: "Verze",
+    adminWikiEditCompareFieldTitle: "Název:",
+    adminWikiEditCompareFieldSubtitle: "Podnázev:",
+    adminWikiEditCompareLegendToken: "text",
+    adminWikiEditCompareLegendRemoved: "= odstraněný text,",
+    adminWikiEditCompareLegendAdded: "= přidaný text.",
+    adminWikiEditViewVersionTitlePrefix: "Náhled verze",
+    adminWikiEditViewVersionCreatedAt: "Vytvořeno",
+    adminWikiEditViewVersionBy: "kým",
+    adminWikiEditDeleteVersionTitle: "Smazat verzi",
+    adminWikiEditDeleteVersionDescription:
+      "Tato verze bude trvale odstraněna z historie článku. Tuto akci nelze vrátit zpět a může ovlivnit sledovatelnost změn.",
+    adminWikiEditDeleteVersionConfirmTitle: "Potvrďte smazání verze",
+    adminWikiEditDeleteVersionConfirmDescription:
+      "Opravdu chcete smazat tuto verzi? Tato akce je trvalá a nevratná.",
+    adminWikiEditDeleteVersionConfirmMetaPrefix: "Verze",
+    adminWikiEditDeleteVersionConfirmMetaCreatedAt: "vytvořeno",
+    adminWikiEditDeleteVersionCurrentActiveError:
+      "Aktuální aktivní verzi nelze smazat.",
+    adminWikiEditDeleteVersionLastVersionError:
+      "Tuto verzi nelze smazat, protože je to poslední zbývající verze.",
+    adminWikiEditDeleteVersionNotFound:
+      "Verze nebo článek nebyly nalezeny.",
+    adminWikiEditDeleteVersionError:
+      "Při mazání verze došlo k chybě.",
+    adminWikiEditDeleteVersionConfirmButton: "Ano, smazat verzi",
+    adminWikiEditBulkDeleteTitle: "Smazat vybrané verze",
+    adminWikiEditBulkDeleteDescriptionPrefix:
+      "Chystáte se trvale smazat",
+    adminWikiEditBulkDeleteDescriptionSuffix:
+      "verze z historie článku. Tuto akci nelze vrátit zpět a může ovlivnit sledování změn.",
+    adminWikiEditBulkDeleteConfirmTitle:
+      "Potvrďte smazání vybraných verzí",
+    adminWikiEditBulkDeleteConfirmDescription:
+      "Opravdu chcete smazat vybrané verze? Tato akce je trvalá a nevratná.",
+    adminWikiEditBulkDeletePartialError:
+      "Některé verze se nepodařilo smazat. Seznam verzí se obnoví.",
+    adminWikiEditBulkDeleteError:
+      "Při mazání vybraných verzí došlo k chybě.",
+    adminWikiEditBulkDeleteConfirmButton: "Ano, smazat vybrané verze",
+  },
+  ar: {
+    adminErrorMissingApiAccess:
+      "لا يوجد وصول إلى واجهة Admin API. يرجى تسجيل الدخول مرة أخرى كمسؤول.",
+    adminWikiCancel: "إلغاء",
+    adminWikiOk: "حسنًا",
+    adminWikiClose: "إغلاق",
+    adminWikiManagementTitle: "إدارة الويكي",
+    adminWikiManagementInfoLabel: "معلومات",
+    adminWikiManagementInfoDescription:
+      "إدارة مقالات الويكي: إنشاء، بحث، تصفية، تغيير الحالة، تصدير وإصدارات.",
+    adminWikiManagementSubtitle: "قائمة وإدارة مقالات الويكي.",
+    adminWikiCreateNewArticle: "إنشاء مقال جديد",
+    adminWikiSearchPlaceholder: "ابحث حسب العنوان أو الـ slug...",
+    adminWikiFilterLanguage: "تصفية حسب اللغة",
+    adminWikiAllLanguages: "كل اللغات",
+    adminWikiFilterStatus: "تصفية حسب الحالة",
+    adminWikiAllStatus: "كل الحالات",
+    adminWikiExportCsv: "تصدير CSV",
+    adminWikiLoadingList: "جارٍ تحميل القائمة...",
+    adminWikiEmptyList: "لا توجد مقالات ويكي للعرض.",
+    adminWikiLoadError:
+      "حدث خطأ أثناء تحميل قائمة الويكي في لوحة الإدارة.",
+    adminWikiStatusUpdateError:
+      "حدث خطأ أثناء تحديث حالة المقال.",
+    adminWikiSelectedPrefix: "المحدد",
+    adminWikiSelectAllVisible: "تحديد كل العناصر الظاهرة",
+    adminWikiSelectArticle: "تحديد مقال",
+    adminWikiIdPrefix: "المعرف",
+    adminWikiDeleteSelected: "حذف المحدد",
+    adminWikiBulkStatus: "حالة جماعية...",
+    adminWikiBulkStatusPlaceholder: "حالة جماعية...",
+    adminWikiDeleteAll: "حذف الكل",
+    adminWikiSelectedCountLabel: "عدد المحدد",
+    adminWikiBulkDeleteTitle: "حذف المقالات المحددة",
+    adminWikiBulkDeleteDescription:
+      "سيتم حذف المقالات المحددة نهائيًا (بما في ذلك جميع الإصدارات). لا يمكن التراجع عن هذا الإجراء.",
+    adminWikiDeleteConfirm: "حذف",
+    adminWikiBulkDeleteError: "حدث خطأ أثناء الحذف الجماعي.",
+    adminWikiBulkStatusTitle: "تغيير الحالة",
+    adminWikiBulkStatusDescription:
+      "سيؤدي ذلك إلى تغيير حالة جميع المقالات المحددة.",
+    adminWikiBulkStatusNewStatusLabel: "الحالة الجديدة",
+    adminWikiBulkStatusError:
+      "حدث خطأ أثناء تحديث الحالة بشكل جماعي.",
+    adminWikiPurgeAllTitle: "حذف جميع المقالات",
+    adminWikiPurgeAllDescriptionPrefix:
+      "أنت على وشك حذف جميع مقالات الويكي",
+    adminWikiPurgeAllDescriptionSuffix: "لا يمكن التراجع عن هذا الإجراء.",
+    adminWikiPurgeAllConfirm: "حذف الكل",
+    adminWikiPurgeAllError: "حدث خطأ أثناء حذف جميع المقالات.",
+    adminWikiActionEdit: "تعديل",
+    adminWikiActionVersions: "الإصدارات",
+    adminWikiStatusUpdating: "جارٍ التحديث...",
+    adminWikiActionActivate: "تفعيل",
+    adminWikiActionDeactivate: "تعطيل",
+    adminWikiCreateSlugRequired: "يرجى إدخال slug للمقال.",
+    adminWikiCreateInvalidOrExists:
+      "بيانات غير صالحة أو أن الـ slug موجود مسبقًا.",
+    adminWikiCreateError: "حدث خطأ أثناء إنشاء المقال.",
+    adminWikiCreateSuccess: "تم إنشاء المقال بنجاح.",
+    adminWikiCreateIntro:
+      "أدخل slug فقط لمقال ويكي جديد. يتم ضبط اللغة والحالة والمحتوى لاحقًا في صفحة التعديل.",
+    adminWikiBackToList: "العودة إلى القائمة",
+    adminWikiCreateBasicInformation: "معلومات أساسية",
+    adminWikiCreateSlugLabel: "Slug",
+    adminWikiCreateSlugPlaceholder: "manual-testing-intro",
+    adminWikiCreateTagsLabel: "الوسوم (مفصولة بفواصل)",
+    adminWikiCreateTagsPlaceholder: "intro, basics, setup",
+    adminWikiCreateArticleIdLabel: "معرف المقال (للقراءة فقط)",
+    adminWikiCreateArticleIdPlaceholder: "يتم إنشاؤه تلقائيًا عند الحفظ",
+    adminWikiCreateFooterNote:
+      "يتم تخزين المقالات التي تُنشأ هنا في قاعدة بيانات BeeLMS (بيئة التطوير).",
+    adminWikiCreateSaving: "جارٍ الحفظ...",
+    adminWikiCreateArticleSaved: "تم حفظ المقال",
+    adminWikiCreateSaveArticle: "حفظ المقال",
+    adminWikiCreateAlreadyCreatedNote:
+      "هذا المقال تم إنشاؤه بالفعل. استخدم صفحة التعديل لإجراء تغييرات.",
+    adminWikiEditRichEditorLoading: "جارٍ تحميل محرر النص...",
+    adminWikiEditTitle: "تعديل مقال ويكي",
+    adminWikiEditSubtitle:
+      "مراجعة وتعديل محتوى مقال ويكي محدد.",
+    adminWikiEditBreadcrumbFallback: "تعديل",
+    adminWikiEditOpenPublicPage: "فتح الصفحة العامة",
+    adminWikiEditPublicVisibleHintPrefix: "يجب أن تكون حالة المقال",
+    adminWikiEditPublicVisibleHintSuffix: "ليكون مرئيًا للعامة.",
+    adminWikiEditLoading: "جارٍ تحميل المقال للتعديل...",
+    adminWikiEditLanguageLabel: "اللغة",
+    adminWikiEditLanguageAria: "لغة مقال الويكي",
+    adminWikiEditLanguageHelp:
+      "تغيير اللغة يقوم بتحميل أو إنشاء نسخة محتوى منفصلة للغة المحددة.",
+    adminWikiEditStatusLabel: "الحالة",
+    adminWikiEditStatusAria: "حالة مقال الويكي",
+    adminWikiEditTitleLabel: "العنوان",
+    adminWikiEditSubtitleLabel: "العنوان الفرعي (اختياري)",
+    adminWikiEditTagsLabel: "الوسوم (مفصولة بفواصل)",
+    adminWikiEditTagsExamplePrefix: "مثال",
+    adminWikiEditContentLabel: "المحتوى",
+    adminWikiEditEditorModeLabel: "وضع المحرر:",
+    adminWikiEditEditorModeMarkdown: "Markdown",
+    adminWikiEditEditorModeRichText: "نص منسق",
+    adminWikiEditRequiredFieldSrOnly: "(حقل مطلوب)",
+    adminWikiEditTitleRequiredError: "العنوان مطلوب. يرجى إدخال نص.",
+    adminWikiEditContentRequiredError:
+      "المحتوى مطلوب. أضف نصًا قبل الحفظ.",
+    adminWikiEditRequiredFieldTitle: "العنوان",
+    adminWikiEditRequiredFieldContent: "المحتوى",
+    adminWikiEditSaveDisabledNoChanges:
+      "يتم تفعيل زر الحفظ عند تغيير أي حقل.",
+    adminWikiEditSaveDisabledMissingFields:
+      "املأ الحقول المطلوبة للحفظ.",
+    adminWikiEditSave: "حفظ",
+    adminWikiEditSaving: "جارٍ الحفظ...",
+    adminWikiEditInvalidData:
+      "بيانات المقال غير صالحة. يرجى مراجعة الحقول.",
+    adminWikiEditSaveError: "حدث خطأ أثناء حفظ التغييرات.",
+    adminWikiEditSaveSuccess: "تم حفظ التغييرات بنجاح.",
+    adminWikiEditMissingArticleId:
+      "معرف المقال مفقود. يرجى إعادة تحميل الصفحة.",
+    adminWikiEditMediaLoadError: "حدث خطأ أثناء تحميل الصور.",
+    adminWikiEditVersionsLoadError: "حدث خطأ أثناء تحميل الإصدارات.",
+    adminWikiEditUploadImage: "رفع صورة",
+    adminWikiEditUploading: "جارٍ الرفع...",
+    adminWikiEditUploadImageError: "حدث خطأ أثناء رفع الصورة.",
+    adminWikiEditDeleteMediaConfirm: "هل أنت متأكد أنك تريد حذف هذه الصورة؟",
+    adminWikiEditDeleteMediaError: "حدث خطأ أثناء حذف الصورة.",
+    adminWikiEditClipboardUnavailable:
+      "واجهة برمجة الحافظة غير متاحة في هذا المتصفح.",
+    adminWikiEditMarkdownCopied: "تم نسخ مقطع Markdown إلى الحافظة.",
+    adminWikiEditMarkdownCopyFailed: "فشل نسخ مقطع Markdown.",
+    adminWikiEditRollbackConfirm:
+      "هل أنت متأكد أنك تريد استعادة المقال إلى هذه النسخة؟",
+    adminWikiEditRollbackNotFound: "لم يتم العثور على النسخة أو المقال.",
+    adminWikiEditRollbackInvalidRequest:
+      "طلب استعادة غير صالح. يرجى المحاولة مرة أخرى.",
+    adminWikiEditRollbackError: "حدث خطأ أثناء استعادة النسخة.",
+    adminWikiEditRollbackSuccess:
+      "تمت استعادة المقال إلى النسخة المحددة.",
+    adminWikiEditCompareSameLangError:
+      "يمكنك مقارنة نسخ بنفس اللغة فقط.",
+    adminWikiEditMermaidHelp:
+      "للمخططات استخدم كتلة كود بلغة mermaid (مثال: ```mermaid ... ```). ستظهر المخططات في المعاينة وفي الويكي العامة.",
+    adminWikiEditCaptionHelp:
+      "لتعليق الصورة: أدخل الصورة ثم في السطر التالي أضف النص (اختياري بخط مائل)، مثال: ![Alt](url) *Caption*.",
+    adminWikiEditPreviewAria: "معاينة المحتوى",
+    adminWikiEditPreviewTitle: "معاينة (كما في الويكي العامة)",
+    adminWikiEditPreviewShow: "إظهار المعاينة",
+    adminWikiEditPreviewHide: "إخفاء المعاينة",
+    adminWikiEditPreviewUntitled: "(بدون عنوان)",
+    adminWikiEditMissingFieldsPrefix: "الحقول المطلوبة مفقودة:",
+    adminWikiEditMissingFieldsSuffix:
+      "أكملها لتفعيل زر \"حفظ\".",
+    adminWikiEditUnsavedChangesWarning: "هناك تغييرات غير محفوظة.",
+    adminWikiEditUnsavedChangesConfirm:
+      "لديك تغييرات غير محفوظة. هل أنت متأكد أنك تريد مغادرة الصفحة؟",
+    adminWikiEditMediaSectionAria: "صور المقال",
+    adminWikiEditMediaSectionTitle: "صور المقال",
+    adminWikiEditMediaSectionDescription:
+      "قم برفع الصور التي تريد الإشارة إليها من محتوى Markdown أعلاه. بعد الرفع سترى رابط URL يمكنك لصقه في النص.",
+    adminWikiEditNeedArticleIdHint:
+      "تأكد أولًا من حفظ المقال وأن لديه معرفًا.",
+    adminWikiEditMediaLoading: "جارٍ تحميل الصور...",
+    adminWikiEditUploadedImagesTitle: "الصور المرفوعة",
+    adminWikiEditUploadedImagesNoArticleId:
+      "لا يوجد معرف مقال بعد. أعد تحميل المقال أو انتظر حتى يكتمل التحميل.",
+    adminWikiEditUploadedImagesEmpty: "لا توجد صور مرفوعة لهذا المقال بعد.",
+    adminWikiEditMediaInsert: "إدراج",
+    adminWikiEditMediaCopyMarkdown: "نسخ Markdown",
+    adminWikiEditMediaDelete: "حذف",
+    adminWikiEditVersionsAria: "إصدارات المقال",
+    adminWikiEditVersionsTitle: "إصدارات المقال",
+    adminWikiEditVersionsHighlight: "انظر هنا",
+    adminWikiEditVersionsLoading: "جارٍ تحميل الإصدارات...",
+    adminWikiEditVersionsEmpty: "لا توجد إصدارات لهذه اللغة.",
+    adminWikiEditVersionsCompareHeader: "مقارنة",
+    adminWikiEditVersionsSelectLabel: "تحديد",
+    adminWikiEditVersionsColVersion: "الإصدار",
+    adminWikiEditVersionsColLanguage: "اللغة",
+    adminWikiEditVersionsColTitle: "العنوان",
+    adminWikiEditVersionsColSubtitle: "العنوان الفرعي",
+    adminWikiEditVersionsColCreatedAt: "تاريخ الإنشاء",
+    adminWikiEditVersionsColCreatedBy: "أنشأه",
+    adminWikiEditVersionsColActions: "إجراءات",
+    adminWikiEditVersionsActionPreview: "معاينة",
+    adminWikiEditVersionsCurrent: "الحالي",
+    adminWikiEditVersionsRollback: "استعادة",
+    adminWikiEditVersionsRollbacking: "جارٍ الاستعادة...",
+    adminWikiEditVersionsDelete: "حذف",
+    adminWikiEditVersionsCompareHelp:
+      "حدد نسختين (بنفس اللغة) لمقارنتهما.",
+    adminWikiEditPageLabel: "صفحة",
+    adminWikiEditOfLabel: "من",
+    adminWikiEditVersionsCountLabel: "إصدارات",
+    adminWikiEditVersionsCompareSelected: "مقارنة المحدد",
+    adminWikiEditVersionsDeleteSelected: "حذف المحدد",
+    adminWikiEditCompareAria: "مقارنة الإصدارات",
+    adminWikiEditCompareTitle: "مقارنة الإصدارات",
+    adminWikiEditCompareSubtitle:
+      "اليسار: إصدار أقدم. اليمين: إصدار أحدث.",
+    adminWikiEditCompareClear: "مسح المقارنة",
+    adminWikiEditCompareOlder: "أقدم",
+    adminWikiEditCompareNewer: "أحدث",
+    adminWikiEditCompareVersionLabel: "إصدار",
+    adminWikiEditCompareFieldTitle: "العنوان:",
+    adminWikiEditCompareFieldSubtitle: "العنوان الفرعي:",
+    adminWikiEditCompareLegendToken: "نص",
+    adminWikiEditCompareLegendRemoved: "= نص محذوف،",
+    adminWikiEditCompareLegendAdded: "= نص مُضاف.",
+    adminWikiEditViewVersionTitlePrefix: "معاينة الإصدار",
+    adminWikiEditViewVersionCreatedAt: "تاريخ الإنشاء",
+    adminWikiEditViewVersionBy: "بواسطة",
+    adminWikiEditDeleteVersionTitle: "حذف إصدار",
+    adminWikiEditDeleteVersionDescription:
+      "سيتم حذف هذا الإصدار نهائيًا من سجل المقال. لا يمكن التراجع عن هذا الإجراء وقد يؤثر على تتبع التغييرات.",
+    adminWikiEditDeleteVersionConfirmTitle: "تأكيد حذف الإصدار",
+    adminWikiEditDeleteVersionConfirmDescription:
+      "هل أنت متأكد أنك تريد حذف هذا الإصدار؟ هذا الإجراء نهائي ولا يمكن التراجع عنه.",
+    adminWikiEditDeleteVersionConfirmMetaPrefix: "الإصدار",
+    adminWikiEditDeleteVersionConfirmMetaCreatedAt: "تاريخ الإنشاء",
+    adminWikiEditDeleteVersionCurrentActiveError:
+      "لا يمكن حذف الإصدار النشط الحالي.",
+    adminWikiEditDeleteVersionLastVersionError:
+      "لا يمكن حذف هذا الإصدار لأنه آخر إصدار متبقٍ.",
+    adminWikiEditDeleteVersionNotFound: "لم يتم العثور على الإصدار أو المقال.",
+    adminWikiEditDeleteVersionError: "حدث خطأ أثناء حذف الإصدار.",
+    adminWikiEditDeleteVersionConfirmButton: "نعم، احذف الإصدار",
+    adminWikiEditBulkDeleteTitle: "حذف الإصدارات المحددة",
+    adminWikiEditBulkDeleteDescriptionPrefix:
+      "أنت على وشك حذف نهائي",
+    adminWikiEditBulkDeleteDescriptionSuffix:
+      "إصدارات من سجل المقال. لا يمكن التراجع عن هذا الإجراء وقد يؤثر على التتبع.",
+    adminWikiEditBulkDeleteConfirmTitle: "تأكيد حذف الإصدارات المحددة",
+    adminWikiEditBulkDeleteConfirmDescription:
+      "هل أنت متأكد أنك تريد حذف الإصدارات المحددة؟ هذا الإجراء نهائي ولا يمكن التراجع عنه.",
+    adminWikiEditBulkDeletePartialError:
+      "تعذر حذف بعض الإصدارات. سيتم تحديث قائمة الإصدارات.",
+    adminWikiEditBulkDeleteError:
+      "حدث خطأ أثناء حذف الإصدارات المحددة.",
+    adminWikiEditBulkDeleteConfirmButton: "نعم، احذف الإصدارات المحددة",
+  },
+};
+
+const ADMIN_COURSES_OVERRIDES: Partial<
+  Record<SupportedLang, Partial<DomainMessages["common"]>>
+> = {
+  bg: {
+    adminCoursesTitle: "Курсове",
+    adminCoursesSubtitle: "Администрация на курсове.",
+    adminCoursesInfoTooltipLabel: "Информация",
+    adminCoursesInfoTooltipTitle: "Курсове",
+    adminCoursesInfoTooltipDescription:
+      "Администрация на курсове: създаване, филтри, сортиране, странициране и експорт CSV.",
+    adminCoursesManageCourseCategoriesCta: "Управление на категориите за курсове →",
+
+    adminCoursesCategoriesCardTitle: "Категории",
+    adminCoursesCategoriesInfoTooltipLabel: "Информация",
+    adminCoursesCategoriesInfoTooltipTitle: "Категории на курсове",
+    adminCoursesCategoriesInfoTooltipDescription:
+      "Категориите се използват за групиране на курсовете. Ако изтриеш категория, курсовете към нея НЕ се изтриват — остават некатегоризирани.",
+    adminCoursesCategoriesSlugHelpTitle: "Slug",
+    adminCoursesCategoriesSlugHelpDescription:
+      "Използвайте само малки букви, цифри и тирета (напр. web-development).",
+    adminCoursesCategoriesTitleHelpTitle: "Заглавие",
+    adminCoursesCategoriesTitleHelpDescription:
+      "Име на категорията, което се вижда от потребителите.",
+    adminCoursesCategoriesOrderHelpTitle: "Подредба",
+    adminCoursesCategoriesOrderHelpDescription:
+      "По-малко число означава, че категорията се показва по-напред.",
+    adminCoursesCategoriesManageCta: "Управление на категориите →",
+    adminCoursesCategoriesSubtitle:
+      "Използвай категориите, за да филтрираш и организираш каталога с курсове.",
+
+    adminCoursesCreateTitle: "Създай курс",
+    adminCoursesCreateCourseTitleLabel: "Заглавие",
+    adminCoursesCreateCourseLanguageLabel: "Езици",
+    adminCoursesLanguagesAll: "Всички езици",
+    adminCoursesLanguagesSelect: "Избери езици",
+    adminCoursesLanguagesCountSuffix: "езика",
+    adminCoursesCreateCourseStatusLabel: "Статус",
+    adminCoursesCreateCourseStatusAria: "Статус на курса",
+    adminCoursesStatusDraft: "Чернова",
+    adminCoursesStatusActive: "Активен",
+    adminCoursesStatusInactive: "Неактивен",
+    adminCoursesCreateCourseCategoryLabel: "Категория",
+    adminCoursesCreateCourseCategoryAria: "Категория на курса",
+    adminCoursesCategorySearchPlaceholder: "Търси категория...",
+    adminCoursesCategoryNone: "(без категория)",
+    adminCoursesPaidCourseLabel: "Платен курс",
+    adminCoursesPaidCourseToggleAria: "Превключи платен курс",
+    adminCoursesPaidDisabledTooltipLabel: "Информация",
+    adminCoursesPaidDisabledTooltipTitle: "Платен курс",
+    adminCoursesPaidDisabledTooltipDescription:
+      "Опцията става активна след като активираш поне един метод за плащане от Admin → Payments (и той е configured).",
+    adminCoursesCurrencyLabel: "Валута",
+    adminCoursesPriceLabel: "Цена",
+    adminCoursesPricePlaceholder: "напр. 9,99",
+    adminCoursesPriceHint: "Пример: 9,99 (или 999 цента)",
+    adminCoursesDescriptionLabel: "Описание",
+    adminCoursesCreating: "Създаване...",
+    adminCoursesCreate: "Създай",
+    adminCoursesCreateError: "Неуспешно създаване на курс.",
+    adminCoursesCreateSuccess: "Курсът е създаден.",
+    adminCoursesOpenCourseCta: "Отвори курса →",
+    adminCoursesExportCsvFilename: "kursove.csv",
+
+    adminCoursesListTitle: "Списък с курсове",
+    adminCoursesExportCsv: "Експорт CSV",
+    adminCoursesReload: "Презареди",
+    adminCoursesSearchPlaceholder: "Търсене по заглавие, ID, категория...",
+    adminCoursesSearchButton: "Търси",
+    adminCoursesStatusFilterAria: "Статус на курсовете",
+    adminCoursesFilterAllStatus: "Всички статуси",
+    adminCoursesPricingFilterAria: "Ценообразуване",
+    adminCoursesPricingAll: "Всички",
+    adminCoursesPricingFree: "Безплатен",
+    adminCoursesPricingPaid: "Платен",
+    adminCoursesCategoryFilterAria: "Категория на курсовете",
+    adminCoursesFilterAllCategories: "Всички категории",
+    adminCoursesLoading: "Зареждане...",
+    adminCoursesLoadError: "Възникна грешка при зареждане на курсовете.",
+    adminCoursesEmpty: "Няма намерени курсове.",
+
+    adminCoursesSelectedCountLabel: "Брой избрани",
+    adminCoursesBulkDeleteSelected: "Изтрий избраните",
+    adminCoursesBulkStatusAria: "Bulk статус",
+    adminCoursesBulkStatusPlaceholder: "Избери статус...",
+    adminCoursesBulkStatusApply: "Приложи",
+    adminCoursesBulkDeleteAllPrefix: "Изтрий всички",
+    adminCoursesSelectAllVisible: "Избери всички видими",
+
+    adminCoursesColCreated: "Създаден",
+    adminCoursesColTitle: "Заглавие",
+    adminCoursesColUpdated: "Обновен",
+    adminCoursesColCategory: "Категория",
+    adminCoursesColLanguage: "Език",
+    adminCoursesColStatus: "Статус",
+    adminCoursesColPaid: "Платен",
+    adminCoursesColPrice: "Цена",
+    adminCoursesColCreatedBy: "Създаден от",
+    adminCoursesColActions: "Действия",
+
+    adminCoursesSelectCoursePrefix: "Избери",
+    adminCoursesIdPrefix: "ID",
+    adminCoursesPlaceholderDash: "-",
+    adminCoursesOpen: "Отвори",
+
+    adminCoursesPaginationShowingPrefix: "Показани",
+    adminCoursesPaginationOf: "от",
+    adminCoursesPaginationCoursesSuffix: "курсове",
+
+    adminCoursesBulkDeleteDialogTitle: "Изтриване на избраните курсове",
+    adminCoursesBulkDeleteDialogDescription:
+      "Избраните курсове ще бъдат физически изтрити. Това действие е необратимо.",
+    adminCoursesDelete: "Изтрий",
+    adminCoursesCancel: "Отказ",
+    adminCoursesBulkDeleteError: "Възникна грешка при bulk изтриването.",
+
+    adminCoursesBulkStatusDialogTitle: "Промяна на статуса",
+    adminCoursesBulkStatusDialogDescription:
+      "Ще промените статуса на всички избрани курсове.",
+    adminCoursesBulkStatusNewStatusLabel: "Нов статус",
+    adminCoursesOk: "OK",
+    adminCoursesBulkStatusError:
+      "Възникна грешка при bulk промяна на статуса.",
+
+    adminCoursesPurgeAllDialogTitle: "Изтриване на всички курсове",
+    adminCoursesPurgeAllDialogDescriptionPrefix:
+      "Ще изтриете абсолютно всички курсове",
+    adminCoursesPurgeAllDialogDescriptionSuffix: "Това действие е необратимо.",
+    adminCoursesDeleteAll: "Изтрий всички",
+    adminCoursesPurgeAllError:
+      "Възникна грешка при изтриване на всички курсове.",
+
+    adminCoursesCreateTitleRequired: "Заглавието е задължително поле.",
+    adminCoursesCreateDescriptionRequired: "Описанието е задължително поле.",
+    adminCoursesCreateLanguagesRequired: "Задължително е да изберете език.",
+    adminCoursesCreateRequiredFields: "Моля, попълнете задължителните полета.",
+    adminCoursesCurrencyInvalid: "Моля, въведете валидна валута (напр. EUR).",
+    adminCoursesPriceInvalid:
+      "Моля, въведете валидна цена (напр. 9,99 или 999).",
+
+    adminCoursesCategoriesRequiredFields: "Моля, попълнете задължителните полета.",
+    adminCoursesCategoriesSlugFormatInvalid:
+      "Slug трябва да е в формат: lower-case, цифри и тирета (напр. web-development).",
+    adminCoursesRequestFailed: "Заявката не беше успешна.",
+    adminCoursesCategoriesTitle: "Категории",
+    adminCoursesCategoriesCreateTitle: "Създай категория",
+    adminCoursesCategoriesReload: "Презареди",
+    adminCoursesCategoriesSlugLabel: "Slug",
+    adminCoursesCategoriesSlugPlaceholder: "напр. web-development",
+    adminCoursesCategoriesNameLabel: "Заглавие",
+    adminCoursesCategoriesNamePlaceholder: "напр. Web development",
+    adminCoursesCategoriesOrderLabel: "Подредба",
+    adminCoursesCategoriesActiveLabel: "Активна",
+    adminCoursesCategoriesCreating: "Създаване...",
+    adminCoursesCategoriesCreate: "Създай",
+    adminCoursesCategoriesListTitle: "Списък с категории",
+    adminCoursesCategoriesExportCsv: "Експорт CSV",
+    adminCoursesCategoriesLoading: "Зареждане...",
+    adminCoursesCategoriesEmpty: "Няма намерени категории.",
+    adminCoursesCategoriesTableTitle: "Заглавие",
+    adminCoursesCategoriesTableSlug: "Slug",
+    adminCoursesCategoriesTableOrder: "Подредба",
+    adminCoursesCategoriesTableActive: "Активна",
+    adminCoursesCategoriesTableActions: "Действия",
+    adminCoursesCategoriesYes: "да",
+    adminCoursesCategoriesNo: "не",
+    adminCoursesCategoriesSaving: "Записване...",
+    adminCoursesCategoriesSave: "Запази",
+    adminCoursesCategoriesCancel: "Отказ",
+    adminCoursesCategoriesEdit: "Редакция",
+    adminCoursesCategoriesDeleting: "Изтриване...",
+    adminCoursesCategoriesDelete: "Изтрий",
+    adminCoursesCategoriesShowingPrefix: "Показани",
+    adminCoursesCategoriesShowingOf: "от",
+    adminCoursesCategoriesShowingSuffix: "категории",
+    adminCoursesCategoriesLoadError:
+      "Възникна грешка при зареждане на категориите.",
+    adminCoursesCategoriesSlugRequired: "Slug е задължително поле.",
+    adminCoursesCategoriesTitleRequired: "Заглавие е задължително поле.",
+    adminCoursesCategoriesOrderInvalid:
+      "Подредбата трябва да е цяло число >= 0.",
+    adminCoursesCategoriesCreateError: "Неуспешно създаване на категория.",
+    adminCoursesCategoriesCreateSuccess: "Категорията е създадена.",
+    adminCoursesCategoriesNoChanges: "Няма промени за запис.",
+    adminCoursesCategoriesSaveError: "Неуспешен запис.",
+    adminCoursesCategoriesSaved: "Записано.",
+    adminCoursesCategoriesDeleteConfirmPrefix:
+      "Сигурен ли си, че искаш да изтриеш категорията",
+    adminCoursesCategoriesDeleteConfirmSuffix:
+      "Курсовете към нея няма да се изтрият — ще останат некатегоризирани.",
+    adminCoursesCategoriesDeleteError: "Неуспешно изтриване на категория.",
+    adminCoursesCategoriesDeleted: "Категорията е изтрита.",
+  },
+  en: {
+    adminCoursesRequestFailed: "Request failed.",
+    adminCoursesCategoriesTitle: "Categories",
+    adminCoursesCategoriesCreateTitle: "Create category",
+    adminCoursesCategoriesReload: "Reload",
+    adminCoursesCategoriesSlugLabel: "Slug",
+    adminCoursesCategoriesSlugPlaceholder: "e.g. web-development",
+    adminCoursesCategoriesNameLabel: "Title",
+    adminCoursesCategoriesNamePlaceholder: "e.g. Web development",
+    adminCoursesCategoriesOrderLabel: "Order",
+    adminCoursesCategoriesActiveLabel: "Active",
+    adminCoursesCategoriesCreating: "Creating...",
+    adminCoursesCategoriesCreate: "Create",
+    adminCoursesCategoriesListTitle: "Categories list",
+    adminCoursesCategoriesExportCsv: "Export CSV",
+    adminCoursesCategoriesLoading: "Loading...",
+    adminCoursesCategoriesEmpty: "No categories found.",
+    adminCoursesCategoriesTableTitle: "Title",
+    adminCoursesCategoriesTableSlug: "Slug",
+    adminCoursesCategoriesTableOrder: "Order",
+    adminCoursesCategoriesTableActive: "Active",
+    adminCoursesCategoriesTableActions: "Actions",
+    adminCoursesCategoriesYes: "yes",
+    adminCoursesCategoriesNo: "no",
+    adminCoursesCategoriesSaving: "Saving...",
+    adminCoursesCategoriesSave: "Save",
+    adminCoursesCategoriesCancel: "Cancel",
+    adminCoursesCategoriesEdit: "Edit",
+    adminCoursesCategoriesDeleting: "Deleting...",
+    adminCoursesCategoriesDelete: "Delete",
+    adminCoursesCategoriesShowingPrefix: "Showing",
+    adminCoursesCategoriesShowingOf: "of",
+    adminCoursesCategoriesShowingSuffix: "categories",
+    adminCoursesCategoriesLoadError: "Error loading categories.",
+    adminCoursesCategoriesSlugRequired: "Slug is required.",
+    adminCoursesCategoriesTitleRequired: "Title is required.",
+    adminCoursesCategoriesOrderInvalid: "Order must be an integer >= 0.",
+    adminCoursesCategoriesCreateError: "Failed to create category.",
+    adminCoursesCategoriesCreateSuccess: "Category created.",
+    adminCoursesCategoriesNoChanges: "No changes to save.",
+    adminCoursesCategoriesSaveError: "Save failed.",
+    adminCoursesCategoriesSaved: "Saved.",
+    adminCoursesCategoriesDeleteConfirmPrefix:
+      "Are you sure you want to delete category",
+    adminCoursesCategoriesDeleteConfirmSuffix:
+      "Courses assigned to it will not be deleted — they will become uncategorized.",
+    adminCoursesCategoriesDeleteError: "Failed to delete category.",
+    adminCoursesCategoriesDeleted: "Category deleted.",
+  },
+  de: {
+    adminCoursesTitle: "Kurse",
+    adminCoursesSubtitle: "Kursverwaltung.",
+    adminCoursesInfoTooltipLabel: "Info",
+    adminCoursesInfoTooltipTitle: "Kurse",
+    adminCoursesInfoTooltipDescription:
+      "Kursverwaltung: erstellen, filtern, sortieren, paginieren und CSV-Export.",
+    adminCoursesManageCourseCategoriesCta: "Kurskategorien verwalten →",
+
+    adminCoursesCategoriesCardTitle: "Kategorien",
+    adminCoursesCategoriesManageCta: "Kategorien verwalten →",
+    adminCoursesCategoriesSubtitle:
+      "Kategorien zum Filtern und Organisieren des Kurskatalogs verwenden.",
+
+    adminCoursesCreateTitle: "Kurs erstellen",
+    adminCoursesCreateCourseTitleLabel: "Titel",
+    adminCoursesCreateCourseLanguageLabel: "Sprachen",
+    adminCoursesLanguagesAll: "Alle Sprachen",
+    adminCoursesCreateCourseStatusLabel: "Status",
+    adminCoursesStatusDraft: "Entwurf",
+    adminCoursesStatusActive: "Aktiv",
+    adminCoursesStatusInactive: "Inaktiv",
+    adminCoursesCreateCourseCategoryLabel: "Kategorie",
+    adminCoursesCategorySearchPlaceholder: "Kategorie suchen...",
+    adminCoursesCategoryNone: "(keine)",
+    adminCoursesPaidCourseLabel: "Bezahlter Kurs",
+    adminCoursesDescriptionLabel: "Beschreibung",
+    adminCoursesCreate: "Erstellen",
+
+    adminCoursesListTitle: "Kursliste",
+    adminCoursesExportCsv: "CSV exportieren",
+    adminCoursesReload: "Neu laden",
+    adminCoursesSearchPlaceholder: "Nach Titel, ID, Kategorie suchen...",
+    adminCoursesSearchButton: "Suchen",
+    adminCoursesFilterAllStatus: "Alle Status",
+    adminCoursesPricingAll: "Alle Preise",
+    adminCoursesPricingFree: "Kostenlos",
+    adminCoursesPricingPaid: "Bezahlt",
+    adminCoursesFilterAllCategories: "Alle Kategorien",
+
+    adminCoursesSelectedCountLabel: "Ausgewählt",
+    adminCoursesBulkDeleteSelected: "Ausgewählte löschen",
+    adminCoursesBulkStatusPlaceholder: "Status (Bulk)...",
+    adminCoursesBulkStatusApply: "Anwenden",
+    adminCoursesBulkDeleteAllPrefix: "Alle löschen",
+    adminCoursesSelectAllVisible: "Alle sichtbaren auswählen",
+
+    adminCoursesColCreated: "Erstellt",
+    adminCoursesColTitle: "Titel",
+    adminCoursesColUpdated: "Aktualisiert",
+    adminCoursesColCategory: "Kategorie",
+    adminCoursesColLanguage: "Sprache",
+    adminCoursesColStatus: "Status",
+    adminCoursesColPaid: "Bezahlt",
+    adminCoursesColPrice: "Preis",
+    adminCoursesColCreatedBy: "Erstellt von",
+    adminCoursesColActions: "Aktionen",
+
+    adminCoursesOpen: "Öffnen",
+
+    adminCoursesCategoriesTitle: "Kategorien",
+    adminCoursesCategoriesCreateTitle: "Kategorie erstellen",
+    adminCoursesCategoriesReload: "Neu laden",
+    adminCoursesCategoriesSlugLabel: "Slug",
+    adminCoursesCategoriesSlugPlaceholder: "z.B. web-development",
+    adminCoursesCategoriesNameLabel: "Titel",
+    adminCoursesCategoriesNamePlaceholder: "z.B. Web development",
+    adminCoursesCategoriesOrderLabel: "Reihenfolge",
+    adminCoursesCategoriesActiveLabel: "Aktiv",
+    adminCoursesCategoriesCreate: "Erstellen",
+    adminCoursesCategoriesListTitle: "Kategorienliste",
+    adminCoursesCategoriesExportCsv: "CSV exportieren",
+    adminCoursesCategoriesEmpty: "Keine Kategorien gefunden.",
+    adminCoursesCategoriesTableTitle: "Titel",
+    adminCoursesCategoriesTableSlug: "Slug",
+    adminCoursesCategoriesTableOrder: "Reihenfolge",
+    adminCoursesCategoriesTableActive: "Aktiv",
+    adminCoursesCategoriesTableActions: "Aktionen",
+    adminCoursesCategoriesYes: "ja",
+    adminCoursesCategoriesNo: "nein",
+    adminCoursesCategoriesSave: "Speichern",
+    adminCoursesCategoriesCancel: "Abbrechen",
+    adminCoursesCategoriesEdit: "Bearbeiten",
+    adminCoursesCategoriesDelete: "Löschen",
+  },
+  es: {
+    adminCoursesTitle: "Cursos",
+    adminCoursesSubtitle: "Administración de cursos.",
+    adminCoursesInfoTooltipLabel: "Info",
+    adminCoursesInfoTooltipTitle: "Cursos",
+    adminCoursesInfoTooltipDescription:
+      "Administración de cursos: crear, filtrar, ordenar, paginar y exportar CSV.",
+    adminCoursesManageCourseCategoriesCta: "Administrar categorías de cursos →",
+
+    adminCoursesCategoriesCardTitle: "Categorías",
+    adminCoursesCategoriesManageCta: "Administrar categorías →",
+    adminCoursesCategoriesSubtitle:
+      "Usa categorías para filtrar y organizar el catálogo de cursos.",
+
+    adminCoursesCreateTitle: "Crear curso",
+    adminCoursesCreateCourseTitleLabel: "Título",
+    adminCoursesCreateCourseLanguageLabel: "Idiomas",
+    adminCoursesLanguagesAll: "Todos los idiomas",
+    adminCoursesCreateCourseStatusLabel: "Estado",
+    adminCoursesStatusDraft: "Borrador",
+    adminCoursesStatusActive: "Activo",
+    adminCoursesStatusInactive: "Inactivo",
+    adminCoursesCreateCourseCategoryLabel: "Categoría",
+    adminCoursesCategorySearchPlaceholder: "Buscar categoría...",
+    adminCoursesCategoryNone: "(ninguna)",
+    adminCoursesPaidCourseLabel: "Curso de pago",
+    adminCoursesDescriptionLabel: "Descripción",
+    adminCoursesCreate: "Crear",
+
+    adminCoursesListTitle: "Lista de cursos",
+    adminCoursesExportCsv: "Exportar CSV",
+    adminCoursesReload: "Recargar",
+    adminCoursesSearchPlaceholder: "Buscar por título, ID, categoría...",
+    adminCoursesSearchButton: "Buscar",
+    adminCoursesFilterAllStatus: "Todos los estados",
+    adminCoursesPricingAll: "Todos los precios",
+    adminCoursesPricingFree: "Gratis",
+    adminCoursesPricingPaid: "De pago",
+    adminCoursesFilterAllCategories: "Todas las categorías",
+
+    adminCoursesSelectedCountLabel: "Seleccionados",
+    adminCoursesBulkDeleteSelected: "Eliminar seleccionados",
+    adminCoursesBulkStatusPlaceholder: "Estado masivo...",
+    adminCoursesBulkStatusApply: "Aplicar",
+    adminCoursesBulkDeleteAllPrefix: "Eliminar todo",
+    adminCoursesSelectAllVisible: "Seleccionar todo lo visible",
+
+    adminCoursesColCreated: "Creado",
+    adminCoursesColTitle: "Título",
+    adminCoursesColUpdated: "Actualizado",
+    adminCoursesColCategory: "Categoría",
+    adminCoursesColLanguage: "Idioma",
+    adminCoursesColStatus: "Estado",
+    adminCoursesColPaid: "De pago",
+    adminCoursesColPrice: "Precio",
+    adminCoursesColCreatedBy: "Creado por",
+    adminCoursesColActions: "Acciones",
+
+    adminCoursesOpen: "Abrir",
+
+    adminCoursesCategoriesTitle: "Categorías",
+    adminCoursesCategoriesCreateTitle: "Crear categoría",
+    adminCoursesCategoriesReload: "Recargar",
+    adminCoursesCategoriesSlugLabel: "Slug",
+    adminCoursesCategoriesSlugPlaceholder: "p. ej. web-development",
+    adminCoursesCategoriesNameLabel: "Título",
+    adminCoursesCategoriesNamePlaceholder: "p. ej. Web development",
+    adminCoursesCategoriesOrderLabel: "Orden",
+    adminCoursesCategoriesActiveLabel: "Activo",
+    adminCoursesCategoriesCreate: "Crear",
+    adminCoursesCategoriesListTitle: "Lista de categorías",
+    adminCoursesCategoriesExportCsv: "Exportar CSV",
+    adminCoursesCategoriesEmpty: "No se encontraron categorías.",
+    adminCoursesCategoriesTableTitle: "Título",
+    adminCoursesCategoriesTableSlug: "Slug",
+    adminCoursesCategoriesTableOrder: "Orden",
+    adminCoursesCategoriesTableActive: "Activo",
+    adminCoursesCategoriesTableActions: "Acciones",
+    adminCoursesCategoriesYes: "sí",
+    adminCoursesCategoriesNo: "no",
+    adminCoursesCategoriesSave: "Guardar",
+    adminCoursesCategoriesCancel: "Cancelar",
+    adminCoursesCategoriesEdit: "Editar",
+    adminCoursesCategoriesDelete: "Eliminar",
+  },
+  pt: {
+    adminCoursesTitle: "Cursos",
+    adminCoursesSubtitle: "Administração de cursos.",
+    adminCoursesInfoTooltipLabel: "Info",
+    adminCoursesInfoTooltipTitle: "Cursos",
+    adminCoursesInfoTooltipDescription:
+      "Administração de cursos: criar, filtrar, ordenar, paginação e exportar CSV.",
+    adminCoursesManageCourseCategoriesCta: "Gerir categorias de cursos →",
+
+    adminCoursesCategoriesCardTitle: "Categorias",
+    adminCoursesCategoriesManageCta: "Gerir categorias →",
+    adminCoursesCategoriesSubtitle:
+      "Use categorias para filtrar e organizar o catálogo de cursos.",
+
+    adminCoursesCreateTitle: "Criar curso",
+    adminCoursesCreateCourseTitleLabel: "Título",
+    adminCoursesCreateCourseLanguageLabel: "Idiomas",
+    adminCoursesLanguagesAll: "Todos os idiomas",
+    adminCoursesCreateCourseStatusLabel: "Estado",
+    adminCoursesStatusDraft: "Rascunho",
+    adminCoursesStatusActive: "Ativo",
+    adminCoursesStatusInactive: "Inativo",
+    adminCoursesCreateCourseCategoryLabel: "Categoria",
+    adminCoursesCategorySearchPlaceholder: "Procurar categoria...",
+    adminCoursesCategoryNone: "(nenhuma)",
+    adminCoursesPaidCourseLabel: "Curso pago",
+    adminCoursesDescriptionLabel: "Descrição",
+    adminCoursesCreate: "Criar",
+
+    adminCoursesListTitle: "Lista de cursos",
+    adminCoursesExportCsv: "Exportar CSV",
+    adminCoursesReload: "Recarregar",
+    adminCoursesSearchPlaceholder: "Pesquisar por título, ID, categoria...",
+    adminCoursesSearchButton: "Pesquisar",
+    adminCoursesFilterAllStatus: "Todos os estados",
+    adminCoursesPricingAll: "Todos os preços",
+    adminCoursesPricingFree: "Grátis",
+    adminCoursesPricingPaid: "Pago",
+    adminCoursesFilterAllCategories: "Todas as categorias",
+
+    adminCoursesSelectedCountLabel: "Selecionados",
+    adminCoursesBulkDeleteSelected: "Eliminar selecionados",
+    adminCoursesBulkStatusPlaceholder: "Estado em massa...",
+    adminCoursesBulkStatusApply: "Aplicar",
+    adminCoursesBulkDeleteAllPrefix: "Eliminar tudo",
+    adminCoursesSelectAllVisible: "Selecionar todos os visíveis",
+
+    adminCoursesColCreated: "Criado",
+    adminCoursesColTitle: "Título",
+    adminCoursesColUpdated: "Atualizado",
+    adminCoursesColCategory: "Categoria",
+    adminCoursesColLanguage: "Idioma",
+    adminCoursesColStatus: "Estado",
+    adminCoursesColPaid: "Pago",
+    adminCoursesColPrice: "Preço",
+    adminCoursesColCreatedBy: "Criado por",
+    adminCoursesColActions: "Ações",
+
+    adminCoursesOpen: "Abrir",
+
+    adminCoursesCategoriesTitle: "Categorias",
+    adminCoursesCategoriesCreateTitle: "Criar categoria",
+    adminCoursesCategoriesReload: "Recarregar",
+    adminCoursesCategoriesSlugLabel: "Slug",
+    adminCoursesCategoriesSlugPlaceholder: "ex.: web-development",
+    adminCoursesCategoriesNameLabel: "Título",
+    adminCoursesCategoriesNamePlaceholder: "ex.: Web development",
+    adminCoursesCategoriesOrderLabel: "Ordem",
+    adminCoursesCategoriesActiveLabel: "Ativo",
+    adminCoursesCategoriesCreate: "Criar",
+    adminCoursesCategoriesListTitle: "Lista de categorias",
+    adminCoursesCategoriesExportCsv: "Exportar CSV",
+    adminCoursesCategoriesEmpty: "Nenhuma categoria encontrada.",
+    adminCoursesCategoriesTableTitle: "Título",
+    adminCoursesCategoriesTableSlug: "Slug",
+    adminCoursesCategoriesTableOrder: "Ordem",
+    adminCoursesCategoriesTableActive: "Ativo",
+    adminCoursesCategoriesTableActions: "Ações",
+    adminCoursesCategoriesYes: "sim",
+    adminCoursesCategoriesNo: "não",
+    adminCoursesCategoriesSave: "Guardar",
+    adminCoursesCategoriesCancel: "Cancelar",
+    adminCoursesCategoriesEdit: "Editar",
+    adminCoursesCategoriesDelete: "Eliminar",
+  },
+  pl: {
+    adminCoursesTitle: "Kursy",
+    adminCoursesSubtitle: "Administracja kursami.",
+    adminCoursesInfoTooltipLabel: "Info",
+    adminCoursesInfoTooltipTitle: "Kursy",
+    adminCoursesInfoTooltipDescription:
+      "Administracja kursami: tworzenie, filtrowanie, sortowanie, stronicowanie i eksport CSV.",
+    adminCoursesManageCourseCategoriesCta: "Zarządzaj kategoriami kursów →",
+
+    adminCoursesCategoriesCardTitle: "Kategorie",
+    adminCoursesCategoriesManageCta: "Zarządzaj kategoriami →",
+    adminCoursesCategoriesSubtitle:
+      "Użyj kategorii, aby filtrować i organizować katalog kursów.",
+
+    adminCoursesCreateTitle: "Utwórz kurs",
+    adminCoursesCreateCourseTitleLabel: "Tytuł",
+    adminCoursesCreateCourseLanguageLabel: "Języki",
+    adminCoursesLanguagesAll: "Wszystkie języki",
+    adminCoursesCreateCourseStatusLabel: "Status",
+    adminCoursesStatusDraft: "Szkic",
+    adminCoursesStatusActive: "Aktywny",
+    adminCoursesStatusInactive: "Nieaktywny",
+    adminCoursesCreateCourseCategoryLabel: "Kategoria",
+    adminCoursesCategorySearchPlaceholder: "Szukaj kategorii...",
+    adminCoursesCategoryNone: "(brak)",
+    adminCoursesPaidCourseLabel: "Kurs płatny",
+    adminCoursesDescriptionLabel: "Opis",
+    adminCoursesCreate: "Utwórz",
+
+    adminCoursesListTitle: "Lista kursów",
+    adminCoursesExportCsv: "Eksport CSV",
+    adminCoursesReload: "Odśwież",
+    adminCoursesSearchPlaceholder: "Szukaj po tytule, ID, kategorii...",
+    adminCoursesSearchButton: "Szukaj",
+    adminCoursesFilterAllStatus: "Wszystkie statusy",
+    adminCoursesPricingAll: "Wszystkie",
+    adminCoursesPricingFree: "Darmowy",
+    adminCoursesPricingPaid: "Płatny",
+    adminCoursesFilterAllCategories: "Wszystkie kategorie",
+
+    adminCoursesSelectedCountLabel: "Liczba wybranych",
+    adminCoursesBulkDeleteSelected: "Usuń wybrane",
+    adminCoursesBulkStatusPlaceholder: "Status zbiorczy...",
+    adminCoursesBulkStatusApply: "Zastosuj",
+    adminCoursesBulkDeleteAllPrefix: "Usuń wszystko",
+    adminCoursesSelectAllVisible: "Zaznacz wszystkie widoczne",
+
+    adminCoursesColCreated: "Utworzono",
+    adminCoursesColTitle: "Tytuł",
+    adminCoursesColUpdated: "Zaktualizowano",
+    adminCoursesColCategory: "Kategoria",
+    adminCoursesColLanguage: "Język",
+    adminCoursesColStatus: "Status",
+    adminCoursesColPaid: "Płatny",
+    adminCoursesColPrice: "Cena",
+    adminCoursesColCreatedBy: "Utworzone przez",
+    adminCoursesColActions: "Akcje",
+
+    adminCoursesOpen: "Otwórz",
+
+    adminCoursesCategoriesTitle: "Kategorie",
+    adminCoursesCategoriesCreateTitle: "Utwórz kategorię",
+    adminCoursesCategoriesReload: "Odśwież",
+    adminCoursesCategoriesSlugLabel: "Slug",
+    adminCoursesCategoriesSlugPlaceholder: "np. web-development",
+    adminCoursesCategoriesNameLabel: "Tytuł",
+    adminCoursesCategoriesNamePlaceholder: "np. Web development",
+    adminCoursesCategoriesOrderLabel: "Kolejność",
+    adminCoursesCategoriesActiveLabel: "Aktywna",
+    adminCoursesCategoriesCreate: "Utwórz",
+    adminCoursesCategoriesListTitle: "Lista kategorii",
+    adminCoursesCategoriesExportCsv: "Eksport CSV",
+    adminCoursesCategoriesEmpty: "Brak kategorii.",
+    adminCoursesCategoriesTableTitle: "Tytuł",
+    adminCoursesCategoriesTableSlug: "Slug",
+    adminCoursesCategoriesTableOrder: "Kolejność",
+    adminCoursesCategoriesTableActive: "Aktywna",
+    adminCoursesCategoriesTableActions: "Akcje",
+    adminCoursesCategoriesYes: "tak",
+    adminCoursesCategoriesNo: "nie",
+    adminCoursesCategoriesSave: "Zapisz",
+    adminCoursesCategoriesCancel: "Anuluj",
+    adminCoursesCategoriesEdit: "Edytuj",
+    adminCoursesCategoriesDelete: "Usuń",
+  },
+  ua: {
+    adminCoursesTitle: "Курси",
+    adminCoursesSubtitle: "Адміністрування курсів.",
+    adminCoursesInfoTooltipLabel: "Інфо",
+    adminCoursesInfoTooltipTitle: "Курси",
+    adminCoursesInfoTooltipDescription:
+      "Адміністрування курсів: створення, фільтри, сортування, пагінація та експорт CSV.",
+    adminCoursesManageCourseCategoriesCta: "Керувати категоріями курсів →",
+
+    adminCoursesCategoriesCardTitle: "Категорії",
+    adminCoursesCategoriesInfoTooltipLabel: "Інфо",
+    adminCoursesCategoriesInfoTooltipTitle: "Категорії курсів",
+    adminCoursesCategoriesInfoTooltipDescription:
+      "Категорії використовуються для групування курсів. Якщо видалити категорію, курси, прив’язані до неї, НЕ буде видалено — вони залишаться без категорії.",
+    adminCoursesCategoriesManageCta: "Керувати категоріями →",
+    adminCoursesCategoriesSubtitle:
+      "Використовуйте категорії для фільтрації та організації каталогу курсів.",
+
+    adminCoursesCreateTitle: "Створити курс",
+    adminCoursesCreateCourseTitleLabel: "Назва",
+    adminCoursesCreateCourseLanguageLabel: "Мови",
+    adminCoursesLanguagesAll: "Усі мови",
+    adminCoursesLanguagesSelect: "Обрати мови",
+    adminCoursesLanguagesCountSuffix: "мов",
+    adminCoursesCreateCourseStatusLabel: "Статус",
+    adminCoursesCreateCourseStatusAria: "Статус курсу",
+    adminCoursesStatusDraft: "Чернетка",
+    adminCoursesStatusActive: "Активний",
+    adminCoursesStatusInactive: "Неактивний",
+    adminCoursesCreateCourseCategoryLabel: "Категорія",
+    adminCoursesCreateCourseCategoryAria: "Категорія курсу",
+    adminCoursesCategorySearchPlaceholder: "Пошук категорії...",
+    adminCoursesCategoryNone: "(немає)",
+    adminCoursesPaidCourseLabel: "Платний курс",
+    adminCoursesPaidCourseToggleAria: "Перемкнути платний курс",
+    adminCoursesPaidDisabledTooltipLabel: "Інфо",
+    adminCoursesPaidDisabledTooltipTitle: "Платний курс",
+    adminCoursesPaidDisabledTooltipDescription:
+      "Опція стане доступною після ввімкнення принаймні одного способу оплати в Admin → Payments (і його налаштування).",
+    adminCoursesCurrencyLabel: "Валюта",
+    adminCoursesPriceLabel: "Ціна",
+    adminCoursesPricePlaceholder: "напр. 9.99",
+    adminCoursesPriceHint: "Приклад: 9.99 (або 999 центів)",
+    adminCoursesDescriptionLabel: "Опис",
+    adminCoursesCreating: "Створення...",
+    adminCoursesCreate: "Створити",
+    adminCoursesCreateError: "Не вдалося створити курс.",
+    adminCoursesCreateSuccess: "Курс створено.",
+    adminCoursesOpenCourseCta: "Відкрити курс →",
+    adminCoursesExportCsvFilename: "courses.csv",
+
+    adminCoursesListTitle: "Список курсів",
+    adminCoursesExportCsv: "Експорт CSV",
+    adminCoursesReload: "Оновити",
+    adminCoursesSearchPlaceholder: "Пошук за назвою, ID, категорією...",
+    adminCoursesSearchButton: "Пошук",
+    adminCoursesStatusFilterAria: "Статус курсів",
+    adminCoursesFilterAllStatus: "Усі статуси",
+    adminCoursesPricingFilterAria: "Ціноутворення",
+    adminCoursesPricingAll: "Усі",
+    adminCoursesPricingFree: "Безкоштовний",
+    adminCoursesPricingPaid: "Платний",
+    adminCoursesCategoryFilterAria: "Категорія курсів",
+    adminCoursesFilterAllCategories: "Усі категорії",
+    adminCoursesLoading: "Завантаження курсів...",
+    adminCoursesLoadError: "Сталася помилка під час завантаження курсів.",
+    adminCoursesEmpty: "Курси не знайдено.",
+
+    adminCoursesSelectedCountLabel: "Кількість вибраних",
+    adminCoursesBulkDeleteSelected: "Видалити вибрані",
+    adminCoursesBulkStatusAria: "Масовий статус",
+    adminCoursesBulkStatusPlaceholder: "Масовий статус...",
+    adminCoursesBulkStatusApply: "Застосувати",
+    adminCoursesBulkDeleteAllPrefix: "Видалити всі",
+    adminCoursesSelectAllVisible: "Вибрати всі видимі",
+
+    adminCoursesColCreated: "Створено",
+    adminCoursesColTitle: "Назва",
+    adminCoursesColUpdated: "Оновлено",
+    adminCoursesColCategory: "Категорія",
+    adminCoursesColLanguage: "Мова",
+    adminCoursesColStatus: "Статус",
+    adminCoursesColPaid: "Платний",
+    adminCoursesColPrice: "Ціна",
+    adminCoursesColCreatedBy: "Створив",
+    adminCoursesColActions: "Дії",
+
+    adminCoursesSelectCoursePrefix: "Вибрати",
+    adminCoursesIdPrefix: "ID",
+    adminCoursesPlaceholderDash: "-",
+    adminCoursesOpen: "Відкрити",
+
+    adminCoursesPaginationShowingPrefix: "Показано",
+    adminCoursesPaginationOf: "з",
+    adminCoursesPaginationCoursesSuffix: "курсів",
+
+    adminCoursesBulkDeleteDialogTitle: "Видалити вибрані курси",
+    adminCoursesBulkDeleteDialogDescription:
+      "Вибрані курси буде видалено назавжди. Цю дію не можна скасувати.",
+    adminCoursesDelete: "Видалити",
+    adminCoursesCancel: "Скасувати",
+    adminCoursesBulkDeleteError:
+      "Сталася помилка під час видалення вибраних курсів.",
+
+    adminCoursesBulkStatusDialogTitle: "Змінити статус",
+    adminCoursesBulkStatusDialogDescription:
+      "Ви збираєтеся змінити статус усіх вибраних курсів.",
+    adminCoursesBulkStatusNewStatusLabel: "Новий статус",
+    adminCoursesOk: "OK",
+    adminCoursesBulkStatusError:
+      "Сталася помилка під час масового оновлення статусу курсів.",
+
+    adminCoursesPurgeAllDialogTitle: "Видалити всі курси",
+    adminCoursesPurgeAllDialogDescriptionPrefix:
+      "Ви збираєтеся видалити всі курси",
+    adminCoursesPurgeAllDialogDescriptionSuffix:
+      "Цю дію не можна скасувати.",
+    adminCoursesDeleteAll: "Видалити всі",
+    adminCoursesPurgeAllError: "Сталася помилка під час видалення всіх курсів.",
+
+    adminCoursesCreateTitleRequired: "Назва є обов’язковою.",
+    adminCoursesCreateDescriptionRequired: "Опис є обов’язковим.",
+    adminCoursesCreateLanguagesRequired: "Будь ласка, оберіть мову.",
+    adminCoursesCreateRequiredFields: "Будь ласка, заповніть обов’язкові поля.",
+    adminCoursesCurrencyInvalid: "Введіть коректну валюту (напр. EUR).",
+    adminCoursesPriceInvalid: "Введіть коректну ціну (напр. 9.99 або 999).",
+
+    adminCoursesCategoriesRequiredFields: "Будь ласка, заповніть обов’язкові поля.",
+    adminCoursesCategoriesSlugFormatInvalid:
+      "Slug має бути в нижньому регістрі з цифрами та дефісами (напр. web-development).",
+
+    adminCoursesRequestFailed: "Запит не вдався.",
+    adminCoursesCategoriesTitle: "Категорії",
+    adminCoursesCategoriesCreateTitle: "Створити категорію",
+    adminCoursesCategoriesReload: "Оновити",
+    adminCoursesCategoriesSlugLabel: "Slug",
+    adminCoursesCategoriesSlugPlaceholder: "напр. web-development",
+    adminCoursesCategoriesNameLabel: "Назва",
+    adminCoursesCategoriesNamePlaceholder: "напр. Web development",
+    adminCoursesCategoriesOrderLabel: "Порядок",
+    adminCoursesCategoriesActiveLabel: "Активна",
+    adminCoursesCategoriesCreating: "Створення...",
+    adminCoursesCategoriesCreate: "Створити",
+    adminCoursesCategoriesListTitle: "Список категорій",
+    adminCoursesCategoriesExportCsv: "Експорт CSV",
+    adminCoursesCategoriesLoading: "Завантаження...",
+    adminCoursesCategoriesEmpty: "Категорій не знайдено.",
+    adminCoursesCategoriesTableTitle: "Назва",
+    adminCoursesCategoriesTableSlug: "Slug",
+    adminCoursesCategoriesTableOrder: "Порядок",
+    adminCoursesCategoriesTableActive: "Активна",
+    adminCoursesCategoriesTableActions: "Дії",
+    adminCoursesCategoriesYes: "так",
+    adminCoursesCategoriesNo: "ні",
+    adminCoursesCategoriesSaving: "Збереження...",
+    adminCoursesCategoriesSave: "Зберегти",
+    adminCoursesCategoriesCancel: "Скасувати",
+    adminCoursesCategoriesEdit: "Редагувати",
+    adminCoursesCategoriesDeleting: "Видалення...",
+    adminCoursesCategoriesDelete: "Видалити",
+    adminCoursesCategoriesShowingPrefix: "Показано",
+    adminCoursesCategoriesShowingOf: "з",
+    adminCoursesCategoriesShowingSuffix: "категорій",
+    adminCoursesCategoriesLoadError: "Помилка завантаження категорій.",
+    adminCoursesCategoriesSlugRequired: "Slug є обов’язковим.",
+    adminCoursesCategoriesTitleRequired: "Назва є обов’язковою.",
+    adminCoursesCategoriesOrderInvalid: "Порядок має бути цілим числом >= 0.",
+    adminCoursesCategoriesCreateError: "Не вдалося створити категорію.",
+    adminCoursesCategoriesCreateSuccess: "Категорію створено.",
+    adminCoursesCategoriesNoChanges: "Немає змін для збереження.",
+    adminCoursesCategoriesSaveError: "Не вдалося зберегти.",
+    adminCoursesCategoriesSaved: "Збережено.",
+    adminCoursesCategoriesDeleteConfirmPrefix:
+      "Ви впевнені, що хочете видалити категорію",
+    adminCoursesCategoriesDeleteConfirmSuffix:
+      "Курси, прив’язані до неї, не буде видалено — вони стануть без категорії.",
+    adminCoursesCategoriesDeleteError: "Не вдалося видалити категорію.",
+    adminCoursesCategoriesDeleted: "Категорію видалено.",
+  },
+  ru: {
+    adminCoursesTitle: "Курсы",
+    adminCoursesSubtitle: "Администрирование курсов.",
+    adminCoursesInfoTooltipLabel: "Инфо",
+    adminCoursesInfoTooltipTitle: "Курсы",
+    adminCoursesInfoTooltipDescription:
+      "Администрирование курсов: создание, фильтры, сортировка, пагинация и экспорт CSV.",
+    adminCoursesManageCourseCategoriesCta: "Управление категориями курсов →",
+    adminCoursesCategoriesCardTitle: "Категории",
+    adminCoursesCategoriesManageCta: "Управление категориями →",
+    adminCoursesCategoriesSubtitle:
+      "Используйте категории для фильтрации и организации каталога курсов.",
+    adminCoursesCreateTitle: "Создать курс",
+    adminCoursesCreateCourseTitleLabel: "Название",
+    adminCoursesCreateCourseLanguageLabel: "Языки",
+    adminCoursesLanguagesAll: "Все языки",
+    adminCoursesCreateCourseStatusLabel: "Статус",
+    adminCoursesStatusDraft: "Черновик",
+    adminCoursesStatusActive: "Активный",
+    adminCoursesStatusInactive: "Неактивный",
+    adminCoursesCreateCourseCategoryLabel: "Категория",
+    adminCoursesCategorySearchPlaceholder: "Поиск категории...",
+    adminCoursesCategoryNone: "(нет)",
+    adminCoursesPaidCourseLabel: "Платный курс",
+    adminCoursesDescriptionLabel: "Описание",
+    adminCoursesCreate: "Создать",
+    adminCoursesListTitle: "Список курсов",
+    adminCoursesExportCsv: "Экспорт CSV",
+    adminCoursesReload: "Обновить",
+    adminCoursesSearchPlaceholder: "Поиск по названию, ID, категории...",
+    adminCoursesSearchButton: "Поиск",
+    adminCoursesFilterAllStatus: "Все статусы",
+    adminCoursesPricingAll: "Все",
+    adminCoursesPricingFree: "Бесплатный",
+    adminCoursesPricingPaid: "Платный",
+    adminCoursesFilterAllCategories: "Все категории",
+    adminCoursesLoading: "Загрузка курсов...",
+    adminCoursesEmpty: "Курсы не найдены.",
+    adminCoursesSelectedCountLabel: "Выбрано",
+    adminCoursesBulkDeleteSelected: "Удалить выбранные",
+    adminCoursesBulkStatusPlaceholder: "Массовый статус...",
+    adminCoursesBulkStatusApply: "Применить",
+    adminCoursesBulkDeleteAllPrefix: "Удалить все",
+    adminCoursesSelectAllVisible: "Выбрать все видимые",
+    adminCoursesColCreated: "Создан",
+    adminCoursesColTitle: "Название",
+    adminCoursesColUpdated: "Обновлен",
+    adminCoursesColCategory: "Категория",
+    adminCoursesColLanguage: "Язык",
+    adminCoursesColStatus: "Статус",
+    adminCoursesColPaid: "Платный",
+    adminCoursesColPrice: "Цена",
+    adminCoursesColCreatedBy: "Создано",
+    adminCoursesColActions: "Действия",
+    adminCoursesOpen: "Открыть",
+    adminCoursesCategoriesTitle: "Категории",
+    adminCoursesCategoriesCreateTitle: "Создать категорию",
+    adminCoursesCategoriesReload: "Обновить",
+    adminCoursesCategoriesSlugLabel: "Slug",
+    adminCoursesCategoriesSlugPlaceholder: "напр. web-development",
+    adminCoursesCategoriesNameLabel: "Название",
+    adminCoursesCategoriesNamePlaceholder: "напр. Web development",
+    adminCoursesCategoriesOrderLabel: "Порядок",
+    adminCoursesCategoriesActiveLabel: "Активная",
+    adminCoursesCategoriesCreate: "Создать",
+    adminCoursesCategoriesListTitle: "Список категорий",
+    adminCoursesCategoriesExportCsv: "Экспорт CSV",
+    adminCoursesCategoriesEmpty: "Категории не найдены.",
+    adminCoursesCategoriesTableTitle: "Название",
+    adminCoursesCategoriesTableSlug: "Slug",
+    adminCoursesCategoriesTableOrder: "Порядок",
+    adminCoursesCategoriesTableActive: "Активная",
+    adminCoursesCategoriesTableActions: "Действия",
+    adminCoursesCategoriesYes: "да",
+    adminCoursesCategoriesNo: "нет",
+    adminCoursesCategoriesSave: "Сохранить",
+    adminCoursesCategoriesCancel: "Отмена",
+    adminCoursesCategoriesEdit: "Редактировать",
+    adminCoursesCategoriesDelete: "Удалить",
+  },
+  fr: {
+    adminCoursesTitle: "Cours",
+    adminCoursesSubtitle: "Administration des cours.",
+    adminCoursesInfoTooltipLabel: "Info",
+    adminCoursesInfoTooltipTitle: "Cours",
+    adminCoursesInfoTooltipDescription:
+      "Administration des cours : créer, filtrer, trier, pagination et export CSV.",
+    adminCoursesManageCourseCategoriesCta: "Gérer les catégories de cours →",
+    adminCoursesCategoriesCardTitle: "Catégories",
+    adminCoursesCategoriesManageCta: "Gérer les catégories →",
+    adminCoursesCategoriesSubtitle:
+      "Utilisez les catégories pour filtrer et organiser le catalogue de cours.",
+    adminCoursesCreateTitle: "Créer un cours",
+    adminCoursesCreateCourseTitleLabel: "Titre",
+    adminCoursesCreateCourseLanguageLabel: "Langues",
+    adminCoursesLanguagesAll: "Toutes les langues",
+    adminCoursesCreateCourseStatusLabel: "Statut",
+    adminCoursesStatusDraft: "Brouillon",
+    adminCoursesStatusActive: "Actif",
+    adminCoursesStatusInactive: "Inactif",
+    adminCoursesCreateCourseCategoryLabel: "Catégorie",
+    adminCoursesCategorySearchPlaceholder: "Rechercher une catégorie...",
+    adminCoursesCategoryNone: "(aucune)",
+    adminCoursesPaidCourseLabel: "Cours payant",
+    adminCoursesDescriptionLabel: "Description",
+    adminCoursesCreate: "Créer",
+    adminCoursesListTitle: "Liste des cours",
+    adminCoursesExportCsv: "Exporter CSV",
+    adminCoursesReload: "Recharger",
+    adminCoursesSearchPlaceholder: "Rechercher par titre, ID, catégorie...",
+    adminCoursesSearchButton: "Rechercher",
+    adminCoursesFilterAllStatus: "Tous les statuts",
+    adminCoursesPricingAll: "Tous",
+    adminCoursesPricingFree: "Gratuit",
+    adminCoursesPricingPaid: "Payant",
+    adminCoursesFilterAllCategories: "Toutes les catégories",
+    adminCoursesSelectedCountLabel: "Sélectionnés",
+    adminCoursesBulkDeleteSelected: "Supprimer la sélection",
+    adminCoursesBulkStatusPlaceholder: "Statut en lot...",
+    adminCoursesBulkStatusApply: "Appliquer",
+    adminCoursesBulkDeleteAllPrefix: "Supprimer tout",
+    adminCoursesSelectAllVisible: "Tout sélectionner (visible)",
+    adminCoursesColCreated: "Créé",
+    adminCoursesColTitle: "Titre",
+    adminCoursesColUpdated: "Mis à jour",
+    adminCoursesColCategory: "Catégorie",
+    adminCoursesColLanguage: "Langue",
+    adminCoursesColStatus: "Statut",
+    adminCoursesColPaid: "Payant",
+    adminCoursesColPrice: "Prix",
+    adminCoursesColCreatedBy: "Créé par",
+    adminCoursesColActions: "Actions",
+    adminCoursesOpen: "Ouvrir",
+    adminCoursesCategoriesTitle: "Catégories",
+    adminCoursesCategoriesCreateTitle: "Créer une catégorie",
+    adminCoursesCategoriesReload: "Recharger",
+    adminCoursesCategoriesSlugLabel: "Slug",
+    adminCoursesCategoriesSlugPlaceholder: "ex. web-development",
+    adminCoursesCategoriesNameLabel: "Titre",
+    adminCoursesCategoriesNamePlaceholder: "ex. Web development",
+    adminCoursesCategoriesOrderLabel: "Ordre",
+    adminCoursesCategoriesActiveLabel: "Actif",
+    adminCoursesCategoriesCreate: "Créer",
+    adminCoursesCategoriesListTitle: "Liste des catégories",
+    adminCoursesCategoriesExportCsv: "Exporter CSV",
+    adminCoursesCategoriesEmpty: "Aucune catégorie trouvée.",
+    adminCoursesCategoriesTableTitle: "Titre",
+    adminCoursesCategoriesTableSlug: "Slug",
+    adminCoursesCategoriesTableOrder: "Ordre",
+    adminCoursesCategoriesTableActive: "Actif",
+    adminCoursesCategoriesTableActions: "Actions",
+    adminCoursesCategoriesYes: "oui",
+    adminCoursesCategoriesNo: "non",
+    adminCoursesCategoriesSave: "Enregistrer",
+    adminCoursesCategoriesCancel: "Annuler",
+    adminCoursesCategoriesEdit: "Modifier",
+    adminCoursesCategoriesDelete: "Supprimer",
+  },
+  tr: {
+    adminCoursesTitle: "Kurslar",
+    adminCoursesSubtitle: "Kurs yönetimi.",
+    adminCoursesInfoTooltipLabel: "Bilgi",
+    adminCoursesInfoTooltipTitle: "Kurslar",
+    adminCoursesInfoTooltipDescription:
+      "Kurs yönetimi: oluşturma, filtreleme, sıralama, sayfalama ve CSV dışa aktarma.",
+    adminCoursesManageCourseCategoriesCta: "Kurs kategorilerini yönet →",
+    adminCoursesCategoriesCardTitle: "Kategoriler",
+    adminCoursesCategoriesManageCta: "Kategorileri yönet →",
+    adminCoursesCategoriesSubtitle:
+      "Kurs kataloğunu filtrelemek ve düzenlemek için kategorileri kullanın.",
+    adminCoursesCreateTitle: "Kurs oluştur",
+    adminCoursesCreateCourseTitleLabel: "Başlık",
+    adminCoursesCreateCourseLanguageLabel: "Diller",
+    adminCoursesLanguagesAll: "Tüm diller",
+    adminCoursesCreateCourseStatusLabel: "Durum",
+    adminCoursesStatusDraft: "Taslak",
+    adminCoursesStatusActive: "Aktif",
+    adminCoursesStatusInactive: "Pasif",
+    adminCoursesCreateCourseCategoryLabel: "Kategori",
+    adminCoursesCategorySearchPlaceholder: "Kategori ara...",
+    adminCoursesCategoryNone: "(yok)",
+    adminCoursesPaidCourseLabel: "Ücretli kurs",
+    adminCoursesDescriptionLabel: "Açıklama",
+    adminCoursesCreate: "Oluştur",
+    adminCoursesListTitle: "Kurs listesi",
+    adminCoursesExportCsv: "CSV dışa aktar",
+    adminCoursesReload: "Yenile",
+    adminCoursesSearchPlaceholder: "Başlık, ID, kategori ile ara...",
+    adminCoursesSearchButton: "Ara",
+    adminCoursesFilterAllStatus: "Tüm durumlar",
+    adminCoursesPricingAll: "Tümü",
+    adminCoursesPricingFree: "Ücretsiz",
+    adminCoursesPricingPaid: "Ücretli",
+    adminCoursesFilterAllCategories: "Tüm kategoriler",
+    adminCoursesSelectedCountLabel: "Seçili sayısı",
+    adminCoursesBulkDeleteSelected: "Seçilileri sil",
+    adminCoursesBulkStatusPlaceholder: "Toplu durum...",
+    adminCoursesBulkStatusApply: "Uygula",
+    adminCoursesBulkDeleteAllPrefix: "Tümünü sil",
+    adminCoursesSelectAllVisible: "Görünenlerin hepsini seç",
+    adminCoursesColCreated: "Oluşturuldu",
+    adminCoursesColTitle: "Başlık",
+    adminCoursesColUpdated: "Güncellendi",
+    adminCoursesColCategory: "Kategori",
+    adminCoursesColLanguage: "Dil",
+    adminCoursesColStatus: "Durum",
+    adminCoursesColPaid: "Ücretli",
+    adminCoursesColPrice: "Fiyat",
+    adminCoursesColCreatedBy: "Oluşturan",
+    adminCoursesColActions: "İşlemler",
+    adminCoursesOpen: "Aç",
+    adminCoursesCategoriesTitle: "Kategoriler",
+    adminCoursesCategoriesCreateTitle: "Kategori oluştur",
+    adminCoursesCategoriesReload: "Yenile",
+    adminCoursesCategoriesSlugLabel: "Slug",
+    adminCoursesCategoriesSlugPlaceholder: "örn. web-development",
+    adminCoursesCategoriesNameLabel: "Başlık",
+    adminCoursesCategoriesNamePlaceholder: "örn. Web development",
+    adminCoursesCategoriesOrderLabel: "Sıra",
+    adminCoursesCategoriesActiveLabel: "Aktif",
+    adminCoursesCategoriesCreate: "Oluştur",
+    adminCoursesCategoriesListTitle: "Kategori listesi",
+    adminCoursesCategoriesExportCsv: "CSV dışa aktar",
+    adminCoursesCategoriesEmpty: "Kategori bulunamadı.",
+    adminCoursesCategoriesTableTitle: "Başlık",
+    adminCoursesCategoriesTableSlug: "Slug",
+    adminCoursesCategoriesTableOrder: "Sıra",
+    adminCoursesCategoriesTableActive: "Aktif",
+    adminCoursesCategoriesTableActions: "İşlemler",
+    adminCoursesCategoriesYes: "evet",
+    adminCoursesCategoriesNo: "hayır",
+    adminCoursesCategoriesSave: "Kaydet",
+    adminCoursesCategoriesCancel: "İptal",
+    adminCoursesCategoriesEdit: "Düzenle",
+    adminCoursesCategoriesDelete: "Sil",
+  },
+  ro: {
+    adminCoursesTitle: "Cursuri",
+    adminCoursesSubtitle: "Administrare cursuri.",
+    adminCoursesInfoTooltipLabel: "Info",
+    adminCoursesInfoTooltipTitle: "Cursuri",
+    adminCoursesInfoTooltipDescription:
+      "Administrare cursuri: creare, filtre, sortare, paginare și export CSV.",
+    adminCoursesManageCourseCategoriesCta: "Gestionează categoriile de cursuri →",
+    adminCoursesCategoriesCardTitle: "Categorii",
+    adminCoursesCategoriesManageCta: "Gestionează categoriile →",
+    adminCoursesCategoriesSubtitle:
+      "Folosește categoriile pentru a filtra și organiza catalogul de cursuri.",
+    adminCoursesCreateTitle: "Creează curs",
+    adminCoursesCreateCourseTitleLabel: "Titlu",
+    adminCoursesCreateCourseLanguageLabel: "Limbi",
+    adminCoursesLanguagesAll: "Toate limbile",
+    adminCoursesCreateCourseStatusLabel: "Status",
+    adminCoursesStatusDraft: "Ciornă",
+    adminCoursesStatusActive: "Activ",
+    adminCoursesStatusInactive: "Inactiv",
+    adminCoursesCreateCourseCategoryLabel: "Categorie",
+    adminCoursesCategorySearchPlaceholder: "Caută categorie...",
+    adminCoursesCategoryNone: "(niciuna)",
+    adminCoursesPaidCourseLabel: "Curs plătit",
+    adminCoursesDescriptionLabel: "Descriere",
+    adminCoursesCreate: "Creează",
+    adminCoursesListTitle: "Listă cursuri",
+    adminCoursesExportCsv: "Export CSV",
+    adminCoursesReload: "Reîncarcă",
+    adminCoursesSearchPlaceholder: "Caută după titlu, ID, categorie...",
+    adminCoursesSearchButton: "Caută",
+    adminCoursesFilterAllStatus: "Toate statusurile",
+    adminCoursesPricingAll: "Toate",
+    adminCoursesPricingFree: "Gratuit",
+    adminCoursesPricingPaid: "Plătit",
+    adminCoursesFilterAllCategories: "Toate categoriile",
+    adminCoursesSelectedCountLabel: "Selectate",
+    adminCoursesBulkDeleteSelected: "Șterge selectate",
+    adminCoursesBulkStatusPlaceholder: "Status bulk...",
+    adminCoursesBulkStatusApply: "Aplică",
+    adminCoursesBulkDeleteAllPrefix: "Șterge tot",
+    adminCoursesSelectAllVisible: "Selectează toate vizibile",
+    adminCoursesColCreated: "Creat",
+    adminCoursesColTitle: "Titlu",
+    adminCoursesColUpdated: "Actualizat",
+    adminCoursesColCategory: "Categorie",
+    adminCoursesColLanguage: "Limbă",
+    adminCoursesColStatus: "Status",
+    adminCoursesColPaid: "Plătit",
+    adminCoursesColPrice: "Preț",
+    adminCoursesColCreatedBy: "Creat de",
+    adminCoursesColActions: "Acțiuni",
+    adminCoursesOpen: "Deschide",
+    adminCoursesCategoriesTitle: "Categorii",
+    adminCoursesCategoriesCreateTitle: "Creează categorie",
+    adminCoursesCategoriesReload: "Reîncarcă",
+    adminCoursesCategoriesSlugLabel: "Slug",
+    adminCoursesCategoriesSlugPlaceholder: "ex. web-development",
+    adminCoursesCategoriesNameLabel: "Titlu",
+    adminCoursesCategoriesNamePlaceholder: "ex. Web development",
+    adminCoursesCategoriesOrderLabel: "Ordine",
+    adminCoursesCategoriesActiveLabel: "Activă",
+    adminCoursesCategoriesCreate: "Creează",
+    adminCoursesCategoriesListTitle: "Listă categorii",
+    adminCoursesCategoriesExportCsv: "Export CSV",
+    adminCoursesCategoriesEmpty: "Nu s-au găsit categorii.",
+    adminCoursesCategoriesTableTitle: "Titlu",
+    adminCoursesCategoriesTableSlug: "Slug",
+    adminCoursesCategoriesTableOrder: "Ordine",
+    adminCoursesCategoriesTableActive: "Activă",
+    adminCoursesCategoriesTableActions: "Acțiuni",
+    adminCoursesCategoriesYes: "da",
+    adminCoursesCategoriesNo: "nu",
+    adminCoursesCategoriesSave: "Salvează",
+    adminCoursesCategoriesCancel: "Anulează",
+    adminCoursesCategoriesEdit: "Editează",
+    adminCoursesCategoriesDelete: "Șterge",
+  },
+  hi: {
+    adminCoursesTitle: "कोर्स",
+    adminCoursesSubtitle: "कोर्स प्रशासन।",
+    adminCoursesInfoTooltipLabel: "जानकारी",
+    adminCoursesInfoTooltipTitle: "कोर्स",
+    adminCoursesInfoTooltipDescription:
+      "कोर्स प्रशासन: बनाना, फ़िल्टर, सॉर्ट, पेजिनेशन और CSV एक्सपोर्ट।",
+    adminCoursesManageCourseCategoriesCta: "कोर्स श्रेणियाँ प्रबंधित करें →",
+    adminCoursesCategoriesCardTitle: "श्रेणियाँ",
+    adminCoursesCategoriesManageCta: "श्रेणियाँ प्रबंधित करें →",
+    adminCoursesCategoriesSubtitle:
+      "कोर्स कैटलॉग को फ़िल्टर और व्यवस्थित करने के लिए श्रेणियाँ उपयोग करें।",
+    adminCoursesCreateTitle: "कोर्स बनाएं",
+    adminCoursesCreateCourseTitleLabel: "शीर्षक",
+    adminCoursesCreateCourseLanguageLabel: "भाषाएँ",
+    adminCoursesLanguagesAll: "सभी भाषाएँ",
+    adminCoursesCreateCourseStatusLabel: "स्थिति",
+    adminCoursesStatusDraft: "ड्राफ्ट",
+    adminCoursesStatusActive: "सक्रिय",
+    adminCoursesStatusInactive: "निष्क्रिय",
+    adminCoursesCreateCourseCategoryLabel: "श्रेणी",
+    adminCoursesCategorySearchPlaceholder: "श्रेणी खोजें...",
+    adminCoursesCategoryNone: "(कोई नहीं)",
+    adminCoursesPaidCourseLabel: "पेड कोर्स",
+    adminCoursesDescriptionLabel: "विवरण",
+    adminCoursesCreate: "बनाएं",
+    adminCoursesListTitle: "कोर्स सूची",
+    adminCoursesExportCsv: "CSV एक्सपोर्ट",
+    adminCoursesReload: "रीलोड",
+    adminCoursesSearchPlaceholder: "शीर्षक, ID, श्रेणी से खोजें...",
+    adminCoursesSearchButton: "खोजें",
+    adminCoursesFilterAllStatus: "सभी स्थिति",
+    adminCoursesPricingAll: "सभी",
+    adminCoursesPricingFree: "मुफ़्त",
+    adminCoursesPricingPaid: "पेड",
+    adminCoursesFilterAllCategories: "सभी श्रेणियाँ",
+    adminCoursesSelectedCountLabel: "चयनित",
+    adminCoursesBulkDeleteSelected: "चयनित हटाएँ",
+    adminCoursesBulkStatusPlaceholder: "बल्क स्थिति...",
+    adminCoursesBulkStatusApply: "लागू करें",
+    adminCoursesBulkDeleteAllPrefix: "सभी हटाएँ",
+    adminCoursesSelectAllVisible: "सभी दिखाई देने वाले चुनें",
+    adminCoursesColCreated: "बनाया गया",
+    adminCoursesColTitle: "शीर्षक",
+    adminCoursesColUpdated: "अपडेटेड",
+    adminCoursesColCategory: "श्रेणी",
+    adminCoursesColLanguage: "भाषा",
+    adminCoursesColStatus: "स्थिति",
+    adminCoursesColPaid: "पेड",
+    adminCoursesColPrice: "कीमत",
+    adminCoursesColCreatedBy: "बनाने वाला",
+    adminCoursesColActions: "कार्रवाइयाँ",
+    adminCoursesOpen: "खोलें",
+    adminCoursesCategoriesTitle: "श्रेणियाँ",
+    adminCoursesCategoriesCreateTitle: "श्रेणी बनाएं",
+    adminCoursesCategoriesReload: "रीलोड",
+    adminCoursesCategoriesSlugLabel: "Slug",
+    adminCoursesCategoriesSlugPlaceholder: "उदा. web-development",
+    adminCoursesCategoriesNameLabel: "शीर्षक",
+    adminCoursesCategoriesNamePlaceholder: "उदा. Web development",
+    adminCoursesCategoriesOrderLabel: "क्रम",
+    adminCoursesCategoriesActiveLabel: "सक्रिय",
+    adminCoursesCategoriesCreate: "बनाएं",
+    adminCoursesCategoriesListTitle: "श्रेणी सूची",
+    adminCoursesCategoriesExportCsv: "CSV एक्सपोर्ट",
+    adminCoursesCategoriesEmpty: "कोई श्रेणी नहीं मिली।",
+    adminCoursesCategoriesTableTitle: "शीर्षक",
+    adminCoursesCategoriesTableSlug: "Slug",
+    adminCoursesCategoriesTableOrder: "क्रम",
+    adminCoursesCategoriesTableActive: "सक्रिय",
+    adminCoursesCategoriesTableActions: "कार्रवाइयाँ",
+    adminCoursesCategoriesYes: "हाँ",
+    adminCoursesCategoriesNo: "नहीं",
+    adminCoursesCategoriesSave: "सेव",
+    adminCoursesCategoriesCancel: "रद्द",
+    adminCoursesCategoriesEdit: "संपादित करें",
+    adminCoursesCategoriesDelete: "हटाएँ",
+  },
+  vi: {
+    adminCoursesTitle: "Khóa học",
+    adminCoursesSubtitle: "Quản trị khóa học.",
+    adminCoursesInfoTooltipLabel: "Info",
+    adminCoursesInfoTooltipTitle: "Khóa học",
+    adminCoursesInfoTooltipDescription:
+      "Quản trị khóa học: tạo, lọc, sắp xếp, phân trang và xuất CSV.",
+    adminCoursesManageCourseCategoriesCta: "Quản lý danh mục khóa học →",
+    adminCoursesCategoriesCardTitle: "Danh mục",
+    adminCoursesCategoriesManageCta: "Quản lý danh mục →",
+    adminCoursesCategoriesSubtitle:
+      "Dùng danh mục để lọc và tổ chức danh mục khóa học.",
+    adminCoursesCreateTitle: "Tạo khóa học",
+    adminCoursesCreateCourseTitleLabel: "Tiêu đề",
+    adminCoursesCreateCourseLanguageLabel: "Ngôn ngữ",
+    adminCoursesLanguagesAll: "Tất cả ngôn ngữ",
+    adminCoursesCreateCourseStatusLabel: "Trạng thái",
+    adminCoursesStatusDraft: "Nháp",
+    adminCoursesStatusActive: "Hoạt động",
+    adminCoursesStatusInactive: "Không hoạt động",
+    adminCoursesCreateCourseCategoryLabel: "Danh mục",
+    adminCoursesCategorySearchPlaceholder: "Tìm danh mục...",
+    adminCoursesCategoryNone: "(không)",
+    adminCoursesPaidCourseLabel: "Khóa học trả phí",
+    adminCoursesDescriptionLabel: "Mô tả",
+    adminCoursesCreate: "Tạo",
+    adminCoursesListTitle: "Danh sách khóa học",
+    adminCoursesExportCsv: "Xuất CSV",
+    adminCoursesReload: "Tải lại",
+    adminCoursesSearchPlaceholder: "Tìm theo tiêu đề, ID, danh mục...",
+    adminCoursesSearchButton: "Tìm",
+    adminCoursesFilterAllStatus: "Tất cả trạng thái",
+    adminCoursesPricingAll: "Tất cả",
+    adminCoursesPricingFree: "Miễn phí",
+    adminCoursesPricingPaid: "Trả phí",
+    adminCoursesFilterAllCategories: "Tất cả danh mục",
+    adminCoursesSelectedCountLabel: "Đã chọn",
+    adminCoursesBulkDeleteSelected: "Xóa đã chọn",
+    adminCoursesBulkStatusPlaceholder: "Trạng thái hàng loạt...",
+    adminCoursesBulkStatusApply: "Áp dụng",
+    adminCoursesBulkDeleteAllPrefix: "Xóa tất cả",
+    adminCoursesSelectAllVisible: "Chọn tất cả hiển thị",
+    adminCoursesColCreated: "Tạo",
+    adminCoursesColTitle: "Tiêu đề",
+    adminCoursesColUpdated: "Cập nhật",
+    adminCoursesColCategory: "Danh mục",
+    adminCoursesColLanguage: "Ngôn ngữ",
+    adminCoursesColStatus: "Trạng thái",
+    adminCoursesColPaid: "Trả phí",
+    adminCoursesColPrice: "Giá",
+    adminCoursesColCreatedBy: "Tạo bởi",
+    adminCoursesColActions: "Hành động",
+    adminCoursesOpen: "Mở",
+    adminCoursesCategoriesTitle: "Danh mục",
+    adminCoursesCategoriesCreateTitle: "Tạo danh mục",
+    adminCoursesCategoriesReload: "Tải lại",
+    adminCoursesCategoriesSlugLabel: "Slug",
+    adminCoursesCategoriesSlugPlaceholder: "vd. web-development",
+    adminCoursesCategoriesNameLabel: "Tiêu đề",
+    adminCoursesCategoriesNamePlaceholder: "vd. Web development",
+    adminCoursesCategoriesOrderLabel: "Thứ tự",
+    adminCoursesCategoriesActiveLabel: "Hoạt động",
+    adminCoursesCategoriesCreate: "Tạo",
+    adminCoursesCategoriesListTitle: "Danh sách danh mục",
+    adminCoursesCategoriesExportCsv: "Xuất CSV",
+    adminCoursesCategoriesEmpty: "Không tìm thấy danh mục.",
+    adminCoursesCategoriesTableTitle: "Tiêu đề",
+    adminCoursesCategoriesTableSlug: "Slug",
+    adminCoursesCategoriesTableOrder: "Thứ tự",
+    adminCoursesCategoriesTableActive: "Hoạt động",
+    adminCoursesCategoriesTableActions: "Hành động",
+    adminCoursesCategoriesYes: "có",
+    adminCoursesCategoriesNo: "không",
+    adminCoursesCategoriesSave: "Lưu",
+    adminCoursesCategoriesCancel: "Hủy",
+    adminCoursesCategoriesEdit: "Sửa",
+    adminCoursesCategoriesDelete: "Xóa",
+  },
+  id: {
+    adminCoursesTitle: "Kursus",
+    adminCoursesSubtitle: "Administrasi kursus.",
+    adminCoursesInfoTooltipLabel: "Info",
+    adminCoursesInfoTooltipTitle: "Kursus",
+    adminCoursesInfoTooltipDescription:
+      "Administrasi kursus: buat, filter, urutkan, paginasi dan ekspor CSV.",
+    adminCoursesManageCourseCategoriesCta: "Kelola kategori kursus →",
+
+    adminCoursesCategoriesCardTitle: "Kategori",
+    adminCoursesCategoriesManageCta: "Kelola kategori →",
+    adminCoursesCategoriesSubtitle:
+      "Gunakan kategori untuk memfilter dan mengatur katalog kursus.",
+
+    adminCoursesCreateTitle: "Buat kursus",
+    adminCoursesCreateCourseTitleLabel: "Judul",
+    adminCoursesCreateCourseLanguageLabel: "Bahasa",
+    adminCoursesLanguagesAll: "Semua bahasa",
+    adminCoursesCreateCourseStatusLabel: "Status",
+    adminCoursesStatusDraft: "Draf",
+    adminCoursesStatusActive: "Aktif",
+    adminCoursesStatusInactive: "Tidak aktif",
+    adminCoursesCreateCourseCategoryLabel: "Kategori",
+    adminCoursesCategorySearchPlaceholder: "Cari kategori...",
+    adminCoursesCategoryNone: "(tidak ada)",
+    adminCoursesPaidCourseLabel: "Kursus berbayar",
+    adminCoursesDescriptionLabel: "Deskripsi",
+    adminCoursesCreate: "Buat",
+
+    adminCoursesListTitle: "Daftar kursus",
+    adminCoursesExportCsv: "Ekspor CSV",
+    adminCoursesReload: "Muat ulang",
+    adminCoursesSearchPlaceholder: "Cari berdasarkan judul, ID, kategori...",
+    adminCoursesSearchButton: "Cari",
+    adminCoursesFilterAllStatus: "Semua status",
+    adminCoursesPricingAll: "Semua",
+    adminCoursesPricingFree: "Gratis",
+    adminCoursesPricingPaid: "Berbayar",
+    adminCoursesFilterAllCategories: "Semua kategori",
+
+    adminCoursesSelectedCountLabel: "Jumlah dipilih",
+    adminCoursesBulkDeleteSelected: "Hapus yang dipilih",
+    adminCoursesBulkStatusPlaceholder: "Status massal...",
+    adminCoursesBulkStatusApply: "Terapkan",
+    adminCoursesBulkDeleteAllPrefix: "Hapus semua",
+    adminCoursesSelectAllVisible: "Pilih semua yang terlihat",
+
+    adminCoursesColCreated: "Dibuat",
+    adminCoursesColTitle: "Judul",
+    adminCoursesColUpdated: "Diperbarui",
+    adminCoursesColCategory: "Kategori",
+    adminCoursesColLanguage: "Bahasa",
+    adminCoursesColStatus: "Status",
+    adminCoursesColPaid: "Berbayar",
+    adminCoursesColPrice: "Harga",
+    adminCoursesColCreatedBy: "Dibuat oleh",
+    adminCoursesColActions: "Aksi",
+
+    adminCoursesOpen: "Buka",
+
+    adminCoursesCategoriesTitle: "Kategori",
+    adminCoursesCategoriesCreateTitle: "Buat kategori",
+    adminCoursesCategoriesReload: "Muat ulang",
+    adminCoursesCategoriesSlugLabel: "Slug",
+    adminCoursesCategoriesSlugPlaceholder: "mis. web-development",
+    adminCoursesCategoriesNameLabel: "Judul",
+    adminCoursesCategoriesNamePlaceholder: "mis. Web development",
+    adminCoursesCategoriesOrderLabel: "Urutan",
+    adminCoursesCategoriesActiveLabel: "Aktif",
+    adminCoursesCategoriesCreate: "Buat",
+    adminCoursesCategoriesListTitle: "Daftar kategori",
+    adminCoursesCategoriesExportCsv: "Ekspor CSV",
+    adminCoursesCategoriesEmpty: "Tidak ada kategori.",
+    adminCoursesCategoriesTableTitle: "Judul",
+    adminCoursesCategoriesTableSlug: "Slug",
+    adminCoursesCategoriesTableOrder: "Urutan",
+    adminCoursesCategoriesTableActive: "Aktif",
+    adminCoursesCategoriesTableActions: "Aksi",
+    adminCoursesCategoriesYes: "ya",
+    adminCoursesCategoriesNo: "tidak",
+    adminCoursesCategoriesSave: "Simpan",
+    adminCoursesCategoriesCancel: "Batal",
+    adminCoursesCategoriesEdit: "Edit",
+    adminCoursesCategoriesDelete: "Hapus",
+  },
+  it: {
+    adminCoursesTitle: "Corsi",
+    adminCoursesSubtitle: "Amministrazione corsi.",
+    adminCoursesInfoTooltipLabel: "Info",
+    adminCoursesInfoTooltipTitle: "Corsi",
+    adminCoursesInfoTooltipDescription:
+      "Amministrazione corsi: crea, filtra, ordina, paginazione ed export CSV.",
+    adminCoursesManageCourseCategoriesCta: "Gestisci categorie corsi →",
+
+    adminCoursesCategoriesCardTitle: "Categorie",
+    adminCoursesCategoriesManageCta: "Gestisci categorie →",
+    adminCoursesCategoriesSubtitle:
+      "Usa le categorie per filtrare e organizzare il catalogo corsi.",
+
+    adminCoursesCreateTitle: "Crea corso",
+    adminCoursesCreateCourseTitleLabel: "Titolo",
+    adminCoursesCreateCourseLanguageLabel: "Lingue",
+    adminCoursesLanguagesAll: "Tutte le lingue",
+    adminCoursesCreateCourseStatusLabel: "Stato",
+    adminCoursesStatusDraft: "Bozza",
+    adminCoursesStatusActive: "Attivo",
+    adminCoursesStatusInactive: "Inattivo",
+    adminCoursesCreateCourseCategoryLabel: "Categoria",
+    adminCoursesCategorySearchPlaceholder: "Cerca categoria...",
+    adminCoursesCategoryNone: "(nessuna)",
+    adminCoursesPaidCourseLabel: "Corso a pagamento",
+    adminCoursesDescriptionLabel: "Descrizione",
+    adminCoursesCreate: "Crea",
+
+    adminCoursesListTitle: "Elenco corsi",
+    adminCoursesExportCsv: "Esporta CSV",
+    adminCoursesReload: "Ricarica",
+    adminCoursesSearchPlaceholder: "Cerca per titolo, ID, categoria...",
+    adminCoursesSearchButton: "Cerca",
+    adminCoursesFilterAllStatus: "Tutti gli stati",
+    adminCoursesPricingAll: "Tutti",
+    adminCoursesPricingFree: "Gratis",
+    adminCoursesPricingPaid: "A pagamento",
+    adminCoursesFilterAllCategories: "Tutte le categorie",
+
+    adminCoursesSelectedCountLabel: "Selezionati",
+    adminCoursesBulkDeleteSelected: "Elimina selezionati",
+    adminCoursesBulkStatusPlaceholder: "Stato bulk...",
+    adminCoursesBulkStatusApply: "Applica",
+    adminCoursesBulkDeleteAllPrefix: "Elimina tutto",
+    adminCoursesSelectAllVisible: "Seleziona tutti i visibili",
+
+    adminCoursesColCreated: "Creato",
+    adminCoursesColTitle: "Titolo",
+    adminCoursesColUpdated: "Aggiornato",
+    adminCoursesColCategory: "Categoria",
+    adminCoursesColLanguage: "Lingua",
+    adminCoursesColStatus: "Stato",
+    adminCoursesColPaid: "A pagamento",
+    adminCoursesColPrice: "Prezzo",
+    adminCoursesColCreatedBy: "Creato da",
+    adminCoursesColActions: "Azioni",
+
+    adminCoursesOpen: "Apri",
+
+    adminCoursesCategoriesTitle: "Categorie",
+    adminCoursesCategoriesCreateTitle: "Crea categoria",
+    adminCoursesCategoriesReload: "Ricarica",
+    adminCoursesCategoriesSlugLabel: "Slug",
+    adminCoursesCategoriesSlugPlaceholder: "es. web-development",
+    adminCoursesCategoriesNameLabel: "Titolo",
+    adminCoursesCategoriesNamePlaceholder: "es. Web development",
+    adminCoursesCategoriesOrderLabel: "Ordine",
+    adminCoursesCategoriesActiveLabel: "Attiva",
+    adminCoursesCategoriesCreate: "Crea",
+    adminCoursesCategoriesListTitle: "Elenco categorie",
+    adminCoursesCategoriesExportCsv: "Esporta CSV",
+    adminCoursesCategoriesEmpty: "Nessuna categoria trovata.",
+    adminCoursesCategoriesTableTitle: "Titolo",
+    adminCoursesCategoriesTableSlug: "Slug",
+    adminCoursesCategoriesTableOrder: "Ordine",
+    adminCoursesCategoriesTableActive: "Attiva",
+    adminCoursesCategoriesTableActions: "Azioni",
+    adminCoursesCategoriesYes: "sì",
+    adminCoursesCategoriesNo: "no",
+    adminCoursesCategoriesSave: "Salva",
+    adminCoursesCategoriesCancel: "Annulla",
+    adminCoursesCategoriesEdit: "Modifica",
+    adminCoursesCategoriesDelete: "Elimina",
+  },
+  ko: {
+    adminCoursesTitle: "코스",
+    adminCoursesSubtitle: "코스 관리.",
+    adminCoursesInfoTooltipLabel: "정보",
+    adminCoursesInfoTooltipTitle: "코스",
+    adminCoursesInfoTooltipDescription:
+      "코스 관리: 생성, 필터, 정렬, 페이지네이션 및 CSV 내보내기.",
+    adminCoursesManageCourseCategoriesCta: "코스 카테고리 관리 →",
+
+    adminCoursesCategoriesCardTitle: "카테고리",
+    adminCoursesCategoriesManageCta: "카테고리 관리 →",
+    adminCoursesCategoriesSubtitle:
+      "카테고리를 사용하여 코스 카탈로그를 필터링하고 정리하세요.",
+
+    adminCoursesCreateTitle: "코스 생성",
+    adminCoursesCreateCourseTitleLabel: "제목",
+    adminCoursesCreateCourseLanguageLabel: "언어",
+    adminCoursesLanguagesAll: "모든 언어",
+    adminCoursesCreateCourseStatusLabel: "상태",
+    adminCoursesStatusDraft: "초안",
+    adminCoursesStatusActive: "활성",
+    adminCoursesStatusInactive: "비활성",
+    adminCoursesCreateCourseCategoryLabel: "카테고리",
+    adminCoursesCategorySearchPlaceholder: "카테고리 검색...",
+    adminCoursesCategoryNone: "(없음)",
+    adminCoursesPaidCourseLabel: "유료 코스",
+    adminCoursesDescriptionLabel: "설명",
+    adminCoursesCreate: "생성",
+
+    adminCoursesListTitle: "코스 목록",
+    adminCoursesExportCsv: "CSV 내보내기",
+    adminCoursesReload: "새로고침",
+    adminCoursesSearchPlaceholder: "제목, ID, 카테고리로 검색...",
+    adminCoursesSearchButton: "검색",
+    adminCoursesFilterAllStatus: "모든 상태",
+    adminCoursesPricingAll: "전체",
+    adminCoursesPricingFree: "무료",
+    adminCoursesPricingPaid: "유료",
+    adminCoursesFilterAllCategories: "모든 카테고리",
+
+    adminCoursesSelectedCountLabel: "선택 수",
+    adminCoursesBulkDeleteSelected: "선택 삭제",
+    adminCoursesBulkStatusPlaceholder: "일괄 상태...",
+    adminCoursesBulkStatusApply: "적용",
+    adminCoursesBulkDeleteAllPrefix: "전체 삭제",
+    adminCoursesSelectAllVisible: "보이는 항목 모두 선택",
+
+    adminCoursesColCreated: "생성됨",
+    adminCoursesColTitle: "제목",
+    adminCoursesColUpdated: "업데이트됨",
+    adminCoursesColCategory: "카테고리",
+    adminCoursesColLanguage: "언어",
+    adminCoursesColStatus: "상태",
+    adminCoursesColPaid: "유료",
+    adminCoursesColPrice: "가격",
+    adminCoursesColCreatedBy: "생성자",
+    adminCoursesColActions: "작업",
+
+    adminCoursesOpen: "열기",
+
+    adminCoursesCategoriesTitle: "카테고리",
+    adminCoursesCategoriesCreateTitle: "카테고리 생성",
+    adminCoursesCategoriesReload: "새로고침",
+    adminCoursesCategoriesSlugLabel: "Slug",
+    adminCoursesCategoriesSlugPlaceholder: "예: web-development",
+    adminCoursesCategoriesNameLabel: "제목",
+    adminCoursesCategoriesNamePlaceholder: "예: Web development",
+    adminCoursesCategoriesOrderLabel: "순서",
+    adminCoursesCategoriesActiveLabel: "활성",
+    adminCoursesCategoriesCreate: "생성",
+    adminCoursesCategoriesListTitle: "카테고리 목록",
+    adminCoursesCategoriesExportCsv: "CSV 내보내기",
+    adminCoursesCategoriesEmpty: "카테고리가 없습니다.",
+    adminCoursesCategoriesTableTitle: "제목",
+    adminCoursesCategoriesTableSlug: "Slug",
+    adminCoursesCategoriesTableOrder: "순서",
+    adminCoursesCategoriesTableActive: "활성",
+    adminCoursesCategoriesTableActions: "작업",
+    adminCoursesCategoriesYes: "예",
+    adminCoursesCategoriesNo: "아니오",
+    adminCoursesCategoriesSave: "저장",
+    adminCoursesCategoriesCancel: "취소",
+    adminCoursesCategoriesEdit: "편집",
+    adminCoursesCategoriesDelete: "삭제",
+  },
+  ja: {
+    adminCoursesTitle: "コース",
+    adminCoursesSubtitle: "コース管理。",
+    adminCoursesInfoTooltipLabel: "情報",
+    adminCoursesInfoTooltipTitle: "コース",
+    adminCoursesInfoTooltipDescription:
+      "コース管理：作成、フィルタ、並び替え、ページネーション、CSV エクスポート。",
+    adminCoursesManageCourseCategoriesCta: "コースカテゴリを管理 →",
+
+    adminCoursesCategoriesCardTitle: "カテゴリ",
+    adminCoursesCategoriesManageCta: "カテゴリを管理 →",
+    adminCoursesCategoriesSubtitle:
+      "カテゴリでコースカタログをフィルタ・整理できます。",
+
+    adminCoursesCreateTitle: "コース作成",
+    adminCoursesCreateCourseTitleLabel: "タイトル",
+    adminCoursesCreateCourseLanguageLabel: "言語",
+    adminCoursesLanguagesAll: "すべての言語",
+    adminCoursesCreateCourseStatusLabel: "ステータス",
+    adminCoursesStatusDraft: "下書き",
+    adminCoursesStatusActive: "有効",
+    adminCoursesStatusInactive: "無効",
+    adminCoursesCreateCourseCategoryLabel: "カテゴリ",
+    adminCoursesCategorySearchPlaceholder: "カテゴリを検索...",
+    adminCoursesCategoryNone: "(なし)",
+    adminCoursesPaidCourseLabel: "有料コース",
+    adminCoursesDescriptionLabel: "説明",
+    adminCoursesCreate: "作成",
+
+    adminCoursesListTitle: "コース一覧",
+    adminCoursesExportCsv: "CSV エクスポート",
+    adminCoursesReload: "再読み込み",
+    adminCoursesSearchPlaceholder: "タイトル、ID、カテゴリで検索...",
+    adminCoursesSearchButton: "検索",
+    adminCoursesFilterAllStatus: "すべてのステータス",
+    adminCoursesPricingAll: "すべて",
+    adminCoursesPricingFree: "無料",
+    adminCoursesPricingPaid: "有料",
+    adminCoursesFilterAllCategories: "すべてのカテゴリ",
+
+    adminCoursesSelectedCountLabel: "選択数",
+    adminCoursesBulkDeleteSelected: "選択を削除",
+    adminCoursesBulkStatusPlaceholder: "一括ステータス...",
+    adminCoursesBulkStatusApply: "適用",
+    adminCoursesBulkDeleteAllPrefix: "すべて削除",
+    adminCoursesSelectAllVisible: "表示中をすべて選択",
+
+    adminCoursesColCreated: "作成日",
+    adminCoursesColTitle: "タイトル",
+    adminCoursesColUpdated: "更新日",
+    adminCoursesColCategory: "カテゴリ",
+    adminCoursesColLanguage: "言語",
+    adminCoursesColStatus: "ステータス",
+    adminCoursesColPaid: "有料",
+    adminCoursesColPrice: "価格",
+    adminCoursesColCreatedBy: "作成者",
+    adminCoursesColActions: "操作",
+
+    adminCoursesOpen: "開く",
+
+    adminCoursesCategoriesTitle: "カテゴリ",
+    adminCoursesCategoriesCreateTitle: "カテゴリ作成",
+    adminCoursesCategoriesReload: "再読み込み",
+    adminCoursesCategoriesSlugLabel: "Slug",
+    adminCoursesCategoriesSlugPlaceholder: "例: web-development",
+    adminCoursesCategoriesNameLabel: "タイトル",
+    adminCoursesCategoriesNamePlaceholder: "例: Web development",
+    adminCoursesCategoriesOrderLabel: "順序",
+    adminCoursesCategoriesActiveLabel: "有効",
+    adminCoursesCategoriesCreate: "作成",
+    adminCoursesCategoriesListTitle: "カテゴリ一覧",
+    adminCoursesCategoriesExportCsv: "CSV エクスポート",
+    adminCoursesCategoriesEmpty: "カテゴリがありません。",
+    adminCoursesCategoriesTableTitle: "タイトル",
+    adminCoursesCategoriesTableSlug: "Slug",
+    adminCoursesCategoriesTableOrder: "順序",
+    adminCoursesCategoriesTableActive: "有効",
+    adminCoursesCategoriesTableActions: "操作",
+    adminCoursesCategoriesYes: "はい",
+    adminCoursesCategoriesNo: "いいえ",
+    adminCoursesCategoriesSave: "保存",
+    adminCoursesCategoriesCancel: "キャンセル",
+    adminCoursesCategoriesEdit: "編集",
+    adminCoursesCategoriesDelete: "削除",
+  },
+  nl: {
+    adminCoursesTitle: "Cursussen",
+    adminCoursesSubtitle: "Cursusbeheer.",
+    adminCoursesInfoTooltipLabel: "Info",
+    adminCoursesInfoTooltipTitle: "Cursussen",
+    adminCoursesInfoTooltipDescription:
+      "Cursusbeheer: aanmaken, filteren, sorteren, pagineren en CSV exporteren.",
+    adminCoursesManageCourseCategoriesCta: "Beheer cursuscategorieën →",
+
+    adminCoursesCategoriesCardTitle: "Categorieën",
+    adminCoursesCategoriesManageCta: "Beheer categorieën →",
+    adminCoursesCategoriesSubtitle:
+      "Gebruik categorieën om de cursuscatalogus te filteren en te organiseren.",
+
+    adminCoursesCreateTitle: "Cursus maken",
+    adminCoursesCreateCourseTitleLabel: "Titel",
+    adminCoursesCreateCourseLanguageLabel: "Talen",
+    adminCoursesLanguagesAll: "Alle talen",
+    adminCoursesCreateCourseStatusLabel: "Status",
+    adminCoursesStatusDraft: "Concept",
+    adminCoursesStatusActive: "Actief",
+    adminCoursesStatusInactive: "Inactief",
+    adminCoursesCreateCourseCategoryLabel: "Categorie",
+    adminCoursesCategorySearchPlaceholder: "Zoek categorie...",
+    adminCoursesCategoryNone: "(geen)",
+    adminCoursesPaidCourseLabel: "Betaalde cursus",
+    adminCoursesDescriptionLabel: "Beschrijving",
+    adminCoursesCreate: "Aanmaken",
+
+    adminCoursesListTitle: "Cursuslijst",
+    adminCoursesExportCsv: "CSV exporteren",
+    adminCoursesReload: "Herladen",
+    adminCoursesSearchPlaceholder: "Zoek op titel, ID, categorie...",
+    adminCoursesSearchButton: "Zoeken",
+    adminCoursesFilterAllStatus: "Alle statussen",
+    adminCoursesPricingAll: "Alle",
+    adminCoursesPricingFree: "Gratis",
+    adminCoursesPricingPaid: "Betaald",
+    adminCoursesFilterAllCategories: "Alle categorieën",
+
+    adminCoursesSelectedCountLabel: "Geselecteerd",
+    adminCoursesBulkDeleteSelected: "Geselecteerde verwijderen",
+    adminCoursesBulkStatusPlaceholder: "Bulk status...",
+    adminCoursesBulkStatusApply: "Toepassen",
+    adminCoursesBulkDeleteAllPrefix: "Alles verwijderen",
+    adminCoursesSelectAllVisible: "Selecteer alle zichtbaren",
+
+    adminCoursesColCreated: "Aangemaakt",
+    adminCoursesColTitle: "Titel",
+    adminCoursesColUpdated: "Bijgewerkt",
+    adminCoursesColCategory: "Categorie",
+    adminCoursesColLanguage: "Taal",
+    adminCoursesColStatus: "Status",
+    adminCoursesColPaid: "Betaald",
+    adminCoursesColPrice: "Prijs",
+    adminCoursesColCreatedBy: "Aangemaakt door",
+    adminCoursesColActions: "Acties",
+
+    adminCoursesOpen: "Open",
+
+    adminCoursesCategoriesTitle: "Categorieën",
+    adminCoursesCategoriesCreateTitle: "Categorie maken",
+    adminCoursesCategoriesReload: "Herladen",
+    adminCoursesCategoriesSlugLabel: "Slug",
+    adminCoursesCategoriesSlugPlaceholder: "bijv. web-development",
+    adminCoursesCategoriesNameLabel: "Titel",
+    adminCoursesCategoriesNamePlaceholder: "bijv. Web development",
+    adminCoursesCategoriesOrderLabel: "Volgorde",
+    adminCoursesCategoriesActiveLabel: "Actief",
+    adminCoursesCategoriesCreate: "Aanmaken",
+    adminCoursesCategoriesListTitle: "Categorielijst",
+    adminCoursesCategoriesExportCsv: "CSV exporteren",
+    adminCoursesCategoriesEmpty: "Geen categorieën gevonden.",
+    adminCoursesCategoriesTableTitle: "Titel",
+    adminCoursesCategoriesTableSlug: "Slug",
+    adminCoursesCategoriesTableOrder: "Volgorde",
+    adminCoursesCategoriesTableActive: "Actief",
+    adminCoursesCategoriesTableActions: "Acties",
+    adminCoursesCategoriesYes: "ja",
+    adminCoursesCategoriesNo: "nee",
+    adminCoursesCategoriesSave: "Opslaan",
+    adminCoursesCategoriesCancel: "Annuleren",
+    adminCoursesCategoriesEdit: "Bewerken",
+    adminCoursesCategoriesDelete: "Verwijderen",
+  },
+  cs: {
+    adminCoursesTitle: "Kurzy",
+    adminCoursesSubtitle: "Administrace kurzů.",
+    adminCoursesInfoTooltipLabel: "Info",
+    adminCoursesInfoTooltipTitle: "Kurzy",
+    adminCoursesInfoTooltipDescription:
+      "Administrace kurzů: vytváření, filtry, řazení, stránkování a export CSV.",
+    adminCoursesManageCourseCategoriesCta: "Spravovat kategorie kurzů →",
+
+    adminCoursesCategoriesCardTitle: "Kategorie",
+    adminCoursesCategoriesManageCta: "Spravovat kategorie →",
+    adminCoursesCategoriesSubtitle:
+      "Použijte kategorie k filtrování a organizaci katalogu kurzů.",
+
+    adminCoursesCreateTitle: "Vytvořit kurz",
+    adminCoursesCreateCourseTitleLabel: "Název",
+    adminCoursesCreateCourseLanguageLabel: "Jazyky",
+    adminCoursesLanguagesAll: "Všechny jazyky",
+    adminCoursesCreateCourseStatusLabel: "Stav",
+    adminCoursesStatusDraft: "Koncept",
+    adminCoursesStatusActive: "Aktivní",
+    adminCoursesStatusInactive: "Neaktivní",
+    adminCoursesCreateCourseCategoryLabel: "Kategorie",
+    adminCoursesCategorySearchPlaceholder: "Hledat kategorii...",
+    adminCoursesCategoryNone: "(žádná)",
+    adminCoursesPaidCourseLabel: "Placený kurz",
+    adminCoursesDescriptionLabel: "Popis",
+    adminCoursesCreate: "Vytvořit",
+
+    adminCoursesListTitle: "Seznam kurzů",
+    adminCoursesExportCsv: "Export CSV",
+    adminCoursesReload: "Znovu načíst",
+    adminCoursesSearchPlaceholder: "Hledat podle názvu, ID, kategorie...",
+    adminCoursesSearchButton: "Hledat",
+    adminCoursesFilterAllStatus: "Všechny stavy",
+    adminCoursesPricingAll: "Vše",
+    adminCoursesPricingFree: "Zdarma",
+    adminCoursesPricingPaid: "Placené",
+    adminCoursesFilterAllCategories: "Všechny kategorie",
+
+    adminCoursesSelectedCountLabel: "Vybráno",
+    adminCoursesBulkDeleteSelected: "Smazat vybrané",
+    adminCoursesBulkStatusPlaceholder: "Hromadný stav...",
+    adminCoursesBulkStatusApply: "Použít",
+    adminCoursesBulkDeleteAllPrefix: "Smazat vše",
+    adminCoursesSelectAllVisible: "Vybrat vše viditelné",
+
+    adminCoursesColCreated: "Vytvořeno",
+    adminCoursesColTitle: "Název",
+    adminCoursesColUpdated: "Aktualizováno",
+    adminCoursesColCategory: "Kategorie",
+    adminCoursesColLanguage: "Jazyk",
+    adminCoursesColStatus: "Stav",
+    adminCoursesColPaid: "Placené",
+    adminCoursesColPrice: "Cena",
+    adminCoursesColCreatedBy: "Vytvořil",
+    adminCoursesColActions: "Akce",
+
+    adminCoursesOpen: "Otevřít",
+
+    adminCoursesCategoriesTitle: "Kategorie",
+    adminCoursesCategoriesCreateTitle: "Vytvořit kategorii",
+    adminCoursesCategoriesReload: "Znovu načíst",
+    adminCoursesCategoriesSlugLabel: "Slug",
+    adminCoursesCategoriesSlugPlaceholder: "např. web-development",
+    adminCoursesCategoriesNameLabel: "Název",
+    adminCoursesCategoriesNamePlaceholder: "např. Web development",
+    adminCoursesCategoriesOrderLabel: "Pořadí",
+    adminCoursesCategoriesActiveLabel: "Aktivní",
+    adminCoursesCategoriesCreate: "Vytvořit",
+    adminCoursesCategoriesListTitle: "Seznam kategorií",
+    adminCoursesCategoriesExportCsv: "Export CSV",
+    adminCoursesCategoriesEmpty: "Nebyly nalezeny žádné kategorie.",
+    adminCoursesCategoriesTableTitle: "Název",
+    adminCoursesCategoriesTableSlug: "Slug",
+    adminCoursesCategoriesTableOrder: "Pořadí",
+    adminCoursesCategoriesTableActive: "Aktivní",
+    adminCoursesCategoriesTableActions: "Akce",
+    adminCoursesCategoriesYes: "ano",
+    adminCoursesCategoriesNo: "ne",
+    adminCoursesCategoriesSave: "Uložit",
+    adminCoursesCategoriesCancel: "Zrušit",
+    adminCoursesCategoriesEdit: "Upravit",
+    adminCoursesCategoriesDelete: "Smazat",
+  },
+  ar: {
+    adminCoursesTitle: "الدورات",
+    adminCoursesSubtitle: "إدارة الدورات.",
+    adminCoursesInfoTooltipLabel: "معلومات",
+    adminCoursesInfoTooltipTitle: "الدورات",
+    adminCoursesInfoTooltipDescription:
+      "إدارة الدورات: إنشاء، فلاتر، فرز، ترقيم صفحات وتصدير CSV.",
+    adminCoursesManageCourseCategoriesCta: "إدارة فئات الدورات →",
+
+    adminCoursesCategoriesCardTitle: "الفئات",
+    adminCoursesCategoriesInfoTooltipLabel: "معلومات",
+    adminCoursesCategoriesInfoTooltipTitle: "فئات الدورات",
+    adminCoursesCategoriesInfoTooltipDescription:
+      "تُستخدم الفئات لتجميع الدورات. إذا حذفت فئة، فلن تُحذف الدورات المرتبطة بها — ستبقى بدون فئة.",
+    adminCoursesCategoriesManageCta: "إدارة الفئات →",
+    adminCoursesCategoriesSubtitle:
+      "استخدم الفئات لتصفية وتنظيم كتالوج الدورات.",
+
+    adminCoursesCreateTitle: "إنشاء دورة",
+    adminCoursesCreateCourseTitleLabel: "العنوان",
+    adminCoursesCreateCourseLanguageLabel: "اللغات",
+    adminCoursesLanguagesAll: "كل اللغات",
+    adminCoursesLanguagesSelect: "اختر اللغات",
+    adminCoursesLanguagesCountSuffix: "لغات",
+    adminCoursesCreateCourseStatusLabel: "الحالة",
+    adminCoursesCreateCourseStatusAria: "حالة الدورة",
+    adminCoursesStatusDraft: "مسودة",
+    adminCoursesStatusActive: "نشطة",
+    adminCoursesStatusInactive: "غير نشطة",
+    adminCoursesCreateCourseCategoryLabel: "الفئة",
+    adminCoursesCreateCourseCategoryAria: "فئة الدورة",
+    adminCoursesCategorySearchPlaceholder: "ابحث عن فئة...",
+    adminCoursesCategoryNone: "(بدون)",
+    adminCoursesPaidCourseLabel: "دورة مدفوعة",
+    adminCoursesPaidCourseToggleAria: "تبديل دورة مدفوعة",
+    adminCoursesPaidDisabledTooltipLabel: "معلومات",
+    adminCoursesPaidDisabledTooltipTitle: "دورة مدفوعة",
+    adminCoursesPaidDisabledTooltipDescription:
+      "يتوفر هذا الخيار بعد تفعيل طريقة دفع واحدة على الأقل في الإدارة → المدفوعات (وتهيئتها).",
+    adminCoursesCurrencyLabel: "العملة",
+    adminCoursesPriceLabel: "السعر",
+    adminCoursesPricePlaceholder: "مثال: 9.99",
+    adminCoursesPriceHint: "مثال: 9.99 (أو 999 سنت)",
+    adminCoursesDescriptionLabel: "الوصف",
+    adminCoursesCreating: "جارٍ الإنشاء...",
+    adminCoursesCreate: "إنشاء",
+    adminCoursesCreateError: "تعذّر إنشاء الدورة.",
+    adminCoursesCreateSuccess: "تم إنشاء الدورة.",
+    adminCoursesOpenCourseCta: "فتح الدورة →",
+    adminCoursesExportCsvFilename: "courses.csv",
+
+    adminCoursesListTitle: "قائمة الدورات",
+    adminCoursesExportCsv: "تصدير CSV",
+    adminCoursesReload: "إعادة تحميل",
+    adminCoursesSearchPlaceholder: "ابحث بالعنوان أو المعرف أو الفئة...",
+    adminCoursesSearchButton: "بحث",
+    adminCoursesStatusFilterAria: "حالة الدورات",
+    adminCoursesFilterAllStatus: "كل الحالات",
+    adminCoursesPricingFilterAria: "التسعير",
+    adminCoursesPricingAll: "كل التسعير",
+    adminCoursesPricingFree: "مجاني",
+    adminCoursesPricingPaid: "مدفوع",
+    adminCoursesCategoryFilterAria: "فئة الدورات",
+    adminCoursesFilterAllCategories: "كل الفئات",
+    adminCoursesLoading: "جارٍ تحميل الدورات...",
+    adminCoursesLoadError: "حدث خطأ أثناء تحميل الدورات.",
+    adminCoursesEmpty: "لم يتم العثور على دورات.",
+
+    adminCoursesSelectedCountLabel: "عدد المحدد",
+    adminCoursesBulkDeleteSelected: "حذف المحدد",
+    adminCoursesBulkStatusAria: "حالة جماعية",
+    adminCoursesBulkStatusPlaceholder: "حالة جماعية...",
+    adminCoursesBulkStatusApply: "تطبيق",
+    adminCoursesBulkDeleteAllPrefix: "حذف الكل",
+    adminCoursesSelectAllVisible: "تحديد كل الظاهر",
+
+    adminCoursesColCreated: "تاريخ الإنشاء",
+    adminCoursesColTitle: "العنوان",
+    adminCoursesColUpdated: "آخر تحديث",
+    adminCoursesColCategory: "الفئة",
+    adminCoursesColLanguage: "اللغة",
+    adminCoursesColStatus: "الحالة",
+    adminCoursesColPaid: "مدفوع",
+    adminCoursesColPrice: "السعر",
+    adminCoursesColCreatedBy: "أُنشئ بواسطة",
+    adminCoursesColActions: "الإجراءات",
+
+    adminCoursesSelectCoursePrefix: "تحديد",
+    adminCoursesIdPrefix: "المعرّف",
+    adminCoursesPlaceholderDash: "-",
+    adminCoursesOpen: "فتح",
+
+    adminCoursesPaginationShowingPrefix: "عرض",
+    adminCoursesPaginationOf: "من",
+    adminCoursesPaginationCoursesSuffix: "دورات",
+
+    adminCoursesBulkDeleteDialogTitle: "حذف الدورات المحددة",
+    adminCoursesBulkDeleteDialogDescription:
+      "سيتم حذف الدورات المحددة نهائيًا. لا يمكن التراجع عن هذا الإجراء.",
+    adminCoursesDelete: "حذف",
+    adminCoursesCancel: "إلغاء",
+    adminCoursesBulkDeleteError:
+      "حدث خطأ أثناء حذف الدورات المحددة.",
+
+    adminCoursesBulkStatusDialogTitle: "تغيير الحالة",
+    adminCoursesBulkStatusDialogDescription:
+      "أنت على وشك تغيير حالة جميع الدورات المحددة.",
+    adminCoursesBulkStatusNewStatusLabel: "الحالة الجديدة",
+    adminCoursesOk: "موافق",
+    adminCoursesBulkStatusError:
+      "حدث خطأ أثناء تحديث حالة الدورات بشكل جماعي.",
+
+    adminCoursesPurgeAllDialogTitle: "حذف جميع الدورات",
+    adminCoursesPurgeAllDialogDescriptionPrefix:
+      "أنت على وشك حذف جميع الدورات",
+    adminCoursesPurgeAllDialogDescriptionSuffix:
+      "لا يمكن التراجع عن هذا الإجراء.",
+    adminCoursesDeleteAll: "حذف الكل",
+    adminCoursesPurgeAllError: "حدث خطأ أثناء حذف جميع الدورات.",
+
+    adminCoursesCreateTitleRequired: "العنوان مطلوب.",
+    adminCoursesCreateDescriptionRequired: "الوصف مطلوب.",
+    adminCoursesCreateLanguagesRequired: "يرجى اختيار لغة.",
+    adminCoursesCreateRequiredFields: "يرجى تعبئة الحقول المطلوبة.",
+    adminCoursesCurrencyInvalid: "يرجى إدخال عملة صالحة (مثل EUR).",
+    adminCoursesPriceInvalid: "يرجى إدخال سعر صالح (مثل 9.99 أو 999).",
+
+    adminCoursesCategoriesRequiredFields: "يرجى تعبئة الحقول المطلوبة.",
+    adminCoursesCategoriesSlugFormatInvalid:
+      "يجب أن يكون الـ slug بأحرف صغيرة مع أرقام وشرطات (مثل web-development).",
+
+    adminCoursesRequestFailed: "فشل الطلب.",
+    adminCoursesCategoriesTitle: "الفئات",
+    adminCoursesCategoriesCreateTitle: "إنشاء فئة",
+    adminCoursesCategoriesReload: "إعادة تحميل",
+    adminCoursesCategoriesSlugLabel: "Slug",
+    adminCoursesCategoriesSlugPlaceholder: "مثال: web-development",
+    adminCoursesCategoriesNameLabel: "العنوان",
+    adminCoursesCategoriesNamePlaceholder: "مثال: Web development",
+    adminCoursesCategoriesOrderLabel: "الترتيب",
+    adminCoursesCategoriesActiveLabel: "نشطة",
+    adminCoursesCategoriesCreating: "جارٍ الإنشاء...",
+    adminCoursesCategoriesCreate: "إنشاء",
+    adminCoursesCategoriesListTitle: "قائمة الفئات",
+    adminCoursesCategoriesExportCsv: "تصدير CSV",
+    adminCoursesCategoriesLoading: "جارٍ التحميل...",
+    adminCoursesCategoriesEmpty: "لم يتم العثور على فئات.",
+    adminCoursesCategoriesTableTitle: "العنوان",
+    adminCoursesCategoriesTableSlug: "Slug",
+    adminCoursesCategoriesTableOrder: "الترتيب",
+    adminCoursesCategoriesTableActive: "نشطة",
+    adminCoursesCategoriesTableActions: "الإجراءات",
+    adminCoursesCategoriesYes: "نعم",
+    adminCoursesCategoriesNo: "لا",
+    adminCoursesCategoriesSaving: "جارٍ الحفظ...",
+    adminCoursesCategoriesSave: "حفظ",
+    adminCoursesCategoriesCancel: "إلغاء",
+    adminCoursesCategoriesEdit: "تعديل",
+    adminCoursesCategoriesDeleting: "جارٍ الحذف...",
+    adminCoursesCategoriesDelete: "حذف",
+    adminCoursesCategoriesShowingPrefix: "عرض",
+    adminCoursesCategoriesShowingOf: "من",
+    adminCoursesCategoriesShowingSuffix: "فئات",
+    adminCoursesCategoriesLoadError: "حدث خطأ أثناء تحميل الفئات.",
+    adminCoursesCategoriesSlugRequired: "الـ slug مطلوب.",
+    adminCoursesCategoriesTitleRequired: "العنوان مطلوب.",
+    adminCoursesCategoriesOrderInvalid:
+      "يجب أن يكون الترتيب رقمًا صحيحًا >= 0.",
+    adminCoursesCategoriesCreateError: "تعذّر إنشاء الفئة.",
+    adminCoursesCategoriesCreateSuccess: "تم إنشاء الفئة.",
+    adminCoursesCategoriesNoChanges: "لا توجد تغييرات للحفظ.",
+    adminCoursesCategoriesSaveError: "فشل الحفظ.",
+    adminCoursesCategoriesSaved: "تم الحفظ.",
+    adminCoursesCategoriesDeleteConfirmPrefix:
+      "هل أنت متأكد أنك تريد حذف الفئة",
+    adminCoursesCategoriesDeleteConfirmSuffix:
+      "لن تُحذف الدورات المرتبطة بها — ستصبح بدون فئة.",
+    adminCoursesCategoriesDeleteError: "تعذّر حذف الفئة.",
+    adminCoursesCategoriesDeleted: "تم حذف الفئة.",
+  },
+};
+
+const ADMIN_USERS_OVERRIDES: Partial<
+  Record<SupportedLang, Partial<DomainMessages["common"]>>
+> = {
+  bg: {
+    adminUsersBreadcrumbTitle: "Потребители",
+    adminUsersInfoTooltipLabel: "Информация",
+    adminUsersInfoTooltipTitle: "Управление на потребители",
+    adminUsersInfoTooltipDescription:
+      "Управление на потребители: търсене, филтри, промяна на роля, деактивиране/активиране и експорт на резултатите.",
+    adminUsersStatusFilterAria: "Статус на потребителите",
+    adminUsersRoleFilterAria: "Роля на потребителите",
+    adminUsersFilterAllStatus: "Всички статуси",
+    adminUsersFilterStatusActive: "Активни",
+    adminUsersFilterStatusDeactivated: "Деактивирани",
+    adminUsersFilterAllRoles: "Всички роли",
+    adminUsersRoleUser: "Потребител",
+    adminUsersRoleAdmin: "Админ",
+    adminUsersRoleMonitoring: "Monitoring",
+    adminUsersRoleTeacher: "Учител",
+    adminUsersRoleAuthor: "Автор",
+    adminUsersExportCsv: "Експорт CSV",
+    adminUsersTableControlsTooltipLabel: "Информация",
+    adminUsersTableControlsTooltipTitle: "Контроли на таблицата",
+    adminUsersTableControlsTooltipDescription:
+      "Използвайте Rows per page за 10/20/50/100. Експорт CSV генерира файл според текущите филтри (server-side).",
+    adminUsersBulkDeleteSelected: "Изтрий избраните",
+    adminUsersBulkDeleteAllPrefix: "Изтрий всички",
+    adminUsersSelectAllVisible: "Избери всички видими",
+    adminUsersTableActions: "Действия",
+    adminUsersSelectUserPrefix: "Избери",
+    adminUsersRoleForPrefix: "Роля за",
+    adminUsersView: "Преглед",
+    adminUsersBulkDeleteDialogTitle: "Изтриване на избраните потребители",
+    adminUsersBulkDeleteDialogDescription:
+      "Избраните потребители ще бъдат физически изтрити. Това действие е необратимо. Вашият акаунт няма да бъде изтрит.",
+    adminUsersSelectedCountLabel: "Брой избрани",
+    adminUsersDelete: "Изтрий",
+    adminUsersCancel: "Отказ",
+    adminUsersBulkDeleteError:
+      "Възникна грешка при bulk изтриването на потребители.",
+    adminUsersPurgeAllDialogTitle: "Изтриване на всички потребители",
+    adminUsersPurgeAllDialogDescriptionPrefix:
+      "Ще изтриете абсолютно всички потребители",
+    adminUsersPurgeAllDialogDescriptionSuffix:
+      "Това действие е необратимо. Вашият акаунт няма да бъде изтрит.",
+    adminUsersDeleteAll: "Изтрий всички",
+    adminUsersPurgeAllError:
+      "Възникна грешка при изтриване на всички потребители.",
+    adminUsersViewDialogTitle: "Данни за потребителя",
+    adminUsersViewDialogSubtitle: "Детайли за избрания потребител.",
+    adminUsersClose: "Затвори",
+    adminUsersOk: "OK",
+    adminUsersEmailLabel: "Email",
+    adminUsersIdPrefix: "ID",
+    adminUsersRoleLabel: "Роля",
+    adminUsersStatusLabel: "Статус",
+    adminUsersUserIdLabel: "User ID",
+    adminUsersCreatedLabel: "Създаден",
+  },
+  en: {
+    adminUsersBreadcrumbTitle: "Users",
+    adminUsersInfoTooltipLabel: "Info",
+    adminUsersInfoTooltipTitle: "Users Management",
+    adminUsersInfoTooltipDescription:
+      "Manage users: search, filters, role changes, activate/deactivate, and export results.",
+    adminUsersStatusFilterAria: "Users status",
+    adminUsersRoleFilterAria: "Users role",
+    adminUsersFilterAllStatus: "All status",
+    adminUsersFilterStatusActive: "Active",
+    adminUsersFilterStatusDeactivated: "Deactivated",
+    adminUsersFilterAllRoles: "All roles",
+    adminUsersRoleUser: "User",
+    adminUsersRoleAdmin: "Admin",
+    adminUsersRoleMonitoring: "Monitoring",
+    adminUsersRoleTeacher: "Teacher",
+    adminUsersRoleAuthor: "Author",
+    adminUsersExportCsv: "Export CSV",
+    adminUsersTableControlsTooltipLabel: "Info",
+    adminUsersTableControlsTooltipTitle: "Table controls",
+    adminUsersTableControlsTooltipDescription:
+      "Use Rows per page for 10/20/50/100. Export CSV generates a file for the current filters (server-side).",
+    adminUsersBulkDeleteSelected: "Delete selected",
+    adminUsersBulkDeleteAllPrefix: "Delete all",
+    adminUsersSelectAllVisible: "Select all visible",
+    adminUsersTableActions: "Actions",
+    adminUsersSelectUserPrefix: "Select",
+    adminUsersRoleForPrefix: "Role for",
+    adminUsersView: "View",
+    adminUsersBulkDeleteDialogTitle: "Delete selected users",
+    adminUsersBulkDeleteDialogDescription:
+      "Selected users will be permanently deleted. This action cannot be undone. Your account will not be deleted.",
+    adminUsersSelectedCountLabel: "Selected count",
+    adminUsersDelete: "Delete",
+    adminUsersCancel: "Cancel",
+    adminUsersBulkDeleteError: "An error occurred while deleting selected users.",
+    adminUsersPurgeAllDialogTitle: "Delete all users",
+    adminUsersPurgeAllDialogDescriptionPrefix:
+      "You are about to delete all users",
+    adminUsersPurgeAllDialogDescriptionSuffix:
+      "This action cannot be undone. Your account will not be deleted.",
+    adminUsersDeleteAll: "Delete all",
+    adminUsersPurgeAllError: "An error occurred while deleting all users.",
+    adminUsersViewDialogTitle: "User details",
+    adminUsersViewDialogSubtitle: "Details for the selected user.",
+    adminUsersClose: "Close",
+    adminUsersOk: "OK",
+    adminUsersEmailLabel: "Email",
+    adminUsersIdPrefix: "ID",
+    adminUsersRoleLabel: "Role",
+    adminUsersStatusLabel: "Status",
+    adminUsersUserIdLabel: "User ID",
+    adminUsersCreatedLabel: "Created",
+  },
+  de: {
+    adminUsersBreadcrumbTitle: "Benutzer",
+    adminUsersInfoTooltipLabel: "Info",
+    adminUsersInfoTooltipTitle: "Benutzerverwaltung",
+    adminUsersInfoTooltipDescription:
+      "Benutzer verwalten: Suche, Filter, Rollen ändern, Aktivieren/Deaktivieren und Export der Ergebnisse.",
+    adminUsersStatusFilterAria: "Benutzerstatus",
+    adminUsersRoleFilterAria: "Benutzerrolle",
+    adminUsersFilterAllStatus: "Alle Status",
+    adminUsersFilterStatusActive: "Aktiv",
+    adminUsersFilterStatusDeactivated: "Deaktiviert",
+    adminUsersFilterAllRoles: "Alle Rollen",
+    adminUsersRoleUser: "Benutzer",
+    adminUsersRoleAdmin: "Admin",
+    adminUsersRoleMonitoring: "Monitoring",
+    adminUsersRoleTeacher: "Lehrer",
+    adminUsersRoleAuthor: "Autor",
+    adminUsersExportCsv: "CSV exportieren",
+    adminUsersTableControlsTooltipLabel: "Info",
+    adminUsersTableControlsTooltipTitle: "Tabellensteuerung",
+    adminUsersTableControlsTooltipDescription:
+      "Nutze Rows per page für 10/20/50/100. CSV-Export erstellt eine Datei basierend auf den aktuellen Filtern (serverseitig).",
+    adminUsersBulkDeleteSelected: "Ausgewählte löschen",
+    adminUsersBulkDeleteAllPrefix: "Alle löschen",
+    adminUsersSelectAllVisible: "Alle sichtbaren auswählen",
+    adminUsersTableActions: "Aktionen",
+    adminUsersSelectUserPrefix: "Auswählen",
+    adminUsersRoleForPrefix: "Rolle für",
+    adminUsersView: "Ansehen",
+    adminUsersBulkDeleteDialogTitle: "Ausgewählte Benutzer löschen",
+    adminUsersBulkDeleteDialogDescription:
+      "Die ausgewählten Benutzer werden dauerhaft gelöscht. Diese Aktion kann nicht rückgängig gemacht werden. Dein Konto wird nicht gelöscht.",
+    adminUsersSelectedCountLabel: "Ausgewählt",
+    adminUsersDelete: "Löschen",
+    adminUsersCancel: "Abbrechen",
+    adminUsersBulkDeleteError:
+      "Beim Löschen der ausgewählten Benutzer ist ein Fehler aufgetreten.",
+    adminUsersPurgeAllDialogTitle: "Alle Benutzer löschen",
+    adminUsersPurgeAllDialogDescriptionPrefix:
+      "Du bist dabei, alle Benutzer zu löschen",
+    adminUsersPurgeAllDialogDescriptionSuffix:
+      "Diese Aktion kann nicht rückgängig gemacht werden. Dein Konto wird nicht gelöscht.",
+    adminUsersDeleteAll: "Alle löschen",
+    adminUsersPurgeAllError:
+      "Beim Löschen aller Benutzer ist ein Fehler aufgetreten.",
+    adminUsersViewDialogTitle: "Benutzerdetails",
+    adminUsersViewDialogSubtitle: "Details zum ausgewählten Benutzer.",
+    adminUsersClose: "Schließen",
+    adminUsersOk: "OK",
+    adminUsersEmailLabel: "E-Mail",
+    adminUsersIdPrefix: "ID",
+    adminUsersRoleLabel: "Rolle",
+    adminUsersStatusLabel: "Status",
+    adminUsersUserIdLabel: "Benutzer-ID",
+    adminUsersCreatedLabel: "Erstellt",
+  },
+  es: {
+    adminUsersBreadcrumbTitle: "Usuarios",
+    adminUsersInfoTooltipLabel: "Info",
+    adminUsersInfoTooltipTitle: "Gestión de usuarios",
+    adminUsersInfoTooltipDescription:
+      "Gestiona usuarios: búsqueda, filtros, cambios de rol, activar/desactivar y exportar resultados.",
+    adminUsersStatusFilterAria: "Estado de usuarios",
+    adminUsersRoleFilterAria: "Rol de usuarios",
+    adminUsersFilterAllStatus: "Todos los estados",
+    adminUsersFilterStatusActive: "Activo",
+    adminUsersFilterStatusDeactivated: "Desactivado",
+    adminUsersFilterAllRoles: "Todos los roles",
+    adminUsersRoleUser: "Usuario",
+    adminUsersRoleAdmin: "Admin",
+    adminUsersRoleMonitoring: "Monitoring",
+    adminUsersRoleTeacher: "Profesor",
+    adminUsersRoleAuthor: "Autor",
+    adminUsersExportCsv: "Exportar CSV",
+    adminUsersTableControlsTooltipLabel: "Info",
+    adminUsersTableControlsTooltipTitle: "Controles de tabla",
+    adminUsersTableControlsTooltipDescription:
+      "Usa Rows per page para 10/20/50/100. Exportar CSV genera un archivo con los filtros actuales (server-side).",
+    adminUsersBulkDeleteSelected: "Eliminar seleccionados",
+    adminUsersBulkDeleteAllPrefix: "Eliminar todos",
+    adminUsersSelectAllVisible: "Seleccionar todos los visibles",
+    adminUsersTableActions: "Acciones",
+    adminUsersSelectUserPrefix: "Seleccionar",
+    adminUsersRoleForPrefix: "Rol para",
+    adminUsersView: "Ver",
+    adminUsersBulkDeleteDialogTitle: "Eliminar usuarios seleccionados",
+    adminUsersBulkDeleteDialogDescription:
+      "Los usuarios seleccionados se eliminarán de forma permanente. Esta acción no se puede deshacer. Tu cuenta no se eliminará.",
+    adminUsersSelectedCountLabel: "Cantidad seleccionada",
+    adminUsersDelete: "Eliminar",
+    adminUsersCancel: "Cancelar",
+    adminUsersBulkDeleteError:
+      "Se produjo un error al eliminar los usuarios seleccionados.",
+    adminUsersPurgeAllDialogTitle: "Eliminar todos los usuarios",
+    adminUsersPurgeAllDialogDescriptionPrefix:
+      "Estás a punto de eliminar todos los usuarios",
+    adminUsersPurgeAllDialogDescriptionSuffix:
+      "Esta acción no se puede deshacer. Tu cuenta no se eliminará.",
+    adminUsersDeleteAll: "Eliminar todos",
+    adminUsersPurgeAllError:
+      "Se produjo un error al eliminar todos los usuarios.",
+    adminUsersViewDialogTitle: "Detalles del usuario",
+    adminUsersViewDialogSubtitle: "Detalles del usuario seleccionado.",
+    adminUsersClose: "Cerrar",
+    adminUsersOk: "OK",
+    adminUsersEmailLabel: "Email",
+    adminUsersIdPrefix: "ID",
+    adminUsersRoleLabel: "Rol",
+    adminUsersStatusLabel: "Estado",
+    adminUsersUserIdLabel: "ID de usuario",
+    adminUsersCreatedLabel: "Creado",
+  },
+  pt: {
+    adminUsersBreadcrumbTitle: "Usuários",
+    adminUsersInfoTooltipLabel: "Info",
+    adminUsersInfoTooltipTitle: "Gestão de utilizadores",
+    adminUsersInfoTooltipDescription:
+      "Gerir utilizadores: pesquisa, filtros, alteração de papel, ativar/desativar e exportar resultados.",
+    adminUsersStatusFilterAria: "Estado dos utilizadores",
+    adminUsersRoleFilterAria: "Papel dos utilizadores",
+    adminUsersFilterAllStatus: "Todos os estados",
+    adminUsersFilterStatusActive: "Ativo",
+    adminUsersFilterStatusDeactivated: "Desativado",
+    adminUsersFilterAllRoles: "Todos os papéis",
+    adminUsersRoleUser: "Utilizador",
+    adminUsersRoleAdmin: "Admin",
+    adminUsersRoleMonitoring: "Monitoring",
+    adminUsersRoleTeacher: "Professor",
+    adminUsersRoleAuthor: "Autor",
+    adminUsersExportCsv: "Exportar CSV",
+    adminUsersTableControlsTooltipLabel: "Info",
+    adminUsersTableControlsTooltipTitle: "Controlos da tabela",
+    adminUsersTableControlsTooltipDescription:
+      "Use Rows per page para 10/20/50/100. Exportar CSV gera um ficheiro com os filtros atuais (server-side).",
+    adminUsersBulkDeleteSelected: "Eliminar selecionados",
+    adminUsersBulkDeleteAllPrefix: "Eliminar todos",
+    adminUsersSelectAllVisible: "Selecionar todos os visíveis",
+    adminUsersTableActions: "Ações",
+    adminUsersSelectUserPrefix: "Selecionar",
+    adminUsersRoleForPrefix: "Papel para",
+    adminUsersView: "Ver",
+    adminUsersBulkDeleteDialogTitle: "Eliminar utilizadores selecionados",
+    adminUsersBulkDeleteDialogDescription:
+      "Os utilizadores selecionados serão eliminados permanentemente. Esta ação não pode ser revertida. A sua conta não será eliminada.",
+    adminUsersSelectedCountLabel: "Selecionados",
+    adminUsersDelete: "Eliminar",
+    adminUsersCancel: "Cancelar",
+    adminUsersBulkDeleteError:
+      "Ocorreu um erro ao eliminar os utilizadores selecionados.",
+    adminUsersPurgeAllDialogTitle: "Eliminar todos os utilizadores",
+    adminUsersPurgeAllDialogDescriptionPrefix:
+      "Está prestes a eliminar todos os utilizadores",
+    adminUsersPurgeAllDialogDescriptionSuffix:
+      "Esta ação não pode ser revertida. A sua conta não será eliminada.",
+    adminUsersDeleteAll: "Eliminar todos",
+    adminUsersPurgeAllError:
+      "Ocorreu um erro ao eliminar todos os utilizadores.",
+    adminUsersViewDialogTitle: "Detalhes do utilizador",
+    adminUsersViewDialogSubtitle: "Detalhes do utilizador selecionado.",
+    adminUsersClose: "Fechar",
+    adminUsersOk: "OK",
+    adminUsersEmailLabel: "Email",
+    adminUsersIdPrefix: "ID",
+    adminUsersRoleLabel: "Papel",
+    adminUsersStatusLabel: "Estado",
+    adminUsersUserIdLabel: "ID do utilizador",
+    adminUsersCreatedLabel: "Criado",
+  },
+  pl: {
+    adminUsersBreadcrumbTitle: "Użytkownicy",
+    adminUsersInfoTooltipLabel: "Informacja",
+    adminUsersInfoTooltipTitle: "Zarządzanie użytkownikami",
+    adminUsersInfoTooltipDescription:
+      "Zarządzaj użytkownikami: wyszukiwanie, filtry, zmiana ról, aktywacja/dezaktywacja i eksport wyników.",
+    adminUsersStatusFilterAria: "Status użytkowników",
+    adminUsersRoleFilterAria: "Rola użytkowników",
+    adminUsersFilterAllStatus: "Wszystkie statusy",
+    adminUsersFilterStatusActive: "Aktywny",
+    adminUsersFilterStatusDeactivated: "Dezaktywowany",
+    adminUsersFilterAllRoles: "Wszystkie role",
+    adminUsersRoleUser: "Użytkownik",
+    adminUsersRoleAdmin: "Admin",
+    adminUsersRoleMonitoring: "Monitoring",
+    adminUsersRoleTeacher: "Nauczyciel",
+    adminUsersRoleAuthor: "Autor",
+    adminUsersExportCsv: "Eksport CSV",
+    adminUsersTableControlsTooltipLabel: "Informacja",
+    adminUsersTableControlsTooltipTitle: "Sterowanie tabelą",
+    adminUsersTableControlsTooltipDescription:
+      "Użyj Rows per page dla 10/20/50/100. Eksport CSV generuje plik dla bieżących filtrów (server-side).",
+    adminUsersBulkDeleteSelected: "Usuń wybrane",
+    adminUsersBulkDeleteAllPrefix: "Usuń wszystkich",
+    adminUsersSelectAllVisible: "Zaznacz wszystkie widoczne",
+    adminUsersTableActions: "Akcje",
+    adminUsersSelectUserPrefix: "Zaznacz",
+    adminUsersRoleForPrefix: "Rola dla",
+    adminUsersView: "Podgląd",
+    adminUsersBulkDeleteDialogTitle: "Usuń wybranych użytkowników",
+    adminUsersBulkDeleteDialogDescription:
+      "Wybrani użytkownicy zostaną trwale usunięci. Tej operacji nie można cofnąć. Twoje konto nie zostanie usunięte.",
+    adminUsersSelectedCountLabel: "Liczba wybranych",
+    adminUsersDelete: "Usuń",
+    adminUsersCancel: "Anuluj",
+    adminUsersBulkDeleteError:
+      "Wystąpił błąd podczas usuwania wybranych użytkowników.",
+    adminUsersPurgeAllDialogTitle: "Usuń wszystkich użytkowników",
+    adminUsersPurgeAllDialogDescriptionPrefix:
+      "Zamierzasz usunąć wszystkich użytkowników",
+    adminUsersPurgeAllDialogDescriptionSuffix:
+      "Tej operacji nie można cofnąć. Twoje konto nie zostanie usunięte.",
+    adminUsersDeleteAll: "Usuń wszystkich",
+    adminUsersPurgeAllError:
+      "Wystąpił błąd podczas usuwania wszystkich użytkowników.",
+    adminUsersViewDialogTitle: "Dane użytkownika",
+    adminUsersViewDialogSubtitle: "Szczegóły wybranego użytkownika.",
+    adminUsersClose: "Zamknij",
+    adminUsersOk: "OK",
+    adminUsersEmailLabel: "Email",
+    adminUsersIdPrefix: "ID",
+    adminUsersRoleLabel: "Rola",
+    adminUsersStatusLabel: "Status",
+    adminUsersUserIdLabel: "ID użytkownika",
+    adminUsersCreatedLabel: "Utworzono",
+  },
+  ua: {
+    adminUsersBreadcrumbTitle: "Користувачі",
+    adminUsersInfoTooltipLabel: "Інфо",
+    adminUsersInfoTooltipTitle: "Керування користувачами",
+    adminUsersInfoTooltipDescription:
+      "Керування користувачами: пошук, фільтри, зміна ролі, активація/деактивація та експорт результатів.",
+    adminUsersStatusFilterAria: "Статус користувачів",
+    adminUsersRoleFilterAria: "Роль користувачів",
+    adminUsersFilterAllStatus: "Усі статуси",
+    adminUsersFilterStatusActive: "Активні",
+    adminUsersFilterStatusDeactivated: "Деактивовані",
+    adminUsersFilterAllRoles: "Усі ролі",
+    adminUsersRoleUser: "Користувач",
+    adminUsersRoleAdmin: "Адмін",
+    adminUsersRoleMonitoring: "Monitoring",
+    adminUsersRoleTeacher: "Викладач",
+    adminUsersRoleAuthor: "Автор",
+    adminUsersExportCsv: "Експорт CSV",
+    adminUsersTableControlsTooltipLabel: "Інфо",
+    adminUsersTableControlsTooltipTitle: "Керування таблицею",
+    adminUsersTableControlsTooltipDescription:
+      "Використовуйте Rows per page для 10/20/50/100. Експорт CSV створює файл з поточними фільтрами (server-side).",
+    adminUsersBulkDeleteSelected: "Видалити вибраних",
+    adminUsersBulkDeleteAllPrefix: "Видалити всіх",
+    adminUsersSelectAllVisible: "Вибрати всіх видимих",
+    adminUsersTableActions: "Дії",
+    adminUsersSelectUserPrefix: "Вибрати",
+    adminUsersRoleForPrefix: "Роль для",
+    adminUsersView: "Перегляд",
+    adminUsersBulkDeleteDialogTitle: "Видалення вибраних користувачів",
+    adminUsersBulkDeleteDialogDescription:
+      "Вибрані користувачі будуть остаточно видалені. Цю дію не можна скасувати. Ваш акаунт не буде видалено.",
+    adminUsersSelectedCountLabel: "Кількість вибраних",
+    adminUsersDelete: "Видалити",
+    adminUsersCancel: "Скасувати",
+    adminUsersBulkDeleteError:
+      "Сталася помилка під час видалення вибраних користувачів.",
+    adminUsersPurgeAllDialogTitle: "Видалення всіх користувачів",
+    adminUsersPurgeAllDialogDescriptionPrefix:
+      "Ви збираєтесь видалити всіх користувачів",
+    adminUsersPurgeAllDialogDescriptionSuffix:
+      "Цю дію не можна скасувати. Ваш акаунт не буде видалено.",
+    adminUsersDeleteAll: "Видалити всіх",
+    adminUsersPurgeAllError:
+      "Сталася помилка під час видалення всіх користувачів.",
+    adminUsersViewDialogTitle: "Дані користувача",
+    adminUsersViewDialogSubtitle: "Деталі вибраного користувача.",
+    adminUsersClose: "Закрити",
+    adminUsersOk: "OK",
+    adminUsersEmailLabel: "Email",
+    adminUsersIdPrefix: "ID",
+    adminUsersRoleLabel: "Роль",
+    adminUsersStatusLabel: "Статус",
+    adminUsersUserIdLabel: "ID користувача",
+    adminUsersCreatedLabel: "Створено",
+  },
+  ru: {
+    adminUsersBreadcrumbTitle: "Пользователи",
+    adminUsersInfoTooltipLabel: "Инфо",
+    adminUsersInfoTooltipTitle: "Управление пользователями",
+    adminUsersInfoTooltipDescription:
+      "Управление пользователями: поиск, фильтры, смена ролей, активация/деактивация и экспорт результатов.",
+    adminUsersStatusFilterAria: "Статус пользователей",
+    adminUsersRoleFilterAria: "Роль пользователей",
+    adminUsersFilterAllStatus: "Все статусы",
+    adminUsersFilterStatusActive: "Активные",
+    adminUsersFilterStatusDeactivated: "Деактивированные",
+    adminUsersFilterAllRoles: "Все роли",
+    adminUsersRoleUser: "Пользователь",
+    adminUsersRoleAdmin: "Админ",
+    adminUsersRoleMonitoring: "Monitoring",
+    adminUsersRoleTeacher: "Преподаватель",
+    adminUsersRoleAuthor: "Автор",
+    adminUsersExportCsv: "Экспорт CSV",
+    adminUsersTableControlsTooltipLabel: "Инфо",
+    adminUsersTableControlsTooltipTitle: "Управление таблицей",
+    adminUsersTableControlsTooltipDescription:
+      "Используйте Rows per page для 10/20/50/100. Экспорт CSV создаёт файл по текущим фильтрам (server-side).",
+    adminUsersBulkDeleteSelected: "Удалить выбранных",
+    adminUsersBulkDeleteAllPrefix: "Удалить всех",
+    adminUsersSelectAllVisible: "Выбрать всех видимых",
+    adminUsersTableActions: "Действия",
+    adminUsersSelectUserPrefix: "Выбрать",
+    adminUsersRoleForPrefix: "Роль для",
+    adminUsersView: "Просмотр",
+    adminUsersBulkDeleteDialogTitle: "Удаление выбранных пользователей",
+    adminUsersBulkDeleteDialogDescription:
+      "Выбранные пользователи будут удалены навсегда. Это действие нельзя отменить. Ваш аккаунт не будет удалён.",
+    adminUsersSelectedCountLabel: "Выбрано",
+    adminUsersDelete: "Удалить",
+    adminUsersCancel: "Отмена",
+    adminUsersBulkDeleteError:
+      "Произошла ошибка при удалении выбранных пользователей.",
+    adminUsersPurgeAllDialogTitle: "Удаление всех пользователей",
+    adminUsersPurgeAllDialogDescriptionPrefix:
+      "Вы собираетесь удалить всех пользователей",
+    adminUsersPurgeAllDialogDescriptionSuffix:
+      "Это действие нельзя отменить. Ваш аккаунт не будет удалён.",
+    adminUsersDeleteAll: "Удалить всех",
+    adminUsersPurgeAllError:
+      "Произошла ошибка при удалении всех пользователей.",
+    adminUsersViewDialogTitle: "Данные пользователя",
+    adminUsersViewDialogSubtitle: "Детали выбранного пользователя.",
+    adminUsersClose: "Закрыть",
+    adminUsersOk: "OK",
+    adminUsersEmailLabel: "Email",
+    adminUsersIdPrefix: "ID",
+    adminUsersRoleLabel: "Роль",
+    adminUsersStatusLabel: "Статус",
+    adminUsersUserIdLabel: "ID пользователя",
+    adminUsersCreatedLabel: "Создан",
+  },
+  fr: {
+    adminUsersBreadcrumbTitle: "Utilisateurs",
+    adminUsersInfoTooltipLabel: "Info",
+    adminUsersInfoTooltipTitle: "Gestion des utilisateurs",
+    adminUsersInfoTooltipDescription:
+      "Gérer les utilisateurs : recherche, filtres, changement de rôle, activation/désactivation et export des résultats.",
+    adminUsersStatusFilterAria: "Statut des utilisateurs",
+    adminUsersRoleFilterAria: "Rôle des utilisateurs",
+    adminUsersFilterAllStatus: "Tous les statuts",
+    adminUsersFilterStatusActive: "Actif",
+    adminUsersFilterStatusDeactivated: "Désactivé",
+    adminUsersFilterAllRoles: "Tous les rôles",
+    adminUsersRoleUser: "Utilisateur",
+    adminUsersRoleAdmin: "Admin",
+    adminUsersRoleMonitoring: "Monitoring",
+    adminUsersRoleTeacher: "Enseignant",
+    adminUsersRoleAuthor: "Auteur",
+    adminUsersExportCsv: "Exporter CSV",
+    adminUsersTableControlsTooltipLabel: "Info",
+    adminUsersTableControlsTooltipTitle: "Contrôles du tableau",
+    adminUsersTableControlsTooltipDescription:
+      "Utilisez Rows per page pour 10/20/50/100. Export CSV génère un fichier selon les filtres actuels (server-side).",
+    adminUsersBulkDeleteSelected: "Supprimer la sélection",
+    adminUsersBulkDeleteAllPrefix: "Tout supprimer",
+    adminUsersSelectAllVisible: "Tout sélectionner (visible)",
+    adminUsersTableActions: "Actions",
+    adminUsersSelectUserPrefix: "Sélectionner",
+    adminUsersRoleForPrefix: "Rôle pour",
+    adminUsersView: "Voir",
+    adminUsersBulkDeleteDialogTitle: "Supprimer les utilisateurs sélectionnés",
+    adminUsersBulkDeleteDialogDescription:
+      "Les utilisateurs sélectionnés seront supprimés définitivement. Cette action est irréversible. Votre compte ne sera pas supprimé.",
+    adminUsersSelectedCountLabel: "Nombre sélectionné",
+    adminUsersDelete: "Supprimer",
+    adminUsersCancel: "Annuler",
+    adminUsersBulkDeleteError:
+      "Une erreur est survenue lors de la suppression des utilisateurs sélectionnés.",
+    adminUsersPurgeAllDialogTitle: "Supprimer tous les utilisateurs",
+    adminUsersPurgeAllDialogDescriptionPrefix:
+      "Vous êtes sur le point de supprimer tous les utilisateurs",
+    adminUsersPurgeAllDialogDescriptionSuffix:
+      "Cette action est irréversible. Votre compte ne sera pas supprimé.",
+    adminUsersDeleteAll: "Tout supprimer",
+    adminUsersPurgeAllError:
+      "Une erreur est survenue lors de la suppression de tous les utilisateurs.",
+    adminUsersViewDialogTitle: "Détails de l’utilisateur",
+    adminUsersViewDialogSubtitle: "Détails de l’utilisateur sélectionné.",
+    adminUsersClose: "Fermer",
+    adminUsersOk: "OK",
+    adminUsersEmailLabel: "Email",
+    adminUsersIdPrefix: "ID",
+    adminUsersRoleLabel: "Rôle",
+    adminUsersStatusLabel: "Statut",
+    adminUsersUserIdLabel: "ID utilisateur",
+    adminUsersCreatedLabel: "Créé",
+  },
+  tr: {
+    adminUsersBreadcrumbTitle: "Kullanıcılar",
+    adminUsersInfoTooltipLabel: "Bilgi",
+    adminUsersInfoTooltipTitle: "Kullanıcı yönetimi",
+    adminUsersInfoTooltipDescription:
+      "Kullanıcıları yönetin: arama, filtreler, rol değiştirme, etkinleştirme/devre dışı bırakma ve sonuçları dışa aktarma.",
+    adminUsersStatusFilterAria: "Kullanıcı durumu",
+    adminUsersRoleFilterAria: "Kullanıcı rolü",
+    adminUsersFilterAllStatus: "Tüm durumlar",
+    adminUsersFilterStatusActive: "Aktif",
+    adminUsersFilterStatusDeactivated: "Devre dışı",
+    adminUsersFilterAllRoles: "Tüm roller",
+    adminUsersRoleUser: "Kullanıcı",
+    adminUsersRoleAdmin: "Admin",
+    adminUsersRoleMonitoring: "Monitoring",
+    adminUsersRoleTeacher: "Öğretmen",
+    adminUsersRoleAuthor: "Yazar",
+    adminUsersExportCsv: "CSV dışa aktar",
+    adminUsersTableControlsTooltipLabel: "Bilgi",
+    adminUsersTableControlsTooltipTitle: "Tablo kontrolleri",
+    adminUsersTableControlsTooltipDescription:
+      "Rows per page için 10/20/50/100 kullanın. CSV dışa aktarma mevcut filtrelere göre dosya üretir (server-side).",
+    adminUsersBulkDeleteSelected: "Seçileni sil",
+    adminUsersBulkDeleteAllPrefix: "Tümünü sil",
+    adminUsersSelectAllVisible: "Görünenlerin tümünü seç",
+    adminUsersTableActions: "İşlemler",
+    adminUsersSelectUserPrefix: "Seç",
+    adminUsersRoleForPrefix: "Şunun rolü",
+    adminUsersView: "Görüntüle",
+    adminUsersBulkDeleteDialogTitle: "Seçili kullanıcıları sil",
+    adminUsersBulkDeleteDialogDescription:
+      "Seçili kullanıcılar kalıcı olarak silinecek. Bu işlem geri alınamaz. Hesabınız silinmez.",
+    adminUsersSelectedCountLabel: "Seçili",
+    adminUsersDelete: "Sil",
+    adminUsersCancel: "İptal",
+    adminUsersBulkDeleteError:
+      "Seçili kullanıcıları silerken bir hata oluştu.",
+    adminUsersPurgeAllDialogTitle: "Tüm kullanıcıları sil",
+    adminUsersPurgeAllDialogDescriptionPrefix:
+      "Tüm kullanıcıları silmek üzeresiniz",
+    adminUsersPurgeAllDialogDescriptionSuffix:
+      "Bu işlem geri alınamaz. Hesabınız silinmez.",
+    adminUsersDeleteAll: "Tümünü sil",
+    adminUsersPurgeAllError:
+      "Tüm kullanıcıları silerken bir hata oluştu.",
+    adminUsersViewDialogTitle: "Kullanıcı detayları",
+    adminUsersViewDialogSubtitle: "Seçili kullanıcı için detaylar.",
+    adminUsersClose: "Kapat",
+    adminUsersOk: "OK",
+    adminUsersEmailLabel: "E-posta",
+    adminUsersIdPrefix: "ID",
+    adminUsersRoleLabel: "Rol",
+    adminUsersStatusLabel: "Durum",
+    adminUsersUserIdLabel: "Kullanıcı ID",
+    adminUsersCreatedLabel: "Oluşturulma",
+  },
+  ro: {
+    adminUsersBreadcrumbTitle: "Utilizatori",
+    adminUsersInfoTooltipLabel: "Info",
+    adminUsersInfoTooltipTitle: "Administrare utilizatori",
+    adminUsersInfoTooltipDescription:
+      "Administrare utilizatori: căutare, filtre, schimbare rol, activare/dezactivare și export rezultate.",
+    adminUsersStatusFilterAria: "Status utilizatori",
+    adminUsersRoleFilterAria: "Rol utilizatori",
+    adminUsersFilterAllStatus: "Toate statusurile",
+    adminUsersFilterStatusActive: "Activ",
+    adminUsersFilterStatusDeactivated: "Dezactivat",
+    adminUsersFilterAllRoles: "Toate rolurile",
+    adminUsersRoleUser: "Utilizator",
+    adminUsersRoleAdmin: "Admin",
+    adminUsersRoleMonitoring: "Monitoring",
+    adminUsersRoleTeacher: "Profesor",
+    adminUsersRoleAuthor: "Autor",
+    adminUsersExportCsv: "Export CSV",
+    adminUsersTableControlsTooltipLabel: "Info",
+    adminUsersTableControlsTooltipTitle: "Controale tabel",
+    adminUsersTableControlsTooltipDescription:
+      "Folosește Rows per page pentru 10/20/50/100. Export CSV generează un fișier pentru filtrele curente (server-side).",
+    adminUsersBulkDeleteSelected: "Șterge selectate",
+    adminUsersBulkDeleteAllPrefix: "Șterge toate",
+    adminUsersSelectAllVisible: "Selectează toate vizibile",
+    adminUsersTableActions: "Acțiuni",
+    adminUsersSelectUserPrefix: "Selectează",
+    adminUsersRoleForPrefix: "Rol pentru",
+    adminUsersView: "Vezi",
+    adminUsersBulkDeleteDialogTitle: "Șterge utilizatorii selectați",
+    adminUsersBulkDeleteDialogDescription:
+      "Utilizatorii selectați vor fi șterși definitiv. Această acțiune nu poate fi anulată. Contul tău nu va fi șters.",
+    adminUsersSelectedCountLabel: "Selectate",
+    adminUsersDelete: "Șterge",
+    adminUsersCancel: "Anulează",
+    adminUsersBulkDeleteError:
+      "A apărut o eroare la ștergerea utilizatorilor selectați.",
+    adminUsersPurgeAllDialogTitle: "Șterge toți utilizatorii",
+    adminUsersPurgeAllDialogDescriptionPrefix:
+      "Ești pe cale să ștergi toți utilizatorii",
+    adminUsersPurgeAllDialogDescriptionSuffix:
+      "Această acțiune nu poate fi anulată. Contul tău nu va fi șters.",
+    adminUsersDeleteAll: "Șterge toate",
+    adminUsersPurgeAllError:
+      "A apărut o eroare la ștergerea tuturor utilizatorilor.",
+    adminUsersViewDialogTitle: "Detalii utilizator",
+    adminUsersViewDialogSubtitle: "Detalii pentru utilizatorul selectat.",
+    adminUsersClose: "Închide",
+    adminUsersOk: "OK",
+    adminUsersEmailLabel: "Email",
+    adminUsersIdPrefix: "ID",
+    adminUsersRoleLabel: "Rol",
+    adminUsersStatusLabel: "Status",
+    adminUsersUserIdLabel: "ID utilizator",
+    adminUsersCreatedLabel: "Creat",
+  },
+  hi: {
+    adminUsersBreadcrumbTitle: "उपयोगकर्ता",
+    adminUsersInfoTooltipLabel: "जानकारी",
+    adminUsersInfoTooltipTitle: "उपयोगकर्ता प्रबंधन",
+    adminUsersInfoTooltipDescription:
+      "उपयोगकर्ताओं का प्रबंधन: खोज, फ़िल्टर, भूमिका बदलना, सक्रिय/निष्क्रिय करना और परिणाम निर्यात करना।",
+    adminUsersStatusFilterAria: "उपयोगकर्ता स्थिति",
+    adminUsersRoleFilterAria: "उपयोगकर्ता भूमिका",
+    adminUsersFilterAllStatus: "सभी स्थितियाँ",
+    adminUsersFilterStatusActive: "सक्रिय",
+    adminUsersFilterStatusDeactivated: "निष्क्रिय",
+    adminUsersFilterAllRoles: "सभी भूमिकाएँ",
+    adminUsersRoleUser: "उपयोगकर्ता",
+    adminUsersRoleAdmin: "एडमिन",
+    adminUsersRoleMonitoring: "Monitoring",
+    adminUsersRoleTeacher: "शिक्षक",
+    adminUsersRoleAuthor: "लेखक",
+    adminUsersExportCsv: "CSV निर्यात",
+    adminUsersTableControlsTooltipLabel: "जानकारी",
+    adminUsersTableControlsTooltipTitle: "टेबल नियंत्रण",
+    adminUsersTableControlsTooltipDescription:
+      "Rows per page के लिए 10/20/50/100 उपयोग करें। CSV निर्यात वर्तमान फ़िल्टर के आधार पर फ़ाइल बनाता है (server-side)।",
+    adminUsersBulkDeleteSelected: "चयनित हटाएँ",
+    adminUsersBulkDeleteAllPrefix: "सभी हटाएँ",
+    adminUsersSelectAllVisible: "सभी दिखाई देने वाले चुनें",
+    adminUsersTableActions: "क्रियाएँ",
+    adminUsersSelectUserPrefix: "चुनें",
+    adminUsersRoleForPrefix: "इसके लिए भूमिका",
+    adminUsersView: "देखें",
+    adminUsersBulkDeleteDialogTitle: "चयनित उपयोगकर्ता हटाएँ",
+    adminUsersBulkDeleteDialogDescription:
+      "चयनित उपयोगकर्ता स्थायी रूप से हटाए जाएंगे। यह क्रिया वापस नहीं की जा सकती। आपका खाता नहीं हटेगा।",
+    adminUsersSelectedCountLabel: "चयनित संख्या",
+    adminUsersDelete: "हटाएँ",
+    adminUsersCancel: "रद्द करें",
+    adminUsersBulkDeleteError:
+      "चयनित उपयोगकर्ताओं को हटाते समय एक त्रुटि हुई।",
+    adminUsersPurgeAllDialogTitle: "सभी उपयोगकर्ता हटाएँ",
+    adminUsersPurgeAllDialogDescriptionPrefix:
+      "आप सभी उपयोगकर्ताओं को हटाने वाले हैं",
+    adminUsersPurgeAllDialogDescriptionSuffix:
+      "यह क्रिया वापस नहीं की जा सकती। आपका खाता नहीं हटेगा।",
+    adminUsersDeleteAll: "सभी हटाएँ",
+    adminUsersPurgeAllError: "सभी उपयोगकर्ताओं को हटाते समय एक त्रुटि हुई।",
+    adminUsersViewDialogTitle: "उपयोगकर्ता विवरण",
+    adminUsersViewDialogSubtitle: "चयनित उपयोगकर्ता के लिए विवरण।",
+    adminUsersClose: "बंद करें",
+    adminUsersOk: "OK",
+    adminUsersEmailLabel: "Email",
+    adminUsersIdPrefix: "ID",
+    adminUsersRoleLabel: "भूमिका",
+    adminUsersStatusLabel: "स्थिति",
+    adminUsersUserIdLabel: "User ID",
+    adminUsersCreatedLabel: "बनाया गया",
+  },
+  vi: {
+    adminUsersBreadcrumbTitle: "Người dùng",
+    adminUsersInfoTooltipLabel: "Thông tin",
+    adminUsersInfoTooltipTitle: "Quản lý người dùng",
+    adminUsersInfoTooltipDescription:
+      "Quản lý người dùng: tìm kiếm, bộ lọc, đổi vai trò, kích hoạt/vô hiệu hóa và xuất kết quả.",
+    adminUsersStatusFilterAria: "Trạng thái người dùng",
+    adminUsersRoleFilterAria: "Vai trò người dùng",
+    adminUsersFilterAllStatus: "Tất cả trạng thái",
+    adminUsersFilterStatusActive: "Hoạt động",
+    adminUsersFilterStatusDeactivated: "Vô hiệu hóa",
+    adminUsersFilterAllRoles: "Tất cả vai trò",
+    adminUsersRoleUser: "Người dùng",
+    adminUsersRoleAdmin: "Admin",
+    adminUsersRoleMonitoring: "Monitoring",
+    adminUsersRoleTeacher: "Giáo viên",
+    adminUsersRoleAuthor: "Tác giả",
+    adminUsersExportCsv: "Xuất CSV",
+    adminUsersTableControlsTooltipLabel: "Thông tin",
+    adminUsersTableControlsTooltipTitle: "Điều khiển bảng",
+    adminUsersTableControlsTooltipDescription:
+      "Dùng Rows per page cho 10/20/50/100. Xuất CSV tạo tệp theo bộ lọc hiện tại (server-side).",
+    adminUsersBulkDeleteSelected: "Xóa đã chọn",
+    adminUsersBulkDeleteAllPrefix: "Xóa tất cả",
+    adminUsersSelectAllVisible: "Chọn tất cả hiển thị",
+    adminUsersTableActions: "Hành động",
+    adminUsersSelectUserPrefix: "Chọn",
+    adminUsersRoleForPrefix: "Vai trò cho",
+    adminUsersView: "Xem",
+    adminUsersBulkDeleteDialogTitle: "Xóa người dùng đã chọn",
+    adminUsersBulkDeleteDialogDescription:
+      "Người dùng đã chọn sẽ bị xóa vĩnh viễn. Hành động này không thể hoàn tác. Tài khoản của bạn sẽ không bị xóa.",
+    adminUsersSelectedCountLabel: "Số lượng đã chọn",
+    adminUsersDelete: "Xóa",
+    adminUsersCancel: "Hủy",
+    adminUsersBulkDeleteError:
+      "Đã xảy ra lỗi khi xóa người dùng đã chọn.",
+    adminUsersPurgeAllDialogTitle: "Xóa tất cả người dùng",
+    adminUsersPurgeAllDialogDescriptionPrefix:
+      "Bạn sắp xóa tất cả người dùng",
+    adminUsersPurgeAllDialogDescriptionSuffix:
+      "Hành động này không thể hoàn tác. Tài khoản của bạn sẽ không bị xóa.",
+    adminUsersDeleteAll: "Xóa tất cả",
+    adminUsersPurgeAllError: "Đã xảy ra lỗi khi xóa tất cả người dùng.",
+    adminUsersViewDialogTitle: "Chi tiết người dùng",
+    adminUsersViewDialogSubtitle: "Chi tiết cho người dùng đã chọn.",
+    adminUsersClose: "Đóng",
+    adminUsersOk: "OK",
+    adminUsersEmailLabel: "Email",
+    adminUsersIdPrefix: "ID",
+    adminUsersRoleLabel: "Vai trò",
+    adminUsersStatusLabel: "Trạng thái",
+    adminUsersUserIdLabel: "User ID",
+    adminUsersCreatedLabel: "Tạo",
+  },
+  id: {
+    adminUsersBreadcrumbTitle: "Pengguna",
+    adminUsersInfoTooltipLabel: "Info",
+    adminUsersInfoTooltipTitle: "Manajemen pengguna",
+    adminUsersInfoTooltipDescription:
+      "Kelola pengguna: pencarian, filter, ubah peran, aktif/nonaktif, dan ekspor hasil.",
+    adminUsersStatusFilterAria: "Status pengguna",
+    adminUsersRoleFilterAria: "Peran pengguna",
+    adminUsersFilterAllStatus: "Semua status",
+    adminUsersFilterStatusActive: "Aktif",
+    adminUsersFilterStatusDeactivated: "Dinonaktifkan",
+    adminUsersFilterAllRoles: "Semua peran",
+    adminUsersRoleUser: "Pengguna",
+    adminUsersRoleAdmin: "Admin",
+    adminUsersRoleMonitoring: "Monitoring",
+    adminUsersRoleTeacher: "Pengajar",
+    adminUsersRoleAuthor: "Penulis",
+    adminUsersExportCsv: "Ekspor CSV",
+    adminUsersTableControlsTooltipLabel: "Info",
+    adminUsersTableControlsTooltipTitle: "Kontrol tabel",
+    adminUsersTableControlsTooltipDescription:
+      "Gunakan Rows per page untuk 10/20/50/100. Ekspor CSV membuat file sesuai filter saat ini (server-side).",
+    adminUsersBulkDeleteSelected: "Hapus yang dipilih",
+    adminUsersBulkDeleteAllPrefix: "Hapus semua",
+    adminUsersSelectAllVisible: "Pilih semua yang terlihat",
+    adminUsersTableActions: "Aksi",
+    adminUsersSelectUserPrefix: "Pilih",
+    adminUsersRoleForPrefix: "Peran untuk",
+    adminUsersView: "Lihat",
+    adminUsersBulkDeleteDialogTitle: "Hapus pengguna yang dipilih",
+    adminUsersBulkDeleteDialogDescription:
+      "Pengguna yang dipilih akan dihapus permanen. Tindakan ini tidak dapat dibatalkan. Akun Anda tidak akan dihapus.",
+    adminUsersSelectedCountLabel: "Jumlah dipilih",
+    adminUsersDelete: "Hapus",
+    adminUsersCancel: "Batal",
+    adminUsersBulkDeleteError:
+      "Terjadi kesalahan saat menghapus pengguna yang dipilih.",
+    adminUsersPurgeAllDialogTitle: "Hapus semua pengguna",
+    adminUsersPurgeAllDialogDescriptionPrefix:
+      "Anda akan menghapus semua pengguna",
+    adminUsersPurgeAllDialogDescriptionSuffix:
+      "Tindakan ini tidak dapat dibatalkan. Akun Anda tidak akan dihapus.",
+    adminUsersDeleteAll: "Hapus semua",
+    adminUsersPurgeAllError: "Terjadi kesalahan saat menghapus semua pengguna.",
+    adminUsersViewDialogTitle: "Detail pengguna",
+    adminUsersViewDialogSubtitle: "Detail untuk pengguna yang dipilih.",
+    adminUsersClose: "Tutup",
+    adminUsersOk: "OK",
+    adminUsersEmailLabel: "Email",
+    adminUsersIdPrefix: "ID",
+    adminUsersRoleLabel: "Peran",
+    adminUsersStatusLabel: "Status",
+    adminUsersUserIdLabel: "User ID",
+    adminUsersCreatedLabel: "Dibuat",
+  },
+  it: {
+    adminUsersBreadcrumbTitle: "Utenti",
+    adminUsersInfoTooltipLabel: "Info",
+    adminUsersInfoTooltipTitle: "Gestione utenti",
+    adminUsersInfoTooltipDescription:
+      "Gestisci utenti: ricerca, filtri, cambio ruolo, attiva/disattiva ed esporta i risultati.",
+    adminUsersStatusFilterAria: "Stato utenti",
+    adminUsersRoleFilterAria: "Ruolo utenti",
+    adminUsersFilterAllStatus: "Tutti gli stati",
+    adminUsersFilterStatusActive: "Attivo",
+    adminUsersFilterStatusDeactivated: "Disattivato",
+    adminUsersFilterAllRoles: "Tutti i ruoli",
+    adminUsersRoleUser: "Utente",
+    adminUsersRoleAdmin: "Admin",
+    adminUsersRoleMonitoring: "Monitoring",
+    adminUsersRoleTeacher: "Docente",
+    adminUsersRoleAuthor: "Autore",
+    adminUsersExportCsv: "Esporta CSV",
+    adminUsersTableControlsTooltipLabel: "Info",
+    adminUsersTableControlsTooltipTitle: "Controlli tabella",
+    adminUsersTableControlsTooltipDescription:
+      "Usa Rows per page per 10/20/50/100. Esporta CSV genera un file in base ai filtri correnti (server-side).",
+    adminUsersBulkDeleteSelected: "Elimina selezionati",
+    adminUsersBulkDeleteAllPrefix: "Elimina tutti",
+    adminUsersSelectAllVisible: "Seleziona tutti i visibili",
+    adminUsersTableActions: "Azioni",
+    adminUsersSelectUserPrefix: "Seleziona",
+    adminUsersRoleForPrefix: "Ruolo per",
+    adminUsersView: "Vedi",
+    adminUsersBulkDeleteDialogTitle: "Elimina utenti selezionati",
+    adminUsersBulkDeleteDialogDescription:
+      "Gli utenti selezionati verranno eliminati definitivamente. Questa azione non può essere annullata. Il tuo account non verrà eliminato.",
+    adminUsersSelectedCountLabel: "Selezionati",
+    adminUsersDelete: "Elimina",
+    adminUsersCancel: "Annulla",
+    adminUsersBulkDeleteError:
+      "Si è verificato un errore durante l'eliminazione degli utenti selezionati.",
+    adminUsersPurgeAllDialogTitle: "Elimina tutti gli utenti",
+    adminUsersPurgeAllDialogDescriptionPrefix:
+      "Stai per eliminare tutti gli utenti",
+    adminUsersPurgeAllDialogDescriptionSuffix:
+      "Questa azione non può essere annullata. Il tuo account non verrà eliminato.",
+    adminUsersDeleteAll: "Elimina tutti",
+    adminUsersPurgeAllError:
+      "Si è verificato un errore durante l'eliminazione di tutti gli utenti.",
+    adminUsersViewDialogTitle: "Dettagli utente",
+    adminUsersViewDialogSubtitle: "Dettagli per l'utente selezionato.",
+    adminUsersClose: "Chiudi",
+    adminUsersOk: "OK",
+    adminUsersEmailLabel: "Email",
+    adminUsersIdPrefix: "ID",
+    adminUsersRoleLabel: "Ruolo",
+    adminUsersStatusLabel: "Stato",
+    adminUsersUserIdLabel: "User ID",
+    adminUsersCreatedLabel: "Creato",
+  },
+  ko: {
+    adminUsersBreadcrumbTitle: "사용자",
+    adminUsersInfoTooltipLabel: "정보",
+    adminUsersInfoTooltipTitle: "사용자 관리",
+    adminUsersInfoTooltipDescription:
+      "사용자 관리: 검색, 필터, 역할 변경, 활성/비활성, 결과 내보내기.",
+    adminUsersStatusFilterAria: "사용자 상태",
+    adminUsersRoleFilterAria: "사용자 역할",
+    adminUsersFilterAllStatus: "모든 상태",
+    adminUsersFilterStatusActive: "활성",
+    adminUsersFilterStatusDeactivated: "비활성",
+    adminUsersFilterAllRoles: "모든 역할",
+    adminUsersRoleUser: "사용자",
+    adminUsersRoleAdmin: "관리자",
+    adminUsersRoleMonitoring: "Monitoring",
+    adminUsersRoleTeacher: "교사",
+    adminUsersRoleAuthor: "작성자",
+    adminUsersExportCsv: "CSV 내보내기",
+    adminUsersTableControlsTooltipLabel: "정보",
+    adminUsersTableControlsTooltipTitle: "테이블 제어",
+    adminUsersTableControlsTooltipDescription:
+      "Rows per page에서 10/20/50/100을 사용하세요. CSV 내보내기는 현재 필터 기준으로 파일을 생성합니다 (server-side).",
+    adminUsersBulkDeleteSelected: "선택 삭제",
+    adminUsersBulkDeleteAllPrefix: "전체 삭제",
+    adminUsersSelectAllVisible: "보이는 항목 모두 선택",
+    adminUsersTableActions: "작업",
+    adminUsersSelectUserPrefix: "선택",
+    adminUsersRoleForPrefix: "역할",
+    adminUsersView: "보기",
+    adminUsersBulkDeleteDialogTitle: "선택한 사용자 삭제",
+    adminUsersBulkDeleteDialogDescription:
+      "선택한 사용자는 영구적으로 삭제됩니다. 이 작업은 되돌릴 수 없습니다. 내 계정은 삭제되지 않습니다.",
+    adminUsersSelectedCountLabel: "선택 수",
+    adminUsersDelete: "삭제",
+    adminUsersCancel: "취소",
+    adminUsersBulkDeleteError:
+      "선택한 사용자를 삭제하는 중 오류가 발생했습니다.",
+    adminUsersPurgeAllDialogTitle: "모든 사용자 삭제",
+    adminUsersPurgeAllDialogDescriptionPrefix:
+      "모든 사용자를 삭제하려고 합니다",
+    adminUsersPurgeAllDialogDescriptionSuffix:
+      "이 작업은 되돌릴 수 없습니다. 내 계정은 삭제되지 않습니다.",
+    adminUsersDeleteAll: "모두 삭제",
+    adminUsersPurgeAllError: "모든 사용자를 삭제하는 중 오류가 발생했습니다.",
+    adminUsersViewDialogTitle: "사용자 상세",
+    adminUsersViewDialogSubtitle: "선택한 사용자의 상세 정보.",
+    adminUsersClose: "닫기",
+    adminUsersOk: "OK",
+    adminUsersEmailLabel: "Email",
+    adminUsersIdPrefix: "ID",
+    adminUsersRoleLabel: "역할",
+    adminUsersStatusLabel: "상태",
+    adminUsersUserIdLabel: "User ID",
+    adminUsersCreatedLabel: "생성됨",
+  },
+  ja: {
+    adminUsersBreadcrumbTitle: "ユーザー",
+    adminUsersInfoTooltipLabel: "情報",
+    adminUsersInfoTooltipTitle: "ユーザー管理",
+    adminUsersInfoTooltipDescription:
+      "ユーザー管理: 検索、フィルター、役割変更、有効/無効、結果のエクスポート。",
+    adminUsersStatusFilterAria: "ユーザーの状態",
+    adminUsersRoleFilterAria: "ユーザーの役割",
+    adminUsersFilterAllStatus: "すべての状態",
+    adminUsersFilterStatusActive: "有効",
+    adminUsersFilterStatusDeactivated: "無効",
+    adminUsersFilterAllRoles: "すべての役割",
+    adminUsersRoleUser: "ユーザー",
+    adminUsersRoleAdmin: "管理者",
+    adminUsersRoleMonitoring: "モニタリング",
+    adminUsersRoleTeacher: "教師",
+    adminUsersRoleAuthor: "著者",
+    adminUsersExportCsv: "CSVをエクスポート",
+    adminUsersTableControlsTooltipLabel: "情報",
+    adminUsersTableControlsTooltipTitle: "テーブル操作",
+    adminUsersTableControlsTooltipDescription:
+      "Rows per pageで10/20/50/100を選択できます。CSVエクスポートは現在のフィルターに基づいてファイルを生成します（サーバー側）。",
+    adminUsersSelectedCountLabel: "選択数",
+    adminUsersBulkDeleteSelected: "選択を削除",
+    adminUsersBulkDeleteAllPrefix: "すべて削除",
+    adminUsersSelectAllVisible: "表示中をすべて選択",
+    adminUsersTableActions: "操作",
+    adminUsersSelectUserPrefix: "選択",
+    adminUsersRoleForPrefix: "役割",
+    adminUsersView: "表示",
+    adminUsersBulkDeleteDialogTitle: "選択したユーザーを削除",
+    adminUsersBulkDeleteDialogDescription:
+      "選択したユーザーは完全に削除されます。この操作は元に戻せません。あなたのアカウントは削除されません。",
+    adminUsersDelete: "削除",
+    adminUsersCancel: "キャンセル",
+    adminUsersBulkDeleteError:
+      "選択したユーザーの削除中にエラーが発生しました。",
+    adminUsersPurgeAllDialogTitle: "すべてのユーザーを削除",
+    adminUsersPurgeAllDialogDescriptionPrefix:
+      "すべてのユーザーを削除しようとしています",
+    adminUsersPurgeAllDialogDescriptionSuffix:
+      "この操作は元に戻せません。あなたのアカウントは削除されません。",
+    adminUsersDeleteAll: "すべて削除",
+    adminUsersPurgeAllError:
+      "すべてのユーザーの削除中にエラーが発生しました。",
+    adminUsersViewDialogTitle: "ユーザー詳細",
+    adminUsersViewDialogSubtitle: "選択したユーザーの詳細。",
+    adminUsersClose: "閉じる",
+    adminUsersOk: "OK",
+    adminUsersEmailLabel: "メール",
+    adminUsersIdPrefix: "ID",
+    adminUsersRoleLabel: "役割",
+    adminUsersStatusLabel: "状態",
+    adminUsersUserIdLabel: "ユーザーID",
+    adminUsersCreatedLabel: "作成日",
+  },
+  nl: {
+    adminUsersBreadcrumbTitle: "Gebruikers",
+    adminUsersInfoTooltipLabel: "Info",
+    adminUsersInfoTooltipTitle: "Gebruikersbeheer",
+    adminUsersInfoTooltipDescription:
+      "Beheer gebruikers: zoeken, filters, rollen wijzigen, activeren/deactiveren en resultaten exporteren.",
+    adminUsersStatusFilterAria: "Gebruikersstatus",
+    adminUsersRoleFilterAria: "Gebruikersrol",
+    adminUsersFilterAllStatus: "Alle statussen",
+    adminUsersFilterStatusActive: "Actief",
+    adminUsersFilterStatusDeactivated: "Gedeactiveerd",
+    adminUsersFilterAllRoles: "Alle rollen",
+    adminUsersRoleUser: "Gebruiker",
+    adminUsersRoleAdmin: "Beheerder",
+    adminUsersRoleMonitoring: "Monitoring",
+    adminUsersRoleTeacher: "Docent",
+    adminUsersRoleAuthor: "Auteur",
+    adminUsersExportCsv: "CSV exporteren",
+    adminUsersTableControlsTooltipLabel: "Info",
+    adminUsersTableControlsTooltipTitle: "Tabelbediening",
+    adminUsersTableControlsTooltipDescription:
+      "Gebruik Rows per page voor 10/20/50/100. CSV exporteren genereert een bestand voor de huidige filters (server-side).",
+    adminUsersSelectedCountLabel: "Aantal geselecteerd",
+    adminUsersBulkDeleteSelected: "Geselecteerde verwijderen",
+    adminUsersBulkDeleteAllPrefix: "Alles verwijderen",
+    adminUsersSelectAllVisible: "Selecteer alle zichtbare",
+    adminUsersTableActions: "Acties",
+    adminUsersSelectUserPrefix: "Selecteer",
+    adminUsersRoleForPrefix: "Rol voor",
+    adminUsersView: "Bekijken",
+    adminUsersBulkDeleteDialogTitle: "Geselecteerde gebruikers verwijderen",
+    adminUsersBulkDeleteDialogDescription:
+      "Geselecteerde gebruikers worden permanent verwijderd. Deze actie kan niet ongedaan worden gemaakt. Je account wordt niet verwijderd.",
+    adminUsersDelete: "Verwijderen",
+    adminUsersCancel: "Annuleren",
+    adminUsersBulkDeleteError:
+      "Er is een fout opgetreden bij het verwijderen van geselecteerde gebruikers.",
+    adminUsersPurgeAllDialogTitle: "Alle gebruikers verwijderen",
+    adminUsersPurgeAllDialogDescriptionPrefix:
+      "Je staat op het punt alle gebruikers te verwijderen",
+    adminUsersPurgeAllDialogDescriptionSuffix:
+      "Deze actie kan niet ongedaan worden gemaakt. Je account wordt niet verwijderd.",
+    adminUsersDeleteAll: "Alles verwijderen",
+    adminUsersPurgeAllError:
+      "Er is een fout opgetreden bij het verwijderen van alle gebruikers.",
+    adminUsersViewDialogTitle: "Gebruikersdetails",
+    adminUsersViewDialogSubtitle: "Details voor de geselecteerde gebruiker.",
+    adminUsersClose: "Sluiten",
+    adminUsersOk: "OK",
+    adminUsersEmailLabel: "E-mail",
+    adminUsersIdPrefix: "ID",
+    adminUsersRoleLabel: "Rol",
+    adminUsersStatusLabel: "Status",
+    adminUsersUserIdLabel: "Gebruikers-ID",
+    adminUsersCreatedLabel: "Aangemaakt",
+  },
+  cs: {
+    adminUsersBreadcrumbTitle: "Uživatelé",
+    adminUsersInfoTooltipLabel: "Info",
+    adminUsersInfoTooltipTitle: "Správa uživatelů",
+    adminUsersInfoTooltipDescription:
+      "Správa uživatelů: vyhledávání, filtry, změny rolí, aktivace/deaktivace a export výsledků.",
+    adminUsersStatusFilterAria: "Stav uživatelů",
+    adminUsersRoleFilterAria: "Role uživatelů",
+    adminUsersFilterAllStatus: "Všechny stavy",
+    adminUsersFilterStatusActive: "Aktivní",
+    adminUsersFilterStatusDeactivated: "Deaktivovaný",
+    adminUsersFilterAllRoles: "Všechny role",
+    adminUsersRoleUser: "Uživatel",
+    adminUsersRoleAdmin: "Admin",
+    adminUsersRoleMonitoring: "Monitoring",
+    adminUsersRoleTeacher: "Učitel",
+    adminUsersRoleAuthor: "Autor",
+    adminUsersExportCsv: "Exportovat CSV",
+    adminUsersTableControlsTooltipLabel: "Info",
+    adminUsersTableControlsTooltipTitle: "Ovládání tabulky",
+    adminUsersTableControlsTooltipDescription:
+      "Použijte Rows per page pro 10/20/50/100. Export CSV vygeneruje soubor pro aktuální filtry (server-side).",
+    adminUsersSelectedCountLabel: "Počet vybraných",
+    adminUsersBulkDeleteSelected: "Smazat vybrané",
+    adminUsersBulkDeleteAllPrefix: "Smazat vše",
+    adminUsersSelectAllVisible: "Vybrat vše viditelné",
+    adminUsersTableActions: "Akce",
+    adminUsersSelectUserPrefix: "Vybrat",
+    adminUsersRoleForPrefix: "Role pro",
+    adminUsersView: "Zobrazit",
+    adminUsersBulkDeleteDialogTitle: "Smazat vybrané uživatele",
+    adminUsersBulkDeleteDialogDescription:
+      "Vybraní uživatelé budou trvale smazáni. Tuto akci nelze vrátit zpět. Váš účet nebude smazán.",
+    adminUsersDelete: "Smazat",
+    adminUsersCancel: "Zrušit",
+    adminUsersBulkDeleteError:
+      "Při mazání vybraných uživatelů došlo k chybě.",
+    adminUsersPurgeAllDialogTitle: "Smazat všechny uživatele",
+    adminUsersPurgeAllDialogDescriptionPrefix:
+      "Chystáte se smazat všechny uživatele",
+    adminUsersPurgeAllDialogDescriptionSuffix:
+      "Tuto akci nelze vrátit zpět. Váš účet nebude smazán.",
+    adminUsersDeleteAll: "Smazat vše",
+    adminUsersPurgeAllError:
+      "Při mazání všech uživatelů došlo k chybě.",
+    adminUsersViewDialogTitle: "Detail uživatele",
+    adminUsersViewDialogSubtitle: "Detaily vybraného uživatele.",
+    adminUsersClose: "Zavřít",
+    adminUsersOk: "OK",
+    adminUsersEmailLabel: "E-mail",
+    adminUsersIdPrefix: "ID",
+    adminUsersRoleLabel: "Role",
+    adminUsersStatusLabel: "Stav",
+    adminUsersUserIdLabel: "ID uživatele",
+    adminUsersCreatedLabel: "Vytvořeno",
+  },
+  ar: {
+    adminUsersBreadcrumbTitle: "المستخدمون",
+    adminUsersInfoTooltipLabel: "معلومات",
+    adminUsersInfoTooltipTitle: "إدارة المستخدمين",
+    adminUsersInfoTooltipDescription:
+      "إدارة المستخدمين: بحث، فلاتر، تغيير الأدوار، تفعيل/تعطيل، وتصدير النتائج.",
+    adminUsersStatusFilterAria: "حالة المستخدمين",
+    adminUsersRoleFilterAria: "دور المستخدمين",
+    adminUsersFilterAllStatus: "كل الحالات",
+    adminUsersFilterStatusActive: "نشط",
+    adminUsersFilterStatusDeactivated: "معطل",
+    adminUsersFilterAllRoles: "كل الأدوار",
+    adminUsersRoleUser: "مستخدم",
+    adminUsersRoleAdmin: "مسؤول",
+    adminUsersRoleMonitoring: "مراقبة",
+    adminUsersRoleTeacher: "معلم",
+    adminUsersRoleAuthor: "مؤلف",
+    adminUsersExportCsv: "تصدير CSV",
+    adminUsersTableControlsTooltipLabel: "معلومات",
+    adminUsersTableControlsTooltipTitle: "عناصر التحكم بالجدول",
+    adminUsersTableControlsTooltipDescription:
+      "استخدم Rows per page لـ 10/20/50/100. يقوم تصدير CSV بإنشاء ملف وفقًا للفلاتر الحالية (على الخادم).",
+    adminUsersSelectedCountLabel: "عدد المحدد",
+    adminUsersBulkDeleteSelected: "حذف المحدد",
+    adminUsersBulkDeleteAllPrefix: "حذف الكل",
+    adminUsersSelectAllVisible: "تحديد كل المرئي",
+    adminUsersTableActions: "الإجراءات",
+    adminUsersSelectUserPrefix: "تحديد",
+    adminUsersRoleForPrefix: "الدور لـ",
+    adminUsersView: "عرض",
+    adminUsersBulkDeleteDialogTitle: "حذف المستخدمين المحددين",
+    adminUsersBulkDeleteDialogDescription:
+      "سيتم حذف المستخدمين المحددين نهائيًا. لا يمكن التراجع عن هذا الإجراء. لن يتم حذف حسابك.",
+    adminUsersDelete: "حذف",
+    adminUsersCancel: "إلغاء",
+    adminUsersBulkDeleteError:
+      "حدث خطأ أثناء حذف المستخدمين المحددين.",
+    adminUsersPurgeAllDialogTitle: "حذف جميع المستخدمين",
+    adminUsersPurgeAllDialogDescriptionPrefix:
+      "أنت على وشك حذف جميع المستخدمين",
+    adminUsersPurgeAllDialogDescriptionSuffix:
+      "لا يمكن التراجع عن هذا الإجراء. لن يتم حذف حسابك.",
+    adminUsersDeleteAll: "حذف الكل",
+    adminUsersPurgeAllError: "حدث خطأ أثناء حذف جميع المستخدمين.",
+    adminUsersViewDialogTitle: "تفاصيل المستخدم",
+    adminUsersViewDialogSubtitle: "تفاصيل المستخدم المحدد.",
+    adminUsersClose: "إغلاق",
+    adminUsersOk: "حسنًا",
+    adminUsersEmailLabel: "البريد الإلكتروني",
+    adminUsersIdPrefix: "ID",
+    adminUsersRoleLabel: "الدور",
+    adminUsersStatusLabel: "الحالة",
+    adminUsersUserIdLabel: "معرّف المستخدم",
+    adminUsersCreatedLabel: "تاريخ الإنشاء",
+  },
+};
+
+ const PAGINATION_COMMON_OVERRIDES: Partial<
+   Record<SupportedLang, Partial<DomainMessages["common"]>>
+ > = {
+   bg: {
+     paginationPerPage: "На страница",
+     paginationRowsPerPageAria: "Редове на страница",
+     paginationFirst: "Първа",
+     paginationPrevious: "Предишна",
+     paginationNext: "Следваща",
+     paginationLast: "Последна",
+     paginationGoToPageAria: "Отиди на страница",
+     paginationGo: "Отиди",
+     paginationInvalidPagePrefix: "Моля, въведете валиден номер на страница",
+   },
+   en: {
+     paginationPerPage: "Per page",
+     paginationRowsPerPageAria: "Rows per page",
+     paginationFirst: "First",
+     paginationPrevious: "Previous",
+     paginationNext: "Next",
+     paginationLast: "Last",
+     paginationGoToPageAria: "Go to page",
+     paginationGo: "Go",
+     paginationInvalidPagePrefix: "Please enter a valid page number",
+   },
+   de: {
+     paginationPerPage: "Pro Seite",
+     paginationRowsPerPageAria: "Zeilen pro Seite",
+     paginationFirst: "Erste",
+     paginationPrevious: "Zurück",
+     paginationNext: "Weiter",
+     paginationLast: "Letzte",
+     paginationGoToPageAria: "Gehe zu Seite",
+     paginationGo: "Los",
+     paginationInvalidPagePrefix: "Bitte gib eine gültige Seitenzahl ein",
+   },
+   es: {
+     paginationPerPage: "Por página",
+     paginationRowsPerPageAria: "Filas por página",
+     paginationFirst: "Primera",
+     paginationPrevious: "Anterior",
+     paginationNext: "Siguiente",
+     paginationLast: "Última",
+     paginationGoToPageAria: "Ir a la página",
+     paginationGo: "Ir",
+     paginationInvalidPagePrefix:
+       "Por favor, introduce un número de página válido",
+   },
+   pt: {
+     paginationPerPage: "Por página",
+     paginationRowsPerPageAria: "Linhas por página",
+     paginationFirst: "Primeira",
+     paginationPrevious: "Anterior",
+     paginationNext: "Seguinte",
+     paginationLast: "Última",
+     paginationGoToPageAria: "Ir para a página",
+     paginationGo: "Ir",
+     paginationInvalidPagePrefix:
+       "Por favor, introduza um número de página válido",
+   },
+   pl: {
+     paginationPerPage: "Na stronę",
+     paginationRowsPerPageAria: "Wierszy na stronę",
+     paginationFirst: "Pierwsza",
+     paginationPrevious: "Poprzednia",
+     paginationNext: "Następna",
+     paginationLast: "Ostatnia",
+     paginationGoToPageAria: "Przejdź do strony",
+     paginationGo: "Idź",
+     paginationInvalidPagePrefix: "Wpisz prawidłowy numer strony",
+   },
+   ua: {
+     paginationPerPage: "На сторінці",
+     paginationRowsPerPageAria: "Рядків на сторінку",
+     paginationFirst: "Перша",
+     paginationPrevious: "Попередня",
+     paginationNext: "Наступна",
+     paginationLast: "Остання",
+     paginationGoToPageAria: "Перейти на сторінку",
+     paginationGo: "Перейти",
+     paginationInvalidPagePrefix:
+       "Будь ласка, введіть коректний номер сторінки",
+   },
+   ru: {
+     paginationPerPage: "На странице",
+     paginationRowsPerPageAria: "Строк на странице",
+     paginationFirst: "Первая",
+     paginationPrevious: "Предыдущая",
+     paginationNext: "Следующая",
+     paginationLast: "Последняя",
+     paginationGoToPageAria: "Перейти на страницу",
+     paginationGo: "Перейти",
+     paginationInvalidPagePrefix:
+       "Пожалуйста, введите корректный номер страницы",
+   },
+   fr: {
+     paginationPerPage: "Par page",
+     paginationRowsPerPageAria: "Lignes par page",
+     paginationFirst: "Première",
+     paginationPrevious: "Précédente",
+     paginationNext: "Suivante",
+     paginationLast: "Dernière",
+     paginationGoToPageAria: "Aller à la page",
+     paginationGo: "Aller",
+     paginationInvalidPagePrefix: "Veuillez saisir un numéro de page valide",
+   },
+   tr: {
+     paginationPerPage: "Sayfa başına",
+     paginationRowsPerPageAria: "Sayfa başına satır",
+     paginationFirst: "İlk",
+     paginationPrevious: "Önceki",
+     paginationNext: "Sonraki",
+     paginationLast: "Son",
+     paginationGoToPageAria: "Sayfaya git",
+     paginationGo: "Git",
+     paginationInvalidPagePrefix: "Lütfen geçerli bir sayfa numarası girin",
+   },
+   ro: {
+     paginationPerPage: "Pe pagină",
+     paginationRowsPerPageAria: "Rânduri pe pagină",
+     paginationFirst: "Prima",
+     paginationPrevious: "Anterioară",
+     paginationNext: "Următoarea",
+     paginationLast: "Ultima",
+     paginationGoToPageAria: "Mergi la pagina",
+     paginationGo: "Mergi",
+     paginationInvalidPagePrefix: "Te rog introdu un număr de pagină valid",
+   },
+   hi: {
+     paginationPerPage: "प्रति पृष्ठ",
+     paginationRowsPerPageAria: "प्रति पृष्ठ पंक्तियाँ",
+     paginationFirst: "पहला",
+     paginationPrevious: "पिछला",
+     paginationNext: "अगला",
+     paginationLast: "अंतिम",
+     paginationGoToPageAria: "पृष्ठ पर जाएँ",
+     paginationGo: "जाएँ",
+     paginationInvalidPagePrefix: "कृपया एक मान्य पृष्ठ संख्या दर्ज करें",
+   },
+   vi: {
+     paginationPerPage: "Mỗi trang",
+     paginationRowsPerPageAria: "Số dòng mỗi trang",
+     paginationFirst: "Đầu",
+     paginationPrevious: "Trước",
+     paginationNext: "Sau",
+     paginationLast: "Cuối",
+     paginationGoToPageAria: "Đi đến trang",
+     paginationGo: "Đi",
+     paginationInvalidPagePrefix: "Vui lòng nhập số trang hợp lệ",
+   },
+   id: {
+     paginationPerPage: "Per halaman",
+     paginationRowsPerPageAria: "Baris per halaman",
+     paginationFirst: "Pertama",
+     paginationPrevious: "Sebelumnya",
+     paginationNext: "Berikutnya",
+     paginationLast: "Terakhir",
+     paginationGoToPageAria: "Ke halaman",
+     paginationGo: "Pergi",
+     paginationInvalidPagePrefix: "Masukkan nomor halaman yang valid",
+   },
+   it: {
+     paginationPerPage: "Per pagina",
+     paginationRowsPerPageAria: "Righe per pagina",
+     paginationFirst: "Prima",
+     paginationPrevious: "Precedente",
+     paginationNext: "Successiva",
+     paginationLast: "Ultima",
+     paginationGoToPageAria: "Vai alla pagina",
+     paginationGo: "Vai",
+     paginationInvalidPagePrefix: "Inserisci un numero di pagina valido",
+   },
+   ko: {
+     paginationPerPage: "페이지당",
+     paginationRowsPerPageAria: "페이지당 행",
+     paginationFirst: "처음",
+     paginationPrevious: "이전",
+     paginationNext: "다음",
+     paginationLast: "마지막",
+     paginationGoToPageAria: "페이지로 이동",
+     paginationGo: "이동",
+     paginationInvalidPagePrefix: "올바른 페이지 번호를 입력하세요",
+   },
+   ja: {
+     paginationPerPage: "ページあたり",
+     paginationRowsPerPageAria: "ページあたりの行数",
+     paginationFirst: "最初",
+     paginationPrevious: "前へ",
+     paginationNext: "次へ",
+     paginationLast: "最後",
+     paginationGoToPageAria: "ページへ移動",
+     paginationGo: "移動",
+     paginationInvalidPagePrefix: "有効なページ番号を入力してください",
+   },
+   nl: {
+     paginationPerPage: "Per pagina",
+     paginationRowsPerPageAria: "Rijen per pagina",
+     paginationFirst: "Eerste",
+     paginationPrevious: "Vorige",
+     paginationNext: "Volgende",
+     paginationLast: "Laatste",
+     paginationGoToPageAria: "Ga naar pagina",
+     paginationGo: "Ga",
+     paginationInvalidPagePrefix: "Voer een geldig paginanummer in",
+   },
+   cs: {
+     paginationPerPage: "Na stránku",
+     paginationRowsPerPageAria: "Řádků na stránku",
+     paginationFirst: "První",
+     paginationPrevious: "Předchozí",
+     paginationNext: "Další",
+     paginationLast: "Poslední",
+     paginationGoToPageAria: "Přejít na stránku",
+     paginationGo: "Jít",
+     paginationInvalidPagePrefix: "Zadejte platné číslo stránky",
+   },
+   ar: {
+     paginationPerPage: "لكل صفحة",
+     paginationRowsPerPageAria: "عدد الصفوف لكل صفحة",
+     paginationFirst: "الأولى",
+     paginationPrevious: "السابق",
+     paginationNext: "التالي",
+     paginationLast: "الأخيرة",
+     paginationGoToPageAria: "اذهب إلى الصفحة",
+     paginationGo: "اذهب",
+     paginationInvalidPagePrefix: "يرجى إدخال رقم صفحة صالح",
+   },
+ };
+
+ const ADMIN_USERS_LABELS_OVERRIDES: Partial<
+   Record<SupportedLang, Partial<DomainMessages["common"]>>
+ > = {
+   bg: {
+     adminUsersTitle: "Потребители (админ)",
+     adminUsersSubtitle:
+       "Списък с потребители и статус на акаунта (активен/неактивен).",
+     adminUsersStatsTotal: "Общо потребители",
+     adminUsersStatsActive: "Активни",
+     adminUsersStatsDeactivated: "Изтрити / неактивни",
+     adminUsersStatsAdmins: "Админи",
+     adminUsersColEmail: "Email",
+     adminUsersColRole: "Роля",
+     adminUsersColActive: "Активен",
+     adminUsersColCreated: "Създаден",
+     adminUsersStatusActive: "Активен",
+     adminUsersStatusInactive: "Неактивен",
+     adminUsersStatusUpdating: "Обновяване...",
+     adminUsersPaginationShowingPrefix: "Показани",
+     adminUsersPaginationOf: "от",
+     adminUsersPaginationUsersSuffix: "потребители",
+   },
+   de: {
+     adminUsersTitle: "Admin-Benutzer",
+     adminUsersSubtitle: "Liste der Benutzer und Kontostatus (aktiv/inaktiv).",
+     adminUsersStatsTotal: "Benutzer gesamt",
+     adminUsersStatsActive: "Aktive",
+     adminUsersStatsDeactivated: "Deaktiviert",
+     adminUsersStatsAdmins: "Admins",
+     adminUsersColEmail: "E-Mail",
+     adminUsersColRole: "Rolle",
+     adminUsersColActive: "Aktiv",
+     adminUsersColCreated: "Erstellt",
+     adminUsersStatusActive: "Aktiv",
+     adminUsersStatusInactive: "Inaktiv",
+     adminUsersStatusUpdating: "Aktualisierung...",
+     adminUsersSearchPlaceholder: "Suche nach E-Mail...",
+     adminUsersSearchButton: "Suchen",
+     adminUsersLoading: "Benutzer werden geladen...",
+     adminUsersError:
+       "Beim Laden der Benutzerliste ist ein Fehler aufgetreten.",
+     adminUsersNoData: "Keine Benutzer zum Anzeigen.",
+     adminUsersStatsLoading: "Benutzerstatistiken werden geladen...",
+     adminUsersStatsError:
+       "Beim Laden der Benutzerstatistiken ist ein Fehler aufgetreten.",
+     adminUsersPaginationShowingPrefix: "Angezeigt",
+     adminUsersPaginationOf: "von",
+     adminUsersPaginationUsersSuffix: "Benutzern",
+   },
+   es: {
+     adminUsersTitle: "Usuarios (Admin)",
+     adminUsersSubtitle:
+       "Lista de usuarios y estado de la cuenta (activo/inactivo).",
+     adminUsersStatsTotal: "Total de usuarios",
+     adminUsersStatsActive: "Activos",
+     adminUsersStatsDeactivated: "Eliminados / inactivos",
+     adminUsersStatsAdmins: "Administradores",
+     adminUsersColEmail: "Correo",
+     adminUsersColRole: "Rol",
+     adminUsersColActive: "Activo",
+     adminUsersColCreated: "Creado",
+     adminUsersStatusActive: "Activo",
+     adminUsersStatusInactive: "Inactivo",
+     adminUsersStatusUpdating: "Actualizando...",
+     adminUsersSearchPlaceholder: "Buscar por correo...",
+     adminUsersSearchButton: "Buscar",
+     adminUsersLoading: "Cargando usuarios...",
+     adminUsersError:
+       "Se produjo un error al cargar la lista de usuarios.",
+     adminUsersNoData: "No hay usuarios para mostrar.",
+     adminUsersStatsLoading: "Cargando estadísticas de usuarios...",
+     adminUsersStatsError:
+       "Se produjo un error al cargar las estadísticas de usuarios.",
+     adminUsersPaginationShowingPrefix: "Mostrando",
+     adminUsersPaginationOf: "de",
+     adminUsersPaginationUsersSuffix: "usuarios",
+   },
+   pt: {
+     adminUsersTitle: "Utilizadores (Admin)",
+     adminUsersSubtitle:
+       "Lista de utilizadores e estado da conta (ativo/inativo).",
+     adminUsersStatsTotal: "Total de utilizadores",
+     adminUsersStatsActive: "Ativos",
+     adminUsersStatsDeactivated: "Eliminados / inativos",
+     adminUsersStatsAdmins: "Administradores",
+     adminUsersColEmail: "Email",
+     adminUsersColRole: "Papel",
+     adminUsersColActive: "Ativo",
+     adminUsersColCreated: "Criado",
+     adminUsersStatusActive: "Ativo",
+     adminUsersStatusInactive: "Inativo",
+     adminUsersStatusUpdating: "A atualizar...",
+     adminUsersSearchPlaceholder: "Pesquisar por email...",
+     adminUsersSearchButton: "Pesquisar",
+     adminUsersLoading: "A carregar utilizadores...",
+     adminUsersError:
+       "Ocorreu um erro ao carregar a lista de utilizadores.",
+     adminUsersNoData: "Sem utilizadores para mostrar.",
+     adminUsersStatsLoading: "A carregar estatísticas de utilizadores...",
+     adminUsersStatsError:
+       "Ocorreu um erro ao carregar as estatísticas de utilizadores.",
+     adminUsersPaginationShowingPrefix: "A mostrar",
+     adminUsersPaginationOf: "de",
+     adminUsersPaginationUsersSuffix: "utilizadores",
+   },
+   pl: {
+     adminUsersTitle: "Użytkownicy (Admin)",
+     adminUsersSubtitle: "Lista użytkowników i status konta (aktywny/nieaktywny).",
+     adminUsersStatsTotal: "Łącznie użytkowników",
+     adminUsersStatsActive: "Aktywni",
+     adminUsersStatsDeactivated: "Usunięci / nieaktywni",
+     adminUsersStatsAdmins: "Administratorzy",
+     adminUsersColEmail: "Email",
+     adminUsersColRole: "Rola",
+     adminUsersColActive: "Aktywny",
+     adminUsersColCreated: "Utworzono",
+     adminUsersStatusActive: "Aktywny",
+     adminUsersStatusInactive: "Nieaktywny",
+     adminUsersStatusUpdating: "Aktualizacja...",
+     adminUsersSearchPlaceholder: "Szukaj po email...",
+     adminUsersSearchButton: "Szukaj",
+     adminUsersLoading: "Ładowanie użytkowników...",
+     adminUsersError:
+       "Wystąpił błąd podczas ładowania listy użytkowników.",
+     adminUsersNoData: "Brak użytkowników do wyświetlenia.",
+     adminUsersStatsLoading: "Ładowanie statystyk użytkowników...",
+     adminUsersStatsError:
+       "Wystąpił błąd podczas ładowania statystyk użytkowników.",
+     adminUsersPaginationShowingPrefix: "Wyświetlanie",
+     adminUsersPaginationOf: "z",
+     adminUsersPaginationUsersSuffix: "użytkowników",
+   },
+   ua: {
+     adminUsersTitle: "Користувачі (Адмін)",
+     adminUsersSubtitle:
+       "Список користувачів і стан акаунта (активний/неактивний).",
+     adminUsersStatsTotal: "Усього користувачів",
+     adminUsersStatsActive: "Активні",
+     adminUsersStatsDeactivated: "Видалені / неактивні",
+     adminUsersStatsAdmins: "Адміни",
+     adminUsersColEmail: "Email",
+     adminUsersColRole: "Роль",
+     adminUsersColActive: "Активний",
+     adminUsersColCreated: "Створено",
+     adminUsersStatusActive: "Активний",
+     adminUsersStatusInactive: "Неактивний",
+     adminUsersStatusUpdating: "Оновлення...",
+     adminUsersSearchPlaceholder: "Пошук за email...",
+     adminUsersSearchButton: "Пошук",
+     adminUsersLoading: "Завантаження користувачів...",
+     adminUsersError:
+       "Сталася помилка під час завантаження списку користувачів.",
+     adminUsersNoData: "Немає користувачів для відображення.",
+     adminUsersStatsLoading: "Завантаження статистики користувачів...",
+     adminUsersStatsError:
+       "Сталася помилка під час завантаження статистики користувачів.",
+     adminUsersPaginationShowingPrefix: "Показано",
+     adminUsersPaginationOf: "з",
+     adminUsersPaginationUsersSuffix: "користувачів",
+   },
+   ru: {
+     adminUsersTitle: "Пользователи (Админ)",
+     adminUsersSubtitle:
+       "Список пользователей и статус аккаунта (активен/неактивен).",
+     adminUsersStatsTotal: "Всего пользователей",
+     adminUsersStatsActive: "Активные",
+     adminUsersStatsDeactivated: "Удалены / неактивны",
+     adminUsersStatsAdmins: "Админы",
+     adminUsersColEmail: "Email",
+     adminUsersColRole: "Роль",
+     adminUsersColActive: "Активен",
+     adminUsersColCreated: "Создан",
+     adminUsersStatusActive: "Активен",
+     adminUsersStatusInactive: "Неактивен",
+     adminUsersStatusUpdating: "Обновление...",
+     adminUsersSearchPlaceholder: "Поиск по email...",
+     adminUsersSearchButton: "Поиск",
+     adminUsersLoading: "Загрузка пользователей...",
+     adminUsersError:
+       "Произошла ошибка при загрузке списка пользователей.",
+     adminUsersNoData: "Нет пользователей для отображения.",
+     adminUsersStatsLoading: "Загрузка статистики пользователей...",
+     adminUsersStatsError:
+       "Произошла ошибка при загрузке статистики пользователей.",
+     adminUsersPaginationShowingPrefix: "Показано",
+     adminUsersPaginationOf: "из",
+     adminUsersPaginationUsersSuffix: "пользователей",
+   },
+   fr: {
+     adminUsersTitle: "Utilisateurs (Admin)",
+     adminUsersSubtitle:
+       "Liste des utilisateurs et statut du compte (actif/inactif).",
+     adminUsersStatsTotal: "Total utilisateurs",
+     adminUsersStatsActive: "Actifs",
+     adminUsersStatsDeactivated: "Supprimés / inactifs",
+     adminUsersStatsAdmins: "Admins",
+     adminUsersColEmail: "Email",
+     adminUsersColRole: "Rôle",
+     adminUsersColActive: "Actif",
+     adminUsersColCreated: "Créé",
+     adminUsersStatusActive: "Actif",
+     adminUsersStatusInactive: "Inactif",
+     adminUsersStatusUpdating: "Mise à jour...",
+     adminUsersSearchPlaceholder: "Rechercher par email...",
+     adminUsersSearchButton: "Rechercher",
+     adminUsersLoading: "Chargement des utilisateurs...",
+     adminUsersError:
+       "Une erreur est survenue lors du chargement de la liste des utilisateurs.",
+     adminUsersNoData: "Aucun utilisateur à afficher.",
+     adminUsersStatsLoading: "Chargement des statistiques utilisateurs...",
+     adminUsersStatsError:
+       "Une erreur est survenue lors du chargement des statistiques utilisateurs.",
+     adminUsersPaginationShowingPrefix: "Affichage",
+     adminUsersPaginationOf: "sur",
+     adminUsersPaginationUsersSuffix: "utilisateurs",
+   },
+   tr: {
+     adminUsersTitle: "Kullanıcılar (Admin)",
+     adminUsersSubtitle:
+       "Kullanıcı listesi ve hesap durumu (aktif/pasif).",
+     adminUsersStatsTotal: "Toplam kullanıcı",
+     adminUsersStatsActive: "Aktif",
+     adminUsersStatsDeactivated: "Silinmiş / pasif",
+     adminUsersStatsAdmins: "Adminler",
+     adminUsersColEmail: "E-posta",
+     adminUsersColRole: "Rol",
+     adminUsersColActive: "Aktif",
+     adminUsersColCreated: "Oluşturulma",
+     adminUsersStatusActive: "Aktif",
+     adminUsersStatusInactive: "Pasif",
+     adminUsersStatusUpdating: "Güncelleniyor...",
+     adminUsersSearchPlaceholder: "E-posta ile ara...",
+     adminUsersSearchButton: "Ara",
+     adminUsersLoading: "Kullanıcılar yükleniyor...",
+     adminUsersError:
+       "Kullanıcı listesi yüklenirken bir hata oluştu.",
+     adminUsersNoData: "Gösterilecek kullanıcı yok.",
+     adminUsersStatsLoading: "Kullanıcı istatistikleri yükleniyor...",
+     adminUsersStatsError:
+       "Kullanıcı istatistikleri yüklenirken bir hata oluştu.",
+     adminUsersPaginationShowingPrefix: "Gösterilen",
+     adminUsersPaginationOf: "/",
+     adminUsersPaginationUsersSuffix: "kullanıcı",
+   },
+   ro: {
+     adminUsersTitle: "Utilizatori (Admin)",
+     adminUsersSubtitle:
+       "Listă de utilizatori și starea contului (activ/inactiv).",
+     adminUsersStatsTotal: "Total utilizatori",
+     adminUsersStatsActive: "Activi",
+     adminUsersStatsDeactivated: "Șterși / inactivi",
+     adminUsersStatsAdmins: "Administratori",
+     adminUsersColEmail: "Email",
+     adminUsersColRole: "Rol",
+     adminUsersColActive: "Activ",
+     adminUsersColCreated: "Creat",
+     adminUsersStatusActive: "Activ",
+     adminUsersStatusInactive: "Inactiv",
+     adminUsersStatusUpdating: "Se actualizează...",
+     adminUsersSearchPlaceholder: "Caută după email...",
+     adminUsersSearchButton: "Caută",
+     adminUsersLoading: "Se încarcă utilizatorii...",
+     adminUsersError:
+       "A apărut o eroare la încărcarea listei de utilizatori.",
+     adminUsersNoData: "Nu există utilizatori de afișat.",
+     adminUsersStatsLoading: "Se încarcă statisticile utilizatorilor...",
+     adminUsersStatsError:
+       "A apărut o eroare la încărcarea statisticilor utilizatorilor.",
+     adminUsersPaginationShowingPrefix: "Afișare",
+     adminUsersPaginationOf: "din",
+     adminUsersPaginationUsersSuffix: "utilizatori",
+   },
+   hi: {
+     adminUsersTitle: "उपयोगकर्ता (एडमिन)",
+     adminUsersSubtitle:
+       "उपयोगकर्ताओं की सूची और खाता स्थिति (सक्रिय/निष्क्रिय)।",
+     adminUsersStatsTotal: "कुल उपयोगकर्ता",
+     adminUsersStatsActive: "सक्रिय",
+     adminUsersStatsDeactivated: "हटाए गए / निष्क्रिय",
+     adminUsersStatsAdmins: "एडमिन",
+     adminUsersColEmail: "Email",
+     adminUsersColRole: "भूमिका",
+     adminUsersColActive: "सक्रिय",
+     adminUsersColCreated: "बनाया गया",
+     adminUsersStatusActive: "सक्रिय",
+     adminUsersStatusInactive: "निष्क्रिय",
+     adminUsersStatusUpdating: "अपडेट हो रहा है...",
+     adminUsersSearchPlaceholder: "ईमेल से खोजें...",
+     adminUsersSearchButton: "खोजें",
+     adminUsersLoading: "उपयोगकर्ता लोड हो रहे हैं...",
+     adminUsersError:
+       "उपयोगकर्ता सूची लोड करते समय एक त्रुटि हुई।",
+     adminUsersNoData: "दिखाने के लिए कोई उपयोगकर्ता नहीं।",
+     adminUsersStatsLoading: "उपयोगकर्ता आँकड़े लोड हो रहे हैं...",
+     adminUsersStatsError:
+       "उपयोगकर्ता आँकड़े लोड करते समय एक त्रुटि हुई।",
+     adminUsersPaginationShowingPrefix: "दिखा रहे हैं",
+     adminUsersPaginationOf: "में से",
+     adminUsersPaginationUsersSuffix: "उपयोगकर्ता",
+   },
+   vi: {
+     adminUsersTitle: "Người dùng (Admin)",
+     adminUsersSubtitle:
+       "Danh sách người dùng và trạng thái tài khoản (hoạt động/không hoạt động).",
+     adminUsersStatsTotal: "Tổng người dùng",
+     adminUsersStatsActive: "Hoạt động",
+     adminUsersStatsDeactivated: "Đã xóa / không hoạt động",
+     adminUsersStatsAdmins: "Admin",
+     adminUsersColEmail: "Email",
+     adminUsersColRole: "Vai trò",
+     adminUsersColActive: "Hoạt động",
+     adminUsersColCreated: "Tạo",
+     adminUsersStatusActive: "Hoạt động",
+     adminUsersStatusInactive: "Không hoạt động",
+     adminUsersStatusUpdating: "Đang cập nhật...",
+     adminUsersSearchPlaceholder: "Tìm theo email...",
+     adminUsersSearchButton: "Tìm",
+     adminUsersLoading: "Đang tải người dùng...",
+     adminUsersError:
+       "Đã xảy ra lỗi khi tải danh sách người dùng.",
+     adminUsersNoData: "Không có người dùng để hiển thị.",
+     adminUsersStatsLoading: "Đang tải thống kê người dùng...",
+     adminUsersStatsError:
+       "Đã xảy ra lỗi khi tải thống kê người dùng.",
+     adminUsersPaginationShowingPrefix: "Đang hiển thị",
+     adminUsersPaginationOf: "trong",
+     adminUsersPaginationUsersSuffix: "người dùng",
+   },
+   id: {
+     adminUsersTitle: "Pengguna (Admin)",
+     adminUsersSubtitle:
+       "Daftar pengguna dan status akun (aktif/nonaktif).",
+     adminUsersStatsTotal: "Total pengguna",
+     adminUsersStatsActive: "Aktif",
+     adminUsersStatsDeactivated: "Dihapus / nonaktif",
+     adminUsersStatsAdmins: "Admin",
+     adminUsersColEmail: "Email",
+     adminUsersColRole: "Peran",
+     adminUsersColActive: "Aktif",
+     adminUsersColCreated: "Dibuat",
+     adminUsersStatusActive: "Aktif",
+     adminUsersStatusInactive: "Nonaktif",
+     adminUsersStatusUpdating: "Memperbarui...",
+     adminUsersSearchPlaceholder: "Cari berdasarkan email...",
+     adminUsersSearchButton: "Cari",
+     adminUsersLoading: "Memuat pengguna...",
+     adminUsersError:
+       "Terjadi kesalahan saat memuat daftar pengguna.",
+     adminUsersNoData: "Tidak ada pengguna untuk ditampilkan.",
+     adminUsersStatsLoading: "Memuat statistik pengguna...",
+     adminUsersStatsError:
+       "Terjadi kesalahan saat memuat statistik pengguna.",
+     adminUsersPaginationShowingPrefix: "Menampilkan",
+     adminUsersPaginationOf: "dari",
+     adminUsersPaginationUsersSuffix: "pengguna",
+   },
+   it: {
+     adminUsersTitle: "Utenti (Admin)",
+     adminUsersSubtitle:
+       "Elenco utenti e stato dell’account (attivo/inattivo).",
+     adminUsersStatsTotal: "Totale utenti",
+     adminUsersStatsActive: "Attivi",
+     adminUsersStatsDeactivated: "Eliminati / inattivi",
+     adminUsersStatsAdmins: "Admin",
+     adminUsersColEmail: "Email",
+     adminUsersColRole: "Ruolo",
+     adminUsersColActive: "Attivo",
+     adminUsersColCreated: "Creato",
+     adminUsersStatusActive: "Attivo",
+     adminUsersStatusInactive: "Inattivo",
+     adminUsersStatusUpdating: "Aggiornamento...",
+     adminUsersSearchPlaceholder: "Cerca per email...",
+     adminUsersSearchButton: "Cerca",
+     adminUsersLoading: "Caricamento utenti...",
+     adminUsersError:
+       "Si è verificato un errore durante il caricamento della lista utenti.",
+     adminUsersNoData: "Nessun utente da mostrare.",
+     adminUsersStatsLoading: "Caricamento statistiche utenti...",
+     adminUsersStatsError:
+       "Si è verificato un errore durante il caricamento delle statistiche utenti.",
+     adminUsersPaginationShowingPrefix: "Visualizzazione",
+     adminUsersPaginationOf: "di",
+     adminUsersPaginationUsersSuffix: "utenti",
+   },
+   ko: {
+     adminUsersTitle: "사용자 (관리자)",
+     adminUsersSubtitle:
+       "사용자 목록 및 계정 상태(활성/비활성).",
+     adminUsersStatsTotal: "전체 사용자",
+     adminUsersStatsActive: "활성",
+     adminUsersStatsDeactivated: "삭제됨 / 비활성",
+     adminUsersStatsAdmins: "관리자",
+     adminUsersColEmail: "Email",
+     adminUsersColRole: "역할",
+     adminUsersColActive: "활성",
+     adminUsersColCreated: "생성됨",
+     adminUsersStatusActive: "활성",
+     adminUsersStatusInactive: "비활성",
+     adminUsersStatusUpdating: "업데이트 중...",
+     adminUsersSearchPlaceholder: "이메일로 검색...",
+     adminUsersSearchButton: "검색",
+     adminUsersLoading: "사용자 로딩 중...",
+     adminUsersError:
+       "사용자 목록을 불러오는 중 오류가 발생했습니다.",
+     adminUsersNoData: "표시할 사용자가 없습니다.",
+     adminUsersStatsLoading: "사용자 통계 로딩 중...",
+     adminUsersStatsError:
+       "사용자 통계를 불러오는 중 오류가 발생했습니다.",
+     adminUsersPaginationShowingPrefix: "표시",
+     adminUsersPaginationOf: "/",
+     adminUsersPaginationUsersSuffix: "사용자",
+   },
+   ja: {
+     adminUsersTitle: "ユーザー（管理）",
+     adminUsersSubtitle:
+       "ユーザー一覧とアカウント状態（有効/無効）。",
+     adminUsersStatsTotal: "総ユーザー数",
+     adminUsersStatsActive: "有効",
+     adminUsersStatsDeactivated: "削除済み / 無効",
+     adminUsersStatsAdmins: "管理者",
+     adminUsersColEmail: "Email",
+     adminUsersColRole: "役割",
+     adminUsersColActive: "有効",
+     adminUsersColCreated: "作成日",
+     adminUsersStatusActive: "有効",
+     adminUsersStatusInactive: "無効",
+     adminUsersStatusUpdating: "更新中...",
+     adminUsersSearchPlaceholder: "Emailで検索...",
+     adminUsersSearchButton: "検索",
+     adminUsersLoading: "ユーザーを読み込み中...",
+     adminUsersError:
+       "ユーザー一覧の読み込み中にエラーが発生しました。",
+     adminUsersNoData: "表示するユーザーがありません。",
+     adminUsersStatsLoading: "ユーザー統計を読み込み中...",
+     adminUsersStatsError:
+       "ユーザー統計の読み込み中にエラーが発生しました。",
+     adminUsersPaginationShowingPrefix: "表示",
+     adminUsersPaginationOf: "/",
+     adminUsersPaginationUsersSuffix: "ユーザー",
+   },
+   nl: {
+     adminUsersTitle: "Gebruikers (Admin)",
+     adminUsersSubtitle:
+       "Lijst van gebruikers en accountstatus (actief/inactief).",
+     adminUsersStatsTotal: "Totaal gebruikers",
+     adminUsersStatsActive: "Actief",
+     adminUsersStatsDeactivated: "Verwijderd / inactief",
+     adminUsersStatsAdmins: "Beheerders",
+     adminUsersColEmail: "E-mail",
+     adminUsersColRole: "Rol",
+     adminUsersColActive: "Actief",
+     adminUsersColCreated: "Aangemaakt",
+     adminUsersStatusActive: "Actief",
+     adminUsersStatusInactive: "Inactief",
+     adminUsersStatusUpdating: "Bijwerken...",
+     adminUsersSearchPlaceholder: "Zoek op e-mail...",
+     adminUsersSearchButton: "Zoeken",
+     adminUsersLoading: "Gebruikers laden...",
+     adminUsersError:
+       "Er is een fout opgetreden bij het laden van de gebruikerslijst.",
+     adminUsersNoData: "Geen gebruikers om te tonen.",
+     adminUsersStatsLoading: "Gebruikersstatistieken laden...",
+     adminUsersStatsError:
+       "Er is een fout opgetreden bij het laden van de gebruikersstatistieken.",
+     adminUsersPaginationShowingPrefix: "Tonen",
+     adminUsersPaginationOf: "van",
+     adminUsersPaginationUsersSuffix: "gebruikers",
+   },
+   cs: {
+     adminUsersTitle: "Uživatelé (Admin)",
+     adminUsersSubtitle:
+       "Seznam uživatelů a stav účtu (aktivní/neaktivní).",
+     adminUsersStatsTotal: "Celkem uživatelů",
+     adminUsersStatsActive: "Aktivní",
+     adminUsersStatsDeactivated: "Smazaní / neaktivní",
+     adminUsersStatsAdmins: "Admini",
+     adminUsersColEmail: "E-mail",
+     adminUsersColRole: "Role",
+     adminUsersColActive: "Aktivní",
+     adminUsersColCreated: "Vytvořeno",
+     adminUsersStatusActive: "Aktivní",
+     adminUsersStatusInactive: "Neaktivní",
+     adminUsersStatusUpdating: "Aktualizuji...",
+     adminUsersSearchPlaceholder: "Hledat podle e-mailu...",
+     adminUsersSearchButton: "Hledat",
+     adminUsersLoading: "Načítání uživatelů...",
+     adminUsersError:
+       "Došlo k chybě při načítání seznamu uživatelů.",
+     adminUsersNoData: "Žádní uživatelé k zobrazení.",
+     adminUsersStatsLoading: "Načítání statistik uživatelů...",
+     adminUsersStatsError:
+       "Došlo k chybě při načítání statistik uživatelů.",
+     adminUsersPaginationShowingPrefix: "Zobrazeno",
+     adminUsersPaginationOf: "z",
+     adminUsersPaginationUsersSuffix: "uživatelů",
+   },
+   ar: {
+     adminUsersTitle: "المستخدمون (الإدارة)",
+     adminUsersSubtitle:
+       "قائمة المستخدمين وحالة الحساب (نشط/غير نشط).",
+     adminUsersStatsTotal: "إجمالي المستخدمين",
+     adminUsersStatsActive: "نشط",
+     adminUsersStatsDeactivated: "محذوف / غير نشط",
+     adminUsersStatsAdmins: "المسؤولون",
+     adminUsersColEmail: "البريد الإلكتروني",
+     adminUsersColRole: "الدور",
+     adminUsersColActive: "نشط",
+     adminUsersColCreated: "تاريخ الإنشاء",
+     adminUsersStatusActive: "نشط",
+     adminUsersStatusInactive: "غير نشط",
+     adminUsersStatusUpdating: "جارٍ التحديث...",
+     adminUsersSearchPlaceholder: "ابحث بالبريد الإلكتروني...",
+     adminUsersSearchButton: "بحث",
+     adminUsersLoading: "جارٍ تحميل المستخدمين...",
+     adminUsersError:
+       "حدث خطأ أثناء تحميل قائمة المستخدمين.",
+     adminUsersNoData: "لا يوجد مستخدمون للعرض.",
+     adminUsersStatsLoading: "جارٍ تحميل إحصائيات المستخدمين...",
+     adminUsersStatsError:
+       "حدث خطأ أثناء تحميل إحصائيات المستخدمين.",
+     adminUsersPaginationShowingPrefix: "عرض",
+     adminUsersPaginationOf: "من",
+     adminUsersPaginationUsersSuffix: "مستخدم",
+   },
+ };
+
+for (const [lang, overrides] of Object.entries(ADMIN_COMMON_OVERRIDES)) {
+  if (!overrides) continue;
+  const target = (messages as Record<string, DomainMessages>)[lang]?.common;
+  if (target) {
+    Object.assign(target, overrides);
+  }
+}
+
+for (const [lang, overrides] of Object.entries(ADMIN_WIKI_OVERRIDES)) {
+  if (!overrides) continue;
+  const target = (messages as Record<string, DomainMessages>)[lang]?.common;
+  if (target) {
+    Object.assign(target, overrides);
+  }
+}
+
+for (const [lang, overrides] of Object.entries(ADMIN_WIKI_CREATE_FIELD_OVERRIDES)) {
+  if (!overrides) continue;
+  const target = (messages as Record<string, DomainMessages>)[lang]?.common;
+  if (target) {
+    Object.assign(target, overrides);
+  }
+}
+
+for (const [lang, overrides] of Object.entries(ADMIN_METRICS_OVERRIDES)) {
+  if (!overrides) continue;
+  const target = (messages as Record<string, DomainMessages>)[lang]?.common;
+  if (target) {
+    Object.assign(target, overrides);
+  }
+}
+
+for (const domains of Object.values(messages as Record<string, DomainMessages>)) {
+  const target = domains?.common;
+  if (target) {
+    Object.assign(target, ADMIN_COURSES_FALLBACK_COMMON);
+  }
+}
+
+for (const [lang, overrides] of Object.entries(ADMIN_COURSES_OVERRIDES)) {
+  if (!overrides) continue;
+  const target = (messages as Record<string, DomainMessages>)[lang]?.common;
+  if (target) {
+    Object.assign(target, overrides);
+  }
+}
+
+for (const domains of Object.values(messages as Record<string, DomainMessages>)) {
+  const target = domains?.common;
+  if (target) {
+    Object.assign(target, ADMIN_USERS_FALLBACK_COMMON);
+  }
+}
+
+for (const [lang, overrides] of Object.entries(ADMIN_USERS_OVERRIDES)) {
+  if (!overrides) continue;
+  const target = (messages as Record<string, DomainMessages>)[lang]?.common;
+  if (target) {
+    Object.assign(target, overrides);
+  }
+}
+
+ for (const [lang, overrides] of Object.entries(PAGINATION_COMMON_OVERRIDES)) {
+   if (!overrides) continue;
+   const target = (messages as Record<string, DomainMessages>)[lang]?.common;
+   if (target) {
+     Object.assign(target, overrides);
+   }
+ }
+
+ for (const [lang, overrides] of Object.entries(ADMIN_USERS_LABELS_OVERRIDES)) {
+   if (!overrides) continue;
+   const target = (messages as Record<string, DomainMessages>)[lang]?.common;
+   if (target) {
+     Object.assign(target, overrides);
+   }
+ }
+
+const REGISTER_AUTH_OVERRIDES: Partial<
+  Record<SupportedLang, Partial<DomainMessages["auth"]>>
+> = {
+  bg: {
+    registerEmailPlaceholder: "your@email.com",
+    registerPasswordPlaceholder: "********",
+    registerPasswordStrengthStrong: "Силна парола",
+    registerPasswordStrengthMedium: "Средна парола",
+    registerPasswordStrengthWeak: "Слаба парола",
+  },
+  en: {
+    registerEmailPlaceholder: "your@email.com",
+    registerPasswordPlaceholder: "********",
+    registerPasswordStrengthStrong: "Strong password",
+    registerPasswordStrengthMedium: "Medium password",
+    registerPasswordStrengthWeak: "Weak password",
+  },
+  de: {
+    registerEmailPlaceholder: "your@email.com",
+    registerPasswordPlaceholder: "********",
+    registerPasswordStrengthStrong: "Starkes Passwort",
+    registerPasswordStrengthMedium: "Mittleres Passwort",
+    registerPasswordStrengthWeak: "Schwaches Passwort",
+  },
+  es: {
+    registerEmailPlaceholder: "your@email.com",
+    registerPasswordPlaceholder: "********",
+    registerPasswordStrengthStrong: "Contraseña fuerte",
+    registerPasswordStrengthMedium: "Contraseña media",
+    registerPasswordStrengthWeak: "Contraseña débil",
+  },
+  pt: {
+    registerEmailPlaceholder: "your@email.com",
+    registerPasswordPlaceholder: "********",
+    registerPasswordStrengthStrong: "Senha forte",
+    registerPasswordStrengthMedium: "Senha média",
+    registerPasswordStrengthWeak: "Senha fraca",
+  },
+  pl: {
+    registerEmailPlaceholder: "your@email.com",
+    registerPasswordPlaceholder: "********",
+    registerPasswordStrengthStrong: "Silne hasło",
+    registerPasswordStrengthMedium: "Średnie hasło",
+    registerPasswordStrengthWeak: "Słabe hasło",
+  },
+  ua: {
+    registerEmailPlaceholder: "your@email.com",
+    registerPasswordPlaceholder: "********",
+    registerPasswordStrengthStrong: "Надійний пароль",
+    registerPasswordStrengthMedium: "Середній пароль",
+    registerPasswordStrengthWeak: "Слабкий пароль",
+  },
+  uk: {
+    registerEmailPlaceholder: "your@email.com",
+    registerPasswordPlaceholder: "********",
+    registerPasswordStrengthStrong: "Надійний пароль",
+    registerPasswordStrengthMedium: "Середній пароль",
+    registerPasswordStrengthWeak: "Слабкий пароль",
+  },
+  ru: {
+    registerEmailPlaceholder: "your@email.com",
+    registerPasswordPlaceholder: "********",
+    registerPasswordStrengthStrong: "Надёжный пароль",
+    registerPasswordStrengthMedium: "Средний пароль",
+    registerPasswordStrengthWeak: "Слабый пароль",
+  },
+  fr: {
+    registerEmailPlaceholder: "your@email.com",
+    registerPasswordPlaceholder: "********",
+    registerPasswordStrengthStrong: "Mot de passe fort",
+    registerPasswordStrengthMedium: "Mot de passe moyen",
+    registerPasswordStrengthWeak: "Mot de passe faible",
+  },
+  tr: {
+    registerEmailPlaceholder: "your@email.com",
+    registerPasswordPlaceholder: "********",
+    registerPasswordStrengthStrong: "Güçlü parola",
+    registerPasswordStrengthMedium: "Orta parola",
+    registerPasswordStrengthWeak: "Zayıf parola",
+  },
+  ro: {
+    registerEmailPlaceholder: "your@email.com",
+    registerPasswordPlaceholder: "********",
+    registerPasswordStrengthStrong: "Parolă puternică",
+    registerPasswordStrengthMedium: "Parolă medie",
+    registerPasswordStrengthWeak: "Parolă slabă",
+  },
+  hi: {
+    registerEmailPlaceholder: "your@email.com",
+    registerPasswordPlaceholder: "********",
+    registerPasswordStrengthStrong: "मज़बूत पासवर्ड",
+    registerPasswordStrengthMedium: "मध्यम पासवर्ड",
+    registerPasswordStrengthWeak: "कमज़ोर पासवर्ड",
+  },
+  vi: {
+    registerEmailPlaceholder: "your@email.com",
+    registerPasswordPlaceholder: "********",
+    registerPasswordStrengthStrong: "Mật khẩu mạnh",
+    registerPasswordStrengthMedium: "Mật khẩu trung bình",
+    registerPasswordStrengthWeak: "Mật khẩu yếu",
+  },
+  id: {
+    registerEmailPlaceholder: "your@email.com",
+    registerPasswordPlaceholder: "********",
+    registerPasswordStrengthStrong: "Kata sandi kuat",
+    registerPasswordStrengthMedium: "Kata sandi sedang",
+    registerPasswordStrengthWeak: "Kata sandi lemah",
+  },
+  it: {
+    registerEmailPlaceholder: "your@email.com",
+    registerPasswordPlaceholder: "********",
+    registerPasswordStrengthStrong: "Password forte",
+    registerPasswordStrengthMedium: "Password media",
+    registerPasswordStrengthWeak: "Password debole",
+  },
+  ko: {
+    registerEmailPlaceholder: "your@email.com",
+    registerPasswordPlaceholder: "********",
+    registerPasswordStrengthStrong: "강력한 비밀번호",
+    registerPasswordStrengthMedium: "보통 비밀번호",
+    registerPasswordStrengthWeak: "약한 비밀번호",
+  },
+  ja: {
+    registerEmailPlaceholder: "your@email.com",
+    registerPasswordPlaceholder: "********",
+    registerPasswordStrengthStrong: "強いパスワード",
+    registerPasswordStrengthMedium: "普通のパスワード",
+    registerPasswordStrengthWeak: "弱いパスワード",
+  },
+  nl: {
+    registerEmailPlaceholder: "your@email.com",
+    registerPasswordPlaceholder: "********",
+    registerPasswordStrengthStrong: "Sterk wachtwoord",
+    registerPasswordStrengthMedium: "Gemiddeld wachtwoord",
+    registerPasswordStrengthWeak: "Zwak wachtwoord",
+  },
+  cs: {
+    registerEmailPlaceholder: "your@email.com",
+    registerPasswordPlaceholder: "********",
+    registerPasswordStrengthStrong: "Silné heslo",
+    registerPasswordStrengthMedium: "Střední heslo",
+    registerPasswordStrengthWeak: "Slabé heslo",
+  },
+  ar: {
+    registerEmailPlaceholder: "your@email.com",
+    registerPasswordPlaceholder: "********",
+    registerPasswordStrengthStrong: "كلمة مرور قوية",
+    registerPasswordStrengthMedium: "كلمة مرور متوسطة",
+    registerPasswordStrengthWeak: "كلمة مرور ضعيفة",
+  },
+};
+
+for (const [lang, overrides] of Object.entries(REGISTER_AUTH_OVERRIDES)) {
+  if (!overrides) continue;
+  const target = (messages as Record<string, DomainMessages>)[lang]?.auth;
+  if (target) {
+    Object.assign(target, overrides);
+  }
+}

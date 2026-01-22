@@ -52,18 +52,20 @@ export function ConfirmDialog({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
       <div
-        className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl"
+        className="w-full max-w-md rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-6 shadow-xl"
         role="dialog"
         aria-modal="true"
       >
-        <h3 className="mb-2 text-base font-semibold text-zinc-900">{title}</h3>
+        <h3 className="mb-2 text-base font-semibold text-[color:var(--foreground)]">
+          {title}
+        </h3>
 
         {(description || danger) && (
           <div
             className={
               danger
                 ? "mb-4 rounded-md border px-4 py-3 text-sm"
-                : "mb-4 text-sm text-zinc-700"
+                : "mb-4 text-sm text-[color:var(--foreground)]"
             }
             style={dangerNoticeStyle}
           >
@@ -72,7 +74,9 @@ export function ConfirmDialog({
         )}
 
         {details ? (
-          <div className="mb-4 text-xs text-zinc-700">{details}</div>
+          <div className="mb-4 text-xs text-[color:var(--foreground)]">
+            {details}
+          </div>
         ) : null}
 
         {error ? (
@@ -85,7 +89,7 @@ export function ConfirmDialog({
           </p>
         ) : null}
 
-        <div className="flex justify-end gap-2">
+        <div className="flex items-center justify-between gap-6">
           <button
             type="button"
             className="be-btn-ghost rounded-md border px-3 py-1.5 text-xs font-medium disabled:opacity-70"

@@ -569,6 +569,7 @@ export class PaymentsService {
       if (typeof supportedValuesOf === 'function') {
         return supportedValuesOf('currency')
           .map((c) => c.toLowerCase())
+          .filter((code) => code !== 'bgn')
           .sort();
       }
     } catch {
@@ -579,7 +580,6 @@ export class PaymentsService {
       'eur',
       'usd',
       'gbp',
-      'bgn',
       'ron',
       'try',
       'chf',
@@ -618,6 +618,9 @@ export class PaymentsService {
       const nextCurrency = (dto.currency ?? '').trim().toLowerCase();
       if (!/^[a-z]{3}$/.test(nextCurrency)) {
         throw new BadRequestException('Invalid currency');
+      }
+      if (nextCurrency === 'bgn') {
+        throw new BadRequestException('Currency BGN is no longer supported');
       }
 
       settings.currency = nextCurrency;

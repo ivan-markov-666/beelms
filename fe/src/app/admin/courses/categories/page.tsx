@@ -7,10 +7,14 @@ import {
   useMemo,
   useState,
 } from "react";
+import { useCurrentLang } from "../../../../i18n/useCurrentLang";
+import { t } from "../../../../i18n/t";
 import { getAccessToken } from "../../../auth-token";
 import { getApiBaseUrl } from "../../../api-url";
 import { AdminBreadcrumbs } from "../../_components/admin-breadcrumbs";
 import { Pagination } from "../../../_components/pagination";
+import { StyledCheckbox } from "../../_components/styled-checkbox";
+import { InfoTooltip } from "../../_components/info-tooltip";
 
 const API_BASE_URL = getApiBaseUrl();
 
@@ -39,6 +43,7 @@ const DEFAULT_FORM: CreateCategoryForm = {
 };
 
 export default function AdminCourseCategoriesPage() {
+  const lang = useCurrentLang();
   const [categories, setCategories] = useState<CourseCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -132,9 +137,9 @@ export default function AdminCourseCategoriesPage() {
         }
       } catch {}
 
-      return "Request failed";
+      return t(lang, "common", "adminCoursesRequestFailed");
     },
-    [],
+    [lang],
   );
 
   const load = useCallback(async () => {
@@ -147,7 +152,7 @@ export default function AdminCourseCategoriesPage() {
       const token = getAccessToken();
       if (!token) {
         setError(
-          "Липсва достъп до Admin API. Моля, влезте отново като администратор.",
+          t(lang, "common", "adminErrorMissingApiAccess"),
         );
         setLoading(false);
         return;
@@ -160,7 +165,7 @@ export default function AdminCourseCategoriesPage() {
       });
 
       if (!res.ok) {
-        setError("Възникна грешка при зареждане на категориите.");
+        setError(t(lang, "common", "adminCoursesCategoriesLoadError"));
         setLoading(false);
         return;
       }
@@ -169,10 +174,10 @@ export default function AdminCourseCategoriesPage() {
       setCategories(Array.isArray(data) ? data : []);
       setLoading(false);
     } catch {
-      setError("Възникна грешка при зареждане на категориите.");
+      setError(t(lang, "common", "adminCoursesCategoriesLoadError"));
       setLoading(false);
     }
-  }, []);
+  }, [lang]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -195,7 +200,7 @@ export default function AdminCourseCategoriesPage() {
     try {
       const token = getAccessToken();
       if (!token) {
-        setCreateError("Липсва достъп до Admin API.");
+        setCreateError(t(lang, "common", "adminErrorMissingApiAccess"));
         setCreating(false);
         return;
       }
@@ -205,13 +210,13 @@ export default function AdminCourseCategoriesPage() {
       const order = Number(form.order);
 
       if (!slug) {
-        setCreateError("Slug is required.");
+        setCreateError(t(lang, "common", "adminCoursesCategoriesSlugRequired"));
         setCreating(false);
         return;
       }
 
       if (!title) {
-        setCreateError("Title is required.");
+        setCreateError(t(lang, "common", "adminCoursesCategoriesTitleRequired"));
         setCreating(false);
         return;
       }
@@ -220,7 +225,7 @@ export default function AdminCourseCategoriesPage() {
         form.order.trim() &&
         (!Number.isFinite(order) || !Number.isInteger(order) || order < 0)
       ) {
-        setCreateError("Order must be an integer >= 0.");
+        setCreateError(t(lang, "common", "adminCoursesCategoriesOrderInvalid"));
         setCreating(false);
         return;
       }
@@ -243,7 +248,9 @@ export default function AdminCourseCategoriesPage() {
 
       if (!res.ok) {
         const msg = await readErrorMessage(res);
-        setCreateError(msg || "Неуспешно създаване на категория.");
+        setCreateError(
+          msg || t(lang, "common", "adminCoursesCategoriesCreateError"),
+        );
         setCreating(false);
         return;
       }
@@ -251,10 +258,10 @@ export default function AdminCourseCategoriesPage() {
       const created = (await res.json()) as CourseCategory;
       setCategories((prev) => [created, ...prev]);
       setForm(DEFAULT_FORM);
-      setCreateSuccess("Категорията е създадена.");
+      setCreateSuccess(t(lang, "common", "adminCoursesCategoriesCreateSuccess"));
       setCreating(false);
     } catch {
-      setCreateError("Неуспешно създаване на категория.");
+      setCreateError(t(lang, "common", "adminCoursesCategoriesCreateError"));
       setCreating(false);
     }
   };
@@ -287,7 +294,7 @@ export default function AdminCourseCategoriesPage() {
     try {
       const token = getAccessToken();
       if (!token) {
-        setSaveError("Липсва достъп до Admin API.");
+        setSaveError(t(lang, "common", "adminErrorMissingApiAccess"));
         setSavingId(null);
         return;
       }
@@ -297,13 +304,13 @@ export default function AdminCourseCategoriesPage() {
       const nextOrder = Number(editDraft.order);
 
       if (!nextSlug) {
-        setSaveError("Slug is required.");
+        setSaveError(t(lang, "common", "adminCoursesCategoriesSlugRequired"));
         setSavingId(null);
         return;
       }
 
       if (!nextTitle) {
-        setSaveError("Title is required.");
+        setSaveError(t(lang, "common", "adminCoursesCategoriesTitleRequired"));
         setSavingId(null);
         return;
       }
@@ -314,7 +321,7 @@ export default function AdminCourseCategoriesPage() {
         !Number.isInteger(nextOrder) ||
         nextOrder < 0
       ) {
-        setSaveError("Order must be an integer >= 0.");
+        setSaveError(t(lang, "common", "adminCoursesCategoriesOrderInvalid"));
         setSavingId(null);
         return;
       }
@@ -327,7 +334,7 @@ export default function AdminCourseCategoriesPage() {
         payload.active = !!editDraft.active;
 
       if (Object.keys(payload).length === 0) {
-        setSaveSuccess("Няма промени за запис.");
+        setSaveSuccess(t(lang, "common", "adminCoursesCategoriesNoChanges"));
         setSavingId(null);
         cancelEdit();
         return;
@@ -347,7 +354,7 @@ export default function AdminCourseCategoriesPage() {
 
       if (!res.ok) {
         const msg = await readErrorMessage(res);
-        setSaveError(msg || "Неуспешен запис.");
+        setSaveError(msg || t(lang, "common", "adminCoursesCategoriesSaveError"));
         setSavingId(null);
         return;
       }
@@ -356,11 +363,11 @@ export default function AdminCourseCategoriesPage() {
       setCategories((prev) =>
         prev.map((x) => (x.id === updated.id ? updated : x)),
       );
-      setSaveSuccess("Записано.");
+      setSaveSuccess(t(lang, "common", "adminCoursesCategoriesSaved"));
       setSavingId(null);
       cancelEdit();
     } catch {
-      setSaveError("Неуспешен запис.");
+      setSaveError(t(lang, "common", "adminCoursesCategoriesSaveError"));
       setSavingId(null);
     }
   };
@@ -369,7 +376,11 @@ export default function AdminCourseCategoriesPage() {
     if (typeof window === "undefined") return;
 
     const ok = window.confirm(
-      `Сигурен ли си, че искаш да изтриеш категорията "${c.title}"? Курсовете към нея няма да се изтрият — ще останат некатегоризирани.`,
+      `${t(lang, "common", "adminCoursesCategoriesDeleteConfirmPrefix")} "${c.title}"? ${t(
+        lang,
+        "common",
+        "adminCoursesCategoriesDeleteConfirmSuffix",
+      )}`,
     );
     if (!ok) return;
 
@@ -382,7 +393,7 @@ export default function AdminCourseCategoriesPage() {
     try {
       const token = getAccessToken();
       if (!token) {
-        setDeleteError("Липсва достъп до Admin API.");
+        setDeleteError(t(lang, "common", "adminErrorMissingApiAccess"));
         setDeletingId(null);
         return;
       }
@@ -399,7 +410,9 @@ export default function AdminCourseCategoriesPage() {
 
       if (!res.ok && res.status !== 204) {
         const msg = await readErrorMessage(res);
-        setDeleteError(msg || "Неуспешно изтриване на категория.");
+        setDeleteError(
+          msg || t(lang, "common", "adminCoursesCategoriesDeleteError"),
+        );
         setDeletingId(null);
         return;
       }
@@ -408,10 +421,10 @@ export default function AdminCourseCategoriesPage() {
       if (editingId === c.id) {
         cancelEdit();
       }
-      setDeleteSuccess("Категорията е изтрита.");
+      setDeleteSuccess(t(lang, "common", "adminCoursesCategoriesDeleted"));
       setDeletingId(null);
     } catch {
-      setDeleteError("Неуспешно изтриване на категория.");
+      setDeleteError(t(lang, "common", "adminCoursesCategoriesDeleteError"));
       setDeletingId(null);
     }
   };
@@ -421,59 +434,96 @@ export default function AdminCourseCategoriesPage() {
       <section className="space-y-3">
         <AdminBreadcrumbs
           items={[
-            { label: "Админ табло", href: "/admin" },
-            { label: "Courses", href: "/admin/courses" },
-            { label: "Categories" },
+            { label: t(lang, "common", "adminDashboardTitle"), href: "/admin" },
+            {
+              label: t(lang, "common", "adminDashboardTabCourses"),
+              href: "/admin/courses",
+            },
+            { label: t(lang, "common", "adminCoursesCategoriesTitle") },
           ]}
+          className="text-[color:var(--foreground)] opacity-70"
         />
       </section>
 
-      <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+      <section className="rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-5 shadow-sm">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">
-            Create category
+          <h2 className="text-lg font-semibold text-[color:var(--foreground)]">
+            {t(lang, "common", "adminCoursesCategoriesCreateTitle")}
           </h2>
           <button
             type="button"
-            className="text-sm font-medium text-green-700 hover:text-green-900"
+            className="text-sm font-medium text-[color:var(--primary)] hover:opacity-90 hover:underline"
             onClick={() => void load()}
           >
-            Reload
+            {t(lang, "common", "adminCoursesCategoriesReload")}
           </button>
         </div>
 
         <form className="mt-4 space-y-4" onSubmit={handleCreate}>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <label className="space-y-1">
-              <span className="text-xs font-medium text-gray-600">Slug</span>
+              <span className="flex items-center gap-2 text-xs font-medium text-[color:var(--foreground)] opacity-80">
+                <span>{t(lang, "common", "adminCoursesCategoriesSlugLabel")}</span>
+                <InfoTooltip
+                  label={t(lang, "common", "adminCoursesCategoriesInfoTooltipLabel")}
+                  title={t(lang, "common", "adminCoursesCategoriesSlugHelpTitle")}
+                  description={t(
+                    lang,
+                    "common",
+                    "adminCoursesCategoriesSlugHelpDescription",
+                  )}
+                />
+              </span>
               <input
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400"
+                className="w-full rounded-md border border-[color:var(--border)] bg-[color:var(--card)] px-3 py-2 text-sm text-[color:var(--foreground)] placeholder:text-[color:var(--foreground)] placeholder:opacity-50 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)]"
                 value={form.slug}
                 onChange={(e) =>
                   setForm((p) => ({ ...p, slug: e.target.value }))
                 }
-                placeholder="e.g. web-development"
+                placeholder={t(lang, "common", "adminCoursesCategoriesSlugPlaceholder")}
                 required
               />
             </label>
 
             <label className="space-y-1">
-              <span className="text-xs font-medium text-gray-600">Title</span>
+              <span className="flex items-center gap-2 text-xs font-medium text-[color:var(--foreground)] opacity-80">
+                <span>{t(lang, "common", "adminCoursesCategoriesNameLabel")}</span>
+                <InfoTooltip
+                  label={t(lang, "common", "adminCoursesCategoriesInfoTooltipLabel")}
+                  title={t(lang, "common", "adminCoursesCategoriesTitleHelpTitle")}
+                  description={t(
+                    lang,
+                    "common",
+                    "adminCoursesCategoriesTitleHelpDescription",
+                  )}
+                />
+              </span>
               <input
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400"
+                className="w-full rounded-md border border-[color:var(--border)] bg-[color:var(--card)] px-3 py-2 text-sm text-[color:var(--foreground)] placeholder:text-[color:var(--foreground)] placeholder:opacity-50 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)]"
                 value={form.title}
                 onChange={(e) =>
                   setForm((p) => ({ ...p, title: e.target.value }))
                 }
-                placeholder="e.g. Web development"
+                placeholder={t(lang, "common", "adminCoursesCategoriesNamePlaceholder")}
                 required
               />
             </label>
 
             <label className="space-y-1">
-              <span className="text-xs font-medium text-gray-600">Order</span>
+              <span className="flex items-center gap-2 text-xs font-medium text-[color:var(--foreground)] opacity-80">
+                <span>{t(lang, "common", "adminCoursesCategoriesOrderLabel")}</span>
+                <InfoTooltip
+                  label={t(lang, "common", "adminCoursesCategoriesInfoTooltipLabel")}
+                  title={t(lang, "common", "adminCoursesCategoriesOrderHelpTitle")}
+                  description={t(
+                    lang,
+                    "common",
+                    "adminCoursesCategoriesOrderHelpDescription",
+                  )}
+                />
+              </span>
               <input
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400"
+                className="w-full rounded-md border border-[color:var(--border)] bg-[color:var(--card)] px-3 py-2 text-sm text-[color:var(--foreground)] placeholder:text-[color:var(--foreground)] placeholder:opacity-50 shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)]"
                 value={form.order}
                 onChange={(e) =>
                   setForm((p) => ({ ...p, order: e.target.value }))
@@ -483,21 +533,22 @@ export default function AdminCourseCategoriesPage() {
               />
             </label>
 
-            <label className="flex items-center gap-2 rounded-md border border-gray-200 px-3 py-2">
-              <input
-                type="checkbox"
+            <label className="flex items-center gap-2 rounded-md border border-[color:var(--border)] px-3 py-2">
+              <StyledCheckbox
                 checked={form.active}
-                onChange={(e) =>
-                  setForm((p) => ({ ...p, active: e.target.checked }))
-                }
+                ariaLabel={t(lang, "common", "adminCoursesCategoriesActiveLabel")}
+                onChange={(checked) => setForm((p) => ({ ...p, active: checked }))}
+                size="lg"
               />
-              <span className="text-sm text-gray-700">Active</span>
+              <span className="text-sm text-[color:var(--foreground)] opacity-80">
+                {t(lang, "common", "adminCoursesCategoriesActiveLabel")}
+              </span>
             </label>
           </div>
 
           {createError && (
             <div
-              className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+              className="rounded-md border border-[color:var(--border)] bg-[color:color-mix(in_srgb,var(--error)_14%,var(--card))] px-4 py-3 text-sm text-[color:var(--error)]"
               role="alert"
             >
               {createError}
@@ -506,7 +557,7 @@ export default function AdminCourseCategoriesPage() {
 
           {createSuccess && (
             <div
-              className="rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700"
+              className="rounded-md border border-[color:var(--border)] bg-[color:color-mix(in_srgb,var(--primary)_14%,var(--card))] px-4 py-3 text-sm text-[color:var(--primary)]"
               role="status"
             >
               {createSuccess}
@@ -516,42 +567,48 @@ export default function AdminCourseCategoriesPage() {
           <button
             type="submit"
             disabled={creating}
-            className="inline-flex items-center rounded-lg bg-green-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-green-700 disabled:opacity-60"
+            className="inline-flex items-center rounded-lg border border-[color:var(--primary)] bg-[color:var(--primary)] px-5 py-2.5 text-sm font-semibold text-[color:var(--on-primary)] shadow-sm transition hover:opacity-90 disabled:opacity-60"
           >
-            {creating ? "Creating..." : "Create"}
+            {creating
+              ? t(lang, "common", "adminCoursesCategoriesCreating")
+              : t(lang, "common", "adminCoursesCategoriesCreate")}
           </button>
         </form>
       </section>
 
-      <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+      <section className="rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-5 shadow-sm">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">
-            Categories list
+          <h2 className="text-lg font-semibold text-[color:var(--foreground)]">
+            {t(lang, "common", "adminCoursesCategoriesListTitle")}
           </h2>
           <div className="flex items-center gap-3">
             <button
               type="button"
-              className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+              className="be-btn-ghost rounded-lg border px-3 py-2 text-sm font-medium shadow-sm disabled:cursor-not-allowed disabled:opacity-60"
               onClick={exportCsv}
               disabled={totalCount === 0}
             >
-              Export CSV
+              {t(lang, "common", "adminCoursesCategoriesExportCsv")}
             </button>
             <button
               type="button"
-              className="text-sm font-medium text-green-700 hover:text-green-900"
+              className="text-sm font-medium text-[color:var(--primary)] hover:opacity-90 hover:underline"
               onClick={() => void load()}
             >
-              Reload
+              {t(lang, "common", "adminCoursesCategoriesReload")}
             </button>
           </div>
         </div>
 
-        {loading && <p className="mt-3 text-sm text-gray-500">Loading...</p>}
+        {loading && (
+          <p className="mt-3 text-sm text-[color:var(--foreground)] opacity-60">
+            {t(lang, "common", "adminCoursesCategoriesLoading")}
+          </p>
+        )}
 
         {!loading && error && (
           <div
-            className="mt-3 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+            className="mt-3 rounded-md border border-[color:var(--border)] bg-[color:color-mix(in_srgb,var(--error)_14%,var(--card))] px-4 py-3 text-sm text-[color:var(--error)]"
             role="alert"
           >
             {error}
@@ -559,12 +616,14 @@ export default function AdminCourseCategoriesPage() {
         )}
 
         {!loading && !error && sorted.length === 0 && (
-          <p className="mt-3 text-sm text-gray-600">No categories found.</p>
+          <p className="mt-3 text-sm text-[color:var(--foreground)] opacity-70">
+            {t(lang, "common", "adminCoursesCategoriesEmpty")}
+          </p>
         )}
 
         {saveError && (
           <div
-            className="mt-3 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+            className="mt-3 rounded-md border border-[color:var(--border)] bg-[color:color-mix(in_srgb,var(--error)_14%,var(--card))] px-4 py-3 text-sm text-[color:var(--error)]"
             role="alert"
           >
             {saveError}
@@ -573,7 +632,7 @@ export default function AdminCourseCategoriesPage() {
 
         {saveSuccess && (
           <div
-            className="mt-3 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700"
+            className="mt-3 rounded-md border border-[color:var(--border)] bg-[color:color-mix(in_srgb,var(--primary)_14%,var(--card))] px-4 py-3 text-sm text-[color:var(--primary)]"
             role="status"
           >
             {saveSuccess}
@@ -582,7 +641,7 @@ export default function AdminCourseCategoriesPage() {
 
         {deleteError && (
           <div
-            className="mt-3 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+            className="mt-3 rounded-md border border-[color:var(--border)] bg-[color:color-mix(in_srgb,var(--error)_14%,var(--card))] px-4 py-3 text-sm text-[color:var(--error)]"
             role="alert"
           >
             {deleteError}
@@ -591,7 +650,7 @@ export default function AdminCourseCategoriesPage() {
 
         {deleteSuccess && (
           <div
-            className="mt-3 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700"
+            className="mt-3 rounded-md border border-[color:var(--border)] bg-[color:color-mix(in_srgb,var(--primary)_14%,var(--card))] px-4 py-3 text-sm text-[color:var(--primary)]"
             role="status"
           >
             {deleteSuccess}
@@ -601,24 +660,37 @@ export default function AdminCourseCategoriesPage() {
         {!loading && !error && sorted.length > 0 && (
           <div className="mt-4 overflow-x-auto">
             <table className="min-w-full text-left text-sm">
-              <thead className="border-b border-gray-200 text-xs uppercase tracking-wide text-gray-500">
+              <thead className="border-b border-[color:var(--border)] text-xs uppercase tracking-wide text-[color:var(--foreground)] opacity-70">
                 <tr>
-                  <th className="px-2 py-2">Title</th>
-                  <th className="px-2 py-2">Slug</th>
-                  <th className="px-2 py-2">Order</th>
-                  <th className="px-2 py-2">Active</th>
-                  <th className="px-2 py-2">Actions</th>
+                  <th className="px-2 py-2">
+                    {t(lang, "common", "adminCoursesCategoriesTableTitle")}
+                  </th>
+                  <th className="px-2 py-2">
+                    {t(lang, "common", "adminCoursesCategoriesTableSlug")}
+                  </th>
+                  <th className="px-2 py-2">
+                    {t(lang, "common", "adminCoursesCategoriesTableOrder")}
+                  </th>
+                  <th className="px-2 py-2">
+                    {t(lang, "common", "adminCoursesCategoriesTableActive")}
+                  </th>
+                  <th className="px-2 py-2">
+                    {t(lang, "common", "adminCoursesCategoriesTableActions")}
+                  </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-[color:var(--border)]">
                 {pageItems.map((c) => {
                   const isEditing = editingId === c.id;
                   return (
-                    <tr key={c.id} className="hover:bg-gray-50">
+                    <tr
+                      key={c.id}
+                      className="hover:bg-[color:color-mix(in_srgb,var(--foreground)_3%,var(--card))]"
+                    >
                       <td className="px-2 py-2">
                         {isEditing ? (
                           <input
-                            className="w-full rounded-md border border-gray-300 px-2 py-1 text-sm"
+                            className="w-full rounded-md border border-[color:var(--border)] bg-[color:var(--card)] px-2 py-1 text-sm text-[color:var(--foreground)]"
                             value={editDraft?.title ?? ""}
                             onChange={(e) =>
                               setEditDraft((p) =>
@@ -627,7 +699,7 @@ export default function AdminCourseCategoriesPage() {
                             }
                           />
                         ) : (
-                          <span className="font-medium text-gray-900">
+                          <span className="font-medium text-[color:var(--foreground)]">
                             {c.title}
                           </span>
                         )}
@@ -635,7 +707,7 @@ export default function AdminCourseCategoriesPage() {
                       <td className="px-2 py-2">
                         {isEditing ? (
                           <input
-                            className="w-full rounded-md border border-gray-300 px-2 py-1 text-sm"
+                            className="w-full rounded-md border border-[color:var(--border)] bg-[color:var(--card)] px-2 py-1 text-sm text-[color:var(--foreground)]"
                             value={editDraft?.slug ?? ""}
                             onChange={(e) =>
                               setEditDraft((p) =>
@@ -644,13 +716,15 @@ export default function AdminCourseCategoriesPage() {
                             }
                           />
                         ) : (
-                          <span className="text-gray-700">{c.slug}</span>
+                          <span className="text-[color:var(--foreground)] opacity-80">
+                            {c.slug}
+                          </span>
                         )}
                       </td>
                       <td className="px-2 py-2">
                         {isEditing ? (
                           <input
-                            className="w-24 rounded-md border border-gray-300 px-2 py-1 text-sm"
+                            className="w-24 rounded-md border border-[color:var(--border)] bg-[color:var(--card)] px-2 py-1 text-sm text-[color:var(--foreground)]"
                             value={editDraft?.order ?? "0"}
                             onChange={(e) =>
                               setEditDraft((p) =>
@@ -660,23 +734,32 @@ export default function AdminCourseCategoriesPage() {
                             inputMode="numeric"
                           />
                         ) : (
-                          <span className="text-gray-700">{c.order}</span>
+                          <span className="text-[color:var(--foreground)] opacity-80">
+                            {c.order}
+                          </span>
                         )}
                       </td>
                       <td className="px-2 py-2">
                         {isEditing ? (
-                          <input
-                            type="checkbox"
+                          <StyledCheckbox
                             checked={!!editDraft?.active}
-                            onChange={(e) =>
+                            ariaLabel={`${t(
+                              lang,
+                              "common",
+                              "adminCoursesCategoriesActiveLabel",
+                            )} ${c.title}`}
+                            onChange={(checked) =>
                               setEditDraft((p) =>
-                                p ? { ...p, active: e.target.checked } : p,
+                                p ? { ...p, active: checked } : p,
                               )
                             }
+                            size="lg"
                           />
                         ) : (
-                          <span className="text-gray-700">
-                            {c.active ? "yes" : "no"}
+                          <span className="text-[color:var(--foreground)] opacity-80">
+                            {c.active
+                              ? t(lang, "common", "adminCoursesCategoriesYes")
+                              : t(lang, "common", "adminCoursesCategoriesNo")}
                           </span>
                         )}
                       </td>
@@ -685,38 +768,42 @@ export default function AdminCourseCategoriesPage() {
                           <div className="flex items-center gap-2">
                             <button
                               type="button"
-                              className="text-sm font-medium text-green-700 hover:text-green-900 disabled:opacity-60"
+                              className="text-sm font-medium text-[color:var(--primary)] hover:opacity-90 disabled:opacity-60"
                               disabled={savingId === c.id}
                               onClick={() => void saveEdit(c)}
                             >
-                              {savingId === c.id ? "Saving..." : "Save"}
+                              {savingId === c.id
+                                ? t(lang, "common", "adminCoursesCategoriesSaving")
+                                : t(lang, "common", "adminCoursesCategoriesSave")}
                             </button>
                             <button
                               type="button"
-                              className="text-sm text-gray-600 hover:text-gray-800"
+                              className="text-sm text-[color:var(--foreground)] opacity-70 hover:opacity-90"
                               disabled={savingId === c.id}
                               onClick={() => cancelEdit()}
                             >
-                              Cancel
+                              {t(lang, "common", "adminCoursesCategoriesCancel")}
                             </button>
                           </div>
                         ) : (
                           <div className="flex items-center gap-3">
                             <button
                               type="button"
-                              className="text-sm font-medium text-green-700 hover:text-green-900"
+                              className="text-sm font-medium text-[color:var(--primary)] hover:opacity-90"
                               disabled={deletingId === c.id}
                               onClick={() => startEdit(c)}
                             >
-                              Edit
+                              {t(lang, "common", "adminCoursesCategoriesEdit")}
                             </button>
                             <button
                               type="button"
-                              className="text-sm font-medium text-red-600 hover:text-red-700 disabled:opacity-60"
+                              className="text-sm font-medium text-[color:var(--error)] hover:opacity-90 disabled:opacity-60"
                               disabled={deletingId === c.id}
                               onClick={() => void deleteCategory(c)}
                             >
-                              {deletingId === c.id ? "Deleting..." : "Delete"}
+                              {deletingId === c.id
+                                ? t(lang, "common", "adminCoursesCategoriesDeleting")
+                                : t(lang, "common", "adminCoursesCategoriesDelete")}
                             </button>
                           </div>
                         )}
@@ -727,11 +814,14 @@ export default function AdminCourseCategoriesPage() {
               </tbody>
             </table>
 
-            <div className="mt-4 flex items-center justify-between border-t border-gray-200 px-3 py-3 text-xs text-gray-600 md:text-sm">
+            <div className="mt-4 flex items-center justify-between border-t border-[color:var(--border)] px-3 py-3 text-xs text-[color:var(--foreground)] opacity-80 md:text-sm">
               <p>
-                Showing <span className="font-semibold">{showingFrom}</span>-
-                <span className="font-semibold">{showingTo}</span> of{" "}
-                <span className="font-semibold">{totalCount}</span> categories
+                {t(lang, "common", "adminCoursesCategoriesShowingPrefix")}{" "}
+                <span className="font-semibold">{showingFrom}</span>-
+                <span className="font-semibold">{showingTo}</span>{" "}
+                {t(lang, "common", "adminCoursesCategoriesShowingOf")}{" "}
+                <span className="font-semibold">{totalCount}</span>{" "}
+                {t(lang, "common", "adminCoursesCategoriesShowingSuffix")}
               </p>
               <Pagination
                 currentPage={safeCurrentPage}

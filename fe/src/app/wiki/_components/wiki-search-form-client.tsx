@@ -1,18 +1,51 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ListboxSelect } from "../../_components/listbox-select";
 
 export function WikiSearchFormClient({
   supportedLangs,
   initialQ,
   initialLang,
+  flagByLang,
 }: {
   supportedLangs: string[];
   initialQ: string;
   initialLang: string;
+  flagByLang: Record<string, string>;
 }) {
   const [lang, setLang] = useState<string>(initialLang);
+
+  const langOptions = useMemo(() => {
+    const makeFlagAdornment = (code?: string | null) => {
+      const normalized = (code ?? "").trim().toLowerCase();
+      if (!normalized) return undefined;
+      return (
+        <span
+          aria-hidden="true"
+          className={`fi fi-${normalized} h-4 w-4 shrink-0 rounded-sm`}
+        />
+      );
+    };
+
+    const base = [
+      {
+        value: "",
+        label: "Всички езици",
+      },
+      ...supportedLangs.map((l) => {
+        const normalized = (l ?? "").trim().toLowerCase();
+        const flagCode = flagByLang[normalized];
+        return {
+          value: normalized,
+          label: normalized.toUpperCase(),
+          leftAdornment: makeFlagAdornment(flagCode),
+        };
+      }),
+    ];
+
+    return base;
+  }, [supportedLangs, flagByLang]);
 
   return (
     <form
@@ -58,20 +91,19 @@ export function WikiSearchFormClient({
           value={lang}
           onChange={(next) => setLang(next)}
           buttonClassName="flex w-full items-center justify-between gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
-          options={[
-            { value: "", label: "Всички езици" },
-            ...supportedLangs.map((l) => ({
-              value: l,
-              label: l.toUpperCase(),
-            })),
-          ]}
+          options={langOptions}
         />
       </div>
 
       <div className="w-full md:w-auto">
         <button
           type="submit"
-          className="inline-flex w-full items-center justify-center rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1 md:w-auto"
+          className="inline-flex w-full items-center justify-center rounded-lg border px-4 py-2 text-sm font-semibold shadow-sm transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-1 focus:ring-offset-[color:var(--card)] md:w-auto"
+          style={{
+            backgroundColor: "var(--primary)",
+            borderColor: "var(--primary)",
+            color: "var(--on-primary)",
+          }}
         >
           Търси
         </button>

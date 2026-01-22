@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
@@ -24,6 +24,122 @@ type MermaidModule = MermaidInstance & {
 };
 
 let mermaidModulePromise: Promise<MermaidInstance> | null = null;
+
+type TocEntry = {
+  level: number;
+  text: string;
+  id: string;
+};
+
+function normalizeHeadingText(raw: string): string {
+  return raw
+    .replace(/\s+/g, " ")
+    .replace(/\s*#+\s*$/, "")
+    .trim();
+}
+
+function stripInlineMarkdown(input: string): string {
+  let out = input;
+
+  out = out.replace(/!\[[^\]]*\]\([^)]*\)/g, "");
+  out = out.replace(/\[([^\]]+)\]\([^)]*\)/g, "$1");
+  out = out.replace(/`([^`]+)`/g, "$1");
+  out = out.replace(/\*\*([^*]+)\*\*/g, "$1");
+  out = out.replace(/\*([^*]+)\*/g, "$1");
+  out = out.replace(/__([^_]+)__/g, "$1");
+  out = out.replace(/_([^_]+)_/g, "$1");
+
+  return normalizeHeadingText(out);
+}
+
+function slugify(input: string): string {
+  const ascii = input
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+
+  const slug = ascii
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
+
+  return slug || "section";
+}
+
+function createSlugger() {
+  const seen = new Map<string, number>();
+  return (raw: string) => {
+    const base = slugify(normalizeHeadingText(raw));
+    const count = (seen.get(base) ?? 0) + 1;
+    seen.set(base, count);
+    return count === 1 ? base : `${base}-${count}`;
+  };
+}
+
+function extractTextFromChildren(children: unknown): string {
+  if (children === null || children === undefined) {
+    return "";
+  }
+
+  if (typeof children === "string" || typeof children === "number") {
+    return String(children);
+  }
+
+  if (Array.isArray(children)) {
+    return children.map((c) => extractTextFromChildren(c)).join("");
+  }
+
+  if (typeof children === "object") {
+    const maybe = children as { props?: { children?: unknown } };
+    return extractTextFromChildren(maybe.props?.children);
+  }
+
+  return "";
+}
+
+function buildToc(content: string): TocEntry[] {
+  const lines = (content ?? "").split(/\r?\n/);
+  const nextId = createSlugger();
+  const entries: TocEntry[] = [];
+
+  let inFence = false;
+  let fenceMarker: string | null = null;
+
+  for (const line of lines) {
+    const fenceMatch = /^\s*(```+|~~~+)\s*/.exec(line);
+    if (fenceMatch) {
+      const marker = fenceMatch[1];
+      if (!inFence) {
+        inFence = true;
+        fenceMarker = marker;
+      } else if (fenceMarker && marker.startsWith(fenceMarker[0])) {
+        inFence = false;
+        fenceMarker = null;
+      }
+      continue;
+    }
+
+    if (inFence) {
+      continue;
+    }
+
+    const match = /^(#{1,4})\s+(.+)$/.exec(line);
+    if (!match) {
+      continue;
+    }
+
+    const level = match[1].length;
+    const text = stripInlineMarkdown(match[2]);
+    if (!text) {
+      continue;
+    }
+
+    entries.push({ level, text, id: nextId(text) });
+  }
+
+  return entries;
+}
 
 export function sanitizeMermaidSvg(svg: string): string {
   try {
@@ -661,12 +777,35 @@ export function MermaidDiagram({ code }: { code: string }) {
 }
 
 export function WikiMarkdown({ content }: { content: string }) {
+  const tocEntries = useMemo(() => buildToc(content), [content]);
+  const headingIdAllocatorRef = useRef<{
+    used: Set<string>;
+    counts: Map<string, number>;
+  } | null>(null);
+  
+  const headingIndexRef = useRef(0);
+
+  useEffect(() => {
+    headingIndexRef.current = 0;
+  }, [content]);
+
+  useEffect(() => {
+    headingIdAllocatorRef.current = {
+      used: new Set(tocEntries.map((e) => e.id)),
+      counts: new Map<string, number>(),
+    };
+  }, [tocEntries]);
+
   const baseAttributes =
     (defaultSchema.attributes as Record<string, unknown> | undefined) ?? {};
   const anchorAttributes = (baseAttributes.a as string[] | undefined) ?? [];
   const imgAttributes = (baseAttributes.img as string[] | undefined) ?? [];
   const spanAttributes = (baseAttributes.span as string[] | undefined) ?? [];
   const divAttributes = (baseAttributes.div as string[] | undefined) ?? [];
+  const h1Attributes = (baseAttributes.h1 as string[] | undefined) ?? [];
+  const h2Attributes = (baseAttributes.h2 as string[] | undefined) ?? [];
+  const h3Attributes = (baseAttributes.h3 as string[] | undefined) ?? [];
+  const h4Attributes = (baseAttributes.h4 as string[] | undefined) ?? [];
   const baseProtocols =
     (defaultSchema.protocols as Record<string, unknown> | undefined) ?? {};
   const hrefProtocols = (baseProtocols.href as string[] | undefined) ?? [];
@@ -680,6 +819,8 @@ export function WikiMarkdown({ content }: { content: string }) {
       "img",
       "span",
       "div",
+      "input",
+      "label",
       "u",
       "sup",
       "sub",
@@ -717,6 +858,12 @@ export function WikiMarkdown({ content }: { content: string }) {
       div: Array.from(
         new Set([...divAttributes, "className", "style", "aria-hidden"]),
       ),
+      input: ["type", "checked", "disabled"],
+      label: ["className"],
+      h1: Array.from(new Set([...h1Attributes, "id", "className"])),
+      h2: Array.from(new Set([...h2Attributes, "id", "className"])),
+      h3: Array.from(new Set([...h3Attributes, "id", "className"])),
+      h4: Array.from(new Set([...h4Attributes, "id", "className"])),
       img: Array.from(
         new Set([
           ...imgAttributes,
@@ -749,6 +896,34 @@ export function WikiMarkdown({ content }: { content: string }) {
   };
 
   const components: Components = {
+    p({ children, ...props }) {
+      const raw = extractTextFromChildren(children);
+      const marker = raw.trim().toLowerCase();
+      if (marker === "[[toc]]") {
+        if (!tocEntries.length) {
+          return null;
+        }
+
+        return (
+          <nav className="wiki-toc" aria-label="Съдържание">
+            <div className="wiki-toc-title">Съдържание</div>
+            <ul className="wiki-toc-list">
+              {tocEntries.map((entry) => (
+                <li
+                  key={entry.id}
+                  className="wiki-toc-item"
+                  style={{ marginLeft: `${Math.max(0, entry.level - 1) * 12}px` }}
+                >
+                  <a href={`#${entry.id}`}>{entry.text}</a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        );
+      }
+
+      return <p {...props}>{children}</p>;
+    },
     a({ children, rel, target, ...props }) {
       const nextRel =
         target === "_blank"
@@ -816,6 +991,71 @@ export function WikiMarkdown({ content }: { content: string }) {
       );
     },
   };
+
+  const renderHeading = (
+    level: 1 | 2 | 3 | 4,
+    children: ReactNode,
+    props: Record<string, unknown>,
+  ) => {
+    const text = normalizeHeadingText(extractTextFromChildren(children));
+    let id: string | null = null;
+
+    for (let i = headingIndexRef.current; i < tocEntries.length; i++) {
+      const entry = tocEntries[i];
+      if (entry.level !== level) {
+        continue;
+      }
+      if (entry.text !== text) {
+        continue;
+      }
+      id = entry.id;
+      headingIndexRef.current = i + 1;
+      break;
+    }
+
+    if (!id) {
+      const allocator = headingIdAllocatorRef.current;
+      if (!allocator) {
+        id = slugify(text);
+      } else {
+        const base = slugify(normalizeHeadingText(text));
+        const next = (allocator.counts.get(base) ?? 0) + 1;
+        allocator.counts.set(base, next);
+
+        let candidate = next === 1 ? base : `${base}-${next}`;
+        while (allocator.used.has(candidate)) {
+          const n = (allocator.counts.get(base) ?? 0) + 1;
+          allocator.counts.set(base, n);
+          candidate = `${base}-${n}`;
+        }
+        allocator.used.add(candidate);
+        id = candidate;
+      }
+    }
+
+    const Tag = `h${level}` as const;
+    return (
+      <Tag {...props} id={id}>
+        <a
+          className="wiki-heading-anchor"
+          href={`#${id}`}
+          aria-label={`Линк към ${text}`}
+        >
+          #
+        </a>
+        {children}
+      </Tag>
+    );
+  };
+
+  components.h1 = ({ children, ...props }) =>
+    renderHeading(1, children as ReactNode, props as Record<string, unknown>);
+  components.h2 = ({ children, ...props }) =>
+    renderHeading(2, children as ReactNode, props as Record<string, unknown>);
+  components.h3 = ({ children, ...props }) =>
+    renderHeading(3, children as ReactNode, props as Record<string, unknown>);
+  components.h4 = ({ children, ...props }) =>
+    renderHeading(4, children as ReactNode, props as Record<string, unknown>);
 
   return (
     <ReactMarkdown

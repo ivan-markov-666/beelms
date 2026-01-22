@@ -61,6 +61,22 @@ function getInactiveToggleRegex() {
   return /(inactive|неактив)/i;
 }
 
+function getRoleForAriaRegex() {
+  return /(role for|роля за)/i;
+}
+
+function getUsersStatusAriaRegex() {
+  return /(users status|статус на потребителите)/i;
+}
+
+function getUsersRoleAriaRegex() {
+  return /(users role|роля на потребителите)/i;
+}
+
+function getViewRegex() {
+  return /(view|преглед)/i;
+}
+
 describe("AdminUsersPage", () => {
   beforeEach(() => {
     jest.resetAllMocks();
@@ -127,7 +143,7 @@ describe("AdminUsersPage", () => {
       expect(screen.getByText("admin@example.com")).toBeInTheDocument();
       expect(
         screen.getByRole("combobox", {
-          name: "Role for admin@example.com",
+          name: getRoleForAriaRegex(),
         }),
       ).toHaveValue("admin");
       expect(
@@ -463,7 +479,7 @@ describe("AdminUsersPage", () => {
     await screen.findByText("Admin Users");
 
     const statusSelect = await screen.findByRole("combobox", {
-      name: "Users status",
+      name: getUsersStatusAriaRegex(),
     });
     await userEvent.click(statusSelect);
     await userEvent.click(
@@ -521,7 +537,7 @@ describe("AdminUsersPage", () => {
     await screen.findByText("Admin Users");
 
     const roleSelect = await screen.findByRole("combobox", {
-      name: "Users role",
+      name: getUsersRoleAriaRegex(),
     });
     await userEvent.click(roleSelect);
     await userEvent.click(
@@ -583,10 +599,6 @@ describe("AdminUsersPage", () => {
       },
     ]);
 
-    const alertSpy = jest
-      .spyOn(window, "alert")
-      .mockImplementation(() => undefined);
-
     render(<AdminUsersPage />);
 
     expect(await screen.findByText("john.doe@example.com")).toBeInTheDocument();
@@ -597,10 +609,15 @@ describe("AdminUsersPage", () => {
     // ID label under the email
     expect(screen.getByText("ID: 1")).toBeInTheDocument();
 
-    const viewButton = screen.getByRole("button", { name: "View" });
+    const viewButton = screen.getByRole("button", { name: getViewRegex() });
     fireEvent.click(viewButton);
 
-    expect(alertSpy).toHaveBeenCalledTimes(1);
-    alertSpy.mockRestore();
+    expect(
+      await screen.findByRole("dialog", { name: /данни за потребителя/i }),
+    ).toBeInTheDocument();
+
+    expect(screen.getByText("john.doe@example.com")).toBeInTheDocument();
+    expect(screen.getByText("User ID")).toBeInTheDocument();
+    expect(screen.getByText("1")).toBeInTheDocument();
   });
 });

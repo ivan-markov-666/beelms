@@ -16,6 +16,7 @@ import { WikiArticleView } from './wiki-article-view.entity';
 import { WikiArticleIpViewDaily } from './wiki-article-ip-view-daily.entity';
 import { User } from '../auth/user.entity';
 import type { UserRole } from '../auth/user-role';
+import { SettingsService } from '../settings/settings.service';
 import { WikiListItemDto } from './dto/wiki-list-item.dto';
 import { AdminWikiListItemDto } from './dto/admin-wiki-list-item.dto';
 import { WikiArticleDetailDto } from './dto/wiki-article-detail.dto';
@@ -66,6 +67,63 @@ function sanitizeFilename(originalName: string): string {
   return `${finalBase}-${timestamp}${ext.toLowerCase()}`;
 }
 
+function normalizeLanguageCode(raw: string): string {
+  const normalized = (raw ?? '').trim().toLowerCase();
+  if (!normalized) return '';
+  return normalized === 'uk' ? 'ua' : normalized;
+}
+
+function extractLanguageFromMarkdownFilename(filename: string): string {
+  const trimmed = (filename ?? '').trim();
+  if (!trimmed) return '';
+
+  const match = trimmed.match(/-([a-zA-Z0-9-]{2,15})\.md$/);
+  if (!match) return '';
+
+  return normalizeLanguageCode(match[1] ?? '');
+}
+
+function extractFirstMarkdownHeading(
+  content: string,
+  level: 1 | 2,
+): string | null {
+  const lines = (content ?? '').split(/\r?\n/);
+
+  let inFence = false;
+  let fenceMarker: string | null = null;
+  const prefix = level === 1 ? '#' : '##';
+
+  for (const rawLine of lines) {
+    const line = rawLine ?? '';
+    const fenceMatch = /^\s*(```+|~~~+)\s*/.exec(line);
+    if (fenceMatch) {
+      const marker = fenceMatch[1];
+      if (!inFence) {
+        inFence = true;
+        fenceMarker = marker;
+      } else if (fenceMarker && marker.startsWith(fenceMarker[0])) {
+        inFence = false;
+        fenceMarker = null;
+      }
+      continue;
+    }
+
+    if (inFence) {
+      continue;
+    }
+
+    const headingMatch = new RegExp(`^\\s*${prefix}\\s+(.+)$`).exec(line);
+    if (!headingMatch) {
+      continue;
+    }
+
+    const title = (headingMatch[1] ?? '').trim();
+    return title.length > 0 ? title : null;
+  }
+
+  return null;
+}
+
 @Injectable()
 export class WikiService {
   constructor(
@@ -81,7 +139,164 @@ export class WikiService {
     private readonly ipViewDailyRepo: Repository<WikiArticleIpViewDaily>,
     @InjectRepository(User)
     private readonly usersRepo: Repository<User>,
+    private readonly settingsService: SettingsService,
   ) {}
+
+  async adminImportArticleTranslationsFromMarkdownFiles(
+    actorUserId: string,
+    articleId: string,
+    files: WikiUploadedFile[] | undefined,
+  ): Promise<{
+    results: Array<{
+      filename: string;
+      language: string | null;
+      status: 'created' | 'skipped' | 'error';
+      versionNumber?: number;
+      error?: string;
+    }>;
+  }> {
+    if (!files || files.length === 0) {
+      throw new BadRequestException('Files are required');
+    }
+
+    const article = await this.articleRepo.findOne({
+      where: { id: articleId },
+    });
+    await this.requireArticleOwnershipForAuthor(actorUserId, article);
+
+    if (!article) {
+      throw new NotFoundException('Article not found');
+    }
+
+    const cfg = await this.settingsService.getOrCreateInstanceConfig();
+    const supportedLangs = Array.isArray(cfg.languages?.supported)
+      ? cfg.languages.supported.map((c) => normalizeLanguageCode(c))
+      : [];
+    const supportedLangSet = new Set(supportedLangs.filter(Boolean));
+
+    const results: Array<{
+      filename: string;
+      language: string | null;
+      status: 'created' | 'skipped' | 'error';
+      versionNumber?: number;
+      error?: string;
+    }> = [];
+
+    for (const file of files) {
+      const filename = (file.originalname ?? 'file.md').trim() || 'file.md';
+      const language = extractLanguageFromMarkdownFilename(filename);
+
+      if (!language) {
+        results.push({
+          filename,
+          language: null,
+          status: 'error',
+          error: 'Cannot detect language from filename',
+        });
+        continue;
+      }
+
+      if (supportedLangSet.size > 0 && !supportedLangSet.has(language)) {
+        results.push({
+          filename,
+          language,
+          status: 'error',
+          error: 'Language is not supported',
+        });
+        continue;
+      }
+
+      if (!file.buffer) {
+        results.push({
+          filename,
+          language,
+          status: 'error',
+          error: 'File buffer is missing',
+        });
+        continue;
+      }
+
+      const content = file.buffer
+        .toString('utf-8')
+        .replace(/^\uFEFF/, '')
+        .trimEnd();
+
+      if (!content.trim()) {
+        results.push({
+          filename,
+          language,
+          status: 'error',
+          error: 'File is empty',
+        });
+        continue;
+      }
+
+      const titleFromMd = extractFirstMarkdownHeading(content, 1);
+      const baseName = path.basename(filename, '.md');
+      const derivedTitle = baseName.replace(
+        new RegExp(`-${language}$`, 'i'),
+        '',
+      );
+      const title = (titleFromMd ?? derivedTitle ?? '').trim() || article.slug;
+
+      const subtitleFromMd = extractFirstMarkdownHeading(content, 2);
+      const subtitle = subtitleFromMd ? subtitleFromMd.trim() : null;
+
+      const latest = await this.versionRepo.find({
+        where: { article: { id: article.id }, language },
+        order: { versionNumber: 'DESC', createdAt: 'DESC' },
+        take: 1,
+        relations: ['article'],
+      });
+
+      const latestVersion = latest[0] ?? null;
+      const currentTitle = (latestVersion?.title ?? '').trim();
+      const currentSubtitle = (latestVersion?.subtitle ?? '').trim();
+      const currentContent = latestVersion?.content ?? '';
+      const incomingSubtitle = (subtitle ?? '').trim();
+
+      const changed =
+        currentTitle !== title ||
+        currentSubtitle !== incomingSubtitle ||
+        currentContent !== content;
+
+      if (!changed && latestVersion) {
+        results.push({
+          filename,
+          language,
+          status: 'skipped',
+          versionNumber: latestVersion.versionNumber,
+        });
+        continue;
+      }
+
+      const nextVersionNumber = latestVersion
+        ? (latestVersion.versionNumber ?? 0) + 1
+        : 1;
+
+      const entity = this.versionRepo.create({
+        article,
+        language,
+        title,
+        subtitle,
+        content,
+        versionNumber: nextVersionNumber,
+        createdByUserId: actorUserId,
+        changeSummary: `Imported from ${filename}`,
+        isPublished: article.status === 'active',
+      });
+
+      const saved = await this.versionRepo.save(entity);
+      results.push({
+        filename,
+        language,
+        status: 'created',
+        versionNumber: saved.versionNumber,
+      });
+    }
+
+    return { results };
+  }
 
   async getAdminArticlesCount(actorUserId: string): Promise<number> {
     const role = await this.getActiveUserRole(actorUserId);

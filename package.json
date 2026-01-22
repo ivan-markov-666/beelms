@@ -38,6 +38,7 @@
     "docker:seed:wiki": "docker compose exec api npm run seed:wiki",
     "docker:seed:courses": "docker compose exec api npm run seed:courses",
     "docker:db:host": "docker compose -f docker-compose.yml -f docker-compose.db-host.yml up -d db",
+    "stop:postgres:local": "powershell -ExecutionPolicy Bypass -File tools/stop-local-postgres.ps1",
     "load-test": "artillery run artillery.yml"
   }
 }

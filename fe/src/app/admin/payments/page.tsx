@@ -118,12 +118,14 @@ function ToggleSwitch({
       }}
       className="relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full border transition-colors focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
       style={{
-        backgroundColor: checked ? "var(--primary)" : "#e5e7eb",
-        borderColor: checked ? "var(--primary)" : "#d1d5db",
+        backgroundColor: checked
+          ? "var(--primary)"
+          : "color-mix(in srgb, var(--foreground) 10%, var(--card))",
+        borderColor: checked ? "var(--primary)" : "var(--border)",
       }}
     >
       <span
-        className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition ${
+        className={`inline-block h-5 w-5 transform rounded-full bg-[color:var(--card)] shadow transition ${
           checked ? "translate-x-5" : "translate-x-0"
         }`}
       />
@@ -244,6 +246,17 @@ export default function AdminPaymentsPage() {
     const normalized = (currencies ?? []).map((c) => (c ?? "").toLowerCase());
     return Array.from(new Set(normalized)).filter(Boolean).sort();
   }, [currencies]);
+
+  const currencySelectOptions = useMemo(() => {
+    const set = new Set(currencyOptions);
+    if (currency) {
+      set.add(currency.toLowerCase());
+    }
+    return Array.from(set)
+      .filter(Boolean)
+      .sort()
+      .map((c) => ({ value: c, label: c.toUpperCase() }));
+  }, [currencyOptions, currency]);
 
   const providers = useMemo(
     () => [
@@ -570,12 +583,12 @@ export default function AdminPaymentsPage() {
         "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold";
       const toneClass =
         props.tone === "green"
-          ? "bg-green-100 text-green-800"
+          ? "bg-[color:color-mix(in_srgb,var(--primary)_14%,var(--card))] text-[color:var(--primary)]"
           : props.tone === "red"
-            ? "bg-red-100 text-red-800"
+            ? "bg-[color:color-mix(in_srgb,var(--error)_14%,var(--card))] text-[color:var(--error)]"
             : props.tone === "amber"
-              ? "bg-amber-100 text-amber-800"
-              : "bg-gray-100 text-gray-800";
+              ? "bg-[color:color-mix(in_srgb,var(--attention)_14%,var(--card))] text-[color:var(--attention)]"
+              : "bg-[color:color-mix(in_srgb,var(--foreground)_8%,var(--card))] text-[color:var(--foreground)]";
       return <span className={`${base} ${toneClass}`}>{props.label}</span>;
     };
 
@@ -586,9 +599,9 @@ export default function AdminPaymentsPage() {
     const revolutConfigured = Boolean(revolut?.configured);
 
     return (
-      <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+      <div className="rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-5 shadow-sm">
         <div className="flex items-center gap-2">
-          <h2 className="text-lg font-semibold text-gray-900">
+          <h2 className="text-lg font-semibold text-[color:var(--foreground)]">
             Provider status
           </h2>
           <InfoTooltip
@@ -599,13 +612,15 @@ export default function AdminPaymentsPage() {
         </div>
 
         {!providerStatus ? (
-          <p className="mt-2 text-sm text-gray-600">Status is not available.</p>
+          <p className="mt-2 text-sm text-[color:var(--foreground)] opacity-80">
+            Status is not available.
+          </p>
         ) : (
           <>
             <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-              <div className="rounded-md border border-gray-200 bg-gray-50 px-4 py-3">
+              <div className="rounded-md border border-[color:var(--border)] bg-[color:color-mix(in_srgb,var(--foreground)_4%,var(--card))] px-4 py-3">
                 <div className="flex items-center justify-between gap-3">
-                  <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  <div className="text-xs font-semibold uppercase tracking-wide text-[color:var(--foreground)] opacity-60">
                     Stripe
                   </div>
                   <Badge
@@ -613,7 +628,7 @@ export default function AdminPaymentsPage() {
                     tone={stripeConfigured ? "green" : "red"}
                   />
                 </div>
-                <div className="mt-3 space-y-2 text-sm text-gray-900">
+                <div className="mt-3 space-y-2 text-sm text-[color:var(--foreground)]">
                   <div className="flex items-center justify-between gap-3">
                     <span className="font-semibold">Enabled</span>
                     <Badge
@@ -642,17 +657,17 @@ export default function AdminPaymentsPage() {
                     />
                   </div>
                   <div>
-                    <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                    <div className="text-xs font-semibold uppercase tracking-wide text-[color:var(--foreground)] opacity-60">
                       Webhook URL
                     </div>
                     <div className="mt-1 flex flex-wrap items-center gap-2">
-                      <div className="min-w-0 flex-1 break-all text-sm text-gray-900">
+                      <div className="min-w-0 flex-1 break-all text-sm text-[color:var(--foreground)]">
                         {stripeWebhookUrl}
                       </div>
                       <button
                         type="button"
                         onClick={() => void copyToClipboard(stripeWebhookUrl)}
-                        className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+                        className="be-btn-ghost rounded-md border px-3 py-1.5 text-xs font-semibold"
                       >
                         Copy
                       </button>
@@ -661,14 +676,14 @@ export default function AdminPaymentsPage() {
                 </div>
               </div>
 
-              <div className="rounded-md border border-gray-200 bg-gray-50 px-4 py-3">
+              <div className="rounded-md border border-[color:var(--border)] bg-[color:color-mix(in_srgb,var(--foreground)_4%,var(--card))] px-4 py-3">
                 <div className="flex items-center justify-between gap-3">
-                  <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  <div className="text-xs font-semibold uppercase tracking-wide text-[color:var(--foreground)] opacity-60">
                     Default provider
                   </div>
                   <Badge label={defaultProvider} tone="gray" />
                 </div>
-                <div className="mt-3 space-y-2 text-sm text-gray-900">
+                <div className="mt-3 space-y-2 text-sm text-[color:var(--foreground)]">
                   <ListboxSelect
                     ariaLabel="Default provider"
                     value={providerStatus?.defaultProvider ?? "stripe"}
@@ -676,7 +691,7 @@ export default function AdminPaymentsPage() {
                     onChange={(next) =>
                       void updateDefaultProvider(next as ProviderKey)
                     }
-                    buttonClassName="flex w-full items-center justify-between gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)] disabled:opacity-70"
+                    buttonClassName="flex w-full items-center justify-between gap-2 rounded-md border border-[color:var(--border)] bg-[color:var(--card)] px-3 py-2 text-sm text-[color:var(--foreground)] shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)] disabled:opacity-70"
                     options={[
                       { value: "stripe", label: "Stripe" },
                       { value: "paypal", label: "PayPal" },
@@ -684,16 +699,16 @@ export default function AdminPaymentsPage() {
                       { value: "revolut", label: "Revolut" },
                     ]}
                   />
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-[color:var(--foreground)] opacity-60">
                     Използва се като default при checkout (ако FE не подаде
                     explicit provider).
                   </p>
                 </div>
               </div>
 
-              <div className="rounded-md border border-gray-200 bg-gray-50 px-4 py-3">
+              <div className="rounded-md border border-[color:var(--border)] bg-[color:color-mix(in_srgb,var(--foreground)_4%,var(--card))] px-4 py-3">
                 <div className="flex items-center justify-between gap-3">
-                  <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  <div className="text-xs font-semibold uppercase tracking-wide text-[color:var(--foreground)] opacity-60">
                     PayPal
                   </div>
                   <Badge
@@ -701,7 +716,7 @@ export default function AdminPaymentsPage() {
                     tone={paypalConfigured ? "green" : "red"}
                   />
                 </div>
-                <div className="mt-3 space-y-2 text-sm text-gray-900">
+                <div className="mt-3 space-y-2 text-sm text-[color:var(--foreground)]">
                   <div className="flex items-center justify-between gap-3">
                     <span className="font-semibold">Enabled</span>
                     <Badge
@@ -718,16 +733,16 @@ export default function AdminPaymentsPage() {
                   </div>
 
                   {paypalConfigured && paypal?.mode === "sandbox" ? (
-                    <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                    <div className="rounded-md border border-[color:var(--border)] bg-[color:color-mix(in_srgb,var(--attention)_10%,var(--card))] px-3 py-2 text-xs text-[color:var(--attention)]">
                       Sandbox mode: плащанията са тестови.
                     </div>
                   ) : null}
                 </div>
               </div>
 
-              <div className="rounded-md border border-gray-200 bg-gray-50 px-4 py-3">
+              <div className="rounded-md border border-[color:var(--border)] bg-[color:color-mix(in_srgb,var(--foreground)_4%,var(--card))] px-4 py-3">
                 <div className="flex items-center justify-between gap-3">
-                  <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  <div className="text-xs font-semibold uppercase tracking-wide text-[color:var(--foreground)] opacity-60">
                     myPOS
                   </div>
                   <Badge
@@ -735,7 +750,7 @@ export default function AdminPaymentsPage() {
                     tone={myposConfigured ? "green" : "red"}
                   />
                 </div>
-                <div className="mt-3 space-y-2 text-sm text-gray-900">
+                <div className="mt-3 space-y-2 text-sm text-[color:var(--foreground)]">
                   <div className="flex items-center justify-between gap-3">
                     <span className="font-semibold">Enabled</span>
                     <Badge
@@ -753,9 +768,9 @@ export default function AdminPaymentsPage() {
                 </div>
               </div>
 
-              <div className="rounded-md border border-gray-200 bg-gray-50 px-4 py-3">
+              <div className="rounded-md border border-[color:var(--border)] bg-[color:color-mix(in_srgb,var(--foreground)_4%,var(--card))] px-4 py-3">
                 <div className="flex items-center justify-between gap-3">
-                  <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  <div className="text-xs font-semibold uppercase tracking-wide text-[color:var(--foreground)] opacity-60">
                     Revolut
                   </div>
                   <Badge
@@ -763,7 +778,7 @@ export default function AdminPaymentsPage() {
                     tone={revolutConfigured ? "green" : "red"}
                   />
                 </div>
-                <div className="mt-3 space-y-2 text-sm text-gray-900">
+                <div className="mt-3 space-y-2 text-sm text-[color:var(--foreground)]">
                   <div className="flex items-center justify-between gap-3">
                     <span className="font-semibold">Enabled</span>
                     <Badge
@@ -781,12 +796,12 @@ export default function AdminPaymentsPage() {
                 </div>
               </div>
 
-              <div className="rounded-md border border-gray-200 bg-gray-50 px-4 py-3">
-                <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+              <div className="rounded-md border border-[color:var(--border)] bg-[color:color-mix(in_srgb,var(--foreground)_4%,var(--card))] px-4 py-3">
+                <div className="text-xs font-semibold uppercase tracking-wide text-[color:var(--foreground)] opacity-60">
                   Frontend
                 </div>
-                <div className="mt-3 text-sm text-gray-900">
-                  <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                <div className="mt-3 text-sm text-[color:var(--foreground)]">
+                  <div className="text-xs font-semibold uppercase tracking-wide text-[color:var(--foreground)] opacity-60">
                     Origin
                   </div>
                   <div className="mt-1 flex flex-wrap items-center gap-2">
@@ -797,7 +812,7 @@ export default function AdminPaymentsPage() {
                       <button
                         type="button"
                         onClick={() => void copyToClipboard(origin)}
-                        className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+                        className="be-btn-ghost rounded-md border px-3 py-1.5 text-xs font-semibold"
                       >
                         Copy
                       </button>
@@ -808,7 +823,7 @@ export default function AdminPaymentsPage() {
             </div>
 
             {stripeConfigured && !stripeWebhookOk ? (
-              <div className="mt-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              <div className="mt-4 rounded-md border border-[color:var(--border)] bg-[color:color-mix(in_srgb,var(--error)_14%,var(--card))] px-4 py-3 text-sm text-[color:var(--error)]">
                 Stripe е configured, но `STRIPE_WEBHOOK_SECRET` липсва. Checkout
                 ще работи, но purchase/unlock може да не се записва автоматично
                 без webhook.
@@ -1157,36 +1172,44 @@ export default function AdminPaymentsPage() {
           ]}
         />
         <div className="flex items-center gap-2">
-          <h1 className="text-3xl font-semibold text-zinc-900">Payments</h1>
+          <h1 className="text-3xl font-semibold text-[color:var(--foreground)]">
+            Payments
+          </h1>
           <InfoTooltip
             label="Payments info"
             title="Payments"
             description="Настройки и инструменти за payment provider-и. Stripe е първият provider; тук ще добавяме и други."
           />
         </div>
-        <p className="text-sm text-zinc-600">
+        <p className="text-sm text-[color:var(--foreground)] opacity-80">
           Settings + sandbox tools per provider.
         </p>
       </header>
 
-      {loading && <p className="text-sm text-zinc-600">Зареждане...</p>}
+      {loading && (
+        <p className="text-sm text-[color:var(--foreground)] opacity-80">
+          Зареждане...
+        </p>
+      )}
 
       {!loading && error && (
-        <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="rounded-md border border-[color:var(--border)] bg-[color:color-mix(in_srgb,var(--error)_14%,var(--card))] px-4 py-3 text-sm text-[color:var(--error)]">
           {error}
         </div>
       )}
 
       {!loading && success && (
-        <div className="rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+        <div className="rounded-md border border-[color:var(--border)] bg-[color:color-mix(in_srgb,var(--primary)_14%,var(--card))] px-4 py-3 text-sm text-[color:var(--primary)]">
           {success}
         </div>
       )}
 
       {!loading && (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <aside className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-            <h2 className="text-sm font-semibold text-gray-900">Providers</h2>
+          <aside className="rounded-lg border border-[color:var(--border)] bg-[color:var(--card)] p-4 shadow-sm">
+            <h2 className="text-sm font-semibold text-[color:var(--foreground)]">
+              Providers
+            </h2>
             <div className="mt-3 space-y-2">
               {providers.map((p) => {
                 const active = p.key === selectedProvider;
@@ -1206,8 +1229,8 @@ export default function AdminPaymentsPage() {
                     className={
                       "flex w-full items-center justify-between gap-3 rounded-md border px-3 py-2 text-left text-sm transition " +
                       (active
-                        ? "border-green-300 bg-green-50 text-green-800"
-                        : "border-gray-200 bg-white text-gray-800 hover:bg-gray-50")
+                        ? "border-[color:var(--primary)] bg-[color:color-mix(in_srgb,var(--primary)_12%,var(--card))] text-[color:var(--foreground)]"
+                        : "border-[color:var(--border)] bg-[color:var(--card)] text-[color:var(--foreground)] hover:bg-[color:color-mix(in_srgb,var(--foreground)_4%,var(--card))]")
                     }
                   >
                     <button
@@ -1216,7 +1239,7 @@ export default function AdminPaymentsPage() {
                       className="min-w-0 flex-1 text-left"
                     >
                       <div className="font-medium">{p.label}</div>
-                      <div className="text-xs text-gray-500">
+                      <div className="text-xs text-[color:var(--foreground)] opacity-60">
                         {p.description}
                       </div>
                     </button>
@@ -1260,24 +1283,21 @@ export default function AdminPaymentsPage() {
 
                   <div className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-2">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">
+                      <label className="block text-sm font-medium text-[color:var(--foreground)] opacity-80">
                         Currency (ISO 4217)
                       </label>
-                      <input
-                        value={currency}
-                        onChange={(e) => setCurrency(e.target.value)}
-                        list="currency-options"
-                        className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-1 focus:ring-[color:var(--primary)]"
-                        placeholder="eur"
-                        disabled={saving}
-                      />
-                      <datalist id="currency-options">
-                        {currencyOptions.map((c) => (
-                          <option key={c} value={c.toUpperCase()} />
-                        ))}
-                      </datalist>
-                      <p className="mt-2 text-xs text-gray-500">
-                        Example: EUR, USD, BGN.
+                      <div className="mt-2">
+                        <ListboxSelect
+                          ariaLabel="Currency (ISO 4217)"
+                          value={currency.toLowerCase()}
+                          disabled={saving}
+                          onChange={(next) => setCurrency(next.toLowerCase())}
+                          buttonClassName="flex w-full items-center justify-between gap-2 rounded-md border border-[color:var(--border)] bg-[color:var(--card)] px-3 py-2 text-sm text-[color:var(--foreground)] shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] focus:ring-offset-1 focus:ring-offset-[color:var(--card)] disabled:opacity-60"
+                          options={currencySelectOptions.length > 0 ? currencySelectOptions : [{ value: currency.toLowerCase(), label: currency.toUpperCase() || "---" }]}
+                        />
+                      </div>
+                      <p className="mt-2 text-xs text-[color:var(--foreground)] opacity-70">
+                        Example: EUR, USD.
                       </p>
                     </div>
 
@@ -1329,7 +1349,7 @@ export default function AdminPaymentsPage() {
                   </div>
 
                   {sandboxError ? (
-                    <div className="mt-3 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                    <div className="mt-3 rounded-md border border-[color:var(--border)] bg-[color:color-mix(in_srgb,var(--error)_14%,var(--card))] px-4 py-3 text-sm text-[color:var(--error)]">
                       {sandboxError}
                     </div>
                   ) : null}
@@ -1410,13 +1430,13 @@ export default function AdminPaymentsPage() {
                   </div>
 
                   {eventsError ? (
-                    <div className="mt-3 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                    <div className="mt-3 rounded-md border border-[color:var(--border)] bg-[color:color-mix(in_srgb,var(--error)_14%,var(--card))] px-4 py-3 text-sm text-[color:var(--error)]">
                       {eventsError}
                     </div>
                   ) : null}
 
                   {retryNotice ? (
-                    <div className="mt-3 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+                    <div className="mt-3 rounded-md border border-[color:var(--border)] bg-[color:color-mix(in_srgb,var(--primary)_14%,var(--card))] px-4 py-3 text-sm text-[color:var(--primary)]">
                       {retryNotice}
                     </div>
                   ) : null}
@@ -1584,7 +1604,7 @@ export default function AdminPaymentsPage() {
                   </div>
 
                   {paypalSandboxError ? (
-                    <div className="mt-3 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                    <div className="mt-3 rounded-md border border-[color:var(--border)] bg-[color:color-mix(in_srgb,var(--error)_14%,var(--card))] px-4 py-3 text-sm text-[color:var(--error)]">
                       {paypalSandboxError}
                     </div>
                   ) : null}
@@ -1689,7 +1709,7 @@ export default function AdminPaymentsPage() {
                   </div>
 
                   {myposSandboxError ? (
-                    <div className="mt-3 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                    <div className="mt-3 rounded-md border border-[color:var(--border)] bg-[color:color-mix(in_srgb,var(--error)_14%,var(--card))] px-4 py-3 text-sm text-[color:var(--error)]">
                       {myposSandboxError}
                     </div>
                   ) : null}
@@ -1794,7 +1814,7 @@ export default function AdminPaymentsPage() {
                   </div>
 
                   {revolutSandboxError ? (
-                    <div className="mt-3 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                    <div className="mt-3 rounded-md border border-[color:var(--border)] bg-[color:color-mix(in_srgb,var(--error)_14%,var(--card))] px-4 py-3 text-sm text-[color:var(--error)]">
                       {revolutSandboxError}
                     </div>
                   ) : null}

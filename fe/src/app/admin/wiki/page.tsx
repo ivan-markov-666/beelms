@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCurrentLang } from "../../../i18n/useCurrentLang";
 import { t } from "../../../i18n/t";
+import type { SupportedLang } from "../../../i18n/config";
 import { getAccessToken } from "../../auth-token";
 import { getApiBaseUrl } from "../../api-url";
 import { Pagination } from "../../_components/pagination";
@@ -27,11 +28,58 @@ type AdminWikiArticle = {
   updatedAt: string;
 };
 
-function formatDateTime(dateIso: string): string {
+function langToLocale(lang: SupportedLang): string {
+  switch (lang) {
+    case "bg":
+      return "bg-BG";
+    case "en":
+      return "en-US";
+    case "de":
+      return "de-DE";
+    case "es":
+      return "es-ES";
+    case "pt":
+      return "pt-PT";
+    case "pl":
+      return "pl-PL";
+    case "ua":
+      return "uk-UA";
+    case "ru":
+      return "ru-RU";
+    case "fr":
+      return "fr-FR";
+    case "tr":
+      return "tr-TR";
+    case "ro":
+      return "ro-RO";
+    case "hi":
+      return "hi-IN";
+    case "vi":
+      return "vi-VN";
+    case "id":
+      return "id-ID";
+    case "it":
+      return "it-IT";
+    case "ko":
+      return "ko-KR";
+    case "ja":
+      return "ja-JP";
+    case "nl":
+      return "nl-NL";
+    case "cs":
+      return "cs-CZ";
+    case "ar":
+      return "ar";
+    default:
+      return lang;
+  }
+}
+
+function formatDateTime(locale: string, dateIso: string): string {
   try {
     const d = new Date(dateIso);
     if (Number.isNaN(d.getTime())) return dateIso;
-    return d.toLocaleDateString("bg-BG", {
+    return d.toLocaleDateString(locale, {
       year: "numeric",
       month: "short",
       day: "2-digit",
@@ -39,14 +87,18 @@ function formatDateTime(dateIso: string): string {
   } catch {
     return dateIso;
   }
+
 }
 
-function getStatusBadge(status: string): { label: string; className: string } {
+function getStatusBadgeForLang(
+  lang: SupportedLang,
+  status: string,
+): { label: string; className: string } {
   const normalized = status.toLowerCase();
 
   if (normalized === "active") {
     return {
-      label: "Active",
+      label: t(lang, "common", "adminWikiStatsActive"),
       className:
         "border-[color:var(--primary)] bg-white text-[color:var(--primary)]",
     };
@@ -54,14 +106,14 @@ function getStatusBadge(status: string): { label: string; className: string } {
 
   if (normalized === "draft") {
     return {
-      label: "Draft",
+      label: t(lang, "common", "adminWikiStatsDraft"),
       className: "border-amber-200 bg-amber-50 text-amber-700",
     };
   }
 
   if (normalized === "inactive") {
     return {
-      label: "Inactive",
+      label: t(lang, "common", "adminWikiStatsInactive"),
       className: "border-zinc-200 bg-zinc-50 text-zinc-600",
     };
   }
@@ -218,7 +270,7 @@ export default function AdminWikiPage() {
         if (!token) {
           if (!cancelled) {
             setError(
-              "Липсва достъп до Admin API. Моля, влезте отново като администратор.",
+              t(headerLang, "common", "adminErrorMissingApiAccess"),
             );
             setLoading(false);
           }
@@ -243,7 +295,7 @@ export default function AdminWikiPage() {
 
         if (!res.ok) {
           if (!cancelled) {
-            setError("Възникна грешка при зареждане на Admin Wiki списъка.");
+            setError(t(headerLang, "common", "adminWikiLoadError"));
             setLoading(false);
           }
           return;
@@ -257,7 +309,7 @@ export default function AdminWikiPage() {
         setLoading(false);
       } catch {
         if (!cancelled) {
-          setError("Възникна грешка при зареждане на Admin Wiki списъка.");
+          setError(t(headerLang, "common", "adminWikiLoadError"));
           setLoading(false);
         }
       }
@@ -561,7 +613,7 @@ export default function AdminWikiPage() {
     } catch {
       setArticles(previousArticles);
       setStatusUpdateError(
-        "Възникна грешка при промяна на статуса на статията.",
+        t(headerLang, "common", "adminWikiStatusUpdateError"),
       );
     } finally {
       setStatusUpdatingId(null);
@@ -585,8 +637,8 @@ export default function AdminWikiPage() {
       <section className="space-y-4">
         <AdminBreadcrumbs
           items={[
-            { label: "Админ табло", href: "/admin" },
-            { label: "Wiki Management" },
+            { label: t(headerLang, "common", "adminDashboardTitle"), href: "/admin" },
+            { label: t(headerLang, "common", "adminWikiManagementTitle") },
           ]}
         />
 
@@ -594,22 +646,25 @@ export default function AdminWikiPage() {
           <div>
             <div className="flex items-center gap-2">
               <h1 className="mb-2 text-3xl font-bold text-gray-900 md:text-4xl">
-                Wiki Management
+                {t(headerLang, "common", "adminWikiManagementTitle")}
               </h1>
               <InfoTooltip
-                label="Wiki management info"
-                title="Wiki Management"
-                description="Управление на wiki статии: търсене, филтри, статус (active/draft/inactive), версии и редакция на съдържанието."
+                label={t(headerLang, "common", "adminWikiManagementInfoLabel")}
+                title={t(headerLang, "common", "adminWikiManagementTitle")}
+                description={t(
+                  headerLang,
+                  "common",
+                  "adminWikiManagementInfoDescription",
+                )}
               />
             </div>
             <p className="text-gray-600">
-              Manage all wiki articles, versions, and content
+              {t(headerLang, "common", "adminWikiManagementSubtitle")}
             </p>
           </div>
           <Link
             href="/admin/wiki/create"
-            className="inline-flex items-center rounded-lg px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-90"
-            style={{ backgroundColor: "var(--primary)" }}
+            className="be-btn-primary inline-flex items-center rounded-lg px-5 py-2.5 text-sm font-semibold shadow-sm"
           >
             <svg
               className="mr-2 h-5 w-5"
@@ -625,7 +680,7 @@ export default function AdminWikiPage() {
                 d="M12 4v16m8-8H4"
               />
             </svg>
-            Create New Article
+            {t(headerLang, "common", "adminWikiCreateNewArticle")}
           </Link>
         </div>
       </section>
@@ -809,7 +864,11 @@ export default function AdminWikiPage() {
               </svg>
               <input
                 type="text"
-                placeholder="Search by title or slug..."
+                placeholder={t(
+                  headerLang,
+                  "common",
+                  "adminWikiSearchPlaceholder",
+                )}
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 className="w-full rounded-lg border border-[color:var(--border)] py-2 pl-10 pr-4 text-sm text-[color:var(--foreground)] shadow-sm focus:border-[color:var(--primary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)]"
@@ -819,11 +878,14 @@ export default function AdminWikiPage() {
 
           <div>
             <ListboxSelect
-              ariaLabel="Wiki language"
+              ariaLabel={t(headerLang, "common", "adminWikiFilterLanguage")}
               value={languageFilter}
               onChange={(next) => setLanguageFilter(next)}
               options={[
-                { value: "", label: "All Languages" },
+                {
+                  value: "",
+                  label: t(headerLang, "common", "adminWikiAllLanguages"),
+                },
                 ...languageFilterOptions.map((code) => ({
                   value: code,
                   label: code.toUpperCase(),
@@ -834,14 +896,23 @@ export default function AdminWikiPage() {
 
           <div>
             <ListboxSelect
-              ariaLabel="Wiki status"
+              ariaLabel={t(headerLang, "common", "adminWikiFilterStatus")}
               value={statusFilter}
               onChange={(next) => setStatusFilter(next)}
               options={[
-                { value: "", label: "All Status" },
-                { value: "draft", label: "Draft" },
-                { value: "active", label: "Active" },
-                { value: "inactive", label: "Inactive" },
+                { value: "", label: t(headerLang, "common", "adminWikiAllStatus") },
+                {
+                  value: "draft",
+                  label: t(headerLang, "common", "adminWikiStatsDraft"),
+                },
+                {
+                  value: "active",
+                  label: t(headerLang, "common", "adminWikiStatsActive"),
+                },
+                {
+                  value: "inactive",
+                  label: t(headerLang, "common", "adminWikiStatsInactive"),
+                },
               ]}
             />
           </div>
@@ -854,14 +925,16 @@ export default function AdminWikiPage() {
             onClick={handleExportCsv}
             disabled={filteredArticles.length === 0}
           >
-            Export CSV
+            {t(headerLang, "common", "adminWikiExportCsv")}
           </button>
         </div>
       </section>
 
       {/* Content state messages */}
       {loading && (
-        <p className="text-sm text-gray-600">Зареждане на списъка...</p>
+        <p className="text-sm text-gray-600">
+          {t(headerLang, "common", "adminWikiLoadingList")}
+        </p>
       )}
 
       {!loading && error && (
@@ -877,7 +950,9 @@ export default function AdminWikiPage() {
       )}
 
       {noArticles && !error && (
-        <p className="text-sm text-gray-600">Няма Wiki статии за показване.</p>
+        <p className="text-sm text-gray-600">
+          {t(headerLang, "common", "adminWikiEmptyList")}
+        </p>
       )}
 
       {hasArticles && (
@@ -885,7 +960,8 @@ export default function AdminWikiPage() {
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-200 bg-gray-50 px-6 py-3">
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-xs font-medium text-gray-700">
-                Selected: {selectedArticleIds.length}
+                {t(headerLang, "common", "adminWikiSelectedPrefix")}:{" "}
+                {selectedArticleIds.length}
               </span>
               <button
                 type="button"
@@ -896,18 +972,30 @@ export default function AdminWikiPage() {
                   setBulkDeleteOpen(true);
                 }}
               >
-                Delete selected
+                {t(headerLang, "common", "adminWikiDeleteSelected")}
               </button>
               <div className="flex items-center gap-2">
                 <ListboxSelect
-                  ariaLabel="Bulk status"
+                  ariaLabel={t(headerLang, "common", "adminWikiBulkStatus")}
                   value={bulkStatus}
                   onChange={(next) => setBulkStatus(next)}
                   options={[
-                    { value: "", label: "Bulk status..." },
-                    { value: "draft", label: "draft" },
-                    { value: "active", label: "active" },
-                    { value: "inactive", label: "inactive" },
+                    {
+                      value: "",
+                      label: t(headerLang, "common", "adminWikiBulkStatusPlaceholder"),
+                    },
+                    {
+                      value: "draft",
+                      label: t(headerLang, "common", "adminWikiStatsDraft"),
+                    },
+                    {
+                      value: "active",
+                      label: t(headerLang, "common", "adminWikiStatsActive"),
+                    },
+                    {
+                      value: "inactive",
+                      label: t(headerLang, "common", "adminWikiStatsInactive"),
+                    },
                   ]}
                 />
                 <button
@@ -919,7 +1007,7 @@ export default function AdminWikiPage() {
                     setBulkStatusOpen(true);
                   }}
                 >
-                  Apply
+                  {t(headerLang, "common", "adminWikiApply")}
                 </button>
               </div>
             </div>
@@ -927,15 +1015,14 @@ export default function AdminWikiPage() {
             {isAdmin && (
               <button
                 type="button"
-                className="rounded-md border border-[color:var(--field-error-border)] bg-white px-3 py-1.5 text-xs font-semibold shadow-sm hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60"
-                style={{ color: "var(--error)" }}
+                className="be-btn-danger rounded-md px-3 py-1.5 text-xs font-semibold shadow-sm"
                 disabled={purgeTotalCount <= 0}
                 onClick={() => {
                   setBulkActionError(null);
                   setPurgeAllOpen(true);
                 }}
               >
-                Delete all ({purgeTotalCount})
+                {t(headerLang, "common", "adminWikiDeleteAll")} ({purgeTotalCount})
               </button>
             )}
           </div>
@@ -967,32 +1054,32 @@ export default function AdminWikiPage() {
                           clearAllVisible();
                         }
                       }}
-                      ariaLabel="Select all visible"
+                      ariaLabel={t(headerLang, "common", "adminWikiSelectAllVisible")}
                     />
                   </th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
-                    Title
+                    {t(headerLang, "common", "adminWikiColTitle")}
                   </th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
-                    Slug
+                    {t(headerLang, "common", "adminWikiColSlug")}
                   </th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
-                    Languages
+                    {t(headerLang, "common", "adminWikiColLanguages")}
                   </th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
-                    Status
+                    {t(headerLang, "common", "adminWikiColStatus")}
                   </th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
-                    Last Updated
+                    {t(headerLang, "common", "adminWikiColLastUpdated")}
                   </th>
                   <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
-                    Actions
+                    {t(headerLang, "common", "adminWikiColActions")}
                   </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {pageArticles.map((article) => {
-                  const badge = getStatusBadge(article.status);
+                  const badge = getStatusBadgeForLang(headerLang, article.status);
                   const langs = languagesByArticleId[article.id] ?? [];
                   const isUpdating = statusUpdatingId === article.id;
                   const normalizedStatus = article.status.toLowerCase();
@@ -1007,7 +1094,7 @@ export default function AdminWikiPage() {
                         <StyledCheckbox
                           checked={selectedSet.has(article.id)}
                           onChange={() => toggleSelected(article.id)}
-                          ariaLabel={`Select ${article.title}`}
+                          ariaLabel={t(headerLang, "common", "adminWikiSelectArticle")}
                         />
                       </td>
                       <td className="px-6 py-4 align-top">
@@ -1015,7 +1102,7 @@ export default function AdminWikiPage() {
                           {article.title}
                         </div>
                         <div className="text-xs text-gray-500">
-                          ID: {article.id}
+                          {t(headerLang, "common", "adminWikiIdPrefix")}: {article.id}
                         </div>
                       </td>
                       <td className="px-6 py-4 align-middle text-sm text-gray-600">
@@ -1052,20 +1139,22 @@ export default function AdminWikiPage() {
                         </span>
                       </td>
                       <td className="px-6 py-4 align-middle text-sm text-gray-600">
-                        {formatDateTime(article.updatedAt)}
+                        {formatDateTime(langToLocale(headerLang), article.updatedAt)}
                       </td>
                       <td className="px-6 py-4 align-middle text-right text-sm">
                         <Link
-                          href={`/admin/wiki/${article.slug}/edit`}
+                          href={`/admin/wiki/${encodeURIComponent(
+                            article.slug,
+                          )}/edit`}
                           className="mr-3 font-medium text-[color:var(--secondary)] hover:opacity-80"
                         >
-                          Edit
+                          {t(headerLang, "common", "adminWikiActionEdit")}
                         </Link>
                         <Link
                           href={`/admin/wiki/${article.slug}/edit#versions`}
                           className="mr-3 font-medium text-[color:var(--primary)] hover:opacity-80"
                         >
-                          Versions
+                          {t(headerLang, "common", "adminWikiActionVersions")}
                         </Link>
                         {canToggleStatus && (
                           <button
@@ -1079,10 +1168,10 @@ export default function AdminWikiPage() {
                             } ${isUpdating ? "cursor-not-allowed opacity-60" : ""}`}
                           >
                             {isUpdating
-                              ? "Updating..."
+                              ? t(headerLang, "common", "adminWikiStatusUpdating")
                               : isInactive
-                                ? "Activate"
-                                : "Deactivate"}
+                                ? t(headerLang, "common", "adminWikiActionActivate")
+                                : t(headerLang, "common", "adminWikiActionDeactivate")}
                           </button>
                         )}
                       </td>
@@ -1095,9 +1184,11 @@ export default function AdminWikiPage() {
 
           <div className="flex items-center justify-between border-t border-gray-200 px-6 py-4">
             <p className="text-sm text-gray-600">
-              Showing <span className="font-semibold">{showingFrom}</span>-
-              <span className="font-semibold">{showingTo}</span> of{" "}
-              <span className="font-semibold">{totalArticles}</span> articles
+              {t(headerLang, "common", "adminWikiFooterShowingPrefix")} {" "}
+              <span className="font-semibold">{showingFrom}</span>-<span className="font-semibold">{showingTo}</span>{" "}
+              {t(headerLang, "common", "adminWikiFooterOf")} {" "}
+              <span className="font-semibold">{totalArticles}</span>{" "}
+              {t(headerLang, "common", "adminWikiFooterArticlesSuffix")}
             </p>
             <Pagination
               currentPage={safeCurrentPage}
@@ -1114,16 +1205,16 @@ export default function AdminWikiPage() {
       )}
       <ConfirmDialog
         open={bulkDeleteOpen}
-        title="Изтриване на избраните статии"
-        description="Избраните статии ще бъдат физически изтрити (включително всички версии). Това действие е необратимо."
+        title={t(headerLang, "common", "adminWikiBulkDeleteTitle")}
+        description={t(headerLang, "common", "adminWikiBulkDeleteDescription")}
         details={
           <div>
-            Брой избрани:{" "}
+            {t(headerLang, "common", "adminWikiSelectedCountLabel")}: {" "}
             <span className="font-semibold">{selectedArticleIds.length}</span>
           </div>
         }
-        confirmLabel="Изтрий"
-        cancelLabel="Отказ"
+        confirmLabel={t(headerLang, "common", "adminWikiDeleteConfirm")}
+        cancelLabel={t(headerLang, "common", "adminWikiCancel")}
         danger
         submitting={bulkDeleteSubmitting}
         error={bulkActionError}
@@ -1170,7 +1261,9 @@ export default function AdminWikiPage() {
                 setPurgeTotalCount((p) => Math.max(0, p - deleted));
               }
             } catch {
-              setBulkActionError("Възникна грешка при bulk изтриването.");
+              setBulkActionError(
+                t(headerLang, "common", "adminWikiBulkDeleteError"),
+              );
             } finally {
               setBulkDeleteSubmitting(false);
             }
@@ -1180,18 +1273,19 @@ export default function AdminWikiPage() {
 
       <ConfirmDialog
         open={bulkStatusOpen}
-        title="Промяна на статуса"
-        description="Ще промените статуса на всички избрани статии."
+        title={t(headerLang, "common", "adminWikiBulkStatusTitle")}
+        description={t(headerLang, "common", "adminWikiBulkStatusDescription")}
         details={
           <div>
-            Нов статус: <span className="font-semibold">{bulkStatus}</span>
+            {t(headerLang, "common", "adminWikiBulkStatusNewStatusLabel")}: {" "}
+            <span className="font-semibold">{bulkStatus}</span>
             <br />
-            Брой избрани:{" "}
+            {t(headerLang, "common", "adminWikiSelectedCountLabel")}: {" "}
             <span className="font-semibold">{selectedArticleIds.length}</span>
           </div>
         }
-        confirmLabel="OK"
-        cancelLabel="Отказ"
+        confirmLabel={t(headerLang, "common", "adminWikiOk")}
+        cancelLabel={t(headerLang, "common", "adminWikiCancel")}
         submitting={bulkStatusSubmitting}
         error={bulkActionError}
         onCancel={() => {
@@ -1231,7 +1325,7 @@ export default function AdminWikiPage() {
               await reloadList();
             } catch {
               setBulkActionError(
-                "Възникна грешка при bulk промяна на статуса.",
+                t(headerLang, "common", "adminWikiBulkStatusError"),
               );
             } finally {
               setBulkStatusSubmitting(false);
@@ -1242,10 +1336,10 @@ export default function AdminWikiPage() {
 
       <ConfirmDialog
         open={purgeAllOpen}
-        title="Изтриване на всички статии"
-        description={`Ще изтриете абсолютно всички wiki статии (${purgeTotalCount}). Това действие е необратимо.`}
-        confirmLabel="Изтрий всички"
-        cancelLabel="Отказ"
+        title={t(headerLang, "common", "adminWikiPurgeAllTitle")}
+        description={`${t(headerLang, "common", "adminWikiPurgeAllDescriptionPrefix")} (${purgeTotalCount}). ${t(headerLang, "common", "adminWikiPurgeAllDescriptionSuffix")}`}
+        confirmLabel={t(headerLang, "common", "adminWikiPurgeAllConfirm")}
+        cancelLabel={t(headerLang, "common", "adminWikiCancel")}
         danger
         submitting={purgeAllSubmitting}
         error={bulkActionError}
@@ -1283,7 +1377,7 @@ export default function AdminWikiPage() {
               setPurgeTotalCount(0);
             } catch {
               setBulkActionError(
-                "Възникна грешка при изтриване на всички статии.",
+                t(headerLang, "common", "adminWikiPurgeAllError"),
               );
             } finally {
               setPurgeAllSubmitting(false);

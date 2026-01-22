@@ -34,6 +34,7 @@
     "seed:wiki:dev": "node --require ts-node/register src/seed/wiki.seed.ts",
     "seed:courses": "node dist/seed/courses.seed.js",
     "seed:courses:dev": "node --require ts-node/register src/seed/courses.seed.ts",
+    "seed:dev:make-admin": "node --require ts-node/register src/seed/dev-make-admin.seed.ts",
     "test:perf": "node scripts/e2e-auth-account-perf.js",
     "start:prod:migrate": "npm run migration:run && npm run migration:check && npm run start:prod"
   },
