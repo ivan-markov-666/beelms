@@ -1,4 +1,7 @@
 import 'reflect-metadata';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as dotenv from 'dotenv';
 import { DataSource } from 'typeorm';
 import { WikiArticle } from './src/wiki/wiki-article.entity';
 import { WikiArticleVersion } from './src/wiki/wiki-article-version.entity';
@@ -27,6 +30,25 @@ import { LegalPage } from './src/legal/legal-page.entity';
 import { CustomPage } from './src/custom-pages/custom-page.entity';
 import { Backup } from './src/backups/backup.entity';
 import { BackupLog } from './src/backups/backup-log.entity';
+
+function loadEnv(): void {
+  const candidatePaths = [
+    path.join(__dirname, '.env'),
+    path.join(__dirname, '..', '.env'),
+    path.join(process.cwd(), '.env'),
+  ];
+
+  for (const candidate of candidatePaths) {
+    if (fs.existsSync(candidate)) {
+      dotenv.config({ path: candidate });
+      return;
+    }
+  }
+
+  dotenv.config();
+}
+
+loadEnv();
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
