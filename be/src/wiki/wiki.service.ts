@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import AdmZip from 'adm-zip';
 import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -31,6 +32,7 @@ import { CreateWikiArticleFeedbackDto } from './dto/create-wiki-article-feedback
 const DEFAULT_MEDIA_ROOT = path.join(process.cwd(), 'media');
 const WIKI_MEDIA_SUBDIR = 'wiki';
 const MAX_WIKI_MEDIA_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
+const MAX_WIKI_PACKAGE_FILE_SIZE_BYTES = 25 * 1024 * 1024; // 25MB
 const WIKI_IP_VIEW_SESSION_WINDOW_MINUTES = 15;
 
 export interface WikiUploadedFile {
@@ -67,6 +69,16 @@ function sanitizeFilename(originalName: string): string {
   return `${finalBase}-${timestamp}${ext.toLowerCase()}`;
 }
 
+function sanitizeBasename(originalName: string): string {
+  const ext = path.extname(originalName);
+  const base = path.basename(originalName, ext);
+  const safeBase = (base ?? '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/gi, '-')
+    .replace(/^-+|-+$/g, '');
+  return safeBase || 'file';
+}
+
 function normalizeLanguageCode(raw: string): string {
   const normalized = (raw ?? '').trim().toLowerCase();
   if (!normalized) return '';
@@ -81,6 +93,127 @@ function extractLanguageFromMarkdownFilename(filename: string): string {
   if (!match) return '';
 
   return normalizeLanguageCode(match[1] ?? '');
+}
+
+function extractTitleAndSubtitleFromMarkdownFilename(
+  filename: string,
+  language: string,
+): { title: string | null; subtitle: string | null } {
+  const baseName = path.basename((filename ?? '').trim(), '.md');
+  if (!baseName) {
+    return { title: null, subtitle: null };
+  }
+
+  const withoutLang = baseName.replace(new RegExp(`-${language}$`, 'i'), '');
+  const trimmed = (withoutLang ?? '').trim();
+  if (!trimmed) {
+    return { title: null, subtitle: null };
+  }
+
+  const separator = '__';
+  const separatorIndex = trimmed.indexOf(separator);
+  if (separatorIndex === -1) {
+    return { title: trimmed, subtitle: null };
+  }
+
+  const titlePart = trimmed.slice(0, separatorIndex).trim();
+  const subtitlePart = trimmed.slice(separatorIndex + separator.length).trim();
+
+  return {
+    title: titlePart.length > 0 ? titlePart : null,
+    subtitle: subtitlePart.length > 0 ? subtitlePart : null,
+  };
+}
+
+type ImageVariantIndex = {
+  shared?: { filename: string; buffer: Buffer };
+  byLang: Map<string, { filename: string; buffer: Buffer }>;
+};
+
+function parseImageVariantFromFilename(filename: string): {
+  baseKey: string;
+  variant: 'shared' | { lang: string };
+} | null {
+  const rawBase = path.basename(filename, path.extname(filename));
+  const trimmed = (rawBase ?? '').trim();
+  if (!trimmed) return null;
+
+  const separator = '__';
+  const idx = trimmed.lastIndexOf(separator);
+  if (idx === -1) {
+    return { baseKey: trimmed, variant: 'shared' };
+  }
+
+  const baseKey = trimmed.slice(0, idx).trim();
+  const suffix = trimmed.slice(idx + separator.length).trim();
+  if (!baseKey) return null;
+
+  const normalizedSuffix = normalizeLanguageCode(suffix);
+  if (!normalizedSuffix || normalizedSuffix.toLowerCase() === 'shared') {
+    return { baseKey, variant: 'shared' };
+  }
+
+  return { baseKey, variant: { lang: normalizedSuffix } };
+}
+
+function isAbsoluteOrExternalUrl(url: string): boolean {
+  const trimmed = (url ?? '').trim();
+  if (!trimmed) return true;
+  if (trimmed.startsWith('data:')) return true;
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+    return true;
+  }
+  if (trimmed.startsWith('/')) return true;
+  return false;
+}
+
+function parseMarkdownInlineLinkTarget(rawTarget: string): {
+  url: string;
+  suffix: string;
+} {
+  const trimmed = (rawTarget ?? '').trim();
+  if (!trimmed) return { url: '', suffix: '' };
+
+  const unwrapped =
+    trimmed.startsWith('<') && trimmed.endsWith('>')
+      ? trimmed.slice(1, -1)
+      : trimmed;
+
+  const firstSpace = unwrapped.search(/\s/);
+  if (firstSpace === -1) {
+    return { url: unwrapped, suffix: '' };
+  }
+
+  return {
+    url: unwrapped.slice(0, firstSpace),
+    suffix: unwrapped.slice(firstSpace).trimStart(),
+  };
+}
+
+function normalizeReferencedAssetKey(rawUrl: string): string {
+  const cleaned = (rawUrl ?? '').split('#')[0]?.split('?')[0] ?? '';
+  const basename = path.basename(cleaned);
+  const withoutExt = path.basename(basename, path.extname(basename));
+  return (withoutExt ?? '').trim();
+}
+
+function resolveImageBucket(
+  imageIndex: Map<string, ImageVariantIndex>,
+  rawKey: string,
+): ImageVariantIndex | undefined {
+  const trimmed = (rawKey ?? '').trim();
+  if (!trimmed) return undefined;
+
+  const direct = imageIndex.get(trimmed);
+  if (direct) return direct;
+
+  const separator = '__';
+  const idx = trimmed.lastIndexOf(separator);
+  if (idx === -1) return undefined;
+
+  const baseKey = trimmed.slice(0, idx).trim();
+  if (!baseKey) return undefined;
+  return imageIndex.get(baseKey);
 }
 
 function extractFirstMarkdownHeading(
@@ -231,16 +364,26 @@ export class WikiService {
         continue;
       }
 
+      const { title: titleFromFilename, subtitle: subtitleFromFilename } =
+        extractTitleAndSubtitleFromMarkdownFilename(filename, language);
+
       const titleFromMd = extractFirstMarkdownHeading(content, 1);
       const baseName = path.basename(filename, '.md');
       const derivedTitle = baseName.replace(
         new RegExp(`-${language}$`, 'i'),
         '',
       );
-      const title = (titleFromMd ?? derivedTitle ?? '').trim() || article.slug;
+      const title =
+        (titleFromFilename ?? titleFromMd ?? derivedTitle ?? '').trim() ||
+        article.slug;
 
       const subtitleFromMd = extractFirstMarkdownHeading(content, 2);
-      const subtitle = subtitleFromMd ? subtitleFromMd.trim() : null;
+      const subtitleCandidate = (
+        subtitleFromFilename ??
+        subtitleFromMd ??
+        ''
+      ).trim();
+      const subtitle = subtitleCandidate.length > 0 ? subtitleCandidate : null;
 
       const latest = await this.versionRepo.find({
         where: { article: { id: article.id }, language },
@@ -292,6 +435,358 @@ export class WikiService {
         language,
         status: 'created',
         versionNumber: saved.versionNumber,
+      });
+    }
+
+    return { results };
+  }
+
+  private async upsertArticleMediaFromBuffer(
+    articleSlug: string,
+    originalName: string,
+    buffer: Buffer,
+  ): Promise<WikiMediaItemDto> {
+    const mediaDir = buildWikiArticleMediaDir(articleSlug);
+    await fs.promises.mkdir(mediaDir, { recursive: true });
+
+    const ext = path.extname(originalName).toLowerCase() || '.bin';
+    const safeBase = sanitizeBasename(originalName);
+    const hash = crypto
+      .createHash('sha256')
+      .update(buffer)
+      .digest('hex')
+      .slice(0, 12);
+    const filename = `${safeBase}-${hash}${ext}`;
+    const filePath = path.join(mediaDir, filename);
+
+    try {
+      await fs.promises.access(filePath, fs.constants.F_OK);
+    } catch {
+      await fs.promises.writeFile(filePath, buffer);
+    }
+
+    return {
+      filename,
+      url: `/wiki/media/${articleSlug}/${filename}`,
+    };
+  }
+
+  async adminImportArticleTranslationsFromPackage(
+    actorUserId: string,
+    articleId: string,
+    file: WikiUploadedFile | undefined,
+  ): Promise<{
+    results: Array<{
+      filename: string;
+      language: string | null;
+      status: 'created' | 'skipped' | 'error';
+      versionNumber?: number;
+      warnings?: string[];
+      error?: string;
+    }>;
+  }> {
+    if (!file) {
+      throw new BadRequestException('File is required');
+    }
+
+    const originalName = (file.originalname ?? '').toLowerCase();
+    if (originalName && !originalName.endsWith('.zip')) {
+      throw new BadRequestException('Only .zip packages are allowed');
+    }
+
+    if (
+      typeof file.size === 'number' &&
+      file.size > MAX_WIKI_PACKAGE_FILE_SIZE_BYTES
+    ) {
+      throw new BadRequestException('File is too large');
+    }
+
+    if (!file.buffer) {
+      throw new BadRequestException('File buffer is missing');
+    }
+
+    const article = await this.articleRepo.findOne({
+      where: { id: articleId },
+    });
+    await this.requireArticleOwnershipForAuthor(actorUserId, article);
+    if (!article) {
+      throw new NotFoundException('Article not found');
+    }
+
+    const cfg = await this.settingsService.getOrCreateInstanceConfig();
+    const supportedLangs = Array.isArray(cfg.languages?.supported)
+      ? cfg.languages.supported.map((c) => normalizeLanguageCode(c))
+      : [];
+    const supportedLangSet = new Set(supportedLangs.filter(Boolean));
+
+    const results: Array<{
+      filename: string;
+      language: string | null;
+      status: 'created' | 'skipped' | 'error';
+      versionNumber?: number;
+      warnings?: string[];
+      error?: string;
+    }> = [];
+
+    let zip: AdmZip;
+    try {
+      zip = new AdmZip(file.buffer);
+    } catch {
+      throw new BadRequestException('Invalid ZIP package');
+    }
+
+    const mdEntries: Array<{ filename: string; buffer: Buffer }> = [];
+    const imageIndex = new Map<string, ImageVariantIndex>();
+
+    const allowedImageExts = new Set([
+      '.png',
+      '.jpg',
+      '.jpeg',
+      '.gif',
+      '.webp',
+      '.svg',
+    ]);
+
+    for (const entry of zip.getEntries()) {
+      if (entry.isDirectory) continue;
+      const entryName = entry.entryName || '';
+      if (entryName.startsWith('__MACOSX/')) continue;
+      const baseName = path.basename(entryName);
+      if (!baseName) continue;
+
+      const ext = path.extname(baseName).toLowerCase();
+      const entryBuffer = entry.getData();
+
+      if (ext === '.md') {
+        mdEntries.push({ filename: baseName, buffer: entryBuffer });
+        continue;
+      }
+
+      if (!allowedImageExts.has(ext)) {
+        continue;
+      }
+
+      if (entryBuffer.length > MAX_WIKI_MEDIA_FILE_SIZE_BYTES) {
+        continue;
+      }
+
+      const parsed = parseImageVariantFromFilename(baseName);
+      if (!parsed) continue;
+
+      const bucket = imageIndex.get(parsed.baseKey) ?? {
+        byLang: new Map<string, { filename: string; buffer: Buffer }>(),
+      };
+
+      if (parsed.variant === 'shared') {
+        bucket.shared = { filename: baseName, buffer: entryBuffer };
+      } else {
+        bucket.byLang.set(parsed.variant.lang, {
+          filename: baseName,
+          buffer: entryBuffer,
+        });
+      }
+
+      imageIndex.set(parsed.baseKey, bucket);
+    }
+
+    const uploadedImageUrlByVariant = new Map<string, string>();
+    const ensureImageUploaded = async (
+      variantFilename: string,
+      buffer: Buffer,
+    ): Promise<string> => {
+      const key = `${variantFilename}:${crypto
+        .createHash('sha256')
+        .update(buffer)
+        .digest('hex')
+        .slice(0, 12)}`;
+      const existing = uploadedImageUrlByVariant.get(key);
+      if (existing) return existing;
+
+      const uploaded = await this.upsertArticleMediaFromBuffer(
+        article.slug,
+        variantFilename,
+        buffer,
+      );
+      uploadedImageUrlByVariant.set(key, uploaded.url);
+      return uploaded.url;
+    };
+
+    for (const md of mdEntries) {
+      const filename = (md.filename ?? 'file.md').trim() || 'file.md';
+      const language = extractLanguageFromMarkdownFilename(filename);
+
+      if (!language) {
+        results.push({
+          filename,
+          language: null,
+          status: 'error',
+          error: 'Cannot detect language from filename',
+        });
+        continue;
+      }
+
+      if (supportedLangSet.size > 0 && !supportedLangSet.has(language)) {
+        results.push({
+          filename,
+          language,
+          status: 'error',
+          error: 'Language is not supported',
+        });
+        continue;
+      }
+
+      const rawContent = md.buffer
+        .toString('utf-8')
+        .replace(/^\uFEFF/, '')
+        .trimEnd();
+
+      if (!rawContent.trim()) {
+        results.push({
+          filename,
+          language,
+          status: 'error',
+          error: 'File is empty',
+        });
+        continue;
+      }
+
+      const warnings: string[] = [];
+
+      const rewrittenContent = await (async () => {
+        const imgRegex = /!\[([^\]]*)\]\(([^)]+)\)/g;
+        const parts: Array<{
+          start: number;
+          end: number;
+          replacement: string;
+        }> = [];
+
+        let match: RegExpExecArray | null;
+        while ((match = imgRegex.exec(rawContent)) !== null) {
+          const alt = match[1] ?? '';
+          const target = match[2] ?? '';
+          const { url, suffix } = parseMarkdownInlineLinkTarget(target);
+          if (!url || isAbsoluteOrExternalUrl(url)) {
+            continue;
+          }
+
+          const assetKey = normalizeReferencedAssetKey(url);
+          if (!assetKey) {
+            continue;
+          }
+
+          const bucket = resolveImageBucket(imageIndex, assetKey);
+          if (!bucket) {
+            warnings.push(`Missing image: ${url}`);
+            continue;
+          }
+
+          const langVariant = bucket.byLang.get(language);
+          const selected = langVariant ?? bucket.shared;
+          if (!selected) {
+            warnings.push(`Missing image variant: ${url}`);
+            continue;
+          }
+
+          const newUrl = await ensureImageUploaded(
+            selected.filename,
+            selected.buffer,
+          );
+          const replacement = `![${alt}](${newUrl}${suffix ? ` ${suffix}` : ''})`;
+          parts.push({
+            start: match.index,
+            end: match.index + match[0].length,
+            replacement,
+          });
+        }
+
+        if (parts.length === 0) {
+          return rawContent;
+        }
+
+        let out = '';
+        let cursor = 0;
+        for (const p of parts) {
+          out += rawContent.slice(cursor, p.start);
+          out += p.replacement;
+          cursor = p.end;
+        }
+        out += rawContent.slice(cursor);
+        return out;
+      })();
+
+      const { title: titleFromFilename, subtitle: subtitleFromFilename } =
+        extractTitleAndSubtitleFromMarkdownFilename(filename, language);
+
+      const titleFromMd = extractFirstMarkdownHeading(rewrittenContent, 1);
+      const baseName = path.basename(filename, '.md');
+      const derivedTitle = baseName.replace(
+        new RegExp(`-${language}$`, 'i'),
+        '',
+      );
+      const title =
+        (titleFromFilename ?? titleFromMd ?? derivedTitle ?? '').trim() ||
+        article.slug;
+
+      const subtitleFromMd = extractFirstMarkdownHeading(rewrittenContent, 2);
+      const subtitleCandidate = (
+        subtitleFromFilename ??
+        subtitleFromMd ??
+        ''
+      ).trim();
+      const subtitle = subtitleCandidate.length > 0 ? subtitleCandidate : null;
+
+      const latest = await this.versionRepo.find({
+        where: { article: { id: article.id }, language },
+        order: { versionNumber: 'DESC', createdAt: 'DESC' },
+        take: 1,
+        relations: ['article'],
+      });
+
+      const latestVersion = latest[0] ?? null;
+      const currentTitle = (latestVersion?.title ?? '').trim();
+      const currentSubtitle = (latestVersion?.subtitle ?? '').trim();
+      const currentContent = latestVersion?.content ?? '';
+      const incomingSubtitle = (subtitle ?? '').trim();
+
+      const changed =
+        currentTitle !== title ||
+        currentSubtitle !== incomingSubtitle ||
+        currentContent !== rewrittenContent;
+
+      if (!changed && latestVersion) {
+        results.push({
+          filename,
+          language,
+          status: 'skipped',
+          versionNumber: latestVersion.versionNumber,
+          warnings: warnings.length > 0 ? warnings : undefined,
+        });
+        continue;
+      }
+
+      const nextVersionNumber = latestVersion
+        ? (latestVersion.versionNumber ?? 0) + 1
+        : 1;
+
+      const entity = this.versionRepo.create({
+        article,
+        language,
+        title,
+        subtitle,
+        content: rewrittenContent,
+        versionNumber: nextVersionNumber,
+        createdByUserId: actorUserId,
+        changeSummary: `Imported from package ${file.originalname ?? 'package.zip'} (${filename})`,
+        isPublished: article.status === 'active',
+      });
+
+      const saved = await this.versionRepo.save(entity);
+      results.push({
+        filename,
+        language,
+        status: 'created',
+        versionNumber: saved.versionNumber,
+        warnings: warnings.length > 0 ? warnings : undefined,
       });
     }
 

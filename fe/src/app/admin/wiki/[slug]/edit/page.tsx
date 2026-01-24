@@ -92,6 +92,7 @@ type TranslationImportResult = {
   language: string | null;
   status: "created" | "skipped" | "error";
   versionNumber?: number;
+  warnings?: string[];
   error?: string;
 };
 
@@ -286,6 +287,14 @@ export default function AdminWikiEditPage() {
   const [importTranslationsResults, setImportTranslationsResults] = useState<
     TranslationImportResult[]
   >([]);
+
+  const [importingPackage, setImportingPackage] = useState(false);
+  const [importPackageError, setImportPackageError] = useState<string | null>(
+    null,
+  );
+  const [importPackageResults, setImportPackageResults] = useState<
+    TranslationImportResult[]
+  >([]);
   const [articleReloadKey, setArticleReloadKey] = useState(0);
 
   const successBannerStyle: CSSProperties = {
@@ -294,8 +303,117 @@ export default function AdminWikiEditPage() {
     color: "#ffffff",
   };
 
+  const handleImportPackageClick = () => {
+    if (!articleId) {
+      setError(t(lang, "common", "adminWikiEditMissingArticleId"));
+      return;
+    }
+
+    setImportPackageError(null);
+
+    if (packageFileInputRef.current) {
+      packageFileInputRef.current.value = "";
+      packageFileInputRef.current.click();
+    }
+  };
+
+  const handlePackageFileSelected: React.ChangeEventHandler<
+    HTMLInputElement
+  > = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    if (!articleId) {
+      setError(t(lang, "common", "adminWikiEditMissingArticleId"));
+      return;
+    }
+
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const token = getAccessToken();
+    if (!token) {
+      setImportPackageError(t(lang, "common", "adminErrorMissingApiAccess"));
+      return;
+    }
+
+    setImportingPackage(true);
+    setImportPackageError(null);
+    setImportPackageResults([]);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch(
+        `${ADMIN_API_BASE_URL}/admin/wiki/articles/${encodeURIComponent(
+          articleId,
+        )}/translations/import-package`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        },
+      );
+
+      if (!res.ok) {
+        try {
+          const errorData: unknown = await res.json();
+          let backendMessage: string | null = null;
+
+          if (
+            errorData &&
+            typeof errorData === "object" &&
+            "message" in errorData
+          ) {
+            const message = (errorData as { message?: unknown }).message;
+            if (typeof message === "string") {
+              backendMessage = message;
+            } else if (Array.isArray(message)) {
+              backendMessage = message
+                .filter((part): part is string => typeof part === "string")
+                .join(" ");
+            }
+          }
+
+          setImportPackageError(
+            backendMessage ??
+              t(lang, "common", "adminWikiEditImportPackageError"),
+          );
+        } catch {
+          setImportPackageError(
+            t(lang, "common", "adminWikiEditImportPackageError"),
+          );
+        }
+        setImportingPackage(false);
+        return;
+      }
+
+      const data = (await res.json()) as {
+        results?: TranslationImportResult[];
+      };
+      const results = Array.isArray(data.results) ? data.results : [];
+      setImportPackageResults(results);
+
+      setVersionsReloadKey((v) => v + 1);
+      setArticleReloadKey((v) => v + 1);
+      setImportingPackage(false);
+    } catch {
+      setImportPackageError(
+        t(lang, "common", "adminWikiEditImportPackageError"),
+      );
+      setImportingPackage(false);
+    }
+  };
+
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const translationFilesInputRef = useRef<HTMLInputElement | null>(null);
+  const packageFileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (!slug) return;
@@ -1878,7 +1996,9 @@ export default function AdminWikiEditPage() {
                   "common",
                   "adminWikiEditImportMarkdownFilenameSuffixHint",
                 )}{" "}
-                <span className="font-mono">article-&lt;lang&gt;.md</span>
+                <span className="font-mono">
+                  &lt;title&gt;[__&lt;subtitle&gt;]-&lt;lang&gt;.md
+                </span>
               </p>
 
               <div className="mb-3 flex items-center gap-3">
@@ -1900,9 +2020,6 @@ export default function AdminWikiEditPage() {
                   className="hidden"
                   onChange={handleTranslationFilesSelected}
                 />
-                <span className="text-xs text-zinc-500">
-                  {t(lang, "common", "adminWikiEditNeedArticleIdHint")}
-                </span>
               </div>
 
               {importTranslationsError && (
@@ -1947,6 +2064,105 @@ export default function AdminWikiEditPage() {
                         </div>
                         {r.error && (
                           <div className="text-red-700">{r.error}</div>
+                        )}
+                        {Array.isArray(r.warnings) && r.warnings.length > 0 && (
+                          <div className="text-amber-700">
+                            {r.warnings.join(" ")}
+                          </div>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </section>
+
+            <section
+              aria-label={t(lang, "common", "adminWikiEditImportPackageAria")}
+              className="border-t border-zinc-200 pt-4"
+            >
+              <h3 className="mb-2 text-sm font-semibold text-zinc-900">
+                {t(lang, "common", "adminWikiEditImportPackageTitle")}
+              </h3>
+              <p className="mb-3 text-xs text-zinc-600">
+                {t(lang, "common", "adminWikiEditImportPackageDescription")}
+              </p>
+
+              <p className="mb-3 text-xs text-zinc-600">
+                {t(lang, "common", "adminWikiEditImportPackageImageNamingHint")}{" "}
+                <span className="font-mono">
+                  &lt;base&gt;__shared.&lt;ext&gt;,
+                  &lt;base&gt;__&lt;lang&gt;.&lt;ext&gt;
+                </span>
+              </p>
+
+              <div className="mb-3 flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={handleImportPackageClick}
+                  disabled={importingPackage || !articleId}
+                  className="inline-flex items-center rounded-md border border-transparent bg-[color:var(--primary)] px-3 py-1.5 text-xs font-medium text-[color:var(--on-primary)] shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
+                >
+                  {importingPackage
+                    ? t(lang, "common", "adminWikiEditImportPackageUploading")
+                    : t(lang, "common", "adminWikiEditImportPackageButton")}
+                </button>
+                <input
+                  ref={packageFileInputRef}
+                  type="file"
+                  accept=".zip,application/zip"
+                  className="hidden"
+                  onChange={handlePackageFileSelected}
+                />
+              </div>
+
+              {importPackageError && (
+                <p className="text-xs text-red-600" role="alert">
+                  {importPackageError}
+                </p>
+              )}
+
+              {importPackageResults.length > 0 && (
+                <div className="mt-3 rounded-md border border-zinc-200 bg-zinc-50 p-3">
+                  <div className="mb-2 text-xs font-semibold text-zinc-900">
+                    {t(
+                      lang,
+                      "common",
+                      "adminWikiEditImportPackageResultsTitle",
+                    )}
+                  </div>
+                  <ul className="space-y-1 text-[11px] font-mono text-zinc-700">
+                    {importPackageResults.map((r, idx) => (
+                      <li
+                        key={`${r.filename}-${r.language ?? "unknown"}-${idx}`}
+                        className="flex flex-col gap-0.5"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="break-all">
+                            {r.filename} ({r.language ?? "?"})
+                          </span>
+                          <span
+                            className={
+                              r.status === "error"
+                                ? "text-red-700"
+                                : r.status === "created"
+                                  ? "text-green-700"
+                                  : "text-zinc-600"
+                            }
+                          >
+                            {r.status}
+                            {typeof r.versionNumber === "number"
+                              ? ` v${r.versionNumber}`
+                              : ""}
+                          </span>
+                        </div>
+                        {r.error && (
+                          <div className="text-red-700">{r.error}</div>
+                        )}
+                        {Array.isArray(r.warnings) && r.warnings.length > 0 && (
+                          <div className="text-amber-700">
+                            {r.warnings.join(" ")}
+                          </div>
                         )}
                       </li>
                     ))}

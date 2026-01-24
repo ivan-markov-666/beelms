@@ -307,6 +307,41 @@ export class AdminWikiController {
     );
   }
 
+  @Post('articles/:id/translations/import-package')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: {
+        fileSize: 25 * 1024 * 1024,
+      },
+    }),
+  )
+  @HttpCode(200)
+  async importArticleTranslationsPackage(
+    @Param('id') id: string,
+    @UploadedFile() file: WikiUploadedFile | undefined,
+    @Req() req: AuthenticatedRequest,
+  ): Promise<{
+    results: Array<{
+      filename: string;
+      language: string | null;
+      status: 'created' | 'skipped' | 'error';
+      versionNumber?: number;
+      warnings?: string[];
+      error?: string;
+    }>;
+  }> {
+    const userId = req.user?.userId;
+    if (!userId) {
+      throw new UnauthorizedException('Authenticated user not found');
+    }
+
+    return await this.wikiService.adminImportArticleTranslationsFromPackage(
+      userId,
+      id,
+      file,
+    );
+  }
+
   @Post('articles/:id/media')
   @UseInterceptors(FileInterceptor('file'))
   @HttpCode(201)
