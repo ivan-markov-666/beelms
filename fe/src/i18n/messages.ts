@@ -10010,20 +10010,33 @@ const ADMIN_WIKI_OVERRIDES: Partial<
     adminWikiEditMediaSectionTitle: "Изображения към статията",
     adminWikiEditMediaSectionDescription:
       "Качете изображения, които искате да реферирате от markdown съдържанието по-горе. След качване ще видите готов URL, който може да поставите директно в текста.",
-    adminWikiEditNeedArticleIdHint:
-      "Първо се уверете, че статията е запазена и има Article ID.",
     adminWikiEditImportMarkdownAria: "Импорт на преводи от Markdown файлове",
     adminWikiEditImportMarkdownTitle: "Импорт на преводи (.md)",
     adminWikiEditImportMarkdownDescription:
-      "Качете няколко .md файла наведнъж (напр. white-box-testing-bg.md, white-box-testing-en.md). Системата ще създаде нова версия за всеки език.",
+      "Качете няколко .md файла наведнъж. Системата ще създаде нова версия за всеки език. Стандарт за именуване на файл: <title>[__<subtitle>]-<lang>.md (напр. Frequently Asked Questions__FAQ-en.md, Häufig gestellte Fragen__FAQ-de.md).",
     adminWikiEditImportMarkdownSupportedLangSuffixes:
       "Поддържани suffix кодове:",
-    adminWikiEditImportMarkdownFilenameSuffixHint: "Име на файл:",
+    adminWikiEditImportMarkdownFilenameSuffixHint:
+      "Стандарт за именуване на файл:",
+    adminWikiEditImportMarkdownFilenameExample:
+      "Примери: Testing Guide__QA-intro-en.md, Testing Guide__QA-intro-de.md",
     adminWikiEditImportMarkdownButton: "Качи .md файлове",
     adminWikiEditImportMarkdownUploading: "Импорт...",
     adminWikiEditImportMarkdownError:
       "Възникна грешка при импорт на markdown файловете.",
     adminWikiEditImportMarkdownResultsTitle: "Резултати от импорта",
+    adminWikiEditImportPackageAria:
+      "Импорт на пакет (ZIP) с преводи и изображения",
+    adminWikiEditImportPackageTitle: "Импорт пакет (.zip) (MD + изображения)",
+    adminWikiEditImportPackageDescription:
+      "Качете един .zip файл, който съдържа .md преводите и изображенията за статията (в една папка). Системата ще качи изображенията и ще пренапише относителните линкове в markdown-а към правилните URL-и за съответния език.",
+    adminWikiEditImportPackageImageNamingHint:
+      "Стандарт за именуване на изображения:",
+    adminWikiEditImportPackageButton: "Качи .zip пакет",
+    adminWikiEditImportPackageUploading: "Импорт...",
+    adminWikiEditImportPackageError:
+      "Възникна грешка при импорт на ZIP пакета.",
+    adminWikiEditImportPackageResultsTitle: "Резултати от импорта (ZIP)",
     adminWikiEditMediaLoading: "Зареждане на изображения...",
     adminWikiEditUploadedImagesTitle: "Качени изображения",
     adminWikiEditUploadedImagesNoArticleId:
@@ -10276,19 +10289,30 @@ const ADMIN_WIKI_OVERRIDES: Partial<
     adminWikiEditMediaSectionTitle: "Article images",
     adminWikiEditMediaSectionDescription:
       "Upload images you want to reference from the markdown content above. After upload you'll see a URL you can paste into the text.",
-    adminWikiEditNeedArticleIdHint:
-      "First make sure the article is saved and has an Article ID.",
     adminWikiEditImportMarkdownAria: "Import translations from Markdown files",
     adminWikiEditImportMarkdownTitle: "Import translations (.md)",
     adminWikiEditImportMarkdownDescription:
-      "Upload multiple .md files at once (e.g. white-box-testing-bg.md, white-box-testing-en.md). The system will create a new version for each language.",
+      "Upload multiple .md files at once. The system will create a new version for each language. Filename naming standard: <title>[__<subtitle>]-<lang>.md (e.g. Frequently Asked Questions__FAQ-en.md, Häufig gestellte Fragen__FAQ-de.md).",
     adminWikiEditImportMarkdownSupportedLangSuffixes: "Supported suffix codes:",
-    adminWikiEditImportMarkdownFilenameSuffixHint: "Filename:",
+    adminWikiEditImportMarkdownFilenameSuffixHint: "Filename naming standard:",
+    adminWikiEditImportMarkdownFilenameExample:
+      "Examples: Testing Guide__QA-intro-en.md, Testing Guide__QA-intro-de.md",
     adminWikiEditImportMarkdownButton: "Upload .md files",
     adminWikiEditImportMarkdownUploading: "Importing...",
     adminWikiEditImportMarkdownError:
       "An error occurred while importing the markdown files.",
     adminWikiEditImportMarkdownResultsTitle: "Import results",
+    adminWikiEditImportPackageAria:
+      "Import a ZIP package with translations and images",
+    adminWikiEditImportPackageTitle: "Import package (.zip) (MD + images)",
+    adminWikiEditImportPackageDescription:
+      "Upload a single .zip file that contains the translated .md files and the images for the article (in one folder). The system uploads the images and rewrites relative links in the markdown to the correct URLs for each language.",
+    adminWikiEditImportPackageImageNamingHint: "Image naming standard:",
+    adminWikiEditImportPackageButton: "Upload .zip package",
+    adminWikiEditImportPackageUploading: "Importing...",
+    adminWikiEditImportPackageError:
+      "An error occurred while importing the ZIP package.",
+    adminWikiEditImportPackageResultsTitle: "ZIP import results",
     adminWikiEditMediaLoading: "Loading images...",
     adminWikiEditUploadedImagesTitle: "Uploaded images",
     adminWikiEditUploadedImagesNoArticleId:
@@ -10542,8 +10566,6 @@ const ADMIN_WIKI_OVERRIDES: Partial<
     adminWikiEditMediaSectionTitle: "Artikelbilder",
     adminWikiEditMediaSectionDescription:
       "Lade Bilder hoch, die du im Markdown-Inhalt oben referenzieren möchtest. Nach dem Upload siehst du eine URL, die du in den Text einfügen kannst.",
-    adminWikiEditNeedArticleIdHint:
-      "Stelle zuerst sicher, dass der Artikel gespeichert ist und eine Artikel-ID hat.",
     adminWikiEditMediaLoading: "Bilder werden geladen...",
     adminWikiEditUploadedImagesTitle: "Hochgeladene Bilder",
     adminWikiEditUploadedImagesNoArticleId:
@@ -10787,8 +10809,6 @@ const ADMIN_WIKI_OVERRIDES: Partial<
     adminWikiEditMediaSectionTitle: "Imágenes del artículo",
     adminWikiEditMediaSectionDescription:
       "Sube imágenes que quieras referenciar desde el contenido Markdown de arriba. Tras subirlas verás una URL que puedes pegar en el texto.",
-    adminWikiEditNeedArticleIdHint:
-      "Primero asegúrate de que el artículo está guardado y tiene un ID.",
     adminWikiEditMediaLoading: "Cargando imágenes...",
     adminWikiEditUploadedImagesTitle: "Imágenes subidas",
     adminWikiEditUploadedImagesNoArticleId:
@@ -11029,8 +11049,6 @@ const ADMIN_WIKI_OVERRIDES: Partial<
     adminWikiEditMediaSectionTitle: "Imagens do artigo",
     adminWikiEditMediaSectionDescription:
       "Carregue imagens que pretende referenciar no conteúdo Markdown acima. Após o carregamento verá um URL que pode colar no texto.",
-    adminWikiEditNeedArticleIdHint:
-      "Certifique-se primeiro de que o artigo está guardado e tem um ID.",
     adminWikiEditMediaLoading: "A carregar imagens...",
     adminWikiEditUploadedImagesTitle: "Imagens carregadas",
     adminWikiEditUploadedImagesNoArticleId:
@@ -11270,8 +11288,6 @@ const ADMIN_WIKI_OVERRIDES: Partial<
     adminWikiEditMediaSectionTitle: "Obrazy artykułu",
     adminWikiEditMediaSectionDescription:
       "Prześlij obrazy, do których chcesz odwoływać się w treści Markdown powyżej. Po przesłaniu zobaczysz URL, który możesz wkleić do tekstu.",
-    adminWikiEditNeedArticleIdHint:
-      "Najpierw upewnij się, że artykuł jest zapisany i ma ID.",
     adminWikiEditMediaLoading: "Ładowanie obrazów...",
     adminWikiEditUploadedImagesTitle: "Przesłane obrazy",
     adminWikiEditUploadedImagesNoArticleId:
@@ -11520,8 +11536,6 @@ const ADMIN_WIKI_OVERRIDES: Partial<
     adminWikiEditMediaSectionTitle: "Images de l’article",
     adminWikiEditMediaSectionDescription:
       "Téléversez des images que vous souhaitez référencer dans le contenu Markdown ci-dessus. Après téléversement, vous verrez une URL à coller dans le texte.",
-    adminWikiEditNeedArticleIdHint:
-      "Assurez-vous d’abord que l’article est enregistré et possède un ID.",
     adminWikiEditMediaLoading: "Chargement des images...",
     adminWikiEditUploadedImagesTitle: "Images téléversées",
     adminWikiEditUploadedImagesNoArticleId:
@@ -11763,8 +11777,6 @@ const ADMIN_WIKI_OVERRIDES: Partial<
     adminWikiEditMediaSectionTitle: "Изображения статьи",
     adminWikiEditMediaSectionDescription:
       "Загрузите изображения, на которые хотите ссылаться из Markdown-контента выше. После загрузки вы увидите URL, который можно вставить в текст.",
-    adminWikiEditNeedArticleIdHint:
-      "Сначала убедитесь, что статья сохранена и имеет ID.",
     adminWikiEditMediaLoading: "Загрузка изображений...",
     adminWikiEditUploadedImagesTitle: "Загруженные изображения",
     adminWikiEditUploadedImagesNoArticleId:
@@ -12006,8 +12018,6 @@ const ADMIN_WIKI_OVERRIDES: Partial<
     adminWikiEditMediaSectionTitle: "Зображення статті",
     adminWikiEditMediaSectionDescription:
       "Завантажте зображення, на які хочете посилатися з Markdown-контенту вище. Після завантаження ви побачите URL, який можна вставити в текст.",
-    adminWikiEditNeedArticleIdHint:
-      "Спочатку переконайтеся, що стаття збережена та має ID.",
     adminWikiEditMediaLoading: "Завантаження зображень...",
     adminWikiEditUploadedImagesTitle: "Завантажені зображення",
     adminWikiEditUploadedImagesNoArticleId:
@@ -12243,8 +12253,6 @@ const ADMIN_WIKI_OVERRIDES: Partial<
     adminWikiEditMediaSectionTitle: "Makale görselleri",
     adminWikiEditMediaSectionDescription:
       "Yukarıdaki Markdown içeriğinde kullanmak istediğiniz görselleri yükleyin. Yükleme sonrası metne yapıştırabileceğiniz bir URL görürsünüz.",
-    adminWikiEditNeedArticleIdHint:
-      "Önce makalenin kaydedildiğinden ve bir ID’si olduğundan emin olun.",
     adminWikiEditMediaLoading: "Görseller yükleniyor...",
     adminWikiEditUploadedImagesTitle: "Yüklenen görseller",
     adminWikiEditUploadedImagesNoArticleId:
@@ -12482,8 +12490,6 @@ const ADMIN_WIKI_OVERRIDES: Partial<
     adminWikiEditMediaSectionTitle: "Imagini articol",
     adminWikiEditMediaSectionDescription:
       "Încarcă imagini pe care vrei să le folosești în conținutul Markdown de mai sus. După încărcare vei vedea un URL pe care îl poți lipi în text.",
-    adminWikiEditNeedArticleIdHint:
-      "Asigură-te mai întâi că articolul este salvat și are un ID.",
     adminWikiEditMediaLoading: "Se încarcă imaginile...",
     adminWikiEditUploadedImagesTitle: "Imagini încărcate",
     adminWikiEditUploadedImagesNoArticleId:
@@ -12718,8 +12724,6 @@ const ADMIN_WIKI_OVERRIDES: Partial<
     adminWikiEditMediaSectionTitle: "लेख की छवियाँ",
     adminWikiEditMediaSectionDescription:
       "ऊपर दिए Markdown कंटेंट में उपयोग करने के लिए छवियाँ अपलोड करें। अपलोड के बाद आपको एक URL मिलेगा जिसे आप टेक्स्ट में पेस्ट कर सकते हैं।",
-    adminWikiEditNeedArticleIdHint:
-      "पहले सुनिश्चित करें कि लेख सेव है और उसका ID है।",
     adminWikiEditMediaLoading: "छवियाँ लोड हो रही हैं...",
     adminWikiEditUploadedImagesTitle: "अपलोड की गई छवियाँ",
     adminWikiEditUploadedImagesNoArticleId:
@@ -12953,8 +12957,6 @@ const ADMIN_WIKI_OVERRIDES: Partial<
     adminWikiEditMediaSectionTitle: "Hình ảnh bài viết",
     adminWikiEditMediaSectionDescription:
       "Tải lên hình ảnh bạn muốn tham chiếu trong nội dung Markdown ở trên. Sau khi tải lên, bạn sẽ thấy URL để dán vào văn bản.",
-    adminWikiEditNeedArticleIdHint:
-      "Trước tiên hãy đảm bảo bài viết đã được lưu và có ID.",
     adminWikiEditMediaLoading: "Đang tải hình ảnh...",
     adminWikiEditUploadedImagesTitle: "Hình ảnh đã tải lên",
     adminWikiEditUploadedImagesNoArticleId:
@@ -13187,10 +13189,6 @@ const ADMIN_WIKI_OVERRIDES: Partial<
       "Anda memiliki perubahan yang belum disimpan. Yakin ingin meninggalkan halaman?",
     adminWikiEditMediaSectionAria: "Gambar artikel",
     adminWikiEditMediaSectionTitle: "Gambar artikel",
-    adminWikiEditMediaSectionDescription:
-      "Unggah gambar yang ingin Anda referensikan di konten Markdown di atas. Setelah diunggah, Anda akan melihat URL yang bisa ditempel ke teks.",
-    adminWikiEditNeedArticleIdHint:
-      "Pastikan artikel sudah disimpan dan memiliki ID.",
     adminWikiEditMediaLoading: "Memuat gambar...",
     adminWikiEditUploadedImagesTitle: "Gambar yang diunggah",
     adminWikiEditUploadedImagesNoArticleId:
