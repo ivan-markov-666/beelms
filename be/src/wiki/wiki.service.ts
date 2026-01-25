@@ -216,6 +216,92 @@ function resolveImageBucket(
   return imageIndex.get(baseKey);
 }
 
+function isSafeZipEntryName(entryName: string): boolean {
+  const name = (entryName ?? '').trim();
+  if (!name) return false;
+  if (name.includes('\\')) return false;
+  if (name.includes(':')) return false;
+  if (name.startsWith('/')) return false;
+  if (name.includes('..')) return false;
+  return true;
+}
+
+function isPng(buffer: Buffer): boolean {
+  if (!buffer || buffer.length < 8) return false;
+  return (
+    buffer[0] === 0x89 &&
+    buffer[1] === 0x50 &&
+    buffer[2] === 0x4e &&
+    buffer[3] === 0x47 &&
+    buffer[4] === 0x0d &&
+    buffer[5] === 0x0a &&
+    buffer[6] === 0x1a &&
+    buffer[7] === 0x0a
+  );
+}
+
+function isJpeg(buffer: Buffer): boolean {
+  if (!buffer || buffer.length < 3) return false;
+  return buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
+}
+
+function isGif(buffer: Buffer): boolean {
+  if (!buffer || buffer.length < 6) return false;
+  const header = buffer.slice(0, 6).toString('ascii');
+  return header === 'GIF87a' || header === 'GIF89a';
+}
+
+function isWebp(buffer: Buffer): boolean {
+  if (!buffer || buffer.length < 12) return false;
+  const riff = buffer.slice(0, 4).toString('ascii');
+  const webp = buffer.slice(8, 12).toString('ascii');
+  return riff === 'RIFF' && webp === 'WEBP';
+}
+
+function validateSvgText(svgText: string): boolean {
+  const lower = (svgText ?? '').toLowerCase();
+  if (!lower) return false;
+
+  const head = lower.slice(0, 3000);
+  if (!head.includes('<svg') && !head.includes('<?xml')) return false;
+
+  const forbiddenFragments = [
+    '<script',
+    'javascript:',
+    '<iframe',
+    '<object',
+    '<embed',
+    '<foreignobject',
+    ' onload=',
+    ' onerror=',
+  ];
+
+  for (const frag of forbiddenFragments) {
+    if (lower.includes(frag)) return false;
+  }
+
+  if (/\son[a-z]+\s*=/.test(lower)) return false;
+  return true;
+}
+
+type ZipEntryLike = {
+  entryName: string;
+  isDirectory: boolean;
+  getData(): Buffer;
+  header?: {
+    size?: number;
+  };
+};
+
+function isZipEntryLike(value: unknown): value is ZipEntryLike {
+  if (!value || typeof value !== 'object') return false;
+  const v = value as Record<string, unknown>;
+  if (typeof v.entryName !== 'string') return false;
+  if (typeof v.isDirectory !== 'boolean') return false;
+  if (typeof v.getData !== 'function') return false;
+  return true;
+}
+
 function extractFirstMarkdownHeading(
   content: string,
   level: 1 | 2,
@@ -484,6 +570,7 @@ export class WikiService {
       warnings?: string[];
       error?: string;
     }>;
+    missingLanguages?: string[];
   }> {
     if (!file) {
       throw new BadRequestException('File is required');
@@ -538,7 +625,8 @@ export class WikiService {
     const mdEntries: Array<{ filename: string; buffer: Buffer }> = [];
     const imageIndex = new Map<string, ImageVariantIndex>();
 
-    const allowedImageExts = new Set([
+    const allowedExts = new Set([
+      '.md',
       '.png',
       '.jpg',
       '.jpeg',
@@ -546,28 +634,112 @@ export class WikiService {
       '.webp',
       '.svg',
     ]);
+    const ignoredBasenames = new Set(['.ds_store', 'thumbs.db', 'desktop.ini']);
+    const forbiddenFiles: string[] = [];
 
-    for (const entry of zip.getEntries()) {
+    const MAX_ZIP_ENTRIES = 250;
+    const MAX_ZIP_TOTAL_UNZIPPED_BYTES = 60 * 1024 * 1024;
+    const MAX_MD_FILE_SIZE_BYTES = 1 * 1024 * 1024;
+    let totalExpectedBytes = 0;
+
+    const rawZipEntries: unknown = zip.getEntries();
+    const zipEntries = (
+      Array.isArray(rawZipEntries)
+        ? rawZipEntries.filter(isZipEntryLike)
+        : ([] as ZipEntryLike[])
+    ).filter((e) => e.entryName);
+    if (zipEntries.length > MAX_ZIP_ENTRIES) {
+      throw new BadRequestException('ZIP contains too many files');
+    }
+
+    for (const entry of zipEntries) {
       if (entry.isDirectory) continue;
       const entryName = entry.entryName || '';
       if (entryName.startsWith('__MACOSX/')) continue;
+      if (!isSafeZipEntryName(entryName)) {
+        forbiddenFiles.push(entryName);
+        continue;
+      }
       const baseName = path.basename(entryName);
       if (!baseName) continue;
 
+      const lowerBase = baseName.toLowerCase();
+      if (lowerBase.startsWith('._')) continue;
+      if (ignoredBasenames.has(lowerBase)) continue;
+
       const ext = path.extname(baseName).toLowerCase();
+
+      if (!allowedExts.has(ext)) {
+        forbiddenFiles.push(baseName);
+        continue;
+      }
+
+      const headerSize = entry.header?.size;
+      if (typeof headerSize === 'number' && headerSize > 0) {
+        totalExpectedBytes += headerSize;
+        if (totalExpectedBytes > MAX_ZIP_TOTAL_UNZIPPED_BYTES) {
+          throw new BadRequestException('ZIP contents are too large');
+        }
+        if (ext === '.md' && headerSize > MAX_MD_FILE_SIZE_BYTES) {
+          forbiddenFiles.push(baseName);
+          continue;
+        }
+        if (ext !== '.md' && headerSize > MAX_WIKI_MEDIA_FILE_SIZE_BYTES) {
+          forbiddenFiles.push(baseName);
+          continue;
+        }
+      }
+
       const entryBuffer = entry.getData();
+      if (!Buffer.isBuffer(entryBuffer)) {
+        forbiddenFiles.push(baseName);
+        continue;
+      }
 
       if (ext === '.md') {
+        if (entryBuffer.length > MAX_MD_FILE_SIZE_BYTES) {
+          forbiddenFiles.push(baseName);
+          continue;
+        }
+        if (entryBuffer.includes(0x00)) {
+          forbiddenFiles.push(baseName);
+          continue;
+        }
         mdEntries.push({ filename: baseName, buffer: entryBuffer });
         continue;
       }
 
-      if (!allowedImageExts.has(ext)) {
+      if (entryBuffer.length > MAX_WIKI_MEDIA_FILE_SIZE_BYTES) {
+        forbiddenFiles.push(baseName);
         continue;
       }
 
-      if (entryBuffer.length > MAX_WIKI_MEDIA_FILE_SIZE_BYTES) {
+      if (ext === '.png' && !isPng(entryBuffer)) {
+        forbiddenFiles.push(baseName);
         continue;
+      }
+
+      if ((ext === '.jpg' || ext === '.jpeg') && !isJpeg(entryBuffer)) {
+        forbiddenFiles.push(baseName);
+        continue;
+      }
+
+      if (ext === '.gif' && !isGif(entryBuffer)) {
+        forbiddenFiles.push(baseName);
+        continue;
+      }
+
+      if (ext === '.webp' && !isWebp(entryBuffer)) {
+        forbiddenFiles.push(baseName);
+        continue;
+      }
+
+      if (ext === '.svg') {
+        const svgText = entryBuffer.toString('utf-8');
+        if (!validateSvgText(svgText)) {
+          forbiddenFiles.push(baseName);
+          continue;
+        }
       }
 
       const parsed = parseImageVariantFromFilename(baseName);
@@ -587,6 +759,14 @@ export class WikiService {
       }
 
       imageIndex.set(parsed.baseKey, bucket);
+    }
+
+    if (forbiddenFiles.length > 0) {
+      const list = forbiddenFiles.slice(0, 8).join(', ');
+      const suffix = forbiddenFiles.length > 8 ? '…' : '';
+      throw new BadRequestException(
+        `ZIP contains forbidden or invalid files: ${list}${suffix}`,
+      );
     }
 
     const uploadedImageUrlByVariant = new Map<string, string>();
@@ -790,7 +970,19 @@ export class WikiService {
       });
     }
 
-    return { results };
+    const missingLanguages = (() => {
+      if (supportedLangSet.size === 0) return undefined;
+      const present = new Set(
+        results
+          .filter((r) => r.language && r.status !== 'error')
+          .map((r) => r.language as string),
+      );
+
+      const missing = supportedLangs.filter((l) => !present.has(l));
+      return missing.length > 0 ? missing : undefined;
+    })();
+
+    return { results, missingLanguages };
   }
 
   async getAdminArticlesCount(actorUserId: string): Promise<number> {
@@ -1818,7 +2010,68 @@ export class WikiService {
       throw new NotFoundException('Article not found');
     }
 
-    article.status = dto.status;
+    const statusScope =
+      dto.statusScope === 'all'
+        ? 'all'
+        : dto.statusScope === 'selected'
+          ? 'selected'
+          : 'single';
+
+    const cfgForScope = await this.settingsService.getOrCreateInstanceConfig();
+    const supportedLangsForScope = Array.isArray(
+      cfgForScope.languages?.supported,
+    )
+      ? cfgForScope.languages.supported.map((c) => normalizeLanguageCode(c))
+      : [];
+    const supportedLangSetForScope = new Set(
+      supportedLangsForScope.filter(Boolean),
+    );
+
+    const selectedLangs = (() => {
+      if (statusScope !== 'selected') return null;
+      const raw = Array.isArray(dto.statusScopeLanguages)
+        ? dto.statusScopeLanguages
+        : [];
+      const normalized = Array.from(
+        new Set(raw.map((l) => normalizeLanguageCode(l)).filter(Boolean)),
+      );
+      const filtered =
+        supportedLangSetForScope.size > 0
+          ? normalized.filter((l) => supportedLangSetForScope.has(l))
+          : normalized;
+      return filtered;
+    })();
+
+    if (
+      statusScope === 'selected' &&
+      (!selectedLangs || selectedLangs.length === 0)
+    ) {
+      throw new BadRequestException(
+        'statusScopeLanguages must contain at least 1 supported language when statusScope is selected',
+      );
+    }
+
+    const selectedLangSet = new Set(selectedLangs ?? []);
+    const isTargetLanguage = (lang: string): boolean => {
+      if (statusScope === 'all') return true;
+      if (statusScope === 'selected') return selectedLangSet.has(lang);
+      return lang === dto.language;
+    };
+
+    let statusAllLanguagesPublishSummary:
+      | {
+          published: string[];
+          skippedMissingFields: string[];
+          skippedMissingTranslation: string[];
+        }
+      | undefined;
+
+    if (dto.status === 'inactive') {
+      article.status = 'inactive';
+    } else {
+      // draft/active are language-level via version.isPublished; keep the article globally active
+      article.status = 'active';
+    }
     if (dto.visibility) {
       article.visibility = dto.visibility;
     }
@@ -1858,6 +2111,19 @@ export class WikiService {
         const nextVersionNumber =
           Math.max(...existingVersions.map((v) => v.versionNumber ?? 0)) + 1;
 
+        const shouldSetPublished =
+          dto.status === 'inactive'
+            ? false
+            : statusScope === 'selected'
+              ? isTargetLanguage(dto.language)
+              : true;
+        const publishFlag =
+          shouldSetPublished && dto.status === 'active'
+            ? true
+            : shouldSetPublished && dto.status === 'draft'
+              ? false
+              : (latestExisting.isPublished ?? false);
+
         const version = this.versionRepo.create({
           article,
           language: dto.language,
@@ -1866,18 +2132,33 @@ export class WikiService {
           content: dto.content,
           versionNumber: nextVersionNumber,
           createdByUserId: actorUserId,
-          isPublished: dto.status === 'active',
+          isPublished: publishFlag,
         });
 
         primaryVersion = await this.versionRepo.save(version);
       } else {
         // Само статусът се е променил – не създаваме нова версия,
         // а обновяваме isPublished на последната версия за езика.
-        latestExisting.isPublished = dto.status === 'active';
+        if (dto.status === 'inactive') {
+          latestExisting.isPublished = false;
+        } else if (
+          statusScope !== 'selected' ||
+          isTargetLanguage(dto.language)
+        ) {
+          latestExisting.isPublished = dto.status === 'active';
+        }
         primaryVersion = await this.versionRepo.save(latestExisting);
       }
     } else {
       // Няма версии за този език – задължително създаваме първа версия.
+      const shouldSetPublished =
+        dto.status === 'inactive'
+          ? false
+          : statusScope === 'selected'
+            ? isTargetLanguage(dto.language)
+            : true;
+      const publishFlag =
+        shouldSetPublished && dto.status === 'active' ? true : false;
       const version = this.versionRepo.create({
         article,
         language: dto.language,
@@ -1886,10 +2167,139 @@ export class WikiService {
         content: dto.content,
         versionNumber: 1,
         createdByUserId: actorUserId,
-        isPublished: dto.status === 'active',
+        isPublished: publishFlag,
       });
 
       primaryVersion = await this.versionRepo.save(version);
+    }
+
+    if (
+      statusScope === 'all' ||
+      statusScope === 'selected' ||
+      dto.status === 'inactive'
+    ) {
+      const publishFlag = dto.status === 'active';
+
+      const allVersions = await this.versionRepo.find({
+        where: {
+          article: { id: article.id },
+        },
+        relations: ['article'],
+      });
+
+      const latestByLanguage = new Map<string, WikiArticleVersion>();
+
+      for (const v of allVersions) {
+        const lang = (v.language ?? '').trim();
+        if (!lang) {
+          continue;
+        }
+
+        const existing = latestByLanguage.get(lang);
+        if (!existing) {
+          latestByLanguage.set(lang, v);
+          continue;
+        }
+
+        const existingNum = existing.versionNumber ?? 0;
+        const currentNum = v.versionNumber ?? 0;
+        if (currentNum > existingNum) {
+          latestByLanguage.set(lang, v);
+        }
+      }
+
+      if (
+        (statusScope === 'all' || statusScope === 'selected') &&
+        dto.status === 'active'
+      ) {
+        const targetLangs = (
+          statusScope === 'selected'
+            ? Array.from(selectedLangSet)
+            : supportedLangsForScope.length > 0
+              ? supportedLangsForScope
+              : Array.from(latestByLanguage.keys())
+        ).filter(Boolean);
+        const targetLangSet = new Set(targetLangs);
+
+        const published: string[] = [];
+        const skippedMissingFields: string[] = [];
+        const skippedMissingTranslation: string[] = [];
+
+        const desiredPublishByLang = new Map<string, boolean>();
+        for (const lang of targetLangs) {
+          const v = latestByLanguage.get(lang) ?? null;
+          if (!v) {
+            desiredPublishByLang.set(lang, false);
+            skippedMissingTranslation.push(lang);
+            continue;
+          }
+
+          const titleOk = (v.title ?? '').trim().length > 0;
+          const contentOk = (v.content ?? '').trim().length > 0;
+          if (!titleOk || !contentOk) {
+            desiredPublishByLang.set(lang, false);
+            skippedMissingFields.push(lang);
+            continue;
+          }
+
+          desiredPublishByLang.set(lang, true);
+          published.push(lang);
+        }
+
+        const toUpdate: WikiArticleVersion[] = [];
+        for (const [lang, v] of Array.from(latestByLanguage.entries())) {
+          if (!targetLangSet.has(lang)) {
+            continue;
+          }
+          const desired = desiredPublishByLang.get(lang) ?? false;
+          if (v.isPublished === desired) {
+            continue;
+          }
+          v.isPublished = desired;
+          toUpdate.push(v);
+        }
+
+        if (toUpdate.length > 0) {
+          await this.versionRepo.save(toUpdate);
+        }
+
+        if (
+          skippedMissingFields.length > 0 ||
+          skippedMissingTranslation.length > 0
+        ) {
+          statusAllLanguagesPublishSummary = {
+            published,
+            skippedMissingFields,
+            skippedMissingTranslation,
+          };
+        }
+      } else {
+        const toUpdate: WikiArticleVersion[] = [];
+
+        for (const v of Array.from(latestByLanguage.values())) {
+          if (v.id === primaryVersion.id) {
+            continue;
+          }
+
+          if (
+            statusScope === 'selected' &&
+            !selectedLangSet.has((v.language ?? '').trim())
+          ) {
+            continue;
+          }
+
+          if (v.isPublished === publishFlag) {
+            continue;
+          }
+
+          v.isPublished = publishFlag;
+          toUpdate.push(v);
+        }
+
+        if (toUpdate.length > 0) {
+          await this.versionRepo.save(toUpdate);
+        }
+      }
     }
 
     const updatedAt =
@@ -1923,6 +2333,7 @@ export class WikiService {
       articleStatus,
       languageStatus,
       updatedAt: updatedAt.toISOString(),
+      statusAllLanguagesPublishSummary,
     };
   }
 

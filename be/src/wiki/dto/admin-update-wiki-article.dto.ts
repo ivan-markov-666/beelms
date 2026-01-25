@@ -30,6 +30,17 @@ export class AdminUpdateWikiArticleDto {
 
   @IsString()
   @IsOptional()
+  @IsIn(['single', 'all', 'selected'])
+  statusScope?: string;
+
+  @IsArray()
+  @IsOptional()
+  @ArrayUnique()
+  @IsString({ each: true })
+  statusScopeLanguages?: string[];
+
+  @IsString()
+  @IsOptional()
   @IsIn(['public', 'course_only'])
   visibility?: string;
 

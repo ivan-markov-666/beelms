@@ -329,6 +329,7 @@ export class AdminWikiController {
       warnings?: string[];
       error?: string;
     }>;
+    missingLanguages?: string[];
   }> {
     const userId = req.user?.userId;
     if (!userId) {
