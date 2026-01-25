@@ -41,7 +41,6 @@
     "marked": "^17.0.1",
     "mermaid": "^10.9.1",
     "next": "^16.0.7",
-    "qa-4-free": "file:..",
     "qrcode": "^1.5.4",
     "react": "19.2.0",
     "react-dom": "19.2.0",
