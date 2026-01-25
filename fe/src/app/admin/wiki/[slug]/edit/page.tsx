@@ -58,6 +58,11 @@ type WikiArticleDetail = {
   status: string;
   articleStatus?: string;
   languageStatus?: string;
+  statusAllLanguagesPublishSummary?: {
+    published: string[];
+    skippedMissingFields: string[];
+    skippedMissingTranslation: string[];
+  };
   updatedAt: string;
 };
 
@@ -68,6 +73,8 @@ type FormState = {
   tags: string;
   content: string;
   status: string;
+  statusScope: "single" | "all" | "selected";
+  statusScopeLanguages: string[];
 };
 
 type AdminWikiArticleVersion = {
@@ -295,7 +302,11 @@ export default function AdminWikiEditPage() {
   const [importPackageResults, setImportPackageResults] = useState<
     TranslationImportResult[]
   >([]);
+  const [importPackageMissingLanguages, setImportPackageMissingLanguages] =
+    useState<string[]>([]);
   const [articleReloadKey, setArticleReloadKey] = useState(0);
+
+  const [saveWarning, setSaveWarning] = useState<string | null>(null);
 
   const successBannerStyle: CSSProperties = {
     backgroundColor: "var(--field-ok-bg, #dcfce7)",
@@ -310,6 +321,7 @@ export default function AdminWikiEditPage() {
     }
 
     setImportPackageError(null);
+    setImportPackageMissingLanguages([]);
 
     if (packageFileInputRef.current) {
       packageFileInputRef.current.value = "";
@@ -343,6 +355,7 @@ export default function AdminWikiEditPage() {
     setImportingPackage(true);
     setImportPackageError(null);
     setImportPackageResults([]);
+    setImportPackageMissingLanguages([]);
 
     try {
       const formData = new FormData();
@@ -396,9 +409,15 @@ export default function AdminWikiEditPage() {
 
       const data = (await res.json()) as {
         results?: TranslationImportResult[];
+        missingLanguages?: string[];
       };
       const results = Array.isArray(data.results) ? data.results : [];
       setImportPackageResults(results);
+      setImportPackageMissingLanguages(
+        Array.isArray(data.missingLanguages)
+          ? data.missingLanguages.filter((l) => typeof l === "string")
+          : [],
+      );
 
       setVersionsReloadKey((v) => v + 1);
       setArticleReloadKey((v) => v + 1);
@@ -468,6 +487,8 @@ export default function AdminWikiEditPage() {
               tags: "",
               content: "",
               status: "draft",
+              statusScope: "single",
+              statusScopeLanguages: [langToLoad],
             };
             setForm(emptyForm);
             setLastSavedForm(null);
@@ -497,6 +518,8 @@ export default function AdminWikiEditPage() {
           tags: formatTagsForInput(data.tags),
           content: data.content ?? "",
           status: effectiveStatus,
+          statusScope: "single",
+          statusScopeLanguages: [data.language ?? currentLanguage ?? "bg"],
         };
         setForm(loadedForm);
         setLastSavedForm(loadedForm);
@@ -688,6 +711,8 @@ export default function AdminWikiEditPage() {
             tags: "",
             content: "",
             status: "draft",
+            statusScope: "single",
+            statusScopeLanguages: [newLang],
           },
     );
     setCurrentLanguage(newLang);
@@ -717,7 +742,11 @@ export default function AdminWikiEditPage() {
       form.subtitle !== lastSavedForm.subtitle ||
       form.tags !== lastSavedForm.tags ||
       form.content !== lastSavedForm.content ||
-      form.status !== lastSavedForm.status);
+      form.status !== lastSavedForm.status ||
+      form.statusScope !== lastSavedForm.statusScope ||
+      (form.statusScope === "selected" &&
+        JSON.stringify(form.statusScopeLanguages) !==
+          JSON.stringify(lastSavedForm.statusScopeLanguages)));
 
   const isContentDirty =
     !!form && (!lastSavedForm || form.content !== lastSavedForm.content);
@@ -750,6 +779,9 @@ export default function AdminWikiEditPage() {
 
   const { missingFields, titleMissing, contentMissing } = requiredFieldsState;
 
+  const currentStatusScope = form?.statusScope ?? "single";
+  const selectedLangCount = form?.statusScopeLanguages?.length ?? 0;
+
   const saveDisabledReason = useMemo(() => {
     if (!isDirty) {
       return t(lang, "common", "adminWikiEditSaveDisabledNoChanges");
@@ -759,8 +791,14 @@ export default function AdminWikiEditPage() {
       return t(lang, "common", "adminWikiEditSaveDisabledMissingFields");
     }
 
+    if (currentStatusScope === "selected") {
+      if (selectedLangCount === 0) {
+        return t(lang, "common", "adminWikiEditStatusScopeLanguagesRequired");
+      }
+    }
+
     return null;
-  }, [isDirty, missingFields, lang]);
+  }, [isDirty, missingFields, lang, currentStatusScope, selectedLangCount]);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -849,6 +887,7 @@ export default function AdminWikiEditPage() {
     setSaving(true);
     setError(null);
     setSuccess(null);
+    setSaveWarning(null);
 
     try {
       const token = getAccessToken();
@@ -875,6 +914,11 @@ export default function AdminWikiEditPage() {
             tags: normalizeTagsInput(form.tags),
             content: form.content,
             status: form.status,
+            statusScope: form.statusScope,
+            statusScopeLanguages:
+              form.statusScope === "selected"
+                ? form.statusScopeLanguages
+                : undefined,
           }),
         },
       );
@@ -909,11 +953,54 @@ export default function AdminWikiEditPage() {
         tags: formatTagsForInput(updated.tags) || form.tags,
         content: updated.content ?? form.content,
         status: effectiveStatus,
+        statusScope: form.statusScope,
+        statusScopeLanguages: form.statusScopeLanguages,
       };
 
       setForm(savedForm);
       setLastSavedForm(savedForm);
       setSuccess(t(lang, "common", "adminWikiEditSaveSuccess"));
+
+      if (
+        (form.statusScope === "all" || form.statusScope === "selected") &&
+        form.status === "active" &&
+        updated.statusAllLanguagesPublishSummary
+      ) {
+        const summary = updated.statusAllLanguagesPublishSummary;
+        const missingFields = Array.isArray(summary.skippedMissingFields)
+          ? summary.skippedMissingFields
+          : [];
+        const missingTranslations = Array.isArray(
+          summary.skippedMissingTranslation,
+        )
+          ? summary.skippedMissingTranslation
+          : [];
+
+        const parts: string[] = [];
+        if (missingFields.length > 0) {
+          parts.push(
+            `${t(
+              lang,
+              "common",
+              "adminWikiEditStatusAllLanguagesSkippedMissingFields",
+            )} ${missingFields.join(", ")}`,
+          );
+        }
+        if (missingTranslations.length > 0) {
+          parts.push(
+            `${t(
+              lang,
+              "common",
+              "adminWikiEditStatusAllLanguagesSkippedMissingTranslation",
+            )} ${missingTranslations.join(", ")}`,
+          );
+        }
+
+        if (parts.length > 0) {
+          setSaveWarning(parts.join("\n"));
+        }
+      }
+
       setVersionsReloadKey((value) => value + 1);
       setSaving(false);
     } catch {
@@ -1336,6 +1423,7 @@ export default function AdminWikiEditPage() {
           tags: formatTagsForInput(updated.tags) || current?.tags || "",
           content: updated.content ?? current?.content ?? "",
           status: effectiveStatus,
+          statusScope: current?.statusScope ?? "single",
         };
         setLastSavedForm(restoredForm);
         return restoredForm;
@@ -1649,30 +1737,165 @@ export default function AdminWikiEditPage() {
                   <ListboxSelect
                     id="status"
                     ariaLabel={t(lang, "common", "adminWikiEditStatusAria")}
-                    value={form.status}
-                    onChange={(next) =>
+                    value={`${form.status}:${form.statusScope}`}
+                    onChange={(next) => {
+                      const raw = (next ?? "").trim();
+                      const [statusPart, scopePart] = raw.split(":");
+                      const normalizedStatus =
+                        statusPart === "active" ||
+                        statusPart === "inactive" ||
+                        statusPart === "draft"
+                          ? statusPart
+                          : "draft";
+                      const normalizedScope =
+                        scopePart === "all"
+                          ? "all"
+                          : scopePart === "selected"
+                            ? "selected"
+                            : "single";
+
                       setForm((prev) =>
-                        prev ? { ...prev, status: next } : prev,
-                      )
-                    }
+                        prev
+                          ? {
+                              ...prev,
+                              status: normalizedStatus,
+                              statusScope: normalizedScope,
+                              statusScopeLanguages:
+                                normalizedScope === "selected" &&
+                                (!prev.statusScopeLanguages ||
+                                  prev.statusScopeLanguages.length === 0)
+                                  ? [prev.language]
+                                  : prev.statusScopeLanguages,
+                            }
+                          : prev,
+                      );
+                    }}
                     buttonClassName="flex w-full items-center justify-between gap-2 rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
                     options={[
                       {
-                        value: "draft",
-                        label: t(lang, "common", "adminWikiStatsDraft"),
+                        value: "draft:single",
+                        label: `${t(lang, "common", "adminWikiStatsDraft")} (${t(
+                          lang,
+                          "common",
+                          "adminWikiEditStatusScopeSingle",
+                        )})`,
                       },
                       {
-                        value: "active",
-                        label: t(lang, "common", "adminWikiStatsActive"),
+                        value: "draft:all",
+                        label: `${t(lang, "common", "adminWikiStatsDraft")} (${t(
+                          lang,
+                          "common",
+                          "adminWikiEditStatusScopeAll",
+                        )})`,
                       },
                       {
-                        value: "inactive",
-                        label: t(lang, "common", "adminWikiStatsInactive"),
+                        value: "draft:selected",
+                        label: `${t(lang, "common", "adminWikiStatsDraft")} (${t(
+                          lang,
+                          "common",
+                          "adminWikiEditStatusScopeSelected",
+                        )})`,
+                      },
+                      {
+                        value: "active:single",
+                        label: `${t(lang, "common", "adminWikiStatsActive")} (${t(
+                          lang,
+                          "common",
+                          "adminWikiEditStatusScopeSingle",
+                        )})`,
+                      },
+                      {
+                        value: "active:all",
+                        label: `${t(lang, "common", "adminWikiStatsActive")} (${t(
+                          lang,
+                          "common",
+                          "adminWikiEditStatusScopeAll",
+                        )})`,
+                      },
+                      {
+                        value: "active:selected",
+                        label: `${t(lang, "common", "adminWikiStatsActive")} (${t(
+                          lang,
+                          "common",
+                          "adminWikiEditStatusScopeSelected",
+                        )})`,
+                      },
+                      {
+                        value: "inactive:single",
+                        label: `${t(lang, "common", "adminWikiStatsInactive")} (${t(
+                          lang,
+                          "common",
+                          "adminWikiEditStatusScopeSingle",
+                        )})`,
+                      },
+                      {
+                        value: "inactive:all",
+                        label: `${t(lang, "common", "adminWikiStatsInactive")} (${t(
+                          lang,
+                          "common",
+                          "adminWikiEditStatusScopeAll",
+                        )})`,
+                      },
+                      {
+                        value: "inactive:selected",
+                        label: `${t(lang, "common", "adminWikiStatsInactive")} (${t(
+                          lang,
+                          "common",
+                          "adminWikiEditStatusScopeSelected",
+                        )})`,
                       },
                     ]}
                   />
                 </div>
               </div>
+
+              {form.statusScope === "selected" && (
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-zinc-800">
+                    {t(
+                      lang,
+                      "common",
+                      "adminWikiEditStatusScopeLanguagesLabel",
+                    )}
+                  </label>
+                  <p className="text-xs text-zinc-500">
+                    {t(lang, "common", "adminWikiEditStatusScopeLanguagesHelp")}
+                  </p>
+                  <div className="grid gap-2 rounded-md border border-zinc-200 bg-zinc-50 p-3 sm:grid-cols-2 md:grid-cols-3">
+                    {(supportedAdminLangs.length > 0
+                      ? supportedAdminLangs
+                      : languageOptions
+                    ).map((code) => {
+                      const checked = form.statusScopeLanguages.includes(code);
+                      return (
+                        <label
+                          key={code}
+                          className="flex items-center gap-2 text-xs text-zinc-800"
+                        >
+                          <input
+                            type="checkbox"
+                            className="h-4 w-4"
+                            checked={checked}
+                            onChange={() => {
+                              setForm((prev) => {
+                                if (!prev) return prev;
+                                const current = prev.statusScopeLanguages ?? [];
+                                const next = checked
+                                  ? current.filter((l) => l !== code)
+                                  : Array.from(new Set([...current, code]));
+                                return { ...prev, statusScopeLanguages: next };
+                              });
+                            }}
+                          />
+                          <span className="font-mono">
+                            {code.toUpperCase()}
+                          </span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
               <div className="space-y-1">
                 <label
@@ -1967,6 +2190,12 @@ export default function AdminWikiEditPage() {
               </div>
             </form>
 
+            {saveWarning && (
+              <div className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 whitespace-pre-line">
+                {saveWarning}
+              </div>
+            )}
+
             <section
               aria-label={t(lang, "common", "adminWikiEditImportMarkdownAria")}
               className="border-t border-zinc-200 pt-4"
@@ -2121,6 +2350,20 @@ export default function AdminWikiEditPage() {
                   {importPackageError}
                 </p>
               )}
+
+              {!importPackageError &&
+                importPackageMissingLanguages.length > 0 && (
+                  <p className="text-xs text-amber-700" role="status">
+                    {t(
+                      lang,
+                      "common",
+                      "adminWikiEditImportPackageMissingLanguagesPrefix",
+                    )}{" "}
+                    <span className="font-mono">
+                      {importPackageMissingLanguages.join(", ")}
+                    </span>
+                  </p>
+                )}
 
               {importPackageResults.length > 0 && (
                 <div className="mt-3 rounded-md border border-zinc-200 bg-zinc-50 p-3">

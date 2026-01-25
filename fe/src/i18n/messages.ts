@@ -9937,6 +9937,14 @@ const ADMIN_WIKI_OVERRIDES: Partial<
       "Смяната на езика зарежда или създава отделна версия на съдържанието за избрания език.",
     adminWikiEditStatusLabel: "Статус",
     adminWikiEditStatusAria: "Статус на Wiki статията",
+    adminWikiEditStatusScopeSingle: "само този език",
+    adminWikiEditStatusScopeAll: "всички езици",
+    adminWikiEditStatusScopeSelected: "избрани езици",
+    adminWikiEditStatusScopeLanguagesLabel: "Езици (избор)",
+    adminWikiEditStatusScopeLanguagesHelp:
+      "Изберете за кои езици да приложите статуса.",
+    adminWikiEditStatusScopeLanguagesRequired:
+      "Изберете поне 1 език, за да приложите статуса.",
     adminWikiEditTitleLabel: "Заглавие",
     adminWikiEditSubtitleLabel: "Подзаглавие (по избор)",
     adminWikiEditTagsLabel: "Тагове (разделени със запетая)",
@@ -10037,6 +10045,12 @@ const ADMIN_WIKI_OVERRIDES: Partial<
     adminWikiEditImportPackageError:
       "Възникна грешка при импорт на ZIP пакета.",
     adminWikiEditImportPackageResultsTitle: "Резултати от импорта (ZIP)",
+    adminWikiEditImportPackageMissingLanguagesPrefix:
+      "Липсват преводи за следните езици (статията няма да има версия за тях):",
+    adminWikiEditStatusAllLanguagesSkippedMissingFields:
+      "Следните езици не бяха активирани, защото липсват задължителни полета (заглавие/съдържание):",
+    adminWikiEditStatusAllLanguagesSkippedMissingTranslation:
+      "Следните езици не бяха активирани, защото липсва превод:",
     adminWikiEditMediaLoading: "Зареждане на изображения...",
     adminWikiEditUploadedImagesTitle: "Качени изображения",
     adminWikiEditUploadedImagesNoArticleId:
@@ -10219,6 +10233,14 @@ const ADMIN_WIKI_OVERRIDES: Partial<
       "Changing the language loads or creates a separate content version for the selected language.",
     adminWikiEditStatusLabel: "Status",
     adminWikiEditStatusAria: "Wiki article status",
+    adminWikiEditStatusScopeSingle: "this language",
+    adminWikiEditStatusScopeAll: "all languages",
+    adminWikiEditStatusScopeSelected: "selected languages",
+    adminWikiEditStatusScopeLanguagesLabel: "Languages (selection)",
+    adminWikiEditStatusScopeLanguagesHelp:
+      "Select which languages the status should be applied to.",
+    adminWikiEditStatusScopeLanguagesRequired:
+      "Select at least 1 language to apply the status.",
     adminWikiEditTitleLabel: "Title",
     adminWikiEditSubtitleLabel: "Subtitle (optional)",
     adminWikiEditTagsLabel: "Tags (comma-separated)",
@@ -10313,6 +10335,12 @@ const ADMIN_WIKI_OVERRIDES: Partial<
     adminWikiEditImportPackageError:
       "An error occurred while importing the ZIP package.",
     adminWikiEditImportPackageResultsTitle: "ZIP import results",
+    adminWikiEditImportPackageMissingLanguagesPrefix:
+      "Missing translations for the following languages (the article will not have a version for them):",
+    adminWikiEditStatusAllLanguagesSkippedMissingFields:
+      "The following languages were not activated because required fields are missing (title/content):",
+    adminWikiEditStatusAllLanguagesSkippedMissingTranslation:
+      "The following languages were not activated because the translation is missing:",
     adminWikiEditMediaLoading: "Loading images...",
     adminWikiEditUploadedImagesTitle: "Uploaded images",
     adminWikiEditUploadedImagesNoArticleId:

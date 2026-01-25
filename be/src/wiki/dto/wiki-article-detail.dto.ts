@@ -10,5 +10,10 @@ export class WikiArticleDetailDto {
   status: string;
   articleStatus?: string;
   languageStatus?: string;
+  statusAllLanguagesPublishSummary?: {
+    published: string[];
+    skippedMissingFields: string[];
+    skippedMissingTranslation: string[];
+  };
   updatedAt: string;
 }
